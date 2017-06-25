@@ -130,7 +130,7 @@ To realize this, we thus need not only the connection to the virtual quantum nod
 
 	Bob, localhost, 8812
 
-The first thing that happens if we execute the script doNew.sh is that after some setting up it will call run.sh, executing:
+The first thing that happens if we execute the script doNew.sh is that after some setting up it will call run.sh, executing::
 	#!/bin/sh
 
 	cd "$NETSIM/examples/corrRNG"
