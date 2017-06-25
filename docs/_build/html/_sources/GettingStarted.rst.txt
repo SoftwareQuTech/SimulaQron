@@ -186,7 +186,7 @@ Let us now look at the programs for Alice and Bob. Alice will merely run a clien
         	reactor.stop()
 
 
-Let us now look at Bob's server program. Observe that Alice will call process_qubit above. Not included in the code below are several standard methods that require no change to be used in examples.::
+Let us now look at Bob's server program to be found in bobTest.py. Observe that Alice will call process_qubit above. Not included in the code below are several standard methods that require no change to be used in examples.::
 
 	#####################################################################################################
 	#

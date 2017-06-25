@@ -21,6 +21,7 @@ a quantum internet.
    :maxdepth: 3
    :caption: Contents:
 
+   Overview
    GettingStarted
    Examples
    SimulaQron
