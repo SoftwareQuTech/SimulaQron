@@ -1,0 +1,146 @@
+
+from twisted.spread import pb
+from twisted.internet import reactor
+from twisted.internet.defer import inlineCallbacks, returnValue, DeferredList, Deferred
+
+from SimulaQron.general.hostConfig import *
+
+from qutip import *
+
+import logging
+import time
+
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+#####################################################################################################
+#
+# setup_local
+#
+# Sets up the local classical comms server (if applicable), and connects to the local virtual node
+# and other classical communication servers. 
+
+def setup_local(myName, virtualNet, classicalNet, lNode, func):
+	"""
+	Sets up
+	- local classical communication server (if desired according to the configuration file)
+	- client connection to the local virtual node quantum backend 
+	- client connections to all other classical communication servers
+	
+	Arguments
+	myName		name of this node (string)
+	virtualNet	servers of the virtual nodes (dictionary of host objects)
+	classicalNet	servers on the classical communication network (dictionary of host objects)
+	lNode		Twisted PB root to use as local server (if applicable)
+	func		function to run if all connections are set up
+	"""
+
+	# Initialize Twisted callback framework
+	dList = []
+
+	# If we are listed as a server node for the classical network, start this server
+	if myName in classicalNet.hostDict:
+		try:
+			logging.debug("LOCAL %s: Starting local classical communication server.",myName)
+			nb = classicalNet.hostDict[myName]
+			nb.root = lNode
+			nb.factory = pb.PBServerFactory(nb.root)
+			reactor.listenTCP(nb.port, nb.factory)
+		except Exception as e:
+			logging.error("LOCAL %s: Cannot start classical communication servers.",myName,e.strerror)
+			return
+
+	# Give the server some time to start up
+	time.sleep(1)
+
+	# Connect to the local virtual node simulating the "local" qubits
+	logging.debug("LOCAL %s: Connecting to local virtual node.",myName)
+	node = virtualNet.hostDict[myName]
+	factory = pb.PBClientFactory()
+	reactor.connectTCP(node.hostname, node.port, factory)
+	deferVirtual = factory.getRootObject()
+	dList.append(deferVirtual)
+
+	# Set up a connection to all the other nodes in the classical network
+	for node in classicalNet.hostDict:
+		nb = classicalNet.hostDict[node]
+		if nb.name != myName:
+			logging.debug("LOCAL %s: Making classical connection to %s.",myName,nb.name)
+			nb.factory = pb.PBClientFactory()
+			reactor.connectTCP(nb.hostname, nb.port, nb.factory)
+			dList.append(nb.factory.getRootObject())
+
+	deferList = DeferredList(dList, consumeErrors=True)
+	deferList.addCallback(init_register, myName, virtualNet, classicalNet, lNode, func)
+	deferList.addErrback(localError)
+	reactor.run()
+	
+
+##################################################################################################
+#
+# init_register
+#
+# Called if all servers are started and all connections are made. Retrieves the relevant
+# root objects to talk to such remote connections
+#
+
+def init_register(resList, myName, virtualNet, classicalNet, lNode, func):
+
+	logging.debug("LOCAL %s: All connections set up.", myName)
+
+	# Retrieve the connection to the local virtual node, if successfull
+	j = 0
+	if resList[j][0]:
+		virtRoot = resList[j][1]
+		if lNode != None:
+			lNode.set_virtual_node(virtRoot)
+	else:
+		logging.error("LOCAL %s: Connection to virtual server failed!",myName)
+		reactor.stop()
+
+	# Retrieve connections to the classical nodes
+	for node in classicalNet.hostDict:
+		nb = classicalNet.hostDict[node]
+		if nb.name != myName:
+			j = j + 1
+			if resList[j][0]:
+				nb.root = resList[j][1]
+				logging.debug("LOCAL %s: Connected node %s with %s",myName, nb.name, nb.root)
+			else:
+				logging.error("LOCAL %s: Connection to %s failed!",myName, nb.name)
+				reactor.stop()
+		
+	# On the local virtual node, we still want to initialize a qubit register
+	defer = virtRoot.callRemote("new_register")
+	defer.addCallback(fill_register, myName, lNode, virtRoot, classicalNet, func)
+	defer.addErrback(localError)
+
+def fill_register(obj, myName, lNode, virtRoot, classicalNet, func):
+		logging.debug("LOCAL %s: Created quantum register at virtual node.",myName)
+		qReg = obj
+
+		# If we run a server, record the handle to the local virtual register
+		if lNode != None:
+			lNode.set_virtual_reg(qReg)
+
+		# Run client side function
+		func(qReg, virtRoot, myName, classicalNet)
+
+def localError(reason):
+	"""
+	Error handling for the connection.
+	"""
+	print("Critical error: ",reason)
+	reactor.stop()
+
+
+def assemble_qubit(realM, imagM):
+	"""
+	Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
+	We need this since Twisted PB does not support sending complex valued object natively.
+	"""
+	M = realM
+	for s in range(len(M)):
+		for t in range(len(M)):
+			M[s][t] = realM[s][t] + 1j * imagM[s][t]
+	
+	return Qobj(M)
+

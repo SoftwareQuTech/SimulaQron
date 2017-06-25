@@ -1,0 +1,328 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting started &#8212; SimulaQron 0.1 alpha documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1 alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Simple examples" href="Examples.html" />
+    <link rel="prev" title="SimulaQron Documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Examples.html" title="Simple examples"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="SimulaQron Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Getting started</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#testing-a-simple-example">Testing a simple example</a><ul>
+<li><a class="reference internal" href="#starting-the-virtual-node-servers">Starting the virtual node servers</a></li>
+<li><a class="reference internal" href="#running-a-protocol">Running a protocol</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">SimulaQron Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Examples.html"
+                        title="next chapter">Simple examples</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/GettingStarted.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>SimulaQron requires <a class="reference external" href="https://python.org/">Python 3</a> , <a class="reference external" href="http://twistedmatrix.com/trac/">Twisted</a> and <a class="reference external" href="http://qutip.org/">QuTip</a>
+Assuming you have python 3 etc already installed already, do:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">twisted</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">qutip</span>
+</pre></div>
+</div>
+<p>For detailed instructions on how to install QuTip and Twisted, please refer to their respective installations instructions. You will then
+need to set the following environment variables in order to execute the code. I am assuming here
+you use bash (e.g., standard on OSX or the GIT Bash install on Windows 10), otherwise set the same variables using your favorite shell.:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>export NETSIM=yourPath/SimulaQron
+export PYTHONPATH=yourPath:$PYTHONPATH
+</pre></div>
+</div>
+<p>where yourPath is the directory containing SimulaQron.</p>
+<p>You may verify the successful installation of the back engine itself, by executing:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">tests</span><span class="o">/</span><span class="n">auto</span><span class="o">/</span><span class="n">testEngine</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="testing-a-simple-example">
+<h2>Testing a simple example<a class="headerlink" href="#testing-a-simple-example" title="Permalink to this headline">¶</a></h2>
+<p>Before delving into how to write any program yourself, let&#8217;s first simply run one of the existing examples to understand the differnt components.
+Remember from the Overview that SimulaQron has two parts: the first are the virtual node servers that act simulate the hardware at each node as well as the quantum communication between them in a transparent manner. The second are the applications themselves which presently can be written in a crude way using the Python Twisted framework connecting to the virtual node servers. An interface using the classical/quantum combiner protocol will be included in v0.2.</p>
+<div class="section" id="starting-the-virtual-node-servers">
+<h3>Starting the virtual node servers<a class="headerlink" href="#starting-the-virtual-node-servers" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>A test configuration of virtual node servers will start 3 nodes, Alice, Bob and Charlie on your local computers. You may do so by executing::</dt>
+<dd>sh run/startVNodes.sh</dd>
+</dl>
+<p>Let us now see in detail what happens when you execute this example script.
+The configuration for the test network is read from config/virtualNodes.cfg. This file defines which virtualNodes to start up and what their names are. The example runs them all locally, but you can as well run them on remote hosts by using one such file on each host.</p>
+<p>For the example, this file is:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Network configuration file</span>
+<span class="c1">#</span>
+<span class="c1"># For each host its informal name, as well as its location in the network must</span>
+<span class="c1"># be listed.</span>
+<span class="c1">#</span>
+<span class="c1"># [name], [hostname], [port number]</span>
+<span class="c1">#</span>
+
+<span class="n">Alice</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8801</span>
+<span class="n">Bob</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8802</span>
+<span class="n">Charlie</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8803</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Provided a configuration in the file above, you can run::</dt>
+<dd>python run/startNode.py Alice &amp;</dd>
+</dl>
+<p>To start the virtual node for Alice. The script startVNodes.sh then simply starts any number of desired virtual nodes:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># startVNodes.sh - start the node Alice, Bob and Charlie</span>
+
+<span class="n">cd</span> <span class="s2">&quot;$NETSIM&quot;</span><span class="o">/</span><span class="n">run</span>
+<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Alice</span> <span class="o">&amp;</span>
+<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Bob</span> <span class="o">&amp;</span>
+<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Charlie</span> <span class="o">&amp;</span>
+</pre></div>
+</div>
+<p>Provided the virtual nodes started successfully you now have a network of 3 simulated quantum nodes that accept connections on the ports indicated above to allow an application program to access qubits on the virtual node servers. The 3 virtual nodes have also established connections to each other in order to exchange simulated quantum traffic.</p>
+</div>
+<div class="section" id="running-a-protocol">
+<h3>Running a protocol<a class="headerlink" href="#running-a-protocol" title="Permalink to this headline">¶</a></h3>
+<p>Having started the virtual quantum nodes, let us now run a simple test application, which already illustrates some of the aspects in realizing protocols.
+Our objective will be to realize the following protocol which will generate 1 shared random bit between Alice and Bob. Evidently, there would be classical means to achieve this trivial task chosen for illustration.</p>
+<ul class="simple">
+<li>Alice generates 1 EPR pair, that is, two maximally entangled qubits <span class="math">\(A\)</span> and <span class="math">\(B\)</span> of the form <span class="math">\(|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)\)</span></li>
+<li>She sends qubit <span class="math">\(B\)</span> to Bob.</li>
+<li>Both Alice and Bob measure their respective qubits to obtain a classical random number <span class="math">\(x \in \{0,1\}\)</span>.</li>
+</ul>
+<p>Before seeing how this example works, let us again simply run the code:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">examples</span><span class="o">/</span><span class="n">corrRNG</span>
+<span class="n">sh</span> <span class="n">doNew</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>Next to a considerable about of debugging information, you should be seeing the following two lines:</p>
+<blockquote>
+<div>ALICE: My Random Number is  0/1
+BOB: My Random Number is  0/1</div></blockquote>
+<p>Note that the order of these two lines may differ, as it does not matter who measures first. So what is actually going on here ? Let us first look at how we will realize the example by making an additional step (3) explicit:</p>
+<ul class="simple">
+<li>Alice generates 1 EPR pair, that is, two maximally entangled qubits <span class="math">\(A\)</span> and <span class="math">\(B\)</span> of the form <span class="math">\(|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)\)</span></li>
+<li>She sends qubit <span class="math">\(B\)</span> to Bob.</li>
+<li>Bob is informed of the identifier of the qubit and is informed it has arrived.</li>
+<li>Both Alice and Bob measure their respective qubits to obtain a classical random number <span class="math">\(x \in \{0,1\}\)</span>.</li>
+</ul>
+<p>While the task we want to realize here is completely trivial, the addition of step 3 does however already highlight a range of choices on how to realize step 3 and the need to find good abstractions to allow easy application development.
+One way to realize step 3 would be to hardwire Bobs measurement: if the hardware can identify the correct qubit from Alice, then we could instruct it to measure it immediately without asking for a notification from Alice. It is clear that in a network that is a bit larger than our tiny three node setup, identifying the right setup requires a link between the underlying qubits and classical control information: this is the objective of the classical/quantum combiner, for which we will provide code in version 0.2 of SimulaQron.</p>
+<p>This version simply allows a completely barebones access to the virtual nodes without implementing such convenient abstractions in order to allow you to explore such possibilities. To this end, we will here actually implement the following protocol for mere illustration purposes. We emphasize that this would be inefficient on a real quantum network since it requires Bob to store his qubit until Alice&#8217;s control message arrives, which can be a significant delay causing the qubit to decohere in the meantime.:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>* Alice generates 1 EPR pair, that is, two maximally entangled qubits :math:`A` and :math:`B` of the form :math:`|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)`
+
+* She sends qubit :math:`B` to Bob.
+
+* Alice sends Bob the correct identifier of the qubit, and tells him to measure it.
+
+* Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`.
+</pre></div>
+</div>
+<p>To realize this, we thus need not only the connection to the virtual quantum node servers, but Alice and Bob themselves need to run a client/server to exchange classical control information. Before looking at the code, we node that the setup of these servers is again determined by a configuration file, namely config/classicalNet.cfg. This file defines which nodes act as servers in the classical communication network listening for control information to execute the protocol. You want to copy this to whatever example you are running. It takes the same format as above, where in our example only Bob will act run a server:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Configuration file for servers on the classical communication network</span>
+<span class="c1">#</span>
+<span class="c1"># For each host its informal name, as well as its location in the network must</span>
+<span class="c1"># be listed.</span>
+<span class="c1">#</span>
+<span class="c1"># [name], [hostname], [port number]</span>
+<span class="c1">#</span>
+
+<span class="n">Bob</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8812</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>The first thing that happens if we execute the script doNew.sh is that after some setting up it will call run.sh, executing:</dt>
+<dd><p class="first">#!/bin/sh</p>
+<p>cd &#8220;$NETSIM/examples/corrRNG&#8221;
+python bobTest.py &amp;</p>
+<p class="last"># Note that this assumes Bob&#8217;s server is up. Given we run everything locally there is essentially no delay though.
+python aliceTest.py</p>
+</dd>
+</dl>
+<p>Let us now look at the programs for Alice and Bob. Alice will merely run a client on the classical communication network that connects to Bob to be found in aliceTest.py. Using the template (see general Examples section) which establishes the connections to the local virtual nodes, we thus need to provide client code for Alice to implement the protocol above. The function runClientNode will automatically be executed once Alice connected to her local virtual quantum node simulating the underlying hardware, and to Bob&#8217;s server:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
+<span class="c1">#</span>
+<span class="c1"># runClientNode</span>
+<span class="c1">#</span>
+<span class="c1"># This will be run on the local node if all communication links are set up (to the virtual node</span>
+<span class="c1"># quantum backend, as well as the nodes in the classical communication network), and the local classical</span>
+<span class="c1"># communication server is running (if applicable).</span>
+<span class="c1">#</span>
+<span class="nd">@inlineCallbacks</span>
+<span class="k">def</span> <span class="nf">runClientNode</span><span class="p">(</span><span class="n">qReg</span><span class="p">,</span> <span class="n">virtRoot</span><span class="p">,</span> <span class="n">myName</span><span class="p">,</span> <span class="n">classicalNet</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Code to execute for the local client node. Called if all connections are established.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        qReg            quantum register (twisted object supporting remote method calls)</span>
+<span class="sd">        virtRoot        virtual quantum ndoe (twisted object supporting remote method calls)</span>
+<span class="sd">        myName          name of this node (string)</span>
+<span class="sd">        classicalNet    servers in the classical communication network (dictionary of hosts)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;LOCAL </span><span class="si">%s</span><span class="s2">: Runing client side program.&quot;</span><span class="p">,</span><span class="n">myName</span><span class="p">)</span>
+
+        <span class="c1"># Create 2 qubits</span>
+        <span class="n">qA</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">virtRoot</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;new_qubit_inreg&quot;</span><span class="p">,</span><span class="n">qReg</span><span class="p">)</span>
+        <span class="n">qB</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">virtRoot</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;new_qubit_inreg&quot;</span><span class="p">,</span><span class="n">qReg</span><span class="p">)</span>
+
+        <span class="c1"># Put qubits A and B in a maximally entangled state</span>
+        <span class="k">yield</span> <span class="n">qA</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;apply_H&quot;</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">qA</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;cnot_onto&quot;</span><span class="p">,</span><span class="n">qB</span><span class="p">)</span>
+
+        <span class="c1"># Send qubit B to Bob</span>
+        <span class="c1"># Instruct the virtual node to transfer the qubit</span>
+        <span class="n">remoteNum</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">virtRoot</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;send_qubit&quot;</span><span class="p">,</span><span class="n">qB</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Tell Bob the ID of the qubit, and ask him to measure</span>
+        <span class="n">bob</span> <span class="o">=</span> <span class="n">classicalNet</span><span class="o">.</span><span class="n">hostDict</span><span class="p">[</span><span class="s2">&quot;Bob&quot;</span><span class="p">]</span>
+        <span class="k">yield</span> <span class="n">bob</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;process_qubit&quot;</span><span class="p">,</span> <span class="n">remoteNum</span><span class="p">)</span>
+
+        <span class="c1"># Measure qubit A to obtain a random number</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">qA</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;measure&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ALICE: My Random Number is &quot;</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">reactor</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Let us now look at Bob&#8217;s server program. Observe that Alice will call process_qubit above. Not included in the code below are several standard methods that require no change to be used in examples.:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
+<span class="c1">#</span>
+<span class="c1"># localNode</span>
+<span class="c1">#</span>
+<span class="c1"># This will be run if the local node acts as a server on the classical communication network,</span>
+<span class="c1"># accepting remote method calls from the other nodes.</span>
+
+<span class="k">class</span> <span class="nc">localNode</span><span class="p">(</span><span class="n">pb</span><span class="o">.</span><span class="n">Root</span><span class="p">):</span>
+
+        <span class="c1"># This can be called by Alice to tell Bob to process the qubit</span>
+        <span class="nd">@inlineCallbacks</span>
+        <span class="k">def</span> <span class="nf">remote_process_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">virtualNum</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Recover the qubit and measure it to get a random number.</span>
+
+<span class="sd">                Arguments</span>
+<span class="sd">                virtualNum      number of the virtual qubit corresponding to the EPR pair received</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+
+                <span class="n">qB</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtRoot</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_virtual_ref&quot;</span><span class="p">,</span><span class="n">virtualNum</span><span class="p">)</span>
+
+                <span class="c1"># Measure</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">qB</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;measure&quot;</span><span class="p">)</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BOB: My Random Number is &quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For further examples, see the examples/ folder. A template for creating your own can be found in template/</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Examples.html" title="Simple examples"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="SimulaQron Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Stephanie Wehner.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>
