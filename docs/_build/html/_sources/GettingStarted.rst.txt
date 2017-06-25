@@ -89,7 +89,7 @@ Before seeing how this example works, let us again simply run the code::
 	cd examples/corrRNG
 	sh doNew.sh
 
-Next to a considerable about of debugging information, you should be seeing the following two lines:
+Next to a considerable about of debugging information, you should be seeing the following two lines::
 
 	ALICE: My Random Number is  0/1
 	BOB: My Random Number is  0/1
@@ -108,15 +108,15 @@ While the task we want to realize here is completely trivial, the addition of st
 One way to realize step 3 would be to hardwire Bobs measurement: if the hardware can identify the correct qubit from Alice, then we could instruct it to measure it immediately without asking for a notification from Alice. It is clear that in a network that is a bit larger than our tiny three node setup, identifying the right setup requires a link between the underlying qubits and classical control information: this is the objective of the classical/quantum combiner, for which we will provide code in version 0.2 of SimulaQron. 
 
 
-This version simply allows a completely barebones access to the virtual nodes without implementing such convenient abstractions in order to allow you to explore such possibilities. To this end, we will here actually implement the following protocol for mere illustration purposes. We emphasize that this would be inefficient on a real quantum network since it requires Bob to store his qubit until Alice's control message arrives, which can be a significant delay causing the qubit to decohere in the meantime.::
+This version simply allows a completely barebones access to the virtual nodes without implementing such convenient abstractions in order to allow you to explore such possibilities. To this end, we will here actually implement the following protocol for mere illustration purposes. We emphasize that this would be inefficient on a real quantum network since it requires Bob to store his qubit until Alice's control message arrives, which can be a significant delay causing the qubit to decohere in the meantime.
 
-	* Alice generates 1 EPR pair, that is, two maximally entangled qubits :math:`A` and :math:`B` of the form :math:`|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)`
+* Alice generates 1 EPR pair, that is, two maximally entangled qubits :math:`A` and :math:`B` of the form :math:`|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)`
 
-	* She sends qubit :math:`B` to Bob.
+* She sends qubit :math:`B` to Bob.
 
-	* Alice sends Bob the correct identifier of the qubit, and tells him to measure it.
+* Alice sends Bob the correct identifier of the qubit, and tells him to measure it.
 
-	* Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`. 
+* Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`. 
 
 To realize this, we thus need not only the connection to the virtual quantum node servers, but Alice and Bob themselves need to run a client/server to exchange classical control information. Before looking at the code, we node that the setup of these servers is again determined by a configuration file, namely config/classicalNet.cfg. This file defines which nodes act as servers in the classical communication network listening for control information to execute the protocol. You want to copy this to whatever example you are running. It takes the same format as above, where in our example only Bob will act run a server::
 
