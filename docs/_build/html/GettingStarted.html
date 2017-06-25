@@ -206,15 +206,16 @@ One way to realize step 3 would be to hardwire Bobs measurement: if the hardware
 <span class="n">Bob</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8812</span>
 </pre></div>
 </div>
-<dl class="docutils">
-<dt>The first thing that happens if we execute the script doNew.sh is that after some setting up it will call run.sh, executing::</dt>
-<dd><p class="first">#!/bin/sh</p>
-<p>cd &#8220;$NETSIM/examples/corrRNG&#8221;
-python bobTest.py &amp;</p>
-<p class="last"># Note that this assumes Bob&#8217;s server is up. Given we run everything locally there is essentially no delay though.
-python aliceTest.py</p>
-</dd>
-</dl>
+<p>The first thing that happens if we execute the script doNew.sh is that after some setting up it will call run.sh, executing:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
+
+<span class="n">cd</span> <span class="s2">&quot;$NETSIM/examples/corrRNG&quot;</span>
+<span class="n">python</span> <span class="n">bobTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
+
+<span class="c1"># Note that this assumes Bob&#39;s server is up. Given we run everything locally there is essentially no delay though.</span>
+<span class="n">python</span> <span class="n">aliceTest</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
 <p>Let us now look at the programs for Alice and Bob. Alice will merely run a client on the classical communication network that connects to Bob to be found in aliceTest.py. Using the template (see general Examples section) which establishes the connections to the local virtual nodes, we thus need to provide client code for Alice to implement the protocol above. The function runClientNode will automatically be executed once Alice connected to her local virtual quantum node simulating the underlying hardware, and to Bob&#8217;s server:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
