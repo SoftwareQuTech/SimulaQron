@@ -41,6 +41,17 @@ from SimulaQron.virtNode.crudeSimulator import *
 
 from SimulaQron.local.setup import *
 
+def assemble_qubit(realM, imagM):
+	"""
+        Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
+        We need this since Twisted PB does not support sending complex valued object natively.
+        """
+	M = realM
+	for s in range(len(M)):
+		for t in range(len(M)):
+			M[s][t] = realM[s][t] + 1j * imagM[s][t]
+	return Qobj(M)
+
 
 
 #####################################################################################################
@@ -65,19 +76,21 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 
 	logging.debug("LOCAL %s: Runing client side program.",myName)
 
-	# Create qubit
+	# Create 2 qubits
 	qA = yield virtRoot.callRemote("new_qubit_inreg",qReg)
+	qB = yield virtRoot.callRemote("new_qubit_inreg",qReg)
 
-	# Instruct the virtual node to transfer the qubit
-	remoteNum = yield virtRoot.callRemote("send_qubit",qA, "Bob")
-	logging.debug("LOCAL %s: Remote qubit is %d.",myName, remoteNum)
+	# Put qubits A and B in an EPR state
+	yield qA.callRemote("apply_H")
+	yield qA.callRemote("cnot_onto",qB)
 
-	# Tell Bob the number of the virtual qubit so the can use it locally
-	bob = classicalNet.hostDict["Bob"]
-	yield bob.root.callRemote("receive_qubit", remoteNum)
+	# Output state
+	(realRho, imagRho) = yield virtRoot.callRemote("get_multiple_qubits",[qA,qB])
+	rho = assemble_qubit(realRho,imagRho)
+	print("EXPECTED: EPR Pair")
+	print("Qubits are:", rho)
 
 	reactor.stop()
-
 
 		
 #####################################################################################################

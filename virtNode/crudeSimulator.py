@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2017, Stephanie Wehner
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 # 1. Redistributions of source code must retain the above copyright
@@ -15,7 +15,7 @@
 # 4. Neither the name of the QuTech organization nor the
 #    names of its contributors may be used to endorse or promote products
 #    derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -39,13 +39,13 @@ from SimulaQron.virtNode.basics import *;
 class simpleEngine(quantumEngine):
 	"""
 	Basic quantum engine which uses QuTip. Works with density matrices and in principle allows full quantum
-	dynamics via QuTip. Subsequently, this is quite slow. 
+	dynamics via QuTip. Subsequently, this is quite slow.
 
 	Attributes:
 		maxQubits:	maximum number of qubits this engine will support.
 	"""
 
-	def __init__(self, maxQubits = 10): 
+	def __init__(self, maxQubits = 10):
 		"""
 		Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.
 		"""
@@ -66,11 +66,11 @@ class simpleEngine(quantumEngine):
 		"""
 		Add a new qubit initialized in the |0> state
 		"""
-		
+
 		# Prepare a clean qubit state in |0>
 		v = basis(2,0)
 		newQubit = v * v.dag()
-	
+
 		return self.add_qubit(newQubit)
 
 	def add_qubit(self, newQubit):
@@ -92,7 +92,7 @@ class simpleEngine(quantumEngine):
 		num = self.activeQubits
 
 		# Increment the number of qubits
-		self.activeQubits = self.activeQubits + 1 
+		self.activeQubits = self.activeQubits + 1
 
 		return(num)
 
@@ -116,15 +116,15 @@ class simpleEngine(quantumEngine):
 				keepList.append(j)
 
 		# Trace out this qubit by taking the partial trace
-		self.qubitReg = self.qubitReg.ptrace(keepList)	
+		self.qubitReg = self.qubitReg.ptrace(keepList)
 
-		# Update the number of qubits 
+		# Update the number of qubits
 		self.activeQubits = self.activeQubits - 1
 
 	def get_qubits(self, qList):
 		"""
 		Retrieves a the qubits in the list. This traces out the rest of the qubits.
-		
+
 		Arguments
 		qList		list of qubits to retrieve, e.g. [1, 4]
 		"""
@@ -133,8 +133,8 @@ class simpleEngine(quantumEngine):
 
 	def get_qubits_RI(self, qList):
 		"""
-		Retrieves the qubits in the list and returns the result as a list divided into 
-		a real and imaginary part. Twisted only likes to send real values lists, 
+		Retrieves the qubits in the list and returns the result as a list divided into
+		a real and imaginary part. Twisted only likes to send real values lists,
 		not complex ones.
 
 		Arguments
@@ -148,7 +148,7 @@ class simpleEngine(quantumEngine):
 
 	def get_register_RI(self):
 		"""
-		Retrieves the entire register in real and imaginary parts and returns the result as a 
+		Retrieves the entire register in real and imaginary parts and returns the result as a
 		list. Twisted only likes to send real valued lists, not complex ones.
 		"""
 		R = self.qubitReg.full().real.tolist()
@@ -161,7 +161,7 @@ class simpleEngine(quantumEngine):
 		Applies a Hadamard gate to the qubits with number qubitNum.
 		"""
 
-		f = sqrt(2);	
+		f = sqrt(2);
 		H = Qobj([[1/f, 1/f],[1/f, -1/f]], dims=[[2],[2]])
 		self.apply_onequbit_gate(H, qubitNum)
 
@@ -198,6 +198,16 @@ class simpleEngine(quantumEngine):
 		Y = Qobj([[1, 0],[0, exp(i * pi/4)]], dims=[[2],[2]])
 		self.apply_onequbit_gate(Y, qubitNum)
 
+	def apply_rotation(self,qubitNum,n,a):
+		"""
+		Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError is raised
+		"""
+		nNorm=np.linalg.norm(n)
+		if nNorm==0:
+			raise ValueError("Rotation vector n can't be 0")
+		R=(-1j*a/(2*nNorm)*(n[0]*sigmax()+n[1]*sigmay()+n[2]*sigmaz())).expm()
+		self.apply_onequbit_gate(R,qubitNum)
+
 	def apply_CNOT(self, qubitNum1, qubitNum2):
 		"""
 		Applies the CNOT to the qubit with the numbers qubitNum1 and qubitNum2.
@@ -208,7 +218,7 @@ class simpleEngine(quantumEngine):
                      	[0, 1, 0, 0],
                      	[0, 0, 0, 1],
                      	[0, 0, 1, 0]],
-                    	dims=[[2, 2], [2, 2]])	
+                    	dims=[[2, 2], [2, 2]])
 
 		# Apply it to the desired qubits
 		self.apply_twoqubit_gate(cnot, qubitNum1, qubitNum2)
@@ -224,14 +234,14 @@ class simpleEngine(quantumEngine):
                      	[0, 1, 0, 0],
                      	[0, 0, 1, 0],
                      	[0, 0, 0, -1]],
-                    	dims=[[2, 2], [2, 2]])	
+                    	dims=[[2, 2], [2, 2]])
 
 		# Apply it to the desired qubits
 		self.apply_twoqubit_gate(cphase,qubitNum1, qubitNum2)
 
 	def get_qubits(self, list):
 		"""
-		Returns the qubits with numbers in list. 
+		Returns the qubits with numbers in list.
 		"""
 
 		# Qutip distinguishes between system dimensionality and matrix dimensionality
@@ -242,15 +252,15 @@ class simpleEngine(quantumEngine):
 			dimL.append(2)
 
 		self.qubitReg.dims = [dimL, dimL]
-	
-		logging.debug("Dimensions %s",self.qubitReg.dims)	
+
+		logging.debug("Dimensions %s",self.qubitReg.dims)
 		return self.qubitReg.ptrace(list)
-		
+
 
 	def apply_onequbit_gate(self, gateU, qubitNum):
 		"""
 		Applies a unitary gate to the specified qubit.
-		
+
 		Arguments:
 		gateU   	unitary to apply as Qobj
 		qubitNum 	the number of the qubit this gate is applied to
@@ -266,17 +276,17 @@ class simpleEngine(quantumEngine):
 		dimL = []
 		for j in range(k):
 			dimL.append(2)
-		
+
 		overallU.dims = [dimL, dimL]
 		self.qubitReg.dims = [dimL, dimL]
 
-		# Apply the unitary 
+		# Apply the unitary
 		self.qubitReg = overallU * self.qubitReg * overallU.dag()
 
 	def apply_twoqubit_gate(self, gateU, qubit1, qubit2):
 		"""
 		Applies a unitary gate to the two specified qubits.
-	
+
 		Arguments:
 		gateU		unitary to apply as Qobj
 		qubit1 		the first qubit
@@ -292,10 +302,10 @@ class simpleEngine(quantumEngine):
 		dimL = []
 		for j in range(k):
 			dimL.append(2)
-		
+
 		overallU.dims = [dimL, dimL]
 		self.qubitReg.dims = [dimL, dimL]
-	
+
 		# Apply the  unitary
 		self.qubitReg = overallU * self.qubitReg * overallU.dag()
 
@@ -307,11 +317,11 @@ class simpleEngine(quantumEngine):
 		Arguments:
 		qubitNum	qubit to be measured
 		"""
-	
+
 		# Check we have such a qubit...
 		if (qubitNum+1) > self.activeQubits:
 			raise quantumError("No such qubit to be measured.")
-		
+
 		# Construct the two measurement operators, and put them at the right position
 		v0 = basis(2,0);
 		P0 = v0 * v0.dag();
@@ -355,7 +365,7 @@ class simpleEngine(quantumEngine):
 		"""
 		Replaces the qubit at position qubitNum with the one given by state.
 		"""
-		
+
 		# Remove the qubit currently there by tracing it out
 		self.remove_qubit(qubitNum)
 
@@ -370,7 +380,7 @@ class simpleEngine(quantumEngine):
 
 	def absorb(self, other):
 		"""
-		Absorb the qubits from the other engine into this one. This is done by tensoring the state at the end. 
+		Absorb the qubits from the other engine into this one. This is done by tensoring the state at the end.
 		"""
 
 		# Check whether there is space
@@ -423,17 +433,17 @@ class simpleEngine(quantumEngine):
 		dimL = []
 		for j in range(k):
 			dimL.append(2)
-	
+
 		self.qubitReg.dims = [dimL, dimL]
-		
+
 class quantumRegister(simpleEngine):
 	"""
-	A simulated quantum register. The qubits who are simulated in this register may be distributed over 
+	A simulated quantum register. The qubits who are simulated in this register may be distributed over
 	different quantum nodes.
 	"""
 
 	def __init__(self, node, num, maxQubits = 10):
-		""" 
+		"""
 		Initialize the quantum register at the given node.
 
 		Arguments

@@ -65,23 +65,17 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 
 	logging.debug("LOCAL %s: Runing client side program.",myName)
 
-	# Create 2 qubits
+	# Create a qubit
 	qA = yield virtRoot.callRemote("new_qubit_inreg",qReg)
-	qB = yield virtRoot.callRemote("new_qubit_inreg",qReg)
 
-	# Put qubits A and B in an EPR state
-	yield qA.callRemote("apply_H")
-	yield qA.callRemote("cnot_onto",qB)
-
-	# Send qubit B to Bob
 	# Instruct the virtual node to transfer the qubit
-	remoteNum = yield virtRoot.callRemote("send_qubit",qB, "Bob")
+	remoteNum = yield virtRoot.callRemote("send_qubit",qA, "Bob")
 	logging.debug("LOCAL %s: Remote qubit is %d.",myName, remoteNum)
 
 	# Tell Bob the number of the virtual qubit so the can use it locally
 	# and extend it to a GHZ state with Charlie
 	bob = classicalNet.hostDict["Bob"]
-	yield bob.root.callRemote("receive_epr", remoteNum)
+	yield bob.root.callRemote("receive_qubit", remoteNum)
 
 	reactor.stop()
 

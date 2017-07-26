@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2017, Stephanie Wehner
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 # 1. Redistributions of source code must retain the above copyright
@@ -15,7 +15,7 @@
 # 4. Neither the name of the QuTech organization nor the
 #    names of its contributors may be used to endorse or promote products
 #    derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ''AS IS'' AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,15 +35,15 @@ import logging
 
 class qubit(pb.Referenceable):
 	"""
-	Simulated qubit object in the specified local simulation engine. 
+	Simulated qubit object in the specified local simulation engine.
 
 	- **Arguments**
 		:node:		network node that this qubit lives at
-		:register:	register on that node that the qubit is in	
+		:register:	register on that node that the qubit is in
 
 	.. note::
 		Qubit objects are local to each node that is simulating a particular quantum register.
-		A qubit object provides the backing for a virtual qubit, which may be at another node. 
+		A qubit object provides the backing for a virtual qubit, which may be at another node.
 	"""
 
 
@@ -91,7 +91,7 @@ class qubit(pb.Referenceable):
 		logging.debug("QUANTUM %s: Adding qubit number %d to register %d",self.node.name, num,self.register.num)
 
 	def remote_apply_X(self):
-		""" 
+		"""
 		Apply X gate to itself by passing it onto the underlying register.
 		"""
 		logging.debug("VIRTUAL NODE %s: applying X to number %d",self.node.name, self.num)
@@ -125,6 +125,15 @@ class qubit(pb.Referenceable):
 		logging.debug("VIRTUAL NODE %s: applying T to number %d",self.node.name, self.num)
 		self.register.apply_T(self.num)
 
+	def remote_apply_rotation(self,*args):
+		"""
+		Apply rotation around axis n with angle a. param should be a dictionary of the form {'n':n,'a':a}
+		"""
+		n=args[0]
+		a=args[1]
+		logging.debug("VIRTUAL NODE %s: applying T to number %d. Axis=%s,angle=%s",self.node.name, self.num,str(tuple(n)),str(a))
+		self.register.apply_rotation(self.num,n,a)
+
 	def remote_measure_inplace(self):
 		"""
 		Measure the qubit in the standard basis. This does NOT delete the qubit, but replace the relevant
@@ -137,14 +146,14 @@ class qubit(pb.Referenceable):
 
 	def remote_measure(self):
 		"""
-		Measure the qubit in the standard basis. This does delete the qubit. 
+		Measure the qubit in the standard basis. This does delete the qubit.
 
 		Returns the measurement outcome.
 		"""
 
-		# Measure the qubit 
+		# Measure the qubit
 		outcome = self.register.measure_qubit(self.num)
-		return outcome	
+		return outcome
 
 	def remote_cnot_onto(self, targetNum):
 		"""
@@ -153,20 +162,20 @@ class qubit(pb.Referenceable):
 		Arguments
 		targetNum	the qubit to use as the target of the CNOT
 		"""
-	
+
 		logging.debug("VIRTUAL NODE %s: CNOT from %d to %d", self.node.name, self.num, targetNum)
 		self.register.apply_CNOT(self.num, targetNum)
 
-	def remote_cphase_onto(self, target):
+	def remote_cphase_onto(self, targetNum):
 		"""
 		Performs a CPHASE operation with this qubit as control, and the other qubit as target.
 
 		Arguments
-		target		the qubit to use as the target of the CNOT
+		targetNum	the qubit to use as the target of the CNOT
 		"""
 
 
-		self.register.apply_CPHASE(self.num, target.num)
+		self.register.apply_CPHASE(self.num, targetNum)
 
 	def remote_get_sim_number(self):
 		"""
@@ -206,5 +215,5 @@ class qubit(pb.Referenceable):
 		return (self.simNum, self.node.name)
 
 
-	
+
 

@@ -95,7 +95,7 @@ class localNode(pb.Root):
 
 	# This can be called by Alice or Bob to tell Charlie where to get the qubit and what to do next
 	@inlineCallbacks
-	def remote_receive_epr_Alice(self, virtualNum):
+	def remote_receive_qubit_Alice(self, virtualNum):
 		"""
 		Recover the qubit from Alice. We should now have a tripartite GHZ state
 		
@@ -112,7 +112,7 @@ class localNode(pb.Root):
 			self.got_both()
 
 	@inlineCallbacks
-	def remote_receive_epr_Bob(self, virtualNum):
+	def remote_receive_qubit_Bob(self, virtualNum):
 		"""
 		Recover the qubit from Bob. We should now have a tripartite GHZ state
 		
@@ -140,7 +140,14 @@ class localNode(pb.Root):
 		logging.debug("LOCAL %s: Got both qubits from Alice and Bob.", self.node.name)
 
 		# We'll test an operation that will cause a merge of the two remote registers
+		yield self.qA.callRemote("apply_H")
 		yield self.qA.callRemote("cnot_onto", self.qB)
+
+		# Output state
+		(realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits",[self.qA,self.qB])
+		rho = self.assemble_qubit(realRho,imagRho)
+		print("EXPECTED: EPR Pair")
+		print("Qubits are:", rho)
 
 	def assemble_qubit(self, realM, imagM):
 		"""

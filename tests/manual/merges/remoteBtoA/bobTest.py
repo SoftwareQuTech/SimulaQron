@@ -94,7 +94,7 @@ class localNode(pb.Root):
 
 	# This can be called by Alice to tell Bob where to get the qubit and what corrections to apply
 	@inlineCallbacks
-	def remote_receive_epr(self, virtualNum):
+	def remote_receive_qubit(self, virtualNum):
 		"""
 		Recover the qubit from teleportation.
 		
@@ -106,17 +106,19 @@ class localNode(pb.Root):
 		logging.debug("LOCAL %s: Getting reference to qubit number %d.",self.node.name, virtualNum)
 
 		# Get a reference to our side of the EPR pair
-		eprB = yield self.virtRoot.callRemote("get_virtual_ref",virtualNum)
+		qA = yield self.virtRoot.callRemote("get_virtual_ref",virtualNum)
 
 		# Create a fresh qubit
 		q = yield self.virtRoot.callRemote("new_qubit_inreg",self.qReg)
 
 		# Test merrge by executing a CNOT from the fresh qubit onto the epr pair - does nothing
-		defer = yield q.callRemote("cnot_onto",eprB)
+		yield q.callRemote("apply_H")
+		yield q.callRemote("cnot_onto",qA)
 
 		# Print the received qubits
-		(realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits",[eprB])
+		(realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits",[qA, q])
 		rho = self.assemble_qubit(realRho,imagRho)
+		print("EXPECTED: EPR pair")
 		print("Qubits are:", rho)
 
 	def assemble_qubit(self, realM, imagM):
