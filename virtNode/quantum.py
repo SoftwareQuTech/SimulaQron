@@ -171,7 +171,7 @@ class qubit(pb.Referenceable):
 		Performs a CPHASE operation with this qubit as control, and the other qubit as target.
 
 		Arguments
-		targetNum	the qubit to use as the target of the CNOT
+		targetNum	the qubit to use as the target of the CPHASE
 		"""
 
 
