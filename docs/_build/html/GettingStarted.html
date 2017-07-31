@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Getting started &#8212; SimulaQron 0.1 alpha documentation</title>
+    <title>Getting started &mdash; SimulaQron 0.1 alpha documentation</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,17 +17,15 @@
         VERSION:     '0.1 alpha',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="SimulaQron package" href="SimulaQron.html" />
+    <link rel="top" title="SimulaQron 0.1 alpha documentation" href="index.html" />
+    <link rel="next" title="Examples" href="Examples.html" />
     <link rel="prev" title="Overview" href="Overview.html" /> 
   </head>
   <body role="document">
@@ -38,15 +36,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="SimulaQron.html" title="SimulaQron package"
+          <a href="Examples.html" title="Examples"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="Overview.html" title="Overview"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -68,20 +63,20 @@
   <p class="topless"><a href="Overview.html"
                         title="previous chapter">Overview</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="SimulaQron.html"
-                        title="next chapter">SimulaQron package</a></p>
+  <p class="topless"><a href="Examples.html"
+                        title="next chapter">Examples</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/GettingStarted.rst.txt"
+      <li><a href="_sources/GettingStarted.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -120,8 +115,8 @@ export PYTHONPATH=yourPath:$PYTHONPATH
 </div>
 <div class="section" id="testing-a-simple-example">
 <h2>Testing a simple example<a class="headerlink" href="#testing-a-simple-example" title="Permalink to this headline">¶</a></h2>
-<p>Before delving into how to write any program yourself, let&#8217;s first simply run one of the existing examples to understand the differnt components.
-Remember from the Overview that SimulaQron has two parts: the first are the virtual node servers that act simulate the hardware at each node as well as the quantum communication between them in a transparent manner. The second are the applications themselves which presently can be written in a crude way using the Python Twisted framework connecting to the virtual node servers. An interface using the classical/quantum combiner protocol will be included in v0.2.</p>
+<p>Before delving into how to write any program yourself, let&#8217;s first simply run one of the existing examples when programming SimulaQron native mode (see <a href="#id1"><span class="problematic" id="id2">:docs:`ExamplesNative`</span></a>) to verify you set up everything correctly.
+Remember from the Overview that SimulaQron has two parts: the first are the virtual node servers that act simulate the hardware at each node as well as the quantum communication between them in a transparent manner. The second are the applications themselves which can be written in two ways, here we will illustrate the native mode using the Python Twisted framework connecting to the virtual node servers. An interface using the classical/quantum combiner protocol will be included in v0.2.</p>
 <div class="section" id="starting-the-virtual-node-servers">
 <h3>Starting the virtual node servers<a class="headerlink" href="#starting-the-virtual-node-servers" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -308,20 +303,17 @@ One way to realize step 3 would be to hardwire Bobs measurement: if the hardware
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="SimulaQron.html" title="SimulaQron package"
+          <a href="Examples.html" title="Examples"
              >next</a> |</li>
         <li class="right" >
           <a href="Overview.html" title="Overview"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2017, Stephanie Wehner.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+        &copy; Copyright 2017, Stephanie Wehner.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
     </div>
   </body>
 </html>

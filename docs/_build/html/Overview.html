@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Overview &#8212; SimulaQron 0.1 alpha documentation</title>
+    <title>Overview &mdash; SimulaQron 0.1 alpha documentation</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,16 +17,14 @@
         VERSION:     '0.1 alpha',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="SimulaQron 0.1 alpha documentation" href="index.html" />
     <link rel="next" title="Getting started" href="GettingStarted.html" />
     <link rel="prev" title="SimulaQron Documentation" href="index.html" /> 
   </head>
@@ -38,15 +36,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="GettingStarted.html" title="Getting started"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="SimulaQron Documentation"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -55,7 +50,7 @@
   <ul>
 <li><a class="reference internal" href="#">Overview</a><ul>
 <li><a class="reference internal" href="#programming-simulaqron">Programming SimulaQron</a></li>
-<li><a class="reference internal" href="#how-simulaqron-works">How SimulaQron works</a><ul>
+<li><a class="reference internal" href="#how-simulaqron-works-internally">How SimulaQron works internally</a><ul>
 <li><a class="reference internal" href="#virtual-quantum-nodes">Virtual quantum nodes</a></li>
 <li><a class="reference internal" href="#the-local-client-engine">The local client engine</a></li>
 </ul>
@@ -73,15 +68,15 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/Overview.rst.txt"
+      <li><a href="_sources/Overview.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -103,30 +98,37 @@
 In the light of the alternate interface below it may appear inefficient to export an intermediary interface. However, the purpose of SimulaQron is precisely to explore and play with highler layer abstractions on top of any hardware, or its simulated version, SimulaQron. As such it is best to think of SimulaQron as a piece of simulated hardware with its own native interface, which we may first abstract into a higher level command language for programming. Examples of how to program SimulaQron in native mode can be found in <a class="reference internal" href="ExamplesDirect.html"><span class="doc">Programming via SimulaQron&#8217;s native Python Twisted Interface (specific to SimulaQron)</span></a>.</p>
 <p>The second way to run applications is via a higher level interface bundled with SimulaQron, called the classical-quantum combiner (CQC) interface. This interface is universally accessible from any language, and will be available on the planned 2020 quantum internet demonstrator connecting several Dutch cities. If you want your applications to later use real quantum hardware instead of SimulaQron, then this is the interface to use. Internally, the CQC included in this package, uses SimulaQron&#8217;s native interface from above in place of real quantum hardware. Examples of how to program using the CQC can be found in <a class="reference internal" href="ExamplesNodeOS.html"><span class="doc">Programming via the Classical-Quantum Combiner Interface</span></a>.</p>
 </div>
-<div class="section" id="how-simulaqron-works">
-<h2>How SimulaQron works<a class="headerlink" href="#how-simulaqron-works" title="Permalink to this headline">¶</a></h2>
-<p>Let us here briefly sketch how SimulaQron works. Further details can be found in this arXiv paper.
+<div class="section" id="how-simulaqron-works-internally">
+<h2>How SimulaQron works internally<a class="headerlink" href="#how-simulaqron-works-internally" title="Permalink to this headline">¶</a></h2>
+<p>Let us here briefly sketch how SimulaQron works internally. Further details can be found in this arXiv paper.
 This simulator consists of two parts and has a relatively modular design:</p>
 <div class="section" id="virtual-quantum-nodes">
 <h3>Virtual quantum nodes<a class="headerlink" href="#virtual-quantum-nodes" title="Permalink to this headline">¶</a></h3>
-<p>The first part sets up virtual quantum network nodes which simulate qubits for you. Think of them as fake hardware providing both the end
-nodes as well as the quantum communication, programmable in SimulaQron&#8217;s native interface. Each node presents
+<p>A virtual quantum node is a server program running on a particular computer that pretends to be quantum hardware, simulating qubits and quantum communication.
+That is, you may thnk of these nodes as fake hardware programmable directly via SimulaQron&#8217;s native interface. Each node presents
 a number of virtual qubits for you to use. These virtual qubits would correspond to the physical qubits
-available at this node, would this be a real physical implementation of the quantum network node. The
-client part (see below), may manipulate these qubits as if they were local physical qubit and also
-instruct to send them to remote nodes. The virtual nodes consists of a number of servers identified
-by their common names (eg Alice, Bob, Charlie) which connect to each other to form a virtual simulation
+available at this node, would this be a real physical implementation of the quantum network node. By connecting to the virtual quantum node server, a
+client program that depends on using quantum hardware, may manipulate these qubits as if they were local physical qubit and also
+instruct to send them to remote nodes.
+The virtual quantum node servers are identifies
+by their common names (eg Alice, Bob, Charlie), and amongst themselves connect classically to form a virtual simulation
 network as a backend.</p>
-<p>As you know, entangled qubits cannot be locally represented by any form of classical information (hence
-the quantum advantage of entanglement in the first place!). As such, if two (or more) nodes share
-qubits which are somehow entangled with each other, then these qubits will actually be simulated
+<p>An important internal element in SimulaQron is the distinction between virtual qubits and simulated qubits. Virtual qubits
+are the qubits as they would be present in real quantum hardware. A virtual qubit is local to each virtual quantum node server
+and may be manipulated there. Each virtual qubit is simulated somewhere, by a simulated qubit. Importantly, this simulated qubit
+may be located at a different simulating node than the node holding the corresponding virtual qubit.
+To see why this is necessary, note that
+entangled qubits cannot be locally represented by any form of classical information (hence
+the quantum advantage of entanglement in the first place!). As such, if two (or more) virtual nodes share
+qubits which are somehow entangled with each other, then these qubits will actually need to be simulated
 at just one of these nodes. That is, they appear to be virtually local (as if they were real physical
 qubits), yet they are actually simulated at just one of the network nodes. As you might imagine,
 this also means that if we want to perform an entangling gate to two qubits which are virtually
 local, but actually simulated in two different backend quantum registers, then a merge of these
 registers is required before the entangling gate can be exectuted. This is all handled transparently
-by the backend provided here.</p>
-<p>As a guide to the backend, it consists of three essential components:</p>
+by the backend provided here. For programming network applications using SimulaQron you will not need to
+deal with this backend simulation.</p>
+<p>Nevertheless, as a guide to the backend, it consists of three essential components:</p>
 <ul class="simple">
 <li>quantumEngine - the one used here is implemented as simpleEngine in crudeSimulator.py which uses quTip as a backend. This corresponds to one quantum register full of qubits across which gates can be performed. Should you wish to use a different backend, you may wish to add a different engine.</li>
 <li>simulatedQubit - for each qubit simulated in that register, there is a simQubit object. This is local to each node. It exports remote method calls. These methods are only called by the virtual node network itself: when a virtual node discovers the qubit is actually simulated remotely, it passes on this call by calling the relevant method on the remote qubit object.</li>
@@ -157,20 +159,17 @@ in native mode), or to the CQC interface. It is up to these applications to exch
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="GettingStarted.html" title="Getting started"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="SimulaQron Documentation"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2017, Stephanie Wehner.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+        &copy; Copyright 2017, Stephanie Wehner.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
     </div>
   </body>
 </html>

@@ -9,9 +9,7 @@ One such abstraction is the classical-quantum combiner (CQC) interface, which we
 internet demonstrator. For programming in a universal, i.e., not Python specific interface see :doc:`ExamplesNodeOS`. 
 
 The examples below assume that you have already made your way through :doc:`GettingStarted`: you have the virtual node servers
-up and running, and ran the simple example of generating correlated randomness. 
-
-Let us know discuss the general template of programming SimulaQron via its native interface, as well as two simple examples.
+up and running, and ran the simple example of generating correlated randomness. Further examples can also be found in examples/nativeMode.
 
 .. toctree::
 	:maxdepth: 2
@@ -19,7 +17,6 @@ Let us know discuss the general template of programming SimulaQron via its nativ
 
 	NativeModeTemplate
 	NativeModeTeleport
-	NativeModeGHZ
 
 
 

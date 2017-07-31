@@ -1,14 +1,13 @@
 Template for programming in native mode
 =======================================
 
-In examples/nativeMode/template you will find a template that allows you to program relatively easily by filling in the relevant parts of the template. Let us now discuss this template in detail. Let us now discuss some steps in using the templates:
+In examples/nativeMode/template you will find a template that allows you to program relatively easily by filling in the relevant parts of the template. Let us now discuss this template in detail. 
 
 #. The first step in programming your application protocol is to determine how many nodes are involved. For simplicity, let us here assume you only have two, called Alice and Bob. This will typically be obvious from the high level description of the quantum protocol that you are given. 
 
-#. The next, and possibly less obvious step, is to determine how classical information is exchanged in the quantum protocol. That is, who sends classical messages to whom, at what time, and what actions are taken when those messages are received. Based on this, you need to decide which nodes run a server on the classical
-network, and which nodes may simply be a client program that connects to the servers to deliver messages. Let us here simply assume, Alice only sends information to Bob, who then acts upon the message received. In this case, we would make Alice a client and Bob a server. Note that one node can obviously fullfill both roles.
+#. The next, and possibly less obvious step, is to determine how classical information is exchanged in the quantum protocol. That is, who sends classical messages to whom, at what time, and what actions are taken when those messages are received. Based on this, you need to decide which nodes run a server on the classical network, and which nodes may simply be a client program that connects to the servers to deliver messages. Let us here simply assume, Alice only sends information to Bob, who then acts upon the message received. In this case, we would make Alice a client and Bob a server. Note that one node can obviously fullfill both roles.
 
-#. The template will look for a file called classicalNet.cfg in the local directory to determine who acts as a server and what that nodes address details are. An example, if only Bob acts as a server would be:
+#. The template will look for a file called classicalNet.cfg in the local directory to determine who acts as a server and what that nodes address details are. An example, if only Bob acts as a server would be::
 
 	# Network configuration file
 	# 
@@ -59,7 +58,7 @@ Let us now see how we would program a protocol in which a node acts as a client.
         	# Stop the server and client - you want to delete this if the nodes acts as a server
         	reactor.stop()
 
-That's all. As a simple example, this code would correspond to the protocol where Alice creates a qubit in the :math:`|+\rangle` state and send it to Bob.
+That's all. As a simple example, this code would correspond to the protocol where Alice creates a qubit in the :math:`|+\rangle` state and send it to Bob.::
 
 
 	#####################################################################################################
