@@ -42,6 +42,7 @@ registers is required before the entangling gate can be exectuted. This is all h
 by the backend provided here.
 
 As a guide to the backend, it consists of three essential components:
+
 * quantumEngine - the one used here is implemented as simpleEngine in crudeSimulator.py which uses quTip as a backend. This corresponds to one quantum register full of qubits across which gates can be performed. Should you wish to use a different backend, you may wish to add a different engine.
 
 * simulatedQubit - for each qubit simulated in that register, there is a simQubit object. This is local to each node. It exports remote method calls. These methods are only called by the virtual node network itself: when a virtual node discovers the qubit is actually simulated remotely, it passes on this call by calling the relevant method on the remote qubit object.
@@ -57,8 +58,6 @@ The local client engine
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The second part is a framework for writing applications that use the virtually simulated quantum 
-network. These applications use a client and server architecture for sending classical control information to
-each other. All applications can be written simply by filling in the relevant parts of the template
-found in examples/template. See also the examples/ and tests/ folder for many examples on how precisely 
-this is done. Instructions on how to fill in the template are given in the examples/template/ files.
+network. Such an application needs to connect locally to the virtual quantum node server simulating the underlying hardware (for programming
+in native mode), or to the CQC interface. It is up to these applications to exchange any classical communication required to execute the protocol.
 
