@@ -126,9 +126,9 @@ this also means that if we want to perform an entangling gate to two qubits whic
 local, but actually simulated in two different backend quantum registers, then a merge of these
 registers is required before the entangling gate can be exectuted. This is all handled transparently
 by the backend provided here.</p>
-<p>As a guide to the backend, it consists of three essential components:
-* quantumEngine - the one used here is implemented as simpleEngine in crudeSimulator.py which uses quTip as a backend. This corresponds to one quantum register full of qubits across which gates can be performed. Should you wish to use a different backend, you may wish to add a different engine.</p>
+<p>As a guide to the backend, it consists of three essential components:</p>
 <ul class="simple">
+<li>quantumEngine - the one used here is implemented as simpleEngine in crudeSimulator.py which uses quTip as a backend. This corresponds to one quantum register full of qubits across which gates can be performed. Should you wish to use a different backend, you may wish to add a different engine.</li>
 <li>simulatedQubit - for each qubit simulated in that register, there is a simQubit object. This is local to each node. It exports remote method calls. These methods are only called by the virtual node network itself: when a virtual node discovers the qubit is actually simulated remotely, it passes on this call by calling the relevant method on the remote qubit object.</li>
 <li>virtualQubit - this is the object representing a virtually local qubit. This carries information about the remote simulating qubit. These virtualQubit objects can in turn be accessed by the clients who can access these virtual qubits as if they were real local physical qubits without having to know where they are actually simulated. That is, the client obtains a pointer to the relevant virtual qubit object on which it can perform operations directly.</li>
 <li>virtualNode - this is the local virtual node which accepts requests to get a virtual qubit object, send qubits to other nodes, or (for convenience sake), read out the state of qubits.</li>
@@ -138,10 +138,8 @@ by the backend provided here.</p>
 <div class="section" id="the-local-client-engine">
 <h3>The local client engine<a class="headerlink" href="#the-local-client-engine" title="Permalink to this headline">¶</a></h3>
 <p>The second part is a framework for writing applications that use the virtually simulated quantum
-network. These applications use a client and server architecture for sending classical control information to
-each other. All applications can be written simply by filling in the relevant parts of the template
-found in examples/template. See also the examples/ and tests/ folder for many examples on how precisely
-this is done. Instructions on how to fill in the template are given in the examples/template/ files.</p>
+network. Such an application needs to connect locally to the virtual quantum node server simulating the underlying hardware (for programming
+in native mode), or to the CQC interface. It is up to these applications to exchange any classical communication required to execute the protocol.</p>
 </div>
 </div>
 </div>

@@ -113,7 +113,7 @@ class localNode(pb.Root):
 		return "Tested!"
 
 	# This can be called by Alice (or other clients on the classical network) to inform Bob 
-	# of an event. 
+	# of an event. Your code goes here.
 	# @inlineCallbacks
 	def remote_tell_bob(self, someInfo):
 
@@ -138,7 +138,7 @@ def main():
 	virtualFile = os.path.join(os.path.dirname(__file__), '../../config/virtualNodes.cfg')
 
 	# This file defines the nodes acting as servers in the classical communication network
-	classicalFile = os.path.join(os.path.dirname(__file__), '../../config/classicalNet.cfg')
+	classicalFile = os.path.join(os.path.dirname(__file__), './classicalNet.cfg')
 
 	# Read configuration files for the virtual quantum, as well as the classical network
 	virtualNet = networkConfig(virtualFile)
