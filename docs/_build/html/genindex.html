@@ -108,6 +108,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.crudeSimulator.simpleEngine.apply_onequbit_gate">apply_onequbit_gate() (SimulaQron.virtNode.crudeSimulator.simpleEngine method)</a>
 </li>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.crudeSimulator.simpleEngine.apply_rotation">apply_rotation() (SimulaQron.virtNode.crudeSimulator.simpleEngine method)</a>
+</li>
       <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.crudeSimulator.simpleEngine.apply_T">apply_T() (SimulaQron.virtNode.crudeSimulator.simpleEngine method)</a>
 </li>
       <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.crudeSimulator.simpleEngine.apply_twoqubit_gate">apply_twoqubit_gate() (SimulaQron.virtNode.crudeSimulator.simpleEngine method)</a>
@@ -180,7 +182,7 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.isLocked">isLocked() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.isLocked">isLocked() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -194,7 +196,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="SimulaQron.local.html#SimulaQron.local.setup.localError">localError() (in module SimulaQron.local.setup)</a>
 </li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.lock">lock() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.lock">lock() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -202,7 +204,7 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.make_fresh">make_fresh() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.make_fresh">make_fresh() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -234,13 +236,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.basics.quantumEngine">quantumEngine (class in SimulaQron.virtNode.basics)</a>
 </li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.basics.quantumError">quantumError</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.crudeSimulator.quantumRegister">quantumRegister (class in SimulaQron.virtNode.crudeSimulator)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.basics.quantumError">quantumError</a>
 </li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit">qubit (class in SimulaQron.virtNode.quantum)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.crudeSimulator.quantumRegister">quantumRegister (class in SimulaQron.virtNode.crudeSimulator)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -252,93 +252,103 @@
 </li>
       <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_add_qubit">remote_add_qubit() (SimulaQron.virtNode.virtual.virtualNode method)</a>
 </li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_apply_H">remote_apply_H() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_apply_H">remote_apply_H() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 
       <ul>
         <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_H">(SimulaQron.virtNode.virtual.virtualQubit method)</a>
 </li>
       </ul></li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_apply_T">remote_apply_T() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_apply_rotation">remote_apply_rotation() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
+
+      <ul>
+        <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_rotation">(SimulaQron.virtNode.virtual.virtualQubit method)</a>
+</li>
+      </ul></li>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_apply_T">remote_apply_T() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 
       <ul>
         <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_T">(SimulaQron.virtNode.virtual.virtualQubit method)</a>
 </li>
       </ul></li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_apply_X">remote_apply_X() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_apply_X">remote_apply_X() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 
       <ul>
         <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_X">(SimulaQron.virtNode.virtual.virtualQubit method)</a>
 </li>
       </ul></li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_apply_Y">remote_apply_Y() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_apply_Y">remote_apply_Y() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 
       <ul>
         <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_Y">(SimulaQron.virtNode.virtual.virtualQubit method)</a>
 </li>
       </ul></li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_apply_Z">remote_apply_Z() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_apply_Z">remote_apply_Z() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 
       <ul>
         <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_Z">(SimulaQron.virtNode.virtual.virtualQubit method)</a>
 </li>
       </ul></li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_cnot_onto">remote_cnot_onto() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_cnot_onto">remote_cnot_onto() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 
       <ul>
         <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_cnot_onto">(SimulaQron.virtNode.virtual.virtualQubit method)</a>
 </li>
       </ul></li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_cphase_onto">remote_cphase_onto() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_cphase_onto">remote_cphase_onto() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
+
+      <ul>
+        <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_cphase_onto">(SimulaQron.virtNode.virtual.virtualQubit method)</a>
 </li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_get_details">remote_get_details() (SimulaQron.virtNode.quantum.qubit method)</a>
+      </ul></li>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_get_details">remote_get_details() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 </li>
       <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_get_global_lock">remote_get_global_lock() (SimulaQron.virtNode.virtual.virtualNode method)</a>
 </li>
       <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_get_multiple_qubits">remote_get_multiple_qubits() (SimulaQron.virtNode.virtual.virtualNode method)</a>
 </li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_get_number">remote_get_number() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_get_number">remote_get_number() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 
       <ul>
         <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_get_number">(SimulaQron.virtNode.virtual.virtualQubit method)</a>
 </li>
       </ul></li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_get_numbers">remote_get_numbers() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_get_numbers">remote_get_numbers() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 </li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_get_qubit">remote_get_qubit() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_get_qubit">remote_get_qubit() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 
       <ul>
         <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_get_qubit">(SimulaQron.virtNode.virtual.virtualQubit method)</a>
 </li>
       </ul></li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_get_register">remote_get_register() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_get_register">remote_get_register() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 
       <ul>
         <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_get_register">(SimulaQron.virtNode.virtual.virtualNode method)</a>
 </li>
       </ul></li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_get_register_del">remote_get_register_del() (SimulaQron.virtNode.virtual.virtualNode method)</a>
-</li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_get_sim_number">remote_get_sim_number() (SimulaQron.virtNode.quantum.qubit method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_get_register_del">remote_get_register_del() (SimulaQron.virtNode.virtual.virtualNode method)</a>
+</li>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_get_sim_number">remote_get_sim_number() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
+</li>
       <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_get_state">remote_get_state() (SimulaQron.virtNode.virtual.virtualNode method)</a>
 </li>
       <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_get_virtual_ref">remote_get_virtual_ref() (SimulaQron.virtNode.virtual.virtualNode method)</a>
 </li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_isActive">remote_isActive() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_isActive">remote_isActive() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 </li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_lock">remote_lock() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_lock">remote_lock() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 </li>
       <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_lock_reg_qubits">remote_lock_reg_qubits() (SimulaQron.virtNode.virtual.virtualNode method)</a>
 </li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_measure">remote_measure() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_measure">remote_measure() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 
       <ul>
         <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_measure">(SimulaQron.virtNode.virtual.virtualQubit method)</a>
 </li>
       </ul></li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_measure_inplace">remote_measure_inplace() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_measure_inplace">remote_measure_inplace() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 </li>
       <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_merge_from">remote_merge_from() (SimulaQron.virtNode.virtual.virtualNode method)</a>
 </li>
@@ -368,7 +378,7 @@
 </li>
       <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_transfer_qubit">remote_transfer_qubit() (SimulaQron.virtNode.virtual.virtualNode method)</a>
 </li>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.remote_unlock">remote_unlock() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_unlock">remote_unlock() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 </li>
       <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_unlock_reg_qubits">remote_unlock_reg_qubits() (SimulaQron.virtNode.virtual.virtualNode method)</a>
 </li>
@@ -414,6 +424,8 @@
 </li>
       <li><a href="SimulaQron.virtNode.html#module-SimulaQron.virtNode.virtual">SimulaQron.virtNode.virtual (module)</a>
 </li>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit">simulatedQubit (class in SimulaQron.virtNode.quantum)</a>
+</li>
       <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.backEnd.start">start() (SimulaQron.virtNode.virtual.backEnd method)</a>
 </li>
   </ul></td>
@@ -422,7 +434,7 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.qubit.unlock">unlock() (SimulaQron.virtNode.quantum.qubit method)</a>
+      <li><a href="SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.unlock">unlock() (SimulaQron.virtNode.quantum.simulatedQubit method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -460,7 +472,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
     </div>
   </body>
 </html>

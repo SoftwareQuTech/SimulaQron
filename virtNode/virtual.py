@@ -304,7 +304,7 @@ class virtualNode(pb.Root):
 
 			# Qubit in the simulation backend, initialized to |0>
 			simNum = self.get_sim_id()
-			simQubit = qubit(self.myID, self.defaultReg, simNum)
+			simQubit = simulatedQubit(self.myID, self.defaultReg, simNum)
 			simQubit.make_fresh()
 			self.simQubits.append(simQubit)
 
@@ -333,7 +333,7 @@ class virtualNode(pb.Root):
 
 			# Qubit in the local simulation backend, initialized to |0>
 			simNum = self.get_sim_id()
-			simQubit = qubit(self.myID, reg, simNum)
+			simQubit = simulatedQubit(self.myID, reg, simNum)
 			simQubit.make_fresh()
 			self.simQubits.append(simQubit)
 
@@ -622,7 +622,7 @@ class virtualNode(pb.Root):
 		# Make new qubit objects
 		for k in range(activeQ):
 			simNum = self.get_sim_id()
-			newQubit = qubit(self.myID, localReg, simNum, offset + k)
+			newQubit = simulatedQubit(self.myID, localReg, simNum, offset + k)
 			self.simQubits.append(newQubit)
 			newD[k] = newQubit
 

@@ -66,7 +66,7 @@
 <span></span><span class="c1">#</span>
 <span class="c1"># Copyright (c) 2017, Stephanie Wehner</span>
 <span class="c1"># All rights reserved.</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1"># Redistribution and use in source and binary forms, with or without</span>
 <span class="c1"># modification, are permitted provided that the following conditions are met:</span>
 <span class="c1"># 1. Redistributions of source code must retain the above copyright</span>
@@ -80,7 +80,7 @@
 <span class="c1"># 4. Neither the name of the QuTech organization nor the</span>
 <span class="c1">#    names of its contributors may be used to endorse or promote products</span>
 <span class="c1">#    derived from this software without specific prior written permission.</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1"># THIS SOFTWARE IS PROVIDED BY &lt;COPYRIGHT HOLDER&gt; &#39;&#39;AS IS&#39;&#39; AND ANY</span>
 <span class="c1"># EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED</span>
 <span class="c1"># WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE</span>
@@ -114,7 +114,7 @@
 
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">configName</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Initialize. This will read the configuration file and populate the name,hostname,port information with the </span>
+<span class="sd">		Initialize. This will read the configuration file and populate the name,hostname,port information with the</span>
 <span class="sd">		information found in the configuration file for the given name.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
@@ -123,9 +123,9 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">myID</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">hostDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 
 <div class="viewcode-block" id="backEnd.start"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.backEnd.start">[docs]</a>	<span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxQubits</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;	</span>
+		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Start listening to requests from other nodes.</span>
-<span class="sd">	</span>
+
 <span class="sd">		Arguments</span>
 <span class="sd">		maxQubits	maximum qubits in the default register</span>
 <span class="sd">		&quot;&quot;&quot;</span>
@@ -142,7 +142,7 @@
 <span class="c1"># virtualNode - this is the virtual quantum node. It keeps track of registers simulated here, qubits</span>
 <span class="c1"># virtually available at this node, etc</span>
 <span class="c1">#</span>
-		
+
 
 <div class="viewcode-block" id="virtualNode"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode">[docs]</a><span class="k">class</span> <span class="nc">virtualNode</span><span class="p">(</span><span class="n">pb</span><span class="o">.</span><span class="n">Root</span><span class="p">):</span>
 
@@ -160,15 +160,15 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">myID</span> <span class="o">=</span> <span class="n">ID</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">self</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
-		
-		<span class="c1"># Initialize list of registers we simulate locally	</span>
+
+		<span class="c1"># Initialize list of registers we simulate locally</span>
 		<span class="c1"># self.simRegisters = []</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">maxRegs</span> <span class="o">=</span> <span class="n">maxRegisters</span>
 
 		<span class="c1"># List of connections</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">conn</span> <span class="o">=</span> <span class="p">{}</span>
-		
-		<span class="c1"># Number of registers _created_ at this node </span>
+
+		<span class="c1"># Number of registers _created_ at this node</span>
 		<span class="c1"># this may not equal the numbers of registers virtually carried</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">numRegs</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -179,7 +179,7 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">virtQubits</span> <span class="o">=</span> <span class="p">[]</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">simQubits</span> <span class="o">=</span> <span class="p">[]</span>
 
-		<span class="c1"># Set up connections to the neighouring nodes in the network </span>
+		<span class="c1"># Set up connections to the neighouring nodes in the network</span>
 		<span class="c1"># Wait so servers have time to start</span>
 		<span class="n">reactor</span><span class="o">.</span><span class="n">callLater</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">connectNet</span><span class="p">)</span>
 
@@ -205,7 +205,7 @@
 <span class="sd">		Initialize the connections to the other virtual nodes in the network according to the available</span>
 <span class="sd">		configuration.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-	
+
 		<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">hostDict</span><span class="p">:</span>
 			<span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">hostDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 			<span class="k">if</span> <span class="n">nb</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
@@ -265,7 +265,7 @@
 				<span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">simNum</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
 					<span class="n">used</span> <span class="o">=</span> <span class="mi">1</span>
 			<span class="k">if</span> <span class="n">used</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-				<span class="k">return</span> <span class="n">j</span>				</div>
+				<span class="k">return</span> <span class="n">j</span></div>
 
 	<span class="k">def</span> <span class="nf">_q_num_to_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
@@ -278,13 +278,15 @@
 
 	<span class="nd">@inlineCallbacks</span>
 	<span class="k">def</span> <span class="nf">_get_global_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Local GET LOCK&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Local GETTING LOCK&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Local GOT LOCK&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
 	<span class="nd">@inlineCallbacks</span>
 <div class="viewcode-block" id="virtualNode.remote_get_global_lock"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_get_global_lock">[docs]</a>	<span class="k">def</span> <span class="nf">remote_get_global_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Remote GET LOCK&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span></div>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Remote GETTING LOCK&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Remote GOT LOCK&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 	<span class="nd">@inlineCallbacks</span>
 	<span class="k">def</span> <span class="nf">_release_global_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -300,7 +302,7 @@
 			<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div>
 
 	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">_lock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit</span><span class="p">):</span>	
+	<span class="k">def</span> <span class="nf">_lock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Acquire the lock on all qubits in the same register as the local sim qubit qubit.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
@@ -309,15 +311,15 @@
 				<span class="k">yield</span> <span class="n">q</span><span class="o">.</span><span class="n">lock</span><span class="p">()</span>
 
 	<span class="nd">@inlineCallbacks</span>
-<div class="viewcode-block" id="virtualNode.remote_lock_reg_qubits"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_lock_reg_qubits">[docs]</a>	<span class="k">def</span> <span class="nf">remote_lock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>	
+<div class="viewcode-block" id="virtualNode.remote_lock_reg_qubits"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_lock_reg_qubits">[docs]</a>	<span class="k">def</span> <span class="nf">remote_lock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Acquire the lock on all qubits in the same register as qubitNum.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-	
+
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_q_num_to_obj</span><span class="p">(</span><span class="n">qubitNum</span><span class="p">))</span></div>
 
 	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">_unlock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit</span><span class="p">):</span>	
+	<span class="k">def</span> <span class="nf">_unlock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Release the lock on all qubits in the same register as qubit.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
@@ -327,17 +329,17 @@
 					<span class="k">yield</span> <span class="n">q</span><span class="o">.</span><span class="n">unlock</span><span class="p">()</span>
 
 	<span class="nd">@inlineCallbacks</span>
-<div class="viewcode-block" id="virtualNode.remote_unlock_reg_qubits"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_unlock_reg_qubits">[docs]</a>	<span class="k">def</span> <span class="nf">remote_unlock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>	
+<div class="viewcode-block" id="virtualNode.remote_unlock_reg_qubits"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_unlock_reg_qubits">[docs]</a>	<span class="k">def</span> <span class="nf">remote_unlock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Release the lock on all qubits in the same register as qubitNum.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-	
-		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unlock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_q_num_to_obj</span><span class="p">(</span><span class="n">qubitNum</span><span class="p">))</span>	</div>
+
+		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unlock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_q_num_to_obj</span><span class="p">(</span><span class="n">qubitNum</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="virtualNode.remote_new_register"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_new_register">[docs]</a>	<span class="k">def</span> <span class="nf">remote_new_register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxQubits</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Initialize a local register. Right now, this simple creates a register according to the simple engine backend</span>
-<span class="sd">		using qubit. </span>
+<span class="sd">		using qubit.</span>
 
 <span class="sd">		Arguments:</span>
 <span class="sd">		maxQubits	maximum number of qubits to use in the default engine (default 10)</span>
@@ -347,7 +349,7 @@
 			<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: Maximum number of registers reached.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 			<span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;Maximum number of registers reached.&quot;</span><span class="p">)</span>
 
-		<span class="bp">self</span><span class="o">.</span><span class="n">numRegs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numRegs</span> <span class="o">+</span> <span class="mi">1</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">numRegs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numRegs</span> <span class="o">+</span> <span class="mi">1</span>
 		<span class="n">newReg</span> <span class="o">=</span> <span class="n">quantumRegister</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numRegs</span><span class="p">,</span> <span class="n">maxQubits</span><span class="p">)</span>
 		<span class="c1"># self.simRegisters.append(newReg)</span>
 
@@ -361,13 +363,13 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: Request to create new qubit.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
-		<span class="k">try</span><span class="p">:</span> 
+		<span class="k">try</span><span class="p">:</span>
 			<span class="c1"># Get a lock to assure IDs are assigned correctly</span>
 			<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_global_lock</span><span class="p">()</span>
 
 			<span class="c1"># Qubit in the simulation backend, initialized to |0&gt;</span>
 			<span class="n">simNum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sim_id</span><span class="p">()</span>
-			<span class="n">simQubit</span> <span class="o">=</span> <span class="n">qubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultReg</span><span class="p">,</span> <span class="n">simNum</span><span class="p">)</span>
+			<span class="n">simQubit</span> <span class="o">=</span> <span class="n">simulatedQubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultReg</span><span class="p">,</span> <span class="n">simNum</span><span class="p">)</span>
 			<span class="n">simQubit</span><span class="o">.</span><span class="n">make_fresh</span><span class="p">()</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">simQubits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">simQubit</span><span class="p">)</span>
 
@@ -388,7 +390,7 @@
 
 		<span class="c1"># Only allow if the register is local</span>
 		<span class="k">if</span> <span class="n">reg</span><span class="o">.</span><span class="n">simNode</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">:</span>
-			<span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;Can only create qubits registers simulated locally by this node.&quot;</span><span class="p">)</span>	
+			<span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;Can only create qubits registers simulated locally by this node.&quot;</span><span class="p">)</span>
 
 		<span class="k">try</span><span class="p">:</span>
 			<span class="c1"># Get a lock to assure IDs are assigned correctly</span>
@@ -396,7 +398,7 @@
 
 			<span class="c1"># Qubit in the local simulation backend, initialized to |0&gt;</span>
 			<span class="n">simNum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sim_id</span><span class="p">()</span>
-			<span class="n">simQubit</span> <span class="o">=</span> <span class="n">qubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">,</span> <span class="n">reg</span><span class="p">,</span> <span class="n">simNum</span><span class="p">)</span>
+			<span class="n">simQubit</span> <span class="o">=</span> <span class="n">simulatedQubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">,</span> <span class="n">reg</span><span class="p">,</span> <span class="n">simNum</span><span class="p">)</span>
 			<span class="n">simQubit</span><span class="o">.</span><span class="n">make_fresh</span><span class="p">()</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">simQubits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">simQubit</span><span class="p">)</span>
 
@@ -423,7 +425,7 @@
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Sends the qubit to the specified target node. This creates a new virtual qubit object at the remote node</span>
 <span class="sd">		with the right qubit and backend details.</span>
-<span class="sd">		</span>
+
 <span class="sd">		Arguments</span>
 <span class="sd">		qubit		virtual qubit to be sent</span>
 <span class="sd">		targetName	target ndoe to place qubit at (host object)</span>
@@ -450,7 +452,7 @@
 
 		<span class="c1"># We gave it away to mark as inactive</span>
 		<span class="n">qubit</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="mi">0</span>
-	
+
 		<span class="c1"># Remove the qubit from the local virtual list. Note it remains in the simulated</span>
 		<span class="c1"># list, since we continue to simulate this qubit.</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">virtQubits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>
@@ -463,11 +465,14 @@
 <span class="sd">		Transfer the qubit to the destination node if we are the simulating node. The reason why we cannot</span>
 <span class="sd">		do this directly is that Twisted PB does not allow objects to be passed between connecting nodes.</span>
 <span class="sd">		Only between the creator of the object and its immediate connections.</span>
-<span class="sd">		</span>
+
 <span class="sd">		Arguments</span>
 <span class="sd">		simQubit	simulated qubit to be sent</span>
 <span class="sd">		targetName	target node to place qubit at (host object)</span>
 <span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Request to transfer qubit to </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
+
 		<span class="c1"># Lookup host id of node</span>
 		<span class="n">remoteNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="p">[</span><span class="n">targetName</span><span class="p">]</span>
 		<span class="n">newNum</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">remoteNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;add_qubit&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">simQubit</span><span class="p">)</span>
@@ -477,11 +482,13 @@
 <div class="viewcode-block" id="virtualNode.remote_add_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_add_qubit">[docs]</a>	<span class="k">def</span> <span class="nf">remote_add_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">qubit</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Add a qubit to the local virtual node.</span>
-<span class="sd">		</span>
+
 <span class="sd">		Arguments</span>
 <span class="sd">		name		name of the node simulating this qubit</span>
 <span class="sd">		qubit		qubit reference in the backend we&#39;re adding</span>
 <span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Request to add qubit from </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
 		<span class="c1"># Get the details of the remote node</span>
 		<span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
@@ -489,7 +496,7 @@
 		<span class="k">try</span><span class="p">:</span>
 			<span class="c1"># Get a lock to make sure IDs are assigned correctly</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_get_global_lock</span><span class="p">()</span>
-			
+
 			<span class="c1"># Generate a new virtual qubit object for the qubit now at this node</span>
 			<span class="n">newNum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_virtual_id</span><span class="p">()</span>
 			<span class="n">newQubit</span> <span class="o">=</span> <span class="n">virtualQubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">newNum</span><span class="p">)</span>
@@ -502,7 +509,7 @@
 		<span class="k">return</span> <span class="n">newNum</span></div>
 
 <div class="viewcode-block" id="virtualNode.remote_get_virtual_ref"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_get_virtual_ref">[docs]</a>	<span class="k">def</span> <span class="nf">remote_get_virtual_ref</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; </span>
+		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Return a virual qubit object for the given number.</span>
 
 <span class="sd">		Arguments</span>
@@ -515,21 +522,21 @@
 		<span class="k">return</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="virtualNode.remote_remove_sim_qubit_num"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_remove_sim_qubit_num">[docs]</a>	<span class="k">def</span> <span class="nf">remote_remove_sim_qubit_num</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delNum</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; </span>
+		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Removes the simulated qubit delQubit from the node and also from the underlying engine. Relies on this qubit</span>
 <span class="sd">		having been locked.</span>
 
 <span class="sd">		Arguments</span>
 <span class="sd">		delNum		simID of the simulated qubit to delete</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		
+
 		<span class="bp">self</span><span class="o">.</span><span class="n">_remove_sim_qubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_q_num_to_obj</span><span class="p">(</span><span class="n">delNum</span><span class="p">))</span></div>
 
 	<span class="nd">@inlineCallbacks</span>
 	<span class="k">def</span> <span class="nf">_remove_sim_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delQubit</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Removes the simulated qubit object.</span>
-<span class="sd">		</span>
+
 <span class="sd">		Arguments</span>
 <span class="sd">		delQubit	simulated qubit object to delete</span>
 <span class="sd">		&quot;&quot;&quot;</span>
@@ -539,8 +546,8 @@
 			<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Attempt to delete qubit not simulated at this node.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 			<span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: Cannot delete qubits we don&#39;t simulate.&quot;</span><span class="p">)</span>
 
-	
-		<span class="c1"># 	</span>
+
+		<span class="c1">#</span>
 		<span class="n">delNum</span> <span class="o">=</span> <span class="n">delQubit</span><span class="o">.</span><span class="n">num</span>
 		<span class="n">delRegister</span> <span class="o">=</span> <span class="n">delQubit</span><span class="o">.</span><span class="n">register</span>
 
@@ -603,9 +610,9 @@
 <span class="sd">		network nodes. This will ignore maxQubits and simply create one large register allowing twice maxQubits qubits.</span>
 
 <span class="sd">		Arguments</span>
-<span class="sd">		qubit1		qubit1 in reg1, called from remote having access to only qubits	</span>
+<span class="sd">		qubit1		qubit1 in reg1, called from remote having access to only qubits</span>
 <span class="sd">		qubit2		qubit2 in reg2</span>
-<span class="sd">		&quot;&quot;&quot;</span>	
+<span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Request to merge local register for qubits simNum </span><span class="si">%d</span><span class="s2"> and simNum </span><span class="si">%d</span><span class="s2">.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">qubit1</span><span class="o">.</span><span class="n">simNum</span><span class="p">,</span> <span class="n">qubit2</span><span class="o">.</span><span class="n">simNum</span><span class="p">)</span>
 
 		<span class="c1"># This should only be called if locks are acquired</span>
@@ -613,8 +620,17 @@
 		<span class="k">assert</span> <span class="n">qubit2</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">locked</span>
 		<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">locked</span>
 
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Request to merge LOCKS PRESENT&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
 		<span class="n">reg1</span> <span class="o">=</span> <span class="n">qubit1</span><span class="o">.</span><span class="n">register</span>
 		<span class="n">reg2</span> <span class="o">=</span> <span class="n">qubit2</span><span class="o">.</span><span class="n">register</span>
+
+		<span class="c1"># Check if there&#39;s anything to do at all</span>
+		<span class="k">if</span> <span class="n">reg1</span> <span class="o">==</span> <span class="n">reg2</span><span class="p">:</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Request to merge local register: not required&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+			<span class="k">return</span>
+
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Request to merge local register: need merge&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
 		<span class="c1"># Allow reg 1 to absorb reg 2</span>
 		<span class="n">reg1</span><span class="o">.</span><span class="n">maxQubits</span> <span class="o">=</span> <span class="n">reg1</span><span class="o">.</span><span class="n">maxQubits</span> <span class="o">+</span> <span class="n">reg2</span><span class="o">.</span><span class="n">activeQubits</span>
@@ -637,7 +653,7 @@
 	<span class="nd">@inlineCallbacks</span>
 <div class="viewcode-block" id="virtualNode.remote_merge_from"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_merge_from">[docs]</a>	<span class="k">def</span> <span class="nf">remote_merge_from</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simNodeName</span><span class="p">,</span> <span class="n">simQubitNum</span><span class="p">,</span> <span class="n">localReg</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Bring a remote register to this node.	</span>
+<span class="sd">		Bring a remote register to this node.</span>
 
 <span class="sd">		Arguments</span>
 <span class="sd">		simNodeName	name of the node who simulates right now</span>
@@ -650,9 +666,11 @@
 		<span class="c1"># This should only be called if lock is acquired</span>
 		<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">locked</span>
 
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Merging from </span><span class="si">%s</span><span class="s2"> LOCKS PRESENT&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">simNodeName</span><span class="p">)</span>
+
 		<span class="c1"># Lookup the local connection for this simulating node</span>
 		<span class="n">simNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="p">[</span><span class="n">simNodeName</span><span class="p">]</span>
-	
+
 		<span class="c1"># Fetch the details of the remote register and qubit, and remove sim qubits at node</span>
 		<span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">activeQ</span><span class="p">,</span> <span class="n">oldRegNum</span><span class="p">,</span> <span class="n">oldQubitNum</span><span class="p">)</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_register_del&quot;</span><span class="p">,</span><span class="n">simQubitNum</span><span class="p">)</span>
 
@@ -669,7 +687,7 @@
 		<span class="c1"># Make new qubit objects</span>
 		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">activeQ</span><span class="p">):</span>
 			<span class="n">simNum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sim_id</span><span class="p">()</span>
-			<span class="n">newQubit</span> <span class="o">=</span> <span class="n">qubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">,</span> <span class="n">localReg</span><span class="p">,</span> <span class="n">simNum</span><span class="p">,</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">k</span><span class="p">)</span>
+			<span class="n">newQubit</span> <span class="o">=</span> <span class="n">simulatedQubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">,</span> <span class="n">localReg</span><span class="p">,</span> <span class="n">simNum</span><span class="p">,</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">k</span><span class="p">)</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">simQubits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newQubit</span><span class="p">)</span>
 			<span class="n">newD</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">newQubit</span>
 
@@ -696,54 +714,45 @@
 <span class="sd">		Arguments</span>
 <span class="sd">		newSimNodeName	new node simulating this qubit</span>
 <span class="sd">		oldSimNodeName	old node simulating the qubit</span>
-<span class="sd">		oldReg		old register </span>
+<span class="sd">		oldReg		old register</span>
 <span class="sd">		newD		dictionary mapping qubit numbers to qubit objects at the new simulating node</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Request to update local virtual qubits.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
 		<span class="c1"># If this is a third node (not involved in the two qubit gate, but carrying virtual qubits</span>
-		<span class="c1"># which were in the simulated register), then we do not have a lock yet. However, we need to get one</span>
-		<span class="c1"># now. Caution: this relies on yield in the node doing the two qubit gate waiting for all updates</span>
-		<span class="c1"># to be completed. Specifically, this means it will retain its locks which should prevent this</span>
-		<span class="c1"># node from simultaneously doing a 2 qubit gate, while we are engaged in an update.</span>
-
-		<span class="k">if</span> <span class="n">newSimNodeName</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span> <span class="ow">and</span> <span class="n">oldSimNodeName</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
-			<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_global_lock</span><span class="p">()</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">locked</span>
+		<span class="c1"># which were in the simulated register), then they will now be updated. We remark that this function</span>
+		<span class="c1"># can only be called from the _simulating node_ now handing over simulation to someone else. Both the simulating</span>
+		<span class="c1"># node and the new simulating node are globally locked so there should be no conflicts here in updating:</span>
+		<span class="c1"># a third node that may wish to do a 2 qubit gate between the qubits to be updated needs to wait.</span>
 
 		<span class="c1"># Lookup the local connections for the given node names</span>
 		<span class="n">newSimNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="p">[</span><span class="n">newSimNodeName</span><span class="p">]</span>
 		<span class="n">oldSimNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="p">[</span><span class="n">oldSimNodeName</span><span class="p">]</span>
-	
-		<span class="k">try</span><span class="p">:</span>	
-			<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtQubits</span><span class="p">:</span>
-				<span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">virtNode</span> <span class="o">==</span> <span class="n">q</span><span class="o">.</span><span class="n">simNode</span><span class="p">:</span>
-					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Simulating node update.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-					<span class="c1"># We previously simulated this qubit ourselves</span>
-					<span class="n">givenReg</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">num</span>
-					<span class="n">givenNum</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">num</span>
-				<span class="k">else</span><span class="p">:</span>
-					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Previously remote simulator node update.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-					<span class="c1"># We had the virtual qubit but it was simulated elsewhere</span>
-					<span class="p">(</span><span class="n">givenNum</span><span class="p">,</span> <span class="n">givenReg</span><span class="p">)</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">q</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_numbers&quot;</span><span class="p">)</span>
 
-				<span class="c1"># Check if this qubit needs updating	</span>
-				<span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">simNode</span> <span class="o">==</span> <span class="n">oldSimNode</span> <span class="ow">and</span> <span class="n">givenReg</span> <span class="o">==</span> <span class="n">oldRegNum</span><span class="p">:</span>
-					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Updating virtual qubit </span><span class="si">%d</span><span class="s2">, previously </span><span class="si">%s</span><span class="s2"> now </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">q</span><span class="o">.</span><span class="n">num</span><span class="p">,</span> <span class="n">oldSimNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">newSimNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-					<span class="n">q</span><span class="o">.</span><span class="n">simNode</span> <span class="o">=</span> <span class="n">newSimNode</span>
-					<span class="n">q</span><span class="o">.</span><span class="n">simQubit</span> <span class="o">=</span> <span class="n">newD</span><span class="p">[</span><span class="n">givenNum</span><span class="p">]</span>
-		<span class="k">finally</span><span class="p">:</span>
-			<span class="k">if</span> <span class="n">newSimNodeName</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span> <span class="ow">and</span> <span class="n">oldSimNodeName</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">_release_global_lock</span><span class="p">()</span></div>
+		<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtQubits</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">virtNode</span> <span class="o">==</span> <span class="n">q</span><span class="o">.</span><span class="n">simNode</span> <span class="ow">and</span> <span class="n">q</span><span class="o">.</span><span class="n">simNode</span> <span class="o">==</span> <span class="n">oldSimNode</span><span class="p">:</span>
+				<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Simulating node update.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+				<span class="c1"># We previously simulated this qubit ourselves</span>
+				<span class="n">givenReg</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">num</span>
+				<span class="n">givenNum</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">num</span>
+			<span class="k">elif</span> <span class="n">q</span><span class="o">.</span><span class="n">simNode</span> <span class="o">==</span> <span class="n">oldSimNode</span><span class="p">:</span>
+				<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Previously remote simulator node update.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+				<span class="c1"># We had the virtual qubit but it was simulated elsewhere</span>
+				<span class="p">(</span><span class="n">givenNum</span><span class="p">,</span> <span class="n">givenReg</span><span class="p">)</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">q</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_numbers&quot;</span><span class="p">)</span>
+
+			<span class="c1"># Check if this qubit needs updating</span>
+			<span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">simNode</span> <span class="o">==</span> <span class="n">oldSimNode</span> <span class="ow">and</span> <span class="n">givenReg</span> <span class="o">==</span> <span class="n">oldRegNum</span><span class="p">:</span>
+				<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Updating virtual qubit </span><span class="si">%d</span><span class="s2">, previously </span><span class="si">%s</span><span class="s2"> now </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">q</span><span class="o">.</span><span class="n">num</span><span class="p">,</span> <span class="n">oldSimNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">newSimNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+				<span class="n">q</span><span class="o">.</span><span class="n">simNode</span> <span class="o">=</span> <span class="n">newSimNode</span>
+				<span class="n">q</span><span class="o">.</span><span class="n">simQubit</span> <span class="o">=</span> <span class="n">newD</span><span class="p">[</span><span class="n">givenNum</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="virtualNode.remote_get_register"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_get_register">[docs]</a>	<span class="k">def</span> <span class="nf">remote_get_register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Return the value of of a locally simulated register which contains this virtual qubit.</span>
 
 <span class="sd">		&quot;&quot;&quot;</span>
-		
+
 		<span class="c1"># XXX Move to virtual qubit?</span>
 		<span class="p">(</span><span class="n">realM</span><span class="p">,</span> <span class="n">imagM</span><span class="p">)</span> <span class="o">=</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">get_register_RI</span><span class="p">()</span>
 		<span class="n">activeQ</span> <span class="o">=</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">activeQubits</span>
@@ -777,7 +786,7 @@
 		<span class="n">oldRegNum</span> <span class="o">=</span> <span class="n">gotQ</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">num</span>
 		<span class="n">oldQubitNum</span> <span class="o">=</span> <span class="n">gotQ</span><span class="o">.</span><span class="n">num</span>
 
-		<span class="c1"># Remove all simulated qubits and the register	</span>
+		<span class="c1"># Remove all simulated qubits and the register</span>
 		<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubits</span><span class="p">:</span>
 			<span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">num</span> <span class="o">==</span> <span class="n">oldRegNum</span><span class="p">:</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">simQubits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
@@ -796,7 +805,7 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 
 		<span class="n">localSim</span> <span class="o">=</span> <span class="kc">False</span>
-		<span class="n">remoteSim</span> <span class="o">=</span> <span class="kc">False</span>	
+		<span class="n">remoteSim</span> <span class="o">=</span> <span class="kc">False</span>
 
 		<span class="c1"># Check whether we are the simulating node.</span>
 		<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">qList</span><span class="p">:</span>
@@ -818,7 +827,7 @@
 			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Looking for simulated qubits. </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">nums</span><span class="p">)</span>
 			<span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">I</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_get_state</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>
 		<span class="k">else</span><span class="p">:</span>
-			<span class="c1"># Qubits are located elsewhere. </span>
+			<span class="c1"># Qubits are located elsewhere.</span>
 			<span class="n">nums</span> <span class="o">=</span> <span class="p">[]</span>
 			<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">qList</span><span class="p">:</span>
 				<span class="p">(</span><span class="n">num</span><span class="p">,</span><span class="n">name</span><span class="p">)</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">q</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_details&quot;</span><span class="p">)</span>
@@ -858,7 +867,7 @@
 <span class="c1">#######</span>
 <span class="c1">#</span>
 <span class="c1"># virtualQubit - a qubit that is virtually carried at this node. It may be simulated elsewhere</span>
-<span class="c1"># but in the simulation it is located at this particular virtualNode. </span>
+<span class="c1"># but in the simulation it is located at this particular virtualNode.</span>
 <span class="c1">#</span>
 <span class="c1"># This is given out as a reference object to users who ask for a &quot;local&quot; qubit</span>
 <span class="c1">#</span>
@@ -868,7 +877,7 @@
 
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">virtNode</span><span class="p">,</span> <span class="n">simNode</span><span class="p">,</span> <span class="n">simQubit</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Creates a virtual qubit object simulated in the specified simulation register backend </span>
+<span class="sd">		Creates a virtual qubit object simulated in the specified simulation register backend</span>
 
 <span class="sd">		Arguments</span>
 <span class="sd">		virtNode	node where this qubit is virtually located</span>
@@ -880,36 +889,37 @@
 		<span class="c1"># Node where this qubit is virtually located</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span> <span class="o">=</span> <span class="n">virtNode</span>
 
-		<span class="c1"># Node where this qubit is being simulated	</span>
+		<span class="c1"># Node where this qubit is being simulated</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">simNode</span> <span class="o">=</span> <span class="n">simNode</span>
 
 		<span class="c1"># Underlying qubit object for simulation</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span> <span class="o">=</span> <span class="n">simQubit</span>
 
-		<span class="c1"># Qubit active at this node. The client may retain a reference to this object, </span>
-		<span class="c1"># which will cause python to keep it, while it has actually be transferred to </span>
-		<span class="c1"># another node. We do not allow operations on a qubit that is now virtually elsewhere. </span>
+		<span class="c1"># Qubit active at this node. The client may retain a reference to this object,</span>
+		<span class="c1"># which will cause python to keep it, while it has actually be transferred to</span>
+		<span class="c1"># another node. We do not allow operations on a qubit that is now virtually elsewhere.</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="mi">1</span>
 
-		<span class="c1"># Our number at this virtual node. Note that this has nothing to do </span>
+		<span class="c1"># Our number at this virtual node. Note that this has nothing to do</span>
 		<span class="c1"># with the number of the qubits in the register</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">num</span> <span class="o">=</span> <span class="n">num</span>
-		
+
 
 <div class="viewcode-block" id="virtualQubit.remote_test"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_test">[docs]</a>	<span class="k">def</span> <span class="nf">remote_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Check call.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">_single_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; </span>
+	<span class="k">def</span> <span class="nf">_single_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Apply the single gate function to the underlying qubit. This is an internal method used by all the other</span>
-<span class="sd">		single qubit calls, which will perform the correct local or remote method calls as applicable after </span>
-<span class="sd">		performing the necessary locking. </span>
+<span class="sd">		single qubit calls, which will perform the correct local or remote method calls as applicable after</span>
+<span class="sd">		performing the necessary locking.</span>
 
 <span class="sd">		Arguments</span>
 <span class="sd">		name		name of the method corresponding to the name. For example: name = apply_X</span>
+<span class="sd">		param		parameters for gates such as rotations (axis,angle)</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-			
+
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Attempt to manipulate qubits no longer at this node.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 			<span class="k">return</span> <span class="kc">False</span>
@@ -921,18 +931,18 @@
 
 		<span class="c1"># Check whether the qubit is local or remote. Due to remote register merges, this may change</span>
 		<span class="c1"># while we try and get a lock. For this reason, we have to wait until we have a lock on an _active_</span>
-		<span class="c1"># qubit before proceeding. If it is no longer active when we get the lock, then it has been </span>
+		<span class="c1"># qubit before proceeding. If it is no longer active when we get the lock, then it has been</span>
 		<span class="c1"># moved elsewhere in the meantime and we need to wait for the remote message to update the virtual</span>
 		<span class="c1"># qubit object in the background.</span>
 		<span class="n">waiting</span> <span class="o">=</span> <span class="kc">True</span>
 		<span class="n">outcome</span> <span class="o">=</span> <span class="kc">False</span>
 		<span class="k">while</span><span class="p">(</span><span class="n">waiting</span><span class="p">):</span>
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="p">:</span>
-				<span class="k">try</span><span class="p">:</span>	
+				<span class="k">try</span><span class="p">:</span>
 					<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">lock</span><span class="p">()</span>
 					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
-						<span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="p">,</span> <span class="n">localName</span><span class="p">)()</span>
-						<span class="n">waiting</span> <span class="o">=</span> <span class="kc">False</span> 
+						<span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="p">,</span> <span class="n">localName</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+						<span class="n">waiting</span> <span class="o">=</span> <span class="kc">False</span>
 						<span class="n">outcome</span> <span class="o">=</span> <span class="kc">True</span>
 				<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
 					<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Cannot apply </span><span class="si">%s</span><span class="s2"> - </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
@@ -945,7 +955,7 @@
 					<span class="n">active</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;isActive&quot;</span><span class="p">)</span>
 					<span class="k">if</span> <span class="n">active</span><span class="p">:</span>
 						<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Calling </span><span class="si">%s</span><span class="s2"> remotely to apply </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-						<span class="n">defer</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+						<span class="n">defer</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
 						<span class="n">waiting</span> <span class="o">=</span> <span class="kc">False</span>
 						<span class="n">outcome</span> <span class="o">=</span> <span class="kc">True</span>
 				<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -959,10 +969,10 @@
 				<span class="k">yield</span> <span class="n">deferLater</span><span class="p">(</span><span class="n">reactor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delay</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">none</span><span class="p">)</span>
 
 		<span class="k">return</span> <span class="n">outcome</span>
-			
+
 	<span class="nd">@inlineCallbacks</span>
 <div class="viewcode-block" id="virtualQubit.remote_apply_X"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_X">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_X</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; </span>
+		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Apply X gate to itself by passing it onto the underlying register.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_gate</span><span class="p">(</span><span class="s2">&quot;apply_X&quot;</span><span class="p">)</span></div>
@@ -996,6 +1006,13 @@
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_gate</span><span class="p">(</span><span class="s2">&quot;apply_T&quot;</span><span class="p">)</span></div>
 
 	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualQubit.remote_apply_rotation"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_rotation">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">a</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Apply rotation around axis n with angle a</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_gate</span><span class="p">(</span><span class="s2">&quot;apply_rotation&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">a</span><span class="p">)</span></div>
+
+	<span class="nd">@inlineCallbacks</span>
 <div class="viewcode-block" id="virtualQubit.remote_measure"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_measure">[docs]</a>	<span class="k">def</span> <span class="nf">remote_measure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Measure the qubit in the standard basis. This does delete the qubit from the simulation.</span>
@@ -1011,9 +1028,9 @@
 		<span class="c1"># while we try and get a lock. For this reason, we have to wait until we have a lock on an _active_</span>
 		<span class="c1"># qubit before proceeding.</span>
 		<span class="n">waiting</span> <span class="o">=</span> <span class="kc">True</span>
-		<span class="k">while</span><span class="p">(</span><span class="n">waiting</span><span class="p">):</span>	
+		<span class="k">while</span><span class="p">(</span><span class="n">waiting</span><span class="p">):</span>
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="p">:</span>
-				<span class="k">try</span><span class="p">:</span>	
+				<span class="k">try</span><span class="p">:</span>
 					<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">lock</span><span class="p">()</span>
 					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
 						<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Measuring local qubit&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -1049,15 +1066,20 @@
 
 	<span class="k">def</span> <span class="nf">_lock_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Wrapper to acquire the global register lock on both nodes that involve the qubits. This one and the target.</span>
+<span class="sd">		Wrapper to acquire the global register lock on both nodes that involve the qubits, and local node.</span>
 
 <span class="sd">		Arguments</span>
 <span class="sd">		target		virtual qubit of the target qubit</span>
-<span class="sd">		&quot;&quot;&quot;</span>
 
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">lockedLocal</span> <span class="o">=</span> <span class="kc">False</span>
+		<span class="n">lockedRemoteTarget</span> <span class="o">=</span> <span class="kc">False</span>
+
+		<span class="c1"># Lock qubits nodes</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="p">:</span>
 			<span class="c1"># first qubit is locally simulated</span>
 			<span class="n">def1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_get_global_lock</span><span class="p">()</span>
+			<span class="n">lockedLocal</span> <span class="o">=</span> <span class="kc">True</span>
 		<span class="k">else</span><span class="p">:</span>
 			<span class="c1"># first qubit is remote</span>
 			<span class="n">def1</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_global_lock&quot;</span><span class="p">)</span>
@@ -1067,13 +1089,25 @@
 			<span class="k">if</span> <span class="n">target</span><span class="o">.</span><span class="n">simNode</span> <span class="o">==</span> <span class="n">target</span><span class="o">.</span><span class="n">virtNode</span><span class="p">:</span>
 				<span class="c1"># target qubit is local</span>
 				<span class="n">def2</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_get_global_lock</span><span class="p">()</span>
+				<span class="n">lockedLocal</span> <span class="o">=</span> <span class="kc">True</span>
 			<span class="k">else</span><span class="p">:</span>
 				<span class="c1"># target qubit is remote</span>
 				<span class="n">def2</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_global_lock&quot;</span><span class="p">)</span>
-			<span class="k">return</span><span class="p">(</span><span class="n">DeferredList</span><span class="p">([</span><span class="n">def1</span><span class="p">,</span> <span class="n">def2</span><span class="p">],</span> <span class="n">fireOnOneCallback</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">consumeErrors</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+				<span class="n">lockedRemoteTarget</span> <span class="o">=</span> <span class="kc">True</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">lockedLocal</span><span class="p">:</span>
+			<span class="n">def0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_get_global_lock</span><span class="p">()</span>
+			
+			<span class="k">if</span> <span class="n">lockedRemoteTarget</span><span class="p">:</span>
+				<span class="k">return</span><span class="p">(</span><span class="n">DeferredList</span><span class="p">([</span><span class="n">def0</span><span class="p">,</span> <span class="n">def1</span><span class="p">,</span> <span class="n">def2</span><span class="p">],</span> <span class="n">fireOnOneCallback</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">consumeErrors</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">return</span><span class="p">(</span><span class="n">DeferredList</span><span class="p">([</span><span class="n">def0</span><span class="p">,</span> <span class="n">def1</span><span class="p">],</span> <span class="n">fireOnOneCallback</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">consumeErrors</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 		<span class="k">else</span><span class="p">:</span>
-			<span class="k">return</span><span class="p">(</span><span class="n">def1</span><span class="p">)</span>
-		
+			<span class="k">if</span> <span class="n">lockedRemoteTarget</span><span class="p">:</span>
+				<span class="k">return</span><span class="p">(</span><span class="n">DeferredList</span><span class="p">([</span><span class="n">def1</span><span class="p">,</span> <span class="n">def2</span><span class="p">],</span> <span class="n">fireOnOneCallback</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">consumeErrors</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">return</span><span class="p">(</span><span class="n">DeferredList</span><span class="p">([</span><span class="n">def1</span><span class="p">],</span> <span class="n">fireOnOneCallback</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">consumeErrors</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
 
 	<span class="nd">@inlineCallbacks</span>
 	<span class="k">def</span> <span class="nf">_unlock_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q1simNode</span><span class="p">,</span> <span class="n">q1virtNode</span><span class="p">,</span> <span class="n">q2simNode</span><span class="p">,</span> <span class="n">q2virtNode</span><span class="p">):</span>
@@ -1090,6 +1124,7 @@
 
 <span class="sd">		&quot;&quot;&quot;</span>
 
+		<span class="c1"># Release qubit node locks </span>
 		<span class="k">if</span> <span class="n">q1simNode</span> <span class="o">==</span> <span class="n">q1virtNode</span><span class="p">:</span>
 			<span class="c1"># first qubit was locally simulated</span>
 			<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_release_global_lock</span><span class="p">()</span>
@@ -1106,12 +1141,16 @@
 				<span class="c1"># target qubit was remote</span>
 				<span class="k">yield</span> <span class="n">q2simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;release_global_lock&quot;</span><span class="p">)</span>
 
+		<span class="c1"># Release local node (may be the same as above)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_release_global_lock</span><span class="p">()</span>
+
+
 	<span class="nd">@inlineCallbacks</span>
 	<span class="k">def</span> <span class="nf">_lock_inreg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Lock all qubits in the same register as the virtual qubit qubit.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		
+
 		<span class="k">if</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simNode</span> <span class="o">==</span> <span class="n">qubit</span><span class="o">.</span><span class="n">virtNode</span><span class="p">:</span>
 			<span class="k">yield</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_lock_reg_qubits</span><span class="p">(</span><span class="n">qubit</span><span class="o">.</span><span class="n">simQubit</span><span class="p">)</span>
 		<span class="k">else</span><span class="p">:</span>
@@ -1121,9 +1160,9 @@
 	<span class="nd">@inlineCallbacks</span>
 	<span class="k">def</span> <span class="nf">_unlock_inreg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Lock all qubits in the same register as the virtual qubit qubit. </span>
+<span class="sd">		Lock all qubits in the same register as the virtual qubit qubit.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		
+
 		<span class="k">if</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simNode</span> <span class="o">==</span> <span class="n">qubit</span><span class="o">.</span><span class="n">virtNode</span><span class="p">:</span>
 			<span class="k">yield</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_unlock_reg_qubits</span><span class="p">(</span><span class="n">qubit</span><span class="o">.</span><span class="n">simQubit</span><span class="p">)</span>
 		<span class="k">else</span><span class="p">:</span>
@@ -1142,10 +1181,21 @@
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_two_qubit_gate</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s2">&quot;cnot_onto&quot;</span><span class="p">)</span></div>
 
 	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualQubit.remote_cphase_onto"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_cphase_onto">[docs]</a>	<span class="k">def</span> <span class="nf">remote_cphase_onto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Performs a CPHASE operation with this qubit as control, and the other qubit as target.</span>
+
+<span class="sd">		Arguments</span>
+<span class="sd">		target		the virtual qubit to use as the target of the CPHASE</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_two_qubit_gate</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s2">&quot;cphase_onto&quot;</span><span class="p">)</span></div>
+
+	<span class="nd">@inlineCallbacks</span>
 	<span class="k">def</span> <span class="nf">_two_qubit_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Perform a two qubit gate including all the required locking. </span>
-<span class="sd">		</span>
+<span class="sd">		Perform a two qubit gate including all the required locking.</span>
+
 <span class="sd">		Arguments</span>
 <span class="sd">		target		second virtual qubit (beyond self which is the first)</span>
 <span class="sd">		name		name of the gate to perform</span>
@@ -1155,14 +1205,15 @@
 			<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Attempt to manipulate qubits no longer at this node.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 			<span class="k">return</span>
 
-		
+
 		<span class="n">localName</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;remote_&quot;</span><span class="p">,</span><span class="n">name</span><span class="p">])</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Doing 2 qubit gate name </span><span class="si">%s</span><span class="s2"> and local call </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">localName</span><span class="p">)</span>
 
-		<span class="c1"># Before we proceed, we need to acquire the gobal locks of the nodes holding the </span>
-		<span class="c1"># registers of both qubits. We wrap this in a timeout with random repeat since there is </span>
+
+		<span class="c1"># Before we proceed, we need to acquire the gobal locks of the nodes holding the</span>
+		<span class="c1"># registers of both qubits. We wrap this in a timeout with random repeat since there is</span>
 		<span class="c1"># otherwise the possibility of a deadlock if two nodes compete for the _two_ locks</span>
-		<span class="n">waiting</span> <span class="o">=</span> <span class="kc">True</span>	
+		<span class="n">waiting</span> <span class="o">=</span> <span class="kc">True</span>
 		<span class="n">attempts</span> <span class="o">=</span> <span class="mi">0</span>
 		<span class="k">while</span><span class="p">(</span><span class="n">waiting</span> <span class="ow">and</span> <span class="n">attempts</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">maxAttempts</span><span class="p">):</span>
 
@@ -1173,19 +1224,19 @@
 			<span class="c1"># Set up the lock acquisition</span>
 			<span class="n">lockD</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock_nodes</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 
-			<span class="k">try</span><span class="p">:</span> 
+			<span class="k">try</span><span class="p">:</span>
 				<span class="c1"># Yield on both of them</span>
 				<span class="n">gotLock</span><span class="p">,</span> <span class="n">timeoutRes</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">DeferredList</span><span class="p">([</span><span class="n">lockD</span><span class="p">,</span> <span class="n">timeoutD</span><span class="p">],</span> <span class="n">fireOnOneCallback</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fireOnOneErrback</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">consumeErrors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
 				<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Cannot get lock </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
-				<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unlock_nodes</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+				<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unlock_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">simNode</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">virtNode</span><span class="p">)</span>
 				<span class="n">timeup</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
 				<span class="k">return</span>
 			<span class="k">else</span><span class="p">:</span>
 				<span class="k">if</span> <span class="n">timeoutD</span><span class="o">.</span><span class="n">called</span><span class="p">:</span>
 					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Timing out getting locks.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 					<span class="n">lockD</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
-					<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unlock_nodes</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+					<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unlock_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">simNode</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">virtNode</span><span class="p">)</span>
 					<span class="n">attempts</span> <span class="o">=</span> <span class="n">attempts</span> <span class="o">+</span> <span class="mi">1</span>
 				<span class="k">elif</span> <span class="n">lockD</span><span class="o">.</span><span class="n">called</span><span class="p">:</span>
 					<span class="n">waiting</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1198,15 +1249,15 @@
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock_inreg</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 
 		<span class="c1"># When merging registers, we may need to update the virtual qubits. Remember the original ones so we can</span>
-		<span class="c1"># send appropriate unlocks below.</span>
+		<span class="c1"># send appropriate unlocks below. (note this assignment must be done after the locks are acquired)</span>
 		<span class="n">q1simNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span>
 		<span class="n">q1virtNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span>
 		<span class="n">q2simNode</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">simNode</span>
 		<span class="n">q2virtNode</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">virtNode</span>
 
 		<span class="c1"># Todo a 2 qubit gate, both qubits must be in the same simulated register. We will merge</span>
-		<span class="c1"># registers if this is not already the case.	</span>
-		<span class="k">try</span><span class="p">:</span> 
+		<span class="c1"># registers if this is not already the case.</span>
+		<span class="k">try</span><span class="p">:</span>
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span> <span class="o">==</span> <span class="n">target</span><span class="o">.</span><span class="n">simNode</span><span class="p">:</span>
 				<span class="c1"># Both qubits are simulated at the same node</span>
 
@@ -1236,7 +1287,7 @@
 						<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Inconsistent simulation. Cannot merge.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 						<span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;Inconsistent simulation&quot;</span><span class="p">)</span>
 
-					<span class="c1"># Merge the remote register according to the simulation IDs of the qubits	</span>
+					<span class="c1"># Merge the remote register according to the simulation IDs of the qubits</span>
 					<span class="n">defer</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;merge_regs&quot;</span><span class="p">,</span> <span class="n">fNum</span><span class="p">,</span> <span class="n">tNum</span><span class="p">)</span>
 
 					<span class="c1"># Get the number of the target in the new register</span>
@@ -1257,7 +1308,7 @@
 						<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Inconsistent simulation. Cannot merge.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 						<span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;Inconsistent simulation.&quot;</span><span class="p">)</span>
 					<span class="n">target</span><span class="o">.</span><span class="n">simQubit</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">remote_merge_from</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">fNum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">register</span><span class="p">)</span>
-		
+
 					<span class="c1"># Get the number of the target in the new register</span>
 					<span class="n">targetNum</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">num</span>
 
@@ -1279,13 +1330,14 @@
 
 					<span class="c1"># Execute the 2 qubit gate</span>
 					<span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="p">,</span> <span class="n">localName</span><span class="p">)(</span><span class="n">targetNum</span><span class="p">)</span>
-				
+
 				<span class="k">else</span><span class="p">:</span>
-					<span class="c1"># Both qubits are remotely simulated - we will pull both registers to become one local register	</span>
+					<span class="c1"># Both qubits are remotely simulated - we will pull both registers to become one local register</span>
 					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: 2qubit command demands total remote merge from </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
 					<span class="c1"># Create a new local register</span>
 					<span class="n">newLocalReg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">remote_new_register</span><span class="p">()</span>
+					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;MADE NEW REGISTER XXX&quot;</span><span class="p">)</span>
 
 					<span class="c1"># Fetch the detail of the two registers from remote</span>
 					<span class="p">(</span><span class="n">fNum</span><span class="p">,</span> <span class="n">fNode</span><span class="p">)</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_details&quot;</span><span class="p">)</span>
@@ -1297,18 +1349,21 @@
 						<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Inconsistent simulation. Cannot merge.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 						<span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;Inconsistent simulation.&quot;</span><span class="p">)</span>
 
+					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;GOT DETAILS XXX&quot;</span><span class="p">)</span>
 					<span class="c1"># Pull the remote registers to this node</span>
 					<span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">remote_merge_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">fNum</span><span class="p">,</span> <span class="n">newLocalReg</span><span class="p">)</span>
+					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;MERGED FROM CONTROL XXX&quot;</span><span class="p">)</span>
 					<span class="n">target</span><span class="o">.</span><span class="n">simQubit</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">target</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">remote_merge_from</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">tNum</span><span class="p">,</span> <span class="n">newLocalReg</span><span class="p">)</span>
-
+					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;MERGED FROM TARGET XXX&quot;</span><span class="p">)</span>
 					<span class="c1"># Get the number of the target in the new register</span>
 					<span class="n">targetNum</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">num</span>
 
 					<span class="c1"># Finally, execute the two qubit gate</span>
-					<span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="p">,</span> <span class="n">localName</span><span class="p">)()</span>
+					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;RUN GATE&quot;</span><span class="p">)</span>
+					<span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="p">,</span> <span class="n">localName</span><span class="p">)(</span><span class="n">targetNum</span><span class="p">)</span>
 		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-			<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Cannot perform two qubit gate </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
-			
+			<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Cannot perform two qubit gate </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> 
+
 		<span class="k">finally</span><span class="p">:</span>
 			<span class="c1"># We need to release all the locks, no matter what happened</span>
 			<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unlock_inreg</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -1321,14 +1376,14 @@
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Returns the number of this qubit in whatever local register it is in. Not useful for the client, but convenient for debugging.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-	
+
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Attempt to manipulate qubits no longer at this node.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="p">:</span>
 			<span class="n">num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">num</span>
 		<span class="k">else</span><span class="p">:</span>
-			<span class="k">try</span><span class="p">:</span> 
+			<span class="k">try</span><span class="p">:</span>
 				<span class="n">num</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_number&quot;</span><span class="p">)</span>
 			<span class="k">except</span> <span class="ne">ConnectionError</span><span class="p">:</span>
 				<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Connection failed: cannot get qubit number.&quot;</span><span class="p">)</span>
@@ -1340,24 +1395,24 @@
 <div class="viewcode-block" id="virtualQubit.remote_get_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_get_qubit">[docs]</a>	<span class="k">def</span> <span class="nf">remote_get_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Returns the state of this qubit in real and imaginary parts separated. This is required</span>
-<span class="sd">		single Twisted cannot natively transfer complex valued objects. </span>
+<span class="sd">		single Twisted cannot natively transfer complex valued objects.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		
+
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Attempt to manipulate qubits no longer at this node.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="p">:</span>
 			<span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">I</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">remote_get_qubit</span><span class="p">()</span>
 		<span class="k">else</span><span class="p">:</span>
-			<span class="k">try</span><span class="p">:</span> 
+			<span class="k">try</span><span class="p">:</span>
 				<span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">I</span><span class="p">)</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_qubit&quot;</span><span class="p">)</span>
 			<span class="k">except</span> <span class="ne">ConnectionError</span><span class="p">:</span>
 				<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Connection failed: cannot get qubit number.&quot;</span><span class="p">)</span>
 
 		<span class="k">return</span> <span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">I</span><span class="p">)</span></div></div>
 
-		
-		
+
+
 </pre></div>
 
           </div>
@@ -1380,7 +1435,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
     </div>
   </body>
 </html>

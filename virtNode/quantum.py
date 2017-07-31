@@ -33,7 +33,7 @@ from twisted.internet.defer import *
 
 import logging
 
-class qubit(pb.Referenceable):
+class simulatedQubit(pb.Referenceable):
 	"""
 	Simulated qubit object in the specified local simulation engine.
 
