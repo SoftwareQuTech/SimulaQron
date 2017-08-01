@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd "$NETSIM/examples/teleport"
+cd "$NETSIM/examples/nativeMode/teleport"
 python bobTest.py &
 python aliceTest.py
 

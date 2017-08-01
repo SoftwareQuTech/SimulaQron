@@ -126,7 +126,7 @@ def main():
 	myName = "Alice"
 
 	# This file defines the network of virtual quantum nodes
-	virtualFile = os.path.join(os.path.dirname(__file__), '../../config/virtualNodes.cfg')
+	virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
 
 	# This file defines the nodes acting as servers in the classical communication network
 	classicalFile = os.path.join(os.path.dirname(__file__), 'classicalNet.cfg')

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd "$NETSIM/examples/corrRNG"
+cd "$NETSIM/examples/nativeMode/corrRNG"
 python bobTest.py &
 python aliceTest.py
 

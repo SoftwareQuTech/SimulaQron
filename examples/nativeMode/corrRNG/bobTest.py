@@ -28,7 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-import os, time
+import sys, os, time
 
 from twisted.spread import pb
 from twisted.internet import reactor
@@ -137,7 +137,7 @@ def main():
 	myName = "Bob"
 
 	# This file defines the network of virtual quantum nodes
-	virtualFile = os.path.join(os.path.dirname(__file__), '../../config/virtualNodes.cfg')
+	virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
 
 	# This file defines the nodes acting as servers in the classical communication network
 	classicalFile = "classicalNet.cfg"

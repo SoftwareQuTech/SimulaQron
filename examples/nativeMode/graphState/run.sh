@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd "$NETSIM/examples/graphState"
+cd "$NETSIM/examples/nativeMode/graphState"
 python bobTest.py &
 python charlieTest.py &
 python davidTest.py &
