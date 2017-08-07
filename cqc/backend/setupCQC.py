@@ -92,24 +92,25 @@ def main(myName):
 		myHost.factory = cqc_factory
 		reactor.listenTCP(myHost.port, myHost.factory)
 	except Exception as e:
-		logging.error("LOCAL %s: Cannot start classical communication servers.",myName,e.strerror)
+		logging.error("LOCAL %s: Cannot start CQC server.",myName,e.strerror)
 		return
 
 	# Connect to the local virtual node simulating the "local" qubits
-	logging.debug("LOCAL %s: Connecting to local virtual node.",myName)
-	virtual_node = virtualNet.hostDict[myName]
-	factory = pb.PBClientFactory()
-	reactor.connectTCP(virtual_node.hostname, virtual_node.port, factory)
-	deferVirtual = factory.getRootObject()
-	dList.append(deferVirtual)
+	try:
+		logging.debug("LOCAL %s: Connecting to local virtual node.",myName)
+		virtual_node = virtualNet.hostDict[myName]
+		factory = pb.PBClientFactory()
+		reactor.connectTCP(virtual_node.hostname, virtual_node.port, factory)
+		deferVirtual = factory.getRootObject()
+		dList.append(deferVirtual)
 
-	deferList = DeferredList(dList, consumeErrors=True)
-	deferList.addCallback(init_register, myName, cqc_factory)
-	deferList.addErrback(localError)
-	reactor.run()
-	
-
-
+		deferList = DeferredList(dList, consumeErrors=True)
+		deferList.addCallback(init_register, myName, cqc_factory)
+		deferList.addErrback(localError)
+		reactor.run()
+	except Exception as e:
+		logging.error("LOCAL %s: Cannot connect to SimulaQron backend.",myName)
+		return
 
 
 ##################################################################################################

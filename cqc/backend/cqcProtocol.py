@@ -43,6 +43,8 @@ from SimulaQron.virtNode.crudeSimulator import *
 
 from SimulaQron.local.setup import *
 
+from SimulaQron.cqc.backend.cqcHeader import *
+
 #####################################################################################################
 #
 # CQC Factory
@@ -94,6 +96,12 @@ class CQCProtocol(Protocol):
 	def __init__(self, factory):
 		self.factory = factory
 
+		self.messageHandlers = {
+			CQC_HELLO : self.handle_hello,
+			CQC_COMMAND : self.handle_command,
+			CQC_FACTORY : self.handle_factory
+		}
+
 	def connectionMade(self):
 		pass
 
@@ -101,6 +109,33 @@ class CQCProtocol(Protocol):
 		pass
 
 	def dataReceived(self, data):
-		self.transport.write(data)
+
+		# The first 3 characters are the header
+		rawHeader = data[0:4]
+		header = CQCHeader(rawHeader);
+
+		# Invoke the relevant message handler, processing the possibly remaining data
+		if header.type in self.messageHandlers: 
+			self.messageHandlers[header.type](header, data)
+		else:	
+			self.send_unsupp(header)
+
+	def send_unsupp(self, header):
+		'''	
+			Send a message saying this command is not supported.
+		'''
 		
+
+		msg = pack("BBH", CQC_VERSION, CQC_ERR_UNSUPP, header.app_id)
+		self.transport.write(msg)
+
+	def handle_hello(self, header, data):
+		msg = pack("BBH", CQC_VERSION, CQC_HELLO, header.app_id)
+		self.transport.write(msg)
+
+	def handle_command(self, header, data):
+		pass
+
+	def handle_factory(self, header, data):
+		pass
 
