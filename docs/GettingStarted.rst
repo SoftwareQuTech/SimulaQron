@@ -8,7 +8,8 @@ Installation
 SimulaQron requires `Python 3 <https://python.org/>`_ , `Twisted <http://twistedmatrix.com/trac/>`_ and `QuTip <http://qutip.org/>`_ 
 Assuming you have python 3 etc already installed already, do::
 
-	pip install twisted
+	pip install twisted 
+	pip install service_identity
 	pip install qutip
 
 For detailed instructions on how to install QuTip and Twisted, please refer to their respective installations instructions. You will then 
