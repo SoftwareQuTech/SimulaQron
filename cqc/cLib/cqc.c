@@ -57,9 +57,9 @@ int main(int argc, char *argv[]) {
    	}
 
 	/* Prepare CQC message */
-	cqc.version = 3;
+	cqc.version = CQC_VERSION;
 	cqc.app_id = 5;
-	cqc.type = CQC_HELLO;
+	cqc.type = CQC_TP_MEASOUT;
    
    	/* Send message to the server */
    	n = write(sockfd, &cqc, sizeof(cqc));
@@ -77,6 +77,6 @@ int main(int argc, char *argv[]) {
       		exit(1);
    	}
 	
-   	printf("Reply version %ul, type %ul, app id %d\n", reply.version, reply.type, reply.app_id);
+   	printf("Reply version %u, type %u, app id %d\n", reply.version, reply.type, reply.app_id);
    	return 0;
 }

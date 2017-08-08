@@ -97,9 +97,10 @@ class CQCProtocol(Protocol):
 		self.factory = factory
 
 		self.messageHandlers = {
-			CQC_HELLO : self.handle_hello,
-			CQC_COMMAND : self.handle_command,
-			CQC_FACTORY : self.handle_factory
+			CQC_TP_HELLO : self.handle_hello,
+			CQC_TP_COMMAND : self.handle_command,
+			CQC_TP_FACTORY : self.handle_factory,
+			CQC_TP_GET_TIME : self.handle_time
 		}
 
 	def connectionMade(self):
@@ -115,8 +116,8 @@ class CQCProtocol(Protocol):
 		header = CQCHeader(rawHeader);
 
 		# Invoke the relevant message handler, processing the possibly remaining data
-		if header.type in self.messageHandlers: 
-			self.messageHandlers[header.type](header, data)
+		if header.tp in self.messageHandlers: 
+			self.messageHandlers[header.tp](header, data)
 		else:	
 			self.send_unsupp(header)
 
@@ -126,16 +127,23 @@ class CQCProtocol(Protocol):
 		'''
 		
 
-		msg = pack("BBH", CQC_VERSION, CQC_ERR_UNSUPP, header.app_id)
+		hdr = CQCHeader();
+		hdr.setVals(CQC_VERSION, CQC_ERR_UNSUPP, header.app_id);
+		msg = hdr.pack();
 		self.transport.write(msg)
 
 	def handle_hello(self, header, data):
-		msg = pack("BBH", CQC_VERSION, CQC_HELLO, header.app_id)
+		hdr = CQCHeader();
+		hdr.setVals(CQC_VERSION, CQC_TP_HELLO, header.app_id);
+		msg = hdr.pack();
 		self.transport.write(msg)
 
 	def handle_command(self, header, data):
 		pass
 
 	def handle_factory(self, header, data):
+		pass
+
+	def handle_time(self, header, data):
 		pass
 

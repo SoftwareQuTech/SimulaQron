@@ -19,14 +19,16 @@ typedef struct
 
 /* Possible CQC Types */
 
-#define CQC_HELLO		0	/* Alive check */
-#define CQC_COMMAND 		1	/* Execute a command list */
-#define CQC_FACTORY		2 	/* Start executing command list repeatedly */
-#define CQC_EXPIRE		3	/* Qubit has expired */
-#define	CQC_DONE		4	/* Command execution done */
-#define CQC_RECV		5	/* Recevied qubit */
-#define CQC_EPR_OK		6	/* Created EPR pair */
-#define	CQC_MEASOUT		7	/* Measurement outcome */
+#define CQC_TP_HELLO		0	/* Alive check */
+#define CQC_TP_COMMAND 		1	/* Execute a command list */
+#define CQC_TP_FACTORY		2 	/* Start executing command list repeatedly */
+#define CQC_TP_EXPIRE		3	/* Qubit has expired */
+#define	CQC_TP_DONE		4	/* Command execution done */
+#define CQC_TP_RECV		5	/* Recevied qubit */
+#define CQC_TP_EPR_OK		6	/* Created EPR pair */
+#define	CQC_TP_MEASOUT		7	/* Measurement outcome */
+#define CQC_TP_GET_TIME		8	/* Get creation time of qubit */
+#define CQC_TP_INF_TIME		9	/* Inform about time */
 
 #define	CQC_ERR_GENERAL		20	/* General purpose error (no details */
 #define	CQC_ERR_NOQUBIT		21	/* No more qubits available */
@@ -59,26 +61,42 @@ typedef struct
 #define CQC_CMD_Z		11	/* Pauli Z */
 #define CQC_CMD_Y		12	/* Pauli Y */
 #define CQC_CMD_T		13	/* T Gate */
+#define CQC_CMD_ROT_X		14	/* Rotation over angle around X in pi/256 increments */
+#define CQC_CMD_ROT_Y		15	/* Rotation over angle around Y in pi/256 increments */
+#define CQC_CMD_ROT_Z		16	/* Rotation over angle around Z in pi/256 increments */
 
 #define CQC_CMD_CNOT		20	/* CNOT Gate with this as control */
-#define CQC_CPHASE		21	/* CPHASE Gate with this as control */
+#define CQC_CMD_CPHASE		21	/* CPHASE Gate with this as control */
 
 /* Command options */
 #define CQC_OPT_NOTIFY		0x01	/* Send a notification when cmd done */
 #define CQC_OPT_ACTION		0x02	/* On if there are actions to execute when done */
-#define CQC_OPT_BLOCK		0x03	/* Block until command is done */
+#define CQC_OPT_BLOCK		0x04	/* Block until command is done */
 
 /* Additional cmd details (optional) */
 #define CQC_CMD_XTRA_HDR	24
 typedef struct
 {
 	uint8_t xtra_qubit_id;	/* ID of the additional qubit */
-	uint8_t angle_step;	/* Angle step of rotation */
+	uint8_t steps;		/* Angle step of rotation (ROT) OR number of repetitions (FACTORY) */
 	uint16_t remote_app_id;	/* Remote application ID */
 	uint64_t remote_node;	/* IP of the remote node */
 	uint32_t cmdLength;	/* Length of the cmds to exectute upon completion */
 	void *cmdPayload;	/* Details to execute when done with this command */
-} __attribute__((__packed__)) cmdHeader;
+} __attribute__((__packed__)) xtraCmdHeader;
+
+/*
+	Definitions for the packet sent upon notifications.
+*/
+
+typedef struct
+{
+	uint8_t qubit_id;	/* ID of the received qubit, if any */
+	uint8_t outcome;	/* Measurement outcome */
+	uint16_t remote_app_id;	/* Remote application ID */
+	uint64_t remote_node;	/* IP of the remote node */
+	uint64_t datetime;	/* Time of qubit */
+} __attribute__((__packed__)) notifyHeader;
 
 #endif
 
