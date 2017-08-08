@@ -65,6 +65,8 @@ class CQCFactory(Factory):
 		self.virtRoot = None
 		self.qReg = None
 
+		self.qDict = {}
+
 	def buildProtocol(self, addr):
 		'''
 		Return an instance of CQCProtocol when a connection is made.
@@ -94,7 +96,8 @@ class CQCFactory(Factory):
 class CQCProtocol(Protocol):
 
 	def __init__(self, factory):
-		self.factory = factory
+		self.factory = factory;
+		self.app_id = 0;
 
 		self.messageHandlers = {
 			CQC_TP_HELLO : self.handle_hello,
@@ -115,6 +118,9 @@ class CQCProtocol(Protocol):
 		rawHeader = data[0:4]
 		header = CQCHeader(rawHeader);
 
+		# Update our app ID
+		self.app_id = header.app_id;
+
 		# Invoke the relevant message handler, processing the possibly remaining data
 		if header.tp in self.messageHandlers: 
 			self.messageHandlers[header.tp](header, data)
@@ -126,13 +132,25 @@ class CQCProtocol(Protocol):
 			Send a message saying this command is not supported.
 		'''
 		
-
 		hdr = CQCHeader();
 		hdr.setVals(CQC_VERSION, CQC_ERR_UNSUPP, header.app_id);
 		msg = hdr.pack();
 		self.transport.write(msg)
 
+	def send_noqubit(self, header):
+		'''	
+			Send a message saying there is no qubit.
+		'''
+		
+		hdr = CQCHeader();
+		hdr.setVals(CQC_VERSION, CQC_ERR_NOQUBIT, header.app_id);
+		msg = hdr.pack();
+		self.transport.write(msg)
+
 	def handle_hello(self, header, data):
+		'''
+			Hello just requires us to return hello - for testing availablility.
+		'''
 		hdr = CQCHeader();
 		hdr.setVals(CQC_VERSION, CQC_TP_HELLO, header.app_id);
 		msg = hdr.pack();
@@ -145,5 +163,52 @@ class CQCProtocol(Protocol):
 		pass
 
 	def handle_time(self, header, data):
-		pass
+
+		# Read the command header to learn the qubit ID
+		rawCmdHeader = data[4:8];
+		hdr = CQCCmdHeader(rawCmdHeader);
+
+		# Lookup the desired qubit list for application
+		qList = self.qDict[header.app_id];
+		if not qList:
+			# App ID has no qubits
+			send_noqubit(self, header);
+			return;
+
+		# Lookup the desired qubit
+		if not qList[hdr.qubit_id]:
+			# Specified qubit is unknown	
+			send_noqubit(self, header);
+			return;
+
+		# Craft reply
+		# First send an appropriate CQC Header
+		reply = CQCHeader();
+		reply.setVals(CQC_VERSION, CQC_TP_INF_TIME, header.app_id)
+		msg = reply.pack();
+		self.transport.write(msg)
+
+		# Then we send a notify header with the timing details
+		notify = CQCNotifyHeader();
+		notify.setVals(header.qubit_id, 0, 0, 0, q.datetime);
+		msg = notify.pack();
+		self.transport.write(msg)
+
+
+#######################################################################################################
+#
+# CQC Internal qubit object to translate to the native mode of SimulaQron
+#
+
+class CQCQubit:
+
+	def __init__(self, qubit_id = 0, datetime = 0, sim = 0):
+		self.qubit_id = qubit_id;
+		self.datetime = datetime;
+		self.sim = sim;
+
+
+
+	
+		
 
