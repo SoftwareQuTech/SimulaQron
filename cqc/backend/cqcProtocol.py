@@ -333,6 +333,7 @@ class CQCProtocol(Protocol):
 		"""
 		pass
 
+	@inlineCallbacks
 	def cmd_x(self, cqc_header, cmd, xtra):
 		"""
 		Apply X Gate
@@ -341,90 +342,122 @@ class CQCProtocol(Protocol):
 		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
 		yield virt_qubit.callRemote("apply_X")
 
+	@inlineCallbacks
 	def cmd_z(self, cqc_header, cmd, xtra):
-		'''
-			Apply Z Gate
-		'''
-		pass
+		"""
+		Apply Z Gate
+		"""
+		logging.debug("CQC %s: Applying Z to App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		yield virt_qubit.callRemote("apply_Z")
 
+	@inlineCallbacks
 	def cmd_y(self, cqc_header, cmd, xtra):
-		'''
-			Apply Y Gate
-		'''
-		pass
+		"""
+		Apply Y Gate
+		"""
+		logging.debug("CQC %s: Applying Y to App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		yield virt_qubit.callRemote("apply_Y")
 
+	@inlineCallbacks
 	def cmd_t(self, cqc_header, cmd, xtra):
-		'''		
-			Apply T Gate
-		'''
-		pass
+		"""
+		Apply T Gate
+		"""
+		logging.debug("CQC %s: Applying T to App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		yield virt_qubit.callRemote("apply_T")
 
+	@inlineCallbacks
 	def cmd_h(self, cqc_header, cmd, xtra):
-		'''
-			Apply H Gate
-		'''
-		pass
+		"""
+		Apply H Gate
+		"""
+		logging.debug("CQC %s: Applying H to App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		yield virt_qubit.callRemote("apply_H")
 
+	@inlineCallbacks
 	def cmd_rotx(self, cqc_header, cmd, xtra):
-		'''
-			Rotate around x axis
-		'''
+		"""
+		Rotate around x axis
+		"""
 		pass
 
+	@inlineCallbacks
 	def cmd_rotz(self, cqc_header, cmd, xtra):
 		'''
 			Rotate around z axis
 		'''
 		pass
 
+	@inlineCallbacks
 	def cmd_roty(self, cqc_header, cmd, xtra):
 		''' 
 			Rotate around y axis
 		'''
 		pass
 
+	@inlineCallbacks
 	def cmd_cnot(self, cqc_header, cmd, xtra):
-		'''
-			Apply CNOT Gate
-		'''
-		pass
+		"""
+		Apply CNOT Gate
+		"""
+		logging.debug("CQC %s: Applying CNOT to App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		control = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		target = self.get_virt_qubit(cqc_header, xtra.qubit_id)
+		yield control.callRemote("cnot_onto",target)
 
+	@inlineCallbacks
 	def cmd_cphase(self, cqc_header, cmd, xtra):
-		'''
-			Apply CPHASE Gate
-		'''
-		pass
+		"""
+		Apply CPHASE Gate
+		"""
+		logging.debug("CQC %s: Applying CPHASE to App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		control = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		target = self.get_virt_qubit(cqc_header, xtra.qubit_id)
+		yield control.callRemote("cphase_onto",target)
 	
+	@inlineCallbacks
 	def cmd_reset(self, cqc_header, cmd, xtra):
 		'''
 			Reset Qubit to |0>
 		'''
 		pass
 
+	@inlineCallbacks
 	def cmd_measure(self, cqc_header, cmd, xtra):
-		''' 
-			Measure qubit.
-		'''
-		pass
+		"""
+		Measure
+		"""
+		logging.debug("CQC %s: Measuring App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		outcome = yield virt_qubit.callRemote("measure")
+		return(outcome)
 
+	@inlineCallbacks
 	def cmd_send(self, cqc_header, cmd, xtra):
 		"""
 		Send qubit to another node.
 		"""
 		pass
 
+	@inlineCallbacks
 	def cmd_recv(self, cqc_header, cmd, xtra):
 		"""
 		Receive qubit from another node.
 		"""
 		pass
 
+	@inlineCallbacks
 	def cmd_epr(self, cqc_header, cmd, xtra):
 		"""
 		Create EPR pair with another node.
 		"""
 		pass
 
+	@inlineCallbacks
 	def cmd_new(self, cqc_header, cmd, xtra):
 		"""
 		Request a new qubit. Since we don't need it, this python CQC just provides very crude timing information.
