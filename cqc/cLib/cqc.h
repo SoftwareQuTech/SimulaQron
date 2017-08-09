@@ -1,31 +1,32 @@
-#
-# Copyright (c) 2017, Stephanie Wehner
-# All rights reserved.
-# 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the distribution.
-# 3. All advertising materials mentioning features or use of this software
-#    must display the following acknowledgement:
-#    This product includes software developed by Stephanie Wehner, QuTech.
-# 4. Neither the name of the QuTech organization nor the
-#    names of its contributors may be used to endorse or promote products
-#    derived from this software without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ''AS IS'' AND ANY
-# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+/*
+Copyright (c) 2017, Stephanie Wehner
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. All advertising materials mentioning features or use of this software
+   must display the following acknowledgement:
+   This product includes software developed by Stephanie Wehner, QuTech.
+4. Neither the name of the QuTech organization nor the
+   names of its contributors may be used to endorse or promote products
+   derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ''AS IS'' AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 #ifndef CQC_H
 #define CQC_H
@@ -38,7 +39,7 @@ typedef struct
 	uint8_t version; /* Pretty wasteful to use a char for that. 3 bits would be plenty, but only done for python now as the total must be 4 bytes */
 	uint8_t type;		/* Packet control type */
 	uint16_t app_id; 	/* Application ID */
-	uint32_t cmdLength;	/* Total length of command instructions to send */
+	uint32_t length;	/* Total length of command instructions to send */
 	void *payload; 		/* Pointer to cmd payload */
 } __attribute__((__packed__)) cqcHeader;
 
@@ -62,6 +63,7 @@ typedef struct
 #define	CQC_ERR_NOQUBIT		21	/* No more qubits available */
 #define	CQC_ERR_UNSUPP		22	/* Command sequence not supported */
 #define	CQC_ERR_TIMEOUT		23	/* Timeout */
+#define CQC_ERR_INUSE		24	/* Qubit ID in use when requesting new ID */
 
 /*
 	Definitions for the command header and commands.
@@ -92,6 +94,7 @@ typedef struct
 #define CQC_CMD_ROT_X		14	/* Rotation over angle around X in pi/256 increments */
 #define CQC_CMD_ROT_Y		15	/* Rotation over angle around Y in pi/256 increments */
 #define CQC_CMD_ROT_Z		16	/* Rotation over angle around Z in pi/256 increments */
+#define CQC_CMD_H		17	/* Hadamard Gate */
 
 #define CQC_CMD_CNOT		20	/* CNOT Gate with this as control */
 #define CQC_CMD_CPHASE		21	/* CPHASE Gate with this as control */
@@ -102,7 +105,7 @@ typedef struct
 #define CQC_OPT_BLOCK		0x04	/* Block until command is done */
 
 /* Additional cmd details (optional) */
-#define CQC_CMD_XTRA_HDR	24
+#define CQC_CMD_XTRA_LENGTH	16
 typedef struct
 {
 	uint8_t xtra_qubit_id;	/* ID of the additional qubit */
@@ -116,7 +119,7 @@ typedef struct
 /*
 	Definitions for the packet sent upon notifications.
 */
-
+#define CQC_NOTIFY_LENGTH	20
 typedef struct
 {
 	uint8_t qubit_id;	/* ID of the received qubit, if any */

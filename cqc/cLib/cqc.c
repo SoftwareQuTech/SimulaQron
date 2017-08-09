@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
 	struct hostent *server;
 	cqcHeader cqc;
 	cqcHeader reply;
+	cmdHeader cmd;
 
 	char buffer[256];
 
@@ -59,10 +60,37 @@ int main(int argc, char *argv[]) {
 	/* Prepare CQC message */
 	cqc.version = CQC_VERSION;
 	cqc.app_id = 5;
-	cqc.type = CQC_TP_MEASOUT;
+	cqc.type = CQC_TP_COMMAND;
+	cqc.length = CQC_CMD_HDR_LENGTH;
    
    	/* Send message to the server */
-   	n = write(sockfd, &cqc, sizeof(cqc));
+   	n = write(sockfd, &cqc, CQC_HDR_LENGTH);
+   	if (n < 0) {
+      		perror("ERROR writing to socket");
+      		exit(1);
+   	}
+   
+   	/* Now read server response */
+	/*
+   	bzero(&reply, sizeof(reply));
+   	n = read(sockfd, &reply, sizeof(reply));
+   
+   	if (n < 0) {
+      		perror("ERROR reading from socket");
+      		exit(1);
+   	}
+	
+   	printf("Reply version %u, type %u, app id %d\n", reply.version, reply.type, reply.app_id);
+	*/
+
+	/* Create a new qubit */
+	bzero(&cmd, sizeof(cmd));
+	cmd.qubit_id = 1;
+	cmd.instr = CQC_CMD_NEW;
+	cmd.options = 0;
+
+   	/* Send message to the server */
+   	n = write(sockfd, &cmd, CQC_CMD_HDR_LENGTH);
    	if (n < 0) {
       		perror("ERROR writing to socket");
       		exit(1);
@@ -78,5 +106,7 @@ int main(int argc, char *argv[]) {
    	}
 	
    	printf("Reply version %u, type %u, app id %d\n", reply.version, reply.type, reply.app_id);
+
+	
    	return 0;
 }

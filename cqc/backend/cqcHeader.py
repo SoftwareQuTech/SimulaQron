@@ -32,6 +32,13 @@ from struct import *
 # Constant defining CQC version
 CQC_VERSION=0
 
+# Lengths of the headers in bytes
+CQC_HDR_LENGTH=8	# Length of the CQC Header
+CQC_CMD_HDR_LENGTH=4	# Length of a command header
+CQC_CMD_XTRA_LENGTH=16	# Length of extra command information
+CQC_NOTIFY_LENGTH=20	# Length of a notification send from the CQC upwards
+
+
 # Constants defining the messages types
 CQC_TP_HELLO=0		# Alive check
 CQC_TP_COMMAND=1	# Execute a command list
@@ -48,6 +55,7 @@ CQC_ERR_GENERAL=20 	# General purpose error (no details
 CQC_ERR_NOQUBIT=21 	# No more qubits available
 CQC_ERR_UNSUPP=22 	# No sequence not supported
 CQC_ERR_TIMEOUT=23 	# Timeout
+CQC_ERR_INUSE=24	# Qubit ID in use (when creating new qubit)
 
 # Possible commands
 CQC_CMD_I=0		# Identity (do nothing, wait one step) 
@@ -65,6 +73,7 @@ CQC_CMD_T=13		# T Gate
 CQC_CMD_ROT_X=14	# Rotation over angle around X in pi/256 increments
 CQC_CMD_ROT_Y=15	# Rotation over angle around Y in pi/256 increments
 CQC_CMD_ROT_Z=16	# Rotation over angle around Z in pi/256 increments
+CQC_CMD_H=17		# Hadamard H
 
 CQC_CMD_CNOT=20		# CNOT Gate with this as control
 CQC_CMD_CPHASE=21	# CPHASE Gate with this as control
@@ -88,6 +97,7 @@ class CQCHeader:
 			self.version = 0;
 			self.tp = -1;
 			self.app_id = 0;
+			self.length = 0;
 		else:
 			self.unpack(headerBytes);
 
@@ -107,7 +117,7 @@ class CQCHeader:
 		if not self.is_set:
 			return(0);
 
-		cqcH = pack("BBH",self.version, self.tp, self.app_id);
+		cqcH = pack("=BBH",self.version, self.tp, self.app_id);
 		return(cqcH);
 
 
@@ -115,11 +125,12 @@ class CQCHeader:
 		'''
 			Unpack packet data. For definitions see cLib/cqc.h
 		'''
-		cqcH = unpack("BBH", headerBytes);
+		cqcH = unpack("=BBHL", headerBytes);
 
 		self.version = cqcH[0];
 		self.tp = cqcH[1];
 		self.app_id = cqcH[2];
+		self.length = cqcH[3];
 		self.is_set = True;
 
 	def printable(self):
@@ -129,12 +140,12 @@ class CQCHeader:
 		if not self.is_set:
 			return(" ");
 
-		toPrint = "Version: " + self.version + " ";
-		toPrint = toPrint + "Type: " + self.tp + " ";
-		toPrint = toPrint + "App ID: " + self.app_id;
+		toPrint = "Version: " + str(self.version) + " "
+		toPrint = toPrint + "Type: " + str(self.tp) + " "
+		toPrint = toPrint + "App ID: " + str(self.app_id)
 		return(toPrint);
 
-class CQCCmdHeaader:
+class CQCCmdHeader:
 	'''
 		Header for a command instruction packet.
 	'''
@@ -143,13 +154,14 @@ class CQCCmdHeaader:
 		'''
 			Initialize using values received from a packet, if available.
 		'''
+		self.notify = False;
+		self.block = False;
+		self.action = False;
+
 		if headerBytes == None:
 			self.is_set = False;
 			self.qubit_id = 0;
 			self.instr = 0;
-			self.notify = False;
-			self.block = False;
-			self.action = False;
 		else:
 			self.unpack(headerBytes);
 
@@ -180,14 +192,14 @@ class CQCCmdHeaader:
 		if self.action:
 			opt = opt | CQC_OPT_ACTION;
 
-		cmdH = pack("HBB",self.qubit_id, self.instr, opt);
+		cmdH = pack("=HBB",self.qubit_id, self.instr, opt);
 		return(cmdH);	
 
 	def unpack(self, headerBytes):
 		'''
 			Unpack packet data. For definitions see cLib/cqc.h
 		'''
-		cmdH = unpack("HBB", headerBytes);
+		cmdH = unpack("=HBB", headerBytes);
 
 		self.qubit_id = cmdH[0];
 		self.instr = cmdH[1];
@@ -208,11 +220,11 @@ class CQCCmdHeaader:
 		if not self.is_set:
 			return(" ");
 
-		toPrint = "Qubit ID: " + self.qubit_id + " ";
-		toPrint = toPrint + "Instruction: " + self.instr + " ";
-		toPrint = toPrint + "Notify: " + self.notify + " ";
-		toPrint = toPrint + "Block: " + self.block + " ";
-		toPrint = toPrint + "Action: " + self.action;
+		toPrint = "Qubit ID: " + str(self.qubit_id) + " ";
+		toPrint = toPrint + "Instruction: " + str(self.instr) + " ";
+		toPrint = toPrint + "Notify: " + str(self.notify) + " ";
+		toPrint = toPrint + "Block: " + str(self.block) + " ";
+		toPrint = toPrint + "Action: " + str(self.action);
 		return(toPrint);
 
 class CQCCmdExtra:
@@ -252,14 +264,14 @@ class CQCCmdExtra:
 		if not self.is_set:
 			return(0);
 
-		xtraH = pack("BBHQL", self.xtra_qubit_id, self.step, self.remote_app_id, self.remote_node, self.cmdLength);
+		xtraH = pack("=BBHQL", self.xtra_qubit_id, self.step, self.remote_app_id, self.remote_node, self.cmdLength);
 		return(xtraH);
 
 	def unpack(self, headerBytes):
 		'''
 			Unpack packet data. For defnitions see cLib/cqc.h
 		'''
-		xtraH = unpack("BBHQL", headerBytes);
+		xtraH = unpack("=BBHQL", headerBytes);
 
 		self.xtra_qubit_id = xtraH[0];
 		self.step = xtraH[1];
@@ -275,11 +287,11 @@ class CQCCmdExtra:
 		if not self.is_set:
 			return(" ");
 
-		toPrint = "Xtra Qubit: " + self.xtra_qubit_id + " ";		
-		toPrint = toPrint + "Angle Step: " + self.step + " ";		
-		toPrint = toPrint + "Remote App ID: " + self.remote_app_id + " ";		
-		toPrint = toPrint + "Remote Node: " + self.remote_node + " ";		
-		toPrint = toPrint + "Command Length: " + self.cmdLength;
+		toPrint = "Xtra Qubit: " + str(self.xtra_qubit_id) + " ";		
+		toPrint = toPrint + "Angle Step: " + str(self.step) + " ";		
+		toPrint = toPrint + "Remote App ID: " + str(self.remote_app_id) + " ";		
+		toPrint = toPrint + "Remote Node: " + str(self.remote_node) + " ";		
+		toPrint = toPrint + "Command Length: " + str(self.cmdLength);
 
 		return(toPrint);
 
@@ -320,14 +332,14 @@ class CQCNotifyHeader:
 		if not self.is_set:
 			return 0;
 
-		xtraH = pack("BBHQQ", self.qubit_id, self.outcome, self.remote_app_id, self.remote_node, self.datetime);
+		xtraH = pack("=BBHQQ", self.qubit_id, self.outcome, self.remote_app_id, self.remote_node, self.datetime);
 		return(xtraH);
 
 	def unpack(self, headerBytes):
 		'''
 			Unpack packet data. For defnitions see cLib/cqc.h
 		'''
-		xtraH = unpack("BBHQQ", headerBytes);
+		xtraH = unpack("=BBHQQ", headerBytes);
 
 		self.qubit_id = xtraH[0];
 		self.outcome = xtraH[1];
@@ -343,9 +355,9 @@ class CQCNotifyHeader:
 		if not self.is_set:
 			return(" ");
 
-		toPrint = "Qubit ID: "  + self.qubit_id + " ";
-		toPrint = toPrint + "Outcome: " + self.outcome + " ";
-		toPrint = toPrint + "Remote App ID: " + self.remote_app_id + " ";
-		toPrint = toPrint + "Remote Node: " + self.remote_node + " ";
-		toPrint = toPrint + "Datetime: " + self.datetime;
+		toPrint = "Qubit ID: "  + str(self.qubit_id) + " ";
+		toPrint = toPrint + "Outcome: " + str(self.outcome) + " ";
+		toPrint = toPrint + "Remote App ID: " + str(self.remote_app_id) + " ";
+		toPrint = toPrint + "Remote Node: " + str(self.remote_node) + " ";
+		toPrint = toPrint + "Datetime: " + str(self.datetime);
 		return(toPrint);

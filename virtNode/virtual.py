@@ -27,6 +27,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from collections import dqueue
+
 from twisted.spread import pb
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue, DeferredLock, Deferred, DeferredList
@@ -353,6 +355,48 @@ class virtualNode(pb.Root):
 		update remote nodes XXX
 		"""
 		pass
+
+	@inlineCallbacks
+	def remote_cqc_send_qubit(self, qubit, targetName, app_id, remote_app_id):
+		"""
+		Send interface for CQC to add the qubit to the remote nodes received list for an application. 
+		"""
+		
+		oldVirtNum = qubit.num
+		newVirtNum = self.remote_send_qubit(qubit, targetName)
+
+		# Lookup host ID of node
+		remoteNode = self.conn[targetName]
+		
+		# Ask to add to list
+		yield remoteNode.root.callRemote("cqc_add_recv_list", self.myID.name, app_id, remote_app_id, newVirtNum)
+
+	def remote_cqc_add_recv_list(self, fromName, from_app_id, to_app_id, new_virt_num):
+		"""
+		Add an item to the received list for use in CQC.
+		"""
+
+		if not self.cqcRecv[to_app_id]:
+			self.cqcRecv[to_app_id] = dqueue([])
+
+		self.cqcRecv[to_app_id].append(QubitCQC(fromName, self.myID.name, from_app_id, to_app_id, new_virt_num));
+
+	def remote_cqc_get_recv(self, fromName, to_app_id):
+		"""
+		Retrieve the next qubit with the given app ID form the received list.
+		"""
+
+		# Get the list corresponding to the specified application ID
+		qQueue = self.cqcRecv[to_app_id]
+		if not qQueue:
+			return None
+
+		# Retrieve the first element on that list (first in, first out)
+		qc = qQueue.popleft();
+		if not qc:
+			return None
+		
+		return self.remote_get_virtual_ref(qc.virt_num)
 
 
 	@inlineCallbacks
@@ -1272,7 +1316,6 @@ class virtualQubit(pb.Referenceable):
 
 					# Create a new local register
 					newLocalReg = self.virtNode.root.remote_new_register()
-					logging.debug("MADE NEW REGISTER XXX")
 
 					# Fetch the detail of the two registers from remote
 					(fNum, fNode) = yield self.simQubit.callRemote("get_details")
@@ -1284,12 +1327,9 @@ class virtualQubit(pb.Referenceable):
 						logging.error("VIRTUAL NODE %s: Inconsistent simulation. Cannot merge.",self.myID.name)
 						raise quantumError("Inconsistent simulation.")
 
-					logging.debug("GOT DETAILS XXX")
 					# Pull the remote registers to this node
 					self.simQubit = yield self.virtNode.root.remote_merge_from(self.simNode.name, fNum, newLocalReg)
-					logging.debug("MERGED FROM CONTROL XXX")
 					target.simQubit = yield target.virtNode.root.remote_merge_from(target.simNode.name, tNum, newLocalReg)
-					logging.debug("MERGED FROM TARGET XXX")
 					# Get the number of the target in the new register
 					targetNum = target.simQubit.num
 
@@ -1347,4 +1387,17 @@ class virtualQubit(pb.Referenceable):
 		return (R,I)
 
 
+
+############################################
+#
+# Keeping track of received qubits for CQC
+
+class QubitCQC:
+	
+	def __init__(self, fromName, toName, from_app_id, to_app_id, new_virt_num):
+		self.fromName = fromName;
+		self.toName = toName;
+		self.from_app_id = from_app_id;
+		self.to_app_id = to_app_id;
+		self.virt_num = virt_num;
 
