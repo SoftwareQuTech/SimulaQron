@@ -54,7 +54,7 @@ from SimulaQron.cqc.backend.cqcHeader import *
 
 class CQCFactory(Factory):
 	
-	def __init__(self, host):
+	def __init__(self, host, name):
 		''' 
 		Initialize CQC Factory. 
 
@@ -62,6 +62,7 @@ class CQCFactory(Factory):
 		'''
 
 		self.host = host	
+		self.name = name
 		self.virtRoot = None
 		self.qReg = None
 
@@ -327,16 +328,18 @@ class CQCProtocol(Protocol):
 		self.transport.write(msg)
 
 	def cmd_i(self, cqc_header, cmd, xtra):
-		'''
-			Do nothing. In reality we would wait a timestep but in SimulaQron we just do nothing.
-		'''
+		"""
+		Do nothing. In reality we would wait a timestep but in SimulaQron we just do nothing.
+		"""
 		pass
 
 	def cmd_x(self, cqc_header, cmd, xtra):
-		'''
-			Apply X Gate
-		'''
-		pass
+		"""
+		Apply X Gate
+		"""
+		logging.debug("CQC %s: Applying X to App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		yield virt_qubit.callRemote("apply_X")
 
 	def cmd_z(self, cqc_header, cmd, xtra):
 		'''
@@ -405,27 +408,27 @@ class CQCProtocol(Protocol):
 		pass
 
 	def cmd_send(self, cqc_header, cmd, xtra):
-		'''
-			Send qubit to another node.
-		'''
+		"""
+		Send qubit to another node.
+		"""
 		pass
 
 	def cmd_recv(self, cqc_header, cmd, xtra):
-		'''
-			Receive qubit from another node.
-		'''
+		"""
+		Receive qubit from another node.
+		"""
 		pass
 
 	def cmd_epr(self, cqc_header, cmd, xtra):
-		'''
-			Create EPR pair with another node.
-		'''
+		"""
+		Create EPR pair with another node.
+		"""
 		pass
 
 	def cmd_new(self, cqc_header, cmd, xtra):
-		'''
-			Request a new qubit. Since we don't need it, this python CQC just provides very crude timing information.
-		'''
+		"""
+		Request a new qubit. Since we don't need it, this python CQC just provides very crude timing information.
+		"""
 
 		logging.debug("Requesting new qubit for App ID %d and qubit id %d",cqc_header.app_id,cmd.qubit_id)
 		virt = yield self.factory.virtRoot.callRemote("new_qubit_inreg",self.factory.qReg)

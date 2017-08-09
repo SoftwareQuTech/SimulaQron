@@ -27,7 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from collections import dqueue
+from collections import deque
 
 from twisted.spread import pb
 from twisted.internet import reactor
@@ -377,7 +377,7 @@ class virtualNode(pb.Root):
 		"""
 
 		if not self.cqcRecv[to_app_id]:
-			self.cqcRecv[to_app_id] = dqueue([])
+			self.cqcRecv[to_app_id] = deque([])
 
 		self.cqcRecv[to_app_id].append(QubitCQC(fromName, self.myID.name, from_app_id, to_app_id, new_virt_num));
 
