@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 	/* Create a new qubit */
 	bzero(&cmd, sizeof(cmd));
 	cmd.qubit_id = 1;
-	cmd.instr = CQC_CMD_NEW;
+	cmd.instr = CQC_CMD_X;
 	cmd.options = 0;
 
    	/* Send message to the server */

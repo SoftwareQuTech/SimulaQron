@@ -66,7 +66,8 @@ class CQCFactory(Factory):
 		self.virtRoot = None
 		self.qReg = None
 
-		self.qDict = {}
+		# Dictionary that keeps qubit dictorionaries for each application
+		self.qubitList = { };
 
 	def buildProtocol(self, addr):
 		'''
@@ -97,9 +98,15 @@ class CQCFactory(Factory):
 class CQCProtocol(Protocol):
 
 	def __init__(self, factory):
+
+		# CQC Factory, including our connection to the SimulaQron backend
 		self.factory = factory;
+
+		# Default application ID, typically one connection per application but we will
+		# deliberately NOT check for that since this is the task of higher layers or an OS
 		self.app_id = 0;
 
+		# Functions to invoke when receiving a CQC Header of a certain type
 		self.messageHandlers = {
 			CQC_TP_HELLO : self.handle_hello,
 			CQC_TP_COMMAND : self.handle_command,
@@ -107,6 +114,7 @@ class CQCProtocol(Protocol):
 			CQC_TP_GET_TIME : self.handle_time
 		}
 
+		# Functions to invoke when receiving a certain command
 		self.commandHandlers = {
 			CQC_CMD_I : self.cmd_i,
 			CQC_CMD_X : self.cmd_x,
@@ -125,11 +133,21 @@ class CQCProtocol(Protocol):
 			CQC_CMD_EPR : self.cmd_epr,
 			CQC_CMD_NEW : self.cmd_new
 		}
+	
 
-		self.appList = { };
+		# Flag to determine whether we already received _all_ of the CQC header
 		self.gotCQCHeader = False;
+
+		# Header for which we are currently processing a packet
 		self.currHeader = None
+
+		# Buffer received data (which may arrive in chunks)
 		self.buf = None
+
+		# Convenience
+		self.name = self.factory.name;
+
+		logging.debug("CQC %s: Initialized Protocol",self.name)
 
 	def connectionMade(self):
 		pass
@@ -139,9 +157,9 @@ class CQCProtocol(Protocol):
 
 	def dataReceived(self, data):
 		"""
-			Receive data. We will always wait to receive enough data for the header, and then the entire packet first before commencing processing.
+		Receive data. We will always wait to receive enough data for the header, and then the entire packet first before commencing processing.
 		"""
-	
+
 		# Read whatever we received into a buffer	
 		if self.buf:
 			self.buf = self.buf + data
@@ -158,7 +176,7 @@ class CQCProtocol(Protocol):
 			self.gotCQCHeader = True;
 			rawHeader = self.buf[0:CQC_HDR_LENGTH]
 			self.currHeader = CQCHeader(rawHeader);
-			logging.debug("Read CQC Header: " + self.currHeader.printable())
+			logging.debug("CQC %s: Read CQC Header: %s", self.name, self.currHeader.printable())
 
 			# Remove the header from the buffer
 			self.buf = self.buf[CQC_HDR_LENGTH:len(self.buf)]
@@ -169,7 +187,7 @@ class CQCProtocol(Protocol):
 			return
 
 		# We got the header and all the data for this packet. Start processing.
-		logging.debug("Processing packet.")
+		logging.debug("CQC %s: Processing packet.", self.name)
 
 		# Update our app ID
 		self.app_id = self.currHeader.app_id;
@@ -178,64 +196,67 @@ class CQCProtocol(Protocol):
 		if self.currHeader.tp in self.messageHandlers: 
 			self.messageHandlers[self.currHeader.tp](self.currHeader, self.buf[0:self.currHeader.length])
 		else:	
-			self._send_back(header, CQC_ERR_UNSUPP)
+			self._send_back_cqc(header, CQC_ERR_UNSUPP)
 
 		# Reset and await the next packet
 		self.gotCQCHeader = False
-		self.buf = self.buf[self.currHeader.length:len(self.buf)]
 
-	def get_virtual_qubit(self, header, qubit_id):
+		# Check if we received data already for the next packet, if so save it
+		if self.currHeader.length < len(self.buf):
+			self.buf = self.buf[self.currHeader.length:len(self.buf)]
+		else:
+			self.buf = None
+
+	def get_virt_qubit(self, header, qubit_id):
 		"""
 		Get reference to the virtual qubit reference in SimulaQron given app and qubit id, if it exists. If not found, send back no qubit error.
 		"""
-		ap = self.appList[app_id];
-		if not ap:
-			self._send_back(header, CQC_ERR_NOQUBIT)
+		if not (header.app_id, qubit_id) in self.factory.qubitList:
+			logging.debug("CQC %s: Qubit not found",self.name)
+			self._send_back_cqc(header, CQC_ERR_NOQUBIT)
 			return None
 
-		qubit = ap[qubit_id]
-		if not qubit:
-			self._send_back(header, CQC_ERR_NOQUBIT)
-			return None
-
+		qubit = self.factory.qubitList[(header.app_id, qubit_id)]
 		return qubit.virt
 
 
-	def _send_back(self,header, msgType):
-		'''
-			Return a simple CQC header with the specified type.
+	def _send_back_cqc(self,header, msgType):
+		"""
+		Return a simple CQC header with the specified type.
 
-			header	 CQC header of the packet we respond to
-			msgType  Message type to return
-		'''
+		header	 CQC header of the packet we respond to
+		msgType  Message type to return
+		"""
 		hdr = CQCHeader();
 		hdr.setVals(CQC_VERSION, msgType, header.app_id);
 		msg = hdr.pack();
 		self.transport.write(msg)
 
 	def handle_hello(self, header, data):
-		'''
-			Hello just requires us to return hello - for testing availablility.
-		'''
+		"""
+		Hello just requires us to return hello - for testing availablility.
+		"""
 		hdr = CQCHeader();
 		hdr.setVals(CQC_VERSION, CQC_TP_HELLO, header.app_id);
 		msg = hdr.pack();
 		self.transport.write(msg)
 
+	@inlineCallbacks
 	def handle_command(self, header, data):
-		'''
-			Handle incoming command requests. 
-		'''
+		"""
+		Handle incoming command requests. 
+		"""
 
-		logging.debug("Received command, length %d", header.length)
+		logging.debug("CQC %s: Received command, length %d", self.name, header.length)
 		
 		# Run the entire command list, incl. actions after completion which here we will do instantly
-		succ = self._process_command(header, header.length, data);
+		succ = yield self._process_command(header, header.length, data);
 		if succ:
 			# Send a notification that we are done if successful
-			logging.debug("Command successful!")
-			self._send_back(header, CQC_TP_DONE);
-	
+			self._send_back_cqc(header, CQC_TP_DONE);
+			logging.debug("CQC %s: Command successful, sent done.", self.name)
+
+	@inlineCallbacks	
 	def _process_command(self, cqc_header, length, data):
 		'''
 			Process the commands - called recursively to also process additional command lists.
@@ -247,7 +268,7 @@ class CQCProtocol(Protocol):
 		while l < length:
 			cmd = CQCCmdHeader(cmdData[l:l+CQC_CMD_HDR_LENGTH]);
 			newl = l + CQC_CMD_HDR_LENGTH;
-			logging.debug("Read CMD Header: " + cmd.printable())
+			logging.debug("CQC %s: Read CMD Header: %s", self.name, cmd.printable())
 
 			# Check if this command includes an additional header
 			if self.hasXtra(cmd):
@@ -257,12 +278,12 @@ class CQCProtocol(Protocol):
 				xtra = None;
 
 			# Run this command
-			logging.debug("Executing command: " + cmd.printable())
-			succ = self.commandHandlers[cmd.instr](cqc_header, cmd, xtra);
+			logging.debug("CQC %s: Executing command: %s", self.name, cmd.printable())
+			succ = yield self.commandHandlers[cmd.instr](cqc_header, cmd, xtra);
 			if not succ:
 				return False
 
-			logging.debug("Done command")
+			logging.debug("CQC %s: Done command.", self.name)
 
 			# Check if there are additional commands to execute afterwards
 			if cmd.action:
@@ -308,7 +329,7 @@ class CQCProtocol(Protocol):
 		qList = self.qDict[header.app_id];
 		if not qList:
 			# App ID has no qubits
-			self._send_back(header, CQC_ERR_NOQUBIT);
+			self._send_back_cqc(header, CQC_ERR_NOQUBIT);
 			return;
 
 		# Lookup the desired qubit
@@ -319,7 +340,7 @@ class CQCProtocol(Protocol):
 
 		# Craft reply
 		# First send an appropriate CQC Header
-		self._send_back(header, CQC_TP_INF_TIME);
+		self._send_back_cqc(header, CQC_TP_INF_TIME);
 
 		# Then we send a notify header with the timing details
 		notify = CQCNotifyHeader();
@@ -338,45 +359,65 @@ class CQCProtocol(Protocol):
 		"""
 		Apply X Gate
 		"""
-		logging.debug("CQC %s: Applying X to App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		logging.debug("CQC %s: Applying X to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
 		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		if not virt_qubit:
+			return False
+
 		yield virt_qubit.callRemote("apply_X")
+		return True
 
 	@inlineCallbacks
 	def cmd_z(self, cqc_header, cmd, xtra):
 		"""
 		Apply Z Gate
 		"""
-		logging.debug("CQC %s: Applying Z to App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		logging.debug("CQC %s: Applying Z to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
 		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		if not virt_qubit:
+			return False
+
 		yield virt_qubit.callRemote("apply_Z")
+		return True
 
 	@inlineCallbacks
 	def cmd_y(self, cqc_header, cmd, xtra):
 		"""
 		Apply Y Gate
 		"""
-		logging.debug("CQC %s: Applying Y to App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		logging.debug("CQC %s: Applying Y to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
 		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		if not virt_qubit:
+			return False
+
 		yield virt_qubit.callRemote("apply_Y")
+		return True
 
 	@inlineCallbacks
 	def cmd_t(self, cqc_header, cmd, xtra):
 		"""
 		Apply T Gate
 		"""
-		logging.debug("CQC %s: Applying T to App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		logging.debug("CQC %s: Applying T to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
 		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		if not virt_qubit:
+			return False
+
 		yield virt_qubit.callRemote("apply_T")
+		return True
 
 	@inlineCallbacks
 	def cmd_h(self, cqc_header, cmd, xtra):
 		"""
 		Apply H Gate
 		"""
-		logging.debug("CQC %s: Applying H to App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		logging.debug("CQC %s: Applying H to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
 		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		if not virt_qubit:
+			return False
+
 		yield virt_qubit.callRemote("apply_H")
+		return True
 
 	@inlineCallbacks
 	def cmd_rotx(self, cqc_header, cmd, xtra):
@@ -404,20 +445,28 @@ class CQCProtocol(Protocol):
 		"""
 		Apply CNOT Gate
 		"""
-		logging.debug("CQC %s: Applying CNOT to App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		logging.debug("CQC %s: Applying CNOT to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
 		control = self.get_virt_qubit(cqc_header, cmd.qubit_id)
 		target = self.get_virt_qubit(cqc_header, xtra.qubit_id)
+		if not(control) or not(target):
+			return False
+
 		yield control.callRemote("cnot_onto",target)
+		return True
 
 	@inlineCallbacks
 	def cmd_cphase(self, cqc_header, cmd, xtra):
 		"""
 		Apply CPHASE Gate
 		"""
-		logging.debug("CQC %s: Applying CPHASE to App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		logging.debug("CQC %s: Applying CPHASE to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
 		control = self.get_virt_qubit(cqc_header, cmd.qubit_id)
 		target = self.get_virt_qubit(cqc_header, xtra.qubit_id)
+		if not(control) or not(target):
+			return False
+
 		yield control.callRemote("cphase_onto",target)
+		return True
 	
 	@inlineCallbacks
 	def cmd_reset(self, cqc_header, cmd, xtra):
@@ -431,10 +480,15 @@ class CQCProtocol(Protocol):
 		"""
 		Measure
 		"""
-		logging.debug("CQC %s: Measuring App ID %d qubit id %d",self.factory.name,cqc_header.app_id,cmd.qubit_id)
+		logging.debug("CQC %s: Measuring App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
 		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		if not virt_qubit:
+			return False
+
 		outcome = yield virt_qubit.callRemote("measure")
-		return(outcome)
+		# Send the outcome back as MEASOUT XXX
+
+		return True
 
 	@inlineCallbacks
 	def cmd_send(self, cqc_header, cmd, xtra):
@@ -463,20 +517,19 @@ class CQCProtocol(Protocol):
 		Request a new qubit. Since we don't need it, this python CQC just provides very crude timing information.
 		"""
 
-		logging.debug("Requesting new qubit for App ID %d and qubit id %d",cqc_header.app_id,cmd.qubit_id)
+		app_id = cqc_header.app_id
+		q_id = cmd.qubit_id
+	
+		if (app_id,q_id) in self.factory.qubitList:
+			logging.debug("CQC %s: Cannot create qubit with the same ID for the same App ID", self.name)
+			self._send_back_cqc(cqc_header, CQC_ERR_INUSE)
+			return False
+
 		virt = yield self.factory.virtRoot.callRemote("new_qubit_inreg",self.factory.qReg)
 		q = CQCQubit(cmd.qubit_id, int(time.time()), virt)
-
-		ap = self.appList[cqc_header.app_id]
-		if not ap:
-			self.appList[cqc_header.app_id] = {}
-			return False
-
-		if ap[cmd.qubit_id]:
-			self._send_back(cqc_header, CQC_ERR_INUSE)
-			return False
-
-		ap[cmd.qubit_id] = q
+		self.factory.qubitList[(app_id,q_id)] = q
+		logging.debug("CQC %s: Requested new qubit (%d,%d)",self.name,app_id, q_id)
+		return True
 
 
 #######################################################################################################
