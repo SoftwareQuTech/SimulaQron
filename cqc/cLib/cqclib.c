@@ -349,18 +349,25 @@ cqc_measure(cqc_lib *cqc, uint8_t qubit_id)
 
   	/* Now read CQC Header from server response */
    	bzero(&reply, sizeof(reply));
-   	n = read(cqc->sockfd, &reply, sizeof(reply));
+   	n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
    	if (n < 0) {
       		perror("ERROR - cannot get reply header");
       		return(-1);
    	}	
+	if(reply.type != CQC_TP_MEASOUT) {
+		fprintf(stderr,"ERROR: Expected MEASOUT");
+		return(-1);
+	}
 
+	/* Then read measurement outcome from notify header */
    	bzero(&note, sizeof(note));
-   	n = read(cqc->sockfd, &note, sizeof(note));
+   	n = read(cqc->sockfd, &note, CQC_NOTIFY_LENGTH);
    	if (n < 0) {
       		perror("ERROR - cannot get measurement outcome");
       		return(-1);
    	}	
+
+	printf("qubit id %d, outcome %d, remote app id %d, remote node %d, datetime %d\n", note.qubit_id, note.outcome,note.remote_app_id, note.remote_node, note.datetime);
 
 	return(note.outcome);
 }
@@ -382,7 +389,7 @@ cqc_wait_until_done(cqc_lib *cqc, unsigned int reps)
 	for(i = 0; i < reps; i++) {
   		/* Now read CQC Header from server response */
    		bzero(&reply, sizeof(reply));
-   		n = read(cqc->sockfd, &reply, sizeof(reply));
+   		n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
    		if (n < 0) {
       			perror("ERROR - cannot get reply header");
       			return(-1);
@@ -421,6 +428,7 @@ int main(int argc, char *argv[]) {
 	char *hostname;
 	cqc_lib *cqc;
 	int app_id;
+	int outcome;
 
 	/* Retrieve arguments from command line */
    	if (argc < 3) {
@@ -441,17 +449,19 @@ int main(int argc, char *argv[]) {
 	cqc_simple_cmd(cqc, CQC_CMD_NEW, 0);
 	cqc_wait_until_done(cqc, 1);
 
-	cqc_simple_cmd(cqc, CQC_CMD_NEW, 1);
+	//cqc_simple_cmd(cqc, CQC_CMD_NEW, 1);
+	// cqc_wait_until_done(cqc, 1);
+
+	//cqc_simple_cmd(cqc, CQC_CMD_I, 0);
+	//cqc_wait_until_done(cqc, 1);
+
+	cqc_simple_cmd(cqc, CQC_CMD_H,0);
 	cqc_wait_until_done(cqc, 1);
 
-	cqc_simple_cmd(cqc, CQC_CMD_I, 0);
-	cqc_wait_until_done(cqc, 1);
-
-	cqc_simple_cmd(cqc, CQC_CMD_X, 0);
-	cqc_wait_until_done(cqc, 1);
-
-	cqc_twoqubit(cqc,CQC_CMD_CPHASE, 0, 1);
-	cqc_wait_until_done(cqc, 1);
+	outcome = cqc_measure(cqc, 0);
+	printf("Outcome: %d\n",outcome);
+	// cqc_twoqubit(cqc,CQC_CMD_CPHASE, 0, 1);
+	// cqc_wait_until_done(cqc, 1);
 		
 	
    	return 0;

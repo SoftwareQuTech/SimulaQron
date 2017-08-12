@@ -121,6 +121,7 @@ class CQCProtocol(Protocol):
 			CQC_CMD_Y : self.cmd_y,
 			CQC_CMD_Z : self.cmd_z,
 			CQC_CMD_T : self.cmd_t,
+			CQC_CMD_H : self.cmd_h,
 			CQC_CMD_ROT_X : self.cmd_rotx,
 			CQC_CMD_ROT_Y : self.cmd_roty,
 			CQC_CMD_ROT_Z : self.cmd_rotz,
@@ -187,8 +188,6 @@ class CQCProtocol(Protocol):
 			return
 
 		# We got the header and all the data for this packet. Start processing.
-		logging.debug("CQC %s: Processing packet.", self.name)
-
 		# Update our app ID
 		self.app_id = self.currHeader.app_id;
 
@@ -228,7 +227,7 @@ class CQCProtocol(Protocol):
 		msgType  Message type to return
 		"""
 		hdr = CQCHeader();
-		hdr.setVals(CQC_VERSION, msgType, header.app_id);
+		hdr.setVals(CQC_VERSION, msgType, header.app_id,0);
 		msg = hdr.pack();
 		self.transport.write(msg)
 
@@ -237,7 +236,7 @@ class CQCProtocol(Protocol):
 		Hello just requires us to return hello - for testing availablility.
 		"""
 		hdr = CQCHeader();
-		hdr.setVals(CQC_VERSION, CQC_TP_HELLO, header.app_id);
+		hdr.setVals(CQC_VERSION, CQC_TP_HELLO, header.app_id,0);
 		msg = hdr.pack();
 		self.transport.write(msg)
 
@@ -247,8 +246,6 @@ class CQCProtocol(Protocol):
 		Handle incoming command requests. 
 		"""
 
-		logging.debug("CQC %s: Received command, length %d", self.name, header.length)
-		
 		# Run the entire command list, incl. actions after completion which here we will do instantly
 		succ = yield self._process_command(header, header.length, data);
 		if succ:
@@ -268,7 +265,6 @@ class CQCProtocol(Protocol):
 		while l < length:
 			cmd = CQCCmdHeader(cmdData[l:l+CQC_CMD_HDR_LENGTH]);
 			newl = l + CQC_CMD_HDR_LENGTH;
-			logging.debug("CQC %s: Read CMD Header: %s", self.name, cmd.printable())
 
 			# Check if this command includes an additional header
 			if self.hasXtra(cmd):
@@ -283,11 +279,13 @@ class CQCProtocol(Protocol):
 
 			# Run this command
 			logging.debug("CQC %s: Executing command: %s", self.name, cmd.printable())
+			if not cmd.instr in self.commandHandlers:
+				self._send_back_cqc(header, CQC_ERR_UNSUPP)
+				return False
+
 			succ = yield self.commandHandlers[cmd.instr](cqc_header, cmd, xtra);
 			if not succ:
 				return False
-
-			logging.debug("CQC %s: Done command.", self.name)
 
 			# Check if there are additional commands to execute afterwards
 			if cmd.action:
@@ -524,7 +522,20 @@ class CQCProtocol(Protocol):
 			return False
 
 		outcome = yield virt_qubit.callRemote("measure")
-		# Send the outcome back as MEASOUT XXX
+		logging.debug("CQC %s: Measured outcome %d",self.name,outcome)
+
+		# Send the outcome back as MEASOUT 
+		self._send_back_cqc(cqc_header, CQC_TP_MEASOUT)
+
+		# Send notify header with outcome
+		hdr = CQCNotifyHeader();
+		hdr.setVals(cmd.qubit_id, outcome, 2,3,4);
+		msg = hdr.pack()
+		self.transport.write(msg)
+		logging.debug("CQC %s: Notify %s",self.name, hdr.printable())
+
+		# Remove from active mapped qubits
+		del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
 
 		return True
 
@@ -563,7 +574,7 @@ class CQCProtocol(Protocol):
 		q_id = cmd.qubit_id
 	
 		if (app_id,q_id) in self.factory.qubitList:
-			logging.debug("CQC %s: Cannot create qubit with the same ID for the same App ID", self.name)
+			logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
 			self._send_back_cqc(cqc_header, CQC_ERR_INUSE)
 			return False
 

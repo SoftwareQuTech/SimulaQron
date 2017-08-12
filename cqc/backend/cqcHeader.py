@@ -103,13 +103,14 @@ class CQCHeader:
 		else:
 			self.unpack(headerBytes);
 
-	def setVals(self, version, tp, app_id):
+	def setVals(self, version, tp, app_id, length):
 		"""
 			Set using given values.
 		"""
 		self.version = version;
 		self.tp = tp;
 		self.app_id = app_id;
+		self.length = length;
 		self.is_set = True;
 
 	def pack(self):
@@ -119,7 +120,7 @@ class CQCHeader:
 		if not self.is_set:
 			return(0);
 
-		cqcH = pack("=BBH",self.version, self.tp, self.app_id);
+		cqcH = pack("=BBHL",self.version, self.tp, self.app_id, self.length);
 		return(cqcH);
 
 
@@ -318,7 +319,7 @@ class CQCNotifyHeader:
 
 	def setVals(self, qubit_id, outcome, remote_app_id, remote_node, datetime):
 		"""
-			Set using given values.
+		Set using given values.
 		"""
 		self.qubit_id = qubit_id;
 		self.outcome = outcome;
@@ -329,7 +330,7 @@ class CQCNotifyHeader:
 
 	def pack(self):
 		"""
-			Pack data into packet form. For definitions see cLib/cqc.h
+		Pack data into packet form. For definitions see cLib/cqc.h
 		"""
 		if not self.is_set:
 			return 0;
