@@ -21,15 +21,17 @@ int main(int argc, char *argv[]) {
 	cqcHeader cqc;
 	cqcHeader reply;
 	cmdHeader cmd;
+	int command;
 
 	char buffer[256];
 
-   	if (argc < 3) {
-      		fprintf(stderr,"usage %s hostname port\n", argv[0]);
+   	if (argc < 4) {
+      		fprintf(stderr,"usage %s hostname port command\n", argv[0]);
       		exit(0);
    	}
 	
    	portno = atoi(argv[2]);
+	command = atoi(argv[3]);
    
    	/* Create a socket point */
    	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -86,7 +88,7 @@ int main(int argc, char *argv[]) {
 	/* Create a new qubit */
 	bzero(&cmd, sizeof(cmd));
 	cmd.qubit_id = 1;
-	cmd.instr = CQC_CMD_X;
+	cmd.instr = command;
 	cmd.options = 0;
 
    	/* Send message to the server */

@@ -27,6 +27,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import sys, logging
+
 from struct import *
 
 # Constant defining CQC version
@@ -84,14 +86,14 @@ CQC_OPT_ACTION=0x02	# On if there are actions to execute when done
 CQC_OPT_BLOCK=0x04	# Block until command is done
 
 class CQCHeader:
-	'''
+	"""
 		Definition of the general CQC header.
-	'''
+	"""
 
 	def __init__(self, headerBytes = None):
-		'''
+		"""
 			Initialize using values received from a packet.
-		'''
+		"""
 		if headerBytes == None:
 			self.is_set = False;
 			self.version = 0;
@@ -102,18 +104,18 @@ class CQCHeader:
 			self.unpack(headerBytes);
 
 	def setVals(self, version, tp, app_id):
-		'''
+		"""
 			Set using given values.
-		'''
+		"""
 		self.version = version;
 		self.tp = tp;
 		self.app_id = app_id;
 		self.is_set = True;
 
 	def pack(self):
-		'''
+		"""
 			Pack data into packet format. For defnitions see cLib/cgc.h
-		'''
+		"""
 		if not self.is_set:
 			return(0);
 
@@ -122,9 +124,9 @@ class CQCHeader:
 
 
 	def unpack(self, headerBytes):
-		'''
+		"""
 			Unpack packet data. For definitions see cLib/cqc.h
-		'''
+		"""
 		cqcH = unpack("=BBHL", headerBytes);
 
 		self.version = cqcH[0];
@@ -134,9 +136,9 @@ class CQCHeader:
 		self.is_set = True;
 
 	def printable(self):
-		'''
+		"""
 			Produce a printable string for information purposes.
-		'''
+		"""
 		if not self.is_set:
 			return(" ");
 
@@ -146,14 +148,14 @@ class CQCHeader:
 		return(toPrint);
 
 class CQCCmdHeader:
-	'''
+	"""
 		Header for a command instruction packet.
-	'''
+	"""
 
 	def __init__(self, headerBytes = None):
-		'''
-			Initialize using values received from a packet, if available.
-		'''
+		"""
+		Initialize using values received from a packet, if available.
+		"""
 		self.notify = False;
 		self.block = False;
 		self.action = False;
@@ -166,9 +168,9 @@ class CQCCmdHeader:
 			self.unpack(headerBytes);
 
 	def setVals(self, qubit_id, instr, notify, block, action):
-		'''
-			Set using given values.
-		'''
+		"""
+		Set using given values.
+		"""
 		self.qubit_id = qubit_id;
 		self.instr = instr;
 		self.notify = notify;
@@ -177,9 +179,9 @@ class CQCCmdHeader:
 		self.is_set = True;
 
 	def pack(self):
-		'''
-			Pack data into packet format. For defnitions see cLib/cgc.h
-		'''
+		"""
+		Pack data into packet format. For defnitions see cLib/cgc.h
+		"""
 
 		if not self.is_set:
 			return(0);
@@ -196,9 +198,9 @@ class CQCCmdHeader:
 		return(cmdH);	
 
 	def unpack(self, headerBytes):
-		'''
-			Unpack packet data. For definitions see cLib/cqc.h
-		'''
+		"""
+		Unpack packet data. For definitions see cLib/cqc.h
+		"""
 		cmdH = unpack("=HBB", headerBytes);
 
 		self.qubit_id = cmdH[0];
@@ -214,9 +216,9 @@ class CQCCmdHeader:
 		self.is_set = True;
 
 	def printable(self):
-		'''
-			Produce a printable string for information purposes.
-		'''
+		"""
+		Produce a printable string for information purposes.
+		"""
 		if not self.is_set:
 			return(" ");
 
@@ -227,18 +229,18 @@ class CQCCmdHeader:
 		toPrint = toPrint + "Action: " + str(self.action);
 		return(toPrint);
 
-class CQCCmdExtra:
-	'''
-		Optional addtional cmd header information. Only relevant for certain commands.
-	'''
+class CQCXtraHeader:
+	"""
+	Optional addtional cmd header information. Only relevant for certain commands.
+	"""
 
 	def __init__(self, headerBytes = None):
-		'''
-			Initialize using values received from a packet.
-		'''
+		"""
+		Initialize using values received from a packet.
+		"""
 		if headerBytes == None:
 			self.is_set = False;
-			self.xtra_qubit_id = 0;
+			self.qubit_id = 0;
 			self.step = 0;
 			self.remote_app_id = 0;
 			self.remote_node = 0;
@@ -247,10 +249,10 @@ class CQCCmdExtra:
 			self.unpack(headerBytes);
 
 	def setVals(self, xtra_qubit_id, step, remote_app_id, remote_node, cmdLength):
-		'''
+		"""
 			Set using given values.
-		'''
-		self.xtra_qubit_id = xtra_qubit_id;
+		"""
+		self.qubit_id = xtra_qubit_id;
 		self.step = step;
 		self.remote_app_id = remote_app_id;
 		self.remote_node = remote_node;
@@ -258,22 +260,22 @@ class CQCCmdExtra:
 		self.is_set = True;
 
 	def pack(self):
-		'''
+		"""
 			Pack data into packet form. For definitions see cLib/cqc.h
-		'''
+		"""
 		if not self.is_set:
 			return(0);
 
-		xtraH = pack("=BBHQL", self.xtra_qubit_id, self.step, self.remote_app_id, self.remote_node, self.cmdLength);
+		xtraH = pack("=BBHQL", self.qubit_id, self.step, self.remote_app_id, self.remote_node, self.cmdLength);
 		return(xtraH);
 
 	def unpack(self, headerBytes):
-		'''
+		"""
 			Unpack packet data. For defnitions see cLib/cqc.h
-		'''
+		"""
 		xtraH = unpack("=BBHQL", headerBytes);
 
-		self.xtra_qubit_id = xtraH[0];
+		self.qubit_id = xtraH[0];
 		self.step = xtraH[1];
 		self.remote_app_id = xtraH[2];
 		self.remote_node = xtraH[3];
@@ -281,13 +283,13 @@ class CQCCmdExtra:
 		self.is_set = True;
 
 	def printable(self):
-		'''
+		"""
 			Produce a printable string for information purposes.
-		'''
+		"""
 		if not self.is_set:
 			return(" ");
 
-		toPrint = "Xtra Qubit: " + str(self.xtra_qubit_id) + " ";		
+		toPrint = "Xtra Qubit: " + str(self.qubit_id) + " ";		
 		toPrint = toPrint + "Angle Step: " + str(self.step) + " ";		
 		toPrint = toPrint + "Remote App ID: " + str(self.remote_app_id) + " ";		
 		toPrint = toPrint + "Remote Node: " + str(self.remote_node) + " ";		
@@ -296,14 +298,14 @@ class CQCCmdExtra:
 		return(toPrint);
 
 class CQCNotifyHeader:
-	'''
+	"""
 		Header used to specify notification details.
-	'''
+	"""
 
 	def __init__(self, headerBytes = None):
-		'''
+		"""
 			Initialize from packet data.
-		'''
+		"""
 		if headerBytes == None:
 			self.is_set = False;
 			self.qubit_id = 0;
@@ -315,9 +317,9 @@ class CQCNotifyHeader:
 			self.unpack(self, headerBytes);
 
 	def setVals(self, qubit_id, outcome, remote_app_id, remote_node, datetime):
-		'''
+		"""
 			Set using given values.
-		'''
+		"""
 		self.qubit_id = qubit_id;
 		self.outcome = outcome;
 		self.remote_app_id = remote_app_id;
@@ -326,9 +328,9 @@ class CQCNotifyHeader:
 		self.is_set=True;
 
 	def pack(self):
-		'''
+		"""
 			Pack data into packet form. For definitions see cLib/cqc.h
-		'''
+		"""
 		if not self.is_set:
 			return 0;
 
@@ -336,9 +338,9 @@ class CQCNotifyHeader:
 		return(xtraH);
 
 	def unpack(self, headerBytes):
-		'''
+		"""
 			Unpack packet data. For defnitions see cLib/cqc.h
-		'''
+		"""
 		xtraH = unpack("=BBHQQ", headerBytes);
 
 		self.qubit_id = xtraH[0];
@@ -349,9 +351,9 @@ class CQCNotifyHeader:
 		self.is_set = True;
 
 	def printable(self):
-		'''
+		"""
 			Produce a printable string for information purposes.
-		'''
+		"""
 		if not self.is_set:
 			return(" ");
 

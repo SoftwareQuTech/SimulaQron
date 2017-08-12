@@ -131,3 +131,25 @@ typedef struct
 
 #endif
 
+/*
+	CQC Library Definitions
+*/
+
+/* Definitions to access and manage CQC */
+typedef struct
+{
+	/* Socket handling to CQC Backend */
+	int sockfd;
+
+	/* Application details */
+	int app_id;
+} cqc_lib;
+
+/* CQC Command buffer */
+typedef struct
+{
+	char *cmd_buf;
+	int cmd_length;
+} cqc_cmd_buf;
+
+

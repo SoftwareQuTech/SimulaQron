@@ -28,8 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-import sys, os, time
-sys.path.insert(0, os.environ.get('NETSIM'))
+import sys, os, time, logging
 
 from twisted.spread import pb
 from twisted.internet import reactor
@@ -44,6 +43,7 @@ from SimulaQron.virtNode.crudeSimulator import *
 from SimulaQron.local.setup import *
 
 from SimulaQron.cqc.backend.cqcHeader import *
+from SimulaQron.cqc.backend.cqcHeader import CQCXtraHeader
 
 #####################################################################################################
 #
@@ -55,11 +55,11 @@ from SimulaQron.cqc.backend.cqcHeader import *
 class CQCFactory(Factory):
 	
 	def __init__(self, host, name):
-		''' 
+		""" 
 		Initialize CQC Factory. 
 
 		lhost	details of the local host (class host)
-		'''
+		"""
 
 		self.host = host	
 		self.name = name
@@ -70,21 +70,21 @@ class CQCFactory(Factory):
 		self.qubitList = { };
 
 	def buildProtocol(self, addr):
-		'''
+		"""
 		Return an instance of CQCProtocol when a connection is made.
-		'''
+		"""
 		return CQCProtocol(self)
 
 	def set_virtual_node(self, virtRoot):
-		'''
+		"""
 		Set the virtual root allowing connections to the SimulaQron backend.
-		'''
+		"""
 		self.virtRoot = virtRoot
 
 	def set_virtual_reg(self, qReg):
-		'''
+		"""
 		Set the default register to use on the SimulaQron backend.
-		'''
+		"""
 		self.qReg = qReg
 
 
@@ -258,9 +258,9 @@ class CQCProtocol(Protocol):
 
 	@inlineCallbacks	
 	def _process_command(self, cqc_header, length, data):
-		'''
+		"""
 			Process the commands - called recursively to also process additional command lists.
-		'''
+		"""
 		cmdData = data
 
 		# Read in all the commands sent
@@ -272,8 +272,12 @@ class CQCProtocol(Protocol):
 
 			# Check if this command includes an additional header
 			if self.hasXtra(cmd):
-				xtra = CQCCmdExtra(cmdData[newl:newl+CQC_CMD_XTRA_LENGTH]);
-				newl = newl + CQC_CMD_XTRA_LENGTH;
+				if len(cmdData) < (newl + CQC_CMD_XTRA_LENGTH):
+					logging.debug("CQC %s: Missing XTRA Header", self.name)
+				else:
+					xtra = CQCXtraHeader(cmdData[newl:newl+CQC_CMD_XTRA_LENGTH]);
+					newl = newl + CQC_CMD_XTRA_LENGTH;
+					logging.debug("CQC %s: Read XTRA Header: %s", self.name, xtra.printable())
 			else:
 				xtra = None;
 
@@ -297,23 +301,23 @@ class CQCProtocol(Protocol):
 		return True
 
 	def hasXtra(self, cmd):
-		'''
-			Check whether this command includes an extra header with additional information.
-		'''
+		"""
+		Check whether this command includes an extra header with additional information.
+		"""
 		if cmd.instr == CQC_CMD_RECV:
-			return(True);
+			return(True)
 		if cmd.instr == CQC_CMD_SEND:
-			return(True);
+			return(True)
 		if cmd.instr == CQC_CMD_EPR:
-			return(True);
+			return(True)
 		if cmd.instr == CQC_CMD_CNOT:
-			return(True);
+			return(True)
 		if cmd.instr == CQC_CMD_CPHASE:
-			return(True);
+			return(True)
 		if cmd.action:
-			return(True);
+			return(True)
 
-		return(False);
+		return(False)
 		
 
 	def handle_factory(self, header, data):
@@ -352,7 +356,8 @@ class CQCProtocol(Protocol):
 		"""
 		Do nothing. In reality we would wait a timestep but in SimulaQron we just do nothing.
 		"""
-		pass
+		logging.debug("CQC %s: Doing Nothing to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		return True
 
 	@inlineCallbacks
 	def cmd_x(self, cqc_header, cmd, xtra):
@@ -424,28 +429,50 @@ class CQCProtocol(Protocol):
 		"""
 		Rotate around x axis
 		"""
-		pass
+		logging.debug("CQC %s: Applying ROTX to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		if not virt_qubit:
+			return False
+
+		yield virt_qubit.callRemote("apply_rotation",[1,0,0],2 * np.pi/256 * xtra.step)
+		return True
 
 	@inlineCallbacks
 	def cmd_rotz(self, cqc_header, cmd, xtra):
-		'''
-			Rotate around z axis
-		'''
-		pass
+		"""
+		Rotate around z axis
+		"""
+		logging.debug("CQC %s: Applying ROTZ to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		if not virt_qubit:
+			return False
+
+		yield virt_qubit.callRemote("apply_rotation",[0,1,0],2 * np.pi/256 * xtra.step)
+		return True
 
 	@inlineCallbacks
 	def cmd_roty(self, cqc_header, cmd, xtra):
-		''' 
-			Rotate around y axis
-		'''
-		pass
+		"""
+		Rotate around y axis
+		"""
+		logging.debug("CQC %s: Applying ROTY to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		if not virt_qubit:
+			return False
+
+		yield virt_qubit.callRemote("apply_rotation",[0,0,1],2 * np.pi/256 * xtra.step)
+		return True
 
 	@inlineCallbacks
 	def cmd_cnot(self, cqc_header, cmd, xtra):
 		"""
 		Apply CNOT Gate
 		"""
-		logging.debug("CQC %s: Applying CNOT to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		if not xtra:
+			logging.debug("CQC %s: Missing XTRA Header", self.name)
+			return False
+
+		logging.debug("CQC %s: Applying CNOT to App ID %d qubit id %d target %d",self.name,cqc_header.app_id,cmd.qubit_id, xtra.qubit_id)
 		control = self.get_virt_qubit(cqc_header, cmd.qubit_id)
 		target = self.get_virt_qubit(cqc_header, xtra.qubit_id)
 		if not(control) or not(target):
@@ -459,7 +486,11 @@ class CQCProtocol(Protocol):
 		"""
 		Apply CPHASE Gate
 		"""
-		logging.debug("CQC %s: Applying CPHASE to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		if not xtra:
+			logging.debug("CQC %s: Missing XTRA Header", self.name)
+			return False
+
+		logging.debug("CQC %s: Applying CPHASE to App ID %d qubit id %d target %d",self.name,cqc_header.app_id,cmd.qubit_id, xtra.qubit_id)
 		control = self.get_virt_qubit(cqc_header, cmd.qubit_id)
 		target = self.get_virt_qubit(cqc_header, xtra.qubit_id)
 		if not(control) or not(target):
@@ -470,10 +501,17 @@ class CQCProtocol(Protocol):
 	
 	@inlineCallbacks
 	def cmd_reset(self, cqc_header, cmd, xtra):
-		'''
-			Reset Qubit to |0>
-		'''
-		pass
+		"""
+		Reset Qubit to |0>
+		"""
+		logging.debug("CQC %s: Reset App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		if not virt_qubit:
+			return False
+
+		# This is wrong XXX
+		outcome = yield virt_qubit.callRemote("measure")
+		return True
 
 	@inlineCallbacks
 	def cmd_measure(self, cqc_header, cmd, xtra):
@@ -495,21 +533,25 @@ class CQCProtocol(Protocol):
 		"""
 		Send qubit to another node.
 		"""
-		pass
+		logging.debug("CQC %s: Sending App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		return True
 
 	@inlineCallbacks
 	def cmd_recv(self, cqc_header, cmd, xtra):
 		"""
 		Receive qubit from another node.
 		"""
-		pass
+		logging.debug("CQC %s: Receiving App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		return True
 
 	@inlineCallbacks
 	def cmd_epr(self, cqc_header, cmd, xtra):
 		"""
 		Create EPR pair with another node.
 		"""
-		pass
+		logging.debug("CQC %s: EPR Pair ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		return True
+		
 
 	@inlineCallbacks
 	def cmd_new(self, cqc_header, cmd, xtra):
