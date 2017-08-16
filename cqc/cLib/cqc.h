@@ -111,8 +111,10 @@ typedef struct
 	uint8_t xtra_qubit_id;	/* ID of the additional qubit */
 	uint8_t steps;		/* Angle step of rotation (ROT) OR number of repetitions (FACTORY) */
 	uint16_t remote_app_id;	/* Remote application ID */
-	uint64_t remote_node;	/* IP of the remote node */
+	uint32_t remote_node;	/* IP of the remote node */
 	uint32_t cmdLength;	/* Length of the cmds to exectute upon completion */
+	uint16_t remote_port;	/* Port of the remote node for control info */
+	uint16_t unused;	/* Need 4 byte segments */
 	void *cmdPayload;	/* Details to execute when done with this command */
 } __attribute__((__packed__)) xtraCmdHeader;
 
@@ -125,8 +127,10 @@ typedef struct
 	uint8_t qubit_id;	/* ID of the received qubit, if any */
 	uint8_t outcome;	/* Measurement outcome */
 	uint16_t remote_app_id;	/* Remote application ID */
-	uint64_t remote_node;	/* IP of the remote node */
+	uint32_t remote_node;	/* IP of the remote node */
 	uint64_t datetime;	/* Time of qubit */
+	uint16_t remote_port;	/* Port of the remote node for control info */
+	uint16_t unused;	/* Need 4 byte segments */
 } __attribute__((__packed__)) notifyHeader;
 
 #endif
@@ -151,5 +155,25 @@ typedef struct
 	char *cmd_buf;
 	int cmd_length;
 } cqc_cmd_buf;
+
+/*
+ 	CQC Function Definitions
+*/
+
+
+cqc_lib * cqc_init(int app_id);
+void cqc_error(uint8_t type);
+int cqc_connect(cqc_lib *cqc, char *hostname, int portno);
+int cqc_cleanup(cqc_lib *cqc);
+int cqc_simple_cmd(cqc_lib *cqc, uint8_t command, uint8_t qubit_id);
+int cqc_full_cmd(cqc_lib *cqc, uint8_t command, uint8_t qubit_id, char notify, char action, char block, uint8_t xtra_id, uint8_t steps, uint16_t r_app_id, uint32_t r_node, uint16_t r_port, uint32_t cmdLength);
+
+int cqc_hello(cqc_lib *cqc);
+int cqc_send(cqc_lib *cqc, uint8_t qubit_id, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port);
+int cqc_recv(cqc_lib *cqc, uint8_t qubit_id, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port);
+int cqc_epr(cqc_lib *cqc, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port);
+int cqc_measure(cqc_lib *cqc, uint8_t qubit_id);
+int cqc_wait_until_done(cqc_lib *cqc, unsigned int reps);
+int cqc_twoqubit(cqc_lib *cqc, uint8_t command, uint8_t qubit1, uint8_t qubit2);
 
 

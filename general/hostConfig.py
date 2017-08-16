@@ -27,7 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import sys
+import sys, socket, struct
 from twisted.spread import pb
 
 class networkConfig(pb.Referenceable):
@@ -80,6 +80,11 @@ class host(pb.Referenceable):
 		self.name = name
 		self.hostname = hostname
 		self.port = int(port)
+
+		# Lookup IP address - store in network byte order(!)
+		addr = socket.gethostbyname(hostname)
+		packedIP = socket.inet_aton(addr)
+		self.ip = struct.unpack("!L", packedIP)[0]
 
 		# Connection identifiers used after connected
 		self.factory = 0

@@ -21,8 +21,8 @@
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 # DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
 # DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES
+# LOSS OF USE, DATA, OR PROFITS OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
@@ -95,58 +95,58 @@ class CQCHeader:
 			Initialize using values received from a packet.
 		"""
 		if headerBytes == None:
-			self.is_set = False;
-			self.version = 0;
-			self.tp = -1;
-			self.app_id = 0;
-			self.length = 0;
+			self.is_set = False
+			self.version = 0
+			self.tp = -1
+			self.app_id = 0
+			self.length = 0
 		else:
-			self.unpack(headerBytes);
+			self.unpack(headerBytes)
 
 	def setVals(self, version, tp, app_id, length):
 		"""
 			Set using given values.
 		"""
-		self.version = version;
-		self.tp = tp;
-		self.app_id = app_id;
-		self.length = length;
-		self.is_set = True;
+		self.version = version
+		self.tp = tp
+		self.app_id = app_id
+		self.length = length
+		self.is_set = True
 
 	def pack(self):
 		"""
 			Pack data into packet format. For defnitions see cLib/cgc.h
 		"""
 		if not self.is_set:
-			return(0);
+			return(0)
 
-		cqcH = pack("=BBHL",self.version, self.tp, self.app_id, self.length);
-		return(cqcH);
+		cqcH = pack("=BBHL",self.version, self.tp, self.app_id, self.length)
+		return(cqcH)
 
 
 	def unpack(self, headerBytes):
 		"""
 			Unpack packet data. For definitions see cLib/cqc.h
 		"""
-		cqcH = unpack("=BBHL", headerBytes);
+		cqcH = unpack("=BBHL", headerBytes)
 
-		self.version = cqcH[0];
-		self.tp = cqcH[1];
-		self.app_id = cqcH[2];
-		self.length = cqcH[3];
-		self.is_set = True;
+		self.version = cqcH[0]
+		self.tp = cqcH[1]
+		self.app_id = cqcH[2]
+		self.length = cqcH[3]
+		self.is_set = True
 
 	def printable(self):
 		"""
 			Produce a printable string for information purposes.
 		"""
 		if not self.is_set:
-			return(" ");
+			return(" ")
 
 		toPrint = "Version: " + str(self.version) + " "
 		toPrint = toPrint + "Type: " + str(self.tp) + " "
 		toPrint = toPrint + "App ID: " + str(self.app_id)
-		return(toPrint);
+		return(toPrint)
 
 class CQCCmdHeader:
 	"""
@@ -157,27 +157,27 @@ class CQCCmdHeader:
 		"""
 		Initialize using values received from a packet, if available.
 		"""
-		self.notify = False;
-		self.block = False;
-		self.action = False;
+		self.notify = False
+		self.block = False
+		self.action = False
 
 		if headerBytes == None:
-			self.is_set = False;
-			self.qubit_id = 0;
-			self.instr = 0;
+			self.is_set = False
+			self.qubit_id = 0
+			self.instr = 0
 		else:
-			self.unpack(headerBytes);
+			self.unpack(headerBytes)
 
 	def setVals(self, qubit_id, instr, notify, block, action):
 		"""
 		Set using given values.
 		"""
-		self.qubit_id = qubit_id;
-		self.instr = instr;
-		self.notify = notify;
-		self.block = block;
-		self.action = action;
-		self.is_set = True;
+		self.qubit_id = qubit_id
+		self.instr = instr
+		self.notify = notify
+		self.block = block
+		self.action = action
+		self.is_set = True
 
 	def pack(self):
 		"""
@@ -185,50 +185,50 @@ class CQCCmdHeader:
 		"""
 
 		if not self.is_set:
-			return(0);
+			return(0)
 	
-		opt = 0;
+		opt = 0
 		if self.notify:
-			opt = opt | CQC_OPT_NOTIFY;
+			opt = opt | CQC_OPT_NOTIFY
 		if self.block:
-			opt = opt | CQC_OPT_BLOCK;
+			opt = opt | CQC_OPT_BLOCK
 		if self.action:
-			opt = opt | CQC_OPT_ACTION;
+			opt = opt | CQC_OPT_ACTION
 
-		cmdH = pack("=HBB",self.qubit_id, self.instr, opt);
-		return(cmdH);	
+		cmdH = pack("=HBB",self.qubit_id, self.instr, opt)
+		return(cmdH)	
 
 	def unpack(self, headerBytes):
 		"""
 		Unpack packet data. For definitions see cLib/cqc.h
 		"""
-		cmdH = unpack("=HBB", headerBytes);
+		cmdH = unpack("=HBB", headerBytes)
 
-		self.qubit_id = cmdH[0];
-		self.instr = cmdH[1];
+		self.qubit_id = cmdH[0]
+		self.instr = cmdH[1]
 
 		if cmdH[2] & CQC_OPT_NOTIFY:
-			self.notify = True;
+			self.notify = True
 		if cmdH[2] & CQC_OPT_BLOCK:
-			self.block = True;
+			self.block = True
 		if cmdH[2] & CQC_OPT_ACTION:
-			self.action = True;
+			self.action = True
 
-		self.is_set = True;
+		self.is_set = True
 
 	def printable(self):
 		"""
 		Produce a printable string for information purposes.
 		"""
 		if not self.is_set:
-			return(" ");
+			return(" ")
 
-		toPrint = "Qubit ID: " + str(self.qubit_id) + " ";
-		toPrint = toPrint + "Instruction: " + str(self.instr) + " ";
-		toPrint = toPrint + "Notify: " + str(self.notify) + " ";
-		toPrint = toPrint + "Block: " + str(self.block) + " ";
-		toPrint = toPrint + "Action: " + str(self.action);
-		return(toPrint);
+		toPrint = "Qubit ID: " + str(self.qubit_id) + " "
+		toPrint = toPrint + "Instruction: " + str(self.instr) + " "
+		toPrint = toPrint + "Notify: " + str(self.notify) + " "
+		toPrint = toPrint + "Block: " + str(self.block) + " "
+		toPrint = toPrint + "Action: " + str(self.action)
+		return(toPrint)
 
 class CQCXtraHeader:
 	"""
@@ -240,63 +240,67 @@ class CQCXtraHeader:
 		Initialize using values received from a packet.
 		"""
 		if headerBytes == None:
-			self.is_set = False;
-			self.qubit_id = 0;
-			self.step = 0;
-			self.remote_app_id = 0;
-			self.remote_node = 0;
-			self.cmdLength = 0;
+			self.is_set = False
+			self.qubit_id = 0
+			self.step = 0
+			self.remote_app_id = 0
+			self.remote_node = 0
+			self.remote_port = 0
+			self.cmdLength = 0
 		else:
-			self.unpack(headerBytes);
+			self.unpack(headerBytes)
 
-	def setVals(self, xtra_qubit_id, step, remote_app_id, remote_node, cmdLength):
+	def setVals(self, xtra_qubit_id, step, remote_app_id, remote_node, remote_port, cmdLength):
 		"""
 			Set using given values.
 		"""
-		self.qubit_id = xtra_qubit_id;
-		self.step = step;
-		self.remote_app_id = remote_app_id;
-		self.remote_node = remote_node;
-		self.cmdLength = cmdLength;
-		self.is_set = True;
+		self.qubit_id = xtra_qubit_id
+		self.step = step
+		self.remote_app_id = remote_app_id
+		self.remote_node = remote_node
+		self.remote_port = remote_port
+		self.cmdLength = cmdLength
+		self.is_set = True
 
 	def pack(self):
 		"""
 			Pack data into packet form. For definitions see cLib/cqc.h
 		"""
 		if not self.is_set:
-			return(0);
+			return(0)
 
-		xtraH = pack("=BBHQL", self.qubit_id, self.step, self.remote_app_id, self.remote_node, self.cmdLength);
-		return(xtraH);
+		xtraH = pack("=BBHLLHH", self.qubit_id, self.step, self.remote_app_id, self.remote_node, self.cmdLength, self.remote_port, 0)
+		return(xtraH)
 
 	def unpack(self, headerBytes):
 		"""
 			Unpack packet data. For defnitions see cLib/cqc.h
 		"""
-		xtraH = unpack("=BBHQL", headerBytes);
+		xtraH = unpack("=BBHLLHH", headerBytes)
 
-		self.qubit_id = xtraH[0];
-		self.step = xtraH[1];
-		self.remote_app_id = xtraH[2];
-		self.remote_node = xtraH[3];
-		self.cmdLength = xtraH[4];
-		self.is_set = True;
+		self.qubit_id = xtraH[0]
+		self.step = xtraH[1]
+		self.remote_app_id = xtraH[2]
+		self.remote_node = xtraH[3]
+		self.cmdLength = xtraH[4]
+		self.remote_port = xtraH[5]
+		self.is_set = True
 
 	def printable(self):
 		"""
 			Produce a printable string for information purposes.
 		"""
 		if not self.is_set:
-			return(" ");
+			return(" ")
 
-		toPrint = "Xtra Qubit: " + str(self.qubit_id) + " ";		
-		toPrint = toPrint + "Angle Step: " + str(self.step) + " ";		
-		toPrint = toPrint + "Remote App ID: " + str(self.remote_app_id) + " ";		
-		toPrint = toPrint + "Remote Node: " + str(self.remote_node) + " ";		
-		toPrint = toPrint + "Command Length: " + str(self.cmdLength);
+		toPrint = "Xtra Qubit: " + str(self.qubit_id) + " "		
+		toPrint = toPrint + "Angle Step: " + str(self.step) + " "		
+		toPrint = toPrint + "Remote App ID: " + str(self.remote_app_id) + " "		
+		toPrint = toPrint + "Remote Node: " + str(self.remote_node) + " "		
+		toPrint = toPrint + "Remote Port: " + str(self.remote_port) + " "		
+		toPrint = toPrint + "Command Length: " + str(self.cmdLength)
 
-		return(toPrint);
+		return(toPrint)
 
 class CQCNotifyHeader:
 	"""
@@ -308,59 +312,63 @@ class CQCNotifyHeader:
 			Initialize from packet data.
 		"""
 		if headerBytes == None:
-			self.is_set = False;
-			self.qubit_id = 0;
-			self.outcome = 0;
-			self.remote_app_id = 0;
-			self.remote_node = 0;
-			self.datetime = 0;
+			self.is_set = False
+			self.qubit_id = 0
+			self.outcome = 0
+			self.remote_app_id = 0
+			self.remote_node = 0
+			self.remote_port = 0
+			self.datetime = 0
 		else:
-			self.unpack(self, headerBytes);
+			self.unpack(self, headerBytes)
 
-	def setVals(self, qubit_id, outcome, remote_app_id, remote_node, datetime):
+	def setVals(self, qubit_id, outcome, remote_app_id, remote_node, remote_port, datetime):
 		"""
 		Set using given values.
 		"""
-		self.qubit_id = qubit_id;
-		self.outcome = outcome;
-		self.remote_app_id = remote_app_id;
-		self.remote_node = remote_node;
-		self.datetime = datetime;
-		self.is_set=True;
+		self.qubit_id = qubit_id
+		self.outcome = outcome
+		self.remote_app_id = remote_app_id
+		self.remote_node = remote_node
+		self.remote_port = remote_port
+		self.datetime = datetime
+		self.is_set=True
 
 	def pack(self):
 		"""
 		Pack data into packet form. For definitions see cLib/cqc.h
 		"""
 		if not self.is_set:
-			return 0;
+			return 0
 
-		xtraH = pack("=BBHQQ", self.qubit_id, self.outcome, self.remote_app_id, self.remote_node, self.datetime);
-		return(xtraH);
+		xtraH = pack("=BBHLQHH", self.qubit_id, self.outcome, self.remote_app_id, self.remote_node, self.datetime, self.remote_port, 0)
+		return(xtraH)
 
 	def unpack(self, headerBytes):
 		"""
 			Unpack packet data. For defnitions see cLib/cqc.h
 		"""
-		xtraH = unpack("=BBHQQ", headerBytes);
+		xtraH = unpack("=BBHLQHH", headerBytes)
 
-		self.qubit_id = xtraH[0];
-		self.outcome = xtraH[1];
-		self.remote_app_id = xtraH[2];
-		self.remote_node = xtraH[3];
-		self.datetime = xtraH[4];
-		self.is_set = True;
+		self.qubit_id = xtraH[0]
+		self.outcome = xtraH[1]
+		self.remote_app_id = xtraH[2]
+		self.remote_node = xtraH[3]
+		self.datetime = xtraH[4]
+		self.remote_port = xtraH[5]
+		self.is_set = True
 
 	def printable(self):
 		"""
 			Produce a printable string for information purposes.
 		"""
 		if not self.is_set:
-			return(" ");
+			return(" ")
 
-		toPrint = "Qubit ID: "  + str(self.qubit_id) + " ";
-		toPrint = toPrint + "Outcome: " + str(self.outcome) + " ";
-		toPrint = toPrint + "Remote App ID: " + str(self.remote_app_id) + " ";
-		toPrint = toPrint + "Remote Node: " + str(self.remote_node) + " ";
-		toPrint = toPrint + "Datetime: " + str(self.datetime);
-		return(toPrint);
+		toPrint = "Qubit ID: "  + str(self.qubit_id) + " "
+		toPrint = toPrint + "Outcome: " + str(self.outcome) + " "
+		toPrint = toPrint + "Remote App ID: " + str(self.remote_app_id) + " "
+		toPrint = toPrint + "Remote Node: " + str(self.remote_node) + " "
+		toPrint = toPrint + "Remote Port: " + str(self.remote_port) + " "		
+		toPrint = toPrint + "Datetime: " + str(self.datetime)
+		return(toPrint)
