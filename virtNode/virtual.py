@@ -1032,7 +1032,7 @@ class virtualQubit(pb.Referenceable):
 		# while we try and get a lock. For this reason, we have to wait until we have a lock on an _active_
 		# qubit before proceeding.
 		waiting = True
-		outcome = -1
+		outcome = None
 		while(waiting):
 			if self.virtNode == self.simNode:
 				try:
@@ -1043,7 +1043,7 @@ class virtualQubit(pb.Referenceable):
 						self.virtNode.root._remove_sim_qubit(self.simQubit)
 						waiting = False
 				except Exception as e:
-					logging.error("VIRTUAL NODE %s: Cannot remove qubit - %s", self.virtNode.name, e)
+					logging.error("VIRTUAL NODE %s: Cannot remove qubit", self.virtNode.name)
 					waiting = False
 				finally:
 					self.simQubit.unlock()
@@ -1058,7 +1058,7 @@ class virtualQubit(pb.Referenceable):
 						defer = yield self.simNode.root.callRemote("remove_sim_qubit_num",num)
 						waiting = False
 				except Exception as e:
-					logging.error("VIRTUAL NODE %s: Cannot remove qubit - %s", self.virtNode.name, e)
+					logging.error("VIRTUAL NODE %s: Cannot remove qubit", self.virtNode.name)
 					waiting = False
 				finally:
 					defer = yield self.simQubit.callRemote("unlock")

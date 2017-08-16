@@ -570,7 +570,7 @@ class CQCProtocol(Protocol):
 			return False
 
 		outcome = yield virt_qubit.callRemote("measure")
-		if (not outcome) or (outcome < 0):
+		if outcome == None:
 			logging.debug("CQC %s: Measurement failed", self.name)
 			self._send_back_cqc(cqc_header, CQC_ERR_GENERAL)
 			return False
