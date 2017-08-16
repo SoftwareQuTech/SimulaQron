@@ -70,6 +70,9 @@ class CQCFactory(Factory):
 		# Dictionary that keeps qubit dictorionaries for each application
 		self.qubitList = { };
 
+		# Lock governing access to the qubitList
+		self._lock = DeferredLock()
+
 	def buildProtocol(self, addr):
 		"""
 		Return an instance of CQCProtocol when a connection is made.
@@ -225,6 +228,9 @@ class CQCProtocol(Protocol):
 	def get_virt_qubit(self, header, qubit_id):
 		"""
 		Get reference to the virtual qubit reference in SimulaQron given app and qubit id, if it exists. If not found, send back no qubit error.
+
+		Caution: Twisted PB does not allow references to objects to be passed back between connections. If you need to pass a qubit reference
+		back to the Twisted PB on a _different_ connection, then use get_virt_qubit_indep below.
 		"""
 		if not (header.app_id, qubit_id) in self.factory.qubitList:
 			logging.debug("CQC %s: Qubit not found",self.name)
@@ -234,6 +240,21 @@ class CQCProtocol(Protocol):
 		qubit = self.factory.qubitList[(header.app_id, qubit_id)]
 		return qubit.virt
 
+	@inlineCallbacks
+	def get_virt_qubit_indep(self, header, qubit_id):
+		"""
+		Get NUMBER (not reference!) to virtual qubit in SimulaQron specific to this connection. If not found, send back no qubit error.
+		"""
+
+		# First let's get the general virtual qubit reference, if any
+		general_ref = self.get_virt_qubit(header, qubit_id)
+		if not general_ref:
+			return(-1) 
+
+		num = yield general_ref.callRemote("get_virt_num")
+		logging.debug("GOT NUMBER %d XXX",num)
+
+		return num
 
 	def _send_back_cqc(self,header, msgType):
 		"""
@@ -321,8 +342,6 @@ class CQCProtocol(Protocol):
 		"""
 		Check whether this command includes an extra header with additional information.
 		"""
-		if cmd.instr == CQC_CMD_RECV:
-			return(True)
 		if cmd.instr == CQC_CMD_SEND:
 			return(True)
 		if cmd.instr == CQC_CMD_EPR:
@@ -365,7 +384,7 @@ class CQCProtocol(Protocol):
 
 		# Then we send a notify header with the timing details
 		notify = CQCNotifyHeader();
-		notify.setVals(header.qubit_id, 0, 0, 0, q.timestamp);
+		notify.setVals(header.qubit_id, 0, 0, 0, 0, q.timestamp);
 		msg = notify.pack();
 		self.transport.write(msg)
 
@@ -551,14 +570,18 @@ class CQCProtocol(Protocol):
 			return False
 
 		outcome = yield virt_qubit.callRemote("measure")
-		logging.debug("CQC %s: Measured outcome %d",self.name,outcome)
+		if (not outcome) or (outcome < 0):
+			logging.debug("CQC %s: Measurement failed", self.name)
+			self._send_back_cqc(cqc_header, CQC_ERR_GENERAL)
+			return False
 
+		logging.debug("CQC %s: Measured outcome %d",self.name,outcome)
 		# Send the outcome back as MEASOUT 
 		self._send_back_cqc(cqc_header, CQC_TP_MEASOUT)
 
 		# Send notify header with outcome
 		hdr = CQCNotifyHeader();
-		hdr.setVals(cmd.qubit_id, outcome, 2,3,4);
+		hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0);
 		msg = hdr.pack()
 		self.transport.write(msg)
 		logging.debug("CQC %s: Notify %s",self.name, hdr.printable())
@@ -575,9 +598,8 @@ class CQCProtocol(Protocol):
 		"""
 
 		# Lookup the virtual qubit form identifier
-		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
-		if not virt_qubit:
-			logging.debug("CQC %s: No such qubit",self.name)
+		virt_num = yield self.get_virt_qubit_indep(cqc_header, cmd.qubit_id)
+		if virt_num < 0:
 			logging.debug("CQC %s: No such qubit",self.name)
 			return False
 	
@@ -588,18 +610,64 @@ class CQCProtocol(Protocol):
 			return False
 
 		# Send instruction to transfer the qubit
-		logging.debug("CQC %s: Sending App ID %d qubit id %d to %s",self.name,cqc_header.app_id,cmd.qubit_id, targetName)
-		yield self.factory.virtRoot.callRemote("cqc_send_qubit", virt_qubit, targetName, cqc_header.app_id, xtra.remote_app_id)
-		logging.debug("CQC %s: Sent qubit", self.name)
+		yield self.factory.virtRoot.callRemote("cqc_send_qubit", virt_num, targetName, cqc_header.app_id, xtra.remote_app_id)
+		logging.debug("CQC %s: Sent App ID %d qubit id %d to %s",self.name,cqc_header.app_id,cmd.qubit_id, targetName)
 		
 		return True
 
 	@inlineCallbacks
 	def cmd_recv(self, cqc_header, cmd, xtra):
 		"""
-		Receive qubit from another node.
+		Receive qubit from another node. Block until qubit is received.
 		"""
-		logging.debug("CQC %s: Receiving App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		logging.debug("CQC %s: Asking to receive for App ID %d",self.name,cqc_header.app_id)
+
+		# First check whether the desired qubit ID is already in use
+		app_id = cqc_header.app_id
+		q_id = cmd.qubit_id
+		if (app_id,q_id) in self.factory.qubitList:
+			logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
+			self._send_back_cqc(cqc_header, CQC_ERR_INUSE)
+			return False
+
+		# This will block until a qubit is received.
+		noQubit = True
+		while(noQubit):
+			virt_qubit = yield self.factory.virtRoot.callRemote("cqc_get_recv", cqc_header.app_id)
+			if virt_qubit:
+				noQubit = False
+			else:
+				sleep(0.1)
+
+		logging.debug("CQC %s: Qubit received for app_id %d",self.name, cqc_header.app_id)
+
+		# Once we have the qubit, add it to the local list and send a reply we received it. Note that we will
+		# recheck whether it exists: it could have been added by another connection in the mean time
+		try:
+			self.factory._lock.acquire()
+
+			if (app_id,q_id) in self.factory.qubitList:
+				logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
+				self._send_back_cqc(cqc_header, CQC_ERR_INUSE)
+				return False
+
+			q = CQCQubit(cmd.qubit_id, int(time.time()), virt_qubit)
+			self.factory.qubitList[(app_id,q_id)] = q
+		finally:		
+			self.factory._lock.release()
+
+		# Send message we received a qubit back
+		logging.debug("GOO")
+		self._send_back_cqc(cqc_header, CQC_TP_RECV)
+
+		# Send notify header with qubit ID
+		logging.debug("GOO")
+		hdr = CQCNotifyHeader();
+		hdr.setVals(cmd.qubit_id, 0, 0,0,0, 0);
+		msg = hdr.pack()
+		self.transport.write(msg)
+		logging.debug("CQC %s: Notify %s",self.name, hdr.printable())		
+
 		return True
 
 	@inlineCallbacks
@@ -619,16 +687,21 @@ class CQCProtocol(Protocol):
 
 		app_id = cqc_header.app_id
 		q_id = cmd.qubit_id
-	
-		if (app_id,q_id) in self.factory.qubitList:
-			logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
-			self._send_back_cqc(cqc_header, CQC_ERR_INUSE)
-			return False
 
-		virt = yield self.factory.virtRoot.callRemote("new_qubit_inreg",self.factory.qReg)
-		q = CQCQubit(cmd.qubit_id, int(time.time()), virt)
-		self.factory.qubitList[(app_id,q_id)] = q
-		logging.debug("CQC %s: Requested new qubit (%d,%d)",self.name,app_id, q_id)
+		try:		
+			self.factory._lock.acquire()
+			if (app_id,q_id) in self.factory.qubitList:
+				logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
+				self._send_back_cqc(cqc_header, CQC_ERR_INUSE)
+				return False
+
+			virt = yield self.factory.virtRoot.callRemote("new_qubit_inreg",self.factory.qReg)
+			q = CQCQubit(cmd.qubit_id, int(time.time()), virt)
+			self.factory.qubitList[(app_id,q_id)] = q
+			logging.debug("CQC %s: Requested new qubit (%d,%d)",self.name,app_id, q_id)
+		finally:
+			self.factory._lock.release()
+
 		return True
 
 

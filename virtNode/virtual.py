@@ -115,7 +115,7 @@ class virtualNode(pb.Root):
 		# Initialize the list of qubits at this node
 		self.virtQubits = []
 		self.simQubits = []
-
+		
 		# Set up connections to the neighouring nodes in the network
 		# Wait so servers have time to start
 		reactor.callLater(2,self.connectNet)
@@ -129,6 +129,10 @@ class virtualNode(pb.Root):
 
 		# Maximum number of attempts at getting locks
 		self.maxAttempts = 300
+
+		# List of qubit received to be polled by CQC
+		self.cqcRecv = {}
+
 
 	def remote_test(self):
 		logging.debug("VIRTUAL NODE %s: Check call virtualNode.", self.myID.name)
@@ -357,13 +361,21 @@ class virtualNode(pb.Root):
 		pass
 
 	@inlineCallbacks
-	def remote_cqc_send_qubit(self, qubit, targetName, app_id, remote_app_id):
+	def remote_cqc_send_qubit(self, num, targetName, app_id, remote_app_id):
 		"""
 		Send interface for CQC to add the qubit to the remote nodes received list for an application. 
+
+		Arguments:
+		num		number of virtual qubit to send
+		targetName	name of the node to send to
+		app_id		application asking to have this qubit delivered
+		remote_app_id	application ID to deliver the qubit to
 		"""
-		
-		oldVirtNum = qubit.num
-		newVirtNum = self.remote_send_qubit(qubit, targetName)
+	
+		qubit = self.remote_get_virtual_ref(num)
+	
+		oldVirtNum = num
+		newVirtNum = yield self.remote_send_qubit(qubit, targetName)
 
 		# Lookup host ID of node
 		remoteNode = self.conn[targetName]
@@ -376,17 +388,22 @@ class virtualNode(pb.Root):
 		Add an item to the received list for use in CQC.
 		"""
 
-		if not self.cqcRecv[to_app_id]:
+		if not (to_app_id in self.cqcRecv):
 			self.cqcRecv[to_app_id] = deque([])
 
 		self.cqcRecv[to_app_id].append(QubitCQC(fromName, self.myID.name, from_app_id, to_app_id, new_virt_num));
+		logging.debug("VIRTUAL NODE %s: Added a qubit for app id %d to recv list", self.myID.name, to_app_id)
 
-	def remote_cqc_get_recv(self, fromName, to_app_id):
+	def remote_cqc_get_recv(self, to_app_id):
 		"""
 		Retrieve the next qubit with the given app ID form the received list.
 		"""
 
+		logging.debug("VIRTUAL NODE %s: Trying to retrieve qubit for app id %d from recv list", self.myID.name, to_app_id)
 		# Get the list corresponding to the specified application ID
+		if not (to_app_id in self.cqcRecv):
+			return None
+
 		qQueue = self.cqcRecv[to_app_id]
 		if not qQueue:
 			return None
@@ -396,6 +413,7 @@ class virtualNode(pb.Root):
 		if not qc:
 			return None
 		
+		logging.debug("VIRTUAL NODE %s: Returning qubit for app id %d from recv list", self.myID.name, to_app_id)
 		return self.remote_get_virtual_ref(qc.virt_num)
 
 
@@ -410,31 +428,37 @@ class virtualNode(pb.Root):
 		targetName	target ndoe to place qubit at (host object)
 		"""
 
+		logging.debug("VIRTUAL NODE %s: Request to transfer qubit sim Num %d to %s.",self.myID.name,qubit.num, targetName)
 		if qubit.active != 1:
 			logging.debug("VIRTUAL NODE %s: Attempt to manipulate qubit no longer at this node.",self.myID.name)
 			return
 
-		logging.debug("VIRTUAL NODE %s: Request to transfer qubit sim Num %d to %s.",self.myID.name,qubit.num, targetName)
 
 		# Lookup host id of node
 		remoteNode = self.conn[targetName]
 
-		# Check whether we are just the virtual, or also the simulating node
-		if qubit.virtNode == qubit.simNode:
-			# We are both the virtual as well as the simulating node
-			# Pass a reference to our locally simulated qubit object to the remote node
-			newNum = yield remoteNode.root.callRemote("add_qubit", self.myID.name, qubit.simQubit)
-		else:
-			# We are only the virtual node, not the simulating one. In this case, we need to ask
-			# the actual simulating node to do the transfer for us.
-			newNum = yield qubit.simNode.root.callRemote("transfer_qubit", qubit.simQubit, targetName)
+		try:
+			# Get lock to prevent access to qubits between sending and manipulating local list
+			self._get_global_lock()
 
-		# We gave it away to mark as inactive
-		qubit.active = 0
+			# Check whether we are just the virtual, or also the simulating node
+			if qubit.virtNode == qubit.simNode:
+				# We are both the virtual as well as the simulating node
+				# Pass a reference to our locally simulated qubit object to the remote node
+				newNum = yield remoteNode.root.callRemote("add_qubit", self.myID.name, qubit.simQubit)
+			else:
+				# We are only the virtual node, not the simulating one. In this case, we need to ask
+				# the actual simulating node to do the transfer for us.
+				newNum = yield qubit.simNode.root.callRemote("transfer_qubit", qubit.simQubit, targetName)
 
-		# Remove the qubit from the local virtual list. Note it remains in the simulated
-		# list, since we continue to simulate this qubit.
-		self.virtQubits.remove(qubit)
+			# We gave it away to mark as inactive
+			qubit.active = 0
+
+			# Remove the qubit from the local virtual list. Note it remains in the simulated
+			# list, since we continue to simulate this qubit. 
+			self.virtQubits.remove(qubit)
+		finally:
+			self._release_global_lock()
 
 		return newNum
 
@@ -865,6 +889,7 @@ class virtualQubit(pb.Referenceable):
 		num		number ID among the virtual qubits
 		"""
 
+
 		# Node where this qubit is virtually located
 		self.virtNode = virtNode
 
@@ -1007,6 +1032,7 @@ class virtualQubit(pb.Referenceable):
 		# while we try and get a lock. For this reason, we have to wait until we have a lock on an _active_
 		# qubit before proceeding.
 		waiting = True
+		outcome = -1
 		while(waiting):
 			if self.virtNode == self.simNode:
 				try:
@@ -1041,7 +1067,7 @@ class virtualQubit(pb.Referenceable):
 			if waiting:
 				yield deferLater(reactor, self._delay, lambda: none)
 
-		returnValue(outcome)
+		return(outcome)
 
 	def _lock_nodes(self, target):
 		"""
@@ -1366,6 +1392,12 @@ class virtualQubit(pb.Referenceable):
 
 		return num
 
+	def remote_get_virt_num(self):
+		"""
+		Returns the number of the virtual qubit.
+		"""
+		return self.num
+
 	@inlineCallbacks
 	def remote_get_qubit(self):
 		"""
@@ -1387,7 +1419,6 @@ class virtualQubit(pb.Referenceable):
 		return (R,I)
 
 
-
 ############################################
 #
 # Keeping track of received qubits for CQC
@@ -1399,5 +1430,5 @@ class QubitCQC:
 		self.toName = toName;
 		self.from_app_id = from_app_id;
 		self.to_app_id = to_app_id;
-		self.virt_num = virt_num;
+		self.virt_num = new_virt_num;
 

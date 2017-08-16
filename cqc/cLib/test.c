@@ -51,28 +51,14 @@ int main(int argc, char *argv[]) {
 	cqc = cqc_init(app_id);
 	cqc_connect(cqc, hostname, portno);
 
-	cqc_simple_cmd(cqc, CQC_CMD_NEW, 0);
+	cqc_simple_cmd(cqc, CQC_CMD_NEW, 100);
 	cqc_wait_until_done(cqc, 1);
 
-	remoteNode.s_addr = ntohl(*((uint32_t *)server->h_addr));
-	printf("Node %u\n",remoteNode.s_addr);
-	cqc_send(cqc, 0, 0, remoteNode.s_addr, remotePort);
+	cqc_simple_cmd(cqc, CQC_CMD_H,100);
 	cqc_wait_until_done(cqc, 1);
 
-	//cqc_simple_cmd(cqc, CQC_CMD_NEW, 1);
-	// cqc_wait_until_done(cqc, 1);
-
-	//cqc_simple_cmd(cqc, CQC_CMD_I, 0);
-	//cqc_wait_until_done(cqc, 1);
-
-	cqc_simple_cmd(cqc, CQC_CMD_H,0);
-	cqc_wait_until_done(cqc, 1);
-
-	outcome = cqc_measure(cqc, 0);
+	outcome = cqc_measure(cqc, 100);
 	printf("Outcome: %d\n",outcome);
-	// cqc_twoqubit(cqc,CQC_CMD_CPHASE, 0, 1);
-	// cqc_wait_until_done(cqc, 1);
-		
 	
    	return 0;
 }

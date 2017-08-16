@@ -170,7 +170,7 @@ int cqc_full_cmd(cqc_lib *cqc, uint8_t command, uint8_t qubit_id, char notify, c
 
 int cqc_hello(cqc_lib *cqc);
 int cqc_send(cqc_lib *cqc, uint8_t qubit_id, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port);
-int cqc_recv(cqc_lib *cqc, uint8_t qubit_id, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port);
+int cqc_recv(cqc_lib *cqc, uint8_t qubit_id);
 int cqc_epr(cqc_lib *cqc, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port);
 int cqc_measure(cqc_lib *cqc, uint8_t qubit_id);
 int cqc_wait_until_done(cqc_lib *cqc, unsigned int reps);

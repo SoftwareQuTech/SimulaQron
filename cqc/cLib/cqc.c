@@ -303,14 +303,42 @@ cqc_send(cqc_lib *cqc, uint8_t qubit_id, uint16_t remote_app_id, uint32_t remote
  *
  * Arguments:
  * qubit_id		id to assign to this qubit once it is received
- * remote_app_id	app id on the remote node to send to
- * remote_node		address of remote node to receive from (IPv6)
- * remote_port		port for classical control info
  */
 int
-cqc_recv(cqc_lib *cqc, uint8_t qubit_id, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port)
+cqc_recv(cqc_lib *cqc, uint8_t qubit_id)
 {
-	return(cqc_full_cmd(cqc, CQC_CMD_RECV, qubit_id, 0, 0, 1, 0, 0, remote_app_id, remote_node, remote_port, 0));
+	int n;
+	cqcHeader reply;
+	notifyHeader note;
+
+	/* Send out request to receive a qubit */
+	n = cqc_simple_cmd(cqc, CQC_CMD_RECV, qubit_id);
+	if (n < 0) {
+		perror("ERROR - Cannot send receive request");
+		return(-1);
+	}
+
+  	/* Now read CQC Header from server response */
+   	bzero(&reply, sizeof(reply));
+   	n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
+   	if (n < 0) {
+      		perror("ERROR - cannot get reply header");
+      		return(-1);
+   	}	
+	if(reply.type != CQC_TP_RECV) {
+		fprintf(stderr,"ERROR: Expected RECV");
+		return(-1);
+	}
+
+	/* Then read qubit id from notify header */
+   	bzero(&note, sizeof(note));
+   	n = read(cqc->sockfd, &note, CQC_NOTIFY_LENGTH);
+   	if (n < 0) {
+      		perror("ERROR - cannot get measurement outcome");
+      		return(-1);
+   	}	
+
+	return(note.qubit_id);
 }
 	
 /* 
