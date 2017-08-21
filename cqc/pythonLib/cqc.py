@@ -48,6 +48,9 @@ class CQCsocket:
 		self._appID=self._next_appID
 		self._next_appID+=1
 
+		# Buffer received data
+		self.buf=None
+
 		# This file defines the network of CQC servers interfacing to virtual quantum nodes
 		if cqcFile==None:
 			self.cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
@@ -59,7 +62,7 @@ class CQCsocket:
 		if self.name in cqcNet.hostDict:
 			myHost = cqcNet.hostDict[self.name]
 		else:
-			logging.error("The name '%s' is not in the cqc network.",myName)
+			logging.error("The name '%s' is not in the cqc network.",name)
 
 		#Get IP of correct form
 		myIP=socket.inet_ntoa(struct.pack("!L",myHost.ip))
@@ -69,12 +72,12 @@ class CQCsocket:
 		try:
 			self._s=socket.socket(socket.AF_INET,socket.SOCK_STREAM,0)
 		except socket.error:
-			logging.error("Could not connect to cqc server: %s",myName)
+			logging.error("Could not connect to cqc server: %s",name)
 		try:
 			self._s.connect((myIP,myHost.port))
 		except socket.error:
 			self._s.close()
-			logging.error("Could not connect to cqc server: %s",myName)
+			logging.error("Could not connect to cqc server: %s",name)
 
 	def __str__(self):
 		return "Socket to cqc server '{}'".format(self.name)
@@ -120,8 +123,52 @@ class CQCsocket:
 		"""
 		Receive data from cqc server. Maxsize is the max size of message.
 		"""
-		data=self._s.recv(maxsize)
-		return CQCHeader(data)
+
+		#Initilize buffer and check
+		gotCQCHeader=False
+
+		for _ in range(10):
+
+			# Receive data
+			data=self._s.recv(maxsize)
+
+			# Read whatever we received into a buffer
+			if self.buf:
+				self.buf+=data
+			else:
+				self.buf=data
+
+			# If we don't have the CQC header yet, try and read it in full.
+			if not gotCQCHeader:
+				if len(self.buf) < CQC_HDR_LENGTH:
+					# Not enough data for CQC header, return and wait for the rest
+					continue
+
+				# Got enough data for the CQC Header so read it in
+				gotCQCHeader = True;
+				rawHeader = self.buf[0:CQC_HDR_LENGTH]
+				currHeader = CQCHeader(rawHeader);
+
+				# Remove the header from the buffer
+				self.buf = self.buf[CQC_HDR_LENGTH:len(self.buf)]
+
+				# logging.debug("CQC %s: Read CQC Header: %s", self.name, self.currHeader.printable())
+			# Check whether we already received all the data
+			if len(self.buf) < currHeader.length:
+				# Still waiting for data
+				# logging.debug("CQC %s: Incomplete data. Waiting.", self.name)
+				continue
+			else:
+				break
+
+		# We got all the data, read notify if there is any
+		if currHeader.length==0:
+			return (currHeader,None)
+		try:
+			notifyHeader=CQCNotifyHeader(buf[:CQC_NOTIFY_LENGTH])
+			return (currHeader,notifyHeader)
+		except struct.error as err:
+			print(err)
 
 class CQCQubit:
 	"""
@@ -139,13 +186,27 @@ class CQCQubit:
 		self._next_qID+=1
 
 		# Create new qubit at the cqc server
-		self._cqc.sendCommand(self._qID,CQC_CMD_NEW)
-		if wait_for_return:
-			print(self._cqc.receive().printable())
+		message=self._cqc.sendCommand(self._qID,CQC_CMD_NEW,wait_for_return=wait_for_return)
+		for hdr in message:
+			try:
+				print(hdr.printable())
+			except AttributeError:
+				pass
 	def __str__(self):
 		return "Qubit at the node {}".format(self._cqc.name)
 
 	def H(self,wait_for_return=True):
-		self._cqc.sendCommand(self._qID,CQC_CMD_H)
-		if wait_for_return:
-			print(self._cqc.receive().printable())
+		message=self._cqc.sendCommand(self._qID,CQC_CMD_H,wait_for_return=wait_for_return)
+		for hdr in message:
+			try:
+				print(hdr.printable())
+			except AttributeError:
+				pass
+
+	def meas(self):
+		message=self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE)
+		for hdr in message:
+			try:
+				print(hdr.printable())
+			except AttributeError:
+				pass

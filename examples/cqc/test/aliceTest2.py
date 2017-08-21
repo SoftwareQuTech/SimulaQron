@@ -52,10 +52,13 @@ def main():
 	cqc=CQCsocket(myName)
 
 	# Create qubit
-	q=CQCQubit(cqc,wait_for_return=False)
+	q=CQCQubit(cqc)
 
 	# Perform Hadamard
-	q.H(wait_for_return=False)
+	q.H()
+
+	# Measure qubit
+	q.meas()
 
 	# Stop the connection
 	cqc.close()
