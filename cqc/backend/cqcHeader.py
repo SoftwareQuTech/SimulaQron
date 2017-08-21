@@ -72,9 +72,9 @@ CQC_CMD_X=10		# Pauli X
 CQC_CMD_Z=11		# Pauli Z
 CQC_CMD_Y=12		# Pauli Y
 CQC_CMD_T=13		# T Gate
-CQC_CMD_ROT_X=14	# Rotation over angle around X in pi/256 increments
-CQC_CMD_ROT_Y=15	# Rotation over angle around Y in pi/256 increments
-CQC_CMD_ROT_Z=16	# Rotation over angle around Z in pi/256 increments
+CQC_CMD_ROT_X=14	# Rotation over angle around X in 2pi/256 increments
+CQC_CMD_ROT_Y=15	# Rotation over angle around Y in 2pi/256 increments
+CQC_CMD_ROT_Z=16	# Rotation over angle around Z in 2pi/256 increments
 CQC_CMD_H=17		# Hadamard H
 
 CQC_CMD_CNOT=20		# CNOT Gate with this as control
@@ -269,21 +269,21 @@ class CQCXtraHeader:
 		if not self.is_set:
 			return(0)
 
-		xtraH = pack("=BBHLLHH", self.qubit_id, self.step, self.remote_app_id, self.remote_node, self.cmdLength, self.remote_port, 0)
+		xtraH = pack("=HHLLHBB", self.qubit_id, self.step, self.remote_app_id, self.remote_node, self.cmdLength, self.remote_port, self. step, 0)
 		return(xtraH)
 
 	def unpack(self, headerBytes):
 		"""
 			Unpack packet data. For defnitions see cLib/cqc.h
 		"""
-		xtraH = unpack("=BBHLLHH", headerBytes)
+		xtraH = unpack("=HHLLHBB", headerBytes)
 
 		self.qubit_id = xtraH[0]
-		self.step = xtraH[1]
-		self.remote_app_id = xtraH[2]
-		self.remote_node = xtraH[3]
-		self.cmdLength = xtraH[4]
-		self.remote_port = xtraH[5]
+		self.remote_app_id = xtraH[1]
+		self.remote_node = xtraH[2]
+		self.cmdLength = xtraH[3]
+		self.remote_port = xtraH[4]
+		self.step = xtraH[5]
 		self.is_set = True
 
 	def printable(self):
@@ -341,21 +341,21 @@ class CQCNotifyHeader:
 		if not self.is_set:
 			return 0
 
-		xtraH = pack("=BBHLQHH", self.qubit_id, self.outcome, self.remote_app_id, self.remote_node, self.datetime, self.remote_port, 0)
+		xtraH = pack("=HHLQHBB", self.qubit_id, self.remote_app_id, self.remote_node, self.datetime, self.remote_port, self.outcome, 0)
 		return(xtraH)
 
 	def unpack(self, headerBytes):
 		"""
 			Unpack packet data. For defnitions see cLib/cqc.h
 		"""
-		xtraH = unpack("=BBHLQHH", headerBytes)
+		xtraH = unpack("=HHLQHBB", headerBytes)
 
 		self.qubit_id = xtraH[0]
-		self.outcome = xtraH[1]
-		self.remote_app_id = xtraH[2]
-		self.remote_node = xtraH[3]
-		self.datetime = xtraH[4]
-		self.remote_port = xtraH[5]
+		self.remote_app_id = xtraH[1]
+		self.remote_node = xtraH[2]
+		self.datetime = xtraH[3]
+		self.remote_port = xtraH[4]
+		self.outcome = xtraH[5]
 		self.is_set = True
 
 	def printable(self):

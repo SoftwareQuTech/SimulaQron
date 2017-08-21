@@ -108,13 +108,13 @@ typedef struct
 #define CQC_CMD_XTRA_LENGTH	16
 typedef struct
 {
-	uint8_t xtra_qubit_id;	/* ID of the additional qubit */
-	uint8_t steps;		/* Angle step of rotation (ROT) OR number of repetitions (FACTORY) */
+	uint16_t xtra_qubit_id;	/* ID of the additional qubit */
 	uint16_t remote_app_id;	/* Remote application ID */
 	uint32_t remote_node;	/* IP of the remote node */
 	uint32_t cmdLength;	/* Length of the cmds to exectute upon completion */
 	uint16_t remote_port;	/* Port of the remote node for control info */
-	uint16_t unused;	/* Need 4 byte segments */
+	uint8_t steps;		/* Angle step of rotation (ROT) OR number of repetitions (FACTORY) */
+	uint8_t unused;	/* Need 4 byte segments */
 	void *cmdPayload;	/* Details to execute when done with this command */
 } __attribute__((__packed__)) xtraCmdHeader;
 
@@ -124,13 +124,13 @@ typedef struct
 #define CQC_NOTIFY_LENGTH	20
 typedef struct
 {
-	uint8_t qubit_id;	/* ID of the received qubit, if any */
-	uint8_t outcome;	/* Measurement outcome */
+	uint16_t qubit_id;	/* ID of the received qubit, if any */
 	uint16_t remote_app_id;	/* Remote application ID */
 	uint32_t remote_node;	/* IP of the remote node */
 	uint64_t datetime;	/* Time of qubit */
 	uint16_t remote_port;	/* Port of the remote node for control info */
-	uint16_t unused;	/* Need 4 byte segments */
+	uint8_t outcome;	/* Measurement outcome */
+	uint8_t unused;	/* Need 4 byte segments */
 } __attribute__((__packed__)) notifyHeader;
 
 #endif
