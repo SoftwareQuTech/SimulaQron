@@ -33,8 +33,8 @@ from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 
 class CQCConnection:
-	_next_appID=0
-	def __init__(self,name,cqcFile=None):
+	_appIDs=[]
+	def __init__(self,name,cqcFile=None,appID=0):
 		"""
 		Initialize a connection to the cqc server with the name given as input.
 		A path to a configure file for the cqc network can be given,
@@ -45,8 +45,10 @@ class CQCConnection:
 		self.name=name
 
 		# Which appID
-		self._appID=self._next_appID
-		self._next_appID+=1
+		if appID in self._appIDs:
+			raise ValueError("appID={} is already in use".format(appID))
+		self._appID=appID
+		self._appIDs.append(self._appID)
 
 		# Buffer received data
 		self.buf=None
@@ -82,26 +84,28 @@ class CQCConnection:
 	def __str__(self):
 		return "Socket to cqc server '{}'".format(self.name)
 
+	def get_appID(self):
+		return self._appID
+
 	def close(self):
 		"""
 		Closes the connection.
 		"""
 		self._s.close()
+		self._appIDs.remove(self._appID)
 
-	def sendSimple(self,tp):#,wait_for_return=True):
+	def sendSimple(self,tp):
 		"""
 		Sends a simple message to the cqc server, for example a HELLO message if tp=CQC_TP_HELLO.
-		If wait_for_return is true, this will wait for a return message and return this as a CQCHeader.
 		"""
 		hdr=CQCHeader()
 		hdr.setVals(CQC_VERSION,tp,self._appID,0)
 		msg=hdr.pack()
 		self._s.send(msg)
 
-	def sendCommand(self,qID,command):#,wait_for_return=True):
+	def sendCommand(self,qID,command):
 		"""
-		Sends a simple message to the cqc server, for example a HELLO message if tp=CQC_TP_HELLO.
-		If wait_for_return is true, this will wait for a return message and return this as a CQCHeader.
+		Sends a simple message and command message to the cqc server.
 		"""
 		#Send Header
 		hdr=CQCHeader()
@@ -114,6 +118,28 @@ class CQCConnection:
 		cmd_hdr.setVals(qID,command,0,0,0) #IS NOTIFY BLOCK AND ACTION IMPLEMENTED?
 		cmd_msg=cmd_hdr.pack()
 		self._s.send(cmd_msg)
+
+	def sendCmdXtra(self,qID,command,xtra_qID=None,step=None,remote_app_ID=None,remote_node=None,remote_port=None,cmd_length=None):
+		"""
+		Sends a simple message, command message and xtra message to the cqc server.
+		"""
+		#Send Header
+		hdr=CQCHeader()
+		hdr.setVals(CQC_VERSION,CQC_TP_COMMAND,self._appID,CQC_CMD_HDR_LENGTH+CQC_CMD_XTRA_LENGTH)
+		msg=hdr.pack()
+		self._s.send(msg)
+
+		#Send Command
+		cmd_hdr=CQCCmdHeader()
+		cmd_hdr.setVals(qID,command,0,0,0) #IS NOTIFY BLOCK AND ACTION IMPLEMENTED?
+		cmd_msg=cmd_hdr.pack()
+		self._s.send(cmd_msg)
+
+		#Send Xtra
+		xtra_hdr=CQCXtraHeader()
+		xtra_hdr.setVals(xtra_qID,step,remote_app_ID,remote_node,remote_port,cmd_length)
+		xtra_msg=xtra_hdr.pack()
+		self._s.send(xtra_msg)
 
 	def receive(self,maxsize=1024): # WHAT IS GOOD SIZE?
 		"""
@@ -193,6 +219,56 @@ class qubit:
 	def __str__(self):
 		return "Qubit at the node {}".format(self._cqc.name)
 
+	def apply_I(self,wait_for_return=True):
+		"""
+		Performs an identity gate on the qubit.
+		If wait_for_return is true, the return message is printed before the method finishes.
+		"""
+		self._cqc.sendCommand(self._qID,CQC_CMD_I)
+		if wait_for_return:
+			message=self._cqc.receive()
+			print_return_msg(message)
+
+	def apply_X(self,wait_for_return=True):
+		"""
+		Performs a X on the qubit.
+		If wait_for_return is true, the return message is printed before the method finishes.
+		"""
+		self._cqc.sendCommand(self._qID,CQC_CMD_X)
+		if wait_for_return:
+			message=self._cqc.receive()
+			print_return_msg(message)
+
+	def apply_Y(self,wait_for_return=True):
+		"""
+		Performs a Y on the qubit.
+		If wait_for_return is true, the return message is printed before the method finishes.
+		"""
+		self._cqc.sendCommand(self._qID,CQC_CMD_Y)
+		if wait_for_return:
+			message=self._cqc.receive()
+			print_return_msg(message)
+
+	def apply_Z(self,wait_for_return=True):
+		"""
+		Performs a Z on the qubit.
+		If wait_for_return is true, the return message is printed before the method finishes.
+		"""
+		self._cqc.sendCommand(self._qID,CQC_CMD_Z)
+		if wait_for_return:
+			message=self._cqc.receive()
+			print_return_msg(message)
+
+	def apply_T(self,wait_for_return=True):
+		"""
+		Performs a T gate on the qubit.
+		If wait_for_return is true, the return message is printed before the method finishes.
+		"""
+		self._cqc.sendCommand(self._qID,CQC_CMD_T)
+		if wait_for_return:
+			message=self._cqc.receive()
+			print_return_msg(message)
+
 	def apply_H(self,wait_for_return=True):
 		"""
 		Performs a Hadamard on the qubit.
@@ -203,15 +279,27 @@ class qubit:
 			message=self._cqc.receive()
 			print_return_msg(message)
 
+	def apply_rot_X(self,step):
+		"""
+		Applies rotation around the x-axis with the angle of 2*pi/256*step radians.
+		If wait_for_return is true, the return message is printed before the method finishes.
+		"""
+		self._cqc.sendCmdXtra(self._qID,CQC_CMD_ROT_X,step=step)
+		if wait_for_return:
+			message=self._cqc.receive()
+			print_return_msg(message)
+
 	def measure(self):
 		"""
 		Measures the qubit in the standard basis and returns the measurement outcome.
+		If now MEASOUT message is received, None is returned.
 		"""
 		self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE)
 
-		#print message
+		#Return measurement outcome
 		message=self._cqc.receive()
-		print_return_msg(message)
+		notifyHdr=message[1]
+		return notifyHdr.outcome
 
 def print_return_msg(message):
 	"""
