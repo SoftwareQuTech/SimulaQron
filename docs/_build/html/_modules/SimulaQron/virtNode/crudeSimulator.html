@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>SimulaQron.virtNode.crudeSimulator &mdash; SimulaQron 0.1 alpha documentation</title>
+    <title>SimulaQron.virtNode.crudeSimulator &#8212; SimulaQron 0.1 alpha documentation</title>
     
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -17,15 +17,16 @@
         VERSION:     '0.1 alpha',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="SimulaQron 0.1 alpha documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,8 +38,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 0.1 alpha documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -46,8 +47,8 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -91,14 +92,14 @@
 <span class="c1"># (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS</span>
 <span class="c1"># SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
 
-<span class="kn">from</span> <span class="nn">qutip</span> <span class="kn">import</span> <span class="o">*</span><span class="p">;</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="o">*</span><span class="p">;</span>
-<span class="kn">from</span> <span class="nn">cmath</span> <span class="kn">import</span> <span class="o">*</span><span class="p">;</span>
+<span class="kn">from</span> <span class="nn">qutip</span> <span class="k">import</span> <span class="o">*</span><span class="p">;</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="o">*</span><span class="p">;</span>
+<span class="kn">from</span> <span class="nn">cmath</span> <span class="k">import</span> <span class="o">*</span><span class="p">;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
-<span class="kn">from</span> <span class="nn">SimulaQron.virtNode.basics</span> <span class="kn">import</span> <span class="o">*</span><span class="p">;</span>
+<span class="kn">from</span> <span class="nn">SimulaQron.virtNode.basics</span> <span class="k">import</span> <span class="o">*</span><span class="p">;</span>
 
 <div class="viewcode-block" id="simpleEngine"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.crudeSimulator.simpleEngine">[docs]</a><span class="k">class</span> <span class="nc">simpleEngine</span><span class="p">(</span><span class="n">quantumEngine</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
@@ -269,7 +270,7 @@
 		<span class="n">nNorm</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">nNorm</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
 			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Rotation vector n can&#39;t be 0&quot;</span><span class="p">)</span>
-		<span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1j</span><span class="o">*</span><span class="n">a</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">nNorm</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">sigmax</span><span class="p">()</span><span class="o">+</span><span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">sigmay</span><span class="p">()</span><span class="o">+</span><span class="n">n</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">sigmaz</span><span class="p">()))</span><span class="o">.</span><span class="n">expm</span><span class="p">()</span>
+		<span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">a</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">nNorm</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">sigmax</span><span class="p">()</span><span class="o">+</span><span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">sigmay</span><span class="p">()</span><span class="o">+</span><span class="n">n</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">sigmaz</span><span class="p">()))</span><span class="o">.</span><span class="n">expm</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">apply_onequbit_gate</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">qubitNum</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="simpleEngine.apply_CNOT"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.crudeSimulator.simpleEngine.apply_CNOT">[docs]</a>	<span class="k">def</span> <span class="nf">apply_CNOT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum1</span><span class="p">,</span> <span class="n">qubitNum2</span><span class="p">):</span>
@@ -474,7 +475,7 @@
 		<span class="n">M</span> <span class="o">=</span> <span class="n">I</span>
 		<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)):</span>
 			<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)):</span>
-				<span class="n">M</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">R</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">+</span> <span class="n">I</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1j</span>
+				<span class="n">M</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">R</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">+</span> <span class="n">I</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1</span><span class="n">j</span>
 
 		<span class="n">qt</span> <span class="o">=</span> <span class="n">Qobj</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
 
@@ -543,13 +544,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 0.1 alpha documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2017, Stephanie Wehner.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright 2017, Stephanie Wehner.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
     </div>
   </body>
 </html>

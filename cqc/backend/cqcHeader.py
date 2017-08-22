@@ -269,7 +269,7 @@ class CQCXtraHeader:
 		if not self.is_set:
 			return(0)
 
-		xtraH = pack("=HHLLHBB", self.qubit_id, self.step, self.remote_app_id, self.remote_node, self.cmdLength, self.remote_port, self. step, 0)
+		xtraH = pack("=HHLLHBB", self.qubit_id, self.remote_app_id, self.remote_node, self.cmdLength, self.remote_port, self.step, 0)
 		return(xtraH)
 
 	def unpack(self, headerBytes):
