@@ -49,16 +49,17 @@ def main():
 	myName="Alice"
 
 	# Initialize the connection
-	cqc=CQCsocket(myName)
+	cqc=CQCConnection(myName)
 
 	# Create qubit
-	q=CQCQubit(cqc)
+	q=qubit(cqc)
 
-	# Perform Hadamard
-	q.H()
+	# Perform Gates
+	q.apply_rot_X(0)
 
 	# Measure qubit
-	q.meas()
+	m=q.measure()
+	print("Measurement outcome is: {}".format(m))
 
 	# Stop the connection
 	cqc.close()

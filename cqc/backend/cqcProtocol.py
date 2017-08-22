@@ -351,6 +351,12 @@ class CQCProtocol(Protocol):
 			return(True)
 		if cmd.instr == CQC_CMD_CPHASE:
 			return(True)
+		if cmd.instr == CQC_CMD_ROT_X:
+			return(True)
+		if cmd.instr == CQC_CMD_ROT_Y:
+			return(True)
+		if cmd.instr == CQC_CMD_ROT_Z:
+			return(True)
 		if cmd.action:
 			return(True)
 
