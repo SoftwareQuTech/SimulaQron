@@ -49,14 +49,16 @@ def main():
 	myName="Alice"
 
 	# Initialize the connection
-	cqc=CQCsocket(myName)
+	cqc=CQCConnection(myName)
 
-	# Send Hello message
-	cqc.sendSimple(CQC_TP_HELLO)
+	# Create qubit
+	q=qubit(cqc)
 
-	# Get return message
-	message=cqc.receive()
-	print_return_msg(message)
+	# Perform Hadamard
+	q.apply_H()
+
+	# Measure qubit
+	q.measure()
 
 	# Stop the connection
 	cqc.close()

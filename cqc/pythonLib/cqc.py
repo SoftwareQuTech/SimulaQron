@@ -32,7 +32,7 @@ import socket, struct, os, sys, logging
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 
-class CQCsocket:
+class CQCConnection:
 	_next_appID=0
 	def __init__(self,name,cqcFile=None):
 		"""
@@ -97,8 +97,6 @@ class CQCsocket:
 		hdr.setVals(CQC_VERSION,tp,self._appID,0)
 		msg=hdr.pack()
 		self._s.send(msg)
-		# if wait_for_return:
-		# 	return self.receive()
 
 	def sendCommand(self,qID,command):#,wait_for_return=True):
 		"""
@@ -116,8 +114,6 @@ class CQCsocket:
 		cmd_hdr.setVals(qID,command,0,0,0) #IS NOTIFY BLOCK AND ACTION IMPLEMENTED?
 		cmd_msg=cmd_hdr.pack()
 		self._s.send(cmd_msg)
-		# if wait_for_return:
-		# 	return self.receive()
 
 	def receive(self,maxsize=1024): # WHAT IS GOOD SIZE?
 		"""
@@ -173,7 +169,7 @@ class CQCsocket:
 		except struct.error as err:
 			print(err)
 
-class CQCQubit:
+class qubit:
 	"""
 	A qubit.
 	"""
@@ -194,16 +190,10 @@ class CQCQubit:
 		if wait_for_return:
 			message=self._cqc.receive()
 			print_return_msg(message)
-		# message=self._cqc.sendCommand(self._qID,CQC_CMD_NEW,wait_for_return=wait_for_return)
-		# for hdr in message:
-		# 	try:
-		# 		print(hdr.printable())
-		# 	except AttributeError:
-		# 		pass
 	def __str__(self):
 		return "Qubit at the node {}".format(self._cqc.name)
 
-	def H(self,wait_for_return=True):
+	def apply_H(self,wait_for_return=True):
 		"""
 		Performs a Hadamard on the qubit.
 		If wait_for_return is true, the return message is printed before the method finishes.
@@ -212,14 +202,8 @@ class CQCQubit:
 		if wait_for_return:
 			message=self._cqc.receive()
 			print_return_msg(message)
-		# message=self._cqc.sendCommand(self._qID,CQC_CMD_H,wait_for_return=wait_for_return)
-		# for hdr in message:
-		# 	try:
-		# 		print(hdr.printable())
-		# 	except AttributeError:
-		# 		pass
 
-	def meas(self):
+	def measure(self):
 		"""
 		Measures the qubit in the standard basis and returns the measurement outcome.
 		"""
@@ -228,16 +212,10 @@ class CQCQubit:
 		#print message
 		message=self._cqc.receive()
 		print_return_msg(message)
-		# message=self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE)
-		# for hdr in message:
-		# 	try:
-		# 		print(hdr.printable())
-		# 	except AttributeError:
-		# 		pass
 
 def print_return_msg(message):
 	"""
-	Prints messsage returned by the receive method of CQCsocket.
+	Prints messsage returned by the receive method of CQCConnection.
 	"""
 	for hdr in message:
 		try:
