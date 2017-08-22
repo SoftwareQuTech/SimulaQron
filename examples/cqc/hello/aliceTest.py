@@ -27,50 +27,17 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import socket
+import sys
 import os
+import struct
+import logging
 
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
+from SimulaQron.cqc.pythonLib.cqc import *
 
-from twisted.internet import reactor
-from twisted.internet.protocol import Factory, Protocol
-from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
 
-#####################################################################################################
-#
-# protocol
-#
-
-class Greeter(Protocol):
-	def sendMessage(self,msg):
-		self.transport.write(msg)
-
-	def dataReceived(self,data):
-		hdr=CQCHeader(data)
-		print(hdr.printable())
-
-def gotProtocol(p):
-	hdr=CQCHeader()
-	hdr.setVals(CQC_VERSION,CQC_TP_HELLO,0,0)
-	msg=hdr.pack()
-	p.sendMessage(msg)
-
-def getHostData(name):
-
-	# Config file for cqc layer
-	cqcFileName=os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
-
-	# Find port of name
-	with open(cqcFileName) as cqcFile:
-		for line in cqcFile:
-			if not line.startswith("#"):
-				words=line.split(',')
-				tmpName=words[0].strip()
-				if tmpName==name:
-					hostType=words[1].strip()
-					port=words[2].strip()
-					return (hostType,int(port))
-	raise ValueError("No such host-name")
 
 #####################################################################################################
 #
@@ -81,16 +48,22 @@ def main():
 	# In this example, we are Alice.
 	myName="Alice"
 
-	# Get the hostType and port of Alice cqc server
-	(hostType,port)=getHostData(myName)
+	# Initialize the connection
+	cqc=CQCsocket(myName)
 
-	#Connect to cqc server and run protocol
-	point=TCP4ClientEndpoint(reactor,hostType,port)
-	d=connectProtocol(point,Greeter())
-	d.addCallback(gotProtocol)
-	reactor.run()
+	# Send Hello message
+	cqc.sendSimple(CQC_TP_HELLO)
+
+	# Get return message
+	message=cqc.receive()
+	print_return_msg(message)
+
+	# Stop the connection
+	cqc.close()
+
+
 
 ##################################################################################################
-# logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
 main()
 

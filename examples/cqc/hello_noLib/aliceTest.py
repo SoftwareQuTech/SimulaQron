@@ -38,6 +38,47 @@ from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.pythonLib.cqc import *
 
 
+#####################################################################################################
+#
+# init
+#
+def init(name,cqcFile=None):
+	"""
+	Initialize a connection to the cqc server with the name given as input.
+	A path to a configure file for the cqc network can be given,
+	if it's not given the config file '$NETSIM/config/cqcNodes.cfg' will be used.
+	Returns a socket object.
+	"""
+
+	# This file defines the network of CQC servers interfacing to virtual quantum nodes
+	if cqcFile==None:
+		cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
+
+	# Read configuration files for the cqc network
+	cqcNet = networkConfig(cqcFile)
+
+	# Host data
+	if name in cqcNet.hostDict:
+		myHost = cqcNet.hostDict[name]
+	else:
+		logging.error("The name '%s' is not in the cqc network.",name)
+
+	#Get IP of correct form
+	myIP=socket.inet_ntoa(struct.pack("!L",myHost.ip))
+
+	#Connect to cqc server and run protocol
+	cqc=None
+	try:
+		cqc=socket.socket(socket.AF_INET,socket.SOCK_STREAM,0)
+	except socket.error:
+		logging.error("Could not connect to cqc server: %s",name)
+	try:
+		cqc.connect((myIP,myHost.port))
+	except socket.error:
+		cqc.close()
+		logging.error("Could not connect to cqc server: %s",name)
+	return cqc
+
 
 #####################################################################################################
 #
@@ -49,20 +90,21 @@ def main():
 	myName="Alice"
 
 	# Initialize the connection
-	cqc=CQCsocket(myName)
+	cqc=init(myName)
 
-	# Create qubit
-	q=CQCQubit(cqc)
+	#Send Hello message
+	hdr=CQCHeader()
+	hdr.setVals(CQC_VERSION,CQC_TP_HELLO,0,0)
+	msg=hdr.pack()
+	cqc.send(msg)
 
-	# Perform Hadamard
-	q.H()
+	#Receive return message
+	data=cqc.recv(128)
+	hdr=CQCHeader(data)
+	print(hdr.printable())
 
-	# Measure qubit
-	q.meas()
-
-	# Stop the connection
+	#Close the connection
 	cqc.close()
-
 
 
 ##################################################################################################

@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cd "$NETSIM/examples/cqc/simple"
+cd "$NETSIM/examples/cqc/hello"
 python aliceTest.py &

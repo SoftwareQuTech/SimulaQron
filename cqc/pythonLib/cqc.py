@@ -84,11 +84,11 @@ class CQCsocket:
 
 	def close(self):
 		"""
-		Closes the connection
+		Closes the connection.
 		"""
 		self._s.close()
 
-	def sendSimple(self,tp,wait_for_return=True):
+	def sendSimple(self,tp):#,wait_for_return=True):
 		"""
 		Sends a simple message to the cqc server, for example a HELLO message if tp=CQC_TP_HELLO.
 		If wait_for_return is true, this will wait for a return message and return this as a CQCHeader.
@@ -97,10 +97,10 @@ class CQCsocket:
 		hdr.setVals(CQC_VERSION,tp,self._appID,0)
 		msg=hdr.pack()
 		self._s.send(msg)
-		if wait_for_return:
-			return self.receive()
+		# if wait_for_return:
+		# 	return self.receive()
 
-	def sendCommand(self,qID,command,wait_for_return=True):
+	def sendCommand(self,qID,command):#,wait_for_return=True):
 		"""
 		Sends a simple message to the cqc server, for example a HELLO message if tp=CQC_TP_HELLO.
 		If wait_for_return is true, this will wait for a return message and return this as a CQCHeader.
@@ -116,12 +116,14 @@ class CQCsocket:
 		cmd_hdr.setVals(qID,command,0,0,0) #IS NOTIFY BLOCK AND ACTION IMPLEMENTED?
 		cmd_msg=cmd_hdr.pack()
 		self._s.send(cmd_msg)
-		if wait_for_return:
-			return self.receive()
+		# if wait_for_return:
+		# 	return self.receive()
 
 	def receive(self,maxsize=1024): # WHAT IS GOOD SIZE?
 		"""
-		Receive data from cqc server. Maxsize is the max size of message.
+		Receive the whole message from cqc server.
+		Returns (CQCHeader,None) or (CQCHeader,CQCNotifyHeader) depending on the type of message.
+		Maxsize is the max size of message.
 		"""
 
 		#Initilize buffer and check
@@ -178,6 +180,7 @@ class CQCQubit:
 	def __init__(self,cqc,wait_for_return=True):
 		"""
 		Initializes the qubit. The cqc connection must be given.
+		If wait_for_return is true, the return message is printed before the method finishes.
 		"""
 		self._cqc=cqc
 
@@ -186,27 +189,57 @@ class CQCQubit:
 		self._next_qID+=1
 
 		# Create new qubit at the cqc server
-		message=self._cqc.sendCommand(self._qID,CQC_CMD_NEW,wait_for_return=wait_for_return)
-		for hdr in message:
-			try:
-				print(hdr.printable())
-			except AttributeError:
-				pass
+		self._cqc.sendCommand(self._qID,CQC_CMD_NEW)
+		if wait_for_return:
+			message=self._cqc.receive()
+			print_return_msg(message)
+		# message=self._cqc.sendCommand(self._qID,CQC_CMD_NEW,wait_for_return=wait_for_return)
+		# for hdr in message:
+		# 	try:
+		# 		print(hdr.printable())
+		# 	except AttributeError:
+		# 		pass
 	def __str__(self):
 		return "Qubit at the node {}".format(self._cqc.name)
 
 	def H(self,wait_for_return=True):
-		message=self._cqc.sendCommand(self._qID,CQC_CMD_H,wait_for_return=wait_for_return)
-		for hdr in message:
-			try:
-				print(hdr.printable())
-			except AttributeError:
-				pass
+		"""
+		Performs a Hadamard on the qubit.
+		If wait_for_return is true, the return message is printed before the method finishes.
+		"""
+		self._cqc.sendCommand(self._qID,CQC_CMD_H)
+		if wait_for_return:
+			message=self._cqc.receive()
+			print_return_msg(message)
+		# message=self._cqc.sendCommand(self._qID,CQC_CMD_H,wait_for_return=wait_for_return)
+		# for hdr in message:
+		# 	try:
+		# 		print(hdr.printable())
+		# 	except AttributeError:
+		# 		pass
 
 	def meas(self):
-		message=self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE)
-		for hdr in message:
-			try:
-				print(hdr.printable())
-			except AttributeError:
-				pass
+		"""
+		Measures the qubit in the standard basis and returns the measurement outcome.
+		"""
+		self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE)
+
+		#print message
+		message=self._cqc.receive()
+		print_return_msg(message)
+		# message=self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE)
+		# for hdr in message:
+		# 	try:
+		# 		print(hdr.printable())
+		# 	except AttributeError:
+		# 		pass
+
+def print_return_msg(message):
+	"""
+	Prints messsage returned by the receive method of CQCsocket.
+	"""
+	for hdr in message:
+		try:
+			print(hdr.printable())
+		except AttributeError:
+			pass
