@@ -119,7 +119,7 @@ class CQCConnection:
 		cmd_msg=cmd_hdr.pack()
 		self._s.send(cmd_msg)
 
-	def sendCmdXtra(self,qID,command,xtra_qID=None,step=None,remote_app_ID=None,remote_node=None,remote_port=None,cmd_length=None):
+	def sendCmdXtra(self,qID,command,xtra_qID=0,step=0,remote_app_ID=0,remote_node=0,remote_port=0,cmd_length=0):
 		"""
 		Sends a simple message, command message and xtra message to the cqc server.
 		"""
@@ -141,7 +141,7 @@ class CQCConnection:
 		xtra_msg=xtra_hdr.pack()
 		self._s.send(xtra_msg)
 
-	def receive(self,maxsize=1024): # WHAT IS GOOD SIZE?
+	def receive(self,maxsize=128): # WHAT IS GOOD SIZE?
 		"""
 		Receive the whole message from cqc server.
 		Returns (CQCHeader,None) or (CQCHeader,CQCNotifyHeader) depending on the type of message.
@@ -279,7 +279,7 @@ class qubit:
 			message=self._cqc.receive()
 			print_return_msg(message)
 
-	def apply_rot_X(self,step):
+	def apply_rot_X(self,step,wait_for_return=True):
 		"""
 		Applies rotation around the x-axis with the angle of 2*pi/256*step radians.
 		If wait_for_return is true, the return message is printed before the method finishes.
