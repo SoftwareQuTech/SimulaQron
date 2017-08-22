@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2017, Stephanie Wehner
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 # 1. Redistributions of source code must retain the above copyright
@@ -15,7 +15,7 @@
 # 4. Neither the name of the QuTech organization nor the
 #    names of its contributors may be used to endorse or promote products
 #    derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ''AS IS'' AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -53,15 +53,15 @@ from SimulaQron.cqc.backend.cqcHeader import CQCXtraHeader
 #
 
 class CQCFactory(Factory):
-	
+
 	def __init__(self, host, name, virtualNet):
-		""" 
-		Initialize CQC Factory. 
+		"""
+		Initialize CQC Factory.
 
 		lhost	details of the local host (class host)
 		"""
 
-		self.host = host	
+		self.host = host
 		self.name = name
 		self.virtualNet = virtualNet
 		self.virtRoot = None
@@ -102,12 +102,12 @@ class CQCFactory(Factory):
 
 		logging.debug("CQC %s: No such node", self.name)
 		return None
-				
+
 
 
 #####################################################################################################
 #
-# CQC Protocol 
+# CQC Protocol
 #
 # Execute the CQC Protocol giving access to the SimulaQron backend via the universal interface.
 #
@@ -151,7 +151,7 @@ class CQCProtocol(Protocol):
 			CQC_CMD_EPR : self.cmd_epr,
 			CQC_CMD_NEW : self.cmd_new
 		}
-	
+
 
 		# Flag to determine whether we already received _all_ of the CQC header
 		self.gotCQCHeader = False;
@@ -178,7 +178,7 @@ class CQCProtocol(Protocol):
 		Receive data. We will always wait to receive enough data for the header, and then the entire packet first before commencing processing.
 		"""
 
-		# Read whatever we received into a buffer	
+		# Read whatever we received into a buffer
 		if self.buf:
 			self.buf = self.buf + data
 		else:
@@ -211,9 +211,9 @@ class CQCProtocol(Protocol):
 		self.app_id = self.currHeader.app_id;
 
 		# Invoke the relevant message handler, processing the possibly remaining data
-		if self.currHeader.tp in self.messageHandlers: 
+		if self.currHeader.tp in self.messageHandlers:
 			self.messageHandlers[self.currHeader.tp](self.currHeader, self.buf[0:self.currHeader.length])
-		else:	
+		else:
 			self._send_back_cqc(header, CQC_ERR_UNSUPP)
 
 		# Reset and await the next packet
@@ -249,22 +249,23 @@ class CQCProtocol(Protocol):
 		# First let's get the general virtual qubit reference, if any
 		general_ref = self.get_virt_qubit(header, qubit_id)
 		if not general_ref:
-			return(-1) 
+			return(-1)
 
 		num = yield general_ref.callRemote("get_virt_num")
 		logging.debug("GOT NUMBER %d XXX",num)
 
 		return num
 
-	def _send_back_cqc(self,header, msgType):
+	def _send_back_cqc(self,header, msgType,length=0):
 		"""
 		Return a simple CQC header with the specified type.
 
 		header	 CQC header of the packet we respond to
 		msgType  Message type to return
+		length	 Length of additional message
 		"""
 		hdr = CQCHeader();
-		hdr.setVals(CQC_VERSION, msgType, header.app_id,0);
+		hdr.setVals(CQC_VERSION, msgType, header.app_id,length);
 		msg = hdr.pack();
 		self.transport.write(msg)
 
@@ -280,7 +281,7 @@ class CQCProtocol(Protocol):
 	@inlineCallbacks
 	def handle_command(self, header, data):
 		"""
-		Handle incoming command requests. 
+		Handle incoming command requests.
 		"""
 
 		logging.debug("CQC %s: Command received", self.name)
@@ -292,7 +293,7 @@ class CQCProtocol(Protocol):
 			self._send_back_cqc(header, CQC_TP_DONE);
 			logging.debug("CQC %s: Command successful, sent done.", self.name)
 
-	@inlineCallbacks	
+	@inlineCallbacks
 	def _process_command(self, cqc_header, length, data):
 		"""
 			Process the commands - called recursively to also process additional command lists.
@@ -354,7 +355,7 @@ class CQCProtocol(Protocol):
 			return(True)
 
 		return(False)
-		
+
 
 	def handle_factory(self, header, data):
 		pass
@@ -374,13 +375,13 @@ class CQCProtocol(Protocol):
 
 		# Lookup the desired qubit
 		if not qList[hdr.qubit_id]:
-			# Specified qubit is unknown	
+			# Specified qubit is unknown
 			send_noqubit(self, header);
 			return;
 
 		# Craft reply
 		# First send an appropriate CQC Header
-		self._send_back_cqc(header, CQC_TP_INF_TIME);
+		self._send_back_cqc(header, CQC_TP_INF_TIME,length=CQC_NOTIFY_LENGTH);
 
 		# Then we send a notify header with the timing details
 		notify = CQCNotifyHeader();
@@ -542,7 +543,7 @@ class CQCProtocol(Protocol):
 
 		yield control.callRemote("cphase_onto",target)
 		return True
-	
+
 	@inlineCallbacks
 	def cmd_reset(self, cqc_header, cmd, xtra):
 		"""
@@ -576,8 +577,8 @@ class CQCProtocol(Protocol):
 			return False
 
 		logging.debug("CQC %s: Measured outcome %d",self.name,outcome)
-		# Send the outcome back as MEASOUT 
-		self._send_back_cqc(cqc_header, CQC_TP_MEASOUT)
+		# Send the outcome back as MEASOUT
+		self._send_back_cqc(cqc_header, CQC_TP_MEASOUT,length=CQC_NOTIFY_LENGTH)
 
 		# Send notify header with outcome
 		hdr = CQCNotifyHeader();
@@ -602,9 +603,9 @@ class CQCProtocol(Protocol):
 		if virt_num < 0:
 			logging.debug("CQC %s: No such qubit",self.name)
 			return False
-	
+
 		# Lookup the name of the remote node used within SimulaQron
-		targetName = self.factory.lookup(xtra.remote_node, xtra.remote_port)	
+		targetName = self.factory.lookup(xtra.remote_node, xtra.remote_port)
 		if targetName == None:
 			logging.debug("CQC %s: Remote node not found %s",self.name,xtra.printable())
 			return False
@@ -612,7 +613,7 @@ class CQCProtocol(Protocol):
 		# Send instruction to transfer the qubit
 		yield self.factory.virtRoot.callRemote("cqc_send_qubit", virt_num, targetName, cqc_header.app_id, xtra.remote_app_id)
 		logging.debug("CQC %s: Sent App ID %d qubit id %d to %s",self.name,cqc_header.app_id,cmd.qubit_id, targetName)
-		
+
 		return True
 
 	@inlineCallbacks
@@ -653,12 +654,12 @@ class CQCProtocol(Protocol):
 
 			q = CQCQubit(cmd.qubit_id, int(time.time()), virt_qubit)
 			self.factory.qubitList[(app_id,q_id)] = q
-		finally:		
+		finally:
 			self.factory._lock.release()
 
 		# Send message we received a qubit back
 		logging.debug("GOO")
-		self._send_back_cqc(cqc_header, CQC_TP_RECV)
+		self._send_back_cqc(cqc_header, CQC_TP_RECV,length=CQC_NOTIFY_LENGTH)
 
 		# Send notify header with qubit ID
 		logging.debug("GOO")
@@ -666,7 +667,7 @@ class CQCProtocol(Protocol):
 		hdr.setVals(cmd.qubit_id, 0, 0,0,0, 0);
 		msg = hdr.pack()
 		self.transport.write(msg)
-		logging.debug("CQC %s: Notify %s",self.name, hdr.printable())		
+		logging.debug("CQC %s: Notify %s",self.name, hdr.printable())
 
 		return True
 
@@ -677,7 +678,7 @@ class CQCProtocol(Protocol):
 		"""
 		logging.debug("CQC %s: EPR Pair ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
 		return True
-		
+
 
 	@inlineCallbacks
 	def cmd_new(self, cqc_header, cmd, xtra):
@@ -688,7 +689,7 @@ class CQCProtocol(Protocol):
 		app_id = cqc_header.app_id
 		q_id = cmd.qubit_id
 
-		try:		
+		try:
 			self.factory._lock.acquire()
 			if (app_id,q_id) in self.factory.qubitList:
 				logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
@@ -719,6 +720,6 @@ class CQCQubit:
 
 
 
-	
-		
+
+
 

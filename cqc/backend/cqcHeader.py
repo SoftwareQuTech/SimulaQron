@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2017, Stephanie Wehner
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 # 1. Redistributions of source code must retain the above copyright
@@ -15,7 +15,7 @@
 # 4. Neither the name of the QuTech organization nor the
 #    names of its contributors may be used to endorse or promote products
 #    derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ''AS IS'' AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -60,10 +60,10 @@ CQC_ERR_TIMEOUT=23 	# Timeout
 CQC_ERR_INUSE=24	# Qubit ID in use (when creating new qubit)
 
 # Possible commands
-CQC_CMD_I=0		# Identity (do nothing, wait one step) 
+CQC_CMD_I=0		# Identity (do nothing, wait one step)
 CQC_CMD_NEW=1		# Ask for a new qubit
 CQC_CMD_MEASURE=2	# Measure qubit
-CQC_CMD_RESET=3		# Reset qubit to |0> 
+CQC_CMD_RESET=3		# Reset qubit to |0>
 CQC_CMD_SEND=4		# Send qubit to another node
 CQC_CMD_RECV=5		# Ask to receive qubit
 CQC_CMD_EPR=6		# Create EPR pair with the specified node
@@ -186,7 +186,7 @@ class CQCCmdHeader:
 
 		if not self.is_set:
 			return(0)
-	
+
 		opt = 0
 		if self.notify:
 			opt = opt | CQC_OPT_NOTIFY
@@ -196,7 +196,7 @@ class CQCCmdHeader:
 			opt = opt | CQC_OPT_ACTION
 
 		cmdH = pack("=HBB",self.qubit_id, self.instr, opt)
-		return(cmdH)	
+		return(cmdH)
 
 	def unpack(self, headerBytes):
 		"""
@@ -293,11 +293,11 @@ class CQCXtraHeader:
 		if not self.is_set:
 			return(" ")
 
-		toPrint = "Xtra Qubit: " + str(self.qubit_id) + " "		
-		toPrint = toPrint + "Angle Step: " + str(self.step) + " "		
-		toPrint = toPrint + "Remote App ID: " + str(self.remote_app_id) + " "		
-		toPrint = toPrint + "Remote Node: " + str(self.remote_node) + " "		
-		toPrint = toPrint + "Remote Port: " + str(self.remote_port) + " "		
+		toPrint = "Xtra Qubit: " + str(self.qubit_id) + " "
+		toPrint = toPrint + "Angle Step: " + str(self.step) + " "
+		toPrint = toPrint + "Remote App ID: " + str(self.remote_app_id) + " "
+		toPrint = toPrint + "Remote Node: " + str(self.remote_node) + " "
+		toPrint = toPrint + "Remote Port: " + str(self.remote_port) + " "
 		toPrint = toPrint + "Command Length: " + str(self.cmdLength)
 
 		return(toPrint)
@@ -320,7 +320,7 @@ class CQCNotifyHeader:
 			self.remote_port = 0
 			self.datetime = 0
 		else:
-			self.unpack(self, headerBytes)
+			self.unpack(headerBytes)
 
 	def setVals(self, qubit_id, outcome, remote_app_id, remote_node, remote_port, datetime):
 		"""
@@ -369,6 +369,6 @@ class CQCNotifyHeader:
 		toPrint = toPrint + "Outcome: " + str(self.outcome) + " "
 		toPrint = toPrint + "Remote App ID: " + str(self.remote_app_id) + " "
 		toPrint = toPrint + "Remote Node: " + str(self.remote_node) + " "
-		toPrint = toPrint + "Remote Port: " + str(self.remote_port) + " "		
+		toPrint = toPrint + "Remote Port: " + str(self.remote_port) + " "
 		toPrint = toPrint + "Datetime: " + str(self.datetime)
 		return(toPrint)

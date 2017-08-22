@@ -167,7 +167,8 @@ class CQCsocket:
 		if currHeader.length==0:
 			return (currHeader,None)
 		try:
-			notifyHeader=CQCNotifyHeader(buf[:CQC_NOTIFY_LENGTH])
+			rawNotifyHeader=self.buf[:CQC_NOTIFY_LENGTH]
+			notifyHeader=CQCNotifyHeader(rawNotifyHeader)
 			return (currHeader,notifyHeader)
 		except struct.error as err:
 			print(err)
