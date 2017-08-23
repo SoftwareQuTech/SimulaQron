@@ -16,16 +16,17 @@
 #    names of its contributors may be used to endorse or promote products
 #    derived from this software without specific prior written permission.
 # 
-# THIS SOFTWARE IS PROVIDED BY COPYRIGHT HOLDER ''AS IS'' AND ANY
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ''AS IS'' AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
 # DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 # (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 # LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 
 import os
 
@@ -80,9 +81,7 @@ class localNode(pb.Root):
 
 		self.virtQubit = None
 		self.virtRoot = None
-
-		self.gotAlice = False
-		self.gotBob = False
+		self.qReg = None
 
 	def set_virtual_node(self, virtRoot):
 		self.virtRoot = virtRoot
@@ -93,61 +92,38 @@ class localNode(pb.Root):
 	def remote_test(self):
 		return "Tested!"
 
-	# This can be called by Alice or Bob to tell Charlie where to get the qubit and what to do next
+	# This can be called by Alice to tell Bob where to get the qubit and what corrections to apply
 	@inlineCallbacks
-	def remote_receive_epr_Alice(self, virtualNum):
+	def remote_receive_qubit(self, virtualNum):
 		"""
-		Recover the qubit from Alice. We should now have a tripartite GHZ state
+		Recover the qubit from teleportation.
 		
 		Arguments
+		a,b		received measurement outcomes from Alice
 		virtualNum	number of the virtual qubit corresponding to the EPR pair received
 		"""
 
 		logging.debug("LOCAL %s: Getting reference to qubit number %d.",self.node.name, virtualNum)
 
-		self.qA = yield self.virtRoot.callRemote("get_virtual_ref",virtualNum)
-		self.gotAlice = True
+		# Get a reference to our side of the EPR pair
+		qA = yield self.virtRoot.callRemote("get_virtual_ref",virtualNum)
 
-		if self.gotAlice and self.gotBob:
-			self.got_both()
+		# Create a fresh qubit
+		q = yield self.virtRoot.callRemote("new_qubit_inreg",self.qReg)
 
-	@inlineCallbacks
-	def remote_receive_epr_Bob(self, virtualNum):
-		"""
-		Recover the qubit from Bob. We should now have a tripartite GHZ state
-		
-		Arguments
-		virtualNum	number of the virtual qubit corresponding to the EPR pair received
-		"""
+		# Create the GHZ state by entangling the fresh qubit
+		yield qA.callRemote("apply_H")
+		yield qA.callRemote("cnot_onto",q)
 
-		logging.debug("LOCAL %s: Getting reference to qubit number %d.",self.node.name, virtualNum)
-
-		self.qB = yield self.virtRoot.callRemote("get_virtual_ref",virtualNum)
-		self.gotBob = True
-
-		if self.gotAlice and self.gotBob:
-			self.got_both()
-
-	@inlineCallbacks
-	def got_both(self):
-		"""
-		Recover the qubit from Bob. We should now have a tripartite GHZ state
-		
-		Arguments
-		virtualNum	number of the virtual qubit corresponding to the EPR pair received
-		"""
-
-		logging.debug("LOCAL %s: Got both qubits from Alice and Bob.", self.node.name)
-
-		# We'll test an operation that will cause a merge of the two remote registers: undo EPR pair
-		yield self.qA.callRemote("cnot_onto", self.qB)
-		yield self.qA.callRemote("apply_H")
-
-		# Output state: expect |0>|0>
-		(realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits",[self.qA,self.qB])
+		# Print the received qubits
+		(realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits",[qA, q])
 		rho = self.assemble_qubit(realRho,imagRho)
-		print("EXPECTED: |0>|0>")
-		print("Qubits are:", rho)
+		expectedRho = Qobj([[0.5,0,0,0.5],[0,0,0,0],[0,0,0,0],[0.5,0,0,0.5]])
+
+		if rho == expectedRho:
+			print("Testing register merge: A to B............ok")
+		else:
+			print("Testing register merge: A to B............fail")
 
 	def assemble_qubit(self, realM, imagM):
 		"""
@@ -161,7 +137,6 @@ class localNode(pb.Root):
 		
 		return Qobj(M)
 		
-
 #####################################################################################################
 #
 # main
@@ -169,7 +144,7 @@ class localNode(pb.Root):
 def main():
 
 	# In this example, we are Bob.
-	myName = "Charlie"
+	myName = "Bob"
 
 	# This file defines the network of virtual quantum nodes
 	virtualFile = os.path.join(os.path.dirname(__file__), '../../../../config/virtualNodes.cfg')
@@ -194,6 +169,6 @@ def main():
 	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
 main()
 

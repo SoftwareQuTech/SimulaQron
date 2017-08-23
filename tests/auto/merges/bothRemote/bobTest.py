@@ -27,7 +27,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 import sys, os
 
 from twisted.spread import pb
@@ -65,17 +64,17 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 
 	logging.debug("LOCAL %s: Runing client side program.",myName)
 
-	# Create a qubit
-	qA = yield virtRoot.callRemote("new_qubit_inreg",qReg)
+	# Create qubits
+	qB = yield virtRoot.callRemote("new_qubit_inreg",qReg)
 
 	# Instruct the virtual node to transfer the qubit
-	remoteNum = yield virtRoot.callRemote("send_qubit",qA, "Bob")
+	remoteNum = yield virtRoot.callRemote("send_qubit",qB, "Charlie")
 	logging.debug("LOCAL %s: Remote qubit is %d.",myName, remoteNum)
 
-	# Tell Bob the number of the virtual qubit so the can use it locally
+	# Tell Charlie the number of the virtual qubit so the can use it locally
 	# and extend it to a GHZ state with Charlie
-	bob = classicalNet.hostDict["Bob"]
-	yield bob.root.callRemote("receive_qubit", remoteNum)
+	charlie = classicalNet.hostDict["Charlie"]
+	yield charlie.root.callRemote("receive_qubit_Bob", remoteNum)
 
 	reactor.stop()
 
@@ -113,8 +112,8 @@ class localNode(pb.Root):
 #
 def main():
 
-	# In this example, we are Alice.
-	myName = "Alice"
+	# In this example, we are Bob.
+	myName = "Bob"
 
 	# This file defines the network of virtual quantum nodes
 	virtualFile = os.path.join(os.path.dirname(__file__), '../../../../config/virtualNodes.cfg')
@@ -139,6 +138,5 @@ def main():
 	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
 main()
-

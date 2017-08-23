@@ -27,21 +27,20 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-import os
+import sys, os
 
 from twisted.spread import pb
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue, DeferredList, Deferred
 
-from qutip import *
-
 from SimulaQron.virtNode.basics import *
 from SimulaQron.virtNode.quantum import *
-from SimulaQron.virtNode.crudeSimulator import *
 from SimulaQron.general.hostConfig import *
+from SimulaQron.virtNode.crudeSimulator import *
 
 from SimulaQron.local.setup import *
+
+
 
 #####################################################################################################
 #
@@ -51,9 +50,10 @@ from SimulaQron.local.setup import *
 # quantum backend, as well as the nodes in the classical communication network), and the local classical
 # communication server is running (if applicable).
 #
+@inlineCallbacks
 def runClientNode(qReg, virtRoot, myName, classicalNet):
 	"""
-	Code to execture for the local client node. Called if all connections are established.
+	Code to execute for the local client node. Called if all connections are established.
 	
 	Arguments
 	qReg		quantum register (twisted object supporting remote method calls)
@@ -64,7 +64,22 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 
 	logging.debug("LOCAL %s: Runing client side program.",myName)
 
+	# Create qubit
+	qA = yield virtRoot.callRemote("new_qubit_inreg",qReg)
 
+	# Instruct the virtual node to transfer the qubit
+	remoteNum = yield virtRoot.callRemote("send_qubit",qA, "Charlie")
+	logging.debug("LOCAL %s: Remote qubit is %d.",myName, remoteNum)
+
+	# Tell Charlie the number of the virtual qubit so the can use it locally
+	# and extend it to a GHZ state with Charlie
+	charlie = classicalNet.hostDict["Charlie"]
+	yield charlie.root.callRemote("receive_qubit_Alice", remoteNum)
+
+	reactor.stop()
+
+
+		
 #####################################################################################################
 #
 # localNode
@@ -79,7 +94,6 @@ class localNode(pb.Root):
 		self.node = node
 		self.classicalNet = classicalNet
 
-		self.virtQubit = None
 		self.virtRoot = None
 		self.qReg = None
 
@@ -92,55 +106,14 @@ class localNode(pb.Root):
 	def remote_test(self):
 		return "Tested!"
 
-	# This can be called by Alice to tell Bob where to get the qubit and what corrections to apply
-	@inlineCallbacks
-	def remote_receive_qubit(self, virtualNum):
-		"""
-		Recover the qubit from teleportation.
-		
-		Arguments
-		a,b		received measurement outcomes from Alice
-		virtualNum	number of the virtual qubit corresponding to the EPR pair received
-		"""
-
-		logging.debug("LOCAL %s: Getting reference to qubit number %d.",self.node.name, virtualNum)
-
-		# Get a reference to our side of the EPR pair
-		qA = yield self.virtRoot.callRemote("get_virtual_ref",virtualNum)
-
-		# Create a fresh qubit
-		q = yield self.virtRoot.callRemote("new_qubit_inreg",self.qReg)
-
-		# Test merrge by executing a CNOT from the fresh qubit onto the epr pair - does nothing
-		yield q.callRemote("apply_H")
-		yield q.callRemote("cnot_onto",qA)
-
-		# Print the received qubits
-		(realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits",[qA, q])
-		rho = self.assemble_qubit(realRho,imagRho)
-		print("EXPECTED: EPR pair")
-		print("Qubits are:", rho)
-
-	def assemble_qubit(self, realM, imagM):
-		"""
-		Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
-		We need this since Twisted PB does not support sending complex valued object natively.
-		"""
-		M = realM
-		for s in range(len(M)):
-			for t in range(len(M)):
-				M[s][t] = realM[s][t] + 1j * imagM[s][t]
-		
-		return Qobj(M)
-		
 #####################################################################################################
 #
 # main
 #
 def main():
 
-	# In this example, we are Bob.
-	myName = "Bob"
+	# In this example, we are Alice.
+	myName = "Alice"
 
 	# This file defines the network of virtual quantum nodes
 	virtualFile = os.path.join(os.path.dirname(__file__), '../../../../config/virtualNodes.cfg')
@@ -165,6 +138,6 @@ def main():
 	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
 main()
 

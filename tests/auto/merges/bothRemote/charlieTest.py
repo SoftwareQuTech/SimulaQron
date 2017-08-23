@@ -146,8 +146,14 @@ class localNode(pb.Root):
 		# Output state
 		(realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits",[self.qA,self.qB])
 		rho = self.assemble_qubit(realRho,imagRho)
-		print("EXPECTED: EPR Pair")
-		print("Qubits are:", rho)
+		expectedRho = Qobj([[0.5,0,0,0.5],[0,0,0,0],[0,0,0,0],[0.5,0,0,0.5]])
+
+		if rho == expectedRho:
+			print("Testing register merge, both remote, different nodes............ok")
+		else:
+			print("Testing register merge, both remote, different nodes............fail")
+
+		reactor.stop()
 
 	def assemble_qubit(self, realM, imagM):
 		"""
@@ -194,6 +200,6 @@ def main():
 	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
 main()
 

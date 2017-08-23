@@ -137,17 +137,23 @@ class localNode(pb.Root):
 		virtualNum	number of the virtual qubit corresponding to the EPR pair received
 		"""
 
-		logging.debug("LOCAL %s: Got both qubits from Alice.", self.node.name)
+		logging.debug("LOCAL %s: Got both qubits from Alice and Bob.", self.node.name)
 
-		# We'll test an operation that will cause a merge of the two remote registers
-		yield self.qA.callRemote("apply_H")
+		# We'll test an operation that will cause a merge of the two remote registers: undo EPR pair
 		yield self.qA.callRemote("cnot_onto", self.qB)
+		yield self.qA.callRemote("apply_H")
 
-		# Output state: expect EPR pair
+		# Output state: expect |0>|0>
 		(realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits",[self.qA,self.qB])
 		rho = self.assemble_qubit(realRho,imagRho)
-		print("EXPECTED: EPR Pair")
-		print("Qubits are:", rho)
+		expectedRho = Qobj([[1,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]])
+
+		if rho == expectedRho:
+			print("Testing register merge, both remote, same node, same register............ok")
+		else:
+			print("Testing register merge, both remote, same node, same register............fail")
+
+		reactor.stop()
 
 	def assemble_qubit(self, realM, imagM):
 		"""
@@ -194,6 +200,6 @@ def main():
 	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
 main()
 
