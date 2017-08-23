@@ -99,7 +99,7 @@ def main():
 	cqc.send(msg)
 
 	#Receive return message
-	data=cqc.recv(128)
+	data=cqc.recv(192)
 	hdr=CQCHeader(data)
 	print(hdr.printable())
 

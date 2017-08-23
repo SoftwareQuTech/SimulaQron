@@ -55,10 +55,11 @@ def main():
 	q=qubit(cqc)
 
 	# Perform Hadamard
-	q.apply_H()
+	q.H()
 
 	# Measure qubit
-	q.measure()
+	m=q.measure()
+	print("Measurement outcome is: {}".format(m))
 
 	# Stop the connection
 	cqc.close()

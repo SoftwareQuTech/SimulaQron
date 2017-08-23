@@ -155,7 +155,7 @@ class CQCConnection:
 		else:
 			checkedBuf=True
 
-		for _ in range(10):
+		while True:
 
 			#If buf does not contain enough data, read in more
 			if checkedBuf:
@@ -183,6 +183,9 @@ class CQCConnection:
 				# Remove the header from the buffer
 				self.buf = self.buf[CQC_HDR_LENGTH:len(self.buf)]
 
+				# Check for error
+				self.check_error(currHeader)
+
 				# logging.debug("CQC %s: Read CQC Header: %s", self.name, self.currHeader.printable())
 			# Check whether we already received all the data
 			if len(self.buf) < currHeader.length:
@@ -203,6 +206,19 @@ class CQCConnection:
 			return (currHeader,notifyHeader)
 		except struct.error as err:
 			print(err)
+	def check_error(self,hdr):
+		self._errorHandler(hdr.tp)
+	def _errorHandler(self,cqc_err):
+		if cqc_err==CQC_ERR_GENERAL:
+			raise CQCGeneralError("General error")
+		if cqc_err==CQC_ERR_NOQUBIT:
+			raise CQCNoQubitError("No more qubits available")
+		if cqc_err==CQC_ERR_UNSUPP:
+			raise CQCUnsuppError("Sequence not supported")
+		if cqc_err==CQC_ERR_TIMEOUT:
+			raise CQCTimeoutError("Timout")
+		if cqc_err==CQC_ERR_INUSE:
+			raise CQCInuseError("Qubit ID in use")
 
 class qubit:
 	"""
@@ -298,6 +314,46 @@ class qubit:
 			message=self._cqc.receive()
 			print_return_msg(message)
 
+	def rot_Y(self,step,notify=True,block=True):
+		"""
+		Applies rotation around the y-axis with the angle of 2*pi/256*step radians.
+		If notify is true, the return message is printed before the method finishes.
+		"""
+		self._cqc.sendCmdXtra(self._qID,CQC_CMD_ROT_Y,step=step,notify=int(notify),block=int(block))
+		if notify:
+			message=self._cqc.receive()
+			print_return_msg(message)
+
+	def rot_Z(self,step,notify=True,block=True):
+		"""
+		Applies rotation around the z-axis with the angle of 2*pi/256*step radians.
+		If notify is true, the return message is printed before the method finishes.
+		"""
+		self._cqc.sendCmdXtra(self._qID,CQC_CMD_ROT_Z,step=step,notify=int(notify),block=int(block))
+		if notify:
+			message=self._cqc.receive()
+			print_return_msg(message)
+
+	def cnot(self,target,notify=True,block=True):
+		"""
+		Applies a cnot onto target.
+		Target should be a qubit-object with the same cqc connection.
+		"""
+		self._cqc.sendCmdXtra(self._qID,CQC_CMD_CNOT,notify=int(notify),block=int(block),xtra_qID=target._qID)
+		if notify:
+			message=self._cqc.receive()
+			print_return_msg(message)
+
+	def cphase(self,target,notify=True,block=True):
+		"""
+		Applies a cnot onto target.
+		Target should be a qubit-object with the same cqc connection.
+		"""
+		self._cqc.sendCmdXtra(self._qID,CQC_CMD_CPHASE,notify=int(notify),block=int(block),xtra_qID=target._qID)
+		if notify:
+			message=self._cqc.receive()
+			print_return_msg(message)
+
 	def measure(self,block=True):
 		"""
 		Measures the qubit in the standard basis and returns the measurement outcome.
@@ -313,16 +369,27 @@ class qubit:
 		except AttributeError:
 			return None
 
-	def reset(self,notify=True,block=True):
+	def reset(self,notify=True,block=True):#TODO NOT WORKING?
 		"""
 		Resets the qubit.
 		If notify is true, the return message is printed before the method finishes.
 		"""
+		raise NotImplementedError("Not implemented yet")
 		self._cqc.sendCommand(self._qID,CQC_CMD_RESET,notify=int(notify),block=int(block))
 		if notify:
 			message=self._cqc.receive()
 			print_return_msg(message)
 
+class CQCGeneralError(Exception):
+	pass
+class CQCNoQubitError(Exception):
+	pass
+class CQCUnsuppError(Exception):
+	pass
+class CQCTimeoutError(Exception):
+	pass
+class CQCInuseError(Exception):
+	pass
 
 def print_return_msg(message):
 	"""

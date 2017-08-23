@@ -51,18 +51,20 @@ def main():
 	# Initialize the connection
 	cqc=CQCConnection(myName)
 
-	# Create qubit 1
+	# cqc.sendCommand(0,CQC_CMD_MEASURE)
+
+	# Create qubits
 	q1=qubit(cqc)
-
-	# Measure qubit 1
-	m1=q1.measure()
-	print("Measurement outcome is: {}".format(m1))
-
-	# Create qubit 2
 	q2=qubit(cqc)
 
-	# Measure qubit 2
+	# Create Bell-pair
+	q1.H()
+	q1.cnot(q2)
+
+	# Measure qubits
+	m1=q1.measure()
 	m2=q2.measure()
+	print("Measurement outcome is: {}".format(m1))
 	print("Measurement outcome is: {}".format(m2))
 
 	# Stop the connection
