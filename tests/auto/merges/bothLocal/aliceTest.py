@@ -27,6 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 import sys, os
 
 from twisted.spread import pb
@@ -39,6 +40,17 @@ from SimulaQron.general.hostConfig import *
 from SimulaQron.virtNode.crudeSimulator import *
 
 from SimulaQron.local.setup import *
+
+def assemble_qubit(realM, imagM):
+	"""
+        Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
+        We need this since Twisted PB does not support sending complex valued object natively.
+        """
+	M = realM
+	for s in range(len(M)):
+		for t in range(len(M)):
+			M[s][t] = realM[s][t] + 1j * imagM[s][t]
+	return Qobj(M)
 
 
 
@@ -72,21 +84,17 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 	yield qA.callRemote("apply_H")
 	yield qA.callRemote("cnot_onto",qB)
 
-	# Send qubit B to Bob
-	# Instruct the virtual node to transfer the qubit
-	remoteNumA = yield virtRoot.callRemote("send_qubit",qA, "Charlie")
-	remoteNumB = yield virtRoot.callRemote("send_qubit",qB, "Charlie")
-	logging.debug("LOCAL %s: Remote qubit is %d.",myName, remoteNumA)
-	logging.debug("LOCAL %s: Remote qubit is %d.",myName, remoteNumB)
+	# Output state
+	(realRho, imagRho) = yield virtRoot.callRemote("get_multiple_qubits",[qA,qB])
+	rho = assemble_qubit(realRho,imagRho)
+	expectedRho = Qobj([[0.5,0,0,0.5],[0,0,0,0],[0,0,0,0],[0.5,0,0,0.5]])
 
-	# Tell Charlie the number of the virtual qubit so the can use it locally
-	# and extend it to a GHZ state with Charlie
-	charlie = classicalNet.hostDict["Charlie"]
-	yield charlie.root.callRemote("receive_epr_Alice", remoteNumA)
-	yield charlie.root.callRemote("receive_epr_Bob", remoteNumB)
+	if rho == expectedRho:
+		print("Testing register merge, both local, same register............ok")
+	else:
+		print("Testing register merge, both local, same register............fail")
 
 	reactor.stop()
-
 
 		
 #####################################################################################################
@@ -147,6 +155,6 @@ def main():
 	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
 main()
 

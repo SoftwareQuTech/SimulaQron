@@ -28,31 +28,20 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-import sys, os
+import os
 
 from twisted.spread import pb
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue, DeferredList, Deferred
 
+from qutip import *
+
 from SimulaQron.virtNode.basics import *
 from SimulaQron.virtNode.quantum import *
-from SimulaQron.general.hostConfig import *
 from SimulaQron.virtNode.crudeSimulator import *
+from SimulaQron.general.hostConfig import *
 
 from SimulaQron.local.setup import *
-
-def assemble_qubit(realM, imagM):
-	"""
-        Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
-        We need this since Twisted PB does not support sending complex valued object natively.
-        """
-	M = realM
-	for s in range(len(M)):
-		for t in range(len(M)):
-			M[s][t] = realM[s][t] + 1j * imagM[s][t]
-	return Qobj(M)
-
-
 
 #####################################################################################################
 #
@@ -62,10 +51,9 @@ def assemble_qubit(realM, imagM):
 # quantum backend, as well as the nodes in the classical communication network), and the local classical
 # communication server is running (if applicable).
 #
-@inlineCallbacks
 def runClientNode(qReg, virtRoot, myName, classicalNet):
 	"""
-	Code to execute for the local client node. Called if all connections are established.
+	Code to execture for the local client node. Called if all connections are established.
 	
 	Arguments
 	qReg		quantum register (twisted object supporting remote method calls)
@@ -75,26 +63,8 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 	"""
 
 	logging.debug("LOCAL %s: Runing client side program.",myName)
-	# Create a second register
-	newReg = yield virtRoot.callRemote("new_register")
 
-	# Create 2 qubits
-	qA = yield virtRoot.callRemote("new_qubit_inreg",qReg)
-	qB = yield virtRoot.callRemote("new_qubit_inreg",newReg)
 
-	# Put qubits A and B in an EPR state
-	yield qA.callRemote("apply_H")
-	yield qA.callRemote("cnot_onto",qB)
-
-	# Output state: expect EPR pair
-	(realRho, imagRho) = yield virtRoot.callRemote("get_multiple_qubits",[qA,qB])
-	rho = assemble_qubit(realRho,imagRho)
-	print("EXPECTED: EPR Pair")
-	print("Qubits are:", rho)
-
-	reactor.stop()
-
-		
 #####################################################################################################
 #
 # localNode
@@ -109,6 +79,7 @@ class localNode(pb.Root):
 		self.node = node
 		self.classicalNet = classicalNet
 
+		self.virtQubit = None
 		self.virtRoot = None
 		self.qReg = None
 
@@ -121,14 +92,59 @@ class localNode(pb.Root):
 	def remote_test(self):
 		return "Tested!"
 
+	# This can be called by Alice to tell Bob where to get the qubit and what corrections to apply
+	@inlineCallbacks
+	def remote_receive_qubit(self, virtualNum):
+		"""
+		Recover the qubit from teleportation.
+		
+		Arguments
+		a,b		received measurement outcomes from Alice
+		virtualNum	number of the virtual qubit corresponding to the EPR pair received
+		"""
+
+		logging.debug("LOCAL %s: Getting reference to qubit number %d.",self.node.name, virtualNum)
+
+		# Get a reference to our side of the EPR pair
+		qA = yield self.virtRoot.callRemote("get_virtual_ref",virtualNum)
+
+		# Create a fresh qubit
+		q = yield self.virtRoot.callRemote("new_qubit_inreg",self.qReg)
+
+		# Test merrge by executing a CNOT from the fresh qubit onto the epr pair - does nothing
+		yield q.callRemote("apply_H")
+		yield q.callRemote("cnot_onto",qA)
+
+		# Print the received qubits
+		(realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits",[qA, q])
+		rho = self.assemble_qubit(realRho,imagRho)
+		expectedRho = Qobj([[0.5,0,0,0.5],[0,0,0,0],[0,0,0,0],[0.5,0,0,0.5]])
+
+		if rho == expectedRho:
+			print("Testing register merge: B to A............ok")
+		else:
+			print("Testing register merge: B to A............fail")
+
+	def assemble_qubit(self, realM, imagM):
+		"""
+		Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
+		We need this since Twisted PB does not support sending complex valued object natively.
+		"""
+		M = realM
+		for s in range(len(M)):
+			for t in range(len(M)):
+				M[s][t] = realM[s][t] + 1j * imagM[s][t]
+		
+		return Qobj(M)
+		
 #####################################################################################################
 #
 # main
 #
 def main():
 
-	# In this example, we are Alice.
-	myName = "Alice"
+	# In this example, we are Bob.
+	myName = "Bob"
 
 	# This file defines the network of virtual quantum nodes
 	virtualFile = os.path.join(os.path.dirname(__file__), '../../../../config/virtualNodes.cfg')
@@ -153,6 +169,6 @@ def main():
 	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
 main()
 

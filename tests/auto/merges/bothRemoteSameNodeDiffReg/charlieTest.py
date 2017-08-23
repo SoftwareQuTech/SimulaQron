@@ -16,10 +16,10 @@
 #    names of its contributors may be used to endorse or promote products
 #    derived from this software without specific prior written permission.
 # 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ''AS IS'' AND ANY
+# THIS SOFTWARE IS PROVIDED BY COPYRIGHT HOLDER ''AS IS'' AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+# DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
 # DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 # (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 # LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -27,20 +27,20 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import sys, os
+import os
 
 from twisted.spread import pb
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue, DeferredList, Deferred
 
+from qutip import *
+
 from SimulaQron.virtNode.basics import *
 from SimulaQron.virtNode.quantum import *
-from SimulaQron.general.hostConfig import *
 from SimulaQron.virtNode.crudeSimulator import *
+from SimulaQron.general.hostConfig import *
 
 from SimulaQron.local.setup import *
-
-
 
 #####################################################################################################
 #
@@ -50,10 +50,9 @@ from SimulaQron.local.setup import *
 # quantum backend, as well as the nodes in the classical communication network), and the local classical
 # communication server is running (if applicable).
 #
-@inlineCallbacks
 def runClientNode(qReg, virtRoot, myName, classicalNet):
 	"""
-	Code to execute for the local client node. Called if all connections are established.
+	Code to execture for the local client node. Called if all connections are established.
 	
 	Arguments
 	qReg		quantum register (twisted object supporting remote method calls)
@@ -64,22 +63,7 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 
 	logging.debug("LOCAL %s: Runing client side program.",myName)
 
-	# Create qubits
-	qB = yield virtRoot.callRemote("new_qubit_inreg",qReg)
 
-	# Instruct the virtual node to transfer the qubit
-	remoteNum = yield virtRoot.callRemote("send_qubit",qB, "Charlie")
-	logging.debug("LOCAL %s: Remote qubit is %d.",myName, remoteNum)
-
-	# Tell Charlie the number of the virtual qubit so the can use it locally
-	# and extend it to a GHZ state with Charlie
-	charlie = classicalNet.hostDict["Charlie"]
-	yield charlie.root.callRemote("receive_qubit_Bob", remoteNum)
-
-	reactor.stop()
-
-
-		
 #####################################################################################################
 #
 # localNode
@@ -94,8 +78,11 @@ class localNode(pb.Root):
 		self.node = node
 		self.classicalNet = classicalNet
 
+		self.virtQubit = None
 		self.virtRoot = None
-		self.qReg = None
+
+		self.gotAlice = False
+		self.gotBob = False
 
 	def set_virtual_node(self, virtRoot):
 		self.virtRoot = virtRoot
@@ -106,6 +93,81 @@ class localNode(pb.Root):
 	def remote_test(self):
 		return "Tested!"
 
+	# This can be called by Alice or Bob to tell Charlie where to get the qubit and what to do next
+	@inlineCallbacks
+	def remote_receive_epr_Alice(self, virtualNum):
+		"""
+		Recover the qubit from Alice. We should now have a tripartite GHZ state
+		
+		Arguments
+		virtualNum	number of the virtual qubit corresponding to the EPR pair received
+		"""
+
+		logging.debug("LOCAL %s: Getting reference to qubit number %d.",self.node.name, virtualNum)
+
+		self.qA = yield self.virtRoot.callRemote("get_virtual_ref",virtualNum)
+		self.gotAlice = True
+
+		if self.gotAlice and self.gotBob:
+			self.got_both()
+
+	@inlineCallbacks
+	def remote_receive_epr_Bob(self, virtualNum):
+		"""
+		Recover the qubit from Bob. We should now have a tripartite GHZ state
+		
+		Arguments
+		virtualNum	number of the virtual qubit corresponding to the EPR pair received
+		"""
+
+		logging.debug("LOCAL %s: Getting reference to qubit number %d.",self.node.name, virtualNum)
+
+		self.qB = yield self.virtRoot.callRemote("get_virtual_ref",virtualNum)
+		self.gotBob = True
+
+		if self.gotAlice and self.gotBob:
+			self.got_both()
+
+	@inlineCallbacks
+	def got_both(self):
+		"""
+		Recover the qubit from Bob. We should now have a tripartite GHZ state
+		
+		Arguments
+		virtualNum	number of the virtual qubit corresponding to the EPR pair received
+		"""
+
+		logging.debug("LOCAL %s: Got both qubits from Alice.", self.node.name)
+
+		# We'll test an operation that will cause a merge of the two remote registers
+		yield self.qA.callRemote("apply_H")
+		yield self.qA.callRemote("cnot_onto", self.qB)
+
+		# Output state: expect EPR pair
+		(realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits",[self.qA,self.qB])
+		rho = self.assemble_qubit(realRho,imagRho)
+		expectedRho = Qobj([[0.5,0,0,0.5],[0,0,0,0],[0,0,0,0],[0.5,0,0,0.5]])
+
+		if rho == expectedRho:
+			print("Testing register merge, both remote, same node, different register............ok")
+		else:
+			print("Testing register merge, both remote, same node, different register............fail")
+
+		reactor.stop()
+
+	def assemble_qubit(self, realM, imagM):
+		"""
+		Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
+		We need this since Twisted PB does not support sending complex valued object natively.
+		"""
+		M = realM
+		for s in range(len(M)):
+			for t in range(len(M)):
+				M[s][t] = realM[s][t] + 1j * imagM[s][t]
+		
+		return Qobj(M)
+		
+
 #####################################################################################################
 #
 # main
@@ -113,7 +175,7 @@ class localNode(pb.Root):
 def main():
 
 	# In this example, we are Bob.
-	myName = "Bob"
+	myName = "Charlie"
 
 	# This file defines the network of virtual quantum nodes
 	virtualFile = os.path.join(os.path.dirname(__file__), '../../../../config/virtualNodes.cfg')
@@ -138,6 +200,6 @@ def main():
 	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
 main()
 

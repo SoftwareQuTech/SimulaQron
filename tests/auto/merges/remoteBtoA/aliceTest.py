@@ -65,7 +65,7 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 
 	logging.debug("LOCAL %s: Runing client side program.",myName)
 
-	# Create qubit
+	# Create a qubit
 	qA = yield virtRoot.callRemote("new_qubit_inreg",qReg)
 
 	# Instruct the virtual node to transfer the qubit
@@ -73,6 +73,7 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 	logging.debug("LOCAL %s: Remote qubit is %d.",myName, remoteNum)
 
 	# Tell Bob the number of the virtual qubit so the can use it locally
+	# and extend it to a GHZ state with Charlie
 	bob = classicalNet.hostDict["Bob"]
 	yield bob.root.callRemote("receive_qubit", remoteNum)
 
@@ -138,6 +139,6 @@ def main():
 	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
 main()
 

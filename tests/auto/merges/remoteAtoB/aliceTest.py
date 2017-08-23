@@ -27,6 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 import sys, os
 
 from twisted.spread import pb
@@ -64,25 +65,16 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 
 	logging.debug("LOCAL %s: Runing client side program.",myName)
 
-	# Create new register
-	newReg = yield virtRoot.callRemote("new_register")
-
-	# Create 2 qubits
+	# Create qubit
 	qA = yield virtRoot.callRemote("new_qubit_inreg",qReg)
-	qB = yield virtRoot.callRemote("new_qubit_inreg",newReg)
 
 	# Instruct the virtual node to transfer the qubit
-	remoteNumA = yield virtRoot.callRemote("send_qubit",qA, "Charlie")
-	remoteNumB = yield virtRoot.callRemote("send_qubit",qB, "Charlie")
-	logging.debug("LOCAL %s: Remote qubit is %d.",myName, remoteNumA)
-	logging.debug("LOCAL %s: Remote qubit is %d.",myName, remoteNumB)
+	remoteNum = yield virtRoot.callRemote("send_qubit",qA, "Bob")
+	logging.debug("LOCAL %s: Remote qubit is %d.",myName, remoteNum)
 
-	# Tell Charlie the number of the virtual qubit so the can use it locally
-	# and extend it to a GHZ state with Charlie
-	charlie = classicalNet.hostDict["Charlie"]
-	yield charlie.root.callRemote("receive_epr_Alice", remoteNumA)
-	yield charlie.root.callRemote("receive_epr_Bob", remoteNumB)
-
+	# Tell Bob the number of the virtual qubit so the can use it locally
+	bob = classicalNet.hostDict["Bob"]
+	yield bob.root.callRemote("receive_qubit", remoteNum)
 	reactor.stop()
 
 
@@ -145,6 +137,6 @@ def main():
 	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
 main()
 

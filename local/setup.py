@@ -38,7 +38,7 @@ from qutip import *
 import logging
 import time
 
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+# logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
 #####################################################################################################
 #
 # setup_local
