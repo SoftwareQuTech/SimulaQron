@@ -45,22 +45,28 @@ from SimulaQron.cqc.pythonLib.cqc import *
 #
 def main():
 
-	# In this example, we are Alice.
-	myName="Alice"
+	# Initialize the connections
+	cqc=CQCConnection("Alice")
 
-	# Initialize the connection
-	cqc=CQCConnection(myName)
+	# Create qubit
+	q=qubit(cqc)
 
-	# Send Hello message
-	cqc.sendSimple(CQC_TP_HELLO)
+	# Measure qubit
+	m=q.measure()
+	print("Measurement outcome is: {}".format(m))
 
-	# Get return message
-	message=cqc.readMessage()
-	print_return_msg(message)
+	#Test
+	qubit._next_qID=0
+
+	# Create qubit
+	q=qubit(cqc)
+
+	# Measure qubit
+	m=q.measure()
+	print("Measurement outcome is: {}".format(m))
 
 	# Stop the connection
 	cqc.close()
-
 
 
 ##################################################################################################

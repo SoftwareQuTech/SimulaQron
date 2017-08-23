@@ -45,25 +45,27 @@ from SimulaQron.cqc.pythonLib.cqc import *
 #
 def main():
 
-	# In this example, we are Alice.
-	myName="Alice"
+	# Initialize the connections
+	Alice=CQCConnection("Alice")
+	Bob=CQCConnection("Bob",appID=1)
 
-	# Initialize the connection
-	cqc=CQCConnection(myName)
-
-	# cqc.sendCommand(0,CQC_CMD_MEASURE)
-
-	# Create qubits
-	q1=qubit(cqc)
-	q2=qubit(cqc)
+	# Create qubits at Alice
+	q1=qubit(Alice)
+	q2=qubit(Alice)
 
 	# Create Bell-pair
 	q1.H()
 	q1.cnot(q2)
 
+	#Send second qubit to Bob
+	Alice.sendQubit(q2,"Bob",remote_appID=1)
+
+	# Bobs receive qubit
+	q3=Bob.recvQubit()
+
 	# Measure qubits
 	m1=q1.measure()
-	m2=q2.measure()
+	m2=q3.measure()
 	print("Measurement outcome is: {}".format(m1))
 	print("Measurement outcome is: {}".format(m2))
 
