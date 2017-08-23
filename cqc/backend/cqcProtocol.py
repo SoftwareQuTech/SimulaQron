@@ -287,17 +287,19 @@ class CQCProtocol(Protocol):
 		logging.debug("CQC %s: Command received", self.name)
 
 		# Run the entire command list, incl. actions after completion which here we will do instantly
-		succ = yield self._process_command(header, header.length, data);
+		(succ,shouldNotify) = yield self._process_command(header, header.length, data);
 		if succ:
-			# Send a notification that we are done if successful
-			self._send_back_cqc(header, CQC_TP_DONE);
-			logging.debug("CQC %s: Command successful, sent done.", self.name)
+			if shouldNotify:
+				# Send a notification that we are done if successful
+				self._send_back_cqc(header, CQC_TP_DONE);
+				logging.debug("CQC %s: Command successful, sent done.", self.name)
 
 	@inlineCallbacks
 	def _process_command(self, cqc_header, length, data):
 		"""
 			Process the commands - called recursively to also process additional command lists.
 		"""
+
 		cmdData = data
 
 		# Read in all the commands sent
@@ -305,6 +307,9 @@ class CQCProtocol(Protocol):
 		while l < length:
 			cmd = CQCCmdHeader(cmdData[l:l+CQC_CMD_HDR_LENGTH]);
 			newl = l + CQC_CMD_HDR_LENGTH;
+
+			# Should we notify
+			shouldNotify=cmd.notify
 
 			# Check if this command includes an additional header
 			if self.hasXtra(cmd):
@@ -322,22 +327,23 @@ class CQCProtocol(Protocol):
 			logging.debug("CQC %s: Executing command: %s", self.name, cmd.printable())
 			if not cmd.instr in self.commandHandlers:
 				self._send_back_cqc(header, CQC_ERR_UNSUPP)
-				return False
+				return (False,0)
 
 			succ = yield self.commandHandlers[cmd.instr](cqc_header, cmd, xtra);
 			if not succ:
-				return False
+				return (False,0)
 
 			# Check if there are additional commands to execute afterwards
 			if cmd.action:
-				succ = self._process_command(cqc_header, xtra.cmdLength, data[newl:newl+xtra.cmdLength])
+				(succ,retNotify) = self._process_command(cqc_header, xtra.cmdLength, data[newl:newl+xtra.cmdLength])
+				shouldNotify=(shouldNotify or retNotify)
 				if not succ:
-					return False
+					return (False,0)
 				newl = newl + xtra.cmdLength;
 
 			l = newl;
 
-		return True
+		return (True,shouldNotify)
 
 	def hasXtra(self, cmd):
 		"""

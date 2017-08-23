@@ -141,31 +141,38 @@ class CQCConnection:
 		xtra_msg=xtra_hdr.pack()
 		self._s.send(xtra_msg)
 
-	def receive(self,maxsize=128): # WHAT IS GOOD SIZE?
+	def receive(self,maxsize=192): # WHAT IS GOOD SIZE?
 		"""
 		Receive the whole message from cqc server.
 		Returns (CQCHeader,None) or (CQCHeader,CQCNotifyHeader) depending on the type of message.
 		Maxsize is the max size of message.
 		"""
 
-		#Initilize buffer and check
+		#Initilize checks
 		gotCQCHeader=False
+		if self.buf:
+			checkedBuf=False
+		else:
+			checkedBuf=True
 
 		for _ in range(10):
 
-			# Receive data
-			data=self._s.recv(maxsize)
+			#If buf does not contain enough data, read in more
+			if checkedBuf:
+				# Receive data
+				data=self._s.recv(maxsize)
 
-			# Read whatever we received into a buffer
-			if self.buf:
-				self.buf+=data
-			else:
-				self.buf=data
+				# Read whatever we received into a buffer
+				if self.buf:
+					self.buf+=data
+				else:
+					self.buf=data
 
 			# If we don't have the CQC header yet, try and read it in full.
 			if not gotCQCHeader:
 				if len(self.buf) < CQC_HDR_LENGTH:
 					# Not enough data for CQC header, return and wait for the rest
+					checkedBuf=True
 					continue
 
 				# Got enough data for the CQC Header so read it in
@@ -181,6 +188,7 @@ class CQCConnection:
 			if len(self.buf) < currHeader.length:
 				# Still waiting for data
 				# logging.debug("CQC %s: Incomplete data. Waiting.", self.name)
+				checkedBuf=True
 				continue
 			else:
 				break
@@ -190,6 +198,7 @@ class CQCConnection:
 			return (currHeader,None)
 		try:
 			rawNotifyHeader=self.buf[:CQC_NOTIFY_LENGTH]
+			self.buf=self.buf[CQC_NOTIFY_LENGTH:len(self.buf)]
 			notifyHeader=CQCNotifyHeader(rawNotifyHeader)
 			return (currHeader,notifyHeader)
 		except struct.error as err:
@@ -294,11 +303,10 @@ class qubit:
 		Measures the qubit in the standard basis and returns the measurement outcome.
 		If now MEASOUT message is received, None is returned.
 		"""
-		self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE,block=int(block))
+		self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE,notify=0,block=int(block))
 
 		#Return measurement outcome
 		message=self._cqc.receive()
-		print_return_msg(message)
 		try:
 			notifyHdr=message[1]
 			return notifyHdr.outcome
