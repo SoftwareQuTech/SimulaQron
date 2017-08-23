@@ -51,15 +51,19 @@ def main():
 	# Initialize the connection
 	cqc=CQCConnection(myName)
 
-	# Create qubit
-	q=qubit(cqc)
+	# Create qubit 1
+	q1=qubit(cqc)
 
-	# Perform Gates
-	q.apply_rot_X(0)
+	# Measure qubit 1
+	m1=q1.measure()
+	print("Measurement outcome is: {}".format(m1))
 
-	# Measure qubit
-	m=q.measure()
-	print("Measurement outcome is: {}".format(m))
+	# Create qubit 2
+	q2=qubit(cqc)
+
+	# Measure qubit 2
+	m2=q2.measure()
+	print("Measurement outcome is: {}".format(m2))
 
 	# Stop the connection
 	cqc.close()

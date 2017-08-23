@@ -103,7 +103,7 @@ class CQCConnection:
 		msg=hdr.pack()
 		self._s.send(msg)
 
-	def sendCommand(self,qID,command):
+	def sendCommand(self,qID,command,notify=1,block=1,action=0):
 		"""
 		Sends a simple message and command message to the cqc server.
 		"""
@@ -115,11 +115,11 @@ class CQCConnection:
 
 		#Send Command
 		cmd_hdr=CQCCmdHeader()
-		cmd_hdr.setVals(qID,command,0,0,0) #IS NOTIFY BLOCK AND ACTION IMPLEMENTED?
+		cmd_hdr.setVals(qID,command,notify,block,action)
 		cmd_msg=cmd_hdr.pack()
 		self._s.send(cmd_msg)
 
-	def sendCmdXtra(self,qID,command,xtra_qID=0,step=0,remote_app_ID=0,remote_node=0,remote_port=0,cmd_length=0):
+	def sendCmdXtra(self,qID,command,notify=1,block=1,action=0,xtra_qID=0,step=0,remote_app_ID=0,remote_node=0,remote_port=0,cmd_length=0):
 		"""
 		Sends a simple message, command message and xtra message to the cqc server.
 		"""
@@ -131,7 +131,7 @@ class CQCConnection:
 
 		#Send Command
 		cmd_hdr=CQCCmdHeader()
-		cmd_hdr.setVals(qID,command,0,0,0) #IS NOTIFY BLOCK AND ACTION IMPLEMENTED?
+		cmd_hdr.setVals(qID,command,notify,block,action)
 		cmd_msg=cmd_hdr.pack()
 		self._s.send(cmd_msg)
 
@@ -200,106 +200,121 @@ class qubit:
 	A qubit.
 	"""
 	_next_qID=0
-	def __init__(self,cqc,wait_for_return=True):
+	def __init__(self,cqc,notify=True,block=True):
 		"""
 		Initializes the qubit. The cqc connection must be given.
-		If wait_for_return is true, the return message is printed before the method finishes.
+		If notify is true, the return message is printed before the method finishes.
 		"""
 		self._cqc=cqc
 
 		# Which qID
-		self._qID=self._next_qID
-		self._next_qID+=1
+		self._qID=qubit._next_qID
+		qubit._next_qID+=1
 
 		# Create new qubit at the cqc server
-		self._cqc.sendCommand(self._qID,CQC_CMD_NEW)
-		if wait_for_return:
+		self._cqc.sendCommand(self._qID,CQC_CMD_NEW,notify=int(notify),block=int(block))
+		if notify:
 			message=self._cqc.receive()
 			print_return_msg(message)
 	def __str__(self):
 		return "Qubit at the node {}".format(self._cqc.name)
 
-	def apply_I(self,wait_for_return=True):
+	def I(self,notify=True,block=True):
 		"""
 		Performs an identity gate on the qubit.
-		If wait_for_return is true, the return message is printed before the method finishes.
+		If notify is true, the return message is printed before the method finishes.
 		"""
-		self._cqc.sendCommand(self._qID,CQC_CMD_I)
-		if wait_for_return:
+		self._cqc.sendCommand(self._qID,CQC_CMD_I,notify=int(notify),block=int(block))
+		if notify:
 			message=self._cqc.receive()
 			print_return_msg(message)
 
-	def apply_X(self,wait_for_return=True):
+	def X(self,notify=True,block=True):
 		"""
 		Performs a X on the qubit.
-		If wait_for_return is true, the return message is printed before the method finishes.
+		If notify is true, the return message is printed before the method finishes.
 		"""
-		self._cqc.sendCommand(self._qID,CQC_CMD_X)
-		if wait_for_return:
+		self._cqc.sendCommand(self._qID,CQC_CMD_X,notify=int(notify),block=int(block))
+		if notify:
 			message=self._cqc.receive()
 			print_return_msg(message)
 
-	def apply_Y(self,wait_for_return=True):
+	def Y(self,notify=True,block=True):
 		"""
 		Performs a Y on the qubit.
-		If wait_for_return is true, the return message is printed before the method finishes.
+		If notify is true, the return message is printed before the method finishes.
 		"""
-		self._cqc.sendCommand(self._qID,CQC_CMD_Y)
-		if wait_for_return:
+		self._cqc.sendCommand(self._qID,CQC_CMD_Y,notify=int(notify),block=int(block))
+		if notify:
 			message=self._cqc.receive()
 			print_return_msg(message)
 
-	def apply_Z(self,wait_for_return=True):
+	def Z(self,notify=True,block=True):
 		"""
 		Performs a Z on the qubit.
-		If wait_for_return is true, the return message is printed before the method finishes.
+		If notify is true, the return message is printed before the method finishes.
 		"""
-		self._cqc.sendCommand(self._qID,CQC_CMD_Z)
-		if wait_for_return:
+		self._cqc.sendCommand(self._qID,CQC_CMD_Z,notify=int(notify),block=int(block))
+		if notify:
 			message=self._cqc.receive()
 			print_return_msg(message)
 
-	def apply_T(self,wait_for_return=True):
+	def T(self,notify=True,block=True):
 		"""
 		Performs a T gate on the qubit.
-		If wait_for_return is true, the return message is printed before the method finishes.
+		If notify is true, the return message is printed before the method finishes.
 		"""
-		self._cqc.sendCommand(self._qID,CQC_CMD_T)
-		if wait_for_return:
+		self._cqc.sendCommand(self._qID,CQC_CMD_T,notify=int(notify),block=int(block))
+		if notify:
 			message=self._cqc.receive()
 			print_return_msg(message)
 
-	def apply_H(self,wait_for_return=True):
+	def H(self,notify=True,block=True):
 		"""
 		Performs a Hadamard on the qubit.
-		If wait_for_return is true, the return message is printed before the method finishes.
+		If notify is true, the return message is printed before the method finishes.
 		"""
-		self._cqc.sendCommand(self._qID,CQC_CMD_H)
-		if wait_for_return:
+		self._cqc.sendCommand(self._qID,CQC_CMD_H,notify=int(notify),block=int(block))
+		if notify:
 			message=self._cqc.receive()
 			print_return_msg(message)
 
-	def apply_rot_X(self,step,wait_for_return=True):
+	def rot_X(self,step,notify=True,block=True):
 		"""
 		Applies rotation around the x-axis with the angle of 2*pi/256*step radians.
-		If wait_for_return is true, the return message is printed before the method finishes.
+		If notify is true, the return message is printed before the method finishes.
 		"""
-		self._cqc.sendCmdXtra(self._qID,CQC_CMD_ROT_X,step=step)
-		if wait_for_return:
+		self._cqc.sendCmdXtra(self._qID,CQC_CMD_ROT_X,step=step,notify=int(notify),block=int(block))
+		if notify:
 			message=self._cqc.receive()
 			print_return_msg(message)
 
-	def measure(self):
+	def measure(self,block=True):
 		"""
 		Measures the qubit in the standard basis and returns the measurement outcome.
 		If now MEASOUT message is received, None is returned.
 		"""
-		self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE)
+		self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE,block=int(block))
 
 		#Return measurement outcome
 		message=self._cqc.receive()
-		notifyHdr=message[1]
-		return notifyHdr.outcome
+		print_return_msg(message)
+		try:
+			notifyHdr=message[1]
+			return notifyHdr.outcome
+		except AttributeError:
+			return None
+
+	def reset(self,notify=True,block=True):
+		"""
+		Resets the qubit.
+		If notify is true, the return message is printed before the method finishes.
+		"""
+		self._cqc.sendCommand(self._qID,CQC_CMD_RESET,notify=int(notify),block=int(block))
+		if notify:
+			message=self._cqc.receive()
+			print_return_msg(message)
+
 
 def print_return_msg(message):
 	"""
