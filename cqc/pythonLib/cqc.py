@@ -34,7 +34,7 @@ from SimulaQron.cqc.backend.cqcHeader import *
 
 class CQCConnection:
 	_appIDs=[]
-	def __init__(self,name,cqcFile=None,appID=0):
+	def __init__(self,name,cqcFile=None,appID=0,virtualFile=None): #TODO hopefully remove virtualFile
 		"""
 		Initialize a connection to the cqc server with the name given as input.
 		A path to a configure file for the cqc network can be given,
@@ -65,6 +65,27 @@ class CQCConnection:
 			myHost = self._cqcNet.hostDict[self.name]
 		else:
 			raise ValueError("Host name '{}' is not in the cqc network".format(name))
+
+		####################################################
+		# Perhaps temporary TODO
+		####################################################
+
+		# This file defines the network of virtual servers
+		if virtualFile==None:
+			self.virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
+
+		# Read configuration files for the virtual network
+		self._virtualNet = networkConfig(self.virtualFile)
+
+		# Host data
+		if self.name in self._virtualNet.hostDict:
+			pass #TODO use host of virt?
+		else:
+			raise ValueError("Host name '{}' is not in the virtual network".format(name))
+
+		####################################################
+		# Perhaps temporary TODO
+		####################################################
 
 		#Get IP of correct form
 		myIP=socket.inet_ntoa(struct.pack("!L",myHost.ip))
@@ -140,6 +161,47 @@ class CQCConnection:
 		xtra_hdr.setVals(xtra_qID,step,remote_appID,remote_node,remote_port,cmd_length)
 		xtra_msg=xtra_hdr.pack()
 		self._s.send(xtra_msg)
+
+	def sendGetTime(self,qID,notify=1,block=1,action=0):
+		"""
+		Sends a simple message and get-time message
+		"""
+		#Send Header
+		hdr=CQCHeader()
+		hdr.setVals(CQC_VERSION,CQC_TP_GET_TIME,self._appID,CQC_CMD_HDR_LENGTH)
+		print("Header")
+		print(hdr.printable())
+		msg=hdr.pack()
+		self._s.send(msg)
+
+		#Send Command
+		cmd_hdr=CQCCmdHeader()
+		cmd_hdr.setVals(qID,0,notify,block,action)
+		print("CmdHeader")
+		print(cmd_hdr.printable())
+		cmd_msg=cmd_hdr.pack()
+		self._s.send(cmd_msg)
+
+	def sendFactory(self,qID,notify=1,block=1,action=0):
+		"""
+		Sends a simple message and factory message
+		"""
+		raise NotImplementedError("Not implemented yet")
+		#Send Header
+		hdr=CQCHeader()
+		hdr.setVals(CQC_VERSION,CQC_TP_FACTORY,self._appID,CQC_CMD_HDR_LENGTH)
+		print("Header")
+		print(hdr.printable())
+		msg=hdr.pack()
+		self._s.send(msg)
+
+		#Send Command
+		cmd_hdr=CQCCmdHeader()
+		cmd_hdr.setVals(qID,0,notify,block,action)
+		print("CmdHeader")
+		print(cmd_hdr.printable())
+		cmd_msg=cmd_hdr.pack()
+		self._s.send(cmd_msg)
 
 	def readMessage(self,maxsize=192): # WHAT IS GOOD SIZE?
 		"""
@@ -228,17 +290,20 @@ class CQCConnection:
 		remote_appID	: The app ID of the application running on the receiving node.
 		"""
 
-		# Get receiving host
-		hostDict=self._cqcNet.hostDict
+		# Get receiving host #TODO for now virtual and not cqc
+		hostDict=self._virtualNet.hostDict
 		if name in hostDict:
 			recvHost=hostDict[name]
 		else:
-			raise ValueError("Host name '{}' is not in the cqc network".format(name))
+			raise ValueError("Host name '{}' is not in the virtual network".format(name))
 
 		self.sendCmdXtra(q._qID,CQC_CMD_SEND,notify=int(notify),block=int(block),remote_appID=remote_appID,remote_node=recvHost.ip,remote_port=recvHost.port)
 		if notify:
 			message=self.readMessage()
 			print_return_msg(message)
+
+		#Deactivate qubit
+		q._active=False
 
 	def recvQubit(self,notify=True,block=True):
 		"""
@@ -248,22 +313,45 @@ class CQCConnection:
 		remote_appID	: The app ID of the application running on the receiving node.
 		"""
 
-		# Get receiving host
-		hostDict=self._cqcNet.hostDict
-		if name in hostDict:
-			recvHost=hostDict[name]
-		else:
-			raise ValueError("Host name '{}' is not in the cqc network".format(name))
-
 		q=qubit(self,createNew=False)
 		self.sendCmdXtra(q._qID,CQC_CMD_RECV,notify=int(notify),block=int(block))
 		message=self.readMessage() #TODO TAKE CARE OF RETURN MESSAGES OF RECEIVE
 		print_return_msg(message)
-		message=self.readMessage()
-		print_return_msg(message)
+		# message=self.readMessage()
+		# print_return_msg(message)
+		# if notify:
+		# 	message=self.readMessage()
+		# 	print_return_msg(message)
+
+		#Activate and return qubit
+		q._active=True
+		return q
+
+	def createEPR(self,name,remote_appID=0,notify=True,block=True):
+		"""
+		Creates epr with other host in cqc network.
+		NOT YET IMPLEMENTED.
+		Name		: Name of the node as specified in the cqc network config file.
+		remote_appID	: The app ID of the application running on the receiving node.
+		"""
+
+		raise NotImplementedError("EPR is not yet implemented")
+
+		# Get receiving host #TODO for now virtual and not cqc
+		hostDict=self._virtualNet.hostDict
+		if name in hostDict:
+			recvHost=hostDict[name]
+		else:
+			raise ValueError("Host name '{}' is not in the virtual network".format(name))
+
+		q=qubit(self,createNew=False)
+		self.sendCmdXtra(q._qID,CQC_CMD_EPR,notify=int(notify),block=int(block),remote_appID=remote_appID,remote_node=recvHost.ip,remote_port=recvHost.port)
 		if notify:
 			message=self.readMessage()
 			print_return_msg(message)
+
+		#Activate and return qubit
+		q._active=True
 		return q
 
 class CQCGeneralError(Exception):
@@ -275,6 +363,8 @@ class CQCUnsuppError(Exception):
 class CQCTimeoutError(Exception):
 	pass
 class CQCInuseError(Exception):
+	pass
+class QubitNotActiveError(Exception):
 	pass
 
 def print_return_msg(message):
@@ -291,18 +381,30 @@ class qubit:
 	"""
 	A qubit.
 	"""
-	_next_qID=0
+	_next_qID={}
 	def __init__(self,cqc,notify=True,block=True,createNew=True):
 		"""
 		Initializes the qubit. The cqc connection must be given.
 		If notify is true, the return message is printed before the method finishes.
 		createNew is set to False when we receive a qubit.
 		"""
+
+		#Cqc connection
 		self._cqc=cqc
 
+		# Active qubit
+		if createNew:
+			self._active=True
+		else:
+			self._active=False
+
 		# Which qID
-		self._qID=qubit._next_qID
-		qubit._next_qID+=1
+		if cqc._appID in qubit._next_qID:
+			self._qID=qubit._next_qID[cqc._appID]
+			qubit._next_qID[cqc._appID]+=1
+		else:
+			self._qID=0
+			qubit._next_qID[cqc._appID]=1
 
 		if createNew:
 			# Create new qubit at the cqc server
@@ -311,13 +413,21 @@ class qubit:
 				message=self._cqc.readMessage()
 				print_return_msg(message)
 	def __str__(self):
-		return "Qubit at the node {}".format(self._cqc.name)
+		if self._active:
+			return "Qubit at the node {}".format(self._cqc.name)
+		else:
+			return "Not active qubit"
+
+	def check_active(self):
+		if not self._active:
+			raise QubitNotActiveError("Qubit is not active, has either been sent, measured or not recieved")
 
 	def I(self,notify=True,block=True):
 		"""
 		Performs an identity gate on the qubit.
 		If notify is true, the return message is printed before the method finishes.
 		"""
+		self.check_active()
 		self._cqc.sendCommand(self._qID,CQC_CMD_I,notify=int(notify),block=int(block))
 		if notify:
 			message=self._cqc.readMessage()
@@ -328,6 +438,7 @@ class qubit:
 		Performs a X on the qubit.
 		If notify is true, the return message is printed before the method finishes.
 		"""
+		self.check_active()
 		self._cqc.sendCommand(self._qID,CQC_CMD_X,notify=int(notify),block=int(block))
 		if notify:
 			message=self._cqc.readMessage()
@@ -338,6 +449,7 @@ class qubit:
 		Performs a Y on the qubit.
 		If notify is true, the return message is printed before the method finishes.
 		"""
+		self.check_active()
 		self._cqc.sendCommand(self._qID,CQC_CMD_Y,notify=int(notify),block=int(block))
 		if notify:
 			message=self._cqc.readMessage()
@@ -348,6 +460,7 @@ class qubit:
 		Performs a Z on the qubit.
 		If notify is true, the return message is printed before the method finishes.
 		"""
+		self.check_active()
 		self._cqc.sendCommand(self._qID,CQC_CMD_Z,notify=int(notify),block=int(block))
 		if notify:
 			message=self._cqc.readMessage()
@@ -358,6 +471,7 @@ class qubit:
 		Performs a T gate on the qubit.
 		If notify is true, the return message is printed before the method finishes.
 		"""
+		self.check_active()
 		self._cqc.sendCommand(self._qID,CQC_CMD_T,notify=int(notify),block=int(block))
 		if notify:
 			message=self._cqc.readMessage()
@@ -368,6 +482,7 @@ class qubit:
 		Performs a Hadamard on the qubit.
 		If notify is true, the return message is printed before the method finishes.
 		"""
+		self.check_active()
 		self._cqc.sendCommand(self._qID,CQC_CMD_H,notify=int(notify),block=int(block))
 		if notify:
 			message=self._cqc.readMessage()
@@ -378,6 +493,7 @@ class qubit:
 		Applies rotation around the x-axis with the angle of 2*pi/256*step radians.
 		If notify is true, the return message is printed before the method finishes.
 		"""
+		self.check_active()
 		self._cqc.sendCmdXtra(self._qID,CQC_CMD_ROT_X,step=step,notify=int(notify),block=int(block))
 		if notify:
 			message=self._cqc.readMessage()
@@ -388,6 +504,7 @@ class qubit:
 		Applies rotation around the y-axis with the angle of 2*pi/256*step radians.
 		If notify is true, the return message is printed before the method finishes.
 		"""
+		self.check_active()
 		self._cqc.sendCmdXtra(self._qID,CQC_CMD_ROT_Y,step=step,notify=int(notify),block=int(block))
 		if notify:
 			message=self._cqc.readMessage()
@@ -398,6 +515,7 @@ class qubit:
 		Applies rotation around the z-axis with the angle of 2*pi/256*step radians.
 		If notify is true, the return message is printed before the method finishes.
 		"""
+		self.check_active()
 		self._cqc.sendCmdXtra(self._qID,CQC_CMD_ROT_Z,step=step,notify=int(notify),block=int(block))
 		if notify:
 			message=self._cqc.readMessage()
@@ -408,6 +526,7 @@ class qubit:
 		Applies a cnot onto target.
 		Target should be a qubit-object with the same cqc connection.
 		"""
+		self.check_active()
 		self._cqc.sendCmdXtra(self._qID,CQC_CMD_CNOT,notify=int(notify),block=int(block),xtra_qID=target._qID)
 		if notify:
 			message=self._cqc.readMessage()
@@ -418,20 +537,23 @@ class qubit:
 		Applies a cnot onto target.
 		Target should be a qubit-object with the same cqc connection.
 		"""
+		self.check_active()
 		self._cqc.sendCmdXtra(self._qID,CQC_CMD_CPHASE,notify=int(notify),block=int(block),xtra_qID=target._qID)
 		if notify:
 			message=self._cqc.readMessage()
 			print_return_msg(message)
 
-	def measure(self,block=True):
+	def measure(self,block=True): #TODO destructive, if so, should delete?
 		"""
 		Measures the qubit in the standard basis and returns the measurement outcome.
 		If now MEASOUT message is received, None is returned.
 		"""
+		self.check_active()
 		self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE,notify=0,block=int(block))
 
 		#Return measurement outcome
 		message=self._cqc.readMessage()
+		self._active=False
 		try:
 			notifyHdr=message[1]
 			return notifyHdr.outcome
@@ -443,10 +565,28 @@ class qubit:
 		Resets the qubit.
 		If notify is true, the return message is printed before the method finishes.
 		"""
+		self.check_active()
 		raise NotImplementedError("Not implemented yet")
 		self._cqc.sendCommand(self._qID,CQC_CMD_RESET,notify=int(notify),block=int(block))
 		if notify:
 			message=self._cqc.readMessage()
 			print_return_msg(message)
+		self._active=False
+
+	def getTime(self,notify=True,block=True):
+		"""
+		Returns the time information of the qubit.
+		If now INF_TIME message is received, None is returned.
+		"""
+		self.check_active()
+		self._cqc.sendGetTime(self._qID,notify=int(notify),block=int(block))
+
+		# Return time-stamp
+		message=self._cqc.readMessage()
+		try:
+			notifyHdr=message[1]
+			return notifyHdr.datetime
+		except AttributeError:
+			return None
 
 

@@ -53,6 +53,8 @@ def main():
 	q1=qubit(Alice)
 	q2=qubit(Alice)
 
+	# tmpqID=q2._qID
+
 	# Create Bell-pair
 	q1.H()
 	q1.cnot(q2)
@@ -63,14 +65,19 @@ def main():
 	# Bobs receive qubit
 	q3=Bob.recvQubit()
 
+	# Test
+	# Alice.sendCommand(tmpqID,CQC_CMD_NEW)
+	# Alice.sendCommand(tmpqID,CQC_CMD_MEASURE)
+
 	# Measure qubits
 	m1=q1.measure()
-	m2=q3.measure()
+	m3=q3.measure()
 	print("Measurement outcome is: {}".format(m1))
-	print("Measurement outcome is: {}".format(m2))
+	print("Measurement outcome is: {}".format(m3))
 
-	# Stop the connection
-	cqc.close()
+	# Stop the connections
+	Alice.close()
+	Bob.close()
 
 
 ##################################################################################################

@@ -375,20 +375,18 @@ class CQCProtocol(Protocol):
 	def handle_time(self, header, data):
 
 		# Read the command header to learn the qubit ID
-		rawCmdHeader = data[4:4+CQC_CMD_HDR_LENGTH];
-		hdr = CQCCmdHeader(rawCmdHeader);
+		rawCmdHeader = data[:CQC_CMD_HDR_LENGTH];
+		cmd_hdr = CQCCmdHeader(rawCmdHeader);
 
-		# Lookup the desired qubit list for application
-		qList = self.qDict[header.app_id];
-		if not qList:
-			# App ID has no qubits
-			self._send_back_cqc(header, CQC_ERR_NOQUBIT);
-			return;
+		# Get the qubit list
+		qList = self.factory.qubitList
 
 		# Lookup the desired qubit
-		if not qList[hdr.qubit_id]:
+		if (header.app_id,cmd_hdr.qubit_id) in qList:
+			q=qList[(header.app_id,cmd_hdr.qubit_id)]
+		else:
 			# Specified qubit is unknown
-			send_noqubit(self, header);
+			self._send_back_cqc(header, CQC_ERR_NOQUBIT);
 			return;
 
 		# Craft reply
@@ -397,7 +395,7 @@ class CQCProtocol(Protocol):
 
 		# Then we send a notify header with the timing details
 		notify = CQCNotifyHeader();
-		notify.setVals(header.qubit_id, 0, 0, 0, 0, q.timestamp);
+		notify.setVals(cmd_hdr.qubit_id, 0, 0, 0, 0, q.timestamp);
 		msg = notify.pack();
 		self.transport.write(msg)
 
