@@ -201,6 +201,10 @@ class simpleEngine(quantumEngine):
 	def apply_rotation(self,qubitNum,n,a):
 		"""
 		Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError is raised
+		Arguments:
+                qubitNum    Qubit number
+		n	    A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+		a	    The rotation angle in radians.
 		"""
 		nNorm=np.linalg.norm(n)
 		if nNorm==0:

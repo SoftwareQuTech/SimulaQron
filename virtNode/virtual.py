@@ -115,7 +115,7 @@ class virtualNode(pb.Root):
 		# Initialize the list of qubits at this node
 		self.virtQubits = []
 		self.simQubits = []
-		
+
 		# Set up connections to the neighouring nodes in the network
 		# Wait so servers have time to start
 		reactor.callLater(2,self.connectNet)
@@ -363,7 +363,7 @@ class virtualNode(pb.Root):
 	@inlineCallbacks
 	def remote_cqc_send_qubit(self, num, targetName, app_id, remote_app_id):
 		"""
-		Send interface for CQC to add the qubit to the remote nodes received list for an application. 
+		Send interface for CQC to add the qubit to the remote nodes received list for an application.
 
 		Arguments:
 		num		number of virtual qubit to send
@@ -371,15 +371,15 @@ class virtualNode(pb.Root):
 		app_id		application asking to have this qubit delivered
 		remote_app_id	application ID to deliver the qubit to
 		"""
-	
+
 		qubit = self.remote_get_virtual_ref(num)
-	
+
 		oldVirtNum = num
 		newVirtNum = yield self.remote_send_qubit(qubit, targetName)
 
 		# Lookup host ID of node
 		remoteNode = self.conn[targetName]
-		
+
 		# Ask to add to list
 		yield remoteNode.root.callRemote("cqc_add_recv_list", self.myID.name, app_id, remote_app_id, newVirtNum)
 
@@ -412,7 +412,7 @@ class virtualNode(pb.Root):
 		qc = qQueue.popleft();
 		if not qc:
 			return None
-		
+
 		logging.debug("VIRTUAL NODE %s: Returning qubit for app id %d from recv list", self.myID.name, to_app_id)
 		return self.remote_get_virtual_ref(qc.virt_num)
 
@@ -455,7 +455,7 @@ class virtualNode(pb.Root):
 			qubit.active = 0
 
 			# Remove the qubit from the local virtual list. Note it remains in the simulated
-			# list, since we continue to simulate this qubit. 
+			# list, since we continue to simulate this qubit.
 			self.virtQubits.remove(qubit)
 		finally:
 			self._release_global_lock()
@@ -1012,7 +1012,10 @@ class virtualQubit(pb.Referenceable):
 	@inlineCallbacks
 	def remote_apply_rotation(self,n,a):
 		"""
-		Apply rotation around axis n with angle a
+		Apply rotation around axis n with angle a.
+		Arguments:
+		n	A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+		a	The rotation angle in radians.
 		"""
 		yield self._single_gate("apply_rotation",n,a)
 
@@ -1102,7 +1105,7 @@ class virtualQubit(pb.Referenceable):
 
 		if not lockedLocal:
 			def0 = self.virtNode.root._get_global_lock()
-			
+
 			if lockedRemoteTarget:
 				return(DeferredList([def0, def1, def2], fireOnOneCallback=False, consumeErrors=True))
 			else:
@@ -1129,7 +1132,7 @@ class virtualQubit(pb.Referenceable):
 
 		"""
 
-		# Release qubit node locks 
+		# Release qubit node locks
 		if q1simNode == q1virtNode:
 			# first qubit was locally simulated
 			yield self.simNode.root._release_global_lock()
@@ -1363,7 +1366,7 @@ class virtualQubit(pb.Referenceable):
 					logging.debug("RUN GATE")
 					getattr(self.simQubit, localName)(targetNum)
 		except Exception as e:
-			logging.error("VIRTUAL NODE %s: Cannot perform two qubit gate %s", self.virtNode.name, e) 
+			logging.error("VIRTUAL NODE %s: Cannot perform two qubit gate %s", self.virtNode.name, e)
 
 		finally:
 			# We need to release all the locks, no matter what happened
@@ -1424,7 +1427,7 @@ class virtualQubit(pb.Referenceable):
 # Keeping track of received qubits for CQC
 
 class QubitCQC:
-	
+
 	def __init__(self, fromName, toName, from_app_id, to_app_id, new_virt_num):
 		self.fromName = fromName;
 		self.toName = toName;

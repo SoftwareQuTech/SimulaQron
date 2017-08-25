@@ -127,11 +127,14 @@ class simulatedQubit(pb.Referenceable):
 
 	def remote_apply_rotation(self,*args):
 		"""
-		Apply rotation around axis n with angle a. param should be a dictionary of the form {'n':n,'a':a}
+		Apply rotation around axis n with angle a.
+		Arguments:
+		n	A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+		a	The rotation angle in radians.
 		"""
 		n=args[0]
 		a=args[1]
-		logging.debug("VIRTUAL NODE %s: applying T to number %d. Axis=%s,angle=%s",self.node.name, self.num,str(tuple(n)),str(a))
+		logging.debug("VIRTUAL NODE %s: applying rotation to number %d. Axis=%s,angle=%s",self.node.name, self.num,str(tuple(n)),str(a))
 		self.register.apply_rotation(self.num,n,a)
 
 	def remote_measure_inplace(self):

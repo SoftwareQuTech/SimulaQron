@@ -575,7 +575,7 @@ class qubit:
 
 		#print info
 		if print_info:
-			print("App {} tells CQC: 'Perform X-rot (angle {}*2pi/256) to qubit with ID {}'".format(step,self._cqc.name,self._qID))
+			print("App {} tells CQC: 'Perform X-rot (angle {}*2pi/256) to qubit with ID {}'".format(self._cqc.name,step,self._qID))
 
 		self._cqc.sendCmdXtra(self._qID,CQC_CMD_ROT_X,step=step,notify=int(notify),block=int(block))
 		if notify:
@@ -593,7 +593,7 @@ class qubit:
 
 		#print info
 		if print_info:
-			print("App {} tells CQC: 'Perform Y-rot (angle {}*2pi/256) to qubit with ID {}'".format(step,self._cqc.name,self._qID))
+			print("App {} tells CQC: 'Perform Y-rot (angle {}*2pi/256) to qubit with ID {}'".format(self._cqc.name,step,self._qID))
 
 		self._cqc.sendCmdXtra(self._qID,CQC_CMD_ROT_Y,step=step,notify=int(notify),block=int(block))
 		if notify:
@@ -611,7 +611,7 @@ class qubit:
 
 		#print info
 		if print_info:
-			print("App {} tells CQC: 'Perform Z-rot (angle {}*2pi/256) to qubit with ID {}'".format(step,self._cqc.name,self._qID))
+			print("App {} tells CQC: 'Perform Z-rot (angle {}*2pi/256) to qubit with ID {}'".format(self._cqc.name,step,self._qID))
 
 		self._cqc.sendCmdXtra(self._qID,CQC_CMD_ROT_Z,step=step,notify=int(notify),block=int(block))
 		if notify:
