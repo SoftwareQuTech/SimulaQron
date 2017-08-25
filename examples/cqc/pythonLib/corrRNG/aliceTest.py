@@ -27,11 +27,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import socket
-import sys
-import os
-import struct
-
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.pythonLib.cqc import *
@@ -44,24 +39,26 @@ from SimulaQron.cqc.pythonLib.cqc import *
 #
 def main():
 
-	# Initialize the connections
-	cqc=CQCConnection("Alice")
+	# Initialize the connection
+	Alice=CQCConnection("Alice")
 
-	# Create qubit
-	q=qubit(cqc)
+	# Create qubits
+	q1=qubit(Alice)
+	q2=qubit(Alice)
 
-	# Do H
-	q.H()
+	# Create Bell-pair
+	q1.H()
+	q1.cnot(q2)
 
-	#Get time stamp
-	t=q.getTime()
-	print("Timestamp is: {}".format(t))
+	#Send second qubit to Bob
+	Alice.sendQubit(q2,"Bob")
 
-	#Measure
-	m=q.measure()
+	# Measure qubit
+	m=q1.measure()
+	print("Alice measurement outcome is: {}".format(m))
 
-	# Stop the connection
-	cqc.close()
+	# Stop the connections
+	Alice.close()
 
 
 ##################################################################################################

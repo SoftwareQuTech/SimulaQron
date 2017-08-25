@@ -90,7 +90,7 @@ class CQCConnection:
 		#Get IP of correct form
 		myIP=socket.inet_ntoa(struct.pack("!L",myHost.ip))
 
-		#Connect to cqc server and run protocol
+		#Connect to cqc server
 		self._s=None
 		try:
 			self._s=socket.socket(socket.AF_INET,socket.SOCK_STREAM,0)
