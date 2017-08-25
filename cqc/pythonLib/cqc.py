@@ -34,11 +34,13 @@ from SimulaQron.cqc.backend.cqcHeader import *
 
 class CQCConnection:
 	_appIDs=[]
-	def __init__(self,name,cqcFile=None,appID=0,virtualFile=None): #TODO hopefully remove virtualFile
+	def __init__(self,name,cqcFile=None,appID=0):
 		"""
-		Initialize a connection to the cqc server with the name given as input.
-		A path to a configure file for the cqc network can be given,
-		if it's not given the config file '$NETSIM/config/cqcNodes.cfg' will be used.
+		Initialize a connection to the cqc server.
+		Arguments:
+		name	: Name of the host.
+		cqcFile	: Path to cqcFile. If None, '$NETSIM/config/cqcNodes.cfg is used.
+		appID	: Application ID, defaults to a nonused ID.
 		"""
 
 		# Host name
@@ -66,27 +68,6 @@ class CQCConnection:
 		else:
 			raise ValueError("Host name '{}' is not in the cqc network".format(name))
 
-		####################################################
-		# Perhaps temporary TODO
-		####################################################
-
-		# This file defines the network of virtual servers
-		if virtualFile==None:
-			self.virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
-
-		# Read configuration files for the virtual network
-		self._virtualNet = networkConfig(self.virtualFile)
-
-		# Host data
-		if self.name in self._virtualNet.hostDict:
-			pass #TODO use host of virt?
-		else:
-			raise ValueError("Host name '{}' is not in the virtual network".format(name))
-
-		####################################################
-		# Perhaps temporary TODO
-		####################################################
-
 		#Get IP of correct form
 		myIP=socket.inet_ntoa(struct.pack("!L",myHost.ip))
 
@@ -106,6 +87,9 @@ class CQCConnection:
 		return "Socket to cqc server '{}'".format(self.name)
 
 	def get_appID(self):
+		"""
+		Returns the application ID.
+		"""
 		return self._appID
 
 	def close(self):
@@ -127,6 +111,12 @@ class CQCConnection:
 	def sendCommand(self,qID,command,notify=1,block=1,action=0):
 		"""
 		Sends a simple message and command message to the cqc server.
+		Arguments:
+		qID	: qubit ID
+		command	: Command to be executed, eg CQC_CMD_H
+		nofify	: Do we wish to be notified when done.
+		block	: Do we want the qubit to be blocked
+		action	: Are there more commands to be executed
 		"""
 		#Send Header
 		hdr=CQCHeader()
@@ -143,6 +133,18 @@ class CQCConnection:
 	def sendCmdXtra(self,qID,command,notify=1,block=1,action=0,xtra_qID=0,step=0,remote_appID=0,remote_node=0,remote_port=0,cmd_length=0):
 		"""
 		Sends a simple message, command message and xtra message to the cqc server.
+		Arguments:
+		qID		: qubit ID
+		command		: Command to be executed, eg CQC_CMD_H
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		action		: Are there more commands to be executed
+		xtra_qID	: Extra qubit ID for for example CNOT
+		step		: Defines the angle of rotation.
+		remote_appID	: Application ID of remote host
+		remote_node	: ip of remote host in cqc network
+		remote_port	: port of remote host in cqc network
+		cmd_length	: length of extra commands
 		"""
 		#Send Header
 		hdr=CQCHeader()
@@ -165,6 +167,12 @@ class CQCConnection:
 	def sendGetTime(self,qID,notify=1,block=1,action=0):
 		"""
 		Sends a simple message and get-time message
+		Arguments:
+		qID		: qubit ID
+		command		: Command to be executed, eg CQC_CMD_H
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		action		: Are there more commands to be executed
 		"""
 		#Send Header
 		hdr=CQCHeader()
@@ -185,6 +193,12 @@ class CQCConnection:
 	def sendFactory(self,qID,notify=1,block=1,action=0):
 		"""
 		Sends a simple message and factory message
+		Arguments:
+		qID		: qubit ID
+		command		: Command to be executed, eg CQC_CMD_H
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		action		: Are there more commands to be executed
 		"""
 		raise NotImplementedError("Not implemented yet")
 		#Send Header
@@ -269,7 +283,7 @@ class CQCConnection:
 
 	def print_CQC_msg(self,message):
 		"""
-		Prints messsage returned by the receive method of CQCConnection.
+		Prints messsage returned by the readMessage method of CQCConnection.
 		"""
 		hdr=message[0]
 		notifyHdr=message[1]
@@ -290,9 +304,15 @@ class CQCConnection:
 			print("CQC tells App {}: 'Timestamp is {}'".format(self.name,notifyHdr.datetime))
 
 	def check_error(self,hdr):
+		"""
+		Checks if there is an error returned.
+		"""
 		self._errorHandler(hdr.tp)
 
 	def _errorHandler(self,cqc_err):
+		"""
+		Raises an error if there is an error-message
+		"""
 		if cqc_err==CQC_ERR_GENERAL:
 			raise CQCGeneralError("General error")
 		if cqc_err==CQC_ERR_NOQUBIT:
@@ -310,14 +330,16 @@ class CQCConnection:
 		q		: The qubit to send.
 		Name		: Name of the node as specified in the cqc network config file.
 		remote_appID	: The app ID of the application running on the receiving node.
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
 		"""
 
-		# Get receiving host #TODO for now virtual and not cqc
+		# Get receiving host
 		hostDict=self._cqcNet.hostDict
 		if name in hostDict:
 			recvHost=hostDict[name]
 		else:
-			raise ValueError("Host name '{}' is not in the virtual network".format(name))
+			raise ValueError("Host name '{}' is not in the cqc network".format(name))
 
 		#print info
 		if print_info:
@@ -338,6 +360,9 @@ class CQCConnection:
 		q		: The qubit to send.
 		Name		: Name of the node as specified in the cqc network config file.
 		remote_appID	: The app ID of the application running on the receiving node.
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 
 		q=qubit(self,createNew=False)
@@ -366,16 +391,19 @@ class CQCConnection:
 		NOT YET IMPLEMENTED.
 		Name		: Name of the node as specified in the cqc network config file.
 		remote_appID	: The app ID of the application running on the receiving node.
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 
 		raise NotImplementedError("EPR is not yet implemented")
 
-		# Get receiving host #TODO for now virtual and not cqc
+		# Get receiving host
 		hostDict=self._cqcNet.hostDict
 		if name in hostDict:
 			recvHost=hostDict[name]
 		else:
-			raise ValueError("Host name '{}' is not in the virtual network".format(name))
+			raise ValueError("Host name '{}' is not in the cqc network".format(name))
 
 		q=qubit(self,createNew=False)
 
@@ -415,8 +443,14 @@ class qubit:
 	def __init__(self,cqc,notify=True,block=True,print_info=True,createNew=True):
 		"""
 		Initializes the qubit. The cqc connection must be given.
-		If notify is true, the return message is printed before the method finishes.
+		If notify, the return message is received before the method finishes.
 		createNew is set to False when we receive a qubit.
+		Arguments:
+		cqc		: The CQCconnection used
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
+		createNew	: If NEW-message should be sent, used internally
 		"""
 
 		#Cqc connection
@@ -454,13 +488,20 @@ class qubit:
 			return "Not active qubit"
 
 	def check_active(self):
+		"""
+		Checks if the qubit is active
+		"""
 		if not self._active:
 			raise QubitNotActiveError("Qubit is not active, has either been sent, measured or not recieved")
 
 	def I(self,notify=True,block=True,print_info=True):
 		"""
 		Performs an identity gate on the qubit.
-		If notify is true, the return message is printed before the method finishes.
+		If notify, the return message is received before the method finishes.
+		Arguments:
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -478,7 +519,11 @@ class qubit:
 	def X(self,notify=True,block=True,print_info=True):
 		"""
 		Performs a X on the qubit.
-		If notify is true, the return message is printed before the method finishes.
+		If notify, the return message is received before the method finishes.
+		Arguments:
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -496,7 +541,11 @@ class qubit:
 	def Y(self,notify=True,block=True,print_info=True):
 		"""
 		Performs a Y on the qubit.
-		If notify is true, the return message is printed before the method finishes.
+		If notify, the return message is received before the method finishes.
+		Arguments:
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -514,7 +563,11 @@ class qubit:
 	def Z(self,notify=True,block=True,print_info=True):
 		"""
 		Performs a Z on the qubit.
-		If notify is true, the return message is printed before the method finishes.
+		If notify, the return message is received before the method finishes.
+		Arguments:
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -532,7 +585,11 @@ class qubit:
 	def T(self,notify=True,block=True,print_info=True):
 		"""
 		Performs a T gate on the qubit.
-		If notify is true, the return message is printed before the method finishes.
+		If notify, the return message is received before the method finishes.
+		Arguments:
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -550,7 +607,11 @@ class qubit:
 	def H(self,notify=True,block=True,print_info=True):
 		"""
 		Performs a Hadamard on the qubit.
-		If notify is true, the return message is printed before the method finishes.
+		If notify, the return message is received before the method finishes.
+		Arguments:
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -567,8 +628,13 @@ class qubit:
 
 	def rot_X(self,step,notify=True,block=True,print_info=True):
 		"""
-		Applies rotation around the x-axis with the angle of 2*pi/256*step radians.
-		If notify is true, the return message is printed before the method finishes.
+		Applies rotation around the x-axis with the angle of step*2*pi/256 radians.
+		If notify, the return message is received before the method finishes.
+		Arguments:
+		step		: Determines the rotation angle in steps of 2*pi/256
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -585,8 +651,13 @@ class qubit:
 
 	def rot_Y(self,step,notify=True,block=True,print_info=True):
 		"""
-		Applies rotation around the y-axis with the angle of 2*pi/256*step radians.
-		If notify is true, the return message is printed before the method finishes.
+		Applies rotation around the y-axis with the angle of step*2*pi/256 radians.
+		If notify, the return message is received before the method finishes.
+		Arguments:
+		step		: Determines the rotation angle in steps of 2*pi/256
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -603,8 +674,13 @@ class qubit:
 
 	def rot_Z(self,step,notify=True,block=True,print_info=True):
 		"""
-		Applies rotation around the z-axis with the angle of 2*pi/256*step radians.
-		If notify is true, the return message is printed before the method finishes.
+		Applies rotation around the z-axis with the angle of step*2*pi/256 radians.
+		If notify, the return message is received before the method finishes.
+		Arguments:
+		step		: Determines the rotation angle in steps of 2*pi/256
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -623,6 +699,12 @@ class qubit:
 		"""
 		Applies a cnot onto target.
 		Target should be a qubit-object with the same cqc connection.
+		If notify, the return message is received before the method finishes.
+		Arguments:
+		target		: The target qubit
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -641,6 +723,12 @@ class qubit:
 		"""
 		Applies a cphase onto target.
 		Target should be a qubit-object with the same cqc connection.
+		If notify, the return message is received before the method finishes.
+		Arguments:
+		target		: The target qubit
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -659,6 +747,9 @@ class qubit:
 		"""
 		Measures the qubit in the standard basis and returns the measurement outcome.
 		If now MEASOUT message is received, None is returned.
+		Arguments:
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -681,7 +772,11 @@ class qubit:
 	def reset(self,notify=True,block=True,print_info=True):#TODO NOT WORKING?
 		"""
 		Resets the qubit.
-		If notify is true, the return message is printed before the method finishes.
+		If notify, the return message is received before the method finishes.
+		Arguments:
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -698,10 +793,13 @@ class qubit:
 				self._cqc.print_CQC_msg(message)
 		self._active=False
 
-	def getTime(self,notify=True,block=True,print_info=True):
+	def getTime(self,block=True,print_info=True):
 		"""
 		Returns the time information of the qubit.
 		If now INF_TIME message is received, None is returned.
+		Arguments:
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -719,5 +817,3 @@ class qubit:
 			return notifyHdr.datetime
 		except AttributeError:
 			return None
-
-
