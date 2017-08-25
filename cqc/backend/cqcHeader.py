@@ -35,55 +35,56 @@ from struct import *
 CQC_VERSION=0
 
 # Lengths of the headers in bytes
-CQC_HDR_LENGTH=8	# Length of the CQC Header
-CQC_CMD_HDR_LENGTH=4	# Length of a command header
-CQC_CMD_XTRA_LENGTH=16	# Length of extra command information
-CQC_NOTIFY_LENGTH=20	# Length of a notification send from the CQC upwards
+CQC_HDR_LENGTH=8		# Length of the CQC Header
+CQC_CMD_HDR_LENGTH=4		# Length of a command header
+CQC_CMD_XTRA_LENGTH=16		# Length of extra command information
+CQC_NOTIFY_LENGTH=20		# Length of a notification send from the CQC upwards
 
 
 # Constants defining the messages types
-CQC_TP_HELLO=0		# Alive check
-CQC_TP_COMMAND=1	# Execute a command list
-CQC_TP_FACTORY=2 	# Start executing command list repeatedly
-CQC_TP_EXPIRE=3		# Qubit has expired
-CQC_TP_DONE=4		# Done with command
-CQC_TP_RECV=5		# Received qubit
-CQC_TP_EPR_OK=6		# Created EPR pair
-CQC_TP_MEASOUT=7	# Measurement outcome
-CQC_TP_GET_TIME=8	# Get creation time of qubit
-CQC_TP_INF_TIME=9	# Return timinig information
+CQC_TP_HELLO=0			# Alive check
+CQC_TP_COMMAND=1		# Execute a command list
+CQC_TP_FACTORY=2 		# Start executing command list repeatedly
+CQC_TP_EXPIRE=3			# Qubit has expired
+CQC_TP_DONE=4			# Done with command
+CQC_TP_RECV=5			# Received qubit
+CQC_TP_EPR_OK=6			# Created EPR pair
+CQC_TP_MEASOUT=7		# Measurement outcome
+CQC_TP_GET_TIME=8		# Get creation time of qubit
+CQC_TP_INF_TIME=9		# Return timinig information
 
-CQC_ERR_GENERAL=20 	# General purpose error (no details
-CQC_ERR_NOQUBIT=21 	# No more qubits available
-CQC_ERR_UNSUPP=22 	# No sequence not supported
-CQC_ERR_TIMEOUT=23 	# Timeout
-CQC_ERR_INUSE=24	# Qubit ID in use (when creating new qubit)
+CQC_ERR_GENERAL=20 		# General purpose error (no details
+CQC_ERR_NOQUBIT=21 		# No more qubits available
+CQC_ERR_UNSUPP=22 		# No sequence not supported
+CQC_ERR_TIMEOUT=23 		# Timeout
+CQC_ERR_INUSE=24		# Qubit ID in use (when creating new qubit)
 
 # Possible commands
-CQC_CMD_I=0		# Identity (do nothing, wait one step)
-CQC_CMD_NEW=1		# Ask for a new qubit
-CQC_CMD_MEASURE=2	# Measure qubit
-CQC_CMD_RESET=3		# Reset qubit to |0>
-CQC_CMD_SEND=4		# Send qubit to another node
-CQC_CMD_RECV=5		# Ask to receive qubit
-CQC_CMD_EPR=6		# Create EPR pair with the specified node
+CQC_CMD_I=0			# Identity (do nothing, wait one step)
+CQC_CMD_NEW=1			# Ask for a new qubit
+CQC_CMD_MEASURE=2		# Measure qubit
+CQC_CMD_MEASURE_INPLACE=3	# Measure qubit inplace
+CQC_CMD_RESET=4			# Reset qubit to |0>
+CQC_CMD_SEND=5			# Send qubit to another node
+CQC_CMD_RECV=6			# Ask to receive qubit
+CQC_CMD_EPR=7			# Create EPR pair with the specified node
 
-CQC_CMD_X=10		# Pauli X
-CQC_CMD_Z=11		# Pauli Z
-CQC_CMD_Y=12		# Pauli Y
-CQC_CMD_T=13		# T Gate
-CQC_CMD_ROT_X=14	# Rotation over angle around X in 2pi/256 increments
-CQC_CMD_ROT_Y=15	# Rotation over angle around Y in 2pi/256 increments
-CQC_CMD_ROT_Z=16	# Rotation over angle around Z in 2pi/256 increments
-CQC_CMD_H=17		# Hadamard H
+CQC_CMD_X=10			# Pauli X
+CQC_CMD_Z=11			# Pauli Z
+CQC_CMD_Y=12			# Pauli Y
+CQC_CMD_T=13			# T Gate
+CQC_CMD_ROT_X=14		# Rotation over angle around X in 2pi/256 increments
+CQC_CMD_ROT_Y=15		# Rotation over angle around Y in 2pi/256 increments
+CQC_CMD_ROT_Z=16		# Rotation over angle around Z in 2pi/256 increments
+CQC_CMD_H=17			# Hadamard H
 
-CQC_CMD_CNOT=20		# CNOT Gate with this as control
-CQC_CMD_CPHASE=21	# CPHASE Gate with this as control
+CQC_CMD_CNOT=20			# CNOT Gate with this as control
+CQC_CMD_CPHASE=21		# CPHASE Gate with this as control
 
 # Command options
-CQC_OPT_NOTIFY=0x01	# Send a notification when cmd done
-CQC_OPT_ACTION=0x02	# On if there are actions to execute when done
-CQC_OPT_BLOCK=0x04	# Block until command is done
+CQC_OPT_NOTIFY=0x01		# Send a notification when cmd done
+CQC_OPT_ACTION=0x02		# On if there are actions to execute when done
+CQC_OPT_BLOCK=0x04		# Block until command is done
 
 class CQCHeader:
 	"""

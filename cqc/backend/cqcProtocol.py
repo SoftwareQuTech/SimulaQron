@@ -145,6 +145,7 @@ class CQCProtocol(Protocol):
 			CQC_CMD_CNOT : self.cmd_cnot,
 			CQC_CMD_CPHASE : self.cmd_cphase,
 			CQC_CMD_MEASURE : self.cmd_measure,
+			CQC_CMD_MEASURE_INPLACE : self.cmd_measure_inplace,
 			CQC_CMD_RESET : self.cmd_reset,
 			CQC_CMD_SEND : self.cmd_send,
 			CQC_CMD_RECV : self.cmd_recv,
@@ -565,12 +566,15 @@ class CQCProtocol(Protocol):
 			logging.debug("CQC %s: No such qubit",self.name)
 			return False
 
-		# This is wrong XXX
-		outcome = yield virt_qubit.callRemote("measure")
+		outcome = yield virt_qubit.callRemote("measure",inplace=True)
+
+		# If state is |1> do correction
+		if outcome:
+			yield virt_qubit.callRemote("apply_X")
 		return True
 
 	@inlineCallbacks
-	def cmd_measure(self, cqc_header, cmd, xtra):
+	def cmd_measure(self, cqc_header, cmd, xtra, inplace=False):
 		"""
 		Measure
 		"""
@@ -580,7 +584,7 @@ class CQCProtocol(Protocol):
 			logging.debug("CQC %s: No such qubit",self.name)
 			return False
 
-		outcome = yield virt_qubit.callRemote("measure")
+		outcome = yield virt_qubit.callRemote("measure",inplace)
 		if outcome == None:
 			logging.debug("CQC %s: Measurement failed", self.name)
 			self._send_back_cqc(cqc_header, CQC_ERR_GENERAL)
@@ -597,8 +601,17 @@ class CQCProtocol(Protocol):
 		self.transport.write(msg)
 		logging.debug("CQC %s: Notify %s",self.name, hdr.printable())
 
-		# Remove from active mapped qubits
-		del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
+		if not inplace:
+			# Remove from active mapped qubits
+			del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
+
+		return True
+
+	@inlineCallbacks
+	def cmd_measure_inplace(self, cqc_header, cmd, xtra):
+
+		# Call measure with inplace=True
+		self.cmd_measure(cqc_header,cmd,xtra,inplace=True)
 
 		return True
 

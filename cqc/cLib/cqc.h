@@ -82,10 +82,11 @@ typedef struct
 #define CQC_CMD_I		0	/* Identity (do nothing, wait one step) */
 #define	CQC_CMD_NEW		1	/* Ask for a new qubit */
 #define CQC_CMD_MEASURE		2	/* Measure qubit */
-#define CQC_CMD_RESET		3	/* Reset qubit to |0> */
-#define CQC_CMD_SEND		4	/* Send qubit to another node */
-#define CQC_CMD_RECV		5	/* Ask to receive qubit */
-#define CQC_CMD_EPR		6	/* Create EPR pair with the specified node */
+#define CQC_CMD_MEASURE_INPLACE	3	/* Measure qubit inplace */
+#define CQC_CMD_RESET		4	/* Reset qubit to |0> */
+#define CQC_CMD_SEND		5	/* Send qubit to another node */
+#define CQC_CMD_RECV		6	/* Ask to receive qubit */
+#define CQC_CMD_EPR		7	/* Create EPR pair with the specified node */
 
 #define CQC_CMD_X		10	/* Pauli X */
 #define CQC_CMD_Z		11	/* Pauli Z */

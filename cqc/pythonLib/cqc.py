@@ -27,7 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import socket, struct, os, sys
+import socket, struct, os, sys, time
 
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
@@ -421,6 +421,75 @@ class CQCConnection:
 		q._active=True
 		return q
 
+	def tomography(self,preparation,iterations,progress_bar=True):
+		"""
+		Does a tomography on the output from the preparation specified.
+		The frequencies from X, Y and Z measurements are returned as a tuple (f_X,f_Y,f_Z).
+		Arguments:
+		preparation	: A function that takes a qubit as input and applies the prepation-operations.
+		iterations	: Number of measurements in each basis.
+		progress_bar	: Displays a progress bar
+		"""
+
+		accum_outcomes=[0,0,0]
+		if progress_bar:
+			progress=100/(3*iterations)
+			print("")
+
+		# Measure in X
+		for _ in range(iterations):
+			# Progress bar
+			if progress_bar:
+				sys.stdout.write('\r')
+				sys.stdout.write("[%-100s] %d%%" % ('='*int(progress),int(progress)))
+				sys.stdout.flush()
+				progress+=100/(3*iterations)
+
+			# prepare and measure
+			q=qubit(self,print_info=False)
+			preparation(q)
+			q.H(print_info=False)
+			m=q.measure(print_info=False)
+			accum_outcomes[0]+=m
+
+		# Measure in Y
+		for _ in range(iterations):
+			# Progress bar
+			if progress_bar:
+				sys.stdout.write('\r')
+				sys.stdout.write("[%-100s] %d%%" % ('='*int(progress),int(progress)))
+				sys.stdout.flush()
+				progress+=100/(3*iterations)
+
+			# prepare and measure
+			q=qubit(self,print_info=False)
+			preparation(q)
+			q.rot_X(192,print_info=False)
+			m=q.measure(print_info=False)
+			accum_outcomes[1]+=m
+
+		# Measure in Z
+		for _ in range(iterations):
+			# Progress bar
+			if progress_bar:
+				sys.stdout.write('\r')
+				sys.stdout.write("[%-100s] %d%%" % ('='*int(progress),int(progress)))
+				sys.stdout.flush()
+				progress+=100/(3*iterations)
+
+			# prepare and measure
+			q=qubit(self,print_info=False)
+			preparation(q)
+			m=q.measure(print_info=False)
+			accum_outcomes[2]+=m
+
+		if progress_bar:
+			progress=0
+			print("")
+
+		freqs=map(lambda x:x/iterations,accum_outcomes)
+		return list(freqs)
+
 class CQCGeneralError(Exception):
 	pass
 class CQCNoQubitError(Exception):
@@ -743,11 +812,14 @@ class qubit:
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
-	def measure(self,block=True,print_info=True): #TODO destructive, if so, should delete?
+	def measure(self,inplace=False,block=True,print_info=True):
 		"""
 		Measures the qubit in the standard basis and returns the measurement outcome.
 		If now MEASOUT message is received, None is returned.
+		If inplace=False, the measurement is destructive and the qubit is removed from memory.
+		If inplace=True, the qubit is left in the post-measurement state.
 		Arguments:
+		inplace		: If false, measure destructively.
 		block		: Do we want the qubit to be blocked
 		print_info	: If info should be printed
 		"""
@@ -758,18 +830,22 @@ class qubit:
 		if print_info:
 			print("App {} tells CQC: 'Measure qubit with ID {}'".format(self._cqc.name,self._qID))
 
-		self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE,notify=0,block=int(block))
+		if inplace:
+			self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE_INPLACE,notify=0,block=int(block))
+		else:
+			self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE,notify=0,block=int(block))
 
 		#Return measurement outcome
 		message=self._cqc.readMessage()
-		self._active=False
+		if not inplace:
+			self._active=False
 		try:
 			notifyHdr=message[1]
 			return notifyHdr.outcome
 		except AttributeError:
 			return None
 
-	def reset(self,notify=True,block=True,print_info=True):#TODO NOT WORKING?
+	def reset(self,notify=True,block=True,print_info=True):
 		"""
 		Resets the qubit.
 		If notify, the return message is received before the method finishes.
@@ -780,7 +856,7 @@ class qubit:
 		"""
 		# check if qubit is active
 		self.check_active()
-		raise NotImplementedError("Not implemented yet")
+		# raise NotImplementedError("Not implemented yet")
 
 		#print info
 		if print_info:
@@ -791,7 +867,7 @@ class qubit:
 			message=self._cqc.readMessage()
 			if print_info:
 				self._cqc.print_CQC_msg(message)
-		self._active=False
+
 
 	def getTime(self,block=True,print_info=True):
 		"""

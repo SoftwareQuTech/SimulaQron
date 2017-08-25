@@ -1020,9 +1020,9 @@ class virtualQubit(pb.Referenceable):
 		yield self._single_gate("apply_rotation",n,a)
 
 	@inlineCallbacks
-	def remote_measure(self):
+	def remote_measure(self,inplace=False):
 		"""
-		Measure the qubit in the standard basis. This does delete the qubit from the simulation.
+		Measure the qubit in the standard basis. If inplace=False, this does delete the qubit from the simulation.
 
 		Returns the measurement outcome.
 		"""
@@ -1043,7 +1043,8 @@ class virtualQubit(pb.Referenceable):
 					if self.simQubit.active:
 						logging.debug("VIRTUAL NODE %s: Measuring local qubit",self.virtNode.name)
 						outcome = self.simQubit.remote_measure_inplace()
-						self.virtNode.root._remove_sim_qubit(self.simQubit)
+						if not inplace:
+							self.virtNode.root._remove_sim_qubit(self.simQubit)
 						waiting = False
 				except Exception as e:
 					logging.error("VIRTUAL NODE %s: Cannot remove qubit", self.virtNode.name)
@@ -1057,8 +1058,9 @@ class virtualQubit(pb.Referenceable):
 					if active:
 						logging.debug("VIRTUAL NODE %s: Measuring remote qubit at %s.",self.virtNode.name, self.simNode.name)
 						outcome = yield self.simQubit.callRemote("measure_inplace")
-						num = yield self.simQubit.callRemote("get_sim_number")
-						defer = yield self.simNode.root.callRemote("remove_sim_qubit_num",num)
+						if not inplace:
+							num = yield self.simQubit.callRemote("get_sim_number")
+							defer = yield self.simNode.root.callRemote("remove_sim_qubit_num",num)
 						waiting = False
 				except Exception as e:
 					logging.error("VIRTUAL NODE %s: Cannot remove qubit", self.virtNode.name)
