@@ -79,7 +79,7 @@ def main(myName):
 	# to handle remote connections on the classical communication network
 	if myName in cqcNet.hostDict:
 		myHost = cqcNet.hostDict[myName]
-		cqc_factory = CQCFactory(myHost, myName, virtualNet)
+		cqc_factory = CQCFactory(myHost, myName, cqcNet)
 	else:
 		logging.error("LOCAL %s: Cannot start classical communication servers.",myName,e.strerror)
 

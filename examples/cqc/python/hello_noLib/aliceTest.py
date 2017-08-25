@@ -100,7 +100,10 @@ def main():
 	#Receive return message
 	data=cqc.recv(192)
 	hdr=CQCHeader(data)
-	print(hdr.printable())
+	if hdr.tp==CQC_TP_HELLO:
+		print("CQC tells App {}: 'HELLO'".format(myName))
+	else:
+		print("Did not receive a hello message, but rather: {}".format(hdr.printable()))
 
 	#Close the connection
 	cqc.close()

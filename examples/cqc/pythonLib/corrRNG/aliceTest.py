@@ -55,7 +55,7 @@ def main():
 
 	# Measure qubit
 	m=q1.measure()
-	print("Alice measurement outcome is: {}".format(m))
+	print("App {}: Measurement outcome is: {}".format(Alice.name,m))
 
 	# Stop the connections
 	Alice.close()

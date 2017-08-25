@@ -54,7 +54,7 @@ from SimulaQron.cqc.backend.cqcHeader import CQCXtraHeader
 
 class CQCFactory(Factory):
 
-	def __init__(self, host, name, virtualNet):
+	def __init__(self, host, name, cqcNet):
 		"""
 		Initialize CQC Factory.
 
@@ -63,7 +63,7 @@ class CQCFactory(Factory):
 
 		self.host = host
 		self.name = name
-		self.virtualNet = virtualNet
+		self.cqcNet = cqcNet
 		self.virtRoot = None
 		self.qReg = None
 
@@ -95,8 +95,8 @@ class CQCFactory(Factory):
 		"""
 		Lookup name of remote host used within SimulaQron given ip and portnumber.
 		"""
-		for entry in self.virtualNet.hostDict:
-			node = self.virtualNet.hostDict[entry]
+		for entry in self.cqcNet.hostDict:
+			node = self.cqcNet.hostDict[entry]
 			if (node.ip == ip) and (node.port == port):
 				return node.name
 

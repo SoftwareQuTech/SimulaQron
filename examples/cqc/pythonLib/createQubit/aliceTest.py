@@ -53,7 +53,7 @@ def main():
 
 	# Measure qubit
 	m=q.measure()
-	print("Measurement outcome is: {}".format(m))
+	print("App {}: Measurement outcome is: {}".format(myName,m))
 
 	# Stop the connection
 	cqc.close()

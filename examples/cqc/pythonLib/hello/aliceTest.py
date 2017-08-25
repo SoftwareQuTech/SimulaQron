@@ -50,7 +50,7 @@ def main():
 
 	# Get return message
 	message=cqc.readMessage()
-	print_return_msg(message)
+	cqc.print_CQC_msg(message)
 
 	# Stop the connection
 	cqc.close()
