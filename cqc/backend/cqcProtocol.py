@@ -1,4 +1,4 @@
-#
+
 # Copyright (c) 2017, Stephanie Wehner
 # All rights reserved.
 #
@@ -661,7 +661,7 @@ class CQCProtocol(Protocol):
 			if virt_qubit:
 				noQubit = False
 			else:
-				sleep(0.1)
+				time.sleep(0.1)
 
 		logging.debug("CQC %s: Qubit received for app_id %d",self.name, cqc_header.app_id)
 
@@ -681,11 +681,11 @@ class CQCProtocol(Protocol):
 			self.factory._lock.release()
 
 		# Send message we received a qubit back
-		logging.debug("GOO")
+		# logging.debug("GOO")
 		self._send_back_cqc(cqc_header, CQC_TP_RECV,length=CQC_NOTIFY_LENGTH)
 
 		# Send notify header with qubit ID
-		logging.debug("GOO")
+		# logging.debug("GOO")
 		hdr = CQCNotifyHeader();
 		hdr.setVals(cmd.qubit_id, 0, 0,0,0, 0);
 		msg = hdr.pack()
