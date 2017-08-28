@@ -27,10 +27,26 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import socket
+
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.pythonLib.cqc import *
 
+
+def recv_classical():
+	buf=bytearray()
+	s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+	s.bind(('',8831))
+	s.listen(1)
+	(conn,addr)=s.accept()
+	while True:
+		data=conn.recv(1024)
+		if not data:
+			break
+		buf+=data
+	conn.close()
+	return list(buf)
 
 
 #####################################################################################################
@@ -39,37 +55,27 @@ from SimulaQron.cqc.pythonLib.cqc import *
 #
 def main():
 
-	# In this example, we are Alice.
-	myName="Alice"
-
 	# Initialize the connection
-	cqc=CQCConnection(myName)
+	Bob=CQCConnection("Bob")
 
-	# Create qubit
-	q=qubit(cqc)
+	# Make an EPR pair with Alice
+	qB=Bob.createEPR("Alice")
 
-	# Perform Hadamard
-	q.H()
+	# Receive info about corrections
+	data=recv_classical())
+
+	# Apply corrections
+	if b==1:
+		qB.X()
+	if a==1:
+		qB.Z()
 
 	# Measure qubit
-	m=q.measure(inplace=True)
-	print("App {}: Measurement outcome is: {}".format(myName,m))
-
-	# for _ in range(10):
-	# 	# Measure qubit
-	# 	m=q.measure(inplace=True)
-	# 	print("App {}: Measurement outcome is: {}".format(myName,m))
-
-	# q.reset()
-
-	# for _ in range(10):
-	# 	# Measure qubit
-	# 	m=q.measure(inplace=True)
-	# 	print("App {}: Measurement outcome is: {}".format(myName,m))
+	m=qB.measure()
+	print("App {}: Measurement outcome is: {}".format(Bob.name,m))
 
 	# Stop the connection
-	cqc.close()
-
+	Bob.close()
 
 
 ##################################################################################################

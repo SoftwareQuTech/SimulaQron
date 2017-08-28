@@ -34,12 +34,13 @@ from SimulaQron.cqc.backend.cqcHeader import *
 
 class CQCConnection:
 	_appIDs=[]
-	def __init__(self,name,cqcFile=None,appID=0):
+	def __init__(self,name,cqcFile=None,appFile=None,appID=0):
 		"""
 		Initialize a connection to the cqc server.
 		Arguments:
 		name	: Name of the host.
 		cqcFile	: Path to cqcFile. If None, '$NETSIM/config/cqcNodes.cfg is used.
+		appFile	: Path to appFile. If None, '$NETSIM/config/appNodes.cfg is used.
 		appID	: Application ID, defaults to a nonused ID.
 		"""
 
@@ -54,6 +55,9 @@ class CQCConnection:
 
 		# Buffer received data
 		self.buf=None
+
+		# ClassicalServer
+		self._classicalServer=None
 
 		# This file defines the network of CQC servers interfacing to virtual quantum nodes
 		if cqcFile==None:
@@ -83,6 +87,13 @@ class CQCConnection:
 			self._s.close()
 			raise RuntimeError("Could not connect to cqc server '{}'".format(name))
 
+		# This file defines the application network
+		if appFile==None:
+			self.appFile = os.environ.get('NETSIM') + "/config/appNodes.cfg"
+
+		# Read configuration files for the application network
+		self._appNet = networkConfig(self.appFile)
+
 	def __str__(self):
 		return "Socket to cqc server '{}'".format(self.name)
 
@@ -98,6 +109,59 @@ class CQCConnection:
 		"""
 		self._s.close()
 		self._appIDs.remove(self._appID)
+
+	def startClassicalServer(self):
+		"""
+		Sets up a classical channel to another host.
+		"""
+
+		#Get host data
+		myHost=self._appNet.hostDict[self.name]
+
+		# Setup server
+		s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+		s.bind((myHost.hostname,myHost.port))
+		s.listen(1)
+		(conn,addr)=s.accept()
+		self._classicalServer=conn
+
+	def closeClassicalServer(self):
+		if self._classicalServer:
+			self._classicalServer.close()
+			self._classicalServer=None
+
+	def recvClassical(self):
+		if self._classicalServer:
+			return self._classicalServer.recv(1024)
+		else:
+			raise ValueError("A classical server is not up and running")
+
+	def sendClassical(self,name,msg,timout=1):
+		"""
+		Sends a classical message to another host in the application network.
+		Arguments:
+		name	The name of the host in the application network.
+		msg	The message to send, will be converted to a bytesarray.
+		timout	The time to try to connect to the server. When timout is reached an RuntimeError is raised.
+		"""
+		if name in self._appNet.hostDict:
+			remoteHost=self._appNet.hostDict[name]
+		else:
+			raise ValueError("Host name '{}' is not in the cqc network".format(name))
+		connected=False
+		for _ in range(10):
+			try:
+				s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+				s.connect((remoteHost.hostname,remoteHost.port))
+				connected=True
+				break
+			except:
+				time.sleep(0.1)
+		if not connected:
+			raise RuntimeError("Could not connect to server {}".format(name))
+		s.send(bytearray(msg))
+		s.close()
+
 
 	def sendSimple(self,tp):
 		"""
@@ -426,7 +490,7 @@ class CQCConnection:
 		q._active=True
 		return q
 
-	def tomography(self,preparation,iterations,progress_bar=True):
+	def tomography(self,preparation,iterations,progress=True):
 		"""
 		Does a tomography on the output from the preparation specified.
 		The frequencies from X, Y and Z measurements are returned as a tuple (f_X,f_Y,f_Z).
@@ -437,18 +501,14 @@ class CQCConnection:
 		"""
 
 		accum_outcomes=[0,0,0]
-		if progress_bar:
-			progress=100/(3*iterations)
-			print("")
+		if progress:
+			bar=progress_bar(3*iterations)
 
 		# Measure in X
 		for _ in range(iterations):
 			# Progress bar
-			if progress_bar:
-				sys.stdout.write('\r')
-				sys.stdout.write("[%-100s] %d%%" % ('='*int(progress),int(progress)))
-				sys.stdout.flush()
-				progress+=100/(3*iterations)
+			if progress:
+				bar.increase()
 
 			# prepare and measure
 			q=qubit(self,print_info=False)
@@ -460,11 +520,8 @@ class CQCConnection:
 		# Measure in Y
 		for _ in range(iterations):
 			# Progress bar
-			if progress_bar:
-				sys.stdout.write('\r')
-				sys.stdout.write("[%-100s] %d%%" % ('='*int(progress),int(progress)))
-				sys.stdout.flush()
-				progress+=100/(3*iterations)
+			if progress:
+				bar.increase()
 
 			# prepare and measure
 			q=qubit(self,print_info=False)
@@ -476,11 +533,8 @@ class CQCConnection:
 		# Measure in Z
 		for _ in range(iterations):
 			# Progress bar
-			if progress_bar:
-				sys.stdout.write('\r')
-				sys.stdout.write("[%-100s] %d%%" % ('='*int(progress),int(progress)))
-				sys.stdout.flush()
-				progress+=100/(3*iterations)
+			if progress:
+				bar.increase()
 
 			# prepare and measure
 			q=qubit(self,print_info=False)
@@ -488,12 +542,29 @@ class CQCConnection:
 			m=q.measure(print_info=False)
 			accum_outcomes[2]+=m
 
-		if progress_bar:
-			progress=0
-			print("")
+		if progress:
+			bar.close()
+			del bar
 
 		freqs=map(lambda x:x/iterations,accum_outcomes)
 		return list(freqs)
+
+class progress_bar:
+	def __init__(self,maxitr):
+		self.maxitr=maxitr
+		self.itr=0
+		print("")
+		self.update()
+	def increase(self):
+		self.itr+=1
+		self.update()
+	def update(self):
+		procent=int(100*self.itr/self.maxitr)
+		sys.stdout.write('\r')
+		sys.stdout.write("[%-100s] %d%%" % ('='*procent,procent))
+		sys.stdout.flush()
+	def close(self):
+		print("")
 
 class CQCGeneralError(Exception):
 	pass
