@@ -637,6 +637,11 @@ class CQCProtocol(Protocol):
 		yield self.factory.virtRoot.callRemote("cqc_send_qubit", virt_num, targetName, cqc_header.app_id, xtra.remote_app_id)
 		logging.debug("CQC %s: Sent App ID %d qubit id %d to %s",self.name,cqc_header.app_id,cmd.qubit_id, targetName)
 
+		# Remove from active mapped qubits
+		print("test1")
+		del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
+		print("test1")
+
 		return True
 
 	@inlineCallbacks
