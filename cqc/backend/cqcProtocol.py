@@ -611,7 +611,7 @@ class CQCProtocol(Protocol):
 	def cmd_measure_inplace(self, cqc_header, cmd, xtra):
 
 		# Call measure with inplace=True
-		self.cmd_measure(cqc_header,cmd,xtra,inplace=True)
+		yield self.cmd_measure(cqc_header,cmd,xtra,inplace=True)
 
 		return True
 
@@ -698,10 +698,84 @@ class CQCProtocol(Protocol):
 	def cmd_epr(self, cqc_header, cmd, xtra):
 		"""
 		Create EPR pair with another node.
+		Depending on the ips and ports this will either create an EPR-pair and send one part, or just receive.
 		"""
-		logging.debug("CQC %s: EPR Pair ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
-		return True
 
+		#Get ip and port of this host
+		host_ip=self.factory.host.ip
+		host_port=self.factory.host.port
+		host_combined=int(str(host_ip)+str(host_port))
+
+		#Get ip and port of remote host
+		remote_ip=xtra.remote_node
+		remote_port=xtra.remote_port
+		remote_combined=int(str(remote_ip)+str(remote_port))
+
+		# Check that remote is a different host
+		if host_combined == remote_combined:
+			logging.debug("CQC %s: For making EPR, the hosts cannot be the same.",self.name)
+			self._send_back_cqc(cqc_header,CQC_ERR_GENERAL)
+			return False
+
+		#Check if we are sending or receiving
+		if host_combined < remote_combined:
+			# We are sending
+			app_id = cqc_header.app_id
+
+			# Create the first qubit
+			succ = yield self.cmd_new(cqc_header,cmd,xtra)
+			if not succ:
+				return False
+
+			# Find a temporary unused qubit id for the second qubit
+			for q_id2 in range(len(self.factory.qubitList)+1):
+				if not ((app_id,q_id2) in self.factory.qubitList):
+					break
+
+			#Create commmand header for second qubit
+			cmd2=CQCCmdHeader()
+			cmd2.setVals(q_id2,None,None,None,None)
+
+			# Create second qubit
+			succ = yield self.cmd_new(cqc_header,cmd2,None)
+			if not succ:
+				return False
+
+			# Produce EPR-pair
+			succ = yield self.cmd_h(cqc_header,cmd,None)
+			if not succ:
+				return False
+			xtra_cnot=CQCXtraHeader()
+			xtra_cnot.setVals(q_id2,None,None,None,None,None)
+			succ = yield self.cmd_cnot(cqc_header,cmd,xtra_cnot)
+			if not succ:
+				return False
+
+			# Send second qubit
+			succ = yield self.cmd_send(cqc_header,cmd2,xtra)
+			if not succ:
+				return False
+
+			# Send message we received a qubit back
+			self._send_back_cqc(cqc_header, CQC_TP_RECV,length=CQC_NOTIFY_LENGTH)
+
+			# Send notify header with qubit ID
+			hdr = CQCNotifyHeader();
+			hdr.setVals(cmd.qubit_id, 0, 0,0,0, 0);
+			msg = hdr.pack()
+			self.transport.write(msg)
+			logging.debug("CQC %s: Notify %s",self.name, hdr.printable())
+
+			logging.debug("CQC %s: EPR Pair ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+			return True
+		else:
+			# We are receiving. self.cmd_recv sends a RECV message.
+			succ = yield self.cmd_recv(cqc_header,cmd,None)
+			if not succ:
+				return False
+
+			logging.debug("CQC %s: EPR Pair ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+			return True
 
 	@inlineCallbacks
 	def cmd_new(self, cqc_header, cmd, xtra):

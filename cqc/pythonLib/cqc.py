@@ -200,7 +200,7 @@ class CQCConnection:
 		block		: Do we want the qubit to be blocked
 		action		: Are there more commands to be executed
 		"""
-		raise NotImplementedError("Not implemented yet")
+		raise NotImplementedError("Not implemented yet") #TODO
 		#Send Header
 		hdr=CQCHeader()
 		hdr.setVals(CQC_VERSION,CQC_TP_FACTORY,self._appID,CQC_CMD_HDR_LENGTH)
@@ -371,15 +371,16 @@ class CQCConnection:
 		if print_info:
 			print("App {} tells CQC: 'Receive qubit'".format(self.name))
 
-		self.sendCmdXtra(q._qID,CQC_CMD_RECV,notify=int(notify),block=int(block))
-		message=self.readMessage() #TODO TAKE CARE OF RETURN MESSAGES OF RECEIVE
+		self.sendCommand(q._qID,CQC_CMD_RECV,notify=int(notify),block=int(block))
+
+		# Get RECV message
+		message=self.readMessage()
 		if print_info:
 			self.print_CQC_msg(message)
-		# message=self.readMessage()
-		# print_return_msg(message)
-		# if notify:
-		# 	message=self.readMessage()
-		# 	print_return_msg(message)
+
+		if notify:
+			message=self.readMessage()
+			self.print_CQC_msg(message)
 
 		#Activate and return qubit
 		q._active=True
@@ -396,8 +397,6 @@ class CQCConnection:
 		print_info	: If info should be printed
 		"""
 
-		raise NotImplementedError("EPR is not yet implemented")
-
 		# Get receiving host
 		hostDict=self._cqcNet.hostDict
 		if name in hostDict:
@@ -412,6 +411,12 @@ class CQCConnection:
 			print("App {} tells CQC: 'Create EPR-pair with {} and appID {}'".format(self.name,name,remote_appID))
 
 		self.sendCmdXtra(q._qID,CQC_CMD_EPR,notify=int(notify),block=int(block),remote_appID=remote_appID,remote_node=recvHost.ip,remote_port=recvHost.port)
+
+		# Get RECV message
+		message=self.readMessage() #TODO TAKE CARE OF RETURN MESSAGES OF RECEIVE
+		# if print_info:
+		# 	self.print_CQC_msg(message)
+
 		if notify:
 			message=self.readMessage()
 			if print_info:
@@ -856,7 +861,6 @@ class qubit:
 		"""
 		# check if qubit is active
 		self.check_active()
-		# raise NotImplementedError("Not implemented yet")
 
 		#print info
 		if print_info:
