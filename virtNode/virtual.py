@@ -544,6 +544,7 @@ class virtualNode(pb.Root):
 		delQubit	simulated qubit object to delete
 		"""
 
+
 		# Caution: Only qubits simulated at this node can be removed
 		if not delQubit in self.simQubits:
 			logging.error("VIRTUAL NODE %s: Attempt to delete qubit not simulated at this node.",self.myID.name)
@@ -553,6 +554,8 @@ class virtualNode(pb.Root):
 		#
 		delNum = delQubit.num
 		delRegister = delQubit.register
+
+		delQubit.register
 
 		try:
 			# We need to manipulate multiple qubits, get global lock
@@ -1047,6 +1050,9 @@ class virtualQubit(pb.Referenceable):
 						outcome = self.simQubit.remote_measure_inplace()
 						if not inplace:
 							self.virtNode.root._remove_sim_qubit(self.simQubit)
+
+							# Delete from virtual qubits
+							self.virtNode.root.virtQubits.remove(self)
 						waiting = False
 				except Exception as e:
 					logging.error("VIRTUAL NODE %s: Cannot remove qubit", self.virtNode.name)
@@ -1063,6 +1069,9 @@ class virtualQubit(pb.Referenceable):
 						if not inplace:
 							num = yield self.simQubit.callRemote("get_sim_number")
 							defer = yield self.simNode.root.callRemote("remove_sim_qubit_num",num)
+
+							# Delete from virtual qubits
+							self.virtNode.root.virtQubits.remove(self)
 						waiting = False
 				except Exception as e:
 					logging.error("VIRTUAL NODE %s: Cannot remove qubit", self.virtNode.name)

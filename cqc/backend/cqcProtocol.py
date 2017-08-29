@@ -611,9 +611,9 @@ class CQCProtocol(Protocol):
 	def cmd_measure_inplace(self, cqc_header, cmd, xtra):
 
 		# Call measure with inplace=True
-		yield self.cmd_measure(cqc_header,cmd,xtra,inplace=True)
+		succ = yield self.cmd_measure(cqc_header,cmd,xtra,inplace=True)
 
-		return True
+		return succ
 
 	@inlineCallbacks
 	def cmd_send(self, cqc_header, cmd, xtra):
