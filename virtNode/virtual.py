@@ -587,7 +587,6 @@ class virtualNode(pb.Root):
 			# Release the global multi qubit lock
 			self._release_global_lock()
 
-
 	def remote_merge_regs(self, num1, num2):
 		"""
 		Merges the two local quantum registers. Note that these register may simulate virtual qubits across different
@@ -790,10 +789,13 @@ class virtualNode(pb.Root):
 		oldQubitNum = gotQ.num
 
 		# Remove all simulated qubits and the register
-		for q in self.simQubits:
+		# Need to iterate of simQubits in reverse, otherwise wrong elements are removed
+		for q in reversed(self.simQubits):
 			if q.register.num == oldRegNum:
 				self.simQubits.remove(q)
+				gotQ.register.activeQubits-=1
 				toRemove = q.register
+
 
 		return (realM, imagM, activeQ, oldRegNum, oldQubitNum)
 

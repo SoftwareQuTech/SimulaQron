@@ -50,6 +50,11 @@ def main():
 	# Entangle the new qubit
 	qB.cnot(qC)
 
+	# TODO
+	Bob.startClassicalServer()
+	msg=Bob.recvClassical()
+	print(msg)
+
 	# Send qubit to Charlie
 	Bob.sendQubit(qC,"Charlie")
 

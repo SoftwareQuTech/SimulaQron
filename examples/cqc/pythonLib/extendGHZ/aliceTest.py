@@ -45,6 +45,9 @@ def main():
 	# Make an EPR pair with Bob
 	qA=Alice.createEPR("Bob")
 
+	# Send message TODO
+	Alice.sendClassical("Bob",[0])
+
 	# Measure qubit
 	m=qA.measure()
 	to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
