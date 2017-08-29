@@ -58,7 +58,10 @@ def main():
 	# Measure the qubits
 	a=q.measure()
 	b=qA.measure()
-	print("App {}: Measurement outcomes are: a={}, b={}".format(Alice.name,a,b))
+	to_print="App {}: Measurement outcomes are: a={}, b={}".format(Alice.name,a,b)
+	print("|"+"-"*(len(to_print)+2)+"|")
+	print("| "+to_print+" |")
+	print("|"+"-"*(len(to_print)+2)+"|")
 
 	# Send corrections to Bob
 	Alice.sendClassical("Bob",[a,b])

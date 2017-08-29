@@ -32,7 +32,6 @@ from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.pythonLib.cqc import *
 
 
-
 #####################################################################################################
 #
 # main
@@ -42,11 +41,20 @@ def main():
 	# Initialize the connection
 	Bob=CQCConnection("Bob")
 
-	# Receive qubit
-	q=Bob.recvQubit()
+	# Make an EPR pair with Alice
+	qB=Bob.createEPR("Alice")
+
+	# Create a fresh qubit
+	qC=qubit(Bob)
+
+	# Entangle the new qubit
+	qB.cnot(qC)
+
+	# Send qubit to Charlie
+	Bob.sendQubit(qC,"Charlie")
 
 	# Measure qubit
-	m=q.measure()
+	m=qB.measure()
 	to_print="App {}: Measurement outcome is: {}".format(Bob.name,m)
 	print("|"+"-"*(len(to_print)+2)+"|")
 	print("| "+to_print+" |")

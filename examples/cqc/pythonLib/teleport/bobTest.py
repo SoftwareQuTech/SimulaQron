@@ -59,7 +59,10 @@ def main():
 
 	# Measure qubit
 	m=qB.measure()
-	print("App {}: Measurement outcome is: {}".format(Bob.name,m))
+	to_print="App {}: Measurement outcome is: {}".format(Bob.name,m)
+	print("|"+"-"*(len(to_print)+2)+"|")
+	print("| "+to_print+" |")
+	print("|"+"-"*(len(to_print)+2)+"|")
 
 	# Stop the connection
 	Bob.close()

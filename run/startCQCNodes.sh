@@ -6,3 +6,4 @@ cd "$NETSIM/cqc/backend/"
 
 python setupCQC.py Alice &
 python setupCQC.py Bob &
+python setupCQC.py Charlie &

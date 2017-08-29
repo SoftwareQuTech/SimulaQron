@@ -638,9 +638,7 @@ class CQCProtocol(Protocol):
 		logging.debug("CQC %s: Sent App ID %d qubit id %d to %s",self.name,cqc_header.app_id,cmd.qubit_id, targetName)
 
 		# Remove from active mapped qubits
-		print("test1")
 		del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
-		print("test1")
 
 		return True
 

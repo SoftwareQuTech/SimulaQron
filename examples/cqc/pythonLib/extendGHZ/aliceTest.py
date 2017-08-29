@@ -27,10 +27,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.pythonLib.cqc import *
-
 
 
 #####################################################################################################
@@ -40,20 +40,20 @@ from SimulaQron.cqc.pythonLib.cqc import *
 def main():
 
 	# Initialize the connection
-	Bob=CQCConnection("Bob")
+	Alice=CQCConnection("Alice")
 
-	# Receive qubit
-	q=Bob.recvQubit()
+	# Make an EPR pair with Bob
+	qA=Alice.createEPR("Bob")
 
 	# Measure qubit
-	m=q.measure()
-	to_print="App {}: Measurement outcome is: {}".format(Bob.name,m)
+	m=qA.measure()
+	to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
 	print("|"+"-"*(len(to_print)+2)+"|")
 	print("| "+to_print+" |")
 	print("|"+"-"*(len(to_print)+2)+"|")
 
-	# Stop the connection
-	Bob.close()
+	# Stop the connections
+	Alice.close()
 
 
 ##################################################################################################

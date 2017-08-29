@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2017, Stephanie Wehner
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 # 1. Redistributions of source code must retain the above copyright
@@ -15,7 +15,7 @@
 # 4. Neither the name of the QuTech organization nor the
 #    names of its contributors may be used to endorse or promote products
 #    derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ''AS IS'' AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -44,7 +44,7 @@ class networkConfig(pb.Referenceable):
 
 	def read_config(self, filename):
 		"""
-		Reads the configuration file in which each line has the form: node name, hostname, port number. 
+		Reads the configuration file in which each line has the form: node name, hostname, port number.
 		For example:
 		Alice, localhost, 8888
 		"""
@@ -64,14 +64,14 @@ class networkConfig(pb.Referenceable):
 		"""
 		host = self.hostDict[name]
 		print("Host details of ", name, ": ", host.hostname, ":", host.port)
-	
+
 
 class host(pb.Referenceable):
-	
+
 	def __init__(self, name, hostname, port):
 		"""
 		Initialize the details of the host. For now, we just keep the following:
-	
+
 		name		informal name of the host (e.g. Alice)
 		hostname	name of the node on the network (e.g. localhost or yournode.qutech.nl)
 		port		port number on hostname
@@ -90,6 +90,6 @@ class host(pb.Referenceable):
 		self.factory = 0
 		self.root = 0
 		self.defer = 0
-		
-			
+
+
 

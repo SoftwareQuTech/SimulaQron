@@ -32,7 +32,6 @@ from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.pythonLib.cqc import *
 
 
-
 #####################################################################################################
 #
 # main
@@ -40,20 +39,20 @@ from SimulaQron.cqc.pythonLib.cqc import *
 def main():
 
 	# Initialize the connection
-	Bob=CQCConnection("Bob")
+	Charlie=CQCConnection("Charlie")
 
 	# Receive qubit
-	q=Bob.recvQubit()
+	qC=Charlie.recvQubit()
 
 	# Measure qubit
-	m=q.measure()
-	to_print="App {}: Measurement outcome is: {}".format(Bob.name,m)
+	m=qC.measure()
+	to_print="App {}: Measurement outcome is: {}".format(Charlie.name,m)
 	print("|"+"-"*(len(to_print)+2)+"|")
 	print("| "+to_print+" |")
 	print("|"+"-"*(len(to_print)+2)+"|")
 
 	# Stop the connection
-	Bob.close()
+	Charlie.close()
 
 
 ##################################################################################################
