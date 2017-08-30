@@ -444,7 +444,8 @@ class CQCConnection:
 
 		if notify:
 			message=self.readMessage()
-			self.print_CQC_msg(message)
+			if print_info:
+				self.print_CQC_msg(message)
 
 		#Activate and return qubit
 		q._active=True
@@ -551,7 +552,7 @@ class CQCConnection:
 		Test the preparation of a qubit.
 		Returns True if the expected values are inside the confidence interval produced from the data received from the tomography function
 		Arguments:
-		preparation	: A function prepares a qubit and returns this (and preferably sets print_info=False)
+		preparation	: A function that takes a CQCConnection as input and prepares a qubit and returns this (and preferably sets print_info=False)
 		exp_values	: The expected values for measurements in the X, Y and Z basis.
 		conf_values	: The confidence interval (in sigmas)
 		iterations	: Number of measurements in each basis.
