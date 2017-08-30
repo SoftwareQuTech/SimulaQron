@@ -81,13 +81,12 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 
 	#Tell number of virtual qubit to Bob and receive measurement outcome parity
 	bob=classicalNet.hostDict["Bob"]
-	parity = yield bob.root.callRemote("receive_qubit",remoteNum)
+	yield bob.root.callRemote("receive_qubit",remoteNum)
 
 	#Measure qubit (X-basis)
 	yield qA.callRemote("apply_H")
 	outcome=yield qA.callRemote("measure")
 	print("Alice outcome was:", outcome)
-	print("Overal parity was:",(parity+outcome)%2)
 
 	reactor.stop()
 

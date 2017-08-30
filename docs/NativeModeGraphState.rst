@@ -110,7 +110,7 @@ Although the order described here is slightly different the end result is still 
 Setting up
 -----------
 
-We will run everything locally (localhost) using the standard virtualNodes.cfg file found in conig that define the virtual quantum nodes run in the background to simulate the quantum hardware::
+We will run everything locally (localhost) using the standard virtualNodes.cfg file found in config that define the virtual quantum nodes run in the background to simulate the quantum hardware::
 
 	# Network configuration file
 	#

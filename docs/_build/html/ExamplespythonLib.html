@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Examples &#8212; SimulaQron 0.1 alpha documentation</title>
+    <title>Examples using the python library &#8212; SimulaQron 0.1 alpha documentation</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -27,8 +27,8 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)" href="ExamplesDirect.html" />
-    <link rel="prev" title="Getting started" href="GettingStarted.html" /> 
+    <link rel="next" title="Teleport" href="ExamplespythonLibTeleport.html" />
+    <link rel="prev" title="Examples using the C library" href="ExamplescLib.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -41,26 +41,28 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="ExamplesDirect.html" title="Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)"
+          <a href="ExamplespythonLibTeleport.html" title="Teleport"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="GettingStarted.html" title="Getting started"
+          <a href="ExamplescLib.html" title="Examples using the C library"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="Examples.html" >Examples</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ExamplesNodeOS.html" accesskey="U">Programming via the Classical-Quantum Combiner Interface</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="GettingStarted.html"
-                        title="previous chapter">Getting started</a></p>
+  <p class="topless"><a href="ExamplescLib.html"
+                        title="previous chapter">Examples using the C library</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="ExamplesDirect.html"
-                        title="next chapter">Programming via SimulaQron&#8217;s native Python Twisted Interface (specific to SimulaQron)</a></p>
+  <p class="topless"><a href="ExamplespythonLibTeleport.html"
+                        title="next chapter">Teleport</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/Examples.rst.txt"
+      <li><a href="_sources/ExamplespythonLib.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -82,22 +84,14 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="examples">
-<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="examples-using-the-python-library">
+<h1>Examples using the python library<a class="headerlink" href="#examples-using-the-python-library" title="Permalink to this headline">¶</a></h1>
+<p>The python library provides a way to program a protocol on a network where the nodes listen to instructions through the classical-quantum combiner (CQC) interface. In the following examples the network is simulated by SimulaQron. But the same examples could be executed on a network with real quantum hardware which allows for instructions through the CQC interface, which is the aim for the 2020 quantum internet demonstrator.</p>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Ways to Program:</span></p>
+<p class="caption"><span class="caption-text">Programming using the python library</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="ExamplesDirect.html">Programming via SimulaQron&#8217;s native Python Twisted Interface (specific to SimulaQron)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="NativeModeTemplate.html">Template for programming in native mode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="NativeModeTeleport.html">Teleporting a Qubit</a></li>
-<li class="toctree-l2"><a class="reference internal" href="NativeModeGraphState.html">Distributing a graph state</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="ExamplesNodeOS.html">Programming via the Classical-Quantum Combiner Interface</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ExamplescLib.html">Examples using the C library</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ExamplespythonLib.html">Examples using the python library</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="ExamplespythonLibTeleport.html">Teleport</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ExamplespythonLibextendGHZ.html">Distribute a GHZ-state</a></li>
 </ul>
 </div>
 </div>
@@ -118,12 +112,14 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="ExamplesDirect.html" title="Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)"
+          <a href="ExamplespythonLibTeleport.html" title="Teleport"
              >next</a> |</li>
         <li class="right" >
-          <a href="GettingStarted.html" title="Getting started"
+          <a href="ExamplescLib.html" title="Examples using the C library"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="Examples.html" >Examples</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ExamplesNodeOS.html" >Programming via the Classical-Quantum Combiner Interface</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
