@@ -31,10 +31,7 @@ from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.pythonLib.cqc import *
 
-def prep(cqc):
-	q=qubit(cqc,print_info=False)
-	q.H(print_info=False)
-	return q
+
 
 #####################################################################################################
 #
@@ -48,16 +45,15 @@ def main():
 	# Initialize the connection
 	cqc=CQCConnection(myName)
 
-	# # Do tomography
-	# freqs=cqc.tomography(prep,100)
-	# print("f_X: {}".format(freqs[0]))
-	# print("f_Y: {}".format(freqs[1]))
-	# print("f_Z: {}".format(freqs[2]))
+	# Create qubit
+	q=qubit(cqc)
 
-	# Test
-	ans=cqc.test_preparation(prep,(0,0.5,0.5),None,iterations=1000)
-	print(ans)
+	# Perform Hadamard
+	q.H()
 
+	# Measure qubit
+	m=q.measure()
+	print("App {}: Measurement outcome is: {}".format(myName,m))
 
 	# Stop the connection
 	cqc.close()

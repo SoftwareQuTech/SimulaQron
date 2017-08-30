@@ -27,7 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import socket, struct, os, sys, time
+import socket, struct, os, sys, time, math
 
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
@@ -495,7 +495,7 @@ class CQCConnection:
 		Does a tomography on the output from the preparation specified.
 		The frequencies from X, Y and Z measurements are returned as a tuple (f_X,f_Y,f_Z).
 		Arguments:
-		preparation	: A function that takes a qubit as input and applies the prepation-operations.
+		preparation	: A function that takes a CQCConnection as input and prepares a qubit and returns this (and preferably sets print_info=False)
 		iterations	: Number of measurements in each basis.
 		progress_bar	: Displays a progress bar
 		"""
@@ -511,8 +511,7 @@ class CQCConnection:
 				bar.increase()
 
 			# prepare and measure
-			q=qubit(self,print_info=False)
-			preparation(q)
+			q=preparation(self)
 			q.H(print_info=False)
 			m=q.measure(print_info=False)
 			accum_outcomes[0]+=m
@@ -524,8 +523,7 @@ class CQCConnection:
 				bar.increase()
 
 			# prepare and measure
-			q=qubit(self,print_info=False)
-			preparation(q)
+			q=preparation(self)
 			q.rot_X(192,print_info=False)
 			m=q.measure(print_info=False)
 			accum_outcomes[1]+=m
@@ -537,8 +535,7 @@ class CQCConnection:
 				bar.increase()
 
 			# prepare and measure
-			q=qubit(self,print_info=False)
-			preparation(q)
+			q=preparation(self)
 			m=q.measure(print_info=False)
 			accum_outcomes[2]+=m
 
@@ -548,6 +545,25 @@ class CQCConnection:
 
 		freqs=map(lambda x:x/iterations,accum_outcomes)
 		return list(freqs)
+
+	def test_preparation(self,preparation,exp_values,conf_interval,iterations=100,progress=True):
+		"""
+		Test the preparation of a qubit.
+		Returns True if the expected values are inside the confidence interval produced from the data received from the tomography function
+		Arguments:
+		preparation	: A function prepares a qubit and returns this (and preferably sets print_info=False)
+		exp_values	: The expected values for measurements in the X, Y and Z basis.
+		conf_values	: The confidence interval (in sigmas)
+		iterations	: Number of measurements in each basis.
+		progress_bar	: Displays a progress bar
+		"""
+		conf=1/math.sqrt(iterations)
+
+		freqs=self.tomography(preparation,iterations,progress=progress)
+		for i in range(3):
+			if abs(freqs[i]-exp_values[i])>conf:
+				return False
+		return True
 
 class progress_bar:
 	def __init__(self,maxitr):
