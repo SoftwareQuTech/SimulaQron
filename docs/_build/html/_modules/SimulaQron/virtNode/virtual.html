@@ -180,7 +180,7 @@
 		<span class="c1"># Initialize the list of qubits at this node</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">virtQubits</span> <span class="o">=</span> <span class="p">[]</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">simQubits</span> <span class="o">=</span> <span class="p">[]</span>
-		
+
 		<span class="c1"># Set up connections to the neighouring nodes in the network</span>
 		<span class="c1"># Wait so servers have time to start</span>
 		<span class="n">reactor</span><span class="o">.</span><span class="n">callLater</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">connectNet</span><span class="p">)</span>
@@ -428,7 +428,7 @@
 	<span class="nd">@inlineCallbacks</span>
 <div class="viewcode-block" id="virtualNode.remote_cqc_send_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_cqc_send_qubit">[docs]</a>	<span class="k">def</span> <span class="nf">remote_cqc_send_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">targetName</span><span class="p">,</span> <span class="n">app_id</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Send interface for CQC to add the qubit to the remote nodes received list for an application. </span>
+<span class="sd">		Send interface for CQC to add the qubit to the remote nodes received list for an application.</span>
 
 <span class="sd">		Arguments:</span>
 <span class="sd">		num		number of virtual qubit to send</span>
@@ -436,15 +436,15 @@
 <span class="sd">		app_id		application asking to have this qubit delivered</span>
 <span class="sd">		remote_app_id	application ID to deliver the qubit to</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-	
+
 		<span class="n">qubit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_get_virtual_ref</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
-	
+
 		<span class="n">oldVirtNum</span> <span class="o">=</span> <span class="n">num</span>
 		<span class="n">newVirtNum</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_send_qubit</span><span class="p">(</span><span class="n">qubit</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
 
 		<span class="c1"># Lookup host ID of node</span>
 		<span class="n">remoteNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="p">[</span><span class="n">targetName</span><span class="p">]</span>
-		
+
 		<span class="c1"># Ask to add to list</span>
 		<span class="k">yield</span> <span class="n">remoteNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;cqc_add_recv_list&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">app_id</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="p">,</span> <span class="n">newVirtNum</span><span class="p">)</span></div>
 
@@ -477,7 +477,7 @@
 		<span class="n">qc</span> <span class="o">=</span> <span class="n">qQueue</span><span class="o">.</span><span class="n">popleft</span><span class="p">();</span>
 		<span class="k">if</span> <span class="ow">not</span> <span class="n">qc</span><span class="p">:</span>
 			<span class="k">return</span> <span class="kc">None</span>
-		
+
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Returning qubit for app id </span><span class="si">%d</span><span class="s2"> from recv list&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">to_app_id</span><span class="p">)</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_get_virtual_ref</span><span class="p">(</span><span class="n">qc</span><span class="o">.</span><span class="n">virt_num</span><span class="p">)</span></div>
 
@@ -520,7 +520,7 @@
 			<span class="n">qubit</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="mi">0</span>
 
 			<span class="c1"># Remove the qubit from the local virtual list. Note it remains in the simulated</span>
-			<span class="c1"># list, since we continue to simulate this qubit. </span>
+			<span class="c1"># list, since we continue to simulate this qubit.</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">virtQubits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>
 		<span class="k">finally</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_release_global_lock</span><span class="p">()</span>
@@ -609,6 +609,7 @@
 <span class="sd">		delQubit	simulated qubit object to delete</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
+
 		<span class="c1"># Caution: Only qubits simulated at this node can be removed</span>
 		<span class="k">if</span> <span class="ow">not</span> <span class="n">delQubit</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubits</span><span class="p">:</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Attempt to delete qubit not simulated at this node.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -618,6 +619,8 @@
 		<span class="c1">#</span>
 		<span class="n">delNum</span> <span class="o">=</span> <span class="n">delQubit</span><span class="o">.</span><span class="n">num</span>
 		<span class="n">delRegister</span> <span class="o">=</span> <span class="n">delQubit</span><span class="o">.</span><span class="n">register</span>
+
+		<span class="n">delQubit</span><span class="o">.</span><span class="n">register</span>
 
 		<span class="k">try</span><span class="p">:</span>
 			<span class="c1"># We need to manipulate multiple qubits, get global lock</span>
@@ -651,7 +654,6 @@
 
 			<span class="c1"># Release the global multi qubit lock</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_release_global_lock</span><span class="p">()</span>
-
 
 <div class="viewcode-block" id="virtualNode.remote_merge_regs"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_merge_regs">[docs]</a>	<span class="k">def</span> <span class="nf">remote_merge_regs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num1</span><span class="p">,</span> <span class="n">num2</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
@@ -855,10 +857,13 @@
 		<span class="n">oldQubitNum</span> <span class="o">=</span> <span class="n">gotQ</span><span class="o">.</span><span class="n">num</span>
 
 		<span class="c1"># Remove all simulated qubits and the register</span>
-		<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubits</span><span class="p">:</span>
+		<span class="c1"># Need to iterate of simQubits in reverse, otherwise wrong elements are removed</span>
+		<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simQubits</span><span class="p">):</span>
 			<span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">num</span> <span class="o">==</span> <span class="n">oldRegNum</span><span class="p">:</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">simQubits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+				<span class="n">gotQ</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">activeQubits</span><span class="o">-=</span><span class="mi">1</span>
 				<span class="n">toRemove</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">register</span>
+
 
 		<span class="k">return</span> <span class="p">(</span><span class="n">realM</span><span class="p">,</span> <span class="n">imagM</span><span class="p">,</span> <span class="n">activeQ</span><span class="p">,</span> <span class="n">oldRegNum</span><span class="p">,</span> <span class="n">oldQubitNum</span><span class="p">)</span></div>
 
@@ -1077,14 +1082,17 @@
 	<span class="nd">@inlineCallbacks</span>
 <div class="viewcode-block" id="virtualQubit.remote_apply_rotation"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_rotation">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">a</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Apply rotation around axis n with angle a</span>
+<span class="sd">		Apply rotation around axis n with angle a.</span>
+<span class="sd">		Arguments:</span>
+<span class="sd">		n	A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)</span>
+<span class="sd">		a	The rotation angle in radians.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_gate</span><span class="p">(</span><span class="s2">&quot;apply_rotation&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">a</span><span class="p">)</span></div>
 
 	<span class="nd">@inlineCallbacks</span>
-<div class="viewcode-block" id="virtualQubit.remote_measure"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_measure">[docs]</a>	<span class="k">def</span> <span class="nf">remote_measure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="virtualQubit.remote_measure"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_measure">[docs]</a>	<span class="k">def</span> <span class="nf">remote_measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Measure the qubit in the standard basis. This does delete the qubit from the simulation.</span>
+<span class="sd">		Measure the qubit in the standard basis. If inplace=False, this does delete the qubit from the simulation.</span>
 
 <span class="sd">		Returns the measurement outcome.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
@@ -1105,7 +1113,11 @@
 					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
 						<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Measuring local qubit&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 						<span class="n">outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">remote_measure_inplace</span><span class="p">()</span>
-						<span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_remove_sim_qubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="p">)</span>
+						<span class="k">if</span> <span class="ow">not</span> <span class="n">inplace</span><span class="p">:</span>
+							<span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_remove_sim_qubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="p">)</span>
+
+							<span class="c1"># Delete from virtual qubits</span>
+							<span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">virtQubits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 						<span class="n">waiting</span> <span class="o">=</span> <span class="kc">False</span>
 				<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
 					<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Cannot remove qubit&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -1119,8 +1131,12 @@
 					<span class="k">if</span> <span class="n">active</span><span class="p">:</span>
 						<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Measuring remote qubit at </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 						<span class="n">outcome</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;measure_inplace&quot;</span><span class="p">)</span>
-						<span class="n">num</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_sim_number&quot;</span><span class="p">)</span>
-						<span class="n">defer</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;remove_sim_qubit_num&quot;</span><span class="p">,</span><span class="n">num</span><span class="p">)</span>
+						<span class="k">if</span> <span class="ow">not</span> <span class="n">inplace</span><span class="p">:</span>
+							<span class="n">num</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_sim_number&quot;</span><span class="p">)</span>
+							<span class="n">defer</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;remove_sim_qubit_num&quot;</span><span class="p">,</span><span class="n">num</span><span class="p">)</span>
+
+							<span class="c1"># Delete from virtual qubits</span>
+							<span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">virtQubits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 						<span class="n">waiting</span> <span class="o">=</span> <span class="kc">False</span>
 				<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
 					<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Cannot remove qubit&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -1167,7 +1183,7 @@
 
 		<span class="k">if</span> <span class="ow">not</span> <span class="n">lockedLocal</span><span class="p">:</span>
 			<span class="n">def0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_get_global_lock</span><span class="p">()</span>
-			
+
 			<span class="k">if</span> <span class="n">lockedRemoteTarget</span><span class="p">:</span>
 				<span class="k">return</span><span class="p">(</span><span class="n">DeferredList</span><span class="p">([</span><span class="n">def0</span><span class="p">,</span> <span class="n">def1</span><span class="p">,</span> <span class="n">def2</span><span class="p">],</span> <span class="n">fireOnOneCallback</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">consumeErrors</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 			<span class="k">else</span><span class="p">:</span>
@@ -1194,7 +1210,7 @@
 
 <span class="sd">		&quot;&quot;&quot;</span>
 
-		<span class="c1"># Release qubit node locks </span>
+		<span class="c1"># Release qubit node locks</span>
 		<span class="k">if</span> <span class="n">q1simNode</span> <span class="o">==</span> <span class="n">q1virtNode</span><span class="p">:</span>
 			<span class="c1"># first qubit was locally simulated</span>
 			<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_release_global_lock</span><span class="p">()</span>
@@ -1428,7 +1444,7 @@
 					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;RUN GATE&quot;</span><span class="p">)</span>
 					<span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simQubit</span><span class="p">,</span> <span class="n">localName</span><span class="p">)(</span><span class="n">targetNum</span><span class="p">)</span>
 		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-			<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Cannot perform two qubit gate </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> 
+			<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Cannot perform two qubit gate </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtNode</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
 
 		<span class="k">finally</span><span class="p">:</span>
 			<span class="c1"># We need to release all the locks, no matter what happened</span>
@@ -1489,7 +1505,7 @@
 <span class="c1"># Keeping track of received qubits for CQC</span>
 
 <div class="viewcode-block" id="QubitCQC"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.QubitCQC">[docs]</a><span class="k">class</span> <span class="nc">QubitCQC</span><span class="p">:</span>
-	
+
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fromName</span><span class="p">,</span> <span class="n">toName</span><span class="p">,</span> <span class="n">from_app_id</span><span class="p">,</span> <span class="n">to_app_id</span><span class="p">,</span> <span class="n">new_virt_num</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">fromName</span> <span class="o">=</span> <span class="n">fromName</span><span class="p">;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">toName</span> <span class="o">=</span> <span class="n">toName</span><span class="p">;</span>

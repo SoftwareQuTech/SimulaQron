@@ -132,8 +132,6 @@ class localNode(pb.Root):
 		outcome=yield qD.callRemote("measure")
 		print("Davids outcome was:", outcome)
 
-		return (0+outcome)%2
-
 #####################################################################################################
 #
 # main

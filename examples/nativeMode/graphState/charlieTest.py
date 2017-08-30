@@ -129,14 +129,12 @@ class localNode(pb.Root):
 
 			#Tell number of virtual qubit to Charlie and receive measurement outcome parity
 			david=self.classicalNet.hostDict["David"]
-			parity = yield david.root.callRemote("receive_qubit",remoteNum)
+			yield david.root.callRemote("receive_qubit",remoteNum)
 
 			#Measure qubit (X-basis)
 			yield qC.callRemote("apply_H")
 			outcome=yield qC.callRemote("measure")
 			print("Charlie outcome was:", outcome)
-
-			return (parity+outcome)%2
 
 		elif sender=="David":
 
@@ -144,7 +142,7 @@ class localNode(pb.Root):
 
 			# Get ref of qubit
 			qE=yield self.virtRoot.callRemote("get_virtual_ref",virtualNum)
-			qC=self.qC #HOW TO GET THIS REF!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			qC=self.qC
 
 			# Expand graph state
 			yield qE.callRemote("cphase_onto",qC)

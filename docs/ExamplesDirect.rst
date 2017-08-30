@@ -17,7 +17,7 @@ up and running, and ran the simple example of generating correlated randomness. 
 
 	NativeModeTemplate
 	NativeModeTeleport
-    NativeModeGraphState
+	NativeModeGraphState
 
 
 

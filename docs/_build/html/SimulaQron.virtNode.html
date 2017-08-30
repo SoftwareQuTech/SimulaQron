@@ -216,7 +216,11 @@ qubitNum        the number of the qubit this gate is applied to</p>
 <dl class="method">
 <dt id="SimulaQron.virtNode.crudeSimulator.simpleEngine.apply_rotation">
 <code class="descname">apply_rotation</code><span class="sig-paren">(</span><em>qubitNum</em>, <em>n</em>, <em>a</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/crudeSimulator.html#simpleEngine.apply_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.crudeSimulator.simpleEngine.apply_rotation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError is raised</p>
+<dd><p>Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError is raised
+Arguments:
+qubitNum    Qubit number
+n           A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+a           The rotation angle in radians.</p>
 </dd></dl>
 
 <dl class="method">
@@ -368,7 +372,10 @@ A qubit object provides the backing for a virtual qubit, which may be at another
 <dl class="method">
 <dt id="SimulaQron.virtNode.quantum.simulatedQubit.remote_apply_rotation">
 <code class="descname">remote_apply_rotation</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/quantum.html#simulatedQubit.remote_apply_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.quantum.simulatedQubit.remote_apply_rotation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply rotation around axis n with angle a. param should be a dictionary of the form {&#8216;n&#8217;:n,&#8217;a&#8217;:a}</p>
+<dd><p>Apply rotation around axis n with angle a.
+Arguments:
+n       A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+a       The rotation angle in radians.</p>
 </dd></dl>
 
 <dl class="method">
@@ -745,7 +752,10 @@ newD            dictionary mapping qubit numbers to qubit objects at the new sim
 <dl class="method">
 <dt id="SimulaQron.virtNode.virtual.virtualQubit.remote_apply_rotation">
 <code class="descname">remote_apply_rotation</code><span class="sig-paren">(</span><em>n</em>, <em>a</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualQubit.remote_apply_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_rotation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply rotation around axis n with angle a</p>
+<dd><p>Apply rotation around axis n with angle a.
+Arguments:
+n       A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+a       The rotation angle in radians.</p>
 </dd></dl>
 
 <dl class="method">
@@ -785,8 +795,8 @@ single Twisted cannot natively transfer complex valued objects.</p>
 
 <dl class="method">
 <dt id="SimulaQron.virtNode.virtual.virtualQubit.remote_measure">
-<code class="descname">remote_measure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualQubit.remote_measure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualQubit.remote_measure" title="Permalink to this definition">¶</a></dt>
-<dd><p>Measure the qubit in the standard basis. This does delete the qubit from the simulation.</p>
+<code class="descname">remote_measure</code><span class="sig-paren">(</span><em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualQubit.remote_measure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualQubit.remote_measure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measure the qubit in the standard basis. If inplace=False, this does delete the qubit from the simulation.</p>
 <p>Returns the measurement outcome.</p>
 </dd></dl>
 

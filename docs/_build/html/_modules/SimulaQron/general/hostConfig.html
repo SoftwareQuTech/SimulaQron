@@ -66,7 +66,7 @@
 <span></span><span class="c1">#</span>
 <span class="c1"># Copyright (c) 2017, Stephanie Wehner</span>
 <span class="c1"># All rights reserved.</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1"># Redistribution and use in source and binary forms, with or without</span>
 <span class="c1"># modification, are permitted provided that the following conditions are met:</span>
 <span class="c1"># 1. Redistributions of source code must retain the above copyright</span>
@@ -80,7 +80,7 @@
 <span class="c1"># 4. Neither the name of the QuTech organization nor the</span>
 <span class="c1">#    names of its contributors may be used to endorse or promote products</span>
 <span class="c1">#    derived from this software without specific prior written permission.</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER &#39;&#39;AS IS&#39;&#39; AND ANY</span>
 <span class="c1"># EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED</span>
 <span class="c1"># WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE</span>
@@ -109,7 +109,7 @@
 
 <div class="viewcode-block" id="networkConfig.read_config"><a class="viewcode-back" href="../../../SimulaQron.general.html#SimulaQron.general.hostConfig.networkConfig.read_config">[docs]</a>	<span class="k">def</span> <span class="nf">read_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Reads the configuration file in which each line has the form: node name, hostname, port number. </span>
+<span class="sd">		Reads the configuration file in which each line has the form: node name, hostname, port number.</span>
 <span class="sd">		For example:</span>
 <span class="sd">		Alice, localhost, 8888</span>
 <span class="sd">		&quot;&quot;&quot;</span>
@@ -129,14 +129,14 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hostDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Host details of &quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;: &quot;</span><span class="p">,</span> <span class="n">host</span><span class="o">.</span><span class="n">hostname</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">host</span><span class="o">.</span><span class="n">port</span><span class="p">)</span></div></div>
-	
+
 
 <div class="viewcode-block" id="host"><a class="viewcode-back" href="../../../SimulaQron.general.html#SimulaQron.general.hostConfig.host">[docs]</a><span class="k">class</span> <span class="nc">host</span><span class="p">(</span><span class="n">pb</span><span class="o">.</span><span class="n">Referenceable</span><span class="p">):</span>
-	
+
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Initialize the details of the host. For now, we just keep the following:</span>
-<span class="sd">	</span>
+
 <span class="sd">		name		informal name of the host (e.g. Alice)</span>
 <span class="sd">		hostname	name of the node on the network (e.g. localhost or yournode.qutech.nl)</span>
 <span class="sd">		port		port number on hostname</span>
@@ -155,8 +155,8 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="mi">0</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="mi">0</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">defer</span> <span class="o">=</span> <span class="mi">0</span></div>
-		
-			
+
+
 
 </pre></div>
 

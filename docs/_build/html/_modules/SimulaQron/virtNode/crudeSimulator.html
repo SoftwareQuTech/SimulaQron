@@ -266,6 +266,10 @@
 <div class="viewcode-block" id="simpleEngine.apply_rotation"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.crudeSimulator.simpleEngine.apply_rotation">[docs]</a>	<span class="k">def</span> <span class="nf">apply_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">qubitNum</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">a</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError is raised</span>
+<span class="sd">		Arguments:</span>
+<span class="sd">                qubitNum    Qubit number</span>
+<span class="sd">		n	    A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)</span>
+<span class="sd">		a	    The rotation angle in radians.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">nNorm</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">nNorm</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
