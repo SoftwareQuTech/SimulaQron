@@ -370,9 +370,43 @@ class CQCProtocol(Protocol):
 
 		return(False)
 
-
+	@inlineCallbacks
 	def handle_factory(self, header, data):
-		pass
+
+		cmd_l=CQC_CMD_HDR_LENGTH
+		xtra_l=CQC_CMD_XTRA_LENGTH
+
+		#Get command header
+		if len(data)<cmd_l:
+			logging.debug("CQC %s: Missing CMD Header", self.name)
+			self._send_back_cqc(header,CQC_ERR_UNSUPP)
+		cmdHeader=CQCCmdHeader(data[:cmd_l])
+
+		#Get xtra header
+		if len(data)<(cmd_l+xtra_l):
+			logging.debug("CQC %s: Missing XTRA Header", self.name)
+			self._send_back_cqc(header,CQC_ERR_UNSUPP)
+		xtraHeader=CQCXtraHeader(data[cmd_l:cmd_l+xtra_l])
+
+		command=cmdHeader.instr
+		num_iter=xtraHeader.step
+
+		# Perform operation multiple times
+		all_succ=True
+		for _ in range(num_iter):
+			if self.hasXtra(cmdHeader):
+				(succ,shouldNotify)=yield self._process_command(header,header.length,data)
+			else:
+				data=data[:cmd_l]+data[cmd_l+xtra_l:]
+				(succ,shouldNotify)=yield self._process_command(header,header.length-xtra_l,data)
+			all_succ=(all_succ and succ)
+		if all_succ:
+			if shouldNotify:
+				# Send a notification that we are done if successful
+				self._send_back_cqc(header, CQC_TP_DONE);
+				logging.debug("CQC %s: Command successful, sent done.", self.name)
+
+
 
 	def handle_time(self, header, data):
 

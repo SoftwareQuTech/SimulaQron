@@ -30,11 +30,8 @@
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.pythonLib.cqc import *
+import time
 
-def prep(cqc):
-	q=qubit(cqc,print_info=False)
-	q.K(print_info=False)
-	return q
 
 #####################################################################################################
 #
@@ -42,26 +39,41 @@ def prep(cqc):
 #
 def main():
 
-	# In this example, we are Alice.
-	myName="Alice"
-
 	# Initialize the connection
-	cqc=CQCConnection(myName)
+	cqc=CQCConnection("Alice")
 
-	# Do tomography
-	freqs=cqc.tomography(prep,100)
-	print("f_X: {}".format(freqs[0]))
-	print("f_Y: {}".format(freqs[1]))
-	print("f_Z: {}".format(freqs[2]))
+	# Test Measure inplace
+	print("Testing measure inplace:")
+	q=qubit(cqc,print_info=False)
+	q.H(print_info=False)
+	m1=q.measure(inplace=True,print_info=False)
+	failed=False
+	for _ in range(10):
+		m2=q.measure(inplace=True,print_info=False)
+		if m1!=m2:
+			print("OK")
+			failed=True
+			break
+	if not failed:
+		print("OK")
+	q.measure(print_info=False)
 
-	# # Test
-	# ans=cqc.test_preparation(prep,(0,0.5,0.5),None,iterations=1000)
-	# print(ans)
-
+	# Test Get time
+	print("Testing getTime:")
+	q1=qubit(cqc,print_info=False)
+	time.sleep(3)
+	q2=qubit(cqc,print_info=False)
+	t1=q1.getTime(print_info=False)
+	t2=q2.getTime(print_info=False)
+	if (t2-t1)==3:
+		print("OK")
+	else:
+		print("FAIL")
+	q1.measure(print_info=False)
+	q2.measure(print_info=False)
 
 	# Stop the connection
 	cqc.close()
-
 
 
 ##################################################################################################
