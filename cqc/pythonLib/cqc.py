@@ -230,7 +230,7 @@ class CQCConnection:
 
 	def sendGetTime(self,qID,notify=1,block=1,action=0):
 		"""
-		Sends a simple message and get-time message
+		Sends get-time message
 		Arguments:
 		qID		: qubit ID
 		command		: Command to be executed, eg CQC_CMD_H
@@ -241,45 +241,48 @@ class CQCConnection:
 		#Send Header
 		hdr=CQCHeader()
 		hdr.setVals(CQC_VERSION,CQC_TP_GET_TIME,self._appID,CQC_CMD_HDR_LENGTH)
-		print("Header")
-		print(hdr.printable())
 		msg=hdr.pack()
 		self._s.send(msg)
 
 		#Send Command
 		cmd_hdr=CQCCmdHeader()
 		cmd_hdr.setVals(qID,0,notify,block,action)
-		print("CmdHeader")
-		print(cmd_hdr.printable())
 		cmd_msg=cmd_hdr.pack()
 		self._s.send(cmd_msg)
 
-	def sendFactory(self,qID,notify=1,block=1,action=0):
+	def sendFactory(self,qID,command,num_iter,notify=1,block=1,action=0,xtra_qID=0,remote_appID=0,remote_node=0,remote_port=0,cmd_length=0):
 		"""
-		Sends a simple message and factory message
+		Sends a factory message
 		Arguments:
 		qID		: qubit ID
 		command		: Command to be executed, eg CQC_CMD_H
+		num_iter	: Number of times to execute command
 		nofify		: Do we wish to be notified when done.
 		block		: Do we want the qubit to be blocked
 		action		: Are there more commands to be executed
+		xtra_qID	: Extra qubit ID for for example CNOT
+		remote_appID	: Application ID of remote host
+		remote_node	: ip of remote host in cqc network
+		remote_port	: port of remote host in cqc network
+		cmd_length	: length of extra commands
 		"""
-		raise NotImplementedError("Not implemented yet") #TODO
 		#Send Header
 		hdr=CQCHeader()
-		hdr.setVals(CQC_VERSION,CQC_TP_FACTORY,self._appID,CQC_CMD_HDR_LENGTH)
-		print("Header")
-		print(hdr.printable())
+		hdr.setVals(CQC_VERSION,CQC_TP_FACTORY,self._appID,CQC_CMD_HDR_LENGTH+CQC_CMD_XTRA_LENGTH)
 		msg=hdr.pack()
 		self._s.send(msg)
 
 		#Send Command
 		cmd_hdr=CQCCmdHeader()
-		cmd_hdr.setVals(qID,0,notify,block,action)
-		print("CmdHeader")
-		print(cmd_hdr.printable())
+		cmd_hdr.setVals(qID,command,notify,block,action)
 		cmd_msg=cmd_hdr.pack()
 		self._s.send(cmd_msg)
+
+		#Send Xtra
+		xtra_hdr=CQCXtraHeader()
+		xtra_hdr.setVals(xtra_qID,num_iter,remote_appID,remote_node,remote_port,cmd_length)
+		xtra_msg=xtra_hdr.pack()
+		self._s.send(xtra_msg)
 
 	def readMessage(self,maxsize=192): # WHAT IS GOOD SIZE?
 		"""
@@ -525,7 +528,7 @@ class CQCConnection:
 
 			# prepare and measure
 			q=preparation(self)
-			q.rot_X(192,print_info=False)
+			q.K(print_info=False)
 			m=q.measure(print_info=False)
 			accum_outcomes[1]+=m
 
@@ -558,7 +561,7 @@ class CQCConnection:
 		iterations	: Number of measurements in each basis.
 		progress_bar	: Displays a progress bar
 		"""
-		conf=1/math.sqrt(iterations)
+		conf=2/math.sqrt(iterations)
 
 		freqs=self.tomography(preparation,iterations,progress=progress)
 		for i in range(3):
@@ -788,6 +791,28 @@ class qubit:
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
+	def K(self,notify=True,block=True,print_info=True):
+		"""
+		Performs a K gate on the qubit.
+		If notify, the return message is received before the method finishes.
+		Arguments:
+		nofify		: Do we wish to be notified when done.
+		block		: Do we want the qubit to be blocked
+		print_info	: If info should be printed
+		"""
+		# check if qubit is active
+		self.check_active()
+
+		#print info
+		if print_info:
+			print("App {} tells CQC: 'Perform K to qubit with ID {}'".format(self._cqc.name,self._qID))
+
+		self._cqc.sendCommand(self._qID,CQC_CMD_K,notify=int(notify),block=int(block))
+		if notify:
+			message=self._cqc.readMessage()
+			if print_info:
+				self._cqc.print_CQC_msg(message)
+
 	def rot_X(self,step,notify=True,block=True,print_info=True):
 		"""
 		Applies rotation around the x-axis with the angle of step*2*pi/256 radians.
@@ -976,7 +1001,7 @@ class qubit:
 		if print_info:
 			print("App {} tells CQC: 'Return time-info of qubit with ID {}'".format(self._cqc.name,self._qID))
 
-		self._cqc.sendGetTime(self._qID,notify=int(notify),block=int(block))
+		self._cqc.sendGetTime(self._qID,notify=0,block=int(block))
 
 		# Return time-stamp
 		message=self._cqc.readMessage()
