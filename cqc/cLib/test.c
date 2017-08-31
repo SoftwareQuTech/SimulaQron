@@ -51,10 +51,10 @@ int main(int argc, char *argv[]) {
 	cqc = cqc_init(app_id);
 	cqc_connect(cqc, hostname, portno);
 
-	cqc_simple_cmd(cqc, CQC_CMD_NEW, 100);
+	cqc_simple_cmd(cqc, CQC_CMD_NEW, 100, 1);
 	cqc_wait_until_done(cqc, 1);
 
-	cqc_simple_cmd(cqc, CQC_CMD_H,100);
+	cqc_simple_cmd(cqc, CQC_CMD_H,100, 1);
 	cqc_wait_until_done(cqc, 1);
 
 	outcome = cqc_measure(cqc, 100);

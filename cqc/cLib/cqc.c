@@ -133,10 +133,11 @@ cqc_cleanup(cqc_lib *cqc)
  * Arguments:
  * command	command identifier to be sent
  * qubit_id	identifier of qubit on which to perform this command
+ * notify	whether to request a DONE upon completion (0 = no, 1 = yes)
  */
 	
 int 
-cqc_simple_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id)
+cqc_simple_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id, uint8_t notify)
 {
 	int n;
 	cqcHeader cqcH;
@@ -159,7 +160,9 @@ cqc_simple_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id)
 	bzero(&cmdH, sizeof(cmdH));
 	cmdH.qubit_id = qubit_id;
 	cmdH.instr = command;
-	cmdH.options = 0;
+	if(notify == 1) {
+		cmdH.options = CQC_OPT_NOTIFY | CQC_OPT_BLOCK;
+	} 
 
    	/* Send message to the server */
    	n = write(cqc->sockfd, &cmdH, CQC_CMD_HDR_LENGTH);
@@ -312,7 +315,7 @@ cqc_recv(cqc_lib *cqc, uint16_t qubit_id)
 	notifyHeader note;
 
 	/* Send out request to receive a qubit */
-	n = cqc_simple_cmd(cqc, CQC_CMD_RECV, qubit_id);
+	n = cqc_simple_cmd(cqc, CQC_CMD_RECV, qubit_id, 0);
 	if (n < 0) {
 		perror("ERROR - Cannot send receive request");
 		return(-1);
@@ -374,7 +377,7 @@ cqc_measure(cqc_lib *cqc, uint16_t qubit_id)
 	cqcHeader reply;
 	notifyHeader note;
 
-	n = cqc_simple_cmd(cqc, CQC_CMD_MEASURE, qubit_id);
+	n = cqc_simple_cmd(cqc, CQC_CMD_MEASURE, qubit_id, 0);
 	if (n < 0) {
 		perror("ERROR - measurement failed");
 		return(-1);
@@ -456,34 +459,6 @@ int
 cqc_twoqubit(cqc_lib *cqc, uint8_t command, uint16_t qubit1, uint16_t qubit2)
 {
 	return(cqc_full_cmd(cqc, command, qubit1, 0, 0, 1, qubit2, 0, 0, 0, 0, 0));
-}
-
-/*
- *  cqc_tomography_dir
- *
- *  Obtain tomographic data on a given qubit number, for testing purposes.
- *
- *  Arguments:
- *  qubit	number of the qubit to obtain
- *  iter	iterations to perform
- *  dir		direction to measure (0=X, 1=Z, 2=Y)
- */
-
-float
-cqc_tomography_dir(cqc_lib *cqc, uint16_t qubit, uint32_t iter, uint8_t dir)
-{
-	int i;
-	uint8_t cmd;
-	int count;
-
-	/* Translate the direction into a rotation command */
-	
-	/* Measure in the given direction iter times to gather stats */	
-	count = 0;
-	for(i = 0; i < iter; i++) {
-
-	}
-
 }
 
 

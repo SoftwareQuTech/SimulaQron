@@ -816,9 +816,13 @@ class CQCProtocol(Protocol):
 			q = CQCQubit(cmd.qubit_id, int(time.time()), virt)
 			self.factory.qubitList[(app_id,q_id)] = q
 			logging.debug("CQC %s: Requested new qubit (%d,%d)",self.name,app_id, q_id)
-		finally:
+		except Error:
+			logging.error("CQC %s: Error creating qubit", self.name)
+			self._send_back_cqc(cqc_header, CQC_ERR_GENERAL)
 			self.factory._lock.release()
+			return False
 
+		self.factory._lock.release()
 		return True
 
 

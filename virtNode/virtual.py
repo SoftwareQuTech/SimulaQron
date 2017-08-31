@@ -318,6 +318,8 @@ class virtualNode(pb.Root):
 			newNum = self.get_virtual_id()
 			newQubit = virtualQubit(self.myID, self.myID, simQubit, newNum)
 			self.virtQubits.append(newQubit)
+		except Error:
+			logging.error("VIRTUAL NODE %s: Maximum number of qubits reached.", self.myID.name)
 		finally:
 			self._release_global_lock()
 

@@ -70,8 +70,14 @@ class simpleEngine(quantumEngine):
 		# Prepare a clean qubit state in |0>
 		v = basis(2,0)
 		newQubit = v * v.dag()
+		
+		try:
+			num = self.add_qubit(newQubit)
+			return num
+		except Error:
+			raise quantumError("Out of qubits.")
+			return(-1)
 
-		return self.add_qubit(newQubit)
 
 	def add_qubit(self, newQubit):
 		"""
