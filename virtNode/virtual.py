@@ -1007,6 +1007,14 @@ class virtualQubit(pb.Referenceable):
 		"""
 		yield self._single_gate("apply_H")
 
+
+	@inlineCallbacks
+	def remote_apply_K(self):
+		"""
+		Apply K gate - taking computational basis to Y eigenbasis.
+		"""
+		yield self._single_gate("apply_K")
+
 	@inlineCallbacks
 	def remote_apply_T(self):
 		"""

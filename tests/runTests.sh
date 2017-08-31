@@ -1,3 +1,6 @@
 #!/bin/bash
 
-sh auto/testAll.sh
+cd auto
+sh testAll.sh
+cd ..
+

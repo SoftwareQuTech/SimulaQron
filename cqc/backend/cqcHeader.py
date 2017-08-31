@@ -77,6 +77,7 @@ CQC_CMD_ROT_X=14		# Rotation over angle around X in 2pi/256 increments
 CQC_CMD_ROT_Y=15		# Rotation over angle around Y in 2pi/256 increments
 CQC_CMD_ROT_Z=16		# Rotation over angle around Z in 2pi/256 increments
 CQC_CMD_H=17			# Hadamard H
+CQC_CMD_K=18			# K Gate - taking computational to Y eigenbasis
 
 CQC_CMD_CNOT=20			# CNOT Gate with this as control
 CQC_CMD_CPHASE=21		# CPHASE Gate with this as control

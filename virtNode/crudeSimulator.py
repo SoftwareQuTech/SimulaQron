@@ -165,6 +165,16 @@ class simpleEngine(quantumEngine):
 		H = Qobj([[1/f, 1/f],[1/f, -1/f]], dims=[[2],[2]])
 		self.apply_onequbit_gate(H, qubitNum)
 
+	def apply_K(self, qubitNum):
+		"""
+		Applies a K gate to the qubits with number qubitNum. Maps computational basis to Y eigenbasis.
+		"""
+
+		f = sqrt(2);
+		i = complex(0,1);
+		K = Qobj([[1/f, -i/f],[i/f, -1/f]], dims=[[2],[2]])
+		self.apply_onequbit_gate(K, qubitNum)
+
 	def apply_X(self, qubitNum):
 		"""
 		Applies a X gate to the qubits with number qubitNum.

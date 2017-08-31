@@ -136,7 +136,7 @@ cqc_cleanup(cqc_lib *cqc)
  */
 	
 int 
-cqc_simple_cmd(cqc_lib *cqc, uint8_t command, uint8_t qubit_id)
+cqc_simple_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id)
 {
 	int n;
 	cqcHeader cqcH;
@@ -191,7 +191,7 @@ cqc_simple_cmd(cqc_lib *cqc, uint8_t command, uint8_t qubit_id)
  */
 
 int
-cqc_full_cmd(cqc_lib *cqc, uint8_t command, uint8_t qubit_id, char notify, char action, char block, uint8_t xtra_id, uint8_t steps, uint16_t r_app_id, uint32_t r_node, uint16_t r_port, uint32_t cmdLength)
+cqc_full_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id, char notify, char action, char block, uint16_t xtra_id, uint8_t steps, uint16_t r_app_id, uint32_t r_node, uint16_t r_port, uint32_t cmdLength)
 {
 	int n;
 	cqcHeader cqcH;
@@ -291,7 +291,7 @@ cqc_hello(cqc_lib *cqc)
  */
 
 int
-cqc_send(cqc_lib *cqc, uint8_t qubit_id, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port)
+cqc_send(cqc_lib *cqc, uint16_t qubit_id, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port)
 {
 	return(cqc_full_cmd(cqc, CQC_CMD_SEND, qubit_id, 0, 0, 1, 0, 0, remote_app_id, remote_node, remote_port, 0));
 }
@@ -305,7 +305,7 @@ cqc_send(cqc_lib *cqc, uint8_t qubit_id, uint16_t remote_app_id, uint32_t remote
  * qubit_id		id to assign to this qubit once it is received
  */
 int
-cqc_recv(cqc_lib *cqc, uint8_t qubit_id)
+cqc_recv(cqc_lib *cqc, uint16_t qubit_id)
 {
 	int n;
 	cqcHeader reply;
@@ -368,7 +368,7 @@ cqc_epr(cqc_lib *cqc, uint16_t remote_app_id, uint32_t remote_node, uint16_t rem
  */
 
 int
-cqc_measure(cqc_lib *cqc, uint8_t qubit_id)
+cqc_measure(cqc_lib *cqc, uint16_t qubit_id)
 {
 	int n;
 	cqcHeader reply;
@@ -445,11 +445,45 @@ cqc_wait_until_done(cqc_lib *cqc, unsigned int reps)
  *  cqc_twoqubit
  * 
  *  Execute local two qubit gate.
+ *
+ *  Arguments:
+ *  command     command id to execute
+ *  qubit1      number of the first qubit
+ *  qubit2	number of the second qubit
  */
 
 int
-cqc_twoqubit(cqc_lib *cqc, uint8_t command, uint8_t qubit1, uint8_t qubit2)
+cqc_twoqubit(cqc_lib *cqc, uint8_t command, uint16_t qubit1, uint16_t qubit2)
 {
 	return(cqc_full_cmd(cqc, command, qubit1, 0, 0, 1, qubit2, 0, 0, 0, 0, 0));
 }
+
+/*
+ *  cqc_tomography_dir
+ *
+ *  Obtain tomographic data on a given qubit number, for testing purposes.
+ *
+ *  Arguments:
+ *  qubit	number of the qubit to obtain
+ *  iter	iterations to perform
+ *  dir		direction to measure (0=X, 1=Z, 2=Y)
+ */
+
+float
+cqc_tomography_dir(cqc_lib *cqc, uint16_t qubit, uint32_t iter, uint8_t dir)
+{
+	int i;
+	uint8_t cmd;
+	int count;
+
+	/* Translate the direction into a rotation command */
+	
+	/* Measure in the given direction iter times to gather stats */	
+	count = 0;
+	for(i = 0; i < iter; i++) {
+
+	}
+
+}
+
 

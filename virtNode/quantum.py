@@ -97,6 +97,13 @@ class simulatedQubit(pb.Referenceable):
 		logging.debug("VIRTUAL NODE %s: applying X to number %d",self.node.name, self.num)
 		self.register.apply_X(self.num)
 
+	def remote_apply_K(self):
+		"""
+		Apply K gate to itself by passing it onto the underlying register. Maps computational to Y eigenbasis.
+		"""
+		logging.debug("VIRTUAL NODE %s: applying K to number %d",self.node.name, self.num)
+		self.register.apply_K(self.num)
+
 	def remote_apply_Y(self):
 		"""
 		Apply Y gate.

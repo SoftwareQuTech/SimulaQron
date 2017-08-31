@@ -139,6 +139,7 @@ class CQCProtocol(Protocol):
 			CQC_CMD_Z : self.cmd_z,
 			CQC_CMD_T : self.cmd_t,
 			CQC_CMD_H : self.cmd_h,
+			CQC_CMD_K : self.cmd_k,
 			CQC_CMD_ROT_X : self.cmd_rotx,
 			CQC_CMD_ROT_Y : self.cmd_roty,
 			CQC_CMD_ROT_Z : self.cmd_rotz,
@@ -475,6 +476,21 @@ class CQCProtocol(Protocol):
 			return False
 
 		yield virt_qubit.callRemote("apply_H")
+		return True
+
+
+	@inlineCallbacks
+	def cmd_k(self, cqc_header, cmd, xtra):
+		"""
+		Apply K Gate
+		"""
+		logging.debug("CQC %s: Applying K to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		if not virt_qubit:
+			logging.debug("CQC %s: No such qubit",self.name)
+			return False
+
+		yield virt_qubit.callRemote("apply_K")
 		return True
 
 	@inlineCallbacks

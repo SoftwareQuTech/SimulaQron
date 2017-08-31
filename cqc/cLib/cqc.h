@@ -96,6 +96,7 @@ typedef struct
 #define CQC_CMD_ROT_Y		15	/* Rotation over angle around Y in pi/256 increments */
 #define CQC_CMD_ROT_Z		16	/* Rotation over angle around Z in pi/256 increments */
 #define CQC_CMD_H		17	/* Hadamard Gate */
+#define CQC_CMD_K		18	/* K Gate - taking computational to Y eigenbasis */
 
 #define CQC_CMD_CNOT		20	/* CNOT Gate with this as control */
 #define CQC_CMD_CPHASE		21	/* CPHASE Gate with this as control */
@@ -166,15 +167,15 @@ cqc_lib * cqc_init(int app_id);
 void cqc_error(uint8_t type);
 int cqc_connect(cqc_lib *cqc, char *hostname, int portno);
 int cqc_cleanup(cqc_lib *cqc);
-int cqc_simple_cmd(cqc_lib *cqc, uint8_t command, uint8_t qubit_id);
-int cqc_full_cmd(cqc_lib *cqc, uint8_t command, uint8_t qubit_id, char notify, char action, char block, uint8_t xtra_id, uint8_t steps, uint16_t r_app_id, uint32_t r_node, uint16_t r_port, uint32_t cmdLength);
+int cqc_simple_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id);
+int cqc_full_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id, char notify, char action, char block, uint16_t xtra_id, uint8_t steps, uint16_t r_app_id, uint32_t r_node, uint16_t r_port, uint32_t cmdLength);
 
 int cqc_hello(cqc_lib *cqc);
-int cqc_send(cqc_lib *cqc, uint8_t qubit_id, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port);
-int cqc_recv(cqc_lib *cqc, uint8_t qubit_id);
+int cqc_send(cqc_lib *cqc, uint16_t qubit_id, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port);
+int cqc_recv(cqc_lib *cqc, uint16_t qubit_id);
 int cqc_epr(cqc_lib *cqc, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port);
-int cqc_measure(cqc_lib *cqc, uint8_t qubit_id);
+int cqc_measure(cqc_lib *cqc, uint16_t qubit_id);
 int cqc_wait_until_done(cqc_lib *cqc, unsigned int reps);
-int cqc_twoqubit(cqc_lib *cqc, uint8_t command, uint8_t qubit1, uint8_t qubit2);
+int cqc_twoqubit(cqc_lib *cqc, uint8_t command, uint16_t qubit1, uint16_t qubit2);
 
 
