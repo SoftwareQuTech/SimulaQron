@@ -156,7 +156,7 @@ def main():
 	# Test CNOT control
 	sys.stdout.write("Testing CNOT control:")
 	exp_values=calc_exp_values(prep_mixed_qutip())
-	ans=cqc.test_preparation(prep_CNOT_control_CQC,exp_values,None,iterations=iterations)
+	ans=cqc.test_preparation(prep_CNOT_control_CQC,exp_values,iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -166,7 +166,7 @@ def main():
 	# Test CNOT target
 	sys.stdout.write("Testing CNOT target:")
 	exp_values=calc_exp_values(prep_mixed_qutip())
-	ans=cqc.test_preparation(prep_CNOT_target_CQC,exp_values,None,iterations=iterations)
+	ans=cqc.test_preparation(prep_CNOT_target_CQC,exp_values,iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -176,7 +176,7 @@ def main():
 	# Test CNOT control
 	sys.stdout.write("Testing CNOT control:")
 	exp_values=calc_exp_values(prep_mixed_qutip())
-	ans=cqc.test_preparation(prep_CPHASE_control_CQC,exp_values,None,iterations=iterations)
+	ans=cqc.test_preparation(prep_CPHASE_control_CQC,exp_values,iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -186,7 +186,7 @@ def main():
 	# Test CNOT target
 	sys.stdout.write("Testing CNOT target:")
 	exp_values=calc_exp_values(prep_mixed_qutip())
-	ans=cqc.test_preparation(prep_CPHASE_target_CQC,exp_values,None,iterations=iterations)
+	ans=cqc.test_preparation(prep_CPHASE_target_CQC,exp_values,iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -196,7 +196,7 @@ def main():
 	# Test EPR1 control
 	sys.stdout.write("Testing EPR1 control:")
 	exp_values=calc_exp_values(prep_mixed_qutip())
-	ans=cqc.test_preparation(prep_EPR1_CQC,exp_values,None,iterations=iterations)
+	ans=cqc.test_preparation(prep_EPR1_CQC,exp_values,iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -206,7 +206,7 @@ def main():
 	# Test EPR2 target
 	sys.stdout.write("Testing EPR2 target:")
 	exp_values=calc_exp_values(prep_mixed_qutip())
-	ans=cqc.test_preparation(prep_EPR2_CQC,exp_values,None,iterations=iterations)
+	ans=cqc.test_preparation(prep_EPR2_CQC,exp_values,iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -216,7 +216,7 @@ def main():
 	# Test send control
 	sys.stdout.write("Testing send:")
 	exp_values=calc_exp_values(prep_H_qutip())
-	ans=cqc.test_preparation(prep_send_CQC,exp_values,None,iterations=iterations)
+	ans=cqc.test_preparation(prep_send_CQC,exp_values,iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -226,7 +226,7 @@ def main():
 	# Test recv target
 	sys.stdout.write("Testing recv:")
 	exp_values=calc_exp_values(prep_H_qutip())
-	ans=cqc.test_preparation(prep_recv_CQC,exp_values,None,iterations=iterations)
+	ans=cqc.test_preparation(prep_recv_CQC,exp_values,iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")

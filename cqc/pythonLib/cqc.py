@@ -550,22 +550,22 @@ class CQCConnection:
 		freqs=map(lambda x:x/iterations,accum_outcomes)
 		return list(freqs)
 
-	def test_preparation(self,preparation,exp_values,conf_interval,iterations=100,progress=True):
+	def test_preparation(self,preparation,exp_values,conf=2,iterations=100,progress=True):
 		"""
 		Test the preparation of a qubit.
 		Returns True if the expected values are inside the confidence interval produced from the data received from the tomography function
 		Arguments:
 		preparation	: A function that takes a CQCConnection as input and prepares a qubit and returns this (and preferably sets print_info=False)
 		exp_values	: The expected values for measurements in the X, Y and Z basis.
-		conf_values	: The confidence interval (in sigmas)
+		conf		: Determines the confidence region (+/- conf/sqrt(iterations) )
 		iterations	: Number of measurements in each basis.
 		progress_bar	: Displays a progress bar
 		"""
-		conf=2/math.sqrt(iterations)
+		epsilon=conf/math.sqrt(iterations)
 
 		freqs=self.tomography(preparation,iterations,progress=progress)
 		for i in range(3):
-			if abs(freqs[i]-exp_values[i])>conf:
+			if abs(freqs[i]-exp_values[i])>epsilon:
 				return False
 		return True
 
