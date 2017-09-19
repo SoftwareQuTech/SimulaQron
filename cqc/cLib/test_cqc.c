@@ -150,4 +150,3 @@ cqc_test_qubit(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint16_t qubit, u
 
 }
 
-
