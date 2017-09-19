@@ -30,7 +30,7 @@ You may verify the successful installation of the back engine itself, by executi
 Testing a simple example
 ------------------------
 
-Before delving into how to write any program yourself, let's first simply run one of the existing examples when programming SimulaQron native mode (see :docs:`ExamplesNative`) to verify you set up everything correctly.
+Before delving into how to write any program yourself, let's first simply run one of the existing examples when programming SimulaQron native mode (see :doc:`ExamplesDirect`) to verify you set up everything correctly.
 Remember from the Overview that SimulaQron has two parts: the first are the virtual node servers that act simulate the hardware at each node as well as the quantum communication between them in a transparent manner. The second are the applications themselves which can be written in two ways, here we will illustrate the native mode using the Python Twisted framework connecting to the virtual node servers. An interface using the classical/quantum combiner protocol will be included in v0.2. 
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

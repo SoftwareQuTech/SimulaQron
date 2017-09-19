@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017, Stephanie Wehner
+# Copyright (c) 2017, Stephanie Wehner and Axel Dahlberg
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -70,7 +70,7 @@ class simpleEngine(quantumEngine):
 		# Prepare a clean qubit state in |0>
 		v = basis(2,0)
 		newQubit = v * v.dag()
-		
+
 		try:
 			num = self.add_qubit(newQubit)
 			return num

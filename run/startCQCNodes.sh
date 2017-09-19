@@ -2,8 +2,8 @@
 
 # start the node Alice, Bob
 
-cd "$NETSIM/cqc/backend/"
+cd "$NETSIM"/run
 
-python setupCQC.py Alice &
-python setupCQC.py Bob &
-python setupCQC.py Charlie &
+python startCQC.py Alice &
+python startCQC.py Bob &
+python startCQC.py Charlie &

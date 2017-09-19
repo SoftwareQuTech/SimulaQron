@@ -1,7 +1,7 @@
 #
-# Copyright (c) 2017, Stephanie Wehner
+# Copyright (c) 2017, Stephanie Wehner and Axel Dahlberg
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 # 1. Redistributions of source code must retain the above copyright
@@ -15,7 +15,7 @@
 # 4. Neither the name of the QuTech organization nor the
 #    names of its contributors may be used to endorse or promote products
 #    derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ''AS IS'' AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -47,7 +47,7 @@ from SimulaQron.local.setup import *
 # To write your on node, you must:
 # - Decide: is it a server or client on the classical network (or both)? This will be defined via the file
 # classicalNet.cfg: if it's listed there then a server will be started.
-# 
+#
 # - If the node acts as a server, fill in the code in localNode above with your own actions. Provide methods
 #   for the clients on the classical network to call remotely.
 #
@@ -68,7 +68,7 @@ from SimulaQron.local.setup import *
 def runClientNode(qReg, virtRoot, myName, classicalNet):
 	"""
 	Code to execute for the local client node. Called if all connections are established.
-	
+
 	Arguments
 	qReg		quantum register (twisted object supporting remote method calls)
 	virtRoot	virtual quantum ndoe (twisted object supporting remote method calls)
@@ -85,18 +85,18 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 	reactor.stop()
 
 
-		
+
 #####################################################################################################
 #
 # localNode
 #
 # This will be run if the local node acts as a server on the classical communication network,
-# accepting remote method calls from the other nodes. 
+# accepting remote method calls from the other nodes.
 
 class localNode(pb.Root):
-	
+
 	def __init__(self, node, classicalNet):
-	
+
 		self.node = node
 		self.classicalNet = classicalNet
 
@@ -112,7 +112,7 @@ class localNode(pb.Root):
 	def remote_test(self):
 		return "Tested!"
 
-	# This can be called by Alice (or other clients on the classical network) to inform Bob 
+	# This can be called by Alice (or other clients on the classical network) to inform Bob
 	# of an event. Your code goes here.
 	# @inlineCallbacks
 	def remote_tell_bob(self, someInfo):
@@ -151,8 +151,8 @@ def main():
 	else:
 		lNode = None
 
-	# Set up the local classical server if applicable, and connect to the virtual 
-	# node and other classical servers. Once all connections are set up, this will 
+	# Set up the local classical server if applicable, and connect to the virtual
+	# node and other classical servers. Once all connections are set up, this will
 	# execute the function runClientNode
 	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 

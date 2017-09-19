@@ -1,7 +1,7 @@
 #
-# Copyright (c) 2017, Stephanie Wehner
+# Copyright (c) 2017, Stephanie Wehner and Axel Dahlberg
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 # 1. Redistributions of source code must retain the above copyright
@@ -15,7 +15,7 @@
 # 4. Neither the name of the QuTech organization nor the
 #    names of its contributors may be used to endorse or promote products
 #    derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY COPYRIGHT HOLDER ''AS IS'' AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -53,7 +53,7 @@ from SimulaQron.local.setup import *
 def runClientNode(qReg, virtRoot, myName, classicalNet):
 	"""
 	Code to execture for the local client node. Called if all connections are established.
-	
+
 	Arguments
 	qReg		quantum register (twisted object supporting remote method calls)
 	virtRoot	virtual quantum ndoe (twisted object supporting remote method calls)
@@ -69,12 +69,12 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 # localNode
 #
 # This will be run if the local node acts as a server on the classical communication network,
-# accepting remote method calls from the other nodes. 
+# accepting remote method calls from the other nodes.
 
 class localNode(pb.Root):
-	
+
 	def __init__(self, node, classicalNet):
-	
+
 		self.node = node
 		self.classicalNet = classicalNet
 
@@ -95,7 +95,7 @@ class localNode(pb.Root):
 	def remote_receive_ghz(self, virtualNum):
 		"""
 		Recover the qubit from Bob. We should now have a tripartite GHZ state
-		
+
 		Arguments
 		virtualNum	number of the virtual qubit corresponding to the EPR pair received
 		"""
@@ -124,9 +124,9 @@ class localNode(pb.Root):
 		for s in range(len(M)):
 			for t in range(len(M)):
 				M[s][t] = realM[s][t] + 1j * imagM[s][t]
-		
+
 		return Qobj(M)
-		
+
 
 #####################################################################################################
 #
@@ -154,8 +154,8 @@ def main():
 	else:
 		lNode = None
 
-	# Set up the local classical server if applicable, and connect to the virtual 
-	# node and other classical servers. Once all connections are set up, this will 
+	# Set up the local classical server if applicable, and connect to the virtual
+	# node and other classical servers. Once all connections are set up, this will
 	# execute the function runClientNode
 	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 

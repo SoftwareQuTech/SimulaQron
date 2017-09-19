@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017, Stephanie Wehner
+# Copyright (c) 2017, Stephanie Wehner and Axel Dahlberg
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -173,8 +173,8 @@ def main():
 	else:
 		print("FAIL")
 
-	# Test CNOT control
-	sys.stdout.write("Testing CNOT control:")
+	# Test CPHASE control
+	sys.stdout.write("Testing CPHASE control:")
 	exp_values=calc_exp_values(prep_mixed_qutip())
 	ans=cqc.test_preparation(prep_CPHASE_control_CQC,exp_values,iterations=iterations)
 	sys.stdout.write('\r')
@@ -183,8 +183,8 @@ def main():
 	else:
 		print("FAIL")
 
-	# Test CNOT target
-	sys.stdout.write("Testing CNOT target:")
+	# Test CPHASE target
+	sys.stdout.write("Testing CPHASE target:")
 	exp_values=calc_exp_values(prep_mixed_qutip())
 	ans=cqc.test_preparation(prep_CPHASE_target_CQC,exp_values,iterations=iterations)
 	sys.stdout.write('\r')
@@ -193,8 +193,8 @@ def main():
 	else:
 		print("FAIL")
 
-	# Test EPR1 control
-	sys.stdout.write("Testing EPR1 control:")
+	# Test EPR1
+	sys.stdout.write("Testing EPR1:")
 	exp_values=calc_exp_values(prep_mixed_qutip())
 	ans=cqc.test_preparation(prep_EPR1_CQC,exp_values,iterations=iterations)
 	sys.stdout.write('\r')
@@ -203,8 +203,8 @@ def main():
 	else:
 		print("FAIL")
 
-	# Test EPR2 target
-	sys.stdout.write("Testing EPR2 target:")
+	# Test EPR2
+	sys.stdout.write("Testing EPR2:")
 	exp_values=calc_exp_values(prep_mixed_qutip())
 	ans=cqc.test_preparation(prep_EPR2_CQC,exp_values,iterations=iterations)
 	sys.stdout.write('\r')

@@ -68,3 +68,54 @@ The second part is a framework for writing applications that use the virtually s
 network. Such an application needs to connect locally to the virtual quantum node server simulating the underlying hardware (for programming
 in native mode), or to the CQC interface. It is up to these applications to exchange any classical communication required to execute the protocol.
 
+
+--------------------------
+Report bugs and contribute
+--------------------------
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+Bugs and feature requests
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For bugs, feature requests, suggestions or other general questions please use GitHubs issue tracker in the repository (located under ‘Issues’ on the main page of the repository).
+Please start your message with specifying one of the four labels below for easier handling of issues, for example::
+
+    Type: bug
+
+    There is a bug when applying the gate...
+
+Always provide enough information to assess the issue and seperate different issues into different messages.
+
+* *bug*: This is for bugs that are encountered. Please provide a way to reproduce the bug, preferably with a minimal example, and explain what goes wrong.
+
+* *feature request*: Is there a feature that you think should be provided? Explain the details of the feature and why you think this should be implemented.
+
+* *help wanted*: If there is something you having trouble with but which is not necessarily a bug. Also use this for other general questions.
+
+* *suggestions*: If you have suggestions on how to improve the features already existing. Be clear on what exactly you think should be improved and explain why.
+
+^^^^^^^^^^
+Contribute
+^^^^^^^^^^
+
+If you would like to contribute with your own code to fix a bug or add an additional feature, this is most welcomed.
+Please then make a pull request on GitHub, which will be reviewed before approval.
+The easiest to proceed is to:
+
+#. Fork the repository.
+#. Make the changes and commit these to your forked branch.
+#. Make a pull request between your branch and the one you forked from. Also provide a message which explains the changes and/or additions you have made.
+
+^^^^^^^^^^^^^^^
+Automated tests
+^^^^^^^^^^^^^^^
+
+There are number of automated tests that can be run to test many of the features of SimulaQron and the CQC interface.
+See :doc:`GettingStarted` for how to run these.
+Some of the automated tests use quantum tomography and are inherently probabilistic.
+Therefore if you see that one of these fails, you can try to run the test again and see if it is consistent.
+
+Some features are at the moment not included in the automated tests, these are:
+
+* The possibility to add a sequence of extra operations to be executed after an initial command.
+* Use the factory to execute a command repeatedly.

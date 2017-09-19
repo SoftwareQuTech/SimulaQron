@@ -1,7 +1,7 @@
 #
-# Copyright (c) 2017, Stephanie Wehner
+# Copyright (c) 2017, Stephanie Wehner and Axel Dahlberg
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 # 1. Redistributions of source code must retain the above copyright
@@ -15,7 +15,7 @@
 # 4. Neither the name of the QuTech organization nor the
 #    names of its contributors may be used to endorse or promote products
 #    derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ''AS IS'' AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -47,7 +47,7 @@ def main():
 	# We are Alice
 	myName = "Alice"
 
-	# Connect to the local virtual Node	
+	# Connect to the local virtual Node
 	node = config.hostDict[myName]
 	factory = pb.PBClientFactory()
 	reactor.connectTCP(node.hostname, node.port, factory)
@@ -100,11 +100,11 @@ def got_root(obj):
 	outcome = yield q2.callRemote("measure")
 	print("Got outcome from EPR:",outcome)
 
-	### 
+	###
 	# Make a new register
 	reg1 = yield obj.callRemote("new_register")
 	reg2 = yield obj.callRemote("new_register")
-	
+
 	q1 = yield obj.callRemote("new_qubit_inreg",reg1)
 	q2 = yield obj.callRemote("new_qubit_inreg",reg2)
 
@@ -156,7 +156,7 @@ def got_root(obj):
 	#
 	num = yield q1.callRemote("get_number")
 	print("Got number:", num)
-	
+
 	(R,I, activeQ, oldRegNum, oldQubitNum) = yield obj.callRemote("get_register",q1)
 	M = I
 
@@ -178,5 +178,5 @@ def got_root(obj):
 
 	reactor.stop()
 
-	
+
 main()

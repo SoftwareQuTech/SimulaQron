@@ -1,7 +1,7 @@
 #
-# Copyright (c) 2017, Stephanie Wehner
+# Copyright (c) 2017, Stephanie Wehner and Axel Dahlberg
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 # 1. Redistributions of source code must retain the above copyright
@@ -15,7 +15,7 @@
 # 4. Neither the name of the QuTech organization nor the
 #    names of its contributors may be used to endorse or promote products
 #    derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ''AS IS'' AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -44,15 +44,15 @@ import time
 # setup_local
 #
 # Sets up the local classical comms server (if applicable), and connects to the local virtual node
-# and other classical communication servers. 
+# and other classical communication servers.
 
 def setup_local(myName, virtualNet, classicalNet, lNode, func):
 	"""
 	Sets up
 	- local classical communication server (if desired according to the configuration file)
-	- client connection to the local virtual node quantum backend 
+	- client connection to the local virtual node quantum backend
 	- client connections to all other classical communication servers
-	
+
 	Arguments
 	myName		name of this node (string)
 	virtualNet	servers of the virtual nodes (dictionary of host objects)
@@ -100,7 +100,7 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func):
 	deferList.addCallback(init_register, myName, virtualNet, classicalNet, lNode, func)
 	deferList.addErrback(localError)
 	reactor.run()
-	
+
 
 ##################################################################################################
 #
@@ -135,7 +135,7 @@ def init_register(resList, myName, virtualNet, classicalNet, lNode, func):
 			else:
 				logging.error("LOCAL %s: Connection to %s failed!",myName, nb.name)
 				reactor.stop()
-		
+
 	# On the local virtual node, we still want to initialize a qubit register
 	defer = virtRoot.callRemote("new_register")
 	defer.addCallback(fill_register, myName, lNode, virtRoot, classicalNet, func)
@@ -169,6 +169,6 @@ def assemble_qubit(realM, imagM):
 	for s in range(len(M)):
 		for t in range(len(M)):
 			M[s][t] = realM[s][t] + 1j * imagM[s][t]
-	
+
 	return Qobj(M)
 
