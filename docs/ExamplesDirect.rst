@@ -15,6 +15,7 @@ up and running, and ran the simple example of generating correlated randomness. 
 	:maxdepth: 2
 	:caption: Native mode examples:
 
+	NativeModeCorrRng
 	NativeModeTemplate
 	NativeModeTeleport
 	NativeModeGraphState

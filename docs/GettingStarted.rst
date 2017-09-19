@@ -21,23 +21,27 @@ you use bash (e.g., standard on OSX or the GIT Bash install on Windows 10), othe
 
 where yourPath is the directory containing SimulaQron.
 
-You may verify the successful installation of the back engine itself, by executing::
+.. You may verify the successful installation of the back engine itself, by executing::
 
-	python tests/auto/testEngine.py 
+.. 	python tests/auto/testEngine.py 
 
 
 ------------------------
 Testing a simple example
 ------------------------
 
-Before delving into how to write any program yourself, let's first simply run one of the existing examples when programming SimulaQron native mode (see :doc:`ExamplesDirect`) to verify you set up everything correctly.
-Remember from the Overview that SimulaQron has two parts: the first are the virtual node servers that act simulate the hardware at each node as well as the quantum communication between them in a transparent manner. The second are the applications themselves which can be written in two ways, here we will illustrate the native mode using the Python Twisted framework connecting to the virtual node servers. An interface using the classical/quantum combiner protocol will be included in v0.2. 
+Before delving into how to write any program yourself, let's first simply run one of the existing examples when programming SimulaQron through the Python library (see :doc:`ExamplespythonLib`).
+Remember from the Overview that SimulaQron has two parts: the first are the virtual node servers that act simulate the hardware at each node as well as the quantum communication between them in a transparent manner.
+The second are the applications themselves which can be written in two ways, the direct way is to use the native mode using the Python Twisted framework connecting to the virtual node servers, see :doc:`ExamplesDirect`.
+Another way is the use the provided Python library that calls the virtual nodes by making use of the classical/quantum combiner interface.
+We will here illustrate how to use SimulaQron with the Python library.
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Starting the virtual node servers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A test configuration of virtual node servers will start 3 nodes, Alice, Bob and Charlie on your local computers. You may do so by executing::
+
 	sh run/startVNodes.sh
 
 Let us now see in detail what happens when you execute this example script. 
@@ -71,6 +75,55 @@ To start the virtual node for Alice. The script startVNodes.sh then simply start
 
 Provided the virtual nodes started successfully you now have a network of 3 simulated quantum nodes that accept connections on the ports indicated above to allow an application program to access qubits on the virtual node servers. The 3 virtual nodes have also established connections to each other in order to exchange simulated quantum traffic. 
 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Starting the CQC servers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Similarly to the virtual nodes we also need to start the CQC servers, which provide the possibility to talk to SimulaQron using the CQC interface.
+A test configuration of CQC servers will start 3 nodes, Alice, Bob and Charlie on your local computers. You may do so by executing::
+
+	sh run/startCQCNodes.sh
+
+The configuration for the CQC network is read from config/CQCNodes.cfg. This file defines which virtualNodes to start up and what their names are.
+**Note that the names for the virtual nodes and the CQC servers have to be the same at the moment.**
+
+For the example, this file is::
+
+	# Network configuration file
+	# 
+	# For each host its informal name, as well as its location in the network must
+	# be listed.
+	#
+	# [name], [hostname], [port number]
+	#
+
+	Alice, localhost, 8801
+	Bob, localhost, 8802
+	Charlie, localhost, 8803
+
+The script startCQCNodes.sh starts any number of desired CQC servers::
+
+	# startCQCNodes.sh - start the node Alice, Bob and Charlie 
+
+	cd "$NETSIM"/run
+	python startCQC.py Alice &
+	python startCQC.py Bob &
+	python startCQC.py Charlie &
+
+Provided the CQC servers started successfully you now have a network of 3 simulated quantum nodes that accept connections on the ports indicated above and takes messages specified by the CQC header.
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Running automated test
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Before turning to an actual protocol it is a good idea to run some tests to see that everything is working.
+It is a good idea to open a new terminal at this point, since the outputs will otherwise be hidden by the debugging information from the virtual nodes and CQC servers.
+Do not forget to set the environment variables.
+To run the test in the new terminal just type::
+
+    sh tests/runAll.sh
+
+Recall that some of these tests use quantum tomography and are inherently probabilistic. If one of the tests therefore fails, try to run it again and see if the error persists.
 
 ^^^^^^^^^^^^^^^^^^^
 Running a protocol
@@ -87,13 +140,13 @@ Our objective will be to realize the following protocol which will generate 1 sh
 
 Before seeing how this example works, let us again simply run the code::
 
-	cd examples/corrRNG
+	cd examples/cqc/pythonLib/corrRNG
 	sh doNew.sh
 
 Next to a considerable about of debugging information, you should be seeing the following two lines::
 
-	ALICE: My Random Number is  0/1
-	BOB: My Random Number is  0/1
+	App Alice: Measurement outcome is: 0/1
+	App Bob: Measurement outcome is: 0/1
 
 Note that the order of these two lines may differ, as it does not matter who measures first. So what is actually going on here ? Let us first look at how we will realize the example by making an additional step (3) explicit:
 
@@ -106,115 +159,62 @@ Note that the order of these two lines may differ, as it does not matter who mea
 * Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`. 
 
 While the task we want to realize here is completely trivial, the addition of step 3 does however already highlight a range of choices on how to realize step 3 and the need to find good abstractions to allow easy application development. 
-One way to realize step 3 would be to hardwire Bobs measurement: if the hardware can identify the correct qubit from Alice, then we could instruct it to measure it immediately without asking for a notification from Alice. It is clear that in a network that is a bit larger than our tiny three node setup, identifying the right setup requires a link between the underlying qubits and classical control information: this is the objective of the classical/quantum combiner, for which we will provide code in version 0.2 of SimulaQron. 
-
-
-This version simply allows a completely barebones access to the virtual nodes without implementing such convenient abstractions in order to allow you to explore such possibilities. To this end, we will here actually implement the following protocol for mere illustration purposes. We emphasize that this would be inefficient on a real quantum network since it requires Bob to store his qubit until Alice's control message arrives, which can be a significant delay causing the qubit to decohere in the meantime.
-
-* Alice generates 1 EPR pair, that is, two maximally entangled qubits :math:`A` and :math:`B` of the form :math:`|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)`
-
-* She sends qubit :math:`B` to Bob.
-
-* Alice sends Bob the correct identifier of the qubit, and tells him to measure it.
-
-* Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`. 
-
-To realize this, we thus need not only the connection to the virtual quantum node servers, but Alice and Bob themselves need to run a client/server to exchange classical control information. Before looking at the code, we node that the setup of these servers is again determined by a configuration file, namely config/classicalNet.cfg. This file defines which nodes act as servers in the classical communication network listening for control information to execute the protocol. You want to copy this to whatever example you are running. It takes the same format as above, where in our example only Bob will act run a server::
-
-	# Configuration file for servers on the classical communication network
-	# 
-	# For each host its informal name, as well as its location in the network must
-	# be listed.
-	#
-	# [name], [hostname], [port number]
-	#
-
-	Bob, localhost, 8812
+One way to realize step 3 would be to hardwire Bobs measurement: if the hardware can identify the correct qubit from Alice, then we could instruct it to measure it immediately without asking for a notification from Alice. It is clear that in a network that is a bit larger than our tiny three node setup, identifying the right setup requires a link between the underlying qubits and classical control information: this is the objective of the classical/quantum combiner.
 
 The first thing that happens if we execute the script doNew.sh is that after some setting up it will call run.sh, executing::
 
 	#!/bin/sh
 
-	cd "$NETSIM/examples/corrRNG"
+	python aliceTest.py
 	python bobTest.py &
 
-	# Note that this assumes Bob's server is up. Given we run everything locally there is essentially no delay though.
-	python aliceTest.py
+Let us now look at the programs for Alice and Bob.
+We first initialize an object of the class ``CQCConnection`` which will do all the communication to the virtual through the CQC interface.
+Qubits can then be created by initializing a qubit-object, which takes a ``CQCConnection`` as an input.
+On these qubits operations can be applied and they can also be sent to other nodes in the network by use of the ``CQCConnection``.
+The full code in aliceTest.py is::
 
-Let us now look at the programs for Alice and Bob. Alice will merely run a client on the classical communication network that connects to Bob to be found in aliceTest.py. Using the template (see general Examples section) which establishes the connections to the local virtual nodes, we thus need to provide client code for Alice to implement the protocol above. The function runClientNode will automatically be executed once Alice connected to her local virtual quantum node simulating the underlying hardware, and to Bob's server::
+	# Initialize the connection
+	Alice=CQCConnection("Alice")
 
-	#####################################################################################################
-	#
-	# runClientNode
-	#
-	# This will be run on the local node if all communication links are set up (to the virtual node
-	# quantum backend, as well as the nodes in the classical communication network), and the local classical
-	# communication server is running (if applicable).
-	#
-	@inlineCallbacks
-	def runClientNode(qReg, virtRoot, myName, classicalNet):
-        	"""
-        	Code to execute for the local client node. Called if all connections are established.
-        
-        	Arguments
-        	qReg            quantum register (twisted object supporting remote method calls)
-        	virtRoot        virtual quantum ndoe (twisted object supporting remote method calls)
-        	myName          name of this node (string)
-        	classicalNet    servers in the classical communication network (dictionary of hosts)
-        	"""
+	# Create qubits
+	q1=qubit(Alice)
+	q2=qubit(Alice)
 
-        	logging.debug("LOCAL %s: Runing client side program.",myName)
+	# Create Bell-pair
+	q1.H()
+	q1.cnot(q2)
 
-        	# Create 2 qubits
-        	qA = yield virtRoot.callRemote("new_qubit_inreg",qReg)
-        	qB = yield virtRoot.callRemote("new_qubit_inreg",qReg)
+	#Send second qubit to Bob
+	Alice.sendQubit(q2,"Bob")
 
-        	# Put qubits A and B in a maximally entangled state
-        	yield qA.callRemote("apply_H")
-        	yield qA.callRemote("cnot_onto",qB)
+	# Measure qubit
+	m=q1.measure()
+	to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
+	print("|"+"-"*(len(to_print)+2)+"|")
+	print("| "+to_print+" |")
+	print("|"+"-"*(len(to_print)+2)+"|")
 
-        	# Send qubit B to Bob
-        	# Instruct the virtual node to transfer the qubit
-        	remoteNum = yield virtRoot.callRemote("send_qubit",qB, "Bob")
+	# Stop the connections
+	Alice.close()
 
-        	# Tell Bob the ID of the qubit, and ask him to measure
-        	bob = classicalNet.hostDict["Bob"]
-        	yield bob.root.callRemote("process_qubit", remoteNum)
+Similarly the code in bobTest.py read::
 
-        	# Measure qubit A to obtain a random number
-        	x = yield qA.callRemote("measure")
-        	print("ALICE: My Random Number is ",x,"\n")
+	# Initialize the connection
+	Bob=CQCConnection("Bob")
 
-        	reactor.stop()
+	# Receive qubit
+	q=Bob.recvQubit()
 
+	# Measure qubit
+	m=q.measure()
+	to_print="App {}: Measurement outcome is: {}".format(Bob.name,m)
+	print("|"+"-"*(len(to_print)+2)+"|")
+	print("| "+to_print+" |")
+	print("|"+"-"*(len(to_print)+2)+"|")
 
-Let us now look at Bob's server program to be found in bobTest.py. Observe that Alice will call process_qubit above. Not included in the code below are several standard methods that require no change to be used in examples.::
+	# Stop the connection
+	Bob.close()
 
-	#####################################################################################################
-	#
-	# localNode
-	#
-	# This will be run if the local node acts as a server on the classical communication network,
-	# accepting remote method calls from the other nodes. 
-
-	class localNode(pb.Root):
-
-        	# This can be called by Alice to tell Bob to process the qubit
-        	@inlineCallbacks
-        	def remote_process_qubit(self, virtualNum):
-                	"""
-                	Recover the qubit and measure it to get a random number.
-                
-                	Arguments
-                	virtualNum      number of the virtual qubit corresponding to the EPR pair received
-                	"""
-
-                	qB = yield self.virtRoot.callRemote("get_virtual_ref",virtualNum)
-
-                	# Measure
-                	x = yield qB.callRemote("measure")
-
-                	print("BOB: My Random Number is ", x, "\n")
-
-For further examples, see the examples/ folder. A template for creating your own can be found in template/
+For further examples, see the examples/ folder.
 
