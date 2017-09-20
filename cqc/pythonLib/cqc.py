@@ -37,11 +37,12 @@ class CQCConnection:
 	def __init__(self,name,cqcFile=None,appFile=None,appID=0):
 		"""
 		Initialize a connection to the cqc server.
-		Arguments:
-		name	: Name of the host.
-		cqcFile	: Path to cqcFile. If None, '$NETSIM/config/cqcNodes.cfg is used.
-		appFile	: Path to appFile. If None, '$NETSIM/config/appNodes.cfg is used.
-		appID	: Application ID, defaults to a nonused ID.
+
+		- **Arguments**
+			:name:		Name of the host.
+			:cqcFile:	Path to cqcFile. If None, '$NETSIM/config/cqcNodes.cfg is used.
+			:appFile:	Path to appFile. If None, '$NETSIM/config/appNodes.cfg is used.
+			:appID:		Application ID, defaults to a nonused ID.
 		"""
 
 		# Host name
@@ -139,10 +140,12 @@ class CQCConnection:
 	def sendClassical(self,name,msg,timout=1):
 		"""
 		Sends a classical message to another host in the application network.
-		Arguments:
-		name	The name of the host in the application network.
-		msg	The message to send, will be converted to a bytesarray.
-		timout	The time to try to connect to the server. When timout is reached an RuntimeError is raised.
+
+		- **Arguments**
+
+			:name:		The name of the host in the application network.
+			:msg:		The message to send, will be converted to a bytesarray.
+			:timout:	The time to try to connect to the server. When timout is reached an RuntimeError is raised.
 		"""
 		if name in self._appNet.hostDict:
 			remoteHost=self._appNet.hostDict[name]
@@ -175,12 +178,14 @@ class CQCConnection:
 	def sendCommand(self,qID,command,notify=1,block=1,action=0):
 		"""
 		Sends a simple message and command message to the cqc server.
-		Arguments:
-		qID	: qubit ID
-		command	: Command to be executed, eg CQC_CMD_H
-		nofify	: Do we wish to be notified when done.
-		block	: Do we want the qubit to be blocked
-		action	: Are there more commands to be executed
+
+		- **Arguments**
+
+		:qID:		qubit ID
+		:command:	Command to be executed, eg CQC_CMD_H
+		:nofify:	Do we wish to be notified when done.
+		:block:		Do we want the qubit to be blocked
+		:action:	Are there more commands to be executed
 		"""
 		#Send Header
 		hdr=CQCHeader()
@@ -197,18 +202,20 @@ class CQCConnection:
 	def sendCmdXtra(self,qID,command,notify=1,block=1,action=0,xtra_qID=0,step=0,remote_appID=0,remote_node=0,remote_port=0,cmd_length=0):
 		"""
 		Sends a simple message, command message and xtra message to the cqc server.
-		Arguments:
-		qID		: qubit ID
-		command		: Command to be executed, eg CQC_CMD_H
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		action		: Are there more commands to be executed
-		xtra_qID	: Extra qubit ID for for example CNOT
-		step		: Defines the angle of rotation.
-		remote_appID	: Application ID of remote host
-		remote_node	: ip of remote host in cqc network
-		remote_port	: port of remote host in cqc network
-		cmd_length	: length of extra commands
+
+		- **Arguments**
+
+		:qID:		 qubit ID
+		:command:	 Command to be executed, eg CQC_CMD_H
+		:nofify:	 Do we wish to be notified when done.
+		:block:		 Do we want the qubit to be blocked
+		:action:	 Are there more commands to be executed
+		:xtra_qID:	 Extra qubit ID for for example CNOT
+		:step:		 Defines the angle of rotation.
+		:remote_appID:	 Application ID of remote host
+		:remote_node:	 ip of remote host in cqc network
+		:remote_port:	 port of remote host in cqc network
+		:cmd_length:	 length of extra commands
 		"""
 		#Send Header
 		hdr=CQCHeader()
