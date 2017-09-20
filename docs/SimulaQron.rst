@@ -10,6 +10,7 @@ Subpackages
     SimulaQron.local
     SimulaQron.virtNode
     SimulaQron.cqc
+    CLib
 
 SimulaQron.conf module
 ----------------------

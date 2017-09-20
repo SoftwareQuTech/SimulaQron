@@ -8,13 +8,20 @@ Programming SimulaQron
 There are two ways to program SimulaQron to run applications. The first is to use SimulaQron's native interface via `Twisted <https://twistedmatrix.com/>`_ Perspective Broker. This interface is specific to Python, and not (easily) accessible from other languages. We will call this interface SimulaQron's native interface throughout. While you may play with simple applications this way, the main purpose of this interface is to allow the development of higher protocol layers and abstractions which will ultimately be used to program quantum networks. 
 In the light of the alternate interface below it may appear inefficient to export an intermediary interface. However, the purpose of SimulaQron is precisely to explore and play with highler layer abstractions on top of any hardware, or its simulated version, SimulaQron. As such it is best to think of SimulaQron as a piece of simulated hardware with its own native interface, which we may first abstract into a higher level command language for programming. Examples of how to program SimulaQron in native mode can be found in :doc:`ExamplesDirect`.
 
-The second way to run applications is via a higher level interface bundled with SimulaQron, called the classical-quantum combiner (CQC) interface. This interface is universally accessible from any language, and will be available on the planned 2020 quantum internet demonstrator connecting several Dutch cities. If you want your applications to later use real quantum hardware instead of SimulaQron, then this is the interface to use. Internally, the CQC included in this package, uses SimulaQron's native interface from above in place of real quantum hardware. Examples of how to program using the CQC can be found in :doc:`ExamplesNodeOS`.
+The second way to run applications is via a higher level interface bundled with SimulaQron, called the classical-quantum combiner (CQC) interface. This interface is universally accessible from any language. It comes with a C and Python library, where the Python CQC is definitely the best place to get started if you have never programmed SimulaQron before. An evolved version of a C library and interface is targeted to be available on the planned 2020 quantum internet demonstrator connecting several Dutch cities. If you want your applications to later use real quantum hardware more easily instead of SimulaQron, then this is the interface to use. Internally, the CQC included in this package, uses SimulaQron's native interface from above in place of real quantum hardware. Examples of how to program using the CQC can be found in :doc:`ExamplesNodeOS`.
+
+.. image:: pic.png
+    :width: 400px
+    :align: center
+    :alt: Programming SimulaQrons Interfaces
+
+Practically, SimulaQron's Backend is a server process running on each local classical computer, emulating quantum hardware. The backend can be programmed directly using Twisted PB aka native mode. For clarity, not efficiency, the CQC Backend is a separate server process, which connects to the SimulaQron backend using Twisted PB. It accepts incoming connections, and using a general packet format can be programmed using any programming language. Libraries for C and Python are provided. If you are starting out, programming in the Python CQC library is by far the easiest way to get going!
 
 -------------------------------
 How SimulaQron works internally
 -------------------------------
 
-Let us here briefly sketch how SimulaQron works internally. Further details can be found in this arXiv paper.
+Let us here briefly sketch how the SimulaQron backend works internally. Further details can be found in an upcoming arXiv paper once we release the full version.
 This simulator consists of two parts and has a relatively modular design:
 
 
@@ -99,7 +106,7 @@ Contribute
 ^^^^^^^^^^
 
 If you would like to contribute with your own code to fix a bug or add an additional feature, this is most welcomed.
-Please then make a pull request on GitHub, which will be reviewed before approval.
+Please then make a pull request on GitHub, which will be reviewed before approval. Please make sure you run the automated tests below before submitting any code.
 The easiest to proceed is to:
 
 #. Fork the repository.
