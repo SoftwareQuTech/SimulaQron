@@ -218,3 +218,11 @@ Similarly the code in bobTest.py read::
 
 For further examples, see the examples/ folder.
 
+^^^^^^^^^^^^^^^^^^^^^^^^
+Logging and debug output
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this Pre Beta, the default is for all code - the SimulaQron Backend, the CQC Backend, and any examples - to produce very detailed logging information. You may set the detail of this output using the Python logging module, by setting logging.DEBUG, logging.ERROR, etc depending on your desired level of detail. The default everywhere is full debug output, ile ::
+
+	logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+
