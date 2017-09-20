@@ -181,11 +181,11 @@ class CQCConnection:
 
 		- **Arguments**
 
-		:qID:		qubit ID
-		:command:	Command to be executed, eg CQC_CMD_H
-		:nofify:	Do we wish to be notified when done.
-		:block:		Do we want the qubit to be blocked
-		:action:	Are there more commands to be executed
+			:qID:		qubit ID
+			:command:	Command to be executed, eg CQC_CMD_H
+			:nofify:	Do we wish to be notified when done.
+			:block:		Do we want the qubit to be blocked
+			:action:	Are there more commands to be executed
 		"""
 		#Send Header
 		hdr=CQCHeader()
@@ -205,17 +205,17 @@ class CQCConnection:
 
 		- **Arguments**
 
-		:qID:		 qubit ID
-		:command:	 Command to be executed, eg CQC_CMD_H
-		:nofify:	 Do we wish to be notified when done.
-		:block:		 Do we want the qubit to be blocked
-		:action:	 Are there more commands to be executed
-		:xtra_qID:	 Extra qubit ID for for example CNOT
-		:step:		 Defines the angle of rotation.
-		:remote_appID:	 Application ID of remote host
-		:remote_node:	 ip of remote host in cqc network
-		:remote_port:	 port of remote host in cqc network
-		:cmd_length:	 length of extra commands
+			:qID:		 qubit ID
+			:command:	 Command to be executed, eg CQC_CMD_H
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:action:	 Are there more commands to be executed
+			:xtra_qID:	 Extra qubit ID for for example CNOT
+			:step:		 Defines the angle of rotation.
+			:remote_appID:	 Application ID of remote host
+			:remote_node:	 ip of remote host in cqc network
+			:remote_port:	 port of remote host in cqc network
+			:cmd_length:	 length of extra commands
 		"""
 		#Send Header
 		hdr=CQCHeader()
@@ -238,12 +238,14 @@ class CQCConnection:
 	def sendGetTime(self,qID,notify=1,block=1,action=0):
 		"""
 		Sends get-time message
-		Arguments:
-		qID		: qubit ID
-		command		: Command to be executed, eg CQC_CMD_H
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		action		: Are there more commands to be executed
+
+		- **Arguments**
+
+			:qID:		 qubit ID
+			:command:	 Command to be executed, eg CQC_CMD_H
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:action:	 Are there more commands to be executed
 		"""
 		#Send Header
 		hdr=CQCHeader()
@@ -260,18 +262,20 @@ class CQCConnection:
 	def sendFactory(self,qID,command,num_iter,notify=1,block=1,action=0,xtra_qID=0,remote_appID=0,remote_node=0,remote_port=0,cmd_length=0):
 		"""
 		Sends a factory message
-		Arguments:
-		qID		: qubit ID
-		command		: Command to be executed, eg CQC_CMD_H
-		num_iter	: Number of times to execute command
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		action		: Are there more commands to be executed
-		xtra_qID	: Extra qubit ID for for example CNOT
-		remote_appID	: Application ID of remote host
-		remote_node	: ip of remote host in cqc network
-		remote_port	: port of remote host in cqc network
-		cmd_length	: length of extra commands
+
+		- **Arguments**
+
+			:qID:		 qubit ID
+			:command:	 Command to be executed, eg CQC_CMD_H
+			:num_iter:	 Number of times to execute command
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:action:	 Are there more commands to be executed
+			:xtra_qID:	 Extra qubit ID for for example CNOT
+			:remote_appID:	 Application ID of remote host
+			:remote_node:	 ip of remote host in cqc network
+			:remote_port:	 port of remote host in cqc network
+			:cmd_length:	 length of extra commands
 		"""
 		#Send Header
 		hdr=CQCHeader()
@@ -401,11 +405,14 @@ class CQCConnection:
 	def sendQubit(self,q,name,remote_appID=0,notify=True,block=True,print_info=True):
 		"""
 		Sends qubit to another node in the cqc network. If this node is not in the network an error is raised.
-		q		: The qubit to send.
-		Name		: Name of the node as specified in the cqc network config file.
-		remote_appID	: The app ID of the application running on the receiving node.
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
+
+		- **Arguments**
+
+			:q:		 The qubit to send.
+			:Name:		 Name of the node as specified in the cqc network config file.
+			:remote_appID:	 The app ID of the application running on the receiving node.
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
 		"""
 
 		# Get receiving host
@@ -431,12 +438,15 @@ class CQCConnection:
 	def recvQubit(self,notify=True,block=True,print_info=True):
 		"""
 		Receives a qubit.
-		q		: The qubit to send.
-		Name		: Name of the node as specified in the cqc network config file.
-		remote_appID	: The app ID of the application running on the receiving node.
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:q:		 The qubit to send.
+			:Name:		 Name of the node as specified in the cqc network config file.
+			:remote_appID:	 The app ID of the application running on the receiving node.
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 
 		q=qubit(self,createNew=False)
@@ -464,12 +474,14 @@ class CQCConnection:
 	def createEPR(self,name,remote_appID=0,notify=True,block=True,print_info=True):
 		"""
 		Creates epr with other host in cqc network.
-		NOT YET IMPLEMENTED.
-		Name		: Name of the node as specified in the cqc network config file.
-		remote_appID	: The app ID of the application running on the receiving node.
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:Name:		 Name of the node as specified in the cqc network config file.
+			:remote_appID:	 The app ID of the application running on the receiving node.
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 
 		# Get receiving host
@@ -488,9 +500,7 @@ class CQCConnection:
 		self.sendCmdXtra(q._qID,CQC_CMD_EPR,notify=int(notify),block=int(block),remote_appID=remote_appID,remote_node=recvHost.ip,remote_port=recvHost.port)
 
 		# Get RECV message
-		message=self.readMessage() #TODO TAKE CARE OF RETURN MESSAGES OF RECEIVE
-		# if print_info:
-		# 	self.print_CQC_msg(message)
+		message=self.readMessage()
 
 		if notify:
 			message=self.readMessage()
@@ -505,10 +515,12 @@ class CQCConnection:
 		"""
 		Does a tomography on the output from the preparation specified.
 		The frequencies from X, Y and Z measurements are returned as a tuple (f_X,f_Y,f_Z).
-		Arguments:
-		preparation	: A function that takes a CQCConnection as input and prepares a qubit and returns this (and preferably sets print_info=False)
-		iterations	: Number of measurements in each basis.
-		progress_bar	: Displays a progress bar
+
+		- **Arguments**
+
+			:preparation:	 A function that takes a CQCConnection as input and prepares a qubit and returns this (and preferably sets print_info=False)
+			:iterations:	 Number of measurements in each basis.
+			:progress_bar:	 Displays a progress bar
 		"""
 
 		accum_outcomes=[0,0,0]
@@ -561,12 +573,14 @@ class CQCConnection:
 		"""
 		Test the preparation of a qubit.
 		Returns True if the expected values are inside the confidence interval produced from the data received from the tomography function
-		Arguments:
-		preparation	: A function that takes a CQCConnection as input and prepares a qubit and returns this (and preferably sets print_info=False)
-		exp_values	: The expected values for measurements in the X, Y and Z basis.
-		conf		: Determines the confidence region (+/- conf/sqrt(iterations) )
-		iterations	: Number of measurements in each basis.
-		progress_bar	: Displays a progress bar
+
+		- **Arguments**
+
+			:preparation:	 A function that takes a CQCConnection as input and prepares a qubit and returns this (and preferably sets print_info=False)
+			:exp_values:	 The expected values for measurements in the X, Y and Z basis.
+			:conf:		 Determines the confidence region (+/- conf/sqrt(iterations) )
+			:iterations:	 Number of measurements in each basis.
+			:progress_bar:	 Displays a progress bar
 		"""
 		epsilon=conf/math.sqrt(iterations)
 
@@ -617,12 +631,14 @@ class qubit:
 		Initializes the qubit. The cqc connection must be given.
 		If notify, the return message is received before the method finishes.
 		createNew is set to False when we receive a qubit.
-		Arguments:
-		cqc		: The CQCconnection used
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
-		createNew	: If NEW-message should be sent, used internally
+
+		- **Arguments**
+
+			:cqc:		 The CQCconnection used
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
+			:createNew:	 If NEW-message should be sent, used internally
 		"""
 
 		#Cqc connection
@@ -670,10 +686,12 @@ class qubit:
 		"""
 		Performs an identity gate on the qubit.
 		If notify, the return message is received before the method finishes.
-		Arguments:
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -692,10 +710,12 @@ class qubit:
 		"""
 		Performs a X on the qubit.
 		If notify, the return message is received before the method finishes.
-		Arguments:
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -714,10 +734,12 @@ class qubit:
 		"""
 		Performs a Y on the qubit.
 		If notify, the return message is received before the method finishes.
-		Arguments:
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -736,10 +758,12 @@ class qubit:
 		"""
 		Performs a Z on the qubit.
 		If notify, the return message is received before the method finishes.
-		Arguments:
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -758,10 +782,12 @@ class qubit:
 		"""
 		Performs a T gate on the qubit.
 		If notify, the return message is received before the method finishes.
-		Arguments:
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -780,10 +806,12 @@ class qubit:
 		"""
 		Performs a Hadamard on the qubit.
 		If notify, the return message is received before the method finishes.
-		Arguments:
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -802,10 +830,12 @@ class qubit:
 		"""
 		Performs a K gate on the qubit.
 		If notify, the return message is received before the method finishes.
-		Arguments:
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -824,11 +854,13 @@ class qubit:
 		"""
 		Applies rotation around the x-axis with the angle of step*2*pi/256 radians.
 		If notify, the return message is received before the method finishes.
-		Arguments:
-		step		: Determines the rotation angle in steps of 2*pi/256
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:step:		 Determines the rotation angle in steps of 2*pi/256
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -847,11 +879,13 @@ class qubit:
 		"""
 		Applies rotation around the y-axis with the angle of step*2*pi/256 radians.
 		If notify, the return message is received before the method finishes.
-		Arguments:
-		step		: Determines the rotation angle in steps of 2*pi/256
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:step:		 Determines the rotation angle in steps of 2*pi/256
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -870,11 +904,13 @@ class qubit:
 		"""
 		Applies rotation around the z-axis with the angle of step*2*pi/256 radians.
 		If notify, the return message is received before the method finishes.
-		Arguments:
-		step		: Determines the rotation angle in steps of 2*pi/256
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:step:		 Determines the rotation angle in steps of 2*pi/256
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -894,11 +930,13 @@ class qubit:
 		Applies a cnot onto target.
 		Target should be a qubit-object with the same cqc connection.
 		If notify, the return message is received before the method finishes.
-		Arguments:
-		target		: The target qubit
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:target:	 The target qubit
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -918,11 +956,13 @@ class qubit:
 		Applies a cphase onto target.
 		Target should be a qubit-object with the same cqc connection.
 		If notify, the return message is received before the method finishes.
-		Arguments:
-		target		: The target qubit
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:target:	 The target qubit
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -943,10 +983,12 @@ class qubit:
 		If now MEASOUT message is received, None is returned.
 		If inplace=False, the measurement is destructive and the qubit is removed from memory.
 		If inplace=True, the qubit is left in the post-measurement state.
-		Arguments:
-		inplace		: If false, measure destructively.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:inplace:	 If false, measure destructively.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -974,10 +1016,12 @@ class qubit:
 		"""
 		Resets the qubit.
 		If notify, the return message is received before the method finishes.
-		Arguments:
-		nofify		: Do we wish to be notified when done.
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
@@ -997,9 +1041,11 @@ class qubit:
 		"""
 		Returns the time information of the qubit.
 		If now INF_TIME message is received, None is returned.
-		Arguments:
-		block		: Do we want the qubit to be blocked
-		print_info	: If info should be printed
+
+		- **Arguments**
+
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
 		"""
 		# check if qubit is active
 		self.check_active()
