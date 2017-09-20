@@ -43,7 +43,7 @@ Possible message types are listed below. Depending on the message type additiona
 CQC Command Header
 ^^^^^^^^^^^^^^^^^^
 
-If the message type is CQC_TP_COMMAND or CQC_TP_FACTORY, then the following additional command header must be supplied. It identifies the specific instruction to execute, as well as the qubit ID on which to perform this instructions. For two qubit gates, request to send or receive, and produce entanglement, the CQC Xtra Header is required supplying further information
+If the message type is CQC_TP_COMMAND, CQC_TP_FACTORY or CQC_TP_GET_TIME, then the following additional command header must be supplied. It identifies the specific instruction to execute, as well as the qubit ID on which to perform this instructions. For rotations, two qubit gates, request to send or receive, and produce entanglement, the CQC Xtra Header is required supplying further information
 
 =========== ============================  ==========  ===============================================================
  Function     Type                         Length      Comment
@@ -88,7 +88,7 @@ CQC Xtra Header
 ^^^^^^^^^^^^^^^
 
 Additional header containing further information. 
-The following commands require an xtra header when issued to the CQC Backend: CQC_CMD_SEND, CQC_CMD_RECV, CQC_CMD_CPHASE, CQC_CMD_CNOT. 
+The following commands require an xtra header when issued to the CQC Backend: CQC_CMD_SEND, CQC_CMD_RECV, CQC_CMD_CPHASE, CQC_CMD_CNOT, CQC_CMD_ROT_X, CQC_CMD_ROT_Y, CQC_CMD_ROT_Z
 
 ============== ============================  ==========  ===============================================================
 Function	Type			      Length	  Comments

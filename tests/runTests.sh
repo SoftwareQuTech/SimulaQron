@@ -1,6 +1,5 @@
 #!/bin/bash
 
-cd auto
+cd "$NETSIM"/tests/auto
 sh testAll.sh
-cd ..
 

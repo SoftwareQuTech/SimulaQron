@@ -6,7 +6,7 @@ Programming SimulaQron
 ----------------------
 
 There are two ways to program SimulaQron to run applications. The first is to use SimulaQron's native interface via `Twisted <https://twistedmatrix.com/>`_ Perspective Broker. This interface is specific to Python, and not (easily) accessible from other languages. We will call this interface SimulaQron's native interface throughout. While you may play with simple applications this way, the main purpose of this interface is to allow the development of higher protocol layers and abstractions which will ultimately be used to program quantum networks. 
-In the light of the alternate interface below it may appear inefficient to export an intermediary interface. However, the purpose of SimulaQron is precisely to explore and play with highler layer abstractions on top of any hardware, or its simulated version, SimulaQron. As such it is best to think of SimulaQron as a piece of simulated hardware with its own native interface, which we may first abstract into a higher level command language for programming. Examples of how to program SimulaQron in native mode can be found in :doc:`ExamplesDirect`.
+In the light of the alternate interface below it may appear inefficient to export an intermediary interface. However, the purpose of SimulaQron is precisely to explore and play with higher layer abstractions on top of any hardware, or its simulated version, SimulaQron. As such it is best to think of SimulaQron as a piece of simulated hardware with its own native interface, which we may first abstract into a higher level command language for programming. Examples of how to program SimulaQron in native mode can be found in :doc:`ExamplesDirect`.
 
 The second way to run applications is via a higher level interface bundled with SimulaQron, called the classical-quantum combiner (CQC) interface. This interface is universally accessible from any language. It comes with a C and Python library, where the Python CQC is definitely the best place to get started if you have never programmed SimulaQron before. An evolved version of a C library and interface is targeted to be available on the planned 2020 quantum internet demonstrator connecting several Dutch cities. If you want your applications to later use real quantum hardware more easily instead of SimulaQron, then this is the interface to use. Internally, the CQC included in this package, uses SimulaQron's native interface from above in place of real quantum hardware. Examples of how to program using the CQC can be found in :doc:`ExamplesNodeOS`.
 
@@ -30,7 +30,7 @@ Virtual quantum nodes
 ^^^^^^^^^^^^^^^^^^^^^
 
 A virtual quantum node is a server program running on a particular computer that pretends to be quantum hardware, simulating qubits and quantum communication.
-That is, you may thnk of these nodes as fake hardware programmable directly via SimulaQron's native interface. Each node presents
+That is, you may think of these nodes as fake hardware programmable directly via SimulaQron's native interface. Each node presents
 a number of virtual qubits for you to use. These virtual qubits would correspond to the physical qubits
 available at this node, would this be a real physical implementation of the quantum network node. By connecting to the virtual quantum node server, a
 client program that depends on using quantum hardware, may manipulate these qubits as if they were local physical qubit and also 
@@ -49,7 +49,7 @@ the quantum advantage of entanglement in the first place!). As such, if two (or 
 qubits which are somehow entangled with each other, then these qubits will actually need to be simulated
 at just one of these nodes. That is, they appear to be virtually local (as if they were real physical
 qubits), yet they are actually simulated at just one of the network nodes. As you might imagine, 
-this also means that if we want to perform an entangling gate to two qubits which are virtually
+this also means that if we want to perform an entangling gate between two qubits which are virtually
 local, but actually simulated in two different backend quantum registers, then a merge of these
 registers is required before the entangling gate can be exectuted. This is all handled transparently 
 by the backend provided here. For programming network applications using SimulaQron you will not need to 
@@ -107,7 +107,7 @@ Contribute
 
 If you would like to contribute with your own code to fix a bug or add an additional feature, this is most welcomed.
 Please then make a pull request on GitHub, which will be reviewed before approval. Please make sure you run the automated tests below before submitting any code.
-The easiest to proceed is to:
+The easiest way to proceed is to:
 
 #. Fork the repository.
 #. Make the changes and commit these to your forked branch.
@@ -117,9 +117,9 @@ The easiest to proceed is to:
 Automated tests
 ^^^^^^^^^^^^^^^
 
-There are number of automated tests that can be run to test many of the features of SimulaQron and the CQC interface.
+There are number of automated tests that test many (but not all) of the features of SimulaQron and the CQC interface.
 See :doc:`GettingStarted` for how to run these.
-Some of the automated tests use quantum tomography and are inherently probabilistic.
+Some of the automated tests use quantum tomography and are thus inherently probabilistic.
 Therefore if you see that one of these fails, you can try to run the test again and see if it is consistent.
 
 Some features are at the moment not included in the automated tests, these are:
