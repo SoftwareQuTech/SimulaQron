@@ -100,7 +100,7 @@ Although the order described here is slightly different the end result is still 
 
 	#. David performs a CPHASE operation between :math:`D` and :math:`E` and sends :math:`E` to Bob.
 
-	#. Bob performs the operation :math:`\exp(\frac{\mathrm{i}\pi}{4}Z)` on :math:`D` (one of the operations to induced a local complementation at :math:`E`).
+	#. David performs the operation :math:`\exp(\frac{\mathrm{i}\pi}{4}Z)` on :math:`D` (one of the operations to induced a local complementation at :math:`E`).
 
 	#. David receives the measurement outcome from Charlie and performs a :math:`Z`-operation on :math:`D` if this is :math:`1` and nothing if it is :math:`0`.
 

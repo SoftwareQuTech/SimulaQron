@@ -84,7 +84,7 @@ A test configuration of CQC servers will start 3 nodes, Alice, Bob and Charlie o
 
 	sh run/startCQCNodes.sh
 
-The configuration for the CQC network is read from config/CQCNodes.cfg. This file defines which virtualNodes to start up and what their names are.
+The configuration for the CQC network is read from config/cqcNodes.cfg. This file defines which CQC servers to start up and what their names are.
 **Note that the names for the virtual nodes and the CQC servers have to be the same at the moment.**
 
 For the example, this file is::
@@ -97,9 +97,9 @@ For the example, this file is::
 	# [name], [hostname], [port number]
 	#
 
-	Alice, localhost, 8801
-	Bob, localhost, 8802
-	Charlie, localhost, 8803
+	Alice, localhost, 8821
+	Bob, localhost, 8822
+	Charlie, localhost, 8823
 
 The script startCQCNodes.sh starts any number of desired CQC servers::
 

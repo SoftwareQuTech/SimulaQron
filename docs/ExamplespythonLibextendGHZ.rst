@@ -177,23 +177,7 @@ Here we program what Charlie should do using the python library::
 Starting
 --------
 
-We first start the virtual quantum node backend, by executing::
-
-	cd "$NETSIM"/run
-	python startNode.py Alice &
-	python startNode.py Bob &
-	python startNode.py David &
-	python startNode.py Charlie &
-
-where $NETSIM is the environment variable defining the SimulaQron directory as outlined in :doc:`GettingStarted`.
-
-We also start up the CQC servers::
-
-	cd "$NETSIM"/cqc/backend
-	python setupCQC.py Alice &
-	python setupCQC.py Bob &
-	python setupCQC.py Charlie &
-
+Start the virtual nodes and CQC servers as explained in :doc:`GettingStarted`.
 We then start up the programs for the parties themselves. These files contain the code above for the corresponding host::
 
 	python aliceTest.py &
