@@ -12,7 +12,13 @@ Assuming you have python 3 etc already installed already, do::
 	pip install service_identity
 	pip install qutip
 
-For detailed instructions on how to install QuTip and Twisted, please refer to their respective installations instructions. You will then 
+For detailed instructions on how to install QuTip and Twisted, please refer to their respective installations instructions. 
+
+To install SimulaQron itself, you can clone the PreBeta git repository. Do::
+
+	git clone https://github.com/StephanieWehner/SimulaQron -b PreBeta
+
+You will then 
 need to set the following environment variables in order to execute the code. I am assuming here
 you use bash (e.g., standard on OSX or the GIT Bash install on Windows 10), otherwise set the same variables using your favorite shell.::
 
