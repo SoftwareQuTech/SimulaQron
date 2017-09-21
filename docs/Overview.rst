@@ -106,12 +106,14 @@ Contribute
 ^^^^^^^^^^
 
 If you would like to contribute with your own code to fix a bug or add an additional feature, this is most welcomed.
-Please then make a pull request on GitHub, which will be reviewed before approval. Please make sure you run the automated tests below before submitting any code.
+Please then make a pull request on GitHub, which will be reviewed before approval.
+For contributing use the *Develop*-branch.
+Please make sure you run the automated tests below before submitting any code.
 The easiest way to proceed is to:
 
-#. Fork the repository.
+#. Fork the repository at the *Develop*-branch.
 #. Make the changes and commit these to your forked branch.
-#. Make a pull request between your branch and the one you forked from. Also provide a message which explains the changes and/or additions you have made.
+#. Make a pull request between your branch and the *Develop*-branch. Also provide a message which explains the changes and/or additions you have made.
 
 ^^^^^^^^^^^^^^^
 Automated tests
