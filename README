@@ -5,5 +5,5 @@ SimulaQron - simple quantum network simulator
 The purpose of this simulator of quantum network nodes is to allow you to develop new applications for
 a future quantum internet, while of course right now we do not yet have real quantum network nodes available for testing.
 
-Documentation and examples are explained in the html documentation docs/_build/html/index.html
-
+Documentation and examples are explained in the html documentation 
+https://stephaniewehner.github.io/SimulaQron/PreBetaDocs/index.html
