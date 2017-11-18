@@ -36,6 +36,7 @@ from SimulaQron.general.hostConfig import *
 from qutip import *
 
 import logging
+import numpy as np
 import time
 
 # logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
@@ -172,3 +173,20 @@ def assemble_qubit(realM, imagM):
 
 	return Qobj(M)
 
+
+def prepare_qubit(a, b):
+    """Prepares a qubit in the state a|0> + b|1>"""
+    if round(abs(a)**2 + abs(b)**2, 10) != 1:
+        raise ValueError('Sum of absolute squares of a and b must be equal to 1')
+
+    if b == 0:
+        return basis(2, 0) * basis(2, 0).dag()
+
+    qubit = basis(2, 0)
+    theta = 2 * np.arccos(a)
+    phi = -1.j * np.log(b / np.sin(theta / 2))
+
+    # rotation to perform on qubit
+    rotation = rz(phi) * ry(theta) * rz(-phi)
+    prepared_qubit = rotation * qubit
+    return prepared_qubit * prepared_qubit.dag()
