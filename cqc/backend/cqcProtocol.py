@@ -224,6 +224,7 @@ class CQCProtocol(Protocol):
 		# Check if we received data already for the next packet, if so save it
 		if self.currHeader.length < len(self.buf):
 			self.buf = self.buf[self.currHeader.length:len(self.buf)]
+			self.dataReceived(b'')
 		else:
 			self.buf = None
 
