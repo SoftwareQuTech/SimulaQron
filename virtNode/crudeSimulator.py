@@ -71,10 +71,11 @@ class simpleEngine(quantumEngine):
 		v = basis(2,0)
 		newQubit = v * v.dag()
 
+
 		try:
 			num = self.add_qubit(newQubit)
 			return num
-		except Error:
+		except quantumError:
 			raise quantumError("Out of qubits.")
 			return(-1)
 

@@ -847,12 +847,14 @@ class CQCProtocol(Protocol):
 				return False
 
 			virt = yield self.factory.virtRoot.callRemote("new_qubit_inreg",self.factory.qReg)
+			if not virt: # if no more qubits
+				raise quantumError("No more qubits available")
 			q = CQCQubit(cmd.qubit_id, int(time.time()), virt)
 			self.factory.qubitList[(app_id,q_id)] = q
 			logging.debug("CQC %s: Requested new qubit (%d,%d)",self.name,app_id, q_id)
-		except Error:
-			logging.error("CQC %s: Error creating qubit", self.name)
-			self._send_back_cqc(cqc_header, CQC_ERR_GENERAL)
+		except quantumError: # if no more qubits
+			logging.error("CQC %s: Maximum number of qubits reached.", self.name)
+			self._send_back_cqc(cqc_header, CQC_ERR_NOQUBIT)
 			self.factory._lock.release()
 			return False
 
