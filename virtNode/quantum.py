@@ -84,6 +84,7 @@ class simulatedQubit(pb.Referenceable):
 		Make this a fresh qubit.
 		"""
 
+
 		# Create a fresh qubit in the |0> state
 		num = self.register.add_fresh_qubit()
 		self.num = num
