@@ -767,6 +767,11 @@ class CQCProtocol(Protocol):
 		remote_port=xtra.remote_port
 		remote_app_id=xtra.remote_app_id
 
+		#Decide directionaly flag
+		host_combined=int(str(host_node)+str(host_port))
+		remote_combined=int(str(remote_node)+str(remote_port))
+		DF=int(host_combined<remote_combined)
+
 		# Create the first qubit
 		(succ,q_id1) = yield self.cmd_new(cqc_header,cmd,xtra,return_q_id=True)
 		if not succ:
@@ -815,7 +820,7 @@ class CQCProtocol(Protocol):
 
 		# Send ent_info header with entanglement information
 		entInfoHdr=CQCEntInfoHeader()
-		entInfoHdr.setVals(host_node,host_port,host_app_id,remote_node,remote_port,remote_app_id,ent_id,int(time.time()),int(time.time()),0,0)
+		entInfoHdr.setVals(host_node,host_port,host_app_id,remote_node,remote_port,remote_app_id,ent_id,int(time.time()),int(time.time()),0,DF)
 		msg=entInfoHdr.pack()
 		self.transport.write(msg)
 		logging.debug("CQC %s: Entanglement information %s",self.name, entInfoHdr.printable())

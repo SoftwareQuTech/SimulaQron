@@ -152,7 +152,7 @@ class CQCConnection:
 		else:
 			raise ValueError("Host name '{}' is not in the cqc network".format(name))
 		connected=False
-		for _ in range(10):
+		for _ in range(int(10*timout)):
 			try:
 				s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 				s.connect((remoteHost.hostname,remoteHost.port))
@@ -162,7 +162,7 @@ class CQCConnection:
 				time.sleep(0.1)
 		if not connected:
 			raise RuntimeError("Could not connect to server {}".format(name))
-		s.send(bytearray(msg))
+		s.send(bytes(msg))
 		s.close()
 
 
@@ -499,7 +499,7 @@ class CQCConnection:
 
 		- **Arguments**
 
-			:Name:		 Name of the node as specified in the cqc network config file.
+			:name:		 Name of the node as specified in the cqc network config file.
 			:remote_appID:	 The app ID of the application running on the receiving node.
 			:nofify:	 Do we wish to be notified when done.
 			:block:		 Do we want the qubit to be blocked
@@ -523,9 +523,14 @@ class CQCConnection:
 		# Get RECV message
 		message=self.readMessage()
 		notifyHdr=message[1]
+		entInfoHdr=message[2]
 		q_id=notifyHdr.qubit_id
 
-		print(message[2].printable())
+		print(entInfoHdr.printable())
+
+		# Send entanglement information
+		msg=entInfoHdr.pack()
+		self.sendClassical(name,msg)
 
 		if notify:
 			message=self.readMessage()
@@ -537,6 +542,37 @@ class CQCConnection:
 
 		#Activate and return qubit
 		q._active=True
+		return q
+
+	def recvEPR(self,notify=True,block=True,print_info=True):
+		"""
+		Receives a qubit from an EPR-pair generated with another node.
+
+		- **Arguments**
+
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
+		"""
+
+		# receive qubit
+		q=self.recvQubit(notify=notify,block=block,print_info=False)
+
+		# receive entanglement information
+		self.startClassicalServer()
+		rawentInfoHdr=self.recvClassical()
+		entInfoHdr=CQCEntInfoHeader(rawentInfoHdr)
+
+		if print_info:
+			# Lookup host name
+			remote_node=entInfoHdr.node_A
+			remote_port=entInfoHdr.port_A
+			for node in self._cqcNet.hostDict.values():
+				if (node.ip==remote_node) and (node.port==remote_port):
+					remote_name=node.name
+
+			print("App {}: Created entanglement with node {} and qubit ID {}".format(self.name,remote_name,q._qID))
+
 		return q
 
 	def tomography(self,preparation,iterations,progress=True):

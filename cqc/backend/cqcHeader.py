@@ -471,7 +471,7 @@ class CQCEntInfoHeader:
 		toPrint = toPrint + "Entanglement ID: " + str(self.id_AB) + " "
 		toPrint = toPrint + "Timestamp: " + str(self.timestamp) + " "
 		toPrint = toPrint + "Time of Goodness: " + str(self.ToG) + " "
-		toPrint = toPrint + "Goodness: " + str(self.goodness)
+		toPrint = toPrint + "Goodness: " + str(self.goodness) + " "
 		toPrint = toPrint + "Directionality Flag: " + str(self.DF)
 		return(toPrint)
 
