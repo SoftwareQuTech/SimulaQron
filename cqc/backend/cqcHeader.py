@@ -39,6 +39,7 @@ CQC_HDR_LENGTH=8		# Length of the CQC Header
 CQC_CMD_HDR_LENGTH=4		# Length of a command header
 CQC_CMD_XTRA_LENGTH=16		# Length of extra command information
 CQC_NOTIFY_LENGTH=20		# Length of a notification send from the CQC upwards
+CQC_ENT_INFO_LENGTH=40		# Length of a entanglement information header
 
 
 # Constants defining the messages types
@@ -374,3 +375,103 @@ class CQCNotifyHeader:
 		toPrint = toPrint + "Remote Port: " + str(self.remote_port) + " "
 		toPrint = toPrint + "Datetime: " + str(self.datetime)
 		return(toPrint)
+
+class CQCEntInfoHeader:
+	"""
+		Header for a entanglement information packet.
+	"""
+
+	def __init__(self, headerBytes = None):
+		"""
+		Initialize using values received from a packet, if available.
+		"""
+
+		if headerBytes == None:
+			self.node_A=0
+			self.port_A=0
+			self.app_id_A=0
+
+			self.node_B=0
+			self.port_B=0
+			self.app_id_B=0
+
+			self.id_AB=0
+
+			self.timestamp=0
+			self.ToG=0
+			self.goodness=0
+			self.DF=0
+		else:
+			self.unpack(headerBytes)
+
+	def setVals(self, node_A, port_A, app_id_A, node_B, port_B, app_id_B, id_AB, timestamp, ToG, goodness, DF):
+		"""
+		Set using given values.
+		"""
+		self.node_A=node_A
+		self.port_A=port_A
+		self.app_id_A=app_id_A
+
+		self.node_B=node_B
+		self.port_B=port_B
+		self.app_id_B=app_id_B
+
+		self.id_AB=id_AB
+
+		self.timestamp=timestamp
+		self.ToG=ToG
+		self.goodness=goodness
+		self.DF=DF
+
+		self.is_set = True
+
+	def pack(self):
+		"""
+		Pack data into packet format. For defnitions see cLib/cgc.h
+		"""
+
+		if not self.is_set:
+			return(0)
+
+		ent_info = pack("=LHHLHHLQQHBB", self.node_A, self.port_A, self.app_id_A, self.node_B, self.port_B, self.app_id_B, self.id_AB, self.timestamp, self.ToG, self.goodness, self.DF, 0)
+		return(ent_info)
+
+	def unpack(self, headerBytes):
+		"""
+		Unpack packet data. For definitions see cLib/cqc.h
+		"""
+		ent_info = unpack("=LHHLHHLQQHBB", headerBytes)
+
+		self.node_A=ent_info[0]
+		self.port_A=ent_info[1]
+		self.app_id_A=ent_info[2]
+
+		self.node_B=ent_info[3]
+		self.port_B=ent_info[4]
+		self.app_id_B=ent_info[5]
+
+		self.id_AB=ent_info[6]
+
+		self.timestamp=ent_info[7]
+		self.ToG=ent_info[8]
+		self.goodness=ent_info[9]
+		self.DF=ent_info[10]
+
+		self.is_set = True
+
+	def printable(self):
+		"""
+		Produce a printable string for information purposes.
+		"""
+		if not self.is_set:
+			return(" ")
+
+		toPrint  = "A: ({}, {}, {})".format(self.node_A,self.port_A,self.app_id_A) + " "
+		toPrint += "B: ({}, {}, {})".format(self.node_B,self.port_B,self.app_id_B) + " "
+		toPrint = toPrint + "Entanglement ID: " + str(self.id_AB) + " "
+		toPrint = toPrint + "Timestamp: " + str(self.timestamp) + " "
+		toPrint = toPrint + "Time of Goodness: " + str(self.ToG) + " "
+		toPrint = toPrint + "Goodness: " + str(self.goodness)
+		toPrint = toPrint + "Directionality Flag: " + str(self.DF)
+		return(toPrint)
+

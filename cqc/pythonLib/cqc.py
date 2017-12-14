@@ -298,7 +298,7 @@ class CQCConnection:
 	def readMessage(self,maxsize=192): # WHAT IS GOOD SIZE?
 		"""
 		Receive the whole message from cqc server.
-		Returns (CQCHeader,None) or (CQCHeader,CQCNotifyHeader) depending on the type of message.
+		Returns (CQCHeader,None,None), (CQCHeader,CQCNotifyHeader,None) or (CQCHeader,CQCNotifyHeader,CQCEntInfoHeader) depending on the type of message.
 		Maxsize is the max size of message.
 		"""
 
@@ -348,16 +348,32 @@ class CQCConnection:
 			else:
 				break
 
-		# We got all the data, read notify if there is any
+		# We got all the data, read notify (and ent_info) if there is any
 		if currHeader.length==0:
-			return (currHeader,None)
-		try:
-			rawNotifyHeader=self.buf[:CQC_NOTIFY_LENGTH]
-			self.buf=self.buf[CQC_NOTIFY_LENGTH:len(self.buf)]
-			notifyHeader=CQCNotifyHeader(rawNotifyHeader)
-			return (currHeader,notifyHeader)
-		except struct.error as err:
-			print(err)
+			return (currHeader,None,None)
+		elif currHeader.length==CQC_NOTIFY_LENGTH:
+			try:
+				rawNotifyHeader=self.buf[:CQC_NOTIFY_LENGTH]
+				self.buf=self.buf[CQC_NOTIFY_LENGTH:len(self.buf)]
+				notifyHeader=CQCNotifyHeader(rawNotifyHeader)
+				return (currHeader,notifyHeader,None)
+			except struct.error as err:
+				print(err)
+		elif currHeader.length==CQC_NOTIFY_LENGTH+CQC_ENT_INFO_LENGTH:
+			try:
+				rawNotifyHeader=self.buf[:CQC_NOTIFY_LENGTH]
+				self.buf=self.buf[CQC_NOTIFY_LENGTH:len(self.buf)]
+				notifyHeader=CQCNotifyHeader(rawNotifyHeader)
+
+				rawEntInfoHeader=self.buf[:CQC_ENT_INFO_LENGTH]
+				self.buf=self.buf[CQC_ENT_INFO_LENGTH:len(self.buf)]
+				entInfoHeader=CQCEntInfoHeader(rawEntInfoHeader)
+
+				return (currHeader,notifyHeader,entInfoHeader)
+			except struct.error as err:
+				print(err)
+		else:
+			print("Warning: Received message of unknown length, return None")
 
 	def print_CQC_msg(self,message):
 		"""
@@ -365,6 +381,7 @@ class CQCConnection:
 		"""
 		hdr=message[0]
 		notifyHdr=message[1]
+		entInfoHdr=message[2]
 
 		if hdr.tp==CQC_TP_HELLO:
 			print("CQC tells App {}: 'HELLO'".format(self.name))
@@ -496,21 +513,27 @@ class CQCConnection:
 		else:
 			raise ValueError("Host name '{}' is not in the cqc network".format(name))
 
-		q=qubit(self,createNew=False)
 
 		#print info
 		if print_info:
 			print("App {} tells CQC: 'Create EPR-pair with {} and appID {}'".format(self.name,name,remote_appID))
 
-		self.sendCmdXtra(q._qID,CQC_CMD_EPR,notify=int(notify),block=int(block),remote_appID=remote_appID,remote_node=recvHost.ip,remote_port=recvHost.port)
+		self.sendCmdXtra(0,CQC_CMD_EPR,notify=int(notify),block=int(block),remote_appID=remote_appID,remote_node=recvHost.ip,remote_port=recvHost.port)
 
 		# Get RECV message
 		message=self.readMessage()
+		notifyHdr=message[1]
+		q_id=notifyHdr.qubit_id
+
+		print(message[2].printable())
 
 		if notify:
 			message=self.readMessage()
 			if print_info:
 				self.print_CQC_msg(message)
+
+		# initialize the qubit
+		q=qubit(self,createNew=False,q_id=q_id)
 
 		#Activate and return qubit
 		q._active=True
