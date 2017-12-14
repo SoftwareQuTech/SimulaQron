@@ -167,6 +167,9 @@ class CQCProtocol(Protocol):
 		# Convenience
 		self.name = self.factory.name;
 
+		# Dictionary storing the next unique qubit id for each used app_id
+		self.next_q_id={}
+
 		logging.debug("CQC %s: Initialized Protocol",self.name)
 
 	def connectionMade(self):
@@ -700,13 +703,9 @@ class CQCProtocol(Protocol):
 		"""
 		logging.debug("CQC %s: Asking to receive for App ID %d",self.name,cqc_header.app_id)
 
-		# First check whether the desired qubit ID is already in use
+		# First get the app_id and q_id
 		app_id = cqc_header.app_id
-		q_id = cmd.qubit_id
-		if (app_id,q_id) in self.factory.qubitList:
-			logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
-			self._send_back_cqc(cqc_header, CQC_ERR_INUSE)
-			return False
+		q_id = self.new_qubit_id(app_id)
 
 		# This will block until a qubit is received.
 		noQubit = True
@@ -729,7 +728,7 @@ class CQCProtocol(Protocol):
 				self._send_back_cqc(cqc_header, CQC_ERR_INUSE)
 				return False
 
-			q = CQCQubit(cmd.qubit_id, int(time.time()), virt_qubit)
+			q = CQCQubit(q_id, int(time.time()), virt_qubit)
 			self.factory.qubitList[(app_id,q_id)] = q
 		finally:
 			self.factory._lock.release()
@@ -741,7 +740,7 @@ class CQCProtocol(Protocol):
 		# Send notify header with qubit ID
 		# logging.debug("GOO")
 		hdr = CQCNotifyHeader();
-		hdr.setVals(cmd.qubit_id, 0, 0,0,0, 0);
+		hdr.setVals(q_id, 0, 0,0,0, 0);
 		msg = hdr.pack()
 		self.transport.write(msg)
 		logging.debug("CQC %s: Notify %s",self.name, hdr.printable())
@@ -833,26 +832,68 @@ class CQCProtocol(Protocol):
 
 	@inlineCallbacks
 	def cmd_new(self, cqc_header, cmd, xtra):
+		# """
+		# Request a new qubit. Since we don't need it, this python CQC just provides very crude timing information.
+		# """
+
+		# app_id = cqc_header.app_id
+		# q_id = cmd.qubit_id
+
+		# try:
+		# 	self.factory._lock.acquire()
+		# 	if (app_id,q_id) in self.factory.qubitList:
+		# 		logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
+		# 		self._send_back_cqc(cqc_header, CQC_ERR_INUSE)
+		# 		return False
+
+		# 	virt = yield self.factory.virtRoot.callRemote("new_qubit_inreg",self.factory.qReg)
+		# 	if not virt: # if no more qubits
+		# 		raise quantumError("No more qubits available")
+		# 	q = CQCQubit(cmd.qubit_id, int(time.time()), virt)
+		# 	self.factory.qubitList[(app_id,q_id)] = q
+		# 	logging.debug("CQC %s: Requested new qubit (%d,%d)",self.name,app_id, q_id)
+		# except quantumError: # if no more qubits
+		# 	logging.error("CQC %s: Maximum number of qubits reached.", self.name)
+		# 	self._send_back_cqc(cqc_header, CQC_ERR_NOQUBIT)
+		# 	self.factory._lock.release()
+		# 	return False
+
+		# self.factory._lock.release()
+		# return True
+
 		"""
 		Request a new qubit. Since we don't need it, this python CQC just provides very crude timing information.
 		"""
 
 		app_id = cqc_header.app_id
-		q_id = cmd.qubit_id
 
 		try:
 			self.factory._lock.acquire()
-			if (app_id,q_id) in self.factory.qubitList:
-				logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
-				self._send_back_cqc(cqc_header, CQC_ERR_INUSE)
-				return False
+			# if (app_id,q_id) in self.factory.qubitList:
+			# 	logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
+			# 	self._send_back_cqc(cqc_header, CQC_ERR_INUSE)
+			# 	return False
 
 			virt = yield self.factory.virtRoot.callRemote("new_qubit_inreg",self.factory.qReg)
 			if not virt: # if no more qubits
 				raise quantumError("No more qubits available")
-			q = CQCQubit(cmd.qubit_id, int(time.time()), virt)
+
+			q_id=self.new_qubit_id(app_id)
+			q = CQCQubit(q_id, int(time.time()), virt)
 			self.factory.qubitList[(app_id,q_id)] = q
 			logging.debug("CQC %s: Requested new qubit (%d,%d)",self.name,app_id, q_id)
+
+			# Send message we created a qubit back
+			# logging.debug("GOO")
+			self._send_back_cqc(cqc_header, CQC_TP_DONE,length=CQC_NOTIFY_LENGTH)
+
+			# Send notify header with qubit ID
+			hdr = CQCNotifyHeader();
+			hdr.setVals(q_id, 0, 0,0,0, 0);
+			msg = hdr.pack()
+			self.transport.write(msg)
+			logging.debug("CQC %s: Notify %s",self.name, hdr.printable())
+
 		except quantumError: # if no more qubits
 			logging.error("CQC %s: Maximum number of qubits reached.", self.name)
 			self._send_back_cqc(cqc_header, CQC_ERR_NOQUBIT)
@@ -861,6 +902,18 @@ class CQCProtocol(Protocol):
 
 		self.factory._lock.release()
 		return True
+
+	def new_qubit_id(self,app_id):
+		"""
+		Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv
+		"""
+		if app_id in self.next_q_id:
+			q_id=self.next_q_id[app_id]
+			self.next_q_id[app_id]+=1
+			return q_id
+		else:
+			self.next_q_id[app_id]=1
+			return 0
 
 
 #######################################################################################################

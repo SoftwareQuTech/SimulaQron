@@ -449,16 +449,18 @@ class CQCConnection:
 			:print_info:	 If info should be printed
 		"""
 
-		q=qubit(self,createNew=False)
 
 		#print info
 		if print_info:
 			print("App {} tells CQC: 'Receive qubit'".format(self.name))
 
-		self.sendCommand(q._qID,CQC_CMD_RECV,notify=int(notify),block=int(block))
+		self.sendCommand(0,CQC_CMD_RECV,notify=int(notify),block=int(block))
 
 		# Get RECV message
 		message=self.readMessage()
+		notifyHdr=message[1]
+		q_id=notifyHdr.qubit_id
+
 		if print_info:
 			self.print_CQC_msg(message)
 
@@ -466,6 +468,9 @@ class CQCConnection:
 			message=self.readMessage()
 			if print_info:
 				self.print_CQC_msg(message)
+
+		# initialize the qubit
+		q=qubit(self,createNew=False,q_id=q_id)
 
 		#Activate and return qubit
 		q._active=True
@@ -625,8 +630,7 @@ class qubit:
 	"""
 	A qubit.
 	"""
-	_next_qID={}
-	def __init__(self,cqc,notify=True,block=True,print_info=True,createNew=True):
+	def __init__(self,cqc,notify=True,block=True,print_info=True,createNew=True,q_id=None):
 		"""
 		Initializes the qubit. The cqc connection must be given.
 		If notify, the return message is received before the method finishes.
@@ -639,6 +643,7 @@ class qubit:
 			:block:		 Do we want the qubit to be blocked
 			:print_info:	 If info should be printed
 			:createNew:	 If NEW-message should be sent, used internally
+			:q_id:		 Qubit id, used internally if createNew
 		"""
 
 		#Cqc connection
@@ -650,25 +655,28 @@ class qubit:
 		else:
 			self._active=False
 
-		# Which qID
-		if cqc._appID in qubit._next_qID:
-			self._qID=qubit._next_qID[cqc._appID]
-			qubit._next_qID[cqc._appID]+=1
-		else:
-			self._qID=0
-			qubit._next_qID[cqc._appID]=1
-
 		if createNew:
 			#print info
 			if print_info:
-				print("App {} tells CQC: 'Create qubit with ID {}'".format(self._cqc.name,self._qID))
+				print("App {} tells CQC: 'Create qubit'".format(self._cqc.name))
 
 			# Create new qubit at the cqc server
-			self._cqc.sendCommand(self._qID,CQC_CMD_NEW,notify=int(notify),block=int(block))
+			self._cqc.sendCommand(0,CQC_CMD_NEW,notify=int(notify),block=int(block))
+
+			#Get qubit id
+			message=self._cqc.readMessage()
+			try:
+				notifyHdr=message[1]
+				self._qID=notifyHdr.qubit_id
+			except AttributeError:
+				raise CQCGeneralError("Didn't receive the qubit id")
+
 			if notify:
 				message=self._cqc.readMessage()
 				if print_info:
 					self._cqc.print_CQC_msg(message)
+		else:
+			self._qID=q_id
 	def __str__(self):
 		if self._active:
 			return "Qubit at the node {}".format(self._cqc.name)
