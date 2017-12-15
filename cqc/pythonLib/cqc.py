@@ -60,6 +60,9 @@ class CQCConnection:
 		# ClassicalServer
 		self._classicalServer=None
 
+		# Classical connections in the application network
+		self._classicalConn={}
+
 		# This file defines the network of CQC servers interfacing to virtual quantum nodes
 		if cqcFile==None:
 			self.cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
@@ -111,31 +114,80 @@ class CQCConnection:
 		self._s.close()
 		self._appIDs.remove(self._appID)
 
+		self.closeClassicalServer()
+
+		for name in list(self._classicalConn):
+			self.closeClassicalChannel(name)
+
 	def startClassicalServer(self):
 		"""
-		Sets up a classical channel to another host.
+		Sets up a server for the application communication, if not already set up.
 		"""
 
-		#Get host data
-		myHost=self._appNet.hostDict[self.name]
+		if not self._classicalServer:
 
-		# Setup server
-		s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-		s.bind((myHost.hostname,myHost.port))
-		s.listen(1)
-		(conn,addr)=s.accept()
-		self._classicalServer=conn
+			#Get host data
+			myHost=self._appNet.hostDict[self.name]
+
+			# Setup server
+			s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+			s.bind((myHost.hostname,myHost.port))
+			s.listen(1)
+			(conn,addr)=s.accept()
+			self._classicalServer=conn
 
 	def closeClassicalServer(self):
 		if self._classicalServer:
 			self._classicalServer.close()
 			self._classicalServer=None
 
-	def recvClassical(self):
-		if self._classicalServer:
-			return self._classicalServer.recv(1024)
-		else:
-			raise ValueError("A classical server is not up and running")
+	def recvClassical(self,timout=1, msg_size=1024):
+		if not self._classicalServer:
+			self.startClassicalServer()
+		for _ in range(10*timout):
+			msg=self._classicalServer.recv(msg_size)
+			if len(msg)>0:
+				return msg
+			time.sleep(0.1)
+
+	def openClassicalChannel(self,name,timout=1):
+		"""
+		Opens a classical connection to another host in the application network.
+
+		- **Arguments**
+
+			:name:		The name of the host in the application network.
+			:timout:	The time to try to connect to the server. When timout is reached an RuntimeError is raised.
+		"""
+		if not name in self._classicalConn:
+			if name in self._appNet.hostDict:
+				remoteHost=self._appNet.hostDict[name]
+			else:
+				raise ValueError("Host name '{}' is not in the cqc network".format(name))
+			connected=False
+			for _ in range(int(10*timout)):
+				try:
+					s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+					s.connect((remoteHost.hostname,remoteHost.port))
+					connected=True
+					break
+				except:
+					time.sleep(0.1)
+			if not connected:
+				raise RuntimeError("Could not connect to server {}".format(name))
+			self._classicalConn[name]=s
+
+	def closeClassicalChannel(self,name):
+		"""
+		Closes a classical connection to another host in the application network.
+
+		- **Arguments**
+
+			:name:		The name of the host in the application network.
+		"""
+		if name in self._classicalConn:
+			s=self._classicalConn.pop(name)
+			s.close()
 
 	def sendClassical(self,name,msg,timout=1):
 		"""
@@ -147,24 +199,9 @@ class CQCConnection:
 			:msg:		The message to send, will be converted to a bytesarray.
 			:timout:	The time to try to connect to the server. When timout is reached an RuntimeError is raised.
 		"""
-		if name in self._appNet.hostDict:
-			remoteHost=self._appNet.hostDict[name]
-		else:
-			raise ValueError("Host name '{}' is not in the cqc network".format(name))
-		connected=False
-		for _ in range(int(10*timout)):
-			try:
-				s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-				s.connect((remoteHost.hostname,remoteHost.port))
-				connected=True
-				break
-			except:
-				time.sleep(0.1)
-		if not connected:
-			raise RuntimeError("Could not connect to server {}".format(name))
-		s.send(bytes(msg))
-		s.close()
-
+		if not name in self._classicalConn:
+			self.openClassicalChannel(name)
+		self._classicalConn[name].send(bytes(msg))
 
 	def sendSimple(self,tp):
 		"""
@@ -526,7 +563,7 @@ class CQCConnection:
 		entInfoHdr=message[2]
 		q_id=notifyHdr.qubit_id
 
-		print(entInfoHdr.printable())
+		# print(entInfoHdr.printable())
 
 		# Send entanglement information
 		msg=entInfoHdr.pack()
@@ -560,7 +597,7 @@ class CQCConnection:
 
 		# receive entanglement information
 		self.startClassicalServer()
-		rawentInfoHdr=self.recvClassical()
+		rawentInfoHdr=self.recvClassical(msg_size=40)
 		entInfoHdr=CQCEntInfoHeader(rawentInfoHdr)
 
 		if print_info:
