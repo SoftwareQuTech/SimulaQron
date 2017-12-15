@@ -69,6 +69,7 @@ CQC_CMD_RESET=4			# Reset qubit to |0>
 CQC_CMD_SEND=5			# Send qubit to another node
 CQC_CMD_RECV=6			# Ask to receive qubit
 CQC_CMD_EPR=7			# Create EPR pair with the specified node
+CQC_CMD_EPR_RECV=8		# Receive half of EPR pair created with other node
 
 CQC_CMD_X=10			# Pauli X
 CQC_CMD_Z=11			# Pauli Z

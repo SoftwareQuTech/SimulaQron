@@ -767,11 +767,6 @@ class CQCProtocol(Protocol):
 		remote_port=xtra.remote_port
 		remote_app_id=xtra.remote_app_id
 
-		#Decide directionaly flag
-		host_combined=int(str(host_node)+str(host_port))
-		remote_combined=int(str(remote_node)+str(remote_port))
-		DF=int(host_combined<remote_combined)
-
 		# Create the first qubit
 		(succ,q_id1) = yield self.cmd_new(cqc_header,cmd,xtra,return_q_id=True)
 		if not succ:
@@ -800,8 +795,15 @@ class CQCProtocol(Protocol):
 		if not succ:
 			return False
 
+		# Get entanglement id
+		ent_id=self.new_ent_id(host_app_id,remote_node,remote_app_id)
+
+		# Prepare ent_info header with entanglement information
+		entInfoHdr=CQCEntInfoHeader()
+		entInfoHdr.setVals(host_node,host_port,host_app_id,remote_node,remote_port,remote_app_id,ent_id,int(time.time()),int(time.time()),0,0)
+
 		# Send second qubit
-		succ = yield self.cmd_send(cqc_header,cmd2,xtra)
+		succ = yield self.send_epr_half(cqc_header,cmd2,xtra,entInfo)
 		if not succ:
 			return False
 
@@ -815,17 +817,39 @@ class CQCProtocol(Protocol):
 		self.transport.write(msg)
 		logging.debug("CQC %s: Notify %s",self.name, hdr.printable())
 
-		# Get entanglement id
-		ent_id=self.new_ent_id(host_app_id,remote_node,remote_app_id)
-
-		# Send ent_info header with entanglement information
-		entInfoHdr=CQCEntInfoHeader()
-		entInfoHdr.setVals(host_node,host_port,host_app_id,remote_node,remote_port,remote_app_id,ent_id,int(time.time()),int(time.time()),0,DF)
 		msg=entInfoHdr.pack()
 		self.transport.write(msg)
 		logging.debug("CQC %s: Entanglement information %s",self.name, entInfoHdr.printable())
 
 		logging.debug("CQC %s: EPR Pair ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		return True
+
+	@inlineCallbacks
+	def send_epr_half(self, cqc_header, cmd, xtra, entInfo):
+		"""
+		Send qubit to another node.
+		"""
+
+		# Lookup the virtual qubit from identifier
+		virt_num = yield self.get_virt_qubit_indep(cqc_header, cmd.qubit_id)
+		if virt_num < 0:
+			logging.debug("CQC %s: No such qubit",self.name)
+			return False
+
+		# Lookup the name of the remote node used within SimulaQron
+		targetName = self.factory.lookup(xtra.remote_node, xtra.remote_port)
+		if targetName == None:
+			logging.debug("CQC %s: Remote node not found %s",self.name,xtra.printable())
+			return False
+
+		# Send instruction to transfer the qubit
+		yield self.factory.virtRoot.callRemote("cqc_send_epr_half", virt_num, targetName, cqc_header.app_id, xtra.remote_app_id, entInfo)
+		# yield self.factory.virtRoot.callRemote("cqc_send_qubit", virt_num, targetName, cqc_header.app_id, xtra.remote_app_id)
+		logging.debug("CQC %s: Sent App ID %d half a EPR pair as qubit id %d to %s",self.name,cqc_header.app_id,cmd.qubit_id, targetName)
+
+		# Remove from active mapped qubits
+		del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
+
 		return True
 
 	@inlineCallbacks
@@ -856,7 +880,7 @@ class CQCProtocol(Protocol):
 
 				# Send notify header with qubit ID
 				hdr = CQCNotifyHeader();
-				hdr.setVals(q_id, 0, 0,0,0, 0);
+				hdr.setVals(q_id, 0, 0, 0, 0, 0);
 				msg = hdr.pack()
 				self.transport.write(msg)
 				logging.debug("CQC %s: Notify %s",self.name, hdr.printable())
