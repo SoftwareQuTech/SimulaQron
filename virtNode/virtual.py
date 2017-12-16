@@ -133,6 +133,9 @@ class virtualNode(pb.Root):
 		# List of qubit received to be polled by CQC
 		self.cqcRecv = {}
 
+		# List of halves of epr-pairs received to be polled by CQC
+		self.cqcRecvEpr = {}
+
 
 	def remote_test(self):
 		logging.debug("VIRTUAL NODE %s: Check call virtualNode.", self.myID.name)
@@ -421,6 +424,62 @@ class virtualNode(pb.Root):
 		logging.debug("VIRTUAL NODE %s: Returning qubit for app id %d from recv list", self.myID.name, to_app_id)
 		return self.remote_get_virtual_ref(qc.virt_num)
 
+	@inlineCallbacks
+	def remote_cqc_send_epr_half(self, num, targetName, app_id, remote_app_id, rawEntInfo):
+		"""
+		Send interface for CQC to add the qubit to the remote nodes received list for an application.
+
+		Arguments:
+		num		number of virtual qubit to send
+		targetName	name of the node to send to
+		app_id		application asking to have this qubit delivered
+		remote_app_id	application ID to deliver the qubit to
+		entInfo		entanglement information
+		"""
+
+		qubit = self.remote_get_virtual_ref(num)
+
+		oldVirtNum = num
+		newVirtNum = yield self.remote_send_qubit(qubit, targetName)
+
+		# Lookup host ID of node
+		remoteNode = self.conn[targetName]
+
+		# Ask to add to list
+		yield remoteNode.root.callRemote("cqc_add_epr_list", self.myID.name, app_id, remote_app_id, newVirtNum, rawEntInfo)
+
+	def remote_cqc_add_epr_list(self, fromName, from_app_id, to_app_id, new_virt_num, rawEntInfo):
+		"""
+		Add an item to the epr list for use in CQC.
+		"""
+
+		if not (to_app_id in self.cqcRecvEpr):
+			self.cqcRecvEpr[to_app_id] = deque([])
+
+		self.cqcRecvEpr[to_app_id].append(QubitCQC(fromName, self.myID.name, from_app_id, to_app_id, new_virt_num,rawEntInfo=rawEntInfo));
+		logging.debug("VIRTUAL NODE %s: Added a qubit for app id %d to epr list", self.myID.name, to_app_id)
+
+	def remote_cqc_get_epr_recv(self, to_app_id):
+		"""
+		Retrieve the next qubit (half of an EPR-pair) with the given app ID from the received list.
+		"""
+
+		logging.debug("VIRTUAL NODE %s: Trying to retrieve qubit for app id %d from epr list", self.myID.name, to_app_id)
+		# Get the list corresponding to the specified application ID
+		if not (to_app_id in self.cqcRecvEpr):
+			return None
+
+		qQueue = self.cqcRecvEpr[to_app_id]
+		if not qQueue:
+			return None
+
+		# Retrieve the first element on that list (first in, first out)
+		qc = qQueue.popleft();
+		if not qc:
+			return None
+
+		logging.debug("VIRTUAL NODE %s: Returning qubit for app id %d from epr list", self.myID.name, to_app_id)
+		return (self.remote_get_virtual_ref(qc.virt_num),qc.rawEntInfo)
 
 	@inlineCallbacks
 	def remote_send_qubit(self, qubit, targetName):
@@ -523,6 +582,7 @@ class virtualNode(pb.Root):
 		Arguments
 		num		number of the virtual qubit
 		"""
+
 		for q in self.virtQubits:
 			if q.num == num:
 				return q
@@ -1454,10 +1514,11 @@ class virtualQubit(pb.Referenceable):
 
 class QubitCQC:
 
-	def __init__(self, fromName, toName, from_app_id, to_app_id, new_virt_num):
+	def __init__(self, fromName, toName, from_app_id, to_app_id, new_virt_num, rawEntInfo=None):
 		self.fromName = fromName;
 		self.toName = toName;
 		self.from_app_id = from_app_id;
 		self.to_app_id = to_app_id;
 		self.virt_num = new_virt_num;
+		self.rawEntInfo=rawEntInfo
 

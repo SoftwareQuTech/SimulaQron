@@ -43,7 +43,7 @@ from SimulaQron.virtNode.crudeSimulator import *
 from SimulaQron.local.setup import *
 
 from SimulaQron.cqc.backend.cqcHeader import *
-from SimulaQron.cqc.backend.cqcHeader import CQCXtraHeader
+from SimulaQron.cqc.backend.entInfoHeader import *
 
 #####################################################################################################
 #
@@ -151,6 +151,7 @@ class CQCProtocol(Protocol):
 			CQC_CMD_SEND : self.cmd_send,
 			CQC_CMD_RECV : self.cmd_recv,
 			CQC_CMD_EPR : self.cmd_epr,
+			CQC_CMD_EPR_RECV : self.cmd_epr_recv,
 			CQC_CMD_NEW : self.cmd_new
 		}
 
@@ -799,8 +800,8 @@ class CQCProtocol(Protocol):
 		ent_id=self.new_ent_id(host_app_id,remote_node,remote_app_id)
 
 		# Prepare ent_info header with entanglement information
-		entInfoHdr=CQCEntInfoHeader()
-		entInfoHdr.setVals(host_node,host_port,host_app_id,remote_node,remote_port,remote_app_id,ent_id,int(time.time()),int(time.time()),0,0)
+		entInfo=EntInfoHeader()
+		entInfo.setVals(host_node,host_port,host_app_id,remote_node,remote_port,remote_app_id,ent_id,int(time.time()),int(time.time()),0,1)
 
 		# Send second qubit
 		succ = yield self.send_epr_half(cqc_header,cmd2,xtra,entInfo)
@@ -808,7 +809,7 @@ class CQCProtocol(Protocol):
 			return False
 
 		# Send message we created EPR pair
-		self._send_back_cqc(cqc_header, CQC_TP_EPR_OK,length=CQC_NOTIFY_LENGTH+CQC_ENT_INFO_LENGTH)
+		self._send_back_cqc(cqc_header, CQC_TP_EPR_OK,length=CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH)
 
 		# Send notify header with qubit ID
 		hdr = CQCNotifyHeader();
@@ -817,9 +818,10 @@ class CQCProtocol(Protocol):
 		self.transport.write(msg)
 		logging.debug("CQC %s: Notify %s",self.name, hdr.printable())
 
-		msg=entInfoHdr.pack()
+		# Send entanglement info
+		msg=entInfo.pack()
 		self.transport.write(msg)
-		logging.debug("CQC %s: Entanglement information %s",self.name, entInfoHdr.printable())
+		logging.debug("CQC %s: Entanglement information %s",self.name, entInfo.printable())
 
 		logging.debug("CQC %s: EPR Pair ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
 		return True
@@ -842,13 +844,75 @@ class CQCProtocol(Protocol):
 			logging.debug("CQC %s: Remote node not found %s",self.name,xtra.printable())
 			return False
 
+		# Prepare update raw entanglement information header
+		updatedEntInfo=EntInfoHeader(entInfo.pack())
+		updatedEntInfo.switch_nodes()
+		rawUpdatedEntInfo=updatedEntInfo.pack()
+
 		# Send instruction to transfer the qubit
-		yield self.factory.virtRoot.callRemote("cqc_send_epr_half", virt_num, targetName, cqc_header.app_id, xtra.remote_app_id, entInfo)
-		# yield self.factory.virtRoot.callRemote("cqc_send_qubit", virt_num, targetName, cqc_header.app_id, xtra.remote_app_id)
+		yield self.factory.virtRoot.callRemote("cqc_send_epr_half", virt_num, targetName, cqc_header.app_id, xtra.remote_app_id, rawUpdatedEntInfo)
 		logging.debug("CQC %s: Sent App ID %d half a EPR pair as qubit id %d to %s",self.name,cqc_header.app_id,cmd.qubit_id, targetName)
 
 		# Remove from active mapped qubits
 		del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
+
+		return True
+
+	@inlineCallbacks
+	def cmd_epr_recv(self, cqc_header, cmd, xtra):
+		"""
+		Receive half of epr from another node. Block until qubit is received.
+		"""
+		logging.debug("CQC %s: Asking to receive for App ID %d",self.name,cqc_header.app_id)
+
+		# First get the app_id and q_id
+		app_id = cqc_header.app_id
+		q_id = self.new_qubit_id(app_id)
+
+		# This will block until a qubit is received.
+		noQubit = True
+		while(noQubit):
+			data = yield self.factory.virtRoot.callRemote("cqc_get_epr_recv", cqc_header.app_id)
+			if data:
+				noQubit = False
+				(virt_qubit,rawEntInfo)=data
+				entInfo=EntInfoHeader(rawEntInfo)
+			else:
+				time.sleep(0.1)
+
+		logging.debug("CQC %s: Qubit received for app_id %d",self.name, cqc_header.app_id)
+
+		# Once we have the qubit, add it to the local list and send a reply we received it. Note that we will
+		# recheck whether it exists: it could have been added by another connection in the mean time
+		try:
+			self.factory._lock.acquire()
+
+			if (app_id,q_id) in self.factory.qubitList:
+				logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
+				self._send_back_cqc(cqc_header, CQC_ERR_INUSE)
+				return False
+
+			q = CQCQubit(q_id, int(time.time()), virt_qubit)
+			self.factory.qubitList[(app_id,q_id)] = q
+		finally:
+			self.factory._lock.release()
+
+		# Send message we received a qubit back
+		self._send_back_cqc(cqc_header, CQC_TP_EPR_OK,length=CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH)
+
+		# Send notify header with qubit ID
+		hdr = CQCNotifyHeader();
+		hdr.setVals(q_id, 0, 0,0,0, 0);
+		msg = hdr.pack()
+		self.transport.write(msg)
+		logging.debug("CQC %s: Notify %s",self.name, hdr.printable())
+
+		# Send entanglement info
+		msg=entInfo.pack()
+		self.transport.write(msg)
+		logging.debug("CQC %s: Entanglement information %s",self.name, entInfo.printable())
+
+		logging.debug("CQC %s: EPR Pair ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
 
 		return True
 

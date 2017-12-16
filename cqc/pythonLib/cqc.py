@@ -31,6 +31,7 @@ import socket, struct, os, sys, time, math
 
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
+from SimulaQron.cqc.backend.entInfoHeader import *
 
 class CQCConnection:
 	_appIDs=[]
@@ -335,7 +336,7 @@ class CQCConnection:
 	def readMessage(self,maxsize=192): # WHAT IS GOOD SIZE?
 		"""
 		Receive the whole message from cqc server.
-		Returns (CQCHeader,None,None), (CQCHeader,CQCNotifyHeader,None) or (CQCHeader,CQCNotifyHeader,CQCEntInfoHeader) depending on the type of message.
+		Returns (CQCHeader,None,None), (CQCHeader,CQCNotifyHeader,None) or (CQCHeader,CQCNotifyHeader,EntInfoHeader) depending on the type of message.
 		Maxsize is the max size of message.
 		"""
 
@@ -396,15 +397,15 @@ class CQCConnection:
 				return (currHeader,notifyHeader,None)
 			except struct.error as err:
 				print(err)
-		elif currHeader.length==CQC_NOTIFY_LENGTH+CQC_ENT_INFO_LENGTH:
+		elif currHeader.length==CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH:
 			try:
 				rawNotifyHeader=self.buf[:CQC_NOTIFY_LENGTH]
 				self.buf=self.buf[CQC_NOTIFY_LENGTH:len(self.buf)]
 				notifyHeader=CQCNotifyHeader(rawNotifyHeader)
 
-				rawEntInfoHeader=self.buf[:CQC_ENT_INFO_LENGTH]
-				self.buf=self.buf[CQC_ENT_INFO_LENGTH:len(self.buf)]
-				entInfoHeader=CQCEntInfoHeader(rawEntInfoHeader)
+				rawEntInfoHeader=self.buf[:ENT_INFO_LENGTH]
+				self.buf=self.buf[ENT_INFO_LENGTH:len(self.buf)]
+				entInfoHeader=EntInfoHeader(rawEntInfoHeader)
 
 				return (currHeader,notifyHeader,entInfoHeader)
 			except struct.error as err:
@@ -429,7 +430,16 @@ class CQCConnection:
 		elif hdr.tp==CQC_TP_RECV:
 			print("CQC tells App {}: 'Received qubit with ID {}'".format(self.name,notifyHdr.qubit_id))
 		elif hdr.tp==CQC_TP_EPR_OK:
-			print("CQC tells App {}: 'EPR created using qubit with ID {}'".format(self.name,notifyHdr.qubit_id))
+
+			# Lookup host name
+			remote_node=entInfoHdr.node_B
+			remote_port=entInfoHdr.port_B
+			for node in self._cqcNet.hostDict.values():
+				if (node.ip==remote_node) and (node.port==remote_port):
+					remote_name=node.name
+					break
+
+			print("CQC tells App {}: 'EPR created with node {}, using qubit with ID {}'".format(self.name,remote_name, notifyHdr.qubit_id))
 		elif hdr.tp==CQC_TP_MEASOUT:
 			print("CQC tells App {}: 'Measurement outcome is {}'".format(self.name,notifyHdr.outcome))
 		elif hdr.tp==CQC_TP_INF_TIME:
@@ -563,11 +573,8 @@ class CQCConnection:
 		entInfoHdr=message[2]
 		q_id=notifyHdr.qubit_id
 
-		# print(entInfoHdr.printable())
-
-		# Send entanglement information
-		msg=entInfoHdr.pack()
-		self.sendClassical(name,msg)
+		if print_info:
+			self.print_CQC_msg(message)
 
 		if notify:
 			message=self.readMessage()
@@ -575,7 +582,7 @@ class CQCConnection:
 				self.print_CQC_msg(message)
 
 		# initialize the qubit
-		q=qubit(self,createNew=False,q_id=q_id)
+		q=qubit(self,createNew=False,q_id=q_id,entInfo=entInfoHdr)
 
 		#Activate and return qubit
 		q._active=True
@@ -592,24 +599,31 @@ class CQCConnection:
 			:print_info:	 If info should be printed
 		"""
 
-		# receive qubit
-		q=self.recvQubit(notify=notify,block=block,print_info=False)
+		#print info
+		if print_info:
+			print("App {} tells CQC: 'Receive half of EPR'".format(self.name))
 
-		# receive entanglement information
-		self.startClassicalServer()
-		rawentInfoHdr=self.recvClassical(msg_size=40)
-		entInfoHdr=CQCEntInfoHeader(rawentInfoHdr)
+		self.sendCommand(0,CQC_CMD_EPR_RECV,notify=int(notify),block=int(block))
+
+		# Get RECV message
+		message=self.readMessage()
+		notifyHdr=message[1]
+		entInfoHdr=message[2]
+		q_id=notifyHdr.qubit_id
 
 		if print_info:
-			# Lookup host name
-			remote_node=entInfoHdr.node_A
-			remote_port=entInfoHdr.port_A
-			for node in self._cqcNet.hostDict.values():
-				if (node.ip==remote_node) and (node.port==remote_port):
-					remote_name=node.name
+			self.print_CQC_msg(message)
 
-			print("App {}: Created entanglement with node {} and qubit ID {}".format(self.name,remote_name,q._qID))
+		if notify:
+			message=self.readMessage()
+			if print_info:
+				self.print_CQC_msg(message)
 
+		# initialize the qubit
+		q=qubit(self,createNew=False,q_id=q_id,entInfo=entInfoHdr)
+
+		#Activate and return qubit
+		q._active=True
 		return q
 
 	def tomography(self,preparation,iterations,progress=True):
@@ -726,7 +740,7 @@ class qubit:
 	"""
 	A qubit.
 	"""
-	def __init__(self,cqc,notify=True,block=True,print_info=True,createNew=True,q_id=None):
+	def __init__(self,cqc,notify=True,block=True,print_info=True,createNew=True,q_id=None, entInfo=None):
 		"""
 		Initializes the qubit. The cqc connection must be given.
 		If notify, the return message is received before the method finishes.
@@ -740,6 +754,7 @@ class qubit:
 			:print_info:	 If info should be printed
 			:createNew:	 If NEW-message should be sent, used internally
 			:q_id:		 Qubit id, used internally if createNew
+			:entInfo:	 Entanglement information, if qubit is part of EPR-pair
 		"""
 
 		#Cqc connection
@@ -773,11 +788,26 @@ class qubit:
 					self._cqc.print_CQC_msg(message)
 		else:
 			self._qID=q_id
+
+		# Entanglement information
+		self._entInfo=entInfo
 	def __str__(self):
 		if self._active:
 			return "Qubit at the node {}".format(self._cqc.name)
 		else:
 			return "Not active qubit"
+
+	def get_entInfo(self):
+		return self._entInfo
+
+	def print_entInfo(self):
+		if self._entInfo:
+			print(self._entInfo.printable())
+		else:
+			print("No entanglement information")
+
+	def set_entInfo(self,entInfo):
+		self._entInfo=entInfo
 
 	def check_active(self):
 		"""
