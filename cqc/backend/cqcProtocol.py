@@ -262,7 +262,7 @@ class CQCProtocol(Protocol):
 			return(-1)
 
 		num = yield general_ref.callRemote("get_virt_num")
-		logging.debug("GOT NUMBER %d XXX",num)
+		# logging.debug("GOT NUMBER %d XXX",num)
 
 		return num
 
@@ -326,7 +326,7 @@ class CQCProtocol(Protocol):
 				if len(cmdData) < (newl + CQC_CMD_XTRA_LENGTH):
 					logging.debug("CQC %s: Missing XTRA Header", self.name)
 				else:
-					logging.debug("XXX")
+					# logging.debug("XXX")
 					xtra = CQCXtraHeader(cmdData[newl:newl+CQC_CMD_XTRA_LENGTH]);
 					newl = newl + CQC_CMD_XTRA_LENGTH;
 					logging.debug("CQC %s: Read XTRA Header: %s", self.name, xtra.printable())
@@ -550,11 +550,11 @@ class CQCProtocol(Protocol):
 		return True
 
 	@inlineCallbacks
-	def cmd_rotz(self, cqc_header, cmd, xtra):
+	def cmd_roty(self, cqc_header, cmd, xtra):
 		"""
-		Rotate around z axis
+		Rotate around y axis
 		"""
-		logging.debug("CQC %s: Applying ROTZ to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		logging.debug("CQC %s: Applying ROTY to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
 		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
 		if not virt_qubit:
 			logging.debug("CQC %s: No such qubit",self.name)
@@ -564,11 +564,11 @@ class CQCProtocol(Protocol):
 		return True
 
 	@inlineCallbacks
-	def cmd_roty(self, cqc_header, cmd, xtra):
+	def cmd_rotz(self, cqc_header, cmd, xtra):
 		"""
-		Rotate around y axis
+		Rotate around z axis
 		"""
-		logging.debug("CQC %s: Applying ROTY to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+		logging.debug("CQC %s: Applying ROTZ to App ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
 		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
 		if not virt_qubit:
 			logging.debug("CQC %s: No such qubit",self.name)
