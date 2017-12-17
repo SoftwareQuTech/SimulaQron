@@ -81,7 +81,7 @@ def main(myName):
 		myHost = cqcNet.hostDict[myName]
 		cqc_factory = CQCFactory(myHost, myName, cqcNet)
 	else:
-		logging.error("LOCAL %s: Cannot start classical communication servers.",myName,e.strerror)
+		logging.error("LOCAL %s: Cannot start classical communication servers.",myName)
 
 	# Initialize Twisted callback framework
 	dList = []
@@ -92,7 +92,7 @@ def main(myName):
 		myHost.factory = cqc_factory
 		reactor.listenTCP(myHost.port, myHost.factory)
 	except Exception as e:
-		logging.error("LOCAL %s: Cannot start CQC server.",myName,e.strerror)
+		logging.error("LOCAL %s: Cannot start CQC server.",myName)
 		return
 
 	# Connect to the local virtual node simulating the "local" qubits

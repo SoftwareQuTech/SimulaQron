@@ -380,10 +380,12 @@ class virtualNode(pb.Root):
 		remote_app_id	application ID to deliver the qubit to
 		"""
 
-		qubit = self.remote_get_virtual_ref(num)
+		logging.debug("VIRTUAL NODE %s: request to send qubit %d to %s",self.myID.name, num, targetName)
+
+		virtQubit = self.remote_get_virtual_ref(num)
 
 		oldVirtNum = num
-		newVirtNum = yield self.remote_send_qubit(qubit, targetName)
+		newVirtNum = yield self.remote_send_qubit(virtQubit, targetName)
 
 		# Lookup host ID of node
 		remoteNode = self.conn[targetName]
@@ -492,7 +494,7 @@ class virtualNode(pb.Root):
 		targetName	target ndoe to place qubit at (host object)
 		"""
 
-		logging.debug("VIRTUAL NODE %s: Request to transfer qubit sim Num %d to %s.",self.myID.name,qubit.num, targetName)
+		logging.debug("VIRTUAL NODE %s: Request to send qubit sim Num %d to %s.",self.myID.name,qubit.num, targetName)
 		if qubit.active != 1:
 			logging.debug("VIRTUAL NODE %s: Attempt to manipulate qubit no longer at this node.",self.myID.name)
 			return
@@ -507,19 +509,23 @@ class virtualNode(pb.Root):
 
 			# Check whether we are just the virtual, or also the simulating node
 			if qubit.virtNode == qubit.simNode:
+				logging.debug("VIRTUAL NODE %s: Sending qubit simulated locally", self.myID.name)
 				# We are both the virtual as well as the simulating node
 				# Pass a reference to our locally simulated qubit object to the remote node
 				newNum = yield remoteNode.root.callRemote("add_qubit", self.myID.name, qubit.simQubit)
 			else:
+				logging.debug("VIRTUAL NODE %s: Sending qubit simulated remotely at %s", self.myID.name, qubit.simNode.name)
 				# We are only the virtual node, not the simulating one. In this case, we need to ask
-				# the actual simulating node to do the transfer for us.
-				newNum = yield qubit.simNode.root.callRemote("transfer_qubit", qubit.simQubit, targetName)
+				# the actual simulating node to do the transfer for us. Due to the pecularities of Twisted PB
+				# we need to do this by the simulated qubit number
+				simQubitNum = yield qubit.simQubit.callRemote("get_sim_number")
+				newNum = yield qubit.simNode.root.callRemote("transfer_qubit", simQubitNum, targetName)
 
-			# We gave it away to mark as inactive
+			# We gave it away so mark as inactive
 			qubit.active = 0
 
 			# Remove the qubit from the local virtual list. Note it remains in the simulated
-			# list, since we continue to simulate this qubit.
+			# list, since we continue to simulate this qubit if we did so before.
 			self.virtQubits.remove(qubit)
 		finally:
 			self._release_global_lock()
@@ -527,18 +533,21 @@ class virtualNode(pb.Root):
 		return newNum
 
 	@inlineCallbacks
-	def remote_transfer_qubit(self, simQubit, targetName):
+	def remote_transfer_qubit(self, simQubitNum, targetName):
 		"""
 		Transfer the qubit to the destination node if we are the simulating node. The reason why we cannot
 		do this directly is that Twisted PB does not allow objects to be passed between connecting nodes.
 		Only between the creator of the object and its immediate connections.
 
 		Arguments
-		simQubit	simulated qubit to be sent
+		simQubitNum	simulated qubit number to be sent
 		targetName	target node to place qubit at (host object)
 		"""
 
 		logging.debug("VIRTUAL NODE %s: Request to transfer qubit to %s.",self.myID.name, targetName)
+	
+		# Convert the number into the right local object	
+		simQubit = self._q_num_to_obj(simQubitNum)
 
 		# Lookup host id of node
 		remoteNode = self.conn[targetName]
@@ -546,13 +555,13 @@ class virtualNode(pb.Root):
 
 		return newNum
 
-	def remote_add_qubit(self, name, qubit):
+	def remote_add_qubit(self, name, simQubit):
 		"""
 		Add a qubit to the local virtual node.
 
 		Arguments
 		name		name of the node simulating this qubit
-		qubit		qubit reference in the backend we're adding
+		simQubit 	simulated qubit reference in the backend we're adding
 		"""
 
 		logging.debug("VIRTUAL NODE %s: Request to add qubit from %s.",self.myID.name, name)
@@ -566,7 +575,7 @@ class virtualNode(pb.Root):
 
 			# Generate a new virtual qubit object for the qubit now at this node
 			newNum = self.get_virtual_id()
-			newQubit = virtualQubit(self.myID, nb, qubit, newNum)
+			newQubit = virtualQubit(self.myID, nb, simQubit, newNum)
 
 			# Add to local list
 			self.virtQubits.append(newQubit)
