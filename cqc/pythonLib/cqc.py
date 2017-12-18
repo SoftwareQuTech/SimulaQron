@@ -197,12 +197,16 @@ class CQCConnection:
 		- **Arguments**
 
 			:name:		The name of the host in the application network.
-			:msg:		The message to send, will be converted to a bytesarray.
+			:msg:		The message to send. Should be either a int in range(0,256) or a list of such ints.
 			:timout:	The time to try to connect to the server. When timout is reached an RuntimeError is raised.
 		"""
 		if not name in self._classicalConn:
 			self.openClassicalChannel(name)
-		self._classicalConn[name].send(bytes(msg))
+		try:
+			to_send=[int(msg)]
+		except TypeError:
+			to_send=msg
+		self._classicalConn[name].send(bytes(to_send))
 
 	def sendSimple(self,tp):
 		"""
