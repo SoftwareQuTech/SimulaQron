@@ -51,6 +51,7 @@ CQC_TP_EPR_OK=6			# Created EPR pair
 CQC_TP_MEASOUT=7		# Measurement outcome
 CQC_TP_GET_TIME=8		# Get creation time of qubit
 CQC_TP_INF_TIME=9		# Return timinig information
+CQC_TP_NEW_OK=10		# Created a new qubit
 
 CQC_ERR_GENERAL=20 		# General purpose error (no details
 CQC_ERR_NOQUBIT=21 		# No more qubits available

@@ -940,7 +940,7 @@ class CQCProtocol(Protocol):
 			if not return_q_id:
 				# Send message we created a qubit back
 				# logging.debug("GOO")
-				self._send_back_cqc(cqc_header, CQC_TP_DONE,length=CQC_NOTIFY_LENGTH)
+				self._send_back_cqc(cqc_header, CQC_TP_NEW_OK,length=CQC_NOTIFY_LENGTH)
 
 				# Send notify header with qubit ID
 				hdr = CQCNotifyHeader();
