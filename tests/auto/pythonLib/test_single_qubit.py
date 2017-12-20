@@ -42,7 +42,7 @@ def calc_exp_values(q):
 	#eigenvectors
 	z0=qutip.basis(2,0)
 	z1=qutip.basis(2,1)
-	x1=1/np.sqrt(2)*(z0+z1)
+	x1=1/np.sqrt(2)*(z0-z1)
 	y1=1/np.sqrt(2)*(z0-1j*z1)
 
 	#projectors
@@ -158,7 +158,7 @@ def prep_rot_qutip(n,a):
 	R=(-1j*a/(2*nNorm)*(n[0]*qutip.sigmax()+n[1]*qutip.sigmay()+n[2]*qutip.sigmaz())).expm()
 	return R*q
 
-def prep_reset_CQC(cqc): #5*pi/8
+def prep_reset_CQC(cqc):
 	q=qubit(cqc,print_info=False)
 	q.H(print_info=False)
 	q.reset(print_info=False)

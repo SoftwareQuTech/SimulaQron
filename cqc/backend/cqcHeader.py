@@ -40,7 +40,6 @@ CQC_CMD_HDR_LENGTH=4		# Length of a command header
 CQC_CMD_XTRA_LENGTH=16		# Length of extra command information
 CQC_NOTIFY_LENGTH=20		# Length of a notification send from the CQC upwards
 
-
 # Constants defining the messages types
 CQC_TP_HELLO=0			# Alive check
 CQC_TP_COMMAND=1		# Execute a command list
@@ -52,12 +51,12 @@ CQC_TP_EPR_OK=6			# Created EPR pair
 CQC_TP_MEASOUT=7		# Measurement outcome
 CQC_TP_GET_TIME=8		# Get creation time of qubit
 CQC_TP_INF_TIME=9		# Return timinig information
+CQC_TP_NEW_OK=10		# Created a new qubit
 
 CQC_ERR_GENERAL=20 		# General purpose error (no details
 CQC_ERR_NOQUBIT=21 		# No more qubits available
 CQC_ERR_UNSUPP=22 		# No sequence not supported
 CQC_ERR_TIMEOUT=23 		# Timeout
-CQC_ERR_INUSE=24		# Qubit ID in use (when creating new qubit)
 
 # Possible commands
 CQC_CMD_I=0			# Identity (do nothing, wait one step)
@@ -68,6 +67,7 @@ CQC_CMD_RESET=4			# Reset qubit to |0>
 CQC_CMD_SEND=5			# Send qubit to another node
 CQC_CMD_RECV=6			# Ask to receive qubit
 CQC_CMD_EPR=7			# Create EPR pair with the specified node
+CQC_CMD_EPR_RECV=8		# Receive half of EPR pair created with other node
 
 CQC_CMD_X=10			# Pauli X
 CQC_CMD_Z=11			# Pauli Z

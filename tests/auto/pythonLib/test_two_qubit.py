@@ -96,17 +96,17 @@ def prep_CPHASE_target_CQC(cqc):
 def prep_EPR1_CQC(cqc):
 	Alice=CQCConnection("Alice",appID=1)
 	qA=Alice.createEPR("Bob",print_info=False)
-	qB=cqc.createEPR("Alice",remote_appID=1,print_info=False)
+	qB=cqc.recvEPR(print_info=False)
 	qA.measure(print_info=False)
 	Alice.close()
 	return qB
 
 def prep_EPR2_CQC(cqc):
-	Charlie=CQCConnection("Charlie",appID=1)
-	qB=cqc.createEPR("Charlie",remote_appID=1,print_info=False)
-	qC=Charlie.createEPR("Bob",print_info=False)
-	qC.measure(print_info=False)
-	Charlie.close()
+	Alice=CQCConnection("Alice",appID=1)
+	qB=cqc.createEPR("Alice",remote_appID=1,print_info=False)
+	qA=Alice.recvEPR(print_info=False)
+	qA.measure(print_info=False)
+	Alice.close()
 	return qB
 
 def prep_send_CQC(cqc):

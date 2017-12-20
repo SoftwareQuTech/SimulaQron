@@ -31,6 +31,7 @@ import socket, struct, os, sys, time, math
 
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
+from SimulaQron.cqc.backend.entInfoHeader import *
 
 class CQCConnection:
 	_appIDs=[]
@@ -59,6 +60,9 @@ class CQCConnection:
 
 		# ClassicalServer
 		self._classicalServer=None
+
+		# Classical connections in the application network
+		self._classicalConn={}
 
 		# This file defines the network of CQC servers interfacing to virtual quantum nodes
 		if cqcFile==None:
@@ -111,31 +115,80 @@ class CQCConnection:
 		self._s.close()
 		self._appIDs.remove(self._appID)
 
+		self.closeClassicalServer()
+
+		for name in list(self._classicalConn):
+			self.closeClassicalChannel(name)
+
 	def startClassicalServer(self):
 		"""
-		Sets up a classical channel to another host.
+		Sets up a server for the application communication, if not already set up.
 		"""
 
-		#Get host data
-		myHost=self._appNet.hostDict[self.name]
+		if not self._classicalServer:
 
-		# Setup server
-		s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-		s.bind((myHost.hostname,myHost.port))
-		s.listen(1)
-		(conn,addr)=s.accept()
-		self._classicalServer=conn
+			#Get host data
+			myHost=self._appNet.hostDict[self.name]
+
+			# Setup server
+			s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+			s.bind((myHost.hostname,myHost.port))
+			s.listen(1)
+			(conn,addr)=s.accept()
+			self._classicalServer=conn
 
 	def closeClassicalServer(self):
 		if self._classicalServer:
 			self._classicalServer.close()
 			self._classicalServer=None
 
-	def recvClassical(self):
-		if self._classicalServer:
-			return self._classicalServer.recv(1024)
-		else:
-			raise ValueError("A classical server is not up and running")
+	def recvClassical(self,timout=1, msg_size=1024):
+		if not self._classicalServer:
+			self.startClassicalServer()
+		for _ in range(10*timout):
+			msg=self._classicalServer.recv(msg_size)
+			if len(msg)>0:
+				return msg
+			time.sleep(0.1)
+
+	def openClassicalChannel(self,name,timout=1):
+		"""
+		Opens a classical connection to another host in the application network.
+
+		- **Arguments**
+
+			:name:		The name of the host in the application network.
+			:timout:	The time to try to connect to the server. When timout is reached an RuntimeError is raised.
+		"""
+		if not name in self._classicalConn:
+			if name in self._appNet.hostDict:
+				remoteHost=self._appNet.hostDict[name]
+			else:
+				raise ValueError("Host name '{}' is not in the cqc network".format(name))
+			connected=False
+			for _ in range(int(10*timout)):
+				try:
+					s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+					s.connect((remoteHost.hostname,remoteHost.port))
+					connected=True
+					break
+				except:
+					time.sleep(0.1)
+			if not connected:
+				raise RuntimeError("Could not connect to server {}".format(name))
+			self._classicalConn[name]=s
+
+	def closeClassicalChannel(self,name):
+		"""
+		Closes a classical connection to another host in the application network.
+
+		- **Arguments**
+
+			:name:		The name of the host in the application network.
+		"""
+		if name in self._classicalConn:
+			s=self._classicalConn.pop(name)
+			s.close()
 
 	def sendClassical(self,name,msg,timout=1):
 		"""
@@ -144,27 +197,16 @@ class CQCConnection:
 		- **Arguments**
 
 			:name:		The name of the host in the application network.
-			:msg:		The message to send, will be converted to a bytesarray.
+			:msg:		The message to send. Should be either a int in range(0,256) or a list of such ints.
 			:timout:	The time to try to connect to the server. When timout is reached an RuntimeError is raised.
 		"""
-		if name in self._appNet.hostDict:
-			remoteHost=self._appNet.hostDict[name]
-		else:
-			raise ValueError("Host name '{}' is not in the cqc network".format(name))
-		connected=False
-		for _ in range(10):
-			try:
-				s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-				s.connect((remoteHost.hostname,remoteHost.port))
-				connected=True
-				break
-			except:
-				time.sleep(0.1)
-		if not connected:
-			raise RuntimeError("Could not connect to server {}".format(name))
-		s.send(bytearray(msg))
-		s.close()
-
+		if not name in self._classicalConn:
+			self.openClassicalChannel(name)
+		try:
+			to_send=[int(msg)]
+		except TypeError:
+			to_send=msg
+		self._classicalConn[name].send(bytes(to_send))
 
 	def sendSimple(self,tp):
 		"""
@@ -298,7 +340,7 @@ class CQCConnection:
 	def readMessage(self,maxsize=192): # WHAT IS GOOD SIZE?
 		"""
 		Receive the whole message from cqc server.
-		Returns (CQCHeader,None) or (CQCHeader,CQCNotifyHeader) depending on the type of message.
+		Returns (CQCHeader,None,None), (CQCHeader,CQCNotifyHeader,None) or (CQCHeader,CQCNotifyHeader,EntInfoHeader) depending on the type of message.
 		Maxsize is the max size of message.
 		"""
 
@@ -348,16 +390,32 @@ class CQCConnection:
 			else:
 				break
 
-		# We got all the data, read notify if there is any
+		# We got all the data, read notify (and ent_info) if there is any
 		if currHeader.length==0:
-			return (currHeader,None)
-		try:
-			rawNotifyHeader=self.buf[:CQC_NOTIFY_LENGTH]
-			self.buf=self.buf[CQC_NOTIFY_LENGTH:len(self.buf)]
-			notifyHeader=CQCNotifyHeader(rawNotifyHeader)
-			return (currHeader,notifyHeader)
-		except struct.error as err:
-			print(err)
+			return (currHeader,None,None)
+		elif currHeader.length==CQC_NOTIFY_LENGTH:
+			try:
+				rawNotifyHeader=self.buf[:CQC_NOTIFY_LENGTH]
+				self.buf=self.buf[CQC_NOTIFY_LENGTH:len(self.buf)]
+				notifyHeader=CQCNotifyHeader(rawNotifyHeader)
+				return (currHeader,notifyHeader,None)
+			except struct.error as err:
+				print(err)
+		elif currHeader.length==CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH:
+			try:
+				rawNotifyHeader=self.buf[:CQC_NOTIFY_LENGTH]
+				self.buf=self.buf[CQC_NOTIFY_LENGTH:len(self.buf)]
+				notifyHeader=CQCNotifyHeader(rawNotifyHeader)
+
+				rawEntInfoHeader=self.buf[:ENT_INFO_LENGTH]
+				self.buf=self.buf[ENT_INFO_LENGTH:len(self.buf)]
+				entInfoHeader=EntInfoHeader(rawEntInfoHeader)
+
+				return (currHeader,notifyHeader,entInfoHeader)
+			except struct.error as err:
+				print(err)
+		else:
+			print("Warning: Received message of unknown length, return None")
 
 	def print_CQC_msg(self,message):
 		"""
@@ -365,6 +423,7 @@ class CQCConnection:
 		"""
 		hdr=message[0]
 		notifyHdr=message[1]
+		entInfoHdr=message[2]
 
 		if hdr.tp==CQC_TP_HELLO:
 			print("CQC tells App {}: 'HELLO'".format(self.name))
@@ -375,7 +434,16 @@ class CQCConnection:
 		elif hdr.tp==CQC_TP_RECV:
 			print("CQC tells App {}: 'Received qubit with ID {}'".format(self.name,notifyHdr.qubit_id))
 		elif hdr.tp==CQC_TP_EPR_OK:
-			print("CQC tells App {}: 'EPR created using qubit with ID {}'".format(self.name,notifyHdr.qubit_id))
+
+			# Lookup host name
+			remote_node=entInfoHdr.node_B
+			remote_port=entInfoHdr.port_B
+			for node in self._cqcNet.hostDict.values():
+				if (node.ip==remote_node) and (node.port==remote_port):
+					remote_name=node.name
+					break
+
+			print("CQC tells App {}: 'EPR created with node {}, using qubit with ID {}'".format(self.name,remote_name, notifyHdr.qubit_id))
 		elif hdr.tp==CQC_TP_MEASOUT:
 			print("CQC tells App {}: 'Measurement outcome is {}'".format(self.name,notifyHdr.outcome))
 		elif hdr.tp==CQC_TP_INF_TIME:
@@ -449,16 +517,18 @@ class CQCConnection:
 			:print_info:	 If info should be printed
 		"""
 
-		q=qubit(self,createNew=False)
 
 		#print info
 		if print_info:
 			print("App {} tells CQC: 'Receive qubit'".format(self.name))
 
-		self.sendCommand(q._qID,CQC_CMD_RECV,notify=int(notify),block=int(block))
+		self.sendCommand(0,CQC_CMD_RECV,notify=int(notify),block=int(block))
 
 		# Get RECV message
 		message=self.readMessage()
+		notifyHdr=message[1]
+		q_id=notifyHdr.qubit_id
+
 		if print_info:
 			self.print_CQC_msg(message)
 
@@ -466,6 +536,9 @@ class CQCConnection:
 			message=self.readMessage()
 			if print_info:
 				self.print_CQC_msg(message)
+
+		# initialize the qubit
+		q=qubit(self,createNew=False,q_id=q_id)
 
 		#Activate and return qubit
 		q._active=True
@@ -477,7 +550,7 @@ class CQCConnection:
 
 		- **Arguments**
 
-			:Name:		 Name of the node as specified in the cqc network config file.
+			:name:		 Name of the node as specified in the cqc network config file.
 			:remote_appID:	 The app ID of the application running on the receiving node.
 			:nofify:	 Do we wish to be notified when done.
 			:block:		 Do we want the qubit to be blocked
@@ -491,21 +564,67 @@ class CQCConnection:
 		else:
 			raise ValueError("Host name '{}' is not in the cqc network".format(name))
 
-		q=qubit(self,createNew=False)
 
 		#print info
 		if print_info:
 			print("App {} tells CQC: 'Create EPR-pair with {} and appID {}'".format(self.name,name,remote_appID))
 
-		self.sendCmdXtra(q._qID,CQC_CMD_EPR,notify=int(notify),block=int(block),remote_appID=remote_appID,remote_node=recvHost.ip,remote_port=recvHost.port)
+		self.sendCmdXtra(0,CQC_CMD_EPR,notify=int(notify),block=int(block),remote_appID=remote_appID,remote_node=recvHost.ip,remote_port=recvHost.port)
 
 		# Get RECV message
 		message=self.readMessage()
+		notifyHdr=message[1]
+		entInfoHdr=message[2]
+		q_id=notifyHdr.qubit_id
+
+		if print_info:
+			self.print_CQC_msg(message)
 
 		if notify:
 			message=self.readMessage()
 			if print_info:
 				self.print_CQC_msg(message)
+
+		# initialize the qubit
+		q=qubit(self,createNew=False,q_id=q_id,entInfo=entInfoHdr)
+
+		#Activate and return qubit
+		q._active=True
+		return q
+
+	def recvEPR(self,notify=True,block=True,print_info=True):
+		"""
+		Receives a qubit from an EPR-pair generated with another node.
+
+		- **Arguments**
+
+			:nofify:	 Do we wish to be notified when done.
+			:block:		 Do we want the qubit to be blocked
+			:print_info:	 If info should be printed
+		"""
+
+		#print info
+		if print_info:
+			print("App {} tells CQC: 'Receive half of EPR'".format(self.name))
+
+		self.sendCommand(0,CQC_CMD_EPR_RECV,notify=int(notify),block=int(block))
+
+		# Get RECV message
+		message=self.readMessage()
+		notifyHdr=message[1]
+		entInfoHdr=message[2]
+		q_id=notifyHdr.qubit_id
+
+		if print_info:
+			self.print_CQC_msg(message)
+
+		if notify:
+			message=self.readMessage()
+			if print_info:
+				self.print_CQC_msg(message)
+
+		# initialize the qubit
+		q=qubit(self,createNew=False,q_id=q_id,entInfo=entInfoHdr)
 
 		#Activate and return qubit
 		q._active=True
@@ -625,8 +744,7 @@ class qubit:
 	"""
 	A qubit.
 	"""
-	_next_qID={}
-	def __init__(self,cqc,notify=True,block=True,print_info=True,createNew=True):
+	def __init__(self,cqc,notify=True,block=True,print_info=True,createNew=True,q_id=None, entInfo=None):
 		"""
 		Initializes the qubit. The cqc connection must be given.
 		If notify, the return message is received before the method finishes.
@@ -639,6 +757,8 @@ class qubit:
 			:block:		 Do we want the qubit to be blocked
 			:print_info:	 If info should be printed
 			:createNew:	 If NEW-message should be sent, used internally
+			:q_id:		 Qubit id, used internally if createNew
+			:entInfo:	 Entanglement information, if qubit is part of EPR-pair
 		"""
 
 		#Cqc connection
@@ -650,30 +770,48 @@ class qubit:
 		else:
 			self._active=False
 
-		# Which qID
-		if cqc._appID in qubit._next_qID:
-			self._qID=qubit._next_qID[cqc._appID]
-			qubit._next_qID[cqc._appID]+=1
-		else:
-			self._qID=0
-			qubit._next_qID[cqc._appID]=1
-
 		if createNew:
 			#print info
 			if print_info:
-				print("App {} tells CQC: 'Create qubit with ID {}'".format(self._cqc.name,self._qID))
+				print("App {} tells CQC: 'Create qubit'".format(self._cqc.name))
 
 			# Create new qubit at the cqc server
-			self._cqc.sendCommand(self._qID,CQC_CMD_NEW,notify=int(notify),block=int(block))
+			self._cqc.sendCommand(0,CQC_CMD_NEW,notify=int(notify),block=int(block))
+
+			#Get qubit id
+			message=self._cqc.readMessage()
+			try:
+				notifyHdr=message[1]
+				self._qID=notifyHdr.qubit_id
+			except AttributeError:
+				raise CQCGeneralError("Didn't receive the qubit id")
+
 			if notify:
 				message=self._cqc.readMessage()
 				if print_info:
 					self._cqc.print_CQC_msg(message)
+		else:
+			self._qID=q_id
+
+		# Entanglement information
+		self._entInfo=entInfo
 	def __str__(self):
 		if self._active:
 			return "Qubit at the node {}".format(self._cqc.name)
 		else:
 			return "Not active qubit"
+
+	def get_entInfo(self):
+		return self._entInfo
+
+	def print_entInfo(self):
+		if self._entInfo:
+			print(self._entInfo.printable())
+		else:
+			print("No entanglement information")
+
+	def set_entInfo(self,entInfo):
+		self._entInfo=entInfo
 
 	def check_active(self):
 		"""
