@@ -1,13 +1,16 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
     <title>SimulaQron.virtNode.virtual &#8212; SimulaQron 0.1 alpha documentation</title>
+    
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -25,7 +28,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
   </head>
-  <body>
+  <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -285,8 +288,8 @@
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Local GOT LOCK&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
-<div class="viewcode-block" id="virtualNode.remote_get_global_lock"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_get_global_lock">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_get_global_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualNode.remote_get_global_lock"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_get_global_lock">[docs]</a>	<span class="k">def</span> <span class="nf">remote_get_global_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Remote GETTING LOCK&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Remote GOT LOCK&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
@@ -298,8 +301,8 @@
 			<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="virtualNode.remote_release_global_lock"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_release_global_lock">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_release_global_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualNode.remote_release_global_lock"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_release_global_lock">[docs]</a>	<span class="k">def</span> <span class="nf">remote_release_global_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Remote RELEASE LOCK&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">locked</span><span class="p">:</span>
 			<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div>
@@ -313,8 +316,8 @@
 			<span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">register</span> <span class="o">==</span> <span class="n">qubit</span><span class="o">.</span><span class="n">register</span><span class="p">:</span>
 				<span class="k">yield</span> <span class="n">q</span><span class="o">.</span><span class="n">lock</span><span class="p">()</span>
 
-<div class="viewcode-block" id="virtualNode.remote_lock_reg_qubits"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_lock_reg_qubits">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_lock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualNode.remote_lock_reg_qubits"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_lock_reg_qubits">[docs]</a>	<span class="k">def</span> <span class="nf">remote_lock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Acquire the lock on all qubits in the same register as qubitNum.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
@@ -331,8 +334,8 @@
 				<span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">locked</span><span class="p">:</span>
 					<span class="k">yield</span> <span class="n">q</span><span class="o">.</span><span class="n">unlock</span><span class="p">()</span>
 
-<div class="viewcode-block" id="virtualNode.remote_unlock_reg_qubits"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_unlock_reg_qubits">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_unlock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualNode.remote_unlock_reg_qubits"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_unlock_reg_qubits">[docs]</a>	<span class="k">def</span> <span class="nf">remote_unlock_reg_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Release the lock on all qubits in the same register as qubitNum.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
@@ -359,8 +362,8 @@
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Initializing new simulated register.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 		<span class="k">return</span> <span class="n">newReg</span></div>
 
-<div class="viewcode-block" id="virtualNode.remote_new_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_new_qubit">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_new_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualNode.remote_new_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_new_qubit">[docs]</a>	<span class="k">def</span> <span class="nf">remote_new_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Create a new qubit in the default local register.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
@@ -380,15 +383,16 @@
 			<span class="n">newNum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_virtual_id</span><span class="p">()</span>
 			<span class="n">newQubit</span> <span class="o">=</span> <span class="n">virtualQubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">,</span> <span class="n">simQubit</span><span class="p">,</span> <span class="n">newNum</span><span class="p">)</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">virtQubits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newQubit</span><span class="p">)</span>
-		<span class="k">except</span> <span class="n">Error</span><span class="p">:</span>
+		<span class="k">except</span> <span class="n">quantumError</span><span class="p">:</span>
+			<span class="n">newQubit</span> <span class="o">=</span> <span class="kc">None</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Maximum number of qubits reached.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 		<span class="k">finally</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_release_global_lock</span><span class="p">()</span>
 
 		<span class="k">return</span> <span class="n">newQubit</span></div>
 
-<div class="viewcode-block" id="virtualNode.remote_new_qubit_inreg"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_new_qubit_inreg">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_new_qubit_inreg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reg</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualNode.remote_new_qubit_inreg"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_new_qubit_inreg">[docs]</a>	<span class="k">def</span> <span class="nf">remote_new_qubit_inreg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reg</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Create a new qubit in the specified register reg.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
@@ -411,9 +415,11 @@
 			<span class="n">newNum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_virtual_id</span><span class="p">()</span>
 			<span class="n">newQubit</span> <span class="o">=</span> <span class="n">virtualQubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">,</span> <span class="n">simQubit</span><span class="p">,</span> <span class="n">newNum</span><span class="p">)</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">virtQubits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newQubit</span><span class="p">)</span>
+		<span class="k">except</span> <span class="n">quantumError</span><span class="p">:</span> <span class="c1"># if no more qubits</span>
+			<span class="n">newQubit</span> <span class="o">=</span> <span class="kc">None</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Maximum number of qubits reached.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 		<span class="k">finally</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_release_global_lock</span><span class="p">()</span>
-
 
 		<span class="k">return</span> <span class="n">newQubit</span></div>
 
@@ -424,8 +430,8 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">pass</span></div>
 
-<div class="viewcode-block" id="virtualNode.remote_cqc_send_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_cqc_send_qubit">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_cqc_send_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">targetName</span><span class="p">,</span> <span class="n">app_id</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualNode.remote_cqc_send_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_cqc_send_qubit">[docs]</a>	<span class="k">def</span> <span class="nf">remote_cqc_send_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">targetName</span><span class="p">,</span> <span class="n">app_id</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Send interface for CQC to add the qubit to the remote nodes received list for an application.</span>
 
@@ -481,8 +487,8 @@
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_get_virtual_ref</span><span class="p">(</span><span class="n">qc</span><span class="o">.</span><span class="n">virt_num</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="virtualNode.remote_send_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_send_qubit">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_send_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">targetName</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualNode.remote_send_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_send_qubit">[docs]</a>	<span class="k">def</span> <span class="nf">remote_send_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">targetName</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Sends the qubit to the specified target node. This creates a new virtual qubit object at the remote node</span>
 <span class="sd">		with the right qubit and backend details.</span>
@@ -526,8 +532,8 @@
 
 		<span class="k">return</span> <span class="n">newNum</span></div>
 
-<div class="viewcode-block" id="virtualNode.remote_transfer_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_transfer_qubit">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_transfer_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simQubit</span><span class="p">,</span> <span class="n">targetName</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualNode.remote_transfer_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_transfer_qubit">[docs]</a>	<span class="k">def</span> <span class="nf">remote_transfer_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simQubit</span><span class="p">,</span> <span class="n">targetName</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Transfer the qubit to the destination node if we are the simulating node. The reason why we cannot</span>
 <span class="sd">		do this directly is that Twisted PB does not allow objects to be passed between connecting nodes.</span>
@@ -719,8 +725,8 @@
 
 		<span class="n">reg2</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="virtualNode.remote_merge_from"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_merge_from">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_merge_from</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simNodeName</span><span class="p">,</span> <span class="n">simQubitNum</span><span class="p">,</span> <span class="n">localReg</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualNode.remote_merge_from"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_merge_from">[docs]</a>	<span class="k">def</span> <span class="nf">remote_merge_from</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simNodeName</span><span class="p">,</span> <span class="n">simQubitNum</span><span class="p">,</span> <span class="n">localReg</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Bring a remote register to this node.</span>
 
@@ -774,8 +780,8 @@
 		<span class="c1"># Return the qubit object corresponding to the new physical qubit</span>
 		<span class="k">return</span> <span class="n">newD</span><span class="p">[</span><span class="n">oldQubitNum</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="virtualNode.remote_update_virtual_merge"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_update_virtual_merge">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_update_virtual_merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newSimNodeName</span><span class="p">,</span> <span class="n">oldSimNodeName</span><span class="p">,</span> <span class="n">oldRegNum</span><span class="p">,</span> <span class="n">newD</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualNode.remote_update_virtual_merge"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_update_virtual_merge">[docs]</a>	<span class="k">def</span> <span class="nf">remote_update_virtual_merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newSimNodeName</span><span class="p">,</span> <span class="n">oldSimNodeName</span><span class="p">,</span> <span class="n">oldRegNum</span><span class="p">,</span> <span class="n">newD</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Update the virtual qubits to the new simulating node, if applicable. This is extremely</span>
 <span class="sd">		inefficient due to not keeping register information in virtualQubit.</span>
@@ -866,8 +872,8 @@
 
 		<span class="k">return</span> <span class="p">(</span><span class="n">realM</span><span class="p">,</span> <span class="n">imagM</span><span class="p">,</span> <span class="n">activeQ</span><span class="p">,</span> <span class="n">oldRegNum</span><span class="p">,</span> <span class="n">oldQubitNum</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="virtualNode.remote_get_multiple_qubits"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_get_multiple_qubits">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_get_multiple_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qList</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualNode.remote_get_multiple_qubits"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_get_multiple_qubits">[docs]</a>	<span class="k">def</span> <span class="nf">remote_get_multiple_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qList</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Return the state of multiple qubits virtually located at this node. This will fail if the qubits</span>
 <span class="sd">		are not in the same register or thus also simulating node.</span>
@@ -1043,51 +1049,51 @@
 
 		<span class="k">return</span> <span class="n">outcome</span>
 
-<div class="viewcode-block" id="virtualQubit.remote_apply_X"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_X">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_apply_X</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualQubit.remote_apply_X"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_X">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_X</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Apply X gate to itself by passing it onto the underlying register.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_gate</span><span class="p">(</span><span class="s2">&quot;apply_X&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="virtualQubit.remote_apply_Y"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_Y">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_apply_Y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualQubit.remote_apply_Y"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_Y">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_Y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Apply Y gate.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_gate</span><span class="p">(</span><span class="s2">&quot;apply_Y&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="virtualQubit.remote_apply_Z"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_Z">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_apply_Z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualQubit.remote_apply_Z"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_Z">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_Z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Apply Z gate.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_gate</span><span class="p">(</span><span class="s2">&quot;apply_Z&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="virtualQubit.remote_apply_H"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_H">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_apply_H</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualQubit.remote_apply_H"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_H">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_H</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Apply H gate.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_gate</span><span class="p">(</span><span class="s2">&quot;apply_H&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="virtualQubit.remote_apply_K"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_K">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_apply_K</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualQubit.remote_apply_K"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_K">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_K</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Apply K gate - taking computational basis to Y eigenbasis.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_gate</span><span class="p">(</span><span class="s2">&quot;apply_K&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="virtualQubit.remote_apply_T"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_T">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_apply_T</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualQubit.remote_apply_T"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_T">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_T</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Apply T gate.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_gate</span><span class="p">(</span><span class="s2">&quot;apply_T&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="virtualQubit.remote_apply_rotation"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_rotation">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_apply_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">a</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualQubit.remote_apply_rotation"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_rotation">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">a</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Apply rotation around axis n with angle a.</span>
 <span class="sd">		Arguments:</span>
@@ -1096,8 +1102,8 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_gate</span><span class="p">(</span><span class="s2">&quot;apply_rotation&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">a</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="virtualQubit.remote_measure"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_measure">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualQubit.remote_measure"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_measure">[docs]</a>	<span class="k">def</span> <span class="nf">remote_measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Measure the qubit in the standard basis. If inplace=False, this does delete the qubit from the simulation.</span>
 
@@ -1262,8 +1268,8 @@
 			<span class="n">simNum</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_sim_number&quot;</span><span class="p">)</span>
 			<span class="k">yield</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;unlock_reg_qubits&quot;</span><span class="p">,</span><span class="n">simNum</span><span class="p">)</span>
 
-<div class="viewcode-block" id="virtualQubit.remote_cnot_onto"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_cnot_onto">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_cnot_onto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualQubit.remote_cnot_onto"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_cnot_onto">[docs]</a>	<span class="k">def</span> <span class="nf">remote_cnot_onto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Performs a CNOT operation with this qubit as control, and the other qubit as target.</span>
 
@@ -1273,8 +1279,8 @@
 
 		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_two_qubit_gate</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s2">&quot;cnot_onto&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="virtualQubit.remote_cphase_onto"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_cphase_onto">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_cphase_onto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualQubit.remote_cphase_onto"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_cphase_onto">[docs]</a>	<span class="k">def</span> <span class="nf">remote_cphase_onto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Performs a CPHASE operation with this qubit as control, and the other qubit as target.</span>
 
@@ -1460,8 +1466,8 @@
 			<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unlock_nodes</span><span class="p">(</span><span class="n">q1simNode</span><span class="p">,</span> <span class="n">q1virtNode</span><span class="p">,</span> <span class="n">q2simNode</span><span class="p">,</span> <span class="n">q2virtNode</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="virtualQubit.remote_get_number"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_get_number">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_get_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualQubit.remote_get_number"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_get_number">[docs]</a>	<span class="k">def</span> <span class="nf">remote_get_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Returns the number of this qubit in whatever local register it is in. Not useful for the client, but convenient for debugging.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
@@ -1486,8 +1492,8 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">num</span></div>
 
-<div class="viewcode-block" id="virtualQubit.remote_get_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_get_qubit">[docs]</a>	<span class="nd">@inlineCallbacks</span>
-	<span class="k">def</span> <span class="nf">remote_get_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualQubit.remote_get_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualQubit.remote_get_qubit">[docs]</a>	<span class="k">def</span> <span class="nf">remote_get_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Returns the state of this qubit in real and imaginary parts separated. This is required</span>
 <span class="sd">		single Twisted cannot natively transfer complex valued objects.</span>
@@ -1542,7 +1548,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
     </div>
   </body>
 </html>

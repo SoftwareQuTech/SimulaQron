@@ -42,7 +42,7 @@ def main():
 	Bob=CQCConnection("Bob")
 
 	# Make an EPR pair with Alice
-	qB=Bob.createEPR("Alice")
+	qB=Bob.recvEPR()
 
 	# Create a fresh qubit
 	qC=qubit(Bob)

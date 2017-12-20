@@ -1,13 +1,16 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
     <title>Generate correlated randomness &#8212; SimulaQron 0.1 alpha documentation</title>
+    
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -27,7 +30,7 @@
     <link rel="next" title="Template for programming in native mode" href="NativeModeTemplate.html" />
     <link rel="prev" title="Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)" href="ExamplesDirect.html" /> 
   </head>
-  <body>
+  <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -45,14 +48,14 @@
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="Examples.html" >Examples</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="ExamplesDirect.html" accesskey="U">Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)</a> &#187;</li> 
+          <li class="nav-item nav-item-2"><a href="ExamplesDirect.html" accesskey="U">Programming via SimulaQron&#8217;s native Python Twisted Interface (specific to SimulaQron)</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="ExamplesDirect.html"
-                        title="previous chapter">Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)</a></p>
+                        title="previous chapter">Programming via SimulaQron&#8217;s native Python Twisted Interface (specific to SimulaQron)</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="NativeModeTemplate.html"
                         title="next chapter">Template for programming in native mode</a></p>
@@ -109,7 +112,7 @@ Our objective will be to realize the following protocol which will generate 1 sh
 </ul>
 <p>While the task we want to realize here is completely trivial, the addition of step 3 does however already highlight a range of choices on how to realize step 3 and the need to find good abstractions to allow easy application development.
 One way to realize step 3 would be to hardwire Bobs measurement: if the hardware can identify the correct qubit from Alice, then we could instruct it to measure it immediately without asking for a notification from Alice. It is clear that in a network that is a bit larger than our tiny three node setup, identifying the right setup requires a link between the underlying qubits and classical control information: this is the objective of the classical/quantum combiner, for which we will provide code in version 0.2 of SimulaQron.</p>
-<p>This version simply allows a completely barebones access to the virtual nodes without implementing such convenient abstractions in order to allow you to explore such possibilities. To this end, we will here actually implement the following protocol for mere illustration purposes. We emphasize that this would be inefficient on a real quantum network since it requires Bob to store his qubit until Alice’s control message arrives, which can be a significant delay causing the qubit to decohere in the meantime.</p>
+<p>This version simply allows a completely barebones access to the virtual nodes without implementing such convenient abstractions in order to allow you to explore such possibilities. To this end, we will here actually implement the following protocol for mere illustration purposes. We emphasize that this would be inefficient on a real quantum network since it requires Bob to store his qubit until Alice&#8217;s control message arrives, which can be a significant delay causing the qubit to decohere in the meantime.</p>
 <ul class="simple">
 <li>Alice generates 1 EPR pair, that is, two maximally entangled qubits <span class="math">\(A\)</span> and <span class="math">\(B\)</span> of the form <span class="math">\(|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)\)</span></li>
 <li>She sends qubit <span class="math">\(B\)</span> to Bob.</li>
@@ -138,7 +141,7 @@ One way to realize step 3 would be to hardwire Bobs measurement: if the hardware
 <span class="n">python</span> <span class="n">aliceTest</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
-<p>Let us now look at the programs for Alice and Bob. Alice will merely run a client on the classical communication network that connects to Bob to be found in aliceTest.py. Using the template (see general Examples section) which establishes the connections to the local virtual nodes, we thus need to provide client code for Alice to implement the protocol above. The function runClientNode will automatically be executed once Alice connected to her local virtual quantum node simulating the underlying hardware, and to Bob’s server:</p>
+<p>Let us now look at the programs for Alice and Bob. Alice will merely run a client on the classical communication network that connects to Bob to be found in aliceTest.py. Using the template (see general Examples section) which establishes the connections to the local virtual nodes, we thus need to provide client code for Alice to implement the protocol above. The function runClientNode will automatically be executed once Alice connected to her local virtual quantum node simulating the underlying hardware, and to Bob&#8217;s server:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># runClientNode</span>
@@ -184,7 +187,7 @@ One way to realize step 3 would be to hardwire Bobs measurement: if the hardware
         <span class="n">reactor</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Let us now look at Bob’s server program to be found in bobTest.py. Observe that Alice will call process_qubit above. Not included in the code below are several standard methods that require no change to be used in examples.:</p>
+<p>Let us now look at Bob&#8217;s server program to be found in bobTest.py. Observe that Alice will call process_qubit above. Not included in the code below are several standard methods that require no change to be used in examples.:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># localNode</span>
@@ -237,12 +240,12 @@ One way to realize step 3 would be to hardwire Bobs measurement: if the hardware
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="Examples.html" >Examples</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="ExamplesDirect.html" >Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)</a> &#187;</li> 
+          <li class="nav-item nav-item-2"><a href="ExamplesDirect.html" >Programming via SimulaQron&#8217;s native Python Twisted Interface (specific to SimulaQron)</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
     </div>
   </body>
 </html>

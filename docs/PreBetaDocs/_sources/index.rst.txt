@@ -26,6 +26,7 @@ The documentation below assumes familiarity with classical network programming c
 
    Overview
    GettingStarted
+   PythonLib
    Examples
    SimulaQron
    FurtherReading

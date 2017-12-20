@@ -1,13 +1,16 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
     <title>SimulaQron.virtNode.crudeSimulator &#8212; SimulaQron 0.1 alpha documentation</title>
+    
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -25,7 +28,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
   </head>
-  <body>
+  <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -133,10 +136,11 @@
 		<span class="n">v</span> <span class="o">=</span> <span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 		<span class="n">newQubit</span> <span class="o">=</span> <span class="n">v</span> <span class="o">*</span> <span class="n">v</span><span class="o">.</span><span class="n">dag</span><span class="p">()</span>
 
+
 		<span class="k">try</span><span class="p">:</span>
 			<span class="n">num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_qubit</span><span class="p">(</span><span class="n">newQubit</span><span class="p">)</span>
 			<span class="k">return</span> <span class="n">num</span>
-		<span class="k">except</span> <span class="n">Error</span><span class="p">:</span>
+		<span class="k">except</span> <span class="n">quantumError</span><span class="p">:</span>
 			<span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;Out of qubits.&quot;</span><span class="p">)</span>
 			<span class="k">return</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
 
@@ -567,7 +571,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
     </div>
   </body>
 </html>

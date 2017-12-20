@@ -1,13 +1,16 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Further Reading &#8212; SimulaQron 0.1 alpha documentation</title>
+    
+    <title>Using the Python library &#8212; SimulaQron 0.1 alpha documentation</title>
+    
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -24,9 +27,10 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="CQC C Library" href="CLib.html" /> 
+    <link rel="next" title="Classical Communication" href="ClassicalCommunication.html" />
+    <link rel="prev" title="Getting started" href="GettingStarted.html" /> 
   </head>
-  <body>
+  <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -37,7 +41,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="CLib.html" title="CQC C Library"
+          <a href="ClassicalCommunication.html" title="Classical Communication"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="GettingStarted.html" title="Getting started"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li> 
       </ul>
@@ -45,12 +52,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="CLib.html"
-                        title="previous chapter">CQC C Library</a></p>
+  <p class="topless"><a href="GettingStarted.html"
+                        title="previous chapter">Getting started</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ClassicalCommunication.html"
+                        title="next chapter">Classical Communication</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/FurtherReading.rst.txt"
+      <li><a href="_sources/PythonLib.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -72,8 +82,21 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="further-reading">
-<h1>Further Reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="using-the-python-library">
+<h1>Using the Python library<a class="headerlink" href="#using-the-python-library" title="Permalink to this headline">¶</a></h1>
+<p>The python library provides a way to program a protocol on a network where the nodes listen to instructions through the classical-quantum combiner (CQC) interface. In the following examples the network is simulated by SimulaQron. But the same examples could be executed on a network with real quantum hardware which allows for instructions through the CQC interface, which is the aim for the 2020 quantum internet demonstrator.</p>
+<p>We give some more detailed information below on how the classical communitation between nodes in the application layer can be realized and also provide some useful commands to program a protocol using the Python library.</p>
+<p>Explicit examples on how to program protocols using the Python library can be found in <a class="reference internal" href="ExamplespythonLib.html"><span class="doc">Examples using the python library</span></a>:.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ClassicalCommunication.html">Classical Communication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="UsefulCommands.html">Useful commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="UsefulCommands.html#cqcconnection"><code class="docutils literal"><span class="pre">CQCConnection</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="UsefulCommands.html#qubit"><code class="docutils literal"><span class="pre">qubit</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 
 
@@ -92,14 +115,17 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="CLib.html" title="CQC C Library"
+          <a href="ClassicalCommunication.html" title="Classical Communication"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="GettingStarted.html" title="Getting started"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
     </div>
   </body>
 </html>
