@@ -1,13 +1,16 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
     <title>Example using the C library &#8212; SimulaQron 0.1 alpha documentation</title>
+    
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -27,7 +30,7 @@
     <link rel="next" title="Examples using the python library" href="ExamplespythonLib.html" />
     <link rel="prev" title="CQC Interface" href="HeaderFormat.html" /> 
   </head>
-  <body>
+  <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -111,7 +114,7 @@
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">testSend</span> <span class="n">localhost</span> <span class="mi">8821</span> <span class="n">localhost</span> <span class="mi">8822</span>
 </pre></div>
 </div>
-<p>Here, both Alice and Bob run on the same host (localhost) but on different ports for testing purposes. To allow the transmission of associated classical control information, the port of Bob’s CQC Backend must also be specified.:</p>
+<p>Here, both Alice and Bob run on the same host (localhost) but on different ports for testing purposes. To allow the transmission of associated classical control information, the port of Bob&#8217;s CQC Backend must also be specified.:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#include &lt;stdio.h&gt;</span>
 <span class="c1">#include &lt;unistd.h&gt;</span>
 <span class="c1">#include &lt;stdlib.h&gt;</span>
@@ -181,8 +184,8 @@
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">testSend</span> <span class="n">localhost</span> <span class="mi">8822</span> <span class="n">localhost</span> <span class="mi">8821</span>
 </pre></div>
 </div>
-<p>Here, both Alice and Bob run on the same host (localhost) but on different ports for testing purposes. To allow the transmission of associated classical control information, the port of Alice’s CQC Backend must also be specified. No actions are taken after the transmission is completed.</p>
-<p>You may be wondering: why is Bob calling recv? In full analogy to classical socket programming, Bob will issue a request to receive a qubit. This merely registers the intention to be notified, once a qubit for the application ID is delivered to Bob’s node. Once a qubit is actually received, a notification is sent that the qubit has arrived and you may device to perform further processing on the qubit data received, such as adding gates to be executed.:</p>
+<p>Here, both Alice and Bob run on the same host (localhost) but on different ports for testing purposes. To allow the transmission of associated classical control information, the port of Alice&#8217;s CQC Backend must also be specified. No actions are taken after the transmission is completed.</p>
+<p>You may be wondering: why is Bob calling recv? In full analogy to classical socket programming, Bob will issue a request to receive a qubit. This merely registers the intention to be notified, once a qubit for the application ID is delivered to Bob&#8217;s node. Once a qubit is actually received, a notification is sent that the qubit has arrived and you may device to perform further processing on the qubit data received, such as adding gates to be executed.:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#include &lt;stdio.h&gt;</span>
 <span class="c1">#include &lt;unistd.h&gt;</span>
 <span class="c1">#include &lt;stdlib.h&gt;</span>
@@ -274,7 +277,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
     </div>
   </body>
 </html>

@@ -1,13 +1,16 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
     <title>Teleporting a Qubit &#8212; SimulaQron 0.1 alpha documentation</title>
+    
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -27,7 +30,7 @@
     <link rel="next" title="Distributing a graph state" href="NativeModeGraphState.html" />
     <link rel="prev" title="Template for programming in native mode" href="NativeModeTemplate.html" /> 
   </head>
-  <body>
+  <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -45,7 +48,7 @@
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="Examples.html" >Examples</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="ExamplesDirect.html" accesskey="U">Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)</a> &#187;</li> 
+          <li class="nav-item nav-item-2"><a href="ExamplesDirect.html" accesskey="U">Programming via SimulaQron&#8217;s native Python Twisted Interface (specific to SimulaQron)</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -95,10 +98,10 @@
             
   <div class="section" id="teleporting-a-qubit">
 <h1>Teleporting a Qubit<a class="headerlink" href="#teleporting-a-qubit" title="Permalink to this headline">¶</a></h1>
-<p>Let’s now consider a very simple protocol, in which Alice first generates an EPR pair with Bob, and then teleports a qubit to Bob. To program it in SimulaQron’s native mode, we will use the template described in <a class="reference internal" href="NativeModeTemplate.html"><span class="doc">Template for programming in native mode</span></a>.</p>
+<p>Let&#8217;s now consider a very simple protocol, in which Alice first generates an EPR pair with Bob, and then teleports a qubit to Bob. To program it in SimulaQron&#8217;s native mode, we will use the template described in <a class="reference internal" href="NativeModeTemplate.html"><span class="doc">Template for programming in native mode</span></a>.</p>
 <div class="section" id="the-protocol">
 <h2>The protocol<a class="headerlink" href="#the-protocol" title="Permalink to this headline">¶</a></h2>
-<p>For completness, let’s briefly recap the protocol:</p>
+<p>For completness, let&#8217;s briefly recap the protocol:</p>
 <ul>
 <li><p class="first">For generating an EPR pair with Bob, Alice proceeds as follows:</p>
 <blockquote>
@@ -136,7 +139,7 @@
 <span class="n">Bob</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8802</span>
 </pre></div>
 </div>
-<p>As we can see from the proocol above, only Alice communicates to Bob for which we will run a client at Alice’ and a server at Bob’s. Since we run everything locally, we may thus use for the configuration file classicalNet.cfg:</p>
+<p>As we can see from the proocol above, only Alice communicates to Bob for which we will run a client at Alice&#8217; and a server at Bob&#8217;s. Since we run everything locally, we may thus use for the configuration file classicalNet.cfg:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Network configuration file</span>
 <span class="c1">#</span>
 <span class="c1"># For each host its informal name, as well as its location in the network must</span>
@@ -325,12 +328,12 @@ for the qubit with that identfier and then processes the relevant quantum instru
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 alpha documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="Examples.html" >Examples</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="ExamplesDirect.html" >Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)</a> &#187;</li> 
+          <li class="nav-item nav-item-2"><a href="ExamplesDirect.html" >Programming via SimulaQron&#8217;s native Python Twisted Interface (specific to SimulaQron)</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
     </div>
   </body>
 </html>

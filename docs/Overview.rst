@@ -10,12 +10,12 @@ In the light of the alternate interface below it may appear inefficient to expor
 
 The second way to run applications is via a higher level interface bundled with SimulaQron, called the classical-quantum combiner (CQC) interface. This interface is universally accessible from any language. It comes with a C and Python library, where the Python CQC is definitely the best place to get started if you have never programmed SimulaQron before. An evolved version of a C library and interface is targeted to be available on the planned 2020 quantum internet demonstrator connecting several Dutch cities. If you want your applications to later use real quantum hardware more easily instead of SimulaQron, then this is the interface to use. Internally, the CQC included in this package, uses SimulaQron's native interface from above in place of real quantum hardware. Examples of how to program using the CQC can be found in :doc:`ExamplesNodeOS`.
 
-.. image:: pic.png
+.. image:: figs/CQC_schematic_v3.pdf
     :width: 400px
     :align: center
     :alt: Programming SimulaQrons Interfaces
 
-Practically, SimulaQron's Backend is a server process running on each local classical computer, emulating quantum hardware. The backend can be programmed directly using Twisted PB aka native mode. For clarity, not efficiency, the CQC Backend is a separate server process, which connects to the SimulaQron backend using Twisted PB. It accepts incoming connections, and using a general packet format can be programmed using any programming language. Libraries for C and Python are provided. If you are starting out, programming in the Python CQC library is by far the easiest way to get going!
+Practically, SimulaQron's Backend is a server process running on each local classical computer, emulating quantum hardware. The backend can be programmed directly using Twisted PB aka native mode. For clarity, not efficiency, the CQC Backend is a separate server process, which connects to the SimulaQron backend using Twisted PB. It accepts incoming connections, and using a general packet format can be programmed using any programming language. Libraries for C and Python are provided. If you are starting out, programming in the Python CQC library is by far the easiest way to get going! Further information about the Python library can be found in :doc:`PythonLib`: and explicit examples using this library in :doc:`ExamplespythonLib`:.
 
 -------------------------------
 How SimulaQron works internally
@@ -66,6 +66,11 @@ Nevertheless, as a guide to the backend, it consists of three essential componen
 * virtualNode - this is the local virtual node which accepts requests to get a virtual qubit object, send qubits to other nodes, or (for convenience sake), read out the state of qubits.
 
 * backEnd - starts up the virtual node backend
+
+.. image:: figs/simulated_virtualQubits_v7.pdf
+    :width: 550px
+    :align: center
+    :alt: Virtual and simulated qubit
 
 ^^^^^^^^^^^^^^^^^^^^^^^
 The local client engine
