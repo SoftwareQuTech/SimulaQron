@@ -40,12 +40,12 @@ def main():
 
 	# Initialize the connection
 	Bob=CQCConnection("Bob")
+	Bob.startClassicalServer()
 
 	# Make an EPR pair with Alice
 	qB=Bob.recvEPR()
 
 	# Receive info about corrections
-	Bob.startClassicalServer()
 	data=Bob.recvClassical()
 	message=list(data)
 	a=message[0]
