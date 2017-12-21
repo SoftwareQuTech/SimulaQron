@@ -467,8 +467,6 @@ class CQCConnection:
 			raise CQCUnsuppError("Sequence not supported")
 		if cqc_err==CQC_ERR_TIMEOUT:
 			raise CQCTimeoutError("Timout")
-		if cqc_err==CQC_ERR_INUSE:
-			raise CQCInuseError("Qubit ID in use")
 
 	def sendQubit(self,q,name,remote_appID=0,notify=True,block=True,print_info=True):
 		"""
