@@ -198,6 +198,9 @@
 		<span class="c1"># List of qubit received to be polled by CQC</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">cqcRecv</span> <span class="o">=</span> <span class="p">{}</span>
 
+		<span class="c1"># List of halves of epr-pairs received to be polled by CQC</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">cqcRecvEpr</span> <span class="o">=</span> <span class="p">{}</span>
+
 
 <div class="viewcode-block" id="virtualNode.remote_test"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_test">[docs]</a>	<span class="k">def</span> <span class="nf">remote_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Check call virtualNode.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
@@ -442,10 +445,12 @@
 <span class="sd">		remote_app_id	application ID to deliver the qubit to</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
-		<span class="n">qubit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_get_virtual_ref</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: request to send qubit </span><span class="si">%d</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
+
+		<span class="n">virtQubit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_get_virtual_ref</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
 
 		<span class="n">oldVirtNum</span> <span class="o">=</span> <span class="n">num</span>
-		<span class="n">newVirtNum</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_send_qubit</span><span class="p">(</span><span class="n">qubit</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
+		<span class="n">newVirtNum</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_send_qubit</span><span class="p">(</span><span class="n">virtQubit</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
 
 		<span class="c1"># Lookup host ID of node</span>
 		<span class="n">remoteNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="p">[</span><span class="n">targetName</span><span class="p">]</span>
@@ -486,6 +491,62 @@
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Returning qubit for app id </span><span class="si">%d</span><span class="s2"> from recv list&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">to_app_id</span><span class="p">)</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_get_virtual_ref</span><span class="p">(</span><span class="n">qc</span><span class="o">.</span><span class="n">virt_num</span><span class="p">)</span></div>
 
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="virtualNode.remote_cqc_send_epr_half"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_cqc_send_epr_half">[docs]</a>	<span class="k">def</span> <span class="nf">remote_cqc_send_epr_half</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">targetName</span><span class="p">,</span> <span class="n">app_id</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="p">,</span> <span class="n">rawEntInfo</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Send interface for CQC to add the qubit to the remote nodes received list for an application.</span>
+
+<span class="sd">		Arguments:</span>
+<span class="sd">		num		number of virtual qubit to send</span>
+<span class="sd">		targetName	name of the node to send to</span>
+<span class="sd">		app_id		application asking to have this qubit delivered</span>
+<span class="sd">		remote_app_id	application ID to deliver the qubit to</span>
+<span class="sd">		entInfo		entanglement information</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="n">qubit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_get_virtual_ref</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+
+		<span class="n">oldVirtNum</span> <span class="o">=</span> <span class="n">num</span>
+		<span class="n">newVirtNum</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_send_qubit</span><span class="p">(</span><span class="n">qubit</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
+
+		<span class="c1"># Lookup host ID of node</span>
+		<span class="n">remoteNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="p">[</span><span class="n">targetName</span><span class="p">]</span>
+
+		<span class="c1"># Ask to add to list</span>
+		<span class="k">yield</span> <span class="n">remoteNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;cqc_add_epr_list&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">app_id</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="p">,</span> <span class="n">newVirtNum</span><span class="p">,</span> <span class="n">rawEntInfo</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="virtualNode.remote_cqc_add_epr_list"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_cqc_add_epr_list">[docs]</a>	<span class="k">def</span> <span class="nf">remote_cqc_add_epr_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fromName</span><span class="p">,</span> <span class="n">from_app_id</span><span class="p">,</span> <span class="n">to_app_id</span><span class="p">,</span> <span class="n">new_virt_num</span><span class="p">,</span> <span class="n">rawEntInfo</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Add an item to the epr list for use in CQC.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">to_app_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cqcRecvEpr</span><span class="p">):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">cqcRecvEpr</span><span class="p">[</span><span class="n">to_app_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([])</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">cqcRecvEpr</span><span class="p">[</span><span class="n">to_app_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QubitCQC</span><span class="p">(</span><span class="n">fromName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">from_app_id</span><span class="p">,</span> <span class="n">to_app_id</span><span class="p">,</span> <span class="n">new_virt_num</span><span class="p">,</span><span class="n">rawEntInfo</span><span class="o">=</span><span class="n">rawEntInfo</span><span class="p">));</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Added a qubit for app id </span><span class="si">%d</span><span class="s2"> to epr list&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">to_app_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="virtualNode.remote_cqc_get_epr_recv"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_cqc_get_epr_recv">[docs]</a>	<span class="k">def</span> <span class="nf">remote_cqc_get_epr_recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">to_app_id</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Retrieve the next qubit (half of an EPR-pair) with the given app ID from the received list.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Trying to retrieve qubit for app id </span><span class="si">%d</span><span class="s2"> from epr list&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">to_app_id</span><span class="p">)</span>
+		<span class="c1"># Get the list corresponding to the specified application ID</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">to_app_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cqcRecvEpr</span><span class="p">):</span>
+			<span class="k">return</span> <span class="kc">None</span>
+
+		<span class="n">qQueue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cqcRecvEpr</span><span class="p">[</span><span class="n">to_app_id</span><span class="p">]</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">qQueue</span><span class="p">:</span>
+			<span class="k">return</span> <span class="kc">None</span>
+
+		<span class="c1"># Retrieve the first element on that list (first in, first out)</span>
+		<span class="n">qc</span> <span class="o">=</span> <span class="n">qQueue</span><span class="o">.</span><span class="n">popleft</span><span class="p">();</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">qc</span><span class="p">:</span>
+			<span class="k">return</span> <span class="kc">None</span>
+
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Returning qubit for app id </span><span class="si">%d</span><span class="s2"> from epr list&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">to_app_id</span><span class="p">)</span>
+		<span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remote_get_virtual_ref</span><span class="p">(</span><span class="n">qc</span><span class="o">.</span><span class="n">virt_num</span><span class="p">),</span><span class="n">qc</span><span class="o">.</span><span class="n">rawEntInfo</span><span class="p">)</span></div>
 
 	<span class="nd">@inlineCallbacks</span>
 <div class="viewcode-block" id="virtualNode.remote_send_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_send_qubit">[docs]</a>	<span class="k">def</span> <span class="nf">remote_send_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">targetName</span><span class="p">):</span>
@@ -498,7 +559,7 @@
 <span class="sd">		targetName	target ndoe to place qubit at (host object)</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
-		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Request to transfer qubit sim Num </span><span class="si">%d</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">qubit</span><span class="o">.</span><span class="n">num</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Request to send qubit sim Num </span><span class="si">%d</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">qubit</span><span class="o">.</span><span class="n">num</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">qubit</span><span class="o">.</span><span class="n">active</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Attempt to manipulate qubit no longer at this node.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 			<span class="k">return</span>
@@ -513,19 +574,23 @@
 
 			<span class="c1"># Check whether we are just the virtual, or also the simulating node</span>
 			<span class="k">if</span> <span class="n">qubit</span><span class="o">.</span><span class="n">virtNode</span> <span class="o">==</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simNode</span><span class="p">:</span>
+				<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Sending qubit simulated locally&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 				<span class="c1"># We are both the virtual as well as the simulating node</span>
 				<span class="c1"># Pass a reference to our locally simulated qubit object to the remote node</span>
 				<span class="n">newNum</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">remoteNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;add_qubit&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simQubit</span><span class="p">)</span>
 			<span class="k">else</span><span class="p">:</span>
+				<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Sending qubit simulated remotely at </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 				<span class="c1"># We are only the virtual node, not the simulating one. In this case, we need to ask</span>
-				<span class="c1"># the actual simulating node to do the transfer for us.</span>
-				<span class="n">newNum</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;transfer_qubit&quot;</span><span class="p">,</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simQubit</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
+				<span class="c1"># the actual simulating node to do the transfer for us. Due to the pecularities of Twisted PB</span>
+				<span class="c1"># we need to do this by the simulated qubit number</span>
+				<span class="n">simQubitNum</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simQubit</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_sim_number&quot;</span><span class="p">)</span>
+				<span class="n">newNum</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">qubit</span><span class="o">.</span><span class="n">simNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;transfer_qubit&quot;</span><span class="p">,</span> <span class="n">simQubitNum</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
 
-			<span class="c1"># We gave it away to mark as inactive</span>
+			<span class="c1"># We gave it away so mark as inactive</span>
 			<span class="n">qubit</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="mi">0</span>
 
 			<span class="c1"># Remove the qubit from the local virtual list. Note it remains in the simulated</span>
-			<span class="c1"># list, since we continue to simulate this qubit.</span>
+			<span class="c1"># list, since we continue to simulate this qubit if we did so before.</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">virtQubits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>
 		<span class="k">finally</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_release_global_lock</span><span class="p">()</span>
@@ -533,18 +598,21 @@
 		<span class="k">return</span> <span class="n">newNum</span></div>
 
 	<span class="nd">@inlineCallbacks</span>
-<div class="viewcode-block" id="virtualNode.remote_transfer_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_transfer_qubit">[docs]</a>	<span class="k">def</span> <span class="nf">remote_transfer_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simQubit</span><span class="p">,</span> <span class="n">targetName</span><span class="p">):</span>
+<div class="viewcode-block" id="virtualNode.remote_transfer_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_transfer_qubit">[docs]</a>	<span class="k">def</span> <span class="nf">remote_transfer_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simQubitNum</span><span class="p">,</span> <span class="n">targetName</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Transfer the qubit to the destination node if we are the simulating node. The reason why we cannot</span>
 <span class="sd">		do this directly is that Twisted PB does not allow objects to be passed between connecting nodes.</span>
 <span class="sd">		Only between the creator of the object and its immediate connections.</span>
 
 <span class="sd">		Arguments</span>
-<span class="sd">		simQubit	simulated qubit to be sent</span>
+<span class="sd">		simQubitNum	simulated qubit number to be sent</span>
 <span class="sd">		targetName	target node to place qubit at (host object)</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Request to transfer qubit to </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
+	
+		<span class="c1"># Convert the number into the right local object	</span>
+		<span class="n">simQubit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_q_num_to_obj</span><span class="p">(</span><span class="n">simQubitNum</span><span class="p">)</span>
 
 		<span class="c1"># Lookup host id of node</span>
 		<span class="n">remoteNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="p">[</span><span class="n">targetName</span><span class="p">]</span>
@@ -552,13 +620,13 @@
 
 		<span class="k">return</span> <span class="n">newNum</span></div>
 
-<div class="viewcode-block" id="virtualNode.remote_add_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_add_qubit">[docs]</a>	<span class="k">def</span> <span class="nf">remote_add_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">qubit</span><span class="p">):</span>
+<div class="viewcode-block" id="virtualNode.remote_add_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.virtualNode.remote_add_qubit">[docs]</a>	<span class="k">def</span> <span class="nf">remote_add_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">simQubit</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Add a qubit to the local virtual node.</span>
 
 <span class="sd">		Arguments</span>
 <span class="sd">		name		name of the node simulating this qubit</span>
-<span class="sd">		qubit		qubit reference in the backend we&#39;re adding</span>
+<span class="sd">		simQubit 	simulated qubit reference in the backend we&#39;re adding</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Request to add qubit from </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
@@ -572,7 +640,7 @@
 
 			<span class="c1"># Generate a new virtual qubit object for the qubit now at this node</span>
 			<span class="n">newNum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_virtual_id</span><span class="p">()</span>
-			<span class="n">newQubit</span> <span class="o">=</span> <span class="n">virtualQubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">newNum</span><span class="p">)</span>
+			<span class="n">newQubit</span> <span class="o">=</span> <span class="n">virtualQubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">simQubit</span><span class="p">,</span> <span class="n">newNum</span><span class="p">)</span>
 
 			<span class="c1"># Add to local list</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">virtQubits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newQubit</span><span class="p">)</span>
@@ -588,6 +656,7 @@
 <span class="sd">		Arguments</span>
 <span class="sd">		num		number of the virtual qubit</span>
 <span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtQubits</span><span class="p">:</span>
 			<span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">num</span> <span class="o">==</span> <span class="n">num</span><span class="p">:</span>
 				<span class="k">return</span> <span class="n">q</span>
@@ -1519,12 +1588,13 @@
 
 <div class="viewcode-block" id="QubitCQC"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.virtual.QubitCQC">[docs]</a><span class="k">class</span> <span class="nc">QubitCQC</span><span class="p">:</span>
 
-	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fromName</span><span class="p">,</span> <span class="n">toName</span><span class="p">,</span> <span class="n">from_app_id</span><span class="p">,</span> <span class="n">to_app_id</span><span class="p">,</span> <span class="n">new_virt_num</span><span class="p">):</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fromName</span><span class="p">,</span> <span class="n">toName</span><span class="p">,</span> <span class="n">from_app_id</span><span class="p">,</span> <span class="n">to_app_id</span><span class="p">,</span> <span class="n">new_virt_num</span><span class="p">,</span> <span class="n">rawEntInfo</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">fromName</span> <span class="o">=</span> <span class="n">fromName</span><span class="p">;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">toName</span> <span class="o">=</span> <span class="n">toName</span><span class="p">;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">from_app_id</span> <span class="o">=</span> <span class="n">from_app_id</span><span class="p">;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">to_app_id</span> <span class="o">=</span> <span class="n">to_app_id</span><span class="p">;</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">virt_num</span> <span class="o">=</span> <span class="n">new_virt_num</span><span class="p">;</span></div>
+		<span class="bp">self</span><span class="o">.</span><span class="n">virt_num</span> <span class="o">=</span> <span class="n">new_virt_num</span><span class="p">;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rawEntInfo</span><span class="o">=</span><span class="n">rawEntInfo</span></div>
 
 </pre></div>
 

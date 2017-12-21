@@ -283,6 +283,12 @@ Depending on the ips and ports this will either create an EPR-pair and send one 
 </dd></dl>
 
 <dl class="method">
+<dt id="SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.cmd_epr_recv">
+<code class="descname">cmd_epr_recv</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCProtocol.cmd_epr_recv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.cmd_epr_recv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive half of epr from another node. Block until qubit is received.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.cmd_h">
 <code class="descname">cmd_h</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCProtocol.cmd_h"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.cmd_h" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply H Gate</p>
@@ -313,8 +319,9 @@ Depending on the ips and ports this will either create an EPR-pair and send one 
 
 <dl class="method">
 <dt id="SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.cmd_new">
-<code class="descname">cmd_new</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCProtocol.cmd_new"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.cmd_new" title="Permalink to this definition">¶</a></dt>
-<dd><p>Request a new qubit. Since we don&#8217;t need it, this python CQC just provides very crude timing information.</p>
+<code class="descname">cmd_new</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em>, <em>return_q_id=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCProtocol.cmd_new"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.cmd_new" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request a new qubit. Since we don&#8217;t need it, this python CQC just provides very crude timing information.
+(return_q_id is used internally)</p>
 </dd></dl>
 
 <dl class="method">
@@ -433,6 +440,24 @@ back to the Twisted PB on a _different_ connection, then use get_virt_qubit_inde
 <dt id="SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.hasXtra">
 <code class="descname">hasXtra</code><span class="sig-paren">(</span><em>cmd</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCProtocol.hasXtra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.hasXtra" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether this command includes an extra header with additional information.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.new_ent_id">
+<code class="descname">new_ent_id</code><span class="sig-paren">(</span><em>host_app_id</em>, <em>remote_node</em>, <em>remote_app_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCProtocol.new_ent_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.new_ent_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new unique entanglement id for the specified host_app_id, remote_node and remote_app_id. Used by cmd_epr.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.new_qubit_id">
+<code class="descname">new_qubit_id</code><span class="sig-paren">(</span><em>app_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCProtocol.new_qubit_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.new_qubit_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.send_epr_half">
+<code class="descname">send_epr_half</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em>, <em>entInfo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCProtocol.send_epr_half"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.send_epr_half" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send qubit to another node.</p>
 </dd></dl>
 
 </dd></dl>

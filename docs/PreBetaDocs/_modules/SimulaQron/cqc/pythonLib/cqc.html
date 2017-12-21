@@ -96,6 +96,7 @@
 
 <span class="kn">from</span> <span class="nn">SimulaQron.general.hostConfig</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.cqcHeader</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.entInfoHeader</span> <span class="k">import</span> <span class="o">*</span>
 
 <div class="viewcode-block" id="CQCConnection"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection">[docs]</a><span class="k">class</span> <span class="nc">CQCConnection</span><span class="p">:</span>
 	<span class="n">_appIDs</span><span class="o">=</span><span class="p">[]</span>
@@ -124,6 +125,9 @@
 
 		<span class="c1"># ClassicalServer</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_classicalServer</span><span class="o">=</span><span class="kc">None</span>
+
+		<span class="c1"># Classical connections in the application network</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_classicalConn</span><span class="o">=</span><span class="p">{}</span>
 
 		<span class="c1"># This file defines the network of CQC servers interfacing to virtual quantum nodes</span>
 		<span class="k">if</span> <span class="n">cqcFile</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span>
@@ -174,33 +178,82 @@
 <span class="sd">		Closes the connection.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appID</span><span class="p">)</span></div>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appID</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">closeClassicalServer</span><span class="p">()</span>
+
+		<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classicalConn</span><span class="p">):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">closeClassicalChannel</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CQCConnection.startClassicalServer"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.startClassicalServer">[docs]</a>	<span class="k">def</span> <span class="nf">startClassicalServer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Sets up a classical channel to another host.</span>
+<span class="sd">		Sets up a server for the application communication, if not already set up.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
-		<span class="c1">#Get host data</span>
-		<span class="n">myHost</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span><span class="o">.</span><span class="n">hostDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classicalServer</span><span class="p">:</span>
 
-		<span class="c1"># Setup server</span>
-		<span class="n">s</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span><span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
-		<span class="n">s</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="n">myHost</span><span class="o">.</span><span class="n">hostname</span><span class="p">,</span><span class="n">myHost</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
-		<span class="n">s</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-		<span class="p">(</span><span class="n">conn</span><span class="p">,</span><span class="n">addr</span><span class="p">)</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">_classicalServer</span><span class="o">=</span><span class="n">conn</span></div>
+			<span class="c1">#Get host data</span>
+			<span class="n">myHost</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span><span class="o">.</span><span class="n">hostDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+
+			<span class="c1"># Setup server</span>
+			<span class="n">s</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span><span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+			<span class="n">s</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="n">myHost</span><span class="o">.</span><span class="n">hostname</span><span class="p">,</span><span class="n">myHost</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+			<span class="n">s</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+			<span class="p">(</span><span class="n">conn</span><span class="p">,</span><span class="n">addr</span><span class="p">)</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_classicalServer</span><span class="o">=</span><span class="n">conn</span></div>
 
 <div class="viewcode-block" id="CQCConnection.closeClassicalServer"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.closeClassicalServer">[docs]</a>	<span class="k">def</span> <span class="nf">closeClassicalServer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classicalServer</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_classicalServer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_classicalServer</span><span class="o">=</span><span class="kc">None</span></div>
 
-<div class="viewcode-block" id="CQCConnection.recvClassical"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.recvClassical">[docs]</a>	<span class="k">def</span> <span class="nf">recvClassical</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classicalServer</span><span class="p">:</span>
-			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classicalServer</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;A classical server is not up and running&quot;</span><span class="p">)</span></div>
+<div class="viewcode-block" id="CQCConnection.recvClassical"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.recvClassical">[docs]</a>	<span class="k">def</span> <span class="nf">recvClassical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">timout</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">msg_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classicalServer</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">startClassicalServer</span><span class="p">()</span>
+		<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="o">*</span><span class="n">timout</span><span class="p">):</span>
+			<span class="n">msg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_classicalServer</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">msg_size</span><span class="p">)</span>
+			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+				<span class="k">return</span> <span class="n">msg</span>
+			<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCConnection.openClassicalChannel"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.openClassicalChannel">[docs]</a>	<span class="k">def</span> <span class="nf">openClassicalChannel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">timout</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Opens a classical connection to another host in the application network.</span>
+
+<span class="sd">		- **Arguments**</span>
+
+<span class="sd">			:name:		The name of the host in the application network.</span>
+<span class="sd">			:timout:	The time to try to connect to the server. When timout is reached an RuntimeError is raised.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classicalConn</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span><span class="o">.</span><span class="n">hostDict</span><span class="p">:</span>
+				<span class="n">remoteHost</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span><span class="o">.</span><span class="n">hostDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Host name &#39;</span><span class="si">{}</span><span class="s2">&#39; is not in the cqc network&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+			<span class="n">connected</span><span class="o">=</span><span class="kc">False</span>
+			<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">10</span><span class="o">*</span><span class="n">timout</span><span class="p">)):</span>
+				<span class="k">try</span><span class="p">:</span>
+					<span class="n">s</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span><span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+					<span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">remoteHost</span><span class="o">.</span><span class="n">hostname</span><span class="p">,</span><span class="n">remoteHost</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+					<span class="n">connected</span><span class="o">=</span><span class="kc">True</span>
+					<span class="k">break</span>
+				<span class="k">except</span><span class="p">:</span>
+					<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">connected</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Could not connect to server </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_classicalConn</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">=</span><span class="n">s</span></div>
+
+<div class="viewcode-block" id="CQCConnection.closeClassicalChannel"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.closeClassicalChannel">[docs]</a>	<span class="k">def</span> <span class="nf">closeClassicalChannel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Closes a classical connection to another host in the application network.</span>
+
+<span class="sd">		- **Arguments**</span>
+
+<span class="sd">			:name:		The name of the host in the application network.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classicalConn</span><span class="p">:</span>
+			<span class="n">s</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_classicalConn</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+			<span class="n">s</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="CQCConnection.sendClassical"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.sendClassical">[docs]</a>	<span class="k">def</span> <span class="nf">sendClassical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">msg</span><span class="p">,</span><span class="n">timout</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
@@ -209,27 +262,16 @@
 <span class="sd">		- **Arguments**</span>
 
 <span class="sd">			:name:		The name of the host in the application network.</span>
-<span class="sd">			:msg:		The message to send, will be converted to a bytesarray.</span>
+<span class="sd">			:msg:		The message to send. Should be either a int in range(0,256) or a list of such ints.</span>
 <span class="sd">			:timout:	The time to try to connect to the server. When timout is reached an RuntimeError is raised.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span><span class="o">.</span><span class="n">hostDict</span><span class="p">:</span>
-			<span class="n">remoteHost</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span><span class="o">.</span><span class="n">hostDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Host name &#39;</span><span class="si">{}</span><span class="s2">&#39; is not in the cqc network&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-		<span class="n">connected</span><span class="o">=</span><span class="kc">False</span>
-		<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-			<span class="k">try</span><span class="p">:</span>
-				<span class="n">s</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span><span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
-				<span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">remoteHost</span><span class="o">.</span><span class="n">hostname</span><span class="p">,</span><span class="n">remoteHost</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
-				<span class="n">connected</span><span class="o">=</span><span class="kc">True</span>
-				<span class="k">break</span>
-			<span class="k">except</span><span class="p">:</span>
-				<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-		<span class="k">if</span> <span class="ow">not</span> <span class="n">connected</span><span class="p">:</span>
-			<span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Could not connect to server </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-		<span class="n">s</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span>
-		<span class="n">s</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
-
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classicalConn</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">openClassicalChannel</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">to_send</span><span class="o">=</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">msg</span><span class="p">)]</span>
+		<span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+			<span class="n">to_send</span><span class="o">=</span><span class="n">msg</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_classicalConn</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">to_send</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="CQCConnection.sendSimple"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.sendSimple">[docs]</a>	<span class="k">def</span> <span class="nf">sendSimple</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tp</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
@@ -363,7 +405,7 @@
 <div class="viewcode-block" id="CQCConnection.readMessage"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.readMessage">[docs]</a>	<span class="k">def</span> <span class="nf">readMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">192</span><span class="p">):</span> <span class="c1"># WHAT IS GOOD SIZE?</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Receive the whole message from cqc server.</span>
-<span class="sd">		Returns (CQCHeader,None) or (CQCHeader,CQCNotifyHeader) depending on the type of message.</span>
+<span class="sd">		Returns (CQCHeader,None,None), (CQCHeader,CQCNotifyHeader,None) or (CQCHeader,CQCNotifyHeader,EntInfoHeader) depending on the type of message.</span>
 <span class="sd">		Maxsize is the max size of message.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
@@ -413,16 +455,32 @@
 			<span class="k">else</span><span class="p">:</span>
 				<span class="k">break</span>
 
-		<span class="c1"># We got all the data, read notify if there is any</span>
+		<span class="c1"># We got all the data, read notify (and ent_info) if there is any</span>
 		<span class="k">if</span> <span class="n">currHeader</span><span class="o">.</span><span class="n">length</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
-			<span class="k">return</span> <span class="p">(</span><span class="n">currHeader</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
-		<span class="k">try</span><span class="p">:</span>
-			<span class="n">rawNotifyHeader</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[:</span><span class="n">CQC_NOTIFY_LENGTH</span><span class="p">]</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[</span><span class="n">CQC_NOTIFY_LENGTH</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">)]</span>
-			<span class="n">notifyHeader</span><span class="o">=</span><span class="n">CQCNotifyHeader</span><span class="p">(</span><span class="n">rawNotifyHeader</span><span class="p">)</span>
-			<span class="k">return</span> <span class="p">(</span><span class="n">currHeader</span><span class="p">,</span><span class="n">notifyHeader</span><span class="p">)</span>
-		<span class="k">except</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-			<span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span></div>
+			<span class="k">return</span> <span class="p">(</span><span class="n">currHeader</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">currHeader</span><span class="o">.</span><span class="n">length</span><span class="o">==</span><span class="n">CQC_NOTIFY_LENGTH</span><span class="p">:</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">rawNotifyHeader</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[:</span><span class="n">CQC_NOTIFY_LENGTH</span><span class="p">]</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[</span><span class="n">CQC_NOTIFY_LENGTH</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">)]</span>
+				<span class="n">notifyHeader</span><span class="o">=</span><span class="n">CQCNotifyHeader</span><span class="p">(</span><span class="n">rawNotifyHeader</span><span class="p">)</span>
+				<span class="k">return</span> <span class="p">(</span><span class="n">currHeader</span><span class="p">,</span><span class="n">notifyHeader</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+			<span class="k">except</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+				<span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">currHeader</span><span class="o">.</span><span class="n">length</span><span class="o">==</span><span class="n">CQC_NOTIFY_LENGTH</span><span class="o">+</span><span class="n">ENT_INFO_LENGTH</span><span class="p">:</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">rawNotifyHeader</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[:</span><span class="n">CQC_NOTIFY_LENGTH</span><span class="p">]</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[</span><span class="n">CQC_NOTIFY_LENGTH</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">)]</span>
+				<span class="n">notifyHeader</span><span class="o">=</span><span class="n">CQCNotifyHeader</span><span class="p">(</span><span class="n">rawNotifyHeader</span><span class="p">)</span>
+
+				<span class="n">rawEntInfoHeader</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[:</span><span class="n">ENT_INFO_LENGTH</span><span class="p">]</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[</span><span class="n">ENT_INFO_LENGTH</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">)]</span>
+				<span class="n">entInfoHeader</span><span class="o">=</span><span class="n">EntInfoHeader</span><span class="p">(</span><span class="n">rawEntInfoHeader</span><span class="p">)</span>
+
+				<span class="k">return</span> <span class="p">(</span><span class="n">currHeader</span><span class="p">,</span><span class="n">notifyHeader</span><span class="p">,</span><span class="n">entInfoHeader</span><span class="p">)</span>
+			<span class="k">except</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+				<span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Received message of unknown length, return None&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CQCConnection.print_CQC_msg"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.print_CQC_msg">[docs]</a>	<span class="k">def</span> <span class="nf">print_CQC_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">message</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
@@ -430,6 +488,7 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">hdr</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 		<span class="n">notifyHdr</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">entInfoHdr</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
 		<span class="k">if</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span><span class="o">==</span><span class="n">CQC_TP_HELLO</span><span class="p">:</span>
 			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;HELLO&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
@@ -440,7 +499,16 @@
 		<span class="k">elif</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span><span class="o">==</span><span class="n">CQC_TP_RECV</span><span class="p">:</span>
 			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;Received qubit with ID </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">))</span>
 		<span class="k">elif</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span><span class="o">==</span><span class="n">CQC_TP_EPR_OK</span><span class="p">:</span>
-			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;EPR created using qubit with ID </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">))</span>
+
+			<span class="c1"># Lookup host name</span>
+			<span class="n">remote_node</span><span class="o">=</span><span class="n">entInfoHdr</span><span class="o">.</span><span class="n">node_B</span>
+			<span class="n">remote_port</span><span class="o">=</span><span class="n">entInfoHdr</span><span class="o">.</span><span class="n">port_B</span>
+			<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">ip</span><span class="o">==</span><span class="n">remote_node</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">port</span><span class="o">==</span><span class="n">remote_port</span><span class="p">):</span>
+					<span class="n">remote_name</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">name</span>
+					<span class="k">break</span>
+
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;EPR created with node </span><span class="si">{}</span><span class="s2">, using qubit with ID </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">remote_name</span><span class="p">,</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">))</span>
 		<span class="k">elif</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span><span class="o">==</span><span class="n">CQC_TP_MEASOUT</span><span class="p">:</span>
 			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;Measurement outcome is </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">notifyHdr</span><span class="o">.</span><span class="n">outcome</span><span class="p">))</span>
 		<span class="k">elif</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span><span class="o">==</span><span class="n">CQC_TP_INF_TIME</span><span class="p">:</span>
@@ -514,16 +582,18 @@
 <span class="sd">			:print_info:	 If info should be printed</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
-		<span class="n">q</span><span class="o">=</span><span class="n">qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">createNew</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 		<span class="c1">#print info</span>
 		<span class="k">if</span> <span class="n">print_info</span><span class="p">:</span>
 			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2"> tells CQC: &#39;Receive qubit&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
-		<span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">_qID</span><span class="p">,</span><span class="n">CQC_CMD_RECV</span><span class="p">,</span><span class="n">notify</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">notify</span><span class="p">),</span><span class="n">block</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">CQC_CMD_RECV</span><span class="p">,</span><span class="n">notify</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">notify</span><span class="p">),</span><span class="n">block</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">))</span>
 
 		<span class="c1"># Get RECV message</span>
 		<span class="n">message</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
+		<span class="n">notifyHdr</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">q_id</span><span class="o">=</span><span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span>
+
 		<span class="k">if</span> <span class="n">print_info</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">print_CQC_msg</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
@@ -531,6 +601,9 @@
 			<span class="n">message</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
 			<span class="k">if</span> <span class="n">print_info</span><span class="p">:</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">print_CQC_msg</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+		<span class="c1"># initialize the qubit</span>
+		<span class="n">q</span><span class="o">=</span><span class="n">qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">createNew</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">q_id</span><span class="o">=</span><span class="n">q_id</span><span class="p">)</span>
 
 		<span class="c1">#Activate and return qubit</span>
 		<span class="n">q</span><span class="o">.</span><span class="n">_active</span><span class="o">=</span><span class="kc">True</span>
@@ -542,7 +615,7 @@
 
 <span class="sd">		- **Arguments**</span>
 
-<span class="sd">			:Name:		 Name of the node as specified in the cqc network config file.</span>
+<span class="sd">			:name:		 Name of the node as specified in the cqc network config file.</span>
 <span class="sd">			:remote_appID:	 The app ID of the application running on the receiving node.</span>
 <span class="sd">			:nofify:	 Do we wish to be notified when done.</span>
 <span class="sd">			:block:		 Do we want the qubit to be blocked</span>
@@ -556,21 +629,67 @@
 		<span class="k">else</span><span class="p">:</span>
 			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Host name &#39;</span><span class="si">{}</span><span class="s2">&#39; is not in the cqc network&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
 
-		<span class="n">q</span><span class="o">=</span><span class="n">qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">createNew</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 		<span class="c1">#print info</span>
 		<span class="k">if</span> <span class="n">print_info</span><span class="p">:</span>
 			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2"> tells CQC: &#39;Create EPR-pair with </span><span class="si">{}</span><span class="s2"> and appID </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">remote_appID</span><span class="p">))</span>
 
-		<span class="bp">self</span><span class="o">.</span><span class="n">sendCmdXtra</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">_qID</span><span class="p">,</span><span class="n">CQC_CMD_EPR</span><span class="p">,</span><span class="n">notify</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">notify</span><span class="p">),</span><span class="n">block</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">),</span><span class="n">remote_appID</span><span class="o">=</span><span class="n">remote_appID</span><span class="p">,</span><span class="n">remote_node</span><span class="o">=</span><span class="n">recvHost</span><span class="o">.</span><span class="n">ip</span><span class="p">,</span><span class="n">remote_port</span><span class="o">=</span><span class="n">recvHost</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">sendCmdXtra</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">CQC_CMD_EPR</span><span class="p">,</span><span class="n">notify</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">notify</span><span class="p">),</span><span class="n">block</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">),</span><span class="n">remote_appID</span><span class="o">=</span><span class="n">remote_appID</span><span class="p">,</span><span class="n">remote_node</span><span class="o">=</span><span class="n">recvHost</span><span class="o">.</span><span class="n">ip</span><span class="p">,</span><span class="n">remote_port</span><span class="o">=</span><span class="n">recvHost</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
 
 		<span class="c1"># Get RECV message</span>
 		<span class="n">message</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
+		<span class="n">notifyHdr</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">entInfoHdr</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+		<span class="n">q_id</span><span class="o">=</span><span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span>
+
+		<span class="k">if</span> <span class="n">print_info</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">print_CQC_msg</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
 		<span class="k">if</span> <span class="n">notify</span><span class="p">:</span>
 			<span class="n">message</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
 			<span class="k">if</span> <span class="n">print_info</span><span class="p">:</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">print_CQC_msg</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+		<span class="c1"># initialize the qubit</span>
+		<span class="n">q</span><span class="o">=</span><span class="n">qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">createNew</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">q_id</span><span class="o">=</span><span class="n">q_id</span><span class="p">,</span><span class="n">entInfo</span><span class="o">=</span><span class="n">entInfoHdr</span><span class="p">)</span>
+
+		<span class="c1">#Activate and return qubit</span>
+		<span class="n">q</span><span class="o">.</span><span class="n">_active</span><span class="o">=</span><span class="kc">True</span>
+		<span class="k">return</span> <span class="n">q</span></div>
+
+<div class="viewcode-block" id="CQCConnection.recvEPR"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.recvEPR">[docs]</a>	<span class="k">def</span> <span class="nf">recvEPR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">notify</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">print_info</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Receives a qubit from an EPR-pair generated with another node.</span>
+
+<span class="sd">		- **Arguments**</span>
+
+<span class="sd">			:nofify:	 Do we wish to be notified when done.</span>
+<span class="sd">			:block:		 Do we want the qubit to be blocked</span>
+<span class="sd">			:print_info:	 If info should be printed</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="c1">#print info</span>
+		<span class="k">if</span> <span class="n">print_info</span><span class="p">:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2"> tells CQC: &#39;Receive half of EPR&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">CQC_CMD_EPR_RECV</span><span class="p">,</span><span class="n">notify</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">notify</span><span class="p">),</span><span class="n">block</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">))</span>
+
+		<span class="c1"># Get RECV message</span>
+		<span class="n">message</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
+		<span class="n">notifyHdr</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">entInfoHdr</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+		<span class="n">q_id</span><span class="o">=</span><span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span>
+
+		<span class="k">if</span> <span class="n">print_info</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">print_CQC_msg</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">notify</span><span class="p">:</span>
+			<span class="n">message</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
+			<span class="k">if</span> <span class="n">print_info</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">print_CQC_msg</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+		<span class="c1"># initialize the qubit</span>
+		<span class="n">q</span><span class="o">=</span><span class="n">qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">createNew</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">q_id</span><span class="o">=</span><span class="n">q_id</span><span class="p">,</span><span class="n">entInfo</span><span class="o">=</span><span class="n">entInfoHdr</span><span class="p">)</span>
 
 		<span class="c1">#Activate and return qubit</span>
 		<span class="n">q</span><span class="o">.</span><span class="n">_active</span><span class="o">=</span><span class="kc">True</span>
@@ -690,8 +809,7 @@
 	<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	A qubit.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
-	<span class="n">_next_qID</span><span class="o">=</span><span class="p">{}</span>
-	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">cqc</span><span class="p">,</span><span class="n">notify</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">print_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">createNew</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">cqc</span><span class="p">,</span><span class="n">notify</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">print_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">createNew</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">q_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entInfo</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Initializes the qubit. The cqc connection must be given.</span>
 <span class="sd">		If notify, the return message is received before the method finishes.</span>
@@ -704,6 +822,8 @@
 <span class="sd">			:block:		 Do we want the qubit to be blocked</span>
 <span class="sd">			:print_info:	 If info should be printed</span>
 <span class="sd">			:createNew:	 If NEW-message should be sent, used internally</span>
+<span class="sd">			:q_id:		 Qubit id, used internally if createNew</span>
+<span class="sd">			:entInfo:	 Entanglement information, if qubit is part of EPR-pair</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
 		<span class="c1">#Cqc connection</span>
@@ -715,30 +835,48 @@
 		<span class="k">else</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_active</span><span class="o">=</span><span class="kc">False</span>
 
-		<span class="c1"># Which qID</span>
-		<span class="k">if</span> <span class="n">cqc</span><span class="o">.</span><span class="n">_appID</span> <span class="ow">in</span> <span class="n">qubit</span><span class="o">.</span><span class="n">_next_qID</span><span class="p">:</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">_qID</span><span class="o">=</span><span class="n">qubit</span><span class="o">.</span><span class="n">_next_qID</span><span class="p">[</span><span class="n">cqc</span><span class="o">.</span><span class="n">_appID</span><span class="p">]</span>
-			<span class="n">qubit</span><span class="o">.</span><span class="n">_next_qID</span><span class="p">[</span><span class="n">cqc</span><span class="o">.</span><span class="n">_appID</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">_qID</span><span class="o">=</span><span class="mi">0</span>
-			<span class="n">qubit</span><span class="o">.</span><span class="n">_next_qID</span><span class="p">[</span><span class="n">cqc</span><span class="o">.</span><span class="n">_appID</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
-
 		<span class="k">if</span> <span class="n">createNew</span><span class="p">:</span>
 			<span class="c1">#print info</span>
 			<span class="k">if</span> <span class="n">print_info</span><span class="p">:</span>
-				<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2"> tells CQC: &#39;Create qubit with ID </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_qID</span><span class="p">))</span>
+				<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2"> tells CQC: &#39;Create qubit&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
 			<span class="c1"># Create new qubit at the cqc server</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_qID</span><span class="p">,</span><span class="n">CQC_CMD_NEW</span><span class="p">,</span><span class="n">notify</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">notify</span><span class="p">),</span><span class="n">block</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">))</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">CQC_CMD_NEW</span><span class="p">,</span><span class="n">notify</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">notify</span><span class="p">),</span><span class="n">block</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">))</span>
+
+			<span class="c1">#Get qubit id</span>
+			<span class="n">message</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">notifyHdr</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_qID</span><span class="o">=</span><span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span>
+			<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="n">CQCGeneralError</span><span class="p">(</span><span class="s2">&quot;Didn&#39;t receive the qubit id&quot;</span><span class="p">)</span>
+
 			<span class="k">if</span> <span class="n">notify</span><span class="p">:</span>
 				<span class="n">message</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
 				<span class="k">if</span> <span class="n">print_info</span><span class="p">:</span>
 					<span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">print_CQC_msg</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_qID</span><span class="o">=</span><span class="n">q_id</span>
+
+		<span class="c1"># Entanglement information</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="o">=</span><span class="n">entInfo</span>
 	<span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active</span><span class="p">:</span>
 			<span class="k">return</span> <span class="s2">&quot;Qubit at the node </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 		<span class="k">else</span><span class="p">:</span>
 			<span class="k">return</span> <span class="s2">&quot;Not active qubit&quot;</span>
+
+<div class="viewcode-block" id="qubit.get_entInfo"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.qubit.get_entInfo">[docs]</a>	<span class="k">def</span> <span class="nf">get_entInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span></div>
+
+<div class="viewcode-block" id="qubit.print_entInfo"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.qubit.print_entInfo">[docs]</a>	<span class="k">def</span> <span class="nf">print_entInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="p">:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="o">.</span><span class="n">printable</span><span class="p">())</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No entanglement information&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="qubit.set_entInfo"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.qubit.set_entInfo">[docs]</a>	<span class="k">def</span> <span class="nf">set_entInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">entInfo</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="o">=</span><span class="n">entInfo</span></div>
 
 <div class="viewcode-block" id="qubit.check_active"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.qubit.check_active">[docs]</a>	<span class="k">def</span> <span class="nf">check_active</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>

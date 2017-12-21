@@ -21,15 +21,15 @@ SimulaQron is written in `Python <http://www.python.org/>`_ and uses the `Twiste
 The documentation below assumes familiarity with classical network programming concepts, Python, Twisted, as well as an elementary understanding of quantum information. We will post a paper to the arXiv describing the internal structure of SimulaQron in more detail when releasing the actual Beta of SimulaQron after this Pre-Beta release. For programming, however, this documentation is the place to look!
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Contents:
 
    Overview
    GettingStarted
+   CQCInterface
    PythonLib
    Examples
    SimulaQron
-   FurtherReading
 
 
 Indices and tables

@@ -13,7 +13,7 @@ State is kept in the following structure, defined in cqc.h::
 		int app_id;
 	} cqc_lib;
 
-The following function are available in the library. To execute a specific command, you need to use the right message type as defined in cqc.h. These can also be found in this documentation :doc:`HeaderFormat`::
+The following function are available in the library. To execute a specific command, you need to use the right message type as defined in cqc.h. These can also be found in this documentation :doc:`CQCInterface`::
 
 	/*
 	 * cqc_init
