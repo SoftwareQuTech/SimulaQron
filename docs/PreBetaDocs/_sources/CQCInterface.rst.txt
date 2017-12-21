@@ -82,7 +82,7 @@ The value of instr can be any of the following::
 	#define CQC_CMD_SEND		5	/* Send qubit to another node */
 	#define CQC_CMD_RECV		6	/* Ask to receive qubit */
 	#define CQC_CMD_EPR		7	/* Create EPR pair with the specified node */
-	#define CQC_CMD_EPR_RECV		8	/* Create EPR pair with the specified node */
+	#define CQC_CMD_EPR_RECV	8	/* Create EPR pair with the specified node */
 
 	#define CQC_CMD_X		10	/* Pauli X */
 	#define CQC_CMD_Z		11	/* Pauli Z */
@@ -101,6 +101,7 @@ The value of instr can be any of the following::
 	#define CQC_OPT_NOTIFY		0x01	/* Send a notification when cmd done */
 	#define CQC_OPT_ACTION		0x02	/* On if there are actions to execute when done */
 	#define CQC_OPT_BLOCK 		0x04	/* Block until command is done */
+	#define CQC_OPT_IFTHEN		0x08	/* Execute command after done */
 
 """""""""""""""
 CQC Xtra Header
