@@ -56,9 +56,6 @@ cqc_error(uint8_t type)
 		case CQC_ERR_TIMEOUT:
 			fprintf(stderr,"CQC ERROR: Timeout.\n");
 			break;
-		case CQC_ERR_INUSE:
-			fprintf(stderr,"CQC ERROR: Qubit ID already in use.\n");
-			break;
 		default:
 			fprintf(stderr,"CQC ERROR: Unknown error type.\n");
 	}

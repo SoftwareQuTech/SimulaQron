@@ -6,7 +6,7 @@
 SimulaQron Documentation
 ========================
 
-Welcome to the SimulaQron Pre-Beta! This is a first pre beta release - despite all our better efforts, we are sure that the documentation is still insufficient, and the code has bugs. As a participant in the Pre-Beta we would love to hear from you and get your feedback about anything related to SimulaQron. Please see below for how to use github to submit bug reports (or feature requests :-) )
+Welcome to the SimulaQron Beta Release! 
 
 SimulaQron is a distributed simulation of the end nodes in a future quantum internet with the specific goal to explore application development. 
 The end nodes in a quantum internet are few qubit processors, which may exchange qubits using
@@ -18,7 +18,7 @@ network nodes, as well as the creation of simulated entanglement.
 
 SimulaQron is written in `Python <http://www.python.org/>`_ and uses the `Twisted <https://twistedmatrix.com/>`_ Perspective Broker. To perform the local qubit simulation, SimulaQron uses `QuTip <http://qutip.org/>`_ but any other quantum simulator with a python interface can easily be used as a local backend. The main challenge of SimulaQron is to allow the simulation of virtual qubits at different network nodes: since these may be entangled they cannot be simulated on one network node, which is solved by a transparent distributed simulation on top of in principle any local simulation engine.
 
-The documentation below assumes familiarity with classical network programming concepts, Python, Twisted, as well as an elementary understanding of quantum information. We will post a paper to the arXiv describing the internal structure of SimulaQron in more detail when releasing the actual Beta of SimulaQron after this Pre-Beta release. For programming, however, this documentation is the place to look!
+The documentation below assumes familiarity with classical network programming concepts, Python, Twisted, as well as an elementary understanding of quantum information. 
 
 .. toctree::
    :maxdepth: 2

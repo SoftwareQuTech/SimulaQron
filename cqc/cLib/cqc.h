@@ -31,8 +31,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef CQC_H
 #define CQC_H
 
+#include "entID.h"
 
 /* Basic CQC Header format */
+
 #define CQC_HDR_LENGTH 		8
 typedef struct
 {
@@ -58,12 +60,12 @@ typedef struct
 #define	CQC_TP_MEASOUT		7	/* Measurement outcome */
 #define CQC_TP_GET_TIME		8	/* Get creation time of qubit */
 #define CQC_TP_INF_TIME		9	/* Inform about time */
+#define CQC_TP_NEW_OK		10 	/* Created new qubit */
 
 #define	CQC_ERR_GENERAL		20	/* General purpose error (no details */
 #define	CQC_ERR_NOQUBIT		21	/* No more qubits available */
 #define	CQC_ERR_UNSUPP		22	/* Command sequence not supported */
 #define	CQC_ERR_TIMEOUT		23	/* Timeout */
-#define CQC_ERR_INUSE		24	/* Qubit ID in use when requesting new ID */
 
 /*
 	Definitions for the command header and commands.
@@ -87,6 +89,7 @@ typedef struct
 #define CQC_CMD_SEND		5	/* Send qubit to another node */
 #define CQC_CMD_RECV		6	/* Ask to receive qubit */
 #define CQC_CMD_EPR		7	/* Create EPR pair with the specified node */
+#define CQC_CMD_EPR_RECV	8	/* Receive EPR pair */
 
 #define CQC_CMD_X		10	/* Pauli X */
 #define CQC_CMD_Z		11	/* Pauli Z */
@@ -105,6 +108,7 @@ typedef struct
 #define CQC_OPT_NOTIFY		0x01	/* Send a notification when cmd done */
 #define CQC_OPT_ACTION		0x02	/* On if there are actions to execute when done */
 #define CQC_OPT_BLOCK		0x04	/* Block until command is done */
+#define CQC_OPT_IFTHEN		0x08	/* Execute commands depending on outcome */
 
 /* Additional cmd details (optional) */
 #define CQC_CMD_XTRA_LENGTH	16
