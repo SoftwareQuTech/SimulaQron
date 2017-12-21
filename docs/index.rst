@@ -18,7 +18,7 @@ network nodes, as well as the creation of simulated entanglement.
 
 SimulaQron is written in `Python <http://www.python.org/>`_ and uses the `Twisted <https://twistedmatrix.com/>`_ Perspective Broker. To perform the local qubit simulation, SimulaQron uses `QuTip <http://qutip.org/>`_ but any other quantum simulator with a python interface can easily be used as a local backend. The main challenge of SimulaQron is to allow the simulation of virtual qubits at different network nodes: since these may be entangled they cannot be simulated on one network node, which is solved by a transparent distributed simulation on top of in principle any local simulation engine.
 
-The documentation below assumes familiarity with classical network programming concepts, Python, Twisted, as well as an elementary understanding of quantum information. 
+The documentation below assumes familiarity with classical network programming concepts, Python, Twisted, as well as an elementary understanding of quantum information. More information on a competition at `Our website'<http://www.simulaqron.org/>`_ 
 
 .. toctree::
    :maxdepth: 2
