@@ -108,7 +108,7 @@
 <span class="kn">from</span> <span class="nn">SimulaQron.local.setup</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.cqcHeader</span> <span class="k">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.cqcHeader</span> <span class="k">import</span> <span class="n">CQCXtraHeader</span>
+<span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.entInfoHeader</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
@@ -216,6 +216,7 @@
 			<span class="n">CQC_CMD_SEND</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_send</span><span class="p">,</span>
 			<span class="n">CQC_CMD_RECV</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_recv</span><span class="p">,</span>
 			<span class="n">CQC_CMD_EPR</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_epr</span><span class="p">,</span>
+			<span class="n">CQC_CMD_EPR_RECV</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_epr_recv</span><span class="p">,</span>
 			<span class="n">CQC_CMD_NEW</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_new</span>
 		<span class="p">}</span>
 
@@ -231,6 +232,12 @@
 
 		<span class="c1"># Convenience</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">;</span>
+
+		<span class="c1"># Dictionary storing the next unique qubit id for each used app_id</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">next_q_id</span><span class="o">=</span><span class="p">{}</span>
+
+		<span class="c1"># Dictionary storing the next unique entanglement id for each used (host_app_id,remote_node,remote_app_id)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">next_ent_id</span><span class="o">=</span><span class="p">{}</span>
 
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Initialized Protocol&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
@@ -320,7 +327,7 @@
 			<span class="k">return</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
 		<span class="n">num</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">general_ref</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;get_virt_num&quot;</span><span class="p">)</span>
-		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;GOT NUMBER </span><span class="si">%d</span><span class="s2"> XXX&quot;</span><span class="p">,</span><span class="n">num</span><span class="p">)</span>
+		<span class="c1"># logging.debug(&quot;GOT NUMBER %d XXX&quot;,num)</span>
 
 		<span class="k">return</span> <span class="n">num</span></div>
 
@@ -384,7 +391,7 @@
 				<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cmdData</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">newl</span> <span class="o">+</span> <span class="n">CQC_CMD_XTRA_LENGTH</span><span class="p">):</span>
 					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Missing XTRA Header&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 				<span class="k">else</span><span class="p">:</span>
-					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;XXX&quot;</span><span class="p">)</span>
+					<span class="c1"># logging.debug(&quot;XXX&quot;)</span>
 					<span class="n">xtra</span> <span class="o">=</span> <span class="n">CQCXtraHeader</span><span class="p">(</span><span class="n">cmdData</span><span class="p">[</span><span class="n">newl</span><span class="p">:</span><span class="n">newl</span><span class="o">+</span><span class="n">CQC_CMD_XTRA_LENGTH</span><span class="p">]);</span>
 					<span class="n">newl</span> <span class="o">=</span> <span class="n">newl</span> <span class="o">+</span> <span class="n">CQC_CMD_XTRA_LENGTH</span><span class="p">;</span>
 					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Read XTRA Header: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">xtra</span><span class="o">.</span><span class="n">printable</span><span class="p">())</span>
@@ -608,11 +615,11 @@
 		<span class="k">return</span> <span class="kc">True</span></div>
 
 	<span class="nd">@inlineCallbacks</span>
-<div class="viewcode-block" id="CQCProtocol.cmd_rotz"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.cmd_rotz">[docs]</a>	<span class="k">def</span> <span class="nf">cmd_rotz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+<div class="viewcode-block" id="CQCProtocol.cmd_roty"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.cmd_roty">[docs]</a>	<span class="k">def</span> <span class="nf">cmd_roty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Rotate around z axis</span>
+<span class="sd">		Rotate around y axis</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Applying ROTZ to App ID </span><span class="si">%d</span><span class="s2"> qubit id </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Applying ROTY to App ID </span><span class="si">%d</span><span class="s2"> qubit id </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
 		<span class="n">virt_qubit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_virt_qubit</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
 		<span class="k">if</span> <span class="ow">not</span> <span class="n">virt_qubit</span><span class="p">:</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: No such qubit&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -622,11 +629,11 @@
 		<span class="k">return</span> <span class="kc">True</span></div>
 
 	<span class="nd">@inlineCallbacks</span>
-<div class="viewcode-block" id="CQCProtocol.cmd_roty"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.cmd_roty">[docs]</a>	<span class="k">def</span> <span class="nf">cmd_roty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+<div class="viewcode-block" id="CQCProtocol.cmd_rotz"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.cmd_rotz">[docs]</a>	<span class="k">def</span> <span class="nf">cmd_rotz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Rotate around y axis</span>
+<span class="sd">		Rotate around z axis</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Applying ROTY to App ID </span><span class="si">%d</span><span class="s2"> qubit id </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Applying ROTZ to App ID </span><span class="si">%d</span><span class="s2"> qubit id </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
 		<span class="n">virt_qubit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_virt_qubit</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
 		<span class="k">if</span> <span class="ow">not</span> <span class="n">virt_qubit</span><span class="p">:</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: No such qubit&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -765,13 +772,9 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Asking to receive for App ID </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">)</span>
 
-		<span class="c1"># First check whether the desired qubit ID is already in use</span>
+		<span class="c1"># First get the app_id and q_id</span>
 		<span class="n">app_id</span> <span class="o">=</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span>
-		<span class="n">q_id</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span>
-		<span class="k">if</span> <span class="p">(</span><span class="n">app_id</span><span class="p">,</span><span class="n">q_id</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">qubitList</span><span class="p">:</span>
-			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Qubit already in use (</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">app_id</span><span class="p">,</span> <span class="n">q_id</span><span class="p">)</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">_send_back_cqc</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">CQC_ERR_INUSE</span><span class="p">)</span>
-			<span class="k">return</span> <span class="kc">False</span>
+		<span class="n">q_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_qubit_id</span><span class="p">(</span><span class="n">app_id</span><span class="p">)</span>
 
 		<span class="c1"># This will block until a qubit is received.</span>
 		<span class="n">noQubit</span> <span class="o">=</span> <span class="kc">True</span>
@@ -794,7 +797,7 @@
 				<span class="bp">self</span><span class="o">.</span><span class="n">_send_back_cqc</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">CQC_ERR_INUSE</span><span class="p">)</span>
 				<span class="k">return</span> <span class="kc">False</span>
 
-			<span class="n">q</span> <span class="o">=</span> <span class="n">CQCQubit</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()),</span> <span class="n">virt_qubit</span><span class="p">)</span>
+			<span class="n">q</span> <span class="o">=</span> <span class="n">CQCQubit</span><span class="p">(</span><span class="n">q_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()),</span> <span class="n">virt_qubit</span><span class="p">)</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">qubitList</span><span class="p">[(</span><span class="n">app_id</span><span class="p">,</span><span class="n">q_id</span><span class="p">)]</span> <span class="o">=</span> <span class="n">q</span>
 		<span class="k">finally</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
@@ -806,7 +809,7 @@
 		<span class="c1"># Send notify header with qubit ID</span>
 		<span class="c1"># logging.debug(&quot;GOO&quot;)</span>
 		<span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCNotifyHeader</span><span class="p">();</span>
-		<span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+		<span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
 		<span class="n">msg</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Notify </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">hdr</span><span class="o">.</span><span class="n">printable</span><span class="p">())</span>
@@ -821,111 +824,235 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 
 		<span class="c1">#Get ip and port of this host</span>
-		<span class="n">host_ip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">ip</span>
+		<span class="n">host_node</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">ip</span>
 		<span class="n">host_port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">port</span>
-		<span class="n">host_combined</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">host_ip</span><span class="p">)</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">host_port</span><span class="p">))</span>
+		<span class="n">host_app_id</span> <span class="o">=</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span>
 
 		<span class="c1">#Get ip and port of remote host</span>
-		<span class="n">remote_ip</span><span class="o">=</span><span class="n">xtra</span><span class="o">.</span><span class="n">remote_node</span>
+		<span class="n">remote_node</span><span class="o">=</span><span class="n">xtra</span><span class="o">.</span><span class="n">remote_node</span>
 		<span class="n">remote_port</span><span class="o">=</span><span class="n">xtra</span><span class="o">.</span><span class="n">remote_port</span>
-		<span class="n">remote_combined</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">remote_ip</span><span class="p">)</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">remote_port</span><span class="p">))</span>
+		<span class="n">remote_app_id</span><span class="o">=</span><span class="n">xtra</span><span class="o">.</span><span class="n">remote_app_id</span>
 
-		<span class="c1"># Check that remote is a different host</span>
-		<span class="k">if</span> <span class="n">host_combined</span> <span class="o">==</span> <span class="n">remote_combined</span><span class="p">:</span>
-			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: For making EPR, the hosts cannot be the same.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">_send_back_cqc</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span><span class="n">CQC_ERR_GENERAL</span><span class="p">)</span>
+		<span class="c1"># Create the first qubit</span>
+		<span class="p">(</span><span class="n">succ</span><span class="p">,</span><span class="n">q_id1</span><span class="p">)</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_new</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span><span class="n">cmd</span><span class="p">,</span><span class="n">xtra</span><span class="p">,</span><span class="n">return_q_id</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
 			<span class="k">return</span> <span class="kc">False</span>
 
-		<span class="c1">#Check if we are sending or receiving</span>
-		<span class="k">if</span> <span class="n">host_combined</span> <span class="o">&lt;</span> <span class="n">remote_combined</span><span class="p">:</span>
-			<span class="c1"># We are sending</span>
-			<span class="n">app_id</span> <span class="o">=</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span>
+		<span class="c1"># Create the second qubit</span>
+		<span class="p">(</span><span class="n">succ</span><span class="p">,</span><span class="n">q_id2</span><span class="p">)</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_new</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span><span class="n">cmd</span><span class="p">,</span><span class="n">xtra</span><span class="p">,</span><span class="n">return_q_id</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
+			<span class="k">return</span> <span class="kc">False</span>
 
-			<span class="c1"># Create the first qubit</span>
-			<span class="n">succ</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_new</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span><span class="n">cmd</span><span class="p">,</span><span class="n">xtra</span><span class="p">)</span>
-			<span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
-				<span class="k">return</span> <span class="kc">False</span>
+		<span class="c1"># Create headers for qubits</span>
+		<span class="n">cmd1</span><span class="o">=</span><span class="n">CQCCmdHeader</span><span class="p">()</span>
+		<span class="n">cmd1</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 
-			<span class="c1"># Find a temporary unused qubit id for the second qubit</span>
-			<span class="k">for</span> <span class="n">q_id2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">qubitList</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-				<span class="k">if</span> <span class="ow">not</span> <span class="p">((</span><span class="n">app_id</span><span class="p">,</span><span class="n">q_id2</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">qubitList</span><span class="p">):</span>
-					<span class="k">break</span>
+		<span class="n">cmd2</span><span class="o">=</span><span class="n">CQCCmdHeader</span><span class="p">()</span>
+		<span class="n">cmd2</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 
-			<span class="c1">#Create commmand header for second qubit</span>
-			<span class="n">cmd2</span><span class="o">=</span><span class="n">CQCCmdHeader</span><span class="p">()</span>
-			<span class="n">cmd2</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id2</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+		<span class="n">xtra_cnot</span><span class="o">=</span><span class="n">CQCXtraHeader</span><span class="p">()</span>
+		<span class="n">xtra_cnot</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 
-			<span class="c1"># Create second qubit</span>
-			<span class="n">succ</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_new</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span><span class="n">cmd2</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
-			<span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
-				<span class="k">return</span> <span class="kc">False</span>
+		<span class="c1"># Produce EPR-pair</span>
+		<span class="n">succ</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_h</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span><span class="n">cmd1</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
+			<span class="k">return</span> <span class="kc">False</span>
+		<span class="n">succ</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_cnot</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span><span class="n">cmd1</span><span class="p">,</span><span class="n">xtra_cnot</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
+			<span class="k">return</span> <span class="kc">False</span>
 
-			<span class="c1"># Produce EPR-pair</span>
-			<span class="n">succ</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_h</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span><span class="n">cmd</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
-			<span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
-				<span class="k">return</span> <span class="kc">False</span>
-			<span class="n">xtra_cnot</span><span class="o">=</span><span class="n">CQCXtraHeader</span><span class="p">()</span>
-			<span class="n">xtra_cnot</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id2</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
-			<span class="n">succ</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_cnot</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span><span class="n">cmd</span><span class="p">,</span><span class="n">xtra_cnot</span><span class="p">)</span>
-			<span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
-				<span class="k">return</span> <span class="kc">False</span>
+		<span class="c1"># Get entanglement id</span>
+		<span class="n">ent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">new_ent_id</span><span class="p">(</span><span class="n">host_app_id</span><span class="p">,</span><span class="n">remote_node</span><span class="p">,</span><span class="n">remote_app_id</span><span class="p">)</span>
 
-			<span class="c1"># Send second qubit</span>
-			<span class="n">succ</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_send</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span><span class="n">cmd2</span><span class="p">,</span><span class="n">xtra</span><span class="p">)</span>
-			<span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
-				<span class="k">return</span> <span class="kc">False</span>
+		<span class="c1"># Prepare ent_info header with entanglement information</span>
+		<span class="n">entInfo</span><span class="o">=</span><span class="n">EntInfoHeader</span><span class="p">()</span>
+		<span class="n">entInfo</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">host_node</span><span class="p">,</span><span class="n">host_port</span><span class="p">,</span><span class="n">host_app_id</span><span class="p">,</span><span class="n">remote_node</span><span class="p">,</span><span class="n">remote_port</span><span class="p">,</span><span class="n">remote_app_id</span><span class="p">,</span><span class="n">ent_id</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()),</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()),</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
 
-			<span class="c1"># Send message we received a qubit back</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">_send_back_cqc</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">CQC_TP_RECV</span><span class="p">,</span><span class="n">length</span><span class="o">=</span><span class="n">CQC_NOTIFY_LENGTH</span><span class="p">)</span>
+		<span class="c1"># Send second qubit</span>
+		<span class="n">succ</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_epr_half</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span><span class="n">cmd2</span><span class="p">,</span><span class="n">xtra</span><span class="p">,</span><span class="n">entInfo</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
+			<span class="k">return</span> <span class="kc">False</span>
 
-			<span class="c1"># Send notify header with qubit ID</span>
-			<span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCNotifyHeader</span><span class="p">();</span>
-			<span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
-			<span class="n">msg</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Notify </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">hdr</span><span class="o">.</span><span class="n">printable</span><span class="p">())</span>
+		<span class="c1"># Send message we created EPR pair</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_send_back_cqc</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">CQC_TP_EPR_OK</span><span class="p">,</span><span class="n">length</span><span class="o">=</span><span class="n">CQC_NOTIFY_LENGTH</span><span class="o">+</span><span class="n">ENT_INFO_LENGTH</span><span class="p">)</span>
 
-			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: EPR Pair ID </span><span class="si">%d</span><span class="s2"> qubit id </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
-			<span class="k">return</span> <span class="kc">True</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="c1"># We are receiving. self.cmd_recv sends a RECV message.</span>
-			<span class="n">succ</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_recv</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span><span class="n">cmd</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
-			<span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
-				<span class="k">return</span> <span class="kc">False</span>
+		<span class="c1"># Send notify header with qubit ID</span>
+		<span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCNotifyHeader</span><span class="p">();</span>
+		<span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+		<span class="n">msg</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Notify </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">hdr</span><span class="o">.</span><span class="n">printable</span><span class="p">())</span>
 
-			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: EPR Pair ID </span><span class="si">%d</span><span class="s2"> qubit id </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
-			<span class="k">return</span> <span class="kc">True</span></div>
+		<span class="c1"># Send entanglement info</span>
+		<span class="n">msg</span><span class="o">=</span><span class="n">entInfo</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Entanglement information </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">entInfo</span><span class="o">.</span><span class="n">printable</span><span class="p">())</span>
+
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: EPR Pair ID </span><span class="si">%d</span><span class="s2"> qubit id </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
+		<span class="k">return</span> <span class="kc">True</span></div>
 
 	<span class="nd">@inlineCallbacks</span>
-<div class="viewcode-block" id="CQCProtocol.cmd_new"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.cmd_new">[docs]</a>	<span class="k">def</span> <span class="nf">cmd_new</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+<div class="viewcode-block" id="CQCProtocol.send_epr_half"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.send_epr_half">[docs]</a>	<span class="k">def</span> <span class="nf">send_epr_half</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="n">entInfo</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Request a new qubit. Since we don&#39;t need it, this python CQC just provides very crude timing information.</span>
+<span class="sd">		Send qubit to another node.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
-		<span class="n">app_id</span> <span class="o">=</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span>
-		<span class="n">q_id</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span>
+		<span class="c1"># Lookup the virtual qubit from identifier</span>
+		<span class="n">virt_num</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_virt_qubit_indep</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">virt_num</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: No such qubit&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+			<span class="k">return</span> <span class="kc">False</span>
 
+		<span class="c1"># Lookup the name of the remote node used within SimulaQron</span>
+		<span class="n">targetName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">xtra</span><span class="o">.</span><span class="n">remote_node</span><span class="p">,</span> <span class="n">xtra</span><span class="o">.</span><span class="n">remote_port</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">targetName</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Remote node not found </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">xtra</span><span class="o">.</span><span class="n">printable</span><span class="p">())</span>
+			<span class="k">return</span> <span class="kc">False</span>
+
+		<span class="c1"># Prepare update raw entanglement information header</span>
+		<span class="n">updatedEntInfo</span><span class="o">=</span><span class="n">EntInfoHeader</span><span class="p">(</span><span class="n">entInfo</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
+		<span class="n">updatedEntInfo</span><span class="o">.</span><span class="n">switch_nodes</span><span class="p">()</span>
+		<span class="n">rawUpdatedEntInfo</span><span class="o">=</span><span class="n">updatedEntInfo</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+
+		<span class="c1"># Send instruction to transfer the qubit</span>
+		<span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">virtRoot</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;cqc_send_epr_half&quot;</span><span class="p">,</span> <span class="n">virt_num</span><span class="p">,</span> <span class="n">targetName</span><span class="p">,</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span> <span class="n">xtra</span><span class="o">.</span><span class="n">remote_app_id</span><span class="p">,</span> <span class="n">rawUpdatedEntInfo</span><span class="p">)</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Sent App ID </span><span class="si">%d</span><span class="s2"> half a EPR pair as qubit id </span><span class="si">%d</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
+
+		<span class="c1"># Remove from active mapped qubits</span>
+		<span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">qubitList</span><span class="p">[(</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span> <span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)]</span>
+
+		<span class="k">return</span> <span class="kc">True</span></div>
+
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="CQCProtocol.cmd_epr_recv"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.cmd_epr_recv">[docs]</a>	<span class="k">def</span> <span class="nf">cmd_epr_recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Receive half of epr from another node. Block until qubit is received.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Asking to receive for App ID </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">)</span>
+
+		<span class="c1"># First get the app_id and q_id</span>
+		<span class="n">app_id</span> <span class="o">=</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span>
+		<span class="n">q_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_qubit_id</span><span class="p">(</span><span class="n">app_id</span><span class="p">)</span>
+
+		<span class="c1"># This will block until a qubit is received.</span>
+		<span class="n">noQubit</span> <span class="o">=</span> <span class="kc">True</span>
+		<span class="k">while</span><span class="p">(</span><span class="n">noQubit</span><span class="p">):</span>
+			<span class="n">data</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">virtRoot</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;cqc_get_epr_recv&quot;</span><span class="p">,</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+				<span class="n">noQubit</span> <span class="o">=</span> <span class="kc">False</span>
+				<span class="p">(</span><span class="n">virt_qubit</span><span class="p">,</span><span class="n">rawEntInfo</span><span class="p">)</span><span class="o">=</span><span class="n">data</span>
+				<span class="n">entInfo</span><span class="o">=</span><span class="n">EntInfoHeader</span><span class="p">(</span><span class="n">rawEntInfo</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Qubit received for app_id </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">)</span>
+
+		<span class="c1"># Once we have the qubit, add it to the local list and send a reply we received it. Note that we will</span>
+		<span class="c1"># recheck whether it exists: it could have been added by another connection in the mean time</span>
 		<span class="k">try</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+
 			<span class="k">if</span> <span class="p">(</span><span class="n">app_id</span><span class="p">,</span><span class="n">q_id</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">qubitList</span><span class="p">:</span>
 				<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Qubit already in use (</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">app_id</span><span class="p">,</span> <span class="n">q_id</span><span class="p">)</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">_send_back_cqc</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">CQC_ERR_INUSE</span><span class="p">)</span>
 				<span class="k">return</span> <span class="kc">False</span>
 
+			<span class="n">q</span> <span class="o">=</span> <span class="n">CQCQubit</span><span class="p">(</span><span class="n">q_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()),</span> <span class="n">virt_qubit</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">qubitList</span><span class="p">[(</span><span class="n">app_id</span><span class="p">,</span><span class="n">q_id</span><span class="p">)]</span> <span class="o">=</span> <span class="n">q</span>
+		<span class="k">finally</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+		<span class="c1"># Send message we received a qubit back</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_send_back_cqc</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">CQC_TP_EPR_OK</span><span class="p">,</span><span class="n">length</span><span class="o">=</span><span class="n">CQC_NOTIFY_LENGTH</span><span class="o">+</span><span class="n">ENT_INFO_LENGTH</span><span class="p">)</span>
+
+		<span class="c1"># Send notify header with qubit ID</span>
+		<span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCNotifyHeader</span><span class="p">();</span>
+		<span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+		<span class="n">msg</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Notify </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">hdr</span><span class="o">.</span><span class="n">printable</span><span class="p">())</span>
+
+		<span class="c1"># Send entanglement info</span>
+		<span class="n">msg</span><span class="o">=</span><span class="n">entInfo</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Entanglement information </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">entInfo</span><span class="o">.</span><span class="n">printable</span><span class="p">())</span>
+
+		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: EPR Pair ID </span><span class="si">%d</span><span class="s2"> qubit id </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="kc">True</span></div>
+
+	<span class="nd">@inlineCallbacks</span>
+<div class="viewcode-block" id="CQCProtocol.cmd_new"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.cmd_new">[docs]</a>	<span class="k">def</span> <span class="nf">cmd_new</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="n">return_q_id</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Request a new qubit. Since we don&#39;t need it, this python CQC just provides very crude timing information.</span>
+<span class="sd">		(return_q_id is used internally)</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="n">app_id</span> <span class="o">=</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span>
+
+		<span class="k">try</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+
 			<span class="n">virt</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">virtRoot</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;new_qubit_inreg&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">qReg</span><span class="p">)</span>
 			<span class="k">if</span> <span class="ow">not</span> <span class="n">virt</span><span class="p">:</span> <span class="c1"># if no more qubits</span>
 				<span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;No more qubits available&quot;</span><span class="p">)</span>
-			<span class="n">q</span> <span class="o">=</span> <span class="n">CQCQubit</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()),</span> <span class="n">virt</span><span class="p">)</span>
+
+			<span class="n">q_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">new_qubit_id</span><span class="p">(</span><span class="n">app_id</span><span class="p">)</span>
+			<span class="n">q</span> <span class="o">=</span> <span class="n">CQCQubit</span><span class="p">(</span><span class="n">q_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()),</span> <span class="n">virt</span><span class="p">)</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">qubitList</span><span class="p">[(</span><span class="n">app_id</span><span class="p">,</span><span class="n">q_id</span><span class="p">)]</span> <span class="o">=</span> <span class="n">q</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Requested new qubit (</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">)&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">app_id</span><span class="p">,</span> <span class="n">q_id</span><span class="p">)</span>
+
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">return_q_id</span><span class="p">:</span>
+				<span class="c1"># Send message we created a qubit back</span>
+				<span class="c1"># logging.debug(&quot;GOO&quot;)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_send_back_cqc</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">CQC_TP_NEW_OK</span><span class="p">,</span><span class="n">length</span><span class="o">=</span><span class="n">CQC_NOTIFY_LENGTH</span><span class="p">)</span>
+
+				<span class="c1"># Send notify header with qubit ID</span>
+				<span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCNotifyHeader</span><span class="p">();</span>
+				<span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+				<span class="n">msg</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+				<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Notify </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">hdr</span><span class="o">.</span><span class="n">printable</span><span class="p">())</span>
+
 		<span class="k">except</span> <span class="n">quantumError</span><span class="p">:</span> <span class="c1"># if no more qubits</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Maximum number of qubits reached.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_send_back_cqc</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">CQC_ERR_NOQUBIT</span><span class="p">)</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
-			<span class="k">return</span> <span class="kc">False</span>
+			<span class="k">if</span> <span class="n">return_q_id</span><span class="p">:</span>
+				<span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">return</span> <span class="kc">False</span>
 
 		<span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
-		<span class="k">return</span> <span class="kc">True</span></div></div>
+		<span class="k">if</span> <span class="n">return_q_id</span><span class="p">:</span>
+			<span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="n">q_id</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="CQCProtocol.new_qubit_id"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.new_qubit_id">[docs]</a>	<span class="k">def</span> <span class="nf">new_qubit_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">app_id</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">app_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_q_id</span><span class="p">:</span>
+			<span class="n">q_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">next_q_id</span><span class="p">[</span><span class="n">app_id</span><span class="p">]</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">next_q_id</span><span class="p">[</span><span class="n">app_id</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
+			<span class="k">return</span> <span class="n">q_id</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">next_q_id</span><span class="p">[</span><span class="n">app_id</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+			<span class="k">return</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="CQCProtocol.new_ent_id"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.new_ent_id">[docs]</a>	<span class="k">def</span> <span class="nf">new_ent_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">host_app_id</span><span class="p">,</span> <span class="n">remote_node</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Returns a new unique entanglement id for the specified host_app_id, remote_node and remote_app_id. Used by cmd_epr.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">pair_id</span><span class="o">=</span><span class="p">(</span><span class="n">host_app_id</span><span class="p">,</span><span class="n">remote_node</span><span class="p">,</span><span class="n">remote_app_id</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">pair_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_ent_id</span><span class="p">:</span>
+			<span class="n">ent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">next_ent_id</span><span class="p">[</span><span class="n">pair_id</span><span class="p">]</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">next_ent_id</span><span class="p">[</span><span class="n">pair_id</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
+			<span class="k">return</span> <span class="n">ent_id</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">next_ent_id</span><span class="p">[</span><span class="n">pair_id</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+			<span class="k">return</span> <span class="mi">0</span></div></div>
 
 
 <span class="c1">#######################################################################################################</span>

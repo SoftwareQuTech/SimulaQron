@@ -118,6 +118,26 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="SimulaQron.cqc.pythonLib.cqc.CQCConnection.closeClassicalChannel">
+<code class="descname">closeClassicalChannel</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection.closeClassicalChannel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection.closeClassicalChannel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes a classical connection to another host in the application network.</p>
+<ul>
+<li><p class="first"><strong>Arguments</strong></p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">name:</th><td class="field-body">The name of the host in the application network.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
 <dt id="SimulaQron.cqc.pythonLib.cqc.CQCConnection.closeClassicalServer">
 <code class="descname">closeClassicalServer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection.closeClassicalServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection.closeClassicalServer" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -133,7 +153,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Name:</th><td class="field-body">Name of the node as specified in the cqc network config file.</td>
+<tr class="field-odd field"><th class="field-name">name:</th><td class="field-body">Name of the node as specified in the cqc network config file.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">remote_appID:</th><td class="field-body">The app ID of the application running on the receiving node.</td>
 </tr>
@@ -157,6 +177,28 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="SimulaQron.cqc.pythonLib.cqc.CQCConnection.openClassicalChannel">
+<code class="descname">openClassicalChannel</code><span class="sig-paren">(</span><em>name</em>, <em>timout=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection.openClassicalChannel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection.openClassicalChannel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens a classical connection to another host in the application network.</p>
+<ul>
+<li><p class="first"><strong>Arguments</strong></p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">name:</th><td class="field-body">The name of the host in the application network.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">timout:</th><td class="field-body">The time to try to connect to the server. When timout is reached an RuntimeError is raised.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
 <dt id="SimulaQron.cqc.pythonLib.cqc.CQCConnection.print_CQC_msg">
 <code class="descname">print_CQC_msg</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection.print_CQC_msg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection.print_CQC_msg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints messsage returned by the readMessage method of CQCConnection.</p>
@@ -166,14 +208,38 @@
 <dt id="SimulaQron.cqc.pythonLib.cqc.CQCConnection.readMessage">
 <code class="descname">readMessage</code><span class="sig-paren">(</span><em>maxsize=192</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection.readMessage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection.readMessage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receive the whole message from cqc server.
-Returns (CQCHeader,None) or (CQCHeader,CQCNotifyHeader) depending on the type of message.
+Returns (CQCHeader,None,None), (CQCHeader,CQCNotifyHeader,None) or (CQCHeader,CQCNotifyHeader,EntInfoHeader) depending on the type of message.
 Maxsize is the max size of message.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="SimulaQron.cqc.pythonLib.cqc.CQCConnection.recvClassical">
-<code class="descname">recvClassical</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection.recvClassical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection.recvClassical" title="Permalink to this definition">¶</a></dt>
+<code class="descname">recvClassical</code><span class="sig-paren">(</span><em>timout=1</em>, <em>msg_size=1024</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection.recvClassical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection.recvClassical" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="SimulaQron.cqc.pythonLib.cqc.CQCConnection.recvEPR">
+<code class="descname">recvEPR</code><span class="sig-paren">(</span><em>notify=True</em>, <em>block=True</em>, <em>print_info=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection.recvEPR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection.recvEPR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receives a qubit from an EPR-pair generated with another node.</p>
+<ul>
+<li><p class="first"><strong>Arguments</strong></p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">nofify:</th><td class="field-body">Do we wish to be notified when done.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">block:</th><td class="field-body">Do we want the qubit to be blocked</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">print_info:</th><td class="field-body">If info should be printed</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</li>
+</ul>
+</dd></dl>
 
 <dl class="method">
 <dt id="SimulaQron.cqc.pythonLib.cqc.CQCConnection.recvQubit">
@@ -218,7 +284,7 @@ Maxsize is the max size of message.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">name:</th><td class="field-body">The name of the host in the application network.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">msg:</th><td class="field-body">The message to send, will be converted to a bytesarray.</td>
+<tr class="field-even field"><th class="field-name">msg:</th><td class="field-body">The message to send. Should be either a int in range(0,256) or a list of such ints.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">timout:</th><td class="field-body">The time to try to connect to the server. When timout is reached an RuntimeError is raised.</td>
 </tr>
@@ -402,7 +468,7 @@ Maxsize is the max size of message.</p>
 <dl class="method">
 <dt id="SimulaQron.cqc.pythonLib.cqc.CQCConnection.startClassicalServer">
 <code class="descname">startClassicalServer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection.startClassicalServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection.startClassicalServer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets up a classical channel to another host.</p>
+<dd><p>Sets up a server for the application communication, if not already set up.</p>
 </dd></dl>
 
 <dl class="method">
@@ -520,7 +586,7 @@ The frequencies from X, Y and Z measurements are returned as a tuple (f_X,f_Y,f_
 
 <dl class="class">
 <dt id="SimulaQron.cqc.pythonLib.cqc.qubit">
-<em class="property">class </em><code class="descclassname">SimulaQron.cqc.pythonLib.cqc.</code><code class="descname">qubit</code><span class="sig-paren">(</span><em>cqc</em>, <em>notify=True</em>, <em>block=True</em>, <em>print_info=True</em>, <em>createNew=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.qubit" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">SimulaQron.cqc.pythonLib.cqc.</code><code class="descname">qubit</code><span class="sig-paren">(</span><em>cqc</em>, <em>notify=True</em>, <em>block=True</em>, <em>print_info=True</em>, <em>createNew=True</em>, <em>q_id=None</em>, <em>entInfo=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.qubit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>A qubit.</p>
 <dl class="method">
@@ -784,6 +850,11 @@ If now INF_TIME message is received, None is returned.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="SimulaQron.cqc.pythonLib.cqc.qubit.get_entInfo">
+<code class="descname">get_entInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#qubit.get_entInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.qubit.get_entInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="SimulaQron.cqc.pythonLib.cqc.qubit.measure">
 <code class="descname">measure</code><span class="sig-paren">(</span><em>inplace=False</em>, <em>block=True</em>, <em>print_info=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#qubit.measure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.qubit.measure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Measures the qubit in the standard basis and returns the measurement outcome.
@@ -809,6 +880,11 @@ If inplace=True, the qubit is left in the post-measurement state.</p>
 </li>
 </ul>
 </dd></dl>
+
+<dl class="method">
+<dt id="SimulaQron.cqc.pythonLib.cqc.qubit.print_entInfo">
+<code class="descname">print_entInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#qubit.print_entInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.qubit.print_entInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="SimulaQron.cqc.pythonLib.cqc.qubit.reset">
@@ -915,6 +991,11 @@ If notify, the return message is received before the method finishes.</p>
 </li>
 </ul>
 </dd></dl>
+
+<dl class="method">
+<dt id="SimulaQron.cqc.pythonLib.cqc.qubit.set_entInfo">
+<code class="descname">set_entInfo</code><span class="sig-paren">(</span><em>entInfo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#qubit.set_entInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.qubit.set_entInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

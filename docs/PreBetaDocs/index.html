@@ -98,65 +98,33 @@ network nodes, as well as the creation of simulated entanglement.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Overview.html">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Overview.html#programming-simulaqron">Programming SimulaQron</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Overview.html#how-simulaqron-works-internally">How SimulaQron works internally</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Overview.html#virtual-quantum-nodes">Virtual quantum nodes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Overview.html#the-local-client-engine">The local client engine</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="Overview.html#report-bugs-and-contribute">Report bugs and contribute</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Overview.html#bugs-and-feature-requests">Bugs and feature requests</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Overview.html#contribute">Contribute</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Overview.html#automated-tests">Automated tests</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="Overview.html#how-simulaqron-works-internally">How SimulaQron works internally</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Overview.html#report-bugs-and-contribute">Report bugs and contribute</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#testing-a-simple-example">Testing a simple example</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="GettingStarted.html#starting-the-virtual-node-servers">Starting the virtual node servers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="GettingStarted.html#starting-the-cqc-servers">Starting the CQC servers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="GettingStarted.html#running-automated-test">Running automated test</a></li>
-<li class="toctree-l3"><a class="reference internal" href="GettingStarted.html#running-a-protocol">Running a protocol</a></li>
-<li class="toctree-l3"><a class="reference internal" href="GettingStarted.html#logging-and-debug-output">Logging and debug output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#testing-a-simple-example">Testing a simple example</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="CQCInterface.html">CQC Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="CQCInterface.html#the-interface">The interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CQCInterface.html#cqc-header-format">CQC Header format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CQCInterface.html#entanglement-header-format">Entanglement Header format</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="PythonLib.html">Using the Python library</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ClassicalCommunication.html">Classical Communication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="UsefulCommands.html">Useful commands</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="UsefulCommands.html#cqcconnection"><code class="docutils literal"><span class="pre">CQCConnection</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="UsefulCommands.html#qubit"><code class="docutils literal"><span class="pre">qubit</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="UsefulCommands.html">Useful commands</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Examples.html">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ExamplesDirect.html">Programming via SimulaQron&#8217;s native Python Twisted Interface (specific to SimulaQron)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="NativeModeCorrRng.html">Generate correlated randomness</a></li>
-<li class="toctree-l3"><a class="reference internal" href="NativeModeTemplate.html">Template for programming in native mode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="NativeModeTeleport.html">Teleporting a Qubit</a></li>
-<li class="toctree-l3"><a class="reference internal" href="NativeModeGraphState.html">Distributing a graph state</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="ExamplesNodeOS.html">Programming via the Classical-Quantum Combiner Interface</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="HeaderFormat.html">CQC Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ExamplescLib.html">Example using the C library</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ExamplespythonLib.html">Examples using the python library</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="ExamplesDirect.html">Programming via SimulaQron&#8217;s native Python Twisted Interface (specific to SimulaQron)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExamplesNodeOS.html">Programming via the Classical-Quantum Combiner Interface</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="SimulaQron.html">SimulaQron package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="SimulaQron.html#subpackages">Subpackages</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="SimulaQron.general.html">SimulaQron.general package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="SimulaQron.local.html">SimulaQron.local package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="SimulaQron.virtNode.html">SimulaQron.virtNode package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="SimulaQron.cqc.html">SimulaQron.cqc package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="CLib.html">CQC C Library</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="SimulaQron.html#subpackages">Subpackages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="SimulaQron.html#module-SimulaQron.conf">SimulaQron.conf module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="SimulaQron.html#module-SimulaQron">Module contents</a></li>
 </ul>

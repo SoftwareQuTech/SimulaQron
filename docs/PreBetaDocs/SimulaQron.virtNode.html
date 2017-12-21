@@ -491,7 +491,7 @@ qubit with the measurement outcome.</p>
 <span id="simulaqron-virtnode-virtual-module"></span><h2>SimulaQron.virtNode.virtual module<a class="headerlink" href="#module-SimulaQron.virtNode.virtual" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="SimulaQron.virtNode.virtual.QubitCQC">
-<em class="property">class </em><code class="descclassname">SimulaQron.virtNode.virtual.</code><code class="descname">QubitCQC</code><span class="sig-paren">(</span><em>fromName</em>, <em>toName</em>, <em>from_app_id</em>, <em>to_app_id</em>, <em>new_virt_num</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#QubitCQC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.QubitCQC" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">SimulaQron.virtNode.virtual.</code><code class="descname">QubitCQC</code><span class="sig-paren">(</span><em>fromName</em>, <em>toName</em>, <em>from_app_id</em>, <em>to_app_id</em>, <em>new_virt_num</em>, <em>rawEntInfo=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#QubitCQC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.QubitCQC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 </dd></dl>
 
@@ -544,11 +544,17 @@ qubit2          qubit2 in reg2</p>
 
 <dl class="method">
 <dt id="SimulaQron.virtNode.virtual.virtualNode.remote_add_qubit">
-<code class="descname">remote_add_qubit</code><span class="sig-paren">(</span><em>name</em>, <em>qubit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.remote_add_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.remote_add_qubit" title="Permalink to this definition">¶</a></dt>
+<code class="descname">remote_add_qubit</code><span class="sig-paren">(</span><em>name</em>, <em>simQubit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.remote_add_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.remote_add_qubit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a qubit to the local virtual node.</p>
 <p>Arguments
 name            name of the node simulating this qubit
-qubit           qubit reference in the backend we&#8217;re adding</p>
+simQubit        simulated qubit reference in the backend we&#8217;re adding</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimulaQron.virtNode.virtual.virtualNode.remote_cqc_add_epr_list">
+<code class="descname">remote_cqc_add_epr_list</code><span class="sig-paren">(</span><em>fromName</em>, <em>from_app_id</em>, <em>to_app_id</em>, <em>new_virt_num</em>, <em>rawEntInfo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.remote_cqc_add_epr_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.remote_cqc_add_epr_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an item to the epr list for use in CQC.</p>
 </dd></dl>
 
 <dl class="method">
@@ -558,9 +564,27 @@ qubit           qubit reference in the backend we&#8217;re adding</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="SimulaQron.virtNode.virtual.virtualNode.remote_cqc_get_epr_recv">
+<code class="descname">remote_cqc_get_epr_recv</code><span class="sig-paren">(</span><em>to_app_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.remote_cqc_get_epr_recv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.remote_cqc_get_epr_recv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the next qubit (half of an EPR-pair) with the given app ID from the received list.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="SimulaQron.virtNode.virtual.virtualNode.remote_cqc_get_recv">
 <code class="descname">remote_cqc_get_recv</code><span class="sig-paren">(</span><em>to_app_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.remote_cqc_get_recv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.remote_cqc_get_recv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieve the next qubit with the given app ID form the received list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimulaQron.virtNode.virtual.virtualNode.remote_cqc_send_epr_half">
+<code class="descname">remote_cqc_send_epr_half</code><span class="sig-paren">(</span><em>num</em>, <em>targetName</em>, <em>app_id</em>, <em>remote_app_id</em>, <em>rawEntInfo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.remote_cqc_send_epr_half"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.remote_cqc_send_epr_half" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send interface for CQC to add the qubit to the remote nodes received list for an application.</p>
+<p>Arguments:
+num             number of virtual qubit to send
+targetName      name of the node to send to
+app_id          application asking to have this qubit delivered
+remote_app_id   application ID to deliver the qubit to
+entInfo         entanglement information</p>
 </dd></dl>
 
 <dl class="method">
@@ -705,12 +729,12 @@ targetName      target ndoe to place qubit at (host object)</p>
 
 <dl class="method">
 <dt id="SimulaQron.virtNode.virtual.virtualNode.remote_transfer_qubit">
-<code class="descname">remote_transfer_qubit</code><span class="sig-paren">(</span><em>simQubit</em>, <em>targetName</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.remote_transfer_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.remote_transfer_qubit" title="Permalink to this definition">¶</a></dt>
+<code class="descname">remote_transfer_qubit</code><span class="sig-paren">(</span><em>simQubitNum</em>, <em>targetName</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.remote_transfer_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.remote_transfer_qubit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transfer the qubit to the destination node if we are the simulating node. The reason why we cannot
 do this directly is that Twisted PB does not allow objects to be passed between connecting nodes.
 Only between the creator of the object and its immediate connections.</p>
 <p>Arguments
-simQubit        simulated qubit to be sent
+simQubitNum     simulated qubit number to be sent
 targetName      target node to place qubit at (host object)</p>
 </dd></dl>
 

@@ -9,7 +9,6 @@ A C and Python Library for programming SimulaQron using the CQC Interface are pr
 	:maxdepth: 2
 	:caption: Examples using the Classical-Quantum Combiner Interface
 
-	HeaderFormat
 	ExamplescLib
 	ExamplespythonLib
 
