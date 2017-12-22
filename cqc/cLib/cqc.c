@@ -441,6 +441,51 @@ cqc_wait_until_done(cqc_lib *cqc, unsigned int reps)
 	return(0);
 }
 
+
+/* 
+ * cqc_wait_until_newok
+ *
+ * Wait until qubit creation is confirmed. Returns qubit id if successful, -1 otherwise.
+ *
+ */
+int
+cqc_wait_until_newok(cqc_lib *cqc)
+{
+	int n;
+	cqcHeader reply;
+	notifyHeader note;
+
+  	/* Now read CQC Header from server response */
+   	bzero(&reply, sizeof(reply));
+   	n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
+   	if (n < 0) {
+      		perror("ERROR - cannot get reply header");
+      		return(-1);
+   	}	
+
+	/* Check whether an error occured */
+	if(reply.type >= CQC_ERR_GENERAL) {
+		cqc_error(reply.type);
+		return(-1);
+	}
+
+	/* Otherwise check whether it's done */
+	if(reply.type != CQC_TP_NEW_OK) {
+		fprintf(stderr,"Unexpected reply of type %d, expected %d\n",reply.type, CQC_TP_NEW_OK);
+		return(-1);
+	}
+
+	/* Then read qubit id from notify header */
+   	bzero(&note, sizeof(note));
+   	n = read(cqc->sockfd, &note, CQC_NOTIFY_LENGTH);
+   	if (n < 0) {
+      		perror("ERROR - cannot get measurement outcome");
+      		return(-1);
+   	}	
+
+	return(note.qubit_id);
+}
+
 /*
  *  cqc_twoqubit
  * 
