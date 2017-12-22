@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
 	int app_id;
 	int outcome;
 	struct hostent *server;
+	uint16_t qubit;
 
 	/* Retrieve arguments from command line */
    	if (argc < 5) {
@@ -51,13 +52,13 @@ int main(int argc, char *argv[]) {
 	cqc = cqc_init(app_id);
 	cqc_connect(cqc, hostname, portno);
 
-	cqc_simple_cmd(cqc, CQC_CMD_NEW, 100, 1);
+	cqc_simple_cmd(cqc, CQC_CMD_NEW, 0, 0);
+	qubit = cqc_wait_until_newok(cqc);
+
+	cqc_simple_cmd(cqc, CQC_CMD_H,qubit, 1);
 	cqc_wait_until_done(cqc, 1);
 
-	cqc_simple_cmd(cqc, CQC_CMD_H,100, 1);
-	cqc_wait_until_done(cqc, 1);
-
-	outcome = cqc_measure(cqc, 100);
+	outcome = cqc_measure(cqc, qubit);
 	printf("Outcome: %d\n",outcome);
 	
    	return 0;

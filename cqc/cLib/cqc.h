@@ -176,11 +176,12 @@ int cqc_full_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id, char notify, 
 
 int cqc_hello(cqc_lib *cqc);
 int cqc_send(cqc_lib *cqc, uint16_t qubit_id, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port);
-int cqc_recv(cqc_lib *cqc, uint16_t qubit_id);
+uint16_t cqc_recv(cqc_lib *cqc);
 int cqc_epr(cqc_lib *cqc, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port);
 int cqc_measure(cqc_lib *cqc, uint16_t qubit_id);
 int cqc_wait_until_done(cqc_lib *cqc, unsigned int reps);
+int cqc_wait_until_newok(cqc_lib *cqc);
 int cqc_twoqubit(cqc_lib *cqc, uint8_t command, uint16_t qubit1, uint16_t qubit2);
-float cqc_tomography_dir(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint32_t iter, uint8_t dir);
-int cqc_test_qubit(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint32_t iter, float epsilon, float exp_x, float exp_y, float exp_z);
+float cqc_tomography_dir(cqc_lib *cqc, uint16_t (*func)(cqc_lib *), uint32_t iter, uint8_t dir);
+int cqc_test_qubit(cqc_lib *cqc, uint16_t (*func)(cqc_lib *), uint32_t iter, float epsilon, float exp_x, float exp_y, float exp_z);
 int cqc_wait_until_newok(cqc_lib *cqc);

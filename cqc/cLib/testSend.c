@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
 	int app_id;
 	int outcome;
 	struct hostent *server;
+	uint16_t qubit;
 
 	/* Retrieve arguments from command line */
    	if (argc < 5) {
@@ -51,8 +52,8 @@ int main(int argc, char *argv[]) {
 	cqc = cqc_init(app_id);
 	cqc_connect(cqc, hostname, portno);
 
-	cqc_simple_cmd(cqc, CQC_CMD_NEW, 0);
-	cqc_wait_until_done(cqc, 1);
+	cqc_simple_cmd(cqc, CQC_CMD_NEW, 0, 0);
+	qubit = cqc_wait_until_newok(cqc);
 
 	remoteNode.s_addr = ntohl(*((uint32_t *)server->h_addr));
 	cqc_send(cqc, 0, app_id, remoteNode.s_addr, remotePort);
