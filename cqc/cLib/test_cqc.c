@@ -32,7 +32,7 @@
  */
 
 float
-cqc_tomography_dir(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint32_t iter, uint8_t dir)
+cqc_tomography_dir(cqc_lib *cqc, uint16_t (*func)(cqc_lib *), uint32_t iter, uint8_t dir)
 {
 	int i;
 	int outcome;
@@ -57,7 +57,8 @@ cqc_tomography_dir(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint32_t iter
 	for(i = 0; i < iter; i++) {
 
 		/* Prepare the qubit */
-		if ((qubit = (* func)(cqc)) < 0) {
+		qubit = (* func)(cqc);
+		if(qubit < 0) {
 			fprintf(stderr,"Failed to prepare qubit for tomography.\n");
 			return(-10);
 		}
@@ -73,7 +74,7 @@ cqc_tomography_dir(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint32_t iter
 
 		outcome = cqc_measure(cqc, qubit);
 		if (outcome < 0) {
-			fprintf(stderr,"Tomography measurement failed.\n");
+			fprintf(stderr,"Tomography measurement failed for qubit %u.\n",qubit);
 			return(-10);
 		}
 
@@ -111,7 +112,7 @@ cqc_tomography_dir(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint32_t iter
  */
 
 int
-cqc_test_qubit(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint32_t iter, float epsilon, float exp_x, float exp_y, float exp_z)
+cqc_test_qubit(cqc_lib *cqc, uint16_t (*func)(cqc_lib *), uint32_t iter, float epsilon, float exp_x, float exp_y, float exp_z)
 {
 	int ret;
 	float tomo_x, tomo_z, tomo_y;

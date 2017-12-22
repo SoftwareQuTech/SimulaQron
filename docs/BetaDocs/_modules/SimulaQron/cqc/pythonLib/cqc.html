@@ -532,8 +532,6 @@
 			<span class="k">raise</span> <span class="n">CQCUnsuppError</span><span class="p">(</span><span class="s2">&quot;Sequence not supported&quot;</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">cqc_err</span><span class="o">==</span><span class="n">CQC_ERR_TIMEOUT</span><span class="p">:</span>
 			<span class="k">raise</span> <span class="n">CQCTimeoutError</span><span class="p">(</span><span class="s2">&quot;Timout&quot;</span><span class="p">)</span>
-		<span class="k">if</span> <span class="n">cqc_err</span><span class="o">==</span><span class="n">CQC_ERR_INUSE</span><span class="p">:</span>
-			<span class="k">raise</span> <span class="n">CQCInuseError</span><span class="p">(</span><span class="s2">&quot;Qubit ID in use&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CQCConnection.sendQubit"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.sendQubit">[docs]</a>	<span class="k">def</span> <span class="nf">sendQubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">remote_appID</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">notify</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">print_info</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>

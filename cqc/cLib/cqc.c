@@ -293,7 +293,7 @@ cqc_hello(cqc_lib *cqc)
 int
 cqc_send(cqc_lib *cqc, uint16_t qubit_id, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port)
 {
-	return(cqc_full_cmd(cqc, CQC_CMD_SEND, qubit_id, 0, 0, 1, 0, 0, remote_app_id, remote_node, remote_port, 0));
+	return(cqc_full_cmd(cqc, CQC_CMD_SEND, qubit_id, 1, 0, 1, 0, 0, remote_app_id, remote_node, remote_port, 0));
 }
 
 /* 
@@ -304,15 +304,15 @@ cqc_send(cqc_lib *cqc, uint16_t qubit_id, uint16_t remote_app_id, uint32_t remot
  * Arguments:
  * qubit_id		id to assign to this qubit once it is received
  */
-int
-cqc_recv(cqc_lib *cqc, uint16_t qubit_id)
+uint16_t
+cqc_recv(cqc_lib *cqc)
 {
 	int n;
 	cqcHeader reply;
 	notifyHeader note;
 
 	/* Send out request to receive a qubit */
-	n = cqc_simple_cmd(cqc, CQC_CMD_RECV, qubit_id, 0);
+	n = cqc_simple_cmd(cqc, CQC_CMD_RECV, 0, 0);
 	if (n < 0) {
 		perror("ERROR - Cannot send receive request");
 		return(-1);
@@ -388,7 +388,7 @@ cqc_measure(cqc_lib *cqc, uint16_t qubit_id)
       		return(-1);
    	}	
 	if(reply.type != CQC_TP_MEASOUT) {
-		fprintf(stderr,"ERROR: Expected MEASOUT");
+		fprintf(stderr,"ERROR: Expected MEASOUT, got %u\n",reply.type);
 		return(-1);
 	}
 
