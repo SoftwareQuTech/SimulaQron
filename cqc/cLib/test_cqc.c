@@ -25,7 +25,6 @@
  *
  *  Arguments:
  *  func	function to call to prepare qubit for tomography
- *  qubit	qubit number to use
  *  iter	iterations to perform
  *  dir		direction to measure (0=Z, 1=X, 2=Y)
  *
@@ -33,7 +32,7 @@
  */
 
 float
-cqc_tomography_dir(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint16_t qubit, uint32_t iter, uint8_t dir)
+cqc_tomography_dir(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint32_t iter, uint8_t dir)
 {
 	int i;
 	int outcome;
@@ -41,6 +40,7 @@ cqc_tomography_dir(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint16_t qubi
 	float iterf;
 	uint8_t cmd;
 	float ratio;
+	uint16_t qubit;
 
 	/* Translate the direction into a rotation command */
 	switch(dir) {
@@ -57,7 +57,7 @@ cqc_tomography_dir(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint16_t qubi
 	for(i = 0; i < iter; i++) {
 
 		/* Prepare the qubit */
-		if ((* func)(cqc, qubit) < 0) {
+		if ((qubit = (* func)(cqc)) < 0) {
 			fprintf(stderr,"Failed to prepare qubit for tomography.\n");
 			return(-10);
 		}
@@ -98,7 +98,6 @@ cqc_tomography_dir(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint16_t qubi
  * Arguments
  * cqc		cqc connection
  * func		function to invoke to prepare qubit 
- * qubit	number of the test qubit
  * iter		number of times to iterate the test in tomography
  * epsilon	desired precision
  * exp_x	expected value for <X>
@@ -112,16 +111,16 @@ cqc_tomography_dir(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint16_t qubi
  */
 
 int
-cqc_test_qubit(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint16_t qubit, uint32_t iter, float epsilon, float exp_x, float exp_y, float exp_z)
+cqc_test_qubit(cqc_lib *cqc, int (*func)(cqc_lib *, uint16_t), uint32_t iter, float epsilon, float exp_x, float exp_y, float exp_z)
 {
 	int ret;
 	float tomo_x, tomo_z, tomo_y;
 	float diff_x, diff_y, diff_z;
 	
 	/* Run tomography in X, Z and Y directions */
-	tomo_z = cqc_tomography_dir(cqc, func, qubit, iter, 0);
-	tomo_x = cqc_tomography_dir(cqc, func, qubit, iter, 1);
-	tomo_y = cqc_tomography_dir(cqc, func, qubit, iter, 2);
+	tomo_z = cqc_tomography_dir(cqc, func, iter, 0);
+	tomo_x = cqc_tomography_dir(cqc, func, iter, 1);
+	tomo_y = cqc_tomography_dir(cqc, func, iter, 2);
 	if ((tomo_x <= -10) || (tomo_z <= -10) || (tomo_y <= -10)) {
 		fprintf(stderr,"Tomography failed.\n");
 		return(-1);
