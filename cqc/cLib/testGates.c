@@ -24,18 +24,20 @@
  */
 
 int
-make_plus(cqc_lib *cqc, uint16_t qubit)
+make_plus(cqc_lib *cqc)
 {
+	uint16_t qubit;
 	
 	/* Create a new qubit in |0> */
 	if (cqc_simple_cmd(cqc, CQC_CMD_NEW, qubit,1) < 0) {
 		fprintf(stderr,"Qubit creation failed.\n");
 		return(-1);
 	}
-	if(cqc_wait_until_done(cqc, 1) < 0) {
+	if((qubit = cqc_wait_until_newok(cqc, 1)) < 0) {
 		fprintf(stderr,"ERROR: Test failed.\n");
 		return(-1);
 	}
+	printf("Made new qubit\n");
 
 	/* Turn it into |+> */
 	if (cqc_simple_cmd(cqc, CQC_CMD_H, qubit,1) < 0) {
@@ -53,20 +55,22 @@ make_plus(cqc_lib *cqc, uint16_t qubit)
 /* 
  * make_zero 
  *
- * Prepares a plus state with the desired qubit ID.
+ * Prepares a plus state
  *
  */
 
 int
-make_zero(cqc_lib *cqc, uint16_t qubit)
+make_zero(cqc_lib *cqc)
 {
 	
+	uint16_t qubit;
+
 	/* Create a new qubit in |0> */
 	if (cqc_simple_cmd(cqc, CQC_CMD_NEW, qubit,1) < 0) {
 		fprintf(stderr,"Qubit creation failed.\n");
 		return(-1);
 	}
-	if(cqc_wait_until_done(cqc, 1) < 0) {
+	if((qubit = cqc_wait_until_newok(cqc)) < 0) {
 		fprintf(stderr,"ERROR: Test failed.\n");
 		return(-1);
 	}
@@ -89,20 +93,21 @@ make_zero(cqc_lib *cqc, uint16_t qubit)
 /* 
  * make_k 
  *
- * Prepares a y eigenstate with the desired qubit ID.
+ * Prepares a y eigenstate
  *
  */
 
 int
-make_k(cqc_lib *cqc, uint16_t qubit)
+make_k(cqc_lib *cqc)
 {
+	uint16_t qubit;
 	
 	/* Create a new qubit in |0> */
 	if (cqc_simple_cmd(cqc, CQC_CMD_NEW, qubit,1) < 0) {
 		fprintf(stderr,"Qubit creation failed.\n");
 		return(-1);
 	}
-	if(cqc_wait_until_done(cqc, 1) < 0) {
+	if((qubit = cqc_wait_until_newok(cqc)) < 0) {
 		fprintf(stderr,"ERROR: Test failed.\n");
 		return(-1);
 	}
