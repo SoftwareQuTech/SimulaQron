@@ -12,6 +12,7 @@ Upon establishing a connection to the CQC Backend, the following packet format c
 
 When accessing the interface directly, you must keep track of qubit IDs for each application ID yourself. It is a deliberate choice that the CQC Backend does not itself keep track of qubit or application IDs, leaving such management to you (and indeed higher levels of abstraction if you wish).
 When a qubit is created with the command `CQC_CMD_NEW` a CQC message will be returned of the type `CQC_TP_NEW_OK` followed by a notification header containing the qubit ID.
+Note that if the option notify, see below, is set to true a message of type `CQC_TP_DONE` will also be returned, after the notification header, saying that the command is finished.
 
 ^^^^^^^^^^^^^^^^^
 CQC Header format
