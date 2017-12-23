@@ -109,7 +109,8 @@
 <a class="reference internal" href="ExamplespythonLib.html"><span class="doc">Examples using the python library</span></a>.</p>
 <p>Upon establishing a connection to the CQC Backend, the following packet format can be used to issue commands to the simulated quantum network. Each interaction to and from the interface starts with a CQC Header, followed by additional headers as appropriate to the message type.</p>
 <p>When accessing the interface directly, you must keep track of qubit IDs for each application ID yourself. It is a deliberate choice that the CQC Backend does not itself keep track of qubit or application IDs, leaving such management to you (and indeed higher levels of abstraction if you wish).
-When a qubit is created with the command <cite>CQC_CMD_NEW</cite> a CQC message will be returned of the type <cite>CQC_TP_NEW_OK</cite> followed by a notification header containing the qubit ID.</p>
+When a qubit is created with the command <cite>CQC_CMD_NEW</cite> a CQC message will be returned of the type <cite>CQC_TP_NEW_OK</cite> followed by a notification header containing the qubit ID.
+Note that if the option notify, see below, is set to true a message of type <cite>CQC_TP_DONE</cite> will also be returned, after the notification header, saying that the command is finished.</p>
 </div>
 <div class="section" id="cqc-header-format">
 <h2>CQC Header format<a class="headerlink" href="#cqc-header-format" title="Permalink to this headline">¶</a></h2>
