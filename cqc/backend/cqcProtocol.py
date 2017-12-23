@@ -114,6 +114,12 @@ class CQCFactory(Factory):
 
 class CQCProtocol(Protocol):
 
+	# Dictionary storing the next unique qubit id for each used app_id
+	_next_q_id={}
+
+	# Dictionary storing the next unique entanglement id for each used (host_app_id,remote_node,remote_app_id)
+	_next_ent_id={}
+
 	def __init__(self, factory):
 
 		# CQC Factory, including our connection to the SimulaQron backend
@@ -167,12 +173,6 @@ class CQCProtocol(Protocol):
 
 		# Convenience
 		self.name = self.factory.name;
-
-		# Dictionary storing the next unique qubit id for each used app_id
-		self.next_q_id={}
-
-		# Dictionary storing the next unique entanglement id for each used (host_app_id,remote_node,remote_app_id)
-		self.next_ent_id={}
 
 		logging.debug("CQC %s: Initialized Protocol",self.name)
 
@@ -679,16 +679,22 @@ class CQCProtocol(Protocol):
 		Send qubit to another node.
 		"""
 
-		# Lookup the virtual qubit form identifier
-		virt_num = yield self.get_virt_qubit_indep(cqc_header, cmd.qubit_id)
-		if virt_num < 0:
-			logging.debug("CQC %s: No such qubit",self.name)
-			return False
-
 		# Lookup the name of the remote node used within SimulaQron
 		targetName = self.factory.lookup(xtra.remote_node, xtra.remote_port)
 		if targetName == None:
 			logging.debug("CQC %s: Remote node not found %s",self.name,xtra.printable())
+			return False
+
+		# Check so that it is not the same node
+		if self.name == targetName:
+			logging.debug("CQC %s: Trying to send from node to itself.",self.name)
+			self._send_back_cqc(cqc_header, CQC_ERR_GENERAL)
+			return False
+
+		# Lookup the virtual qubit from identifier
+		virt_num = yield self.get_virt_qubit_indep(cqc_header, cmd.qubit_id)
+		if virt_num < 0:
+			logging.debug("CQC %s: No such qubit",self.name)
 			return False
 
 		# Send instruction to transfer the qubit
@@ -707,9 +713,8 @@ class CQCProtocol(Protocol):
 		"""
 		logging.debug("CQC %s: Asking to receive for App ID %d",self.name,cqc_header.app_id)
 
-		# First get the app_id and q_id
+		# First get the app_id
 		app_id = cqc_header.app_id
-		q_id = self.new_qubit_id(app_id)
 
 		# This will block until a qubit is received.
 		noQubit = True
@@ -726,6 +731,9 @@ class CQCProtocol(Protocol):
 		# recheck whether it exists: it could have been added by another connection in the mean time
 		try:
 			self.factory._lock.acquire()
+
+			# Get new qubit ID
+			q_id = self.new_qubit_id(app_id)
 
 			if (app_id,q_id) in self.factory.qubitList:
 				logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
@@ -796,7 +804,7 @@ class CQCProtocol(Protocol):
 		if not succ:
 			return False
 
-		# Get entanglement id
+		# Get entanglement id XXX lock here?
 		ent_id=self.new_ent_id(host_app_id,remote_node,remote_app_id)
 
 		# Prepare ent_info header with entanglement information
@@ -968,12 +976,12 @@ class CQCProtocol(Protocol):
 		"""
 		Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv
 		"""
-		if app_id in self.next_q_id:
-			q_id=self.next_q_id[app_id]
-			self.next_q_id[app_id]+=1
+		if app_id in CQCProtocol._next_q_id:
+			q_id=CQCProtocol._next_q_id[app_id]
+			CQCProtocol._next_q_id[app_id]+=1
 			return q_id
 		else:
-			self.next_q_id[app_id]=1
+			CQCProtocol._next_q_id[app_id]=1
 			return 0
 
 	def new_ent_id(self,host_app_id, remote_node, remote_app_id):
@@ -981,12 +989,12 @@ class CQCProtocol(Protocol):
 		Returns a new unique entanglement id for the specified host_app_id, remote_node and remote_app_id. Used by cmd_epr.
 		"""
 		pair_id=(host_app_id,remote_node,remote_app_id)
-		if pair_id in self.next_ent_id:
-			ent_id=self.next_ent_id[pair_id]
-			self.next_ent_id[pair_id]+=1
+		if pair_id in CQCProtocol._next_ent_id:
+			ent_id=CQCProtocol._next_ent_id[pair_id]
+			CQCProtocol._next_ent_id[pair_id]+=1
 			return ent_id
 		else:
-			self.next_ent_id[pair_id]=1
+			CQCProtocol._next_ent_id[pair_id]=1
 			return 0
 
 
