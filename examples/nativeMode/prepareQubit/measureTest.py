@@ -78,25 +78,14 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 
 	logging.debug("LOCAL %s: Running client side program.",myName)
 
-	a = 1 / np.sqrt(2)
-	b = 1 / np.sqrt(2)
-	pa = 0
-	pb = 0
-	expected_pa = abs(a) ** 2
-	expected_pb = abs(b) ** 2
+	a = np.sqrt(1/3)
+	b = np.sqrt(2/3)
 
-	for i in range(100):
-		qubit = yield virtRoot.callRemote("new_qubit_inreg", qReg)
-		yield from prepare_qubit(a, b, qubit)
-		measurement = yield qubit.callRemote("measure")
-		pa += measurement == 0
-		pb += measurement == 1
+	p0, p1 = yield from tomography_measurement(qReg, virtRoot, a, b)
+	exp_0, exp_1 = calculate_expected_values(a, b)
 
-	pa /= 100
-	pb /= 100
-
-	logging.debug("Expected p(a) = %s, expected p(b) = %s", expected_pa, expected_pb)
-	logging.debug("Measured p(a) = %s, measured p(b) = %s", pa, pb)
+	logging.debug("Expected p0 = %s, expected p1 = %s", exp_0, exp_1)
+	logging.debug("Measured p0 = %s, measured p1 = %s", p0, p1)
 
 	# Stop the server and client - you want to delete this if the nodes acts as a server
 	reactor.stop()
@@ -112,6 +101,53 @@ def prepare_qubit(a, b, qubit):
 	yield qubit.callRemote("apply_rotation", z, phi)
 	yield qubit.callRemote("apply_rotation", y, theta)
 	yield qubit.callRemote("apply_rotation", z, -phi)
+
+
+def tomography_measurement(qReg, virtRoot, a, b, iterations=100):
+	p0, p1 = np.array([0, 0, 0]), np.array([0, 0, 0])
+
+	# measure in X basis
+	for _ in range(iterations):
+		q = yield virtRoot.callRemote("new_qubit_inreg", qReg)
+		yield from prepare_qubit(a, b, q)
+		q.callRemote("apply_H")
+		m = yield q.callRemote("measure")
+		p0[0] += m == 0
+		p1[0] += m
+
+	# measure in Y basis
+	for _ in range(iterations):
+		q = yield virtRoot.callRemote("new_qubit_inreg", qReg)
+		yield from prepare_qubit(a, b, q)
+		q.callRemote("apply_K")
+		m = yield q.callRemote("measure")
+		p0[1] += m == 0
+		p1[1] += m
+
+	# measure in Z basis
+	for _ in range(iterations):
+		q = yield virtRoot.callRemote("new_qubit_inreg", qReg)
+		yield from prepare_qubit(a, b, q)
+		m = yield q.callRemote("measure")
+		p0[2] += m == 0
+		p1[2] += m
+
+	return p0/iterations, p1/iterations
+
+
+def calculate_expected_values(a, b):
+	f = np.sqrt(2)
+	exp_0 = [0, 0, 0]
+	exp_0[0] = abs((a + b) / f) ** 2
+	exp_0[1] = abs((a - b*1.j) / f) ** 2
+	exp_0[2] = abs(a) ** 2
+
+	exp_1 = [0, 0, 0]
+	exp_1[0] = abs((a - b) / f) ** 2
+	exp_1[1] = abs((a*1.j - b) / f) ** 2
+	exp_1[2] = abs(b) ** 2
+
+	return exp_0, exp_1
 
 #####################################################################################################
 #
