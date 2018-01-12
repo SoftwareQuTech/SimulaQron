@@ -44,6 +44,7 @@ from SimulaQron.local.setup import *
 
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.backend.entInfoHeader import *
+from SimulaQron.cqc.backend.cqcConfig import *
 
 #####################################################################################################
 #
@@ -718,12 +719,17 @@ class CQCProtocol(Protocol):
 
 		# This will block until a qubit is received.
 		noQubit = True
-		while(noQubit):
+		for _ in range(CQC_CONF_RECV_TIMEOUT):
 			virt_qubit = yield self.factory.virtRoot.callRemote("cqc_get_recv", cqc_header.app_id)
 			if virt_qubit:
 				noQubit = False
+				break
 			else:
 				time.sleep(0.1)
+		if noQubit:
+			logging.debug("CQC %s: TIMEOUT, no qubit received.", self.name)
+			self._send_back_cqc(cqc_header, CQC_ERR_TIMEOUT)
+			return False
 
 		logging.debug("CQC %s: Qubit received for app_id %d",self.name, cqc_header.app_id)
 

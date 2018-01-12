@@ -727,15 +727,15 @@ class progress_bar:
 
 class CQCGeneralError(Exception):
 	pass
-class CQCNoQubitError(Exception):
+class CQCNoQubitError(CQCGeneralError):
 	pass
-class CQCUnsuppError(Exception):
+class CQCUnsuppError(CQCGeneralError):
 	pass
-class CQCTimeoutError(Exception):
+class CQCTimeoutError(CQCGeneralError):
 	pass
-class CQCInuseError(Exception):
+class CQCInuseError(CQCGeneralError):
 	pass
-class QubitNotActiveError(Exception):
+class QubitNotActiveError(CQCGeneralError):
 	pass
 
 
