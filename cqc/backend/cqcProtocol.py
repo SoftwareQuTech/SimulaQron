@@ -891,6 +891,7 @@ class CQCProtocol(Protocol):
 				noQubit = False
 				(virt_qubit,rawEntInfo)=data
 				entInfo=EntInfoHeader(rawEntInfo)
+				break
 			else:
 				time.sleep(0.1)
 		if noQubit:
