@@ -545,13 +545,18 @@ class virtualNode(pb.Root):
 		"""
 
 		logging.debug("VIRTUAL NODE %s: Request to transfer qubit to %s.",self.myID.name, targetName)
-	
-		# Convert the number into the right local object	
+
+		# Convert the number into the right local object
 		simQubit = self._q_num_to_obj(simQubitNum)
 
 		# Lookup host id of node
 		remoteNode = self.conn[targetName]
-		newNum = yield remoteNode.root.callRemote("add_qubit", self.myID.name, simQubit)
+
+		# Check if we are both the destination node and simulating node
+		if self.myID.name==targetName:
+			newNum = yield remoteNode.root.remote_add_qubit(self.myID.name,simQubit)
+		else:
+			newNum = yield remoteNode.root.callRemote("add_qubit", self.myID.name, simQubit)
 
 		return newNum
 

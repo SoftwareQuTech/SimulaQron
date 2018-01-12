@@ -34,3 +34,4 @@
 # Sets how long a node waits for receiving a qubit.
 # Raises a CQC_ERR_TIMEOUT when times is up.
 CQC_CONF_RECV_TIMEOUT=10 # (x 100ms)
+CQC_CONF_RECV_EPR_TIMEOUT=10 # (x 100ms)

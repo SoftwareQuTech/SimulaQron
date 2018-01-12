@@ -885,7 +885,7 @@ class CQCProtocol(Protocol):
 
 		# This will block until a qubit is received.
 		noQubit = True
-		while(noQubit):
+		for _ in range(CQC_CONF_RECV_EPR_TIMEOUT):
 			data = yield self.factory.virtRoot.callRemote("cqc_get_epr_recv", cqc_header.app_id)
 			if data:
 				noQubit = False
@@ -893,6 +893,10 @@ class CQCProtocol(Protocol):
 				entInfo=EntInfoHeader(rawEntInfo)
 			else:
 				time.sleep(0.1)
+		if noQubit:
+			logging.debug("CQC %s: TIMEOUT, no qubit received.", self.name)
+			self._send_back_cqc(cqc_header, CQC_ERR_TIMEOUT)
+			return False
 
 		logging.debug("CQC %s: Qubit received for app_id %d",self.name, cqc_header.app_id)
 
