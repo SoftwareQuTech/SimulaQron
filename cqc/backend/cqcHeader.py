@@ -57,12 +57,13 @@ CQC_ERR_GENERAL=20 		# General purpose error (no details
 CQC_ERR_NOQUBIT=21 		# No more qubits available
 CQC_ERR_UNSUPP=22 		# No sequence not supported
 CQC_ERR_TIMEOUT=23 		# Timeout
+CQC_ERR_INUSE = 24		# Qubit already in use
 
 # Possible commands
 CQC_CMD_I=0			# Identity (do nothing, wait one step)
 CQC_CMD_NEW=1			# Ask for a new qubit
 CQC_CMD_MEASURE=2		# Measure qubit
-CQC_CMD_MEASURE_INPLACE=3	# Measure qubit inplace
+CQC_CMD_MEASURE_INPLACE = 3 	# Measure qubit inplace
 CQC_CMD_RESET=4			# Reset qubit to |0>
 CQC_CMD_SEND=5			# Send qubit to another node
 CQC_CMD_RECV=6			# Ask to receive qubit

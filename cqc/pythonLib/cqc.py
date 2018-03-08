@@ -322,7 +322,7 @@ class CQCConnection:
 		"""
 		#Send Header
 		hdr=CQCHeader()
-		hdr.setVals(CQC_VERSION,CQC_TP_FACTORY,self._appID,CQC_CMD_HDR_LENGTH+CQC_CMD_XTRA_LENGTH)
+		hdr.setVals(CQC_VERSION, CQC_TP_FACTORY, self._appID, CQC_CMD_HDR_LENGTH+CQC_CMD_XTRA_LENGTH)
 		msg=hdr.pack()
 		self._s.send(msg)
 
@@ -338,7 +338,7 @@ class CQCConnection:
 		xtra_msg=xtra_hdr.pack()
 		self._s.send(xtra_msg)
 
-	def readMessage(self,maxsize=192): # WHAT IS GOOD SIZE?
+	def readMessage(self, maxsize=192): # WHAT IS GOOD SIZE?
 		"""
 		Receive the whole message from cqc server.
 		Returns (CQCHeader,None,None), (CQCHeader,CQCNotifyHeader,None) or (CQCHeader,CQCNotifyHeader,EntInfoHeader) depending on the type of message.
@@ -354,7 +354,7 @@ class CQCConnection:
 
 		while True:
 
-			#If buf does not contain enough data, read in more
+			# If buf does not contain enough data, read in more
 			if checkedBuf:
 				# Receive data
 				data=self._s.recv(maxsize)
@@ -563,13 +563,11 @@ class CQCConnection:
 		else:
 			raise ValueError("Host name '{}' is not in the cqc network".format(name))
 
-
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Create EPR-pair with {} and appID {}'".format(self.name,name,remote_appID))
+			print("App {} tells CQC: 'Create EPR-pair with {} and appID {}'".format(self.name, name, remote_appID))
 
-		self.sendCmdXtra(0,CQC_CMD_EPR,notify=int(notify),block=int(block),remote_appID=remote_appID,remote_node=recvHost.ip,remote_port=recvHost.port)
-
+		self.sendCmdXtra(0, CQC_CMD_EPR, notify=int(notify), block=int(block), remote_appID=remote_appID, remote_node=recvHost.ip, remote_port=recvHost.port)
 		# Get RECV message
 		message=self.readMessage()
 		notifyHdr=message[1]
@@ -640,7 +638,6 @@ class CQCConnection:
 			:iterations:	 Number of measurements in each basis.
 			:progress_bar:	 Displays a progress bar
 		"""
-
 		accum_outcomes=[0,0,0]
 		if progress:
 			bar=progress_bar(3*iterations)
@@ -702,9 +699,9 @@ class CQCConnection:
 		"""
 		epsilon=conf/math.sqrt(iterations)
 
-		freqs=self.tomography(preparation,iterations,progress=progress)
+		freqs=self.tomography(preparation, iterations, progress=progress)
 		for i in range(3):
-			if abs(freqs[i]-exp_values[i])>epsilon:
+			if abs(freqs[i]-exp_values[i]) > epsilon:
 				return False
 		return True
 
@@ -720,8 +717,9 @@ class progress_bar:
 	def update(self):
 		procent=int(100*self.itr/self.maxitr)
 		sys.stdout.write('\r')
-		sys.stdout.write("[%-100s] %d%%" % ('='*procent,procent))
+		sys.stdout.write("[%-100s] %d%%" % ('='*procent, procent))
 		sys.stdout.flush()
+		pass
 	def close(self):
 		print("")
 
