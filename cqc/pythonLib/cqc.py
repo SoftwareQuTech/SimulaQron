@@ -33,9 +33,11 @@ from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.backend.entInfoHeader import *
 
+
 class CQCConnection:
-	_appIDs=[]
-	def __init__(self,name,cqcFile=None,appFile=None,appID=0):
+	_appIDs = []
+
+	def __init__(self, name, cqcFile=None, appFile=None, appID=0):
 		"""
 		Initialize a connection to the cqc server.
 
@@ -47,25 +49,25 @@ class CQCConnection:
 		"""
 
 		# Host name
-		self.name=name
+		self.name = name
 
 		# Which appID
 		if appID in self._appIDs:
 			raise ValueError("appID={} is already in use".format(appID))
-		self._appID=appID
+		self._appID = appID
 		self._appIDs.append(self._appID)
 
 		# Buffer received data
-		self.buf=None
+		self.buf = None
 
 		# ClassicalServer
-		self._classicalServer=None
+		self._classicalServer = None
 
 		# Classical connections in the application network
-		self._classicalConn={}
+		self._classicalConn = {}
 
 		# This file defines the network of CQC servers interfacing to virtual quantum nodes
-		if cqcFile==None:
+		if cqcFile == None:
 			self.cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
 
 		# Read configuration files for the cqc network
@@ -77,23 +79,23 @@ class CQCConnection:
 		else:
 			raise ValueError("Host name '{}' is not in the cqc network".format(name))
 
-		#Get IP of correct form
-		myIP=socket.inet_ntoa(struct.pack("!L",myHost.ip))
+		# Get IP of correct form
+		myIP = socket.inet_ntoa(struct.pack("!L", myHost.ip))
 
-		#Connect to cqc server
-		self._s=None
+		# Connect to cqc server
+		self._s = None
 		try:
-			self._s=socket.socket(socket.AF_INET,socket.SOCK_STREAM,0)
+			self._s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
 		except socket.error:
 			raise RuntimeError("Could not connect to cqc server '{}'".format(name))
 		try:
-			self._s.connect((myIP,myHost.port))
+			self._s.connect((myIP, myHost.port))
 		except socket.error:
 			self._s.close()
 			raise RuntimeError("Could not connect to cqc server '{}'".format(name))
 
 		# This file defines the application network
-		if appFile==None:
+		if appFile == None:
 			self.appFile = os.environ.get('NETSIM') + "/config/appNodes.cfg"
 
 		# Read configuration files for the application network
@@ -126,33 +128,32 @@ class CQCConnection:
 		"""
 
 		if not self._classicalServer:
-
-			#Get host data
-			myHost=self._appNet.hostDict[self.name]
+			# Get host data
+			myHost = self._appNet.hostDict[self.name]
 
 			# Setup server
-			s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-			s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
-			s.bind((myHost.hostname,myHost.port))
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+			s.bind((myHost.hostname, myHost.port))
 			s.listen(1)
-			(conn,addr)=s.accept()
-			self._classicalServer=conn
+			(conn, addr) = s.accept()
+			self._classicalServer = conn
 
 	def closeClassicalServer(self):
 		if self._classicalServer:
 			self._classicalServer.close()
-			self._classicalServer=None
+			self._classicalServer = None
 
-	def recvClassical(self,timout=1, msg_size=1024):
+	def recvClassical(self, timout=1, msg_size=1024):
 		if not self._classicalServer:
 			self.startClassicalServer()
-		for _ in range(10*timout):
-			msg=self._classicalServer.recv(msg_size)
-			if len(msg)>0:
+		for _ in range(10 * timout):
+			msg = self._classicalServer.recv(msg_size)
+			if len(msg) > 0:
 				return msg
 			time.sleep(0.1)
 
-	def openClassicalChannel(self,name,timout=1):
+	def openClassicalChannel(self, name, timout=1):
 		"""
 		Opens a classical connection to another host in the application network.
 
@@ -163,23 +164,23 @@ class CQCConnection:
 		"""
 		if not name in self._classicalConn:
 			if name in self._appNet.hostDict:
-				remoteHost=self._appNet.hostDict[name]
+				remoteHost = self._appNet.hostDict[name]
 			else:
 				raise ValueError("Host name '{}' is not in the cqc network".format(name))
-			connected=False
-			for _ in range(int(10*timout)):
+			connected = False
+			for _ in range(int(10 * timout)):
 				try:
-					s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-					s.connect((remoteHost.hostname,remoteHost.port))
-					connected=True
+					s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+					s.connect((remoteHost.hostname, remoteHost.port))
+					connected = True
 					break
 				except:
 					time.sleep(0.1)
 			if not connected:
 				raise RuntimeError("Could not connect to server {}".format(name))
-			self._classicalConn[name]=s
+			self._classicalConn[name] = s
 
-	def closeClassicalChannel(self,name):
+	def closeClassicalChannel(self, name):
 		"""
 		Closes a classical connection to another host in the application network.
 
@@ -188,10 +189,10 @@ class CQCConnection:
 			:name:		The name of the host in the application network.
 		"""
 		if name in self._classicalConn:
-			s=self._classicalConn.pop(name)
+			s = self._classicalConn.pop(name)
 			s.close()
 
-	def sendClassical(self,name,msg,timout=1):
+	def sendClassical(self, name, msg, timout=1):
 		"""
 		Sends a classical message to another host in the application network.
 
@@ -204,21 +205,21 @@ class CQCConnection:
 		if not name in self._classicalConn:
 			self.openClassicalChannel(name)
 		try:
-			to_send=[int(msg)]
+			to_send = [int(msg)]
 		except:
-			to_send=msg
+			to_send = msg
 		self._classicalConn[name].send(bytes(to_send))
 
-	def sendSimple(self,tp):
+	def sendSimple(self, tp):
 		"""
 		Sends a simple message to the cqc server, for example a HELLO message if tp=CQC_TP_HELLO.
 		"""
-		hdr=CQCHeader()
-		hdr.setVals(CQC_VERSION,tp,self._appID,0)
-		msg=hdr.pack()
+		hdr = CQCHeader()
+		hdr.setVals(CQC_VERSION, tp, self._appID, 0)
+		msg = hdr.pack()
 		self._s.send(msg)
 
-	def sendCommand(self,qID,command,notify=1,block=1,action=0):
+	def sendCommand(self, qID, command, notify=1, block=1, action=0):
 		"""
 		Sends a simple message and command message to the cqc server.
 
@@ -230,19 +231,20 @@ class CQCConnection:
 			:block:		Do we want the qubit to be blocked
 			:action:	Are there more commands to be executed
 		"""
-		#Send Header
-		hdr=CQCHeader()
-		hdr.setVals(CQC_VERSION,CQC_TP_COMMAND,self._appID,CQC_CMD_HDR_LENGTH)
-		msg=hdr.pack()
+		# Send Header
+		hdr = CQCHeader()
+		hdr.setVals(CQC_VERSION, CQC_TP_COMMAND, self._appID, CQC_CMD_HDR_LENGTH)
+		msg = hdr.pack()
 		self._s.send(msg)
 
-		#Send Command
-		cmd_hdr=CQCCmdHeader()
-		cmd_hdr.setVals(qID,command,notify,block,action)
-		cmd_msg=cmd_hdr.pack()
+		# Send Command
+		cmd_hdr = CQCCmdHeader()
+		cmd_hdr.setVals(qID, command, notify, block, action)
+		cmd_msg = cmd_hdr.pack()
 		self._s.send(cmd_msg)
 
-	def sendCmdXtra(self,qID,command,notify=1,block=1,action=0,xtra_qID=0,step=0,remote_appID=0,remote_node=0,remote_port=0,cmd_length=0):
+	def sendCmdXtra(self, qID, command, notify=1, block=1, action=0, xtra_qID=0, step=0, remote_appID=0, remote_node=0,
+					remote_port=0, cmd_length=0):
 		"""
 		Sends a simple message, command message and xtra message to the cqc server.
 
@@ -260,25 +262,25 @@ class CQCConnection:
 			:remote_port:	 port of remote host in cqc network
 			:cmd_length:	 length of extra commands
 		"""
-		#Send Header
-		hdr=CQCHeader()
-		hdr.setVals(CQC_VERSION,CQC_TP_COMMAND,self._appID,CQC_CMD_HDR_LENGTH+CQC_CMD_XTRA_LENGTH)
-		msg=hdr.pack()
+		# Send Header
+		hdr = CQCHeader()
+		hdr.setVals(CQC_VERSION, CQC_TP_COMMAND, self._appID, CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
+		msg = hdr.pack()
 		self._s.send(msg)
 
-		#Send Command
-		cmd_hdr=CQCCmdHeader()
-		cmd_hdr.setVals(qID,command,notify,block,action)
-		cmd_msg=cmd_hdr.pack()
+		# Send Command
+		cmd_hdr = CQCCmdHeader()
+		cmd_hdr.setVals(qID, command, notify, block, action)
+		cmd_msg = cmd_hdr.pack()
 		self._s.send(cmd_msg)
 
-		#Send Xtra
-		xtra_hdr=CQCXtraHeader()
-		xtra_hdr.setVals(xtra_qID,step,remote_appID,remote_node,remote_port,cmd_length)
-		xtra_msg=xtra_hdr.pack()
+		# Send Xtra
+		xtra_hdr = CQCXtraHeader()
+		xtra_hdr.setVals(xtra_qID, step, remote_appID, remote_node, remote_port, cmd_length)
+		xtra_msg = xtra_hdr.pack()
 		self._s.send(xtra_msg)
 
-	def sendGetTime(self,qID,notify=1,block=1,action=0):
+	def sendGetTime(self, qID, notify=1, block=1, action=0):
 		"""
 		Sends get-time message
 
@@ -290,19 +292,20 @@ class CQCConnection:
 			:block:		 Do we want the qubit to be blocked
 			:action:	 Are there more commands to be executed
 		"""
-		#Send Header
-		hdr=CQCHeader()
-		hdr.setVals(CQC_VERSION,CQC_TP_GET_TIME,self._appID,CQC_CMD_HDR_LENGTH)
-		msg=hdr.pack()
+		# Send Header
+		hdr = CQCHeader()
+		hdr.setVals(CQC_VERSION, CQC_TP_GET_TIME, self._appID, CQC_CMD_HDR_LENGTH)
+		msg = hdr.pack()
 		self._s.send(msg)
 
-		#Send Command
-		cmd_hdr=CQCCmdHeader()
-		cmd_hdr.setVals(qID,0,notify,block,action)
-		cmd_msg=cmd_hdr.pack()
+		# Send Command
+		cmd_hdr = CQCCmdHeader()
+		cmd_hdr.setVals(qID, 0, notify, block, action)
+		cmd_msg = cmd_hdr.pack()
 		self._s.send(cmd_msg)
 
-	def sendFactory(self,qID,command,num_iter,notify=1,block=1,action=0,xtra_qID=0,remote_appID=0,remote_node=0,remote_port=0,cmd_length=0):
+	def sendFactory(self, qID, command, num_iter, notify=1, block=1, action=0, xtra_qID=0, remote_appID=0,
+					remote_node=0, remote_port=0, cmd_length=0):
 		"""
 		Sends a factory message
 
@@ -320,56 +323,56 @@ class CQCConnection:
 			:remote_port:	 port of remote host in cqc network
 			:cmd_length:	 length of extra commands
 		"""
-		#Send Header
-		hdr=CQCHeader()
-		hdr.setVals(CQC_VERSION, CQC_TP_FACTORY, self._appID, CQC_CMD_HDR_LENGTH+CQC_CMD_XTRA_LENGTH)
-		msg=hdr.pack()
+		# Send Header
+		hdr = CQCHeader()
+		hdr.setVals(CQC_VERSION, CQC_TP_FACTORY, self._appID, CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
+		msg = hdr.pack()
 		self._s.send(msg)
 
-		#Send Command
-		cmd_hdr=CQCCmdHeader()
-		cmd_hdr.setVals(qID,command,notify,block,action)
-		cmd_msg=cmd_hdr.pack()
+		# Send Command
+		cmd_hdr = CQCCmdHeader()
+		cmd_hdr.setVals(qID, command, notify, block, action)
+		cmd_msg = cmd_hdr.pack()
 		self._s.send(cmd_msg)
 
-		#Send Xtra
-		xtra_hdr=CQCXtraHeader()
-		xtra_hdr.setVals(xtra_qID,num_iter,remote_appID,remote_node,remote_port,cmd_length)
-		xtra_msg=xtra_hdr.pack()
+		# Send Xtra
+		xtra_hdr = CQCXtraHeader()
+		xtra_hdr.setVals(xtra_qID, num_iter, remote_appID, remote_node, remote_port, cmd_length)
+		xtra_msg = xtra_hdr.pack()
 		self._s.send(xtra_msg)
 
-	def readMessage(self, maxsize=192): # WHAT IS GOOD SIZE?
+	def readMessage(self, maxsize=192):  # WHAT IS GOOD SIZE?
 		"""
 		Receive the whole message from cqc server.
 		Returns (CQCHeader,None,None), (CQCHeader,CQCNotifyHeader,None) or (CQCHeader,CQCNotifyHeader,EntInfoHeader) depending on the type of message.
 		Maxsize is the max size of message.
 		"""
 
-		#Initilize checks
-		gotCQCHeader=False
+		# Initilize checks
+		gotCQCHeader = False
 		if self.buf:
-			checkedBuf=False
+			checkedBuf = False
 		else:
-			checkedBuf=True
+			checkedBuf = True
 
 		while True:
 
 			# If buf does not contain enough data, read in more
 			if checkedBuf:
 				# Receive data
-				data=self._s.recv(maxsize)
+				data = self._s.recv(maxsize)
 
 				# Read whatever we received into a buffer
 				if self.buf:
-					self.buf+=data
+					self.buf += data
 				else:
-					self.buf=data
+					self.buf = data
 
 			# If we don't have the CQC header yet, try and read it in full.
 			if not gotCQCHeader:
 				if len(self.buf) < CQC_HDR_LENGTH:
 					# Not enough data for CQC header, return and wait for the rest
-					checkedBuf=True
+					checkedBuf = True
 					continue
 
 				# Got enough data for the CQC Header so read it in
@@ -386,90 +389,91 @@ class CQCConnection:
 			# Check whether we already received all the data
 			if len(self.buf) < currHeader.length:
 				# Still waiting for data
-				checkedBuf=True
+				checkedBuf = True
 				continue
 			else:
 				break
 
 		# We got all the data, read notify (and ent_info) if there is any
-		if currHeader.length==0:
-			return (currHeader,None,None)
-		elif currHeader.length==CQC_NOTIFY_LENGTH:
+		if currHeader.length == 0:
+			return (currHeader, None, None)
+		elif currHeader.length == CQC_NOTIFY_LENGTH:
 			try:
-				rawNotifyHeader=self.buf[:CQC_NOTIFY_LENGTH]
-				self.buf=self.buf[CQC_NOTIFY_LENGTH:len(self.buf)]
-				notifyHeader=CQCNotifyHeader(rawNotifyHeader)
-				return (currHeader,notifyHeader,None)
+				rawNotifyHeader = self.buf[:CQC_NOTIFY_LENGTH]
+				self.buf = self.buf[CQC_NOTIFY_LENGTH:len(self.buf)]
+				notifyHeader = CQCNotifyHeader(rawNotifyHeader)
+				return (currHeader, notifyHeader, None)
 			except struct.error as err:
 				print(err)
-		elif currHeader.length==CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH:
+		elif currHeader.length == CQC_NOTIFY_LENGTH + ENT_INFO_LENGTH:
 			try:
-				rawNotifyHeader=self.buf[:CQC_NOTIFY_LENGTH]
-				self.buf=self.buf[CQC_NOTIFY_LENGTH:len(self.buf)]
-				notifyHeader=CQCNotifyHeader(rawNotifyHeader)
+				rawNotifyHeader = self.buf[:CQC_NOTIFY_LENGTH]
+				self.buf = self.buf[CQC_NOTIFY_LENGTH:len(self.buf)]
+				notifyHeader = CQCNotifyHeader(rawNotifyHeader)
 
-				rawEntInfoHeader=self.buf[:ENT_INFO_LENGTH]
-				self.buf=self.buf[ENT_INFO_LENGTH:len(self.buf)]
-				entInfoHeader=EntInfoHeader(rawEntInfoHeader)
+				rawEntInfoHeader = self.buf[:ENT_INFO_LENGTH]
+				self.buf = self.buf[ENT_INFO_LENGTH:len(self.buf)]
+				entInfoHeader = EntInfoHeader(rawEntInfoHeader)
 
-				return (currHeader,notifyHeader,entInfoHeader)
+				return (currHeader, notifyHeader, entInfoHeader)
 			except struct.error as err:
 				print(err)
 		else:
 			print("Warning: Received message of unknown length, return None")
 
-	def print_CQC_msg(self,message):
+	def print_CQC_msg(self, message):
 		"""
 		Prints messsage returned by the readMessage method of CQCConnection.
 		"""
-		hdr=message[0]
-		notifyHdr=message[1]
-		entInfoHdr=message[2]
+		hdr = message[0]
+		notifyHdr = message[1]
+		entInfoHdr = message[2]
 
-		if hdr.tp==CQC_TP_HELLO:
+		if hdr.tp == CQC_TP_HELLO:
 			print("CQC tells App {}: 'HELLO'".format(self.name))
-		elif hdr.tp==CQC_TP_EXPIRE:
-			print("CQC tells App {}: 'Qubit with ID {} has expired'".format(self.name,notifyHdr.qubit_id))
-		elif hdr.tp==CQC_TP_DONE:
+		elif hdr.tp == CQC_TP_EXPIRE:
+			print("CQC tells App {}: 'Qubit with ID {} has expired'".format(self.name, notifyHdr.qubit_id))
+		elif hdr.tp == CQC_TP_DONE:
 			print("CQC tells App {}: 'Done with command'".format(self.name))
-		elif hdr.tp==CQC_TP_RECV:
-			print("CQC tells App {}: 'Received qubit with ID {}'".format(self.name,notifyHdr.qubit_id))
-		elif hdr.tp==CQC_TP_EPR_OK:
+		elif hdr.tp == CQC_TP_RECV:
+			print("CQC tells App {}: 'Received qubit with ID {}'".format(self.name, notifyHdr.qubit_id))
+		elif hdr.tp == CQC_TP_EPR_OK:
 
 			# Lookup host name
-			remote_node=entInfoHdr.node_B
-			remote_port=entInfoHdr.port_B
+			remote_node = entInfoHdr.node_B
+			remote_port = entInfoHdr.port_B
 			for node in self._cqcNet.hostDict.values():
-				if (node.ip==remote_node) and (node.port==remote_port):
-					remote_name=node.name
+				if (node.ip == remote_node) and (node.port == remote_port):
+					remote_name = node.name
 					break
 
-			print("CQC tells App {}: 'EPR created with node {}, using qubit with ID {}'".format(self.name,remote_name, notifyHdr.qubit_id))
-		elif hdr.tp==CQC_TP_MEASOUT:
-			print("CQC tells App {}: 'Measurement outcome is {}'".format(self.name,notifyHdr.outcome))
-		elif hdr.tp==CQC_TP_INF_TIME:
-			print("CQC tells App {}: 'Timestamp is {}'".format(self.name,notifyHdr.datetime))
+			print("CQC tells App {}: 'EPR created with node {}, using qubit with ID {}'".format(self.name, remote_name,
+																								notifyHdr.qubit_id))
+		elif hdr.tp == CQC_TP_MEASOUT:
+			print("CQC tells App {}: 'Measurement outcome is {}'".format(self.name, notifyHdr.outcome))
+		elif hdr.tp == CQC_TP_INF_TIME:
+			print("CQC tells App {}: 'Timestamp is {}'".format(self.name, notifyHdr.datetime))
 
-	def check_error(self,hdr):
+	def check_error(self, hdr):
 		"""
 		Checks if there is an error returned.
 		"""
 		self._errorHandler(hdr.tp)
 
-	def _errorHandler(self,cqc_err):
+	def _errorHandler(self, cqc_err):
 		"""
 		Raises an error if there is an error-message
 		"""
-		if cqc_err==CQC_ERR_GENERAL:
+		if cqc_err == CQC_ERR_GENERAL:
 			raise CQCGeneralError("General error")
-		if cqc_err==CQC_ERR_NOQUBIT:
+		if cqc_err == CQC_ERR_NOQUBIT:
 			raise CQCNoQubitError("Qubit not available or no more qubits available")
-		if cqc_err==CQC_ERR_UNSUPP:
+		if cqc_err == CQC_ERR_UNSUPP:
 			raise CQCUnsuppError("Sequence not supported")
-		if cqc_err==CQC_ERR_TIMEOUT:
+		if cqc_err == CQC_ERR_TIMEOUT:
 			raise CQCTimeoutError("Timout")
 
-	def sendQubit(self,q,name,remote_appID=0,notify=True,block=True,print_info=True):
+	def sendQubit(self, q, name, remote_appID=0, notify=True, block=True, print_info=True):
 		"""
 		Sends qubit to another node in the cqc network. If this node is not in the network an error is raised.
 
@@ -483,26 +487,28 @@ class CQCConnection:
 		"""
 
 		# Get receiving host
-		hostDict=self._cqcNet.hostDict
+		hostDict = self._cqcNet.hostDict
 		if name in hostDict:
-			recvHost=hostDict[name]
+			recvHost = hostDict[name]
 		else:
 			raise ValueError("Host name '{}' is not in the cqc network".format(name))
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Send qubit with ID {} to {} and appID {}'".format(self.name,q._qID,name,remote_appID))
+			print("App {} tells CQC: 'Send qubit with ID {} to {} and appID {}'".format(self.name, q._qID, name,
+																						remote_appID))
 
-		self.sendCmdXtra(q._qID,CQC_CMD_SEND,notify=int(notify),block=int(block),remote_appID=remote_appID,remote_node=recvHost.ip,remote_port=recvHost.port)
+		self.sendCmdXtra(q._qID, CQC_CMD_SEND, notify=int(notify), block=int(block), remote_appID=remote_appID,
+						 remote_node=recvHost.ip, remote_port=recvHost.port)
 		if notify:
-			message=self.readMessage()
+			message = self.readMessage()
 			if print_info:
 				self.print_CQC_msg(message)
 
-		#Deactivate qubit
-		q._active=False
+		# Deactivate qubit
+		q._active = False
 
-	def recvQubit(self,notify=True,block=True,print_info=True):
+	def recvQubit(self, notify=True, block=True, print_info=True):
 		"""
 		Receives a qubit.
 
@@ -516,34 +522,33 @@ class CQCConnection:
 			:print_info:	 If info should be printed
 		"""
 
-
-		#print info
+		# print info
 		if print_info:
 			print("App {} tells CQC: 'Receive qubit'".format(self.name))
 
-		self.sendCommand(0,CQC_CMD_RECV,notify=int(notify),block=int(block))
+		self.sendCommand(0, CQC_CMD_RECV, notify=int(notify), block=int(block))
 
 		# Get RECV message
-		message=self.readMessage()
-		notifyHdr=message[1]
-		q_id=notifyHdr.qubit_id
+		message = self.readMessage()
+		notifyHdr = message[1]
+		q_id = notifyHdr.qubit_id
 
 		if print_info:
 			self.print_CQC_msg(message)
 
 		if notify:
-			message=self.readMessage()
+			message = self.readMessage()
 			if print_info:
 				self.print_CQC_msg(message)
 
 		# initialize the qubit
-		q=qubit(self,createNew=False,q_id=q_id)
+		q = qubit(self, createNew=False, q_id=q_id)
 
-		#Activate and return qubit
-		q._active=True
+		# Activate and return qubit
+		q._active = True
 		return q
 
-	def createEPR(self,name,remote_appID=0,notify=True,block=True,print_info=True):
+	def createEPR(self, name, remote_appID=0, notify=True, block=True, print_info=True):
 		"""
 		Creates epr with other host in cqc network.
 
@@ -557,9 +562,9 @@ class CQCConnection:
 		"""
 
 		# Get receiving host
-		hostDict=self._cqcNet.hostDict
+		hostDict = self._cqcNet.hostDict
 		if name in hostDict:
-			recvHost=hostDict[name]
+			recvHost = hostDict[name]
 		else:
 			raise ValueError("Host name '{}' is not in the cqc network".format(name))
 
@@ -567,29 +572,30 @@ class CQCConnection:
 		if print_info:
 			print("App {} tells CQC: 'Create EPR-pair with {} and appID {}'".format(self.name, name, remote_appID))
 
-		self.sendCmdXtra(0, CQC_CMD_EPR, notify=int(notify), block=int(block), remote_appID=remote_appID, remote_node=recvHost.ip, remote_port=recvHost.port)
+		self.sendCmdXtra(0, CQC_CMD_EPR, notify=int(notify), block=int(block), remote_appID=remote_appID,
+						 remote_node=recvHost.ip, remote_port=recvHost.port)
 		# Get RECV message
-		message=self.readMessage()
-		notifyHdr=message[1]
-		entInfoHdr=message[2]
-		q_id=notifyHdr.qubit_id
+		message = self.readMessage()
+		notifyHdr = message[1]
+		entInfoHdr = message[2]
+		q_id = notifyHdr.qubit_id
 
 		if print_info:
 			self.print_CQC_msg(message)
 
 		if notify:
-			message=self.readMessage()
+			message = self.readMessage()
 			if print_info:
 				self.print_CQC_msg(message)
 
 		# initialize the qubit
-		q=qubit(self,createNew=False,q_id=q_id,entInfo=entInfoHdr)
+		q = qubit(self, createNew=False, q_id=q_id, entInfo=entInfoHdr)
 
-		#Activate and return qubit
-		q._active=True
+		# Activate and return qubit
+		q._active = True
 		return q
 
-	def recvEPR(self,notify=True,block=True,print_info=True):
+	def recvEPR(self, notify=True, block=True, print_info=True):
 		"""
 		Receives a qubit from an EPR-pair generated with another node.
 
@@ -600,34 +606,34 @@ class CQCConnection:
 			:print_info:	 If info should be printed
 		"""
 
-		#print info
+		# print info
 		if print_info:
 			print("App {} tells CQC: 'Receive half of EPR'".format(self.name))
 
-		self.sendCommand(0,CQC_CMD_EPR_RECV,notify=int(notify),block=int(block))
+		self.sendCommand(0, CQC_CMD_EPR_RECV, notify=int(notify), block=int(block))
 
 		# Get RECV message
-		message=self.readMessage()
-		notifyHdr=message[1]
-		entInfoHdr=message[2]
-		q_id=notifyHdr.qubit_id
+		message = self.readMessage()
+		notifyHdr = message[1]
+		entInfoHdr = message[2]
+		q_id = notifyHdr.qubit_id
 
 		if print_info:
 			self.print_CQC_msg(message)
 
 		if notify:
-			message=self.readMessage()
+			message = self.readMessage()
 			if print_info:
 				self.print_CQC_msg(message)
 
 		# initialize the qubit
-		q=qubit(self,createNew=False,q_id=q_id,entInfo=entInfoHdr)
+		q = qubit(self, createNew=False, q_id=q_id, entInfo=entInfoHdr)
 
-		#Activate and return qubit
-		q._active=True
+		# Activate and return qubit
+		q._active = True
 		return q
 
-	def tomography(self,preparation,iterations,progress=True):
+	def tomography(self, preparation, iterations, progress=True):
 		"""
 		Does a tomography on the output from the preparation specified.
 		The frequencies from X, Y and Z measurements are returned as a tuple (f_X,f_Y,f_Z).
@@ -638,9 +644,9 @@ class CQCConnection:
 			:iterations:	 Number of measurements in each basis.
 			:progress_bar:	 Displays a progress bar
 		"""
-		accum_outcomes=[0,0,0]
+		accum_outcomes = [0, 0, 0]
 		if progress:
-			bar=progress_bar(3*iterations)
+			bar = progress_bar(3 * iterations)
 
 		# Measure in X
 		for _ in range(iterations):
@@ -649,10 +655,10 @@ class CQCConnection:
 				bar.increase()
 
 			# prepare and measure
-			q=preparation(self)
+			q = preparation(self)
 			q.H(print_info=False)
-			m=q.measure(print_info=False)
-			accum_outcomes[0]+=m
+			m = q.measure(print_info=False)
+			accum_outcomes[0] += m
 
 		# Measure in Y
 		for _ in range(iterations):
@@ -661,10 +667,10 @@ class CQCConnection:
 				bar.increase()
 
 			# prepare and measure
-			q=preparation(self)
+			q = preparation(self)
 			q.K(print_info=False)
-			m=q.measure(print_info=False)
-			accum_outcomes[1]+=m
+			m = q.measure(print_info=False)
+			accum_outcomes[1] += m
 
 		# Measure in Z
 		for _ in range(iterations):
@@ -673,18 +679,18 @@ class CQCConnection:
 				bar.increase()
 
 			# prepare and measure
-			q=preparation(self)
-			m=q.measure(print_info=False)
-			accum_outcomes[2]+=m
+			q = preparation(self)
+			m = q.measure(print_info=False)
+			accum_outcomes[2] += m
 
 		if progress:
 			bar.close()
 			del bar
 
-		freqs=map(lambda x:x/iterations,accum_outcomes)
+		freqs = map(lambda x: x / iterations, accum_outcomes)
 		return list(freqs)
 
-	def test_preparation(self,preparation,exp_values,conf=2,iterations=100,progress=True):
+	def test_preparation(self, preparation, exp_values, conf=2, iterations=100, progress=True):
 		"""
 		Test the preparation of a qubit.
 		Returns True if the expected values are inside the confidence interval produced from the data received from the tomography function
@@ -697,42 +703,57 @@ class CQCConnection:
 			:iterations:	 Number of measurements in each basis.
 			:progress_bar:	 Displays a progress bar
 		"""
-		epsilon=conf/math.sqrt(iterations)
+		epsilon = conf / math.sqrt(iterations)
 
-		freqs=self.tomography(preparation, iterations, progress=progress)
+		freqs = self.tomography(preparation, iterations, progress=progress)
 		for i in range(3):
-			if abs(freqs[i]-exp_values[i]) > epsilon:
+			if abs(freqs[i] - exp_values[i]) > epsilon:
 				return False
 		return True
 
+
 class progress_bar:
-	def __init__(self,maxitr):
-		self.maxitr=maxitr
-		self.itr=0
+	def __init__(self, maxitr):
+		self.maxitr = maxitr
+		self.itr = 0
 		print("")
 		self.update()
+
 	def increase(self):
-		self.itr+=1
+		self.itr += 1
 		self.update()
+
 	def update(self):
-		procent=int(100*self.itr/self.maxitr)
+		procent = int(100 * self.itr / self.maxitr)
 		sys.stdout.write('\r')
-		sys.stdout.write("[%-100s] %d%%" % ('='*procent, procent))
+		sys.stdout.write("[%-100s] %d%%" % ('=' * procent, procent))
 		sys.stdout.flush()
 		pass
+
 	def close(self):
 		print("")
 
+
 class CQCGeneralError(Exception):
 	pass
+
+
 class CQCNoQubitError(CQCGeneralError):
 	pass
+
+
 class CQCUnsuppError(CQCGeneralError):
 	pass
+
+
 class CQCTimeoutError(CQCGeneralError):
 	pass
+
+
 class CQCInuseError(CQCGeneralError):
 	pass
+
+
 class QubitNotActiveError(CQCGeneralError):
 	pass
 
@@ -741,7 +762,8 @@ class qubit:
 	"""
 	A qubit.
 	"""
-	def __init__(self,cqc,notify=True,block=True,print_info=True,createNew=True,q_id=None, entInfo=None):
+
+	def __init__(self, cqc, notify=True, block=True, print_info=True, createNew=True, q_id=None, entInfo=None):
 		"""
 		Initializes the qubit. The cqc connection must be given.
 		If notify, the return message is received before the method finishes.
@@ -758,49 +780,49 @@ class qubit:
 			:entInfo:	 Entanglement information, if qubit is part of EPR-pair
 		"""
 
-		#Cqc connection
-		self._cqc=cqc
+		# Cqc connection
+		self._cqc = cqc
 
 		# Active qubit
 		if createNew:
-			self._active=True
+			self._active = True
 		else:
-			self._active=False
+			self._active = False
 
 		if createNew:
-			#print info
+			# print info
 			if print_info:
 				print("App {} tells CQC: 'Create qubit'".format(self._cqc.name))
 
 			# Create new qubit at the cqc server
-			self._cqc.sendCommand(0,CQC_CMD_NEW,notify=int(notify),block=int(block))
+			self._cqc.sendCommand(0, CQC_CMD_NEW, notify=int(notify), block=int(block))
 
-			#Get qubit id
-			message=self._cqc.readMessage()
+			# Get qubit id
+			message = self._cqc.readMessage()
 			try:
-				notifyHdr=message[1]
-				self._qID=notifyHdr.qubit_id
+				notifyHdr = message[1]
+				self._qID = notifyHdr.qubit_id
 			except AttributeError:
 				raise CQCGeneralError("Didn't receive the qubit id")
 
 			if notify:
-				message=self._cqc.readMessage()
+				message = self._cqc.readMessage()
 				if print_info:
 					self._cqc.print_CQC_msg(message)
 		else:
-			self._qID=q_id
+			self._qID = q_id
 
 		# Entanglement information
-		self._entInfo=entInfo
+		self._entInfo = entInfo
 
 		# Lookup remote entangled node
-		self._remote_entNode=None
+		self._remote_entNode = None
 		if self._entInfo:
-			ip=self._entInfo.node_B
-			port=self._entInfo.port_B
+			ip = self._entInfo.node_B
+			port = self._entInfo.port_B
 			for node in self._cqc._cqcNet.hostDict.values():
-				if (node.ip==ip) and (node.port==port):
-					self._remote_entNode=node.name
+				if (node.ip == ip) and (node.port == port):
+					self._remote_entNode = node.name
 					break
 
 	def __str__(self):
@@ -818,17 +840,17 @@ class qubit:
 		else:
 			print("No entanglement information")
 
-	def set_entInfo(self,entInfo):
-		self._entInfo=entInfo
+	def set_entInfo(self, entInfo):
+		self._entInfo = entInfo
 
 		# Lookup remote entangled node
-		self._remote_entNode=None
+		self._remote_entNode = None
 		if self._entInfo:
-			ip=self._entInfo.node_B
-			port=self._entInfo.port_B
+			ip = self._entInfo.node_B
+			port = self._entInfo.port_B
 			for node in self.cqcNet.hostDict.values():
-				if (node.ip==ip) and (node.port==port):
-					self._remote_entNode=node.name
+				if (node.ip == ip) and (node.port == port):
+					self._remote_entNode = node.name
 					break
 
 	def is_entangled(self):
@@ -846,7 +868,7 @@ class qubit:
 		if not self._active:
 			raise QubitNotActiveError("Qubit is not active, has either been sent, measured or not recieved")
 
-	def I(self,notify=True,block=True,print_info=True):
+	def I(self, notify=True, block=True, print_info=True):
 		"""
 		Performs an identity gate on the qubit.
 		If notify, the return message is received before the method finishes.
@@ -860,17 +882,17 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Do nothing with qubit with ID {}'".format(self._cqc.name,self._qID))
+			print("App {} tells CQC: 'Do nothing with qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID,CQC_CMD_I,notify=int(notify),block=int(block))
+		self._cqc.sendCommand(self._qID, CQC_CMD_I, notify=int(notify), block=int(block))
 		if notify:
-			message=self._cqc.readMessage()
+			message = self._cqc.readMessage()
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
-	def X(self,notify=True,block=True,print_info=True):
+	def X(self, notify=True, block=True, print_info=True):
 		"""
 		Performs a X on the qubit.
 		If notify, the return message is received before the method finishes.
@@ -884,17 +906,17 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Perform X to qubit with ID {}'".format(self._cqc.name,self._qID))
+			print("App {} tells CQC: 'Perform X to qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID,CQC_CMD_X,notify=int(notify),block=int(block))
+		self._cqc.sendCommand(self._qID, CQC_CMD_X, notify=int(notify), block=int(block))
 		if notify:
-			message=self._cqc.readMessage()
+			message = self._cqc.readMessage()
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
-	def Y(self,notify=True,block=True,print_info=True):
+	def Y(self, notify=True, block=True, print_info=True):
 		"""
 		Performs a Y on the qubit.
 		If notify, the return message is received before the method finishes.
@@ -908,17 +930,17 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Perform Y to qubit with ID {}'".format(self._cqc.name,self._qID))
+			print("App {} tells CQC: 'Perform Y to qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID,CQC_CMD_Y,notify=int(notify),block=int(block))
+		self._cqc.sendCommand(self._qID, CQC_CMD_Y, notify=int(notify), block=int(block))
 		if notify:
-			message=self._cqc.readMessage()
+			message = self._cqc.readMessage()
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
-	def Z(self,notify=True,block=True,print_info=True):
+	def Z(self, notify=True, block=True, print_info=True):
 		"""
 		Performs a Z on the qubit.
 		If notify, the return message is received before the method finishes.
@@ -932,17 +954,17 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Perform Z to qubit with ID {}'".format(self._cqc.name,self._qID))
+			print("App {} tells CQC: 'Perform Z to qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID,CQC_CMD_Z,notify=int(notify),block=int(block))
+		self._cqc.sendCommand(self._qID, CQC_CMD_Z, notify=int(notify), block=int(block))
 		if notify:
-			message=self._cqc.readMessage()
+			message = self._cqc.readMessage()
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
-	def T(self,notify=True,block=True,print_info=True):
+	def T(self, notify=True, block=True, print_info=True):
 		"""
 		Performs a T gate on the qubit.
 		If notify, the return message is received before the method finishes.
@@ -956,17 +978,17 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Perform T to qubit with ID {}'".format(self._cqc.name,self._qID))
+			print("App {} tells CQC: 'Perform T to qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID,CQC_CMD_T,notify=int(notify),block=int(block))
+		self._cqc.sendCommand(self._qID, CQC_CMD_T, notify=int(notify), block=int(block))
 		if notify:
-			message=self._cqc.readMessage()
+			message = self._cqc.readMessage()
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
-	def H(self,notify=True,block=True,print_info=True):
+	def H(self, notify=True, block=True, print_info=True):
 		"""
 		Performs a Hadamard on the qubit.
 		If notify, the return message is received before the method finishes.
@@ -980,17 +1002,17 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Perform H to qubit with ID {}'".format(self._cqc.name,self._qID))
+			print("App {} tells CQC: 'Perform H to qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID,CQC_CMD_H,notify=int(notify),block=int(block))
+		self._cqc.sendCommand(self._qID, CQC_CMD_H, notify=int(notify), block=int(block))
 		if notify:
-			message=self._cqc.readMessage()
+			message = self._cqc.readMessage()
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
-	def K(self,notify=True,block=True,print_info=True):
+	def K(self, notify=True, block=True, print_info=True):
 		"""
 		Performs a K gate on the qubit.
 		If notify, the return message is received before the method finishes.
@@ -1004,17 +1026,17 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Perform K to qubit with ID {}'".format(self._cqc.name,self._qID))
+			print("App {} tells CQC: 'Perform K to qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID,CQC_CMD_K,notify=int(notify),block=int(block))
+		self._cqc.sendCommand(self._qID, CQC_CMD_K, notify=int(notify), block=int(block))
 		if notify:
-			message=self._cqc.readMessage()
+			message = self._cqc.readMessage()
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
-	def rot_X(self,step,notify=True,block=True,print_info=True):
+	def rot_X(self, step, notify=True, block=True, print_info=True):
 		"""
 		Applies rotation around the x-axis with the angle of step*2*pi/256 radians.
 		If notify, the return message is received before the method finishes.
@@ -1029,17 +1051,19 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Perform X-rot (angle {}*2pi/256) to qubit with ID {}'".format(self._cqc.name,step,self._qID))
+			print(
+				"App {} tells CQC: 'Perform X-rot (angle {}*2pi/256) to qubit with ID {}'".format(self._cqc.name, step,
+																								  self._qID))
 
-		self._cqc.sendCmdXtra(self._qID,CQC_CMD_ROT_X,step=step,notify=int(notify),block=int(block))
+		self._cqc.sendCmdXtra(self._qID, CQC_CMD_ROT_X, step=step, notify=int(notify), block=int(block))
 		if notify:
-			message=self._cqc.readMessage()
+			message = self._cqc.readMessage()
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
-	def rot_Y(self,step,notify=True,block=True,print_info=True):
+	def rot_Y(self, step, notify=True, block=True, print_info=True):
 		"""
 		Applies rotation around the y-axis with the angle of step*2*pi/256 radians.
 		If notify, the return message is received before the method finishes.
@@ -1054,17 +1078,19 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Perform Y-rot (angle {}*2pi/256) to qubit with ID {}'".format(self._cqc.name,step,self._qID))
+			print(
+				"App {} tells CQC: 'Perform Y-rot (angle {}*2pi/256) to qubit with ID {}'".format(self._cqc.name, step,
+																								  self._qID))
 
-		self._cqc.sendCmdXtra(self._qID,CQC_CMD_ROT_Y,step=step,notify=int(notify),block=int(block))
+		self._cqc.sendCmdXtra(self._qID, CQC_CMD_ROT_Y, step=step, notify=int(notify), block=int(block))
 		if notify:
-			message=self._cqc.readMessage()
+			message = self._cqc.readMessage()
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
-	def rot_Z(self,step,notify=True,block=True,print_info=True):
+	def rot_Z(self, step, notify=True, block=True, print_info=True):
 		"""
 		Applies rotation around the z-axis with the angle of step*2*pi/256 radians.
 		If notify, the return message is received before the method finishes.
@@ -1079,17 +1105,19 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Perform Z-rot (angle {}*2pi/256) to qubit with ID {}'".format(self._cqc.name,step,self._qID))
+			print(
+				"App {} tells CQC: 'Perform Z-rot (angle {}*2pi/256) to qubit with ID {}'".format(self._cqc.name, step,
+																								  self._qID))
 
-		self._cqc.sendCmdXtra(self._qID,CQC_CMD_ROT_Z,step=step,notify=int(notify),block=int(block))
+		self._cqc.sendCmdXtra(self._qID, CQC_CMD_ROT_Z, step=step, notify=int(notify), block=int(block))
 		if notify:
-			message=self._cqc.readMessage()
+			message = self._cqc.readMessage()
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
-	def cnot(self,target,notify=True,block=True,print_info=True):
+	def cnot(self, target, notify=True, block=True, print_info=True):
 		"""
 		Applies a cnot onto target.
 		Target should be a qubit-object with the same cqc connection.
@@ -1105,17 +1133,19 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Perform CNOT to qubits with IDs {}(control) {}(target)'".format(self._cqc.name,self._qID,target._qID))
+			print("App {} tells CQC: 'Perform CNOT to qubits with IDs {}(control) {}(target)'".format(self._cqc.name,
+																									  self._qID,
+																									  target._qID))
 
-		self._cqc.sendCmdXtra(self._qID,CQC_CMD_CNOT,notify=int(notify),block=int(block),xtra_qID=target._qID)
+		self._cqc.sendCmdXtra(self._qID, CQC_CMD_CNOT, notify=int(notify), block=int(block), xtra_qID=target._qID)
 		if notify:
-			message=self._cqc.readMessage()
+			message = self._cqc.readMessage()
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
-	def cphase(self,target,notify=True,block=True,print_info=True):
+	def cphase(self, target, notify=True, block=True, print_info=True):
 		"""
 		Applies a cphase onto target.
 		Target should be a qubit-object with the same cqc connection.
@@ -1131,17 +1161,19 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Perform CPHASE to qubits with IDs {}(control) {}(target)'".format(self._cqc.name,self._qID,target))
+			print("App {} tells CQC: 'Perform CPHASE to qubits with IDs {}(control) {}(target)'".format(self._cqc.name,
+																										self._qID,
+																										target))
 
-		self._cqc.sendCmdXtra(self._qID,CQC_CMD_CPHASE,notify=int(notify),block=int(block),xtra_qID=target._qID)
+		self._cqc.sendCmdXtra(self._qID, CQC_CMD_CPHASE, notify=int(notify), block=int(block), xtra_qID=target._qID)
 		if notify:
-			message=self._cqc.readMessage()
+			message = self._cqc.readMessage()
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
-	def measure(self,inplace=False,block=True,print_info=True):
+	def measure(self, inplace=False, block=True, print_info=True):
 		"""
 		Measures the qubit in the standard basis and returns the measurement outcome.
 		If now MEASOUT message is received, None is returned.
@@ -1157,26 +1189,26 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Measure qubit with ID {}'".format(self._cqc.name,self._qID))
+			print("App {} tells CQC: 'Measure qubit with ID {}'".format(self._cqc.name, self._qID))
 
 		if inplace:
-			self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE_INPLACE,notify=0,block=int(block))
+			self._cqc.sendCommand(self._qID, CQC_CMD_MEASURE_INPLACE, notify=0, block=int(block))
 		else:
-			self._cqc.sendCommand(self._qID,CQC_CMD_MEASURE,notify=0,block=int(block))
+			self._cqc.sendCommand(self._qID, CQC_CMD_MEASURE, notify=0, block=int(block))
 
-		#Return measurement outcome
-		message=self._cqc.readMessage()
+		# Return measurement outcome
+		message = self._cqc.readMessage()
 		if not inplace:
-			self._active=False
+			self._active = False
 		try:
-			notifyHdr=message[1]
+			notifyHdr = message[1]
 			return notifyHdr.outcome
 		except AttributeError:
 			return None
 
-	def reset(self,notify=True,block=True,print_info=True):
+	def reset(self, notify=True, block=True, print_info=True):
 		"""
 		Resets the qubit.
 		If notify, the return message is received before the method finishes.
@@ -1190,18 +1222,17 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Reset qubit with ID {}'".format(self._cqc.name,self._qID))
+			print("App {} tells CQC: 'Reset qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID,CQC_CMD_RESET,notify=int(notify),block=int(block))
+		self._cqc.sendCommand(self._qID, CQC_CMD_RESET, notify=int(notify), block=int(block))
 		if notify:
-			message=self._cqc.readMessage()
+			message = self._cqc.readMessage()
 			if print_info:
 				self._cqc.print_CQC_msg(message)
 
-
-	def getTime(self,block=True,print_info=True):
+	def getTime(self, block=True, print_info=True):
 		"""
 		Returns the time information of the qubit.
 		If now INF_TIME message is received, None is returned.
@@ -1214,16 +1245,16 @@ class qubit:
 		# check if qubit is active
 		self.check_active()
 
-		#print info
+		# print info
 		if print_info:
-			print("App {} tells CQC: 'Return time-info of qubit with ID {}'".format(self._cqc.name,self._qID))
+			print("App {} tells CQC: 'Return time-info of qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendGetTime(self._qID,notify=0,block=int(block))
+		self._cqc.sendGetTime(self._qID, notify=0, block=int(block))
 
 		# Return time-stamp
-		message=self._cqc.readMessage()
+		message = self._cqc.readMessage()
 		try:
-			notifyHdr=message[1]
+			notifyHdr = message[1]
 			return notifyHdr.datetime
 		except AttributeError:
 			return None

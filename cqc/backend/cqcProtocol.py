@@ -45,6 +45,7 @@ from SimulaQron.local.setup import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.backend.entInfoHeader import *
 from SimulaQron.cqc.backend.cqcMessageHandler import *
+from SimulaQron.cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
 
 #####################################################################################################
 #
@@ -133,6 +134,7 @@ class CQCProtocol(Protocol):
 		# Define which entity you use to handle the messages
 		# Could be using the SimulaQron handler, but also just a logger
 		self.messageHandler = SimulaqronCQCHandler(factory, self)
+		# self.messageHandler = CQCLogMessageHandler(factory.name, self)
 
 		# Flag to determine whether we already received _all_ of the CQC header
 		self.gotCQCHeader = False
