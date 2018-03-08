@@ -94,6 +94,9 @@ class CQCMessageHandler(ABC):
 
 	# @inlineCallbacks
 	def handle_cqc_header(self, header, message):
+		"""
+		This calls the correct method to handle the cqcmessage, based on the type specified in the header
+		"""
 		if header.tp in self.messageHandlers:
 			self.messageHandlers[header.tp](header, message)
 		else:
