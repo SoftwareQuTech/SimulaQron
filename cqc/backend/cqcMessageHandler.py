@@ -55,7 +55,7 @@ Abstract class. Classes that inherit this class define how to handle incoming cq
 
 class CQCMessageHandler(ABC):
 
-	def __init__(self, host_name, protocol):
+	def __init__(self, factory, protocol):
 		# Functions to invoke when receiving a CQC Header of a certain type
 		self.messageHandlers = {
 			CQC_TP_HELLO: self.handle_hello,
@@ -89,11 +89,11 @@ class CQCMessageHandler(ABC):
 		}
 
 		# Convenience
-		self.name = host_name
+		self.name = factory.name
 		self.protocol = protocol  # ugly, but for now I don't know a better way
 
 	# @inlineCallbacks
-	def handle_cqc_header(self, header, message):
+	def handle_cqc_message(self, header, message):
 		"""
 		This calls the correct method to handle the cqcmessage, based on the type specified in the header
 		"""
@@ -286,7 +286,7 @@ class CQCMessageHandler(ABC):
 class SimulaqronCQCHandler(CQCMessageHandler):
 
 	def __init__(self, factory, protocol):
-		super().__init__(factory.name, protocol)
+		super().__init__(factory, protocol)
 		self.factory = factory
 
 	def handle_hello(self, header, data):

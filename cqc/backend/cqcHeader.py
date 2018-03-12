@@ -88,12 +88,13 @@ CQC_OPT_NOTIFY=0x01		# Send a notification when cmd done
 CQC_OPT_ACTION=0x02		# On if there are actions to execute when done
 CQC_OPT_BLOCK=0x04		# Block until command is done
 
+
 class CQCHeader:
 	"""
 		Definition of the general CQC header.
 	"""
 
-	def __init__(self, headerBytes = None):
+	def __init__(self, headerBytes=None):
 		"""
 			Initialize using values received from a packet.
 		"""
@@ -121,18 +122,15 @@ class CQCHeader:
 			Pack data into packet format. For defnitions see cLib/cgc.h
 		"""
 		if not self.is_set:
-			return(0)
-
-		cqcH = pack("=BBHL",self.version, self.tp, self.app_id, self.length)
-		return(cqcH)
-
+			return 0
+		cqcH = pack("=BBHL", self.version, self.tp, self.app_id, self.length)
+		return cqcH
 
 	def unpack(self, headerBytes):
 		"""
 			Unpack packet data. For definitions see cLib/cqc.h
 		"""
 		cqcH = unpack("=BBHL", headerBytes)
-
 		self.version = cqcH[0]
 		self.tp = cqcH[1]
 		self.app_id = cqcH[2]

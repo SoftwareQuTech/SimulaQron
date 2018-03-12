@@ -162,7 +162,7 @@ class CQCConnection:
 			:name:		The name of the host in the application network.
 			:timout:	The time to try to connect to the server. When timout is reached an RuntimeError is raised.
 		"""
-		if not name in self._classicalConn:
+		if name not in self._classicalConn:
 			if name in self._appNet.hostDict:
 				remoteHost = self._appNet.hostDict[name]
 			else:
@@ -376,9 +376,9 @@ class CQCConnection:
 					continue
 
 				# Got enough data for the CQC Header so read it in
-				gotCQCHeader = True;
+				gotCQCHeader = True
 				rawHeader = self.buf[0:CQC_HDR_LENGTH]
-				currHeader = CQCHeader(rawHeader);
+				currHeader = CQCHeader(rawHeader)
 
 				# Remove the header from the buffer
 				self.buf = self.buf[CQC_HDR_LENGTH:len(self.buf)]
@@ -393,16 +393,15 @@ class CQCConnection:
 				continue
 			else:
 				break
-
 		# We got all the data, read notify (and ent_info) if there is any
 		if currHeader.length == 0:
-			return (currHeader, None, None)
+			return currHeader, None, None
 		elif currHeader.length == CQC_NOTIFY_LENGTH:
 			try:
 				rawNotifyHeader = self.buf[:CQC_NOTIFY_LENGTH]
 				self.buf = self.buf[CQC_NOTIFY_LENGTH:len(self.buf)]
 				notifyHeader = CQCNotifyHeader(rawNotifyHeader)
-				return (currHeader, notifyHeader, None)
+				return currHeader, notifyHeader, None
 			except struct.error as err:
 				print(err)
 		elif currHeader.length == CQC_NOTIFY_LENGTH + ENT_INFO_LENGTH:
@@ -415,7 +414,7 @@ class CQCConnection:
 				self.buf = self.buf[ENT_INFO_LENGTH:len(self.buf)]
 				entInfoHeader = EntInfoHeader(rawEntInfoHeader)
 
-				return (currHeader, notifyHeader, entInfoHeader)
+				return currHeader, notifyHeader, entInfoHeader
 			except struct.error as err:
 				print(err)
 		else:

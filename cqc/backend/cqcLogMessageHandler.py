@@ -1,4 +1,3 @@
-
 # Copyright (c) 2018, Stephanie Wehner and Axel Dahlberg
 # All rights reserved.
 #
@@ -31,25 +30,29 @@
 This class interfaces cqcMessageHandler, and is for testing purposes only
 """
 
+from twisted.internet.defer import inlineCallbacks
+
 from SimulaQron.cqc.backend.cqcMessageHandler import CQCMessageHandler
 from SimulaQron.cqc.backend.cqcHeader import *
 
+import time
 import os
 import json
 import traceback
 
+from SimulaQron.cqc.backend.entInfoHeader import EntInfoHeader, ENT_INFO_LENGTH
+
 
 class CQCLogMessageHandler(CQCMessageHandler):
-
 	dir_path = os.path.dirname(os.path.realpath(__file__))
 	cur_qubit_id = 0
 	logData = []
 	log_index = 0
 
-	def __init__(self, host_name, protocol):
-		super().__init__(host_name, protocol)
-		CQCLogMessageHandler.file = "{}/logFile{}.json".format(CQCLogMessageHandler.dir_path, host_name)
-
+	def __init__(self, factory, protocol):
+		super().__init__(factory, protocol)
+		self.factory = factory
+		CQCLogMessageHandler.file = "{}/logFile{}.json".format(CQCLogMessageHandler.dir_path, factory.name)
 
 	@classmethod
 	def parse_data(cls, header, cmd, xtra, comment):
@@ -58,7 +61,8 @@ class CQCLogMessageHandler(CQCMessageHandler):
 			subdata['comment'] = comment
 			subdata['cqc_header'] = cls.parse_header(header)
 			subdata['cmd_header'] = cls.parse_cmd(cmd)
-			subdata['xtra_header'] = cls.parse_xtra(xtra)
+			if xtra:
+				subdata['xtra_header'] = cls.parse_xtra(xtra)
 			cls.logData.append(subdata)
 			cls.log_index += 1
 			with open(cls.file, 'w') as outfile:
@@ -90,6 +94,13 @@ class CQCLogMessageHandler(CQCMessageHandler):
 	@classmethod
 	def parse_xtra(cls, xtra):
 		xtra_data = {}
+		xtra_data['is_set'] = xtra.is_set
+		xtra_data['qubit_id'] = xtra.qubit_id
+		xtra_data['step'] = xtra.step
+		xtra_data['remote_app_id'] = xtra.remote_app_id
+		xtra_data['remote_node'] = xtra.remote_node
+		xtra_data['remote_port'] = xtra.remote_port
+		xtra_data['cmdLength'] = xtra.cmdLength
 		return xtra_data
 
 	def handle_hello(self, header, data):
@@ -156,6 +167,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		hdr = CQCNotifyHeader()
 		hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0)
 		msg = hdr.pack()
+		self.protocol._send_back_cqc(cqc_header, CQC_TP_MEASOUT, length=CQC_NOTIFY_LENGTH)
 		self.protocol.transport.write(msg)
 		return True
 
@@ -165,6 +177,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		hdr = CQCNotifyHeader()
 		hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0)
 		msg = hdr.pack()
+		self.protocol._send_back_cqc(cqc_header, CQC_TP_MEASOUT, length=CQC_NOTIFY_LENGTH)
 		self.protocol.transport.write(msg)
 		return True
 
@@ -178,11 +191,73 @@ class CQCLogMessageHandler(CQCMessageHandler):
 
 	def cmd_recv(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Receive")
+		q_id = CQCLogMessageHandler.cur_qubit_id
+		CQCLogMessageHandler.cur_qubit_id += 1
+
+		self.protocol._send_back_cqc(cqc_header, CQC_TP_RECV, length=CQC_NOTIFY_LENGTH)
+		hdr = CQCNotifyHeader()
+		hdr.setVals(q_id, 0, 0, 0, 0, 0)
+		msg = hdr.pack()
+		self.protocol.transport.write(msg)
 		return True
 
 	def cmd_epr(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "EPR")
+		self.parse_data(cqc_header, cmd, xtra, "Create EPR")
+
+		# Get ip and port of this host
+		host_node = self.factory.host.ip
+		host_port = self.factory.host.port
+		host_app_id = cqc_header.app_id
+
+		# Get ip and port of remote host
+		remote_node = xtra.remote_node
+		remote_port = xtra.remote_port
+		remote_app_id = xtra.remote_app_id
+
+		# Create the first qubit
+		(succ, q_id1) = self.cmd_new(cqc_header, cmd, xtra, return_q_id=True)
+		if not succ:
+			return False
+
+		# Create the second qubit
+		(succ, q_id2) = self.cmd_new(cqc_header, cmd, xtra, return_q_id=True)
+		if not succ:
+			return False
+
+		# Create headers for qubits
+		cmd1 = CQCCmdHeader()
+		cmd1.setVals(q_id1, 0, 0, 0, 0)
+
+		cmd2 = CQCCmdHeader()
+		cmd2.setVals(q_id2, 0, 0, 0, 0)
+
+		xtra_cnot = CQCXtraHeader()
+		xtra_cnot.setVals(q_id2, 0, 0, 0, 0, 0)
+
+		# Produce EPR-pair
+		succ = self.cmd_h(cqc_header, cmd1, None)
+		if not succ:
+			return False
+		succ = self.cmd_cnot(cqc_header, cmd1, xtra_cnot)
+		if not succ:
+			return False
+
+		self.protocol._send_back_cqc(cqc_header, CQC_TP_EPR_OK, length=CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH)
+		hdr = CQCNotifyHeader()
+		hdr.setVals(q_id1, 0, 0, 0, 0, 0)
+		msg = hdr.pack()
+		self.protocol.transport.write(msg)
+		logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
+
+		# Send entanglement info
+		ent_id = 1
+		ent_info = EntInfoHeader()
+		ent_info.setVals(host_node, host_port, host_app_id, remote_node, remote_port, remote_app_id, ent_id, int(time.time()), int(time.time()), 0, 1)
+
+		msg = ent_info.pack()
+		self.protocol.transport.write(msg)
 		return True
+
 
 	def cmd_epr_recv(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Receive EPR")
@@ -201,6 +276,5 @@ class CQCLogMessageHandler(CQCMessageHandler):
 			msg = hdr.pack()
 			self.protocol.transport.write(msg)
 		if return_q_id:
-			print(q_id)
 			return True, q_id
 		return True
