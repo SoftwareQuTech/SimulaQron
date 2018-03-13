@@ -202,7 +202,7 @@ class CQCConnection:
 			:msg:		The message to send. Should be either a int in range(0,256) or a list of such ints.
 			:timout:	The time to try to connect to the server. When timout is reached an RuntimeError is raised.
 		"""
-		if not name in self._classicalConn:
+		if name not in self._classicalConn:
 			self.openClassicalChannel(name)
 		try:
 			to_send = [int(msg)]

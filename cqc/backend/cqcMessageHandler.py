@@ -126,10 +126,6 @@ class CQCMessageHandler(ABC):
 
 		return False
 
-	@abstractmethod
-	def handle_hello(self, header, data):
-		pass
-
 	@inlineCallbacks
 	def handle_command(self, header, data):
 		"""
@@ -193,6 +189,10 @@ class CQCMessageHandler(ABC):
 			cur_length = newl
 
 		return True, should_notify
+
+	@abstractmethod
+	def handle_hello(self, header, data):
+		pass
 
 	@abstractmethod
 	def handle_factory(self, header, data):
@@ -630,7 +630,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 		# Create headers for qubits
 		cmd1 = CQCCmdHeader()
-		cmd1.setVals(q_id1, 0, 0, 0, 0)
+		cmd1.setVals(q_id1, CQC_CMD_H, 0, 0, 0)
 
 		cmd2 = CQCCmdHeader()
 		cmd2.setVals(q_id2, 0, 0, 0, 0)
@@ -776,7 +776,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		(return_q_id is used internally)
 		"""
 		app_id = cqc_header.app_id
-
 		try:
 			self.factory._lock.acquire()
 
@@ -808,7 +807,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 				return False, None
 			else:
 				return False
-
 		self.factory._lock.release()
 		if return_q_id:
 			return True, q_id

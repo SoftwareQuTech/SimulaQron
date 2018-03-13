@@ -30,7 +30,7 @@
 This class interfaces cqcMessageHandler, and is for testing purposes only
 """
 
-from twisted.internet.defer import inlineCallbacks
+# from twisted.internet.defer import inlineCallbacks
 
 from SimulaQron.cqc.backend.cqcMessageHandler import CQCMessageHandler
 from SimulaQron.cqc.backend.cqcHeader import *
@@ -38,7 +38,6 @@ from SimulaQron.cqc.backend.cqcHeader import *
 import time
 import os
 import json
-import traceback
 
 from SimulaQron.cqc.backend.entInfoHeader import EntInfoHeader, ENT_INFO_LENGTH
 
@@ -47,7 +46,6 @@ class CQCLogMessageHandler(CQCMessageHandler):
 	dir_path = os.path.dirname(os.path.realpath(__file__))
 	cur_qubit_id = 0
 	logData = []
-	log_index = 0
 
 	def __init__(self, factory, protocol):
 		super().__init__(factory, protocol)
@@ -56,20 +54,30 @@ class CQCLogMessageHandler(CQCMessageHandler):
 
 	@classmethod
 	def parse_data(cls, header, cmd, xtra, comment):
-		try:
-			subdata = {}
-			subdata['comment'] = comment
-			subdata['cqc_header'] = cls.parse_header(header)
-			subdata['cmd_header'] = cls.parse_cmd(cmd)
-			if xtra:
-				subdata['xtra_header'] = cls.parse_xtra(xtra)
-			cls.logData.append(subdata)
-			cls.log_index += 1
-			with open(cls.file, 'w') as outfile:
-				json.dump(cls.logData, outfile)
-		except Exception as e:
-			print(e)
-			traceback.print_exc()
+		subdata = {}
+		subdata['comment'] = comment
+		subdata['cqc_header'] = cls.parse_header(header)
+		subdata['cmd_header'] = cls.parse_cmd(cmd)
+		if xtra:
+			subdata['xtra_header'] = cls.parse_xtra(xtra)
+		cls.logData.append(subdata)
+		with open(cls.file, 'w') as outfile:
+			json.dump(cls.logData, outfile)
+
+	@classmethod
+	def parse_handle_data(cls, header, data, comment):
+		cmd_l = CQC_CMD_HDR_LENGTH
+		xtra_l = CQC_CMD_XTRA_LENGTH
+		subdata = {}
+		subdata['comment'] = comment
+		subdata['cqc_header'] = cls.parse_header(header)
+		if len(data) >= cmd_l:
+			subdata['cmd_header'] = cls.parse_cmd(CQCCmdHeader(data[:cmd_l]))
+		if len(data) >= cmd_l + xtra_l:
+			subdata['xtra_header'] = cls.parse_xtra(CQCXtraHeader(data[cmd_l:cmd_l+xtra_l]))
+		cls.logData.append(subdata)
+		with open(cls.file, 'w') as outfile:
+			json.dump(cls.logData, outfile)
 
 	@classmethod
 	def parse_header(cls, header):
@@ -104,12 +112,67 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		return xtra_data
 
 	def handle_hello(self, header, data):
-		return True
+		"""
+		Hello just requires us to return hello - for testing availability.
+		"""
+		self.parse_handle_data(header, data, "Handle Hello")
+		hdr = CQCHeader()
+		hdr.setVals(CQC_VERSION, CQC_TP_HELLO, header.app_id, 0)
+		msg = hdr.pack()
+		self.protocol.transport.write(msg)
 
 	def handle_factory(self, header, data):
-		return True
+		# Calls process_command, which should also log
+		self.parse_handle_data(header, data, "Handle factory")
+		cmd_l = CQC_CMD_HDR_LENGTH
+		xtra_l = CQC_CMD_XTRA_LENGTH
+
+		# Get command header
+		if len(data) < cmd_l:
+			# logging.debug("CQC %s: Missing CMD Header", self.name)
+			self.protocol._send_back_cqc(header, CQC_ERR_UNSUPP)
+		cmd_header = CQCCmdHeader(data[:cmd_l])
+
+		# Get xtra header
+		if len(data) < (cmd_l + xtra_l):
+			# logging.debug("CQC %s: Missing XTRA Header", self.name)
+			self.protocol._send_back_cqc(header, CQC_ERR_UNSUPP)
+		xtra_header = CQCXtraHeader(data[cmd_l:cmd_l + xtra_l])
+
+		num_iter = xtra_header.step
+
+		# Perform operation multiple times
+		all_succ = True
+		for _ in range(num_iter):
+			if self.has_extra(cmd_header):
+				(succ, should_notify) = self._process_command(header, header.length, data)
+			else:
+				data = data[:cmd_l] + data[cmd_l + xtra_l:]
+				(succ, should_notify) = self._process_command(header, header.length - xtra_l, data)
+			all_succ = (all_succ and succ)
+		if all_succ:
+			if should_notify:
+				# Send a notification that we are done if successful
+				self.protocol._send_back_cqc(header, CQC_TP_DONE)
+				# logging.debug("CQC %s: Command successful, sent done.", self.name)
 
 	def handle_time(self, header, data):
+		self.parse_handle_data(header, data, "Handle time")
+		# Read the command header to learn the qubit ID
+		raw_cmd_header = data[:CQC_CMD_HDR_LENGTH]
+		cmd_hdr = CQCCmdHeader(raw_cmd_header)
+		# Craft reply
+		# First send an appropriate CQC Header
+		self.protocol._send_back_cqc(header, CQC_TP_INF_TIME, length=CQC_NOTIFY_LENGTH)
+
+		# Then we send a notify header with the timing details
+		# We do not have a qubit, so no timestamp either.
+		# So let's send back some random date
+		datetime = 758505600
+		notify = CQCNotifyHeader()
+		notify.setVals(cmd_hdr.qubit_id, 0, 0, 0, 0, datetime)
+		msg = notify.pack()
+		self.protocol.transport.write(msg)
 		return True
 
 	def cmd_i(self, cqc_header, cmd, xtra):
@@ -162,8 +225,8 @@ class CQCLogMessageHandler(CQCMessageHandler):
 
 	def cmd_measure(self, cqc_header, cmd, xtra, inplace=False):
 		self.parse_data(cqc_header, cmd, xtra, "Measure")
-		# We'll always have 1 as outcome
-		outcome = 1
+		# We'll always have 2 as outcome
+		outcome = 2
 		hdr = CQCNotifyHeader()
 		hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0)
 		msg = hdr.pack()
@@ -173,7 +236,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
 
 	def cmd_measure_inplace(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Measure in place")
-		outcome = 1
+		outcome = 2
 		hdr = CQCNotifyHeader()
 		hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0)
 		msg = hdr.pack()
@@ -261,6 +324,15 @@ class CQCLogMessageHandler(CQCMessageHandler):
 
 	def cmd_epr_recv(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Receive EPR")
+		q_id = CQCLogMessageHandler.cur_qubit_id
+		CQCLogMessageHandler.cur_qubit_id += 1
+
+		self.protocol._send_back_cqc(cqc_header, CQC_TP_RECV, length=CQC_NOTIFY_LENGTH)
+		hdr = CQCNotifyHeader()
+		hdr.setVals(q_id, 0, 0, 0, 0, 0)
+		msg = hdr.pack()
+		self.protocol.transport.write(msg)
+
 		return True
 
 	def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False):
