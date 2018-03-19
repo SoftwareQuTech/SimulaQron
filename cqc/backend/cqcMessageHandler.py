@@ -53,9 +53,12 @@ Abstract class. Classes that inherit this class define how to handle incoming cq
 """
 
 
+
+
+
 class CQCMessageHandler(ABC):
 
-	def __init__(self, factory, protocol):
+	def __init__(self, factory):
 		# Functions to invoke when receiving a CQC Header of a certain type
 		self.messageHandlers = {
 			CQC_TP_HELLO: self.handle_hello,
@@ -90,7 +93,8 @@ class CQCMessageHandler(ABC):
 
 		# Convenience
 		self.name = factory.name
-		self.protocol = protocol  # ugly, but for now I don't know a better way
+		self.protocol = None
+		# self.protocol = protocol  # ugly, but for now I don't know a better way
 
 	# @inlineCallbacks
 	def handle_cqc_message(self, header, message):
@@ -98,9 +102,26 @@ class CQCMessageHandler(ABC):
 		This calls the correct method to handle the cqcmessage, based on the type specified in the header
 		"""
 		if header.tp in self.messageHandlers:
-			self.messageHandlers[header.tp](header, message)
+			try:
+				return self.messageHandlers[header.tp](header, message)
+			except UnknownQubitError as e:
+				logging.error(str(e))
+				return self.create_return_message(header.app_id, CQC_ERR_NOQUBIT)
 		else:
-			raise UnknownCommandError("Unknown header command {}".format(header.tp))
+			return self.create_return_message(header.app_id, CQC_ERR_UNSUPP)
+
+	@staticmethod
+	def create_return_message(app_id, msg_type, length=0):
+		"""
+		Creates a messaage that the protocol should send back
+		:param app_id: the app_id to which the message should be send
+		:param msg_type: the type of message to return
+		:return: a new header message to be send back
+		:param length: the length of additional message
+		"""
+		hdr = CQCHeader()
+		hdr.setVals(CQC_VERSION, msg_type, app_id, length)
+		return hdr.pack()
 
 	@staticmethod
 	def has_extra(cmd):
@@ -133,11 +154,12 @@ class CQCMessageHandler(ABC):
 		"""
 		logging.debug("CQC %s: Command received", self.name)
 		# Run the entire command list, incl. actions after completion which here we will do instantly
-		success, should_notify = yield self._process_command(header, header.length, data)
+		msgs, success, should_notify = yield self._process_command(header, header.length, data)
 		if success and should_notify:
 			# Send a notification that we are done if successful
-			self.protocol._send_back_cqc(header, CQC_TP_DONE)
 			logging.debug("CQC %s: Command successful, sent done.", self.name)
+			msgs.append(self.create_return_message(header.app_id, CQC_TP_DONE))
+		return msgs
 
 	@inlineCallbacks
 	def _process_command(self, cqc_header, length, data):
@@ -150,6 +172,7 @@ class CQCMessageHandler(ABC):
 		# Read in all the commands sent
 		cur_length = 0
 		should_notify = False
+		return_messages = []
 		while cur_length < length:
 			cmd = CQCCmdHeader(cmd_data[cur_length:cur_length + CQC_CMD_HDR_LENGTH])
 			newl = cur_length + CQC_CMD_HDR_LENGTH
@@ -162,7 +185,6 @@ class CQCMessageHandler(ABC):
 				if len(cmd_data) < (newl + CQC_CMD_XTRA_LENGTH):
 					logging.debug("CQC %s: Missing XTRA Header", self.name)
 				else:
-					# logging.debug("XXX")
 					xtra = CQCXtraHeader(cmd_data[newl:newl + CQC_CMD_XTRA_LENGTH])
 					newl = newl + CQC_CMD_XTRA_LENGTH
 					logging.debug("CQC %s: Read XTRA Header: %s", self.name, xtra.printable())
@@ -172,23 +194,27 @@ class CQCMessageHandler(ABC):
 			# Run this command
 			logging.debug("CQC %s: Executing command: %s", self.name, cmd.printable())
 			if cmd.instr not in self.commandHandlers:
-				raise UnknownCommandError("Unknown command {}".format(cmd.instr))
+				logging.debug("CQC {}: Unknown command {}".format(self.name, cmd.instr))
+				return self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
 
-			succ = yield self.commandHandlers[cmd.instr](cqc_header, cmd, xtra)
-			if not succ:
-				return False, 0
+			msgs = yield self.commandHandlers[cmd.instr](cqc_header, cmd, xtra)
+			if msgs is None:
+				return return_messages, False, 0
+
+			return_messages.extend(msgs)
 
 			# Check if there are additional commands to execute afterwards
 			if cmd.action:
-				(succ, retNotify) = self._process_command(cqc_header, xtra.cmdLength, data[newl:newl + xtra.cmdLength])
+				(msgs, succ, retNotify) = self._process_command(cqc_header, xtra.cmdLength, data[newl:newl + xtra.cmdLength])
 				should_notify = (should_notify or retNotify)
 				if not succ:
-					return False, 0
+					return return_messages, False, 0
+				return_messages.extend(msgs)
 				newl = newl + xtra.cmdLength
 
 			cur_length = newl
 
-		return True, should_notify
+		return return_messages, True, should_notify
 
 	@abstractmethod
 	def handle_hello(self, header, data):
@@ -279,24 +305,31 @@ class CQCMessageHandler(ABC):
 		pass
 
 	@abstractmethod
-	def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False):
+	def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False, return_succ=False):
 		pass
 
 
 class SimulaqronCQCHandler(CQCMessageHandler):
 
-	def __init__(self, factory, protocol):
-		super().__init__(factory, protocol)
+	# Dictionary storing the next unique qubit id for each used app_id
+	_next_q_id = {}
+
+	# Dictionary storing the next unique entanglement id for each used (host_app_id,remote_node,remote_app_id)
+	_next_ent_id = {}
+
+	def __init__(self, factory):
+		super().__init__(factory)
 		self.factory = factory
+
+		# Dictionary that keeps qubit dictorionaries for each application
+		self.qubitList = {}
 
 	def handle_hello(self, header, data):
 		"""
 		Hello just requires us to return hello - for testing availability.
 		"""
-		hdr = CQCHeader()
-		hdr.setVals(CQC_VERSION, CQC_TP_HELLO, header.app_id, 0)
-		msg = hdr.pack()
-		self.protocol.transport.write(msg)
+		msg = self.create_return_message(header.app_id, CQC_TP_HELLO)
+		return msg
 
 	@inlineCallbacks
 	def handle_factory(self, header, data):
@@ -307,13 +340,13 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# Get command header
 		if len(data) < cmd_l:
 			logging.debug("CQC %s: Missing CMD Header", self.name)
-			self.protocol._send_back_cqc(header, CQC_ERR_UNSUPP)
+			return self.create_return_message(header.app_id, CQC_ERR_UNSUPP)
 		cmd_header = CQCCmdHeader(data[:cmd_l])
 
 		# Get xtra header
 		if len(data) < (cmd_l + xtra_l):
 			logging.debug("CQC %s: Missing XTRA Header", self.name)
-			self.protocol._send_back_cqc(header, CQC_ERR_UNSUPP)
+			return self.create_return_message(header.app_id, CQC_ERR_UNSUPP)
 		xtra_header = CQCXtraHeader(data[cmd_l:cmd_l + xtra_l])
 
 		command = cmd_header.instr
@@ -321,18 +354,22 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 		# Perform operation multiple times
 		all_succ = True
+		should_notify = False
+		return_messages = []
 		for _ in range(num_iter):
 			if self.has_extra(cmd_header):
-				(succ, should_notify) = yield self._process_command(header, header.length, data)
+				(msgs, succ, should_notify) = yield self._process_command(header, header.length, data)
 			else:
 				data = data[:cmd_l] + data[cmd_l + xtra_l:]
-				(succ, should_notify) = yield self._process_command(header, header.length - xtra_l, data)
+				(msgs, succ, should_notify) = yield self._process_command(header, header.length - xtra_l, data)
 			all_succ = (all_succ and succ)
+			return_messages.extend(msgs)
 		if all_succ:
 			if should_notify:
 				# Send a notification that we are done if successful
-				self.protocol._send_back_cqc(header, CQC_TP_DONE)
 				logging.debug("CQC %s: Command successful, sent done.", self.name)
+				return_messages.append(self.create_return_message(header.app_id, CQC_TP_DONE))
+		return return_messages
 
 	def handle_time(self, header, data):
 
@@ -348,25 +385,24 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			q = q_list[(header.app_id, cmd_hdr.qubit_id)]
 		else:
 			# Specified qubit is unknown
-			self.protocol._send_back_cqc(header, CQC_ERR_NOQUBIT)
-			return
+			return self.create_return_message(header.app_id, CQC_ERR_NOQUBIT)
 
 		# Craft reply
 		# First send an appropriate CQC Header
-		self.protocol._send_back_cqc(header, CQC_TP_INF_TIME, length=CQC_NOTIFY_LENGTH)
+		cqc_msg = self.create_return_message(header.app_id, CQC_TP_INF_TIME, length=CQC_NOTIFY_LENGTH)
 
 		# Then we send a notify header with the timing details
 		notify = CQCNotifyHeader()
 		notify.setVals(cmd_hdr.qubit_id, 0, 0, 0, 0, q.timestamp)
 		msg = notify.pack()
-		self.protocol.transport.write(msg)
+		return [cqc_msg, msg]
 
 	def cmd_i(self, cqc_header, cmd, xtra):
 		"""
 		Do nothing. In reality we would wait a timestep but in SimulaQron we just do nothing.
 		"""
 		logging.debug("CQC %s: Doing Nothing to App ID %d qubit id %d", self.name, cqc_header.app_id, cmd.qubit_id)
-		return True
+		return []
 
 	def cmd_x(self, cqc_header, cmd, xtra):
 		"""
@@ -414,10 +450,10 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
 		if not virt_qubit:
 			logging.debug("CQC %s: No such qubit", self.name)
-			return False
+			return self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
 
 		yield virt_qubit.callRemote("apply_rotation", axis , 2 * np.pi/256 * xtra.step)
-		return True
+		return []
 
 	def cmd_rotx(self, cqc_header, cmd, xtra):
 		"""
@@ -458,30 +494,29 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
 		if not virt_qubit:
 			logging.debug("CQC %s: No such qubit", self.name)
-			return False
+			return self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
 
 		outcome = yield virt_qubit.callRemote("measure", inplace)
 		if outcome is None:
 			logging.debug("CQC %s: Measurement failed", self.name)
-			self.protocol._send_back_cqc(cqc_header, CQC_ERR_GENERAL)
-			return False
+			return self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
 
 		logging.debug("CQC %s: Measured outcome %d", self.name, outcome)
 		# Send the outcome back as MEASOUT
-		self.protocol._send_back_cqc(cqc_header, CQC_TP_MEASOUT, length=CQC_NOTIFY_LENGTH)
+		cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_MEASOUT, length=CQC_NOTIFY_LENGTH)
 
 		# Send notify header with outcome
 		hdr = CQCNotifyHeader()
 		hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0)
 		msg = hdr.pack()
-		self.protocol.transport.write(msg)
+		# self.protocol.transport.write(msg)
 		logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
 
 		if not inplace:
 			# Remove from active mapped qubits
 			del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
 
-		return True
+		return [cqc_msg, msg]
 
 	@inlineCallbacks
 	def cmd_measure_inplace(self, cqc_header, cmd, xtra):
@@ -507,7 +542,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# If state is |1> do correction
 		if outcome:
 			yield virt_qubit.callRemote("apply_X")
-		return True
+		return []
 
 	@inlineCallbacks
 	def cmd_send(self, cqc_header, cmd, xtra):
@@ -524,8 +559,8 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# Check so that it is not the same node
 		if self.name == target_name:
 			logging.debug("CQC %s: Trying to send from node to itself.", self.name)
-			self.protocol._send_back_cqc(cqc_header, CQC_ERR_GENERAL)
-			return False
+			# self.protocol._send_back_cqc(cqc_header, CQC_ERR_GENERAL)
+			return self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
 
 		# Lookup the virtual qubit from identifier
 		virt_num = yield self.get_virt_qubit_indep(cqc_header, cmd.qubit_id)
@@ -540,7 +575,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# Remove from active mapped qubits
 		del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
 
-		return True
+		return []
 
 	@inlineCallbacks
 	def cmd_recv(self, cqc_header, cmd, xtra):
@@ -564,8 +599,8 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 				time.sleep(0.1)
 		if no_qubit:
 			logging.debug("CQC %s: TIMEOUT, no qubit received.", self.name)
-			self.protocol._send_back_cqc(cqc_header, CQC_ERR_TIMEOUT)
-			return False
+			# self.protocol._send_back_cqc(cqc_header, CQC_ERR_TIMEOUT)
+			return self.create_return_message(cqc_header.app_id, CQC_ERR_TIMEOUT)
 
 		logging.debug("CQC %s: Qubit received for app_id %d",self.name, cqc_header.app_id)
 
@@ -575,12 +610,12 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			self.factory._lock.acquire()
 
 			# Get new qubit ID
-			q_id = self.protocol.new_qubit_id(app_id)
+			q_id = self.new_qubit_id(app_id)
 
 			if (app_id, q_id) in self.factory.qubitList:
 				logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
-				self.protocol._send_back_cqc(cqc_header, CQC_ERR_INUSE)
-				return False
+				# self.protocol._send_back_cqc(cqc_header, CQC_ERR_INUSE)
+				return self.create_return_message(cqc_header.app_id, CQC_ERR_INUSE)
 
 			q = CQCQubit(q_id, int(time.time()), virt_qubit)
 			self.factory.qubitList[(app_id, q_id)] = q
@@ -589,17 +624,17 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 		# Send message we received a qubit back
 		# logging.debug("GOO")
-		self.protocol._send_back_cqc(cqc_header, CQC_TP_RECV, length=CQC_NOTIFY_LENGTH)
+		recv_msg = self.create_return_message(cqc_header.app_id, CQC_TP_RECV, length=CQC_NOTIFY_LENGTH)
 
 		# Send notify header with qubit ID
 		# logging.debug("GOO")
 		hdr = CQCNotifyHeader()
 		hdr.setVals(q_id, 0, 0, 0, 0, 0)
 		msg = hdr.pack()
-		self.protocol.transport.write(msg)
+		# self.protocol.transport.write(msg)
 		logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
 
-		return True
+		return [recv_msg, msg]
 
 	@inlineCallbacks
 	def cmd_epr(self, cqc_header, cmd, xtra):
@@ -618,15 +653,20 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		remote_port = xtra.remote_port
 		remote_app_id = xtra.remote_app_id
 
+		# Messages to write back
+		return_messages = []
+
 		# Create the first qubit
-		(succ, q_id1) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True)
+		(msgs, succ, q_id1) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
 		if not succ:
 			return False
+		return_messages.extend(msgs)
 
 		# Create the second qubit
-		(succ, q_id2) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True)
+		(msgs, succ, q_id2) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
 		if not succ:
 			return False
+		return_messages.extend(msgs)
 
 		# Create headers for qubits
 		cmd1 = CQCCmdHeader()
@@ -639,15 +679,18 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		xtra_cnot.setVals(q_id2, 0, 0, 0, 0, 0)
 
 		# Produce EPR-pair
-		succ = yield self.cmd_h(cqc_header, cmd1, None)
-		if not succ:
-			return False
-		succ = yield self.cmd_cnot(cqc_header, cmd1, xtra_cnot)
-		if not succ:
-			return False
+		msgs = yield self.cmd_h(cqc_header, cmd1, None)
+		# Should not give back any messages, if it does, send it back
+		if msgs is None or len(msgs) > 0:
+			return_messages.extend(msgs)
+			return return_messages
+		msgs = yield self.cmd_cnot(cqc_header, cmd1, xtra_cnot)
+		if msgs is None or len(msgs) > 0:
+			return_messages.extend(msgs)
+			return return_messages
 
 		# Get entanglement id XXX lock here?
-		ent_id = self.protocol.new_ent_id(host_app_id, remote_node, remote_app_id)
+		ent_id = self.new_ent_id(host_app_id, remote_node, remote_app_id)
 
 		# Prepare ent_info header with entanglement information
 		ent_info = EntInfoHeader()
@@ -658,22 +701,27 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			return False
 
 		# Send message we created EPR pair
-		self.protocol._send_back_cqc(cqc_header, CQC_TP_EPR_OK, length=CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH)
+		msg_ok = self.create_return_message(cqc_header.app_id, CQC_TP_EPR_OK, length=CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH)
+
+		return_messages.append(msg_ok)
 
 		# Send notify header with qubit ID
 		hdr = CQCNotifyHeader()
 		hdr.setVals(q_id1, 0, 0, 0, 0, 0)
-		msg = hdr.pack()
-		self.protocol.transport.write(msg)
+		msg_notify = hdr.pack()
+
+		return_messages.append(msg_notify)
+		# self.protocol.transport.write(msg)
 		logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
 
 		# Send entanglement info
-		msg = ent_info.pack()
-		self.protocol.transport.write(msg)
+		msg_ent_info = ent_info.pack()
+		return_messages.append(msg_ent_info)
+		# self.protocol.transport.write(msg)
 		logging.debug("CQC %s: Entanglement information %s", self.name, ent_info.printable())
 
 		logging.debug("CQC %s: EPR Pair ID %d qubit id %d", self.name, cqc_header.app_id, cmd.qubit_id)
-		return True
+		return return_messages
 
 	@inlineCallbacks
 	def send_epr_half(self, cqc_header, cmd, xtra, ent_info):
@@ -713,7 +761,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 		# First get the app_id and q_id
 		app_id = cqc_header.app_id
-		q_id = self.protocol.new_qubit_id(app_id)
+		q_id = self.new_qubit_id(app_id)
 
 		# This will block until a qubit is received.
 		no_qubit = True
@@ -730,8 +778,8 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 				time.sleep(0.1)
 		if no_qubit:
 			logging.debug("CQC %s: TIMEOUT, no qubit received.", self.name)
-			self.protocol._send_back_cqc(cqc_header, CQC_ERR_TIMEOUT)
-			return False
+			# self.protocol._send_back_cqc(cqc_header, CQC_ERR_TIMEOUT)
+			return self.create_return_message(cqc_header.app_id, CQC_ERR_TIMEOUT)
 
 		logging.debug("CQC %s: Qubit received for app_id %d", self.name, cqc_header.app_id)
 
@@ -742,8 +790,8 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 			if (app_id, q_id) in self.factory.qubitList:
 				logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
-				self.protocol._send_back_cqc(cqc_header, CQC_ERR_INUSE)
-				return False
+				# self.protocol._send_back_cqc(cqc_header, CQC_ERR_INUSE)
+				return self.create_return_message(cqc_header.app_id, CQC_ERR_INUSE)
 
 			q = CQCQubit(q_id, int(time.time()), virt_qubit)
 			self.factory.qubitList[(app_id, q_id)] = q
@@ -751,31 +799,32 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			self.factory._lock.release()
 
 		# Send message we received a qubit back
-		self.protocol._send_back_cqc(cqc_header, CQC_TP_EPR_OK, length=CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH)
+		cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_EPR_OK, length=CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH)
 
 		# Send notify header with qubit ID
 		hdr = CQCNotifyHeader()
 		hdr.setVals(q_id, 0, 0, 0, 0, 0)
-		msg = hdr.pack()
-		self.protocol.transport.write(msg)
+		notify_msg = hdr.pack()
+		# self.protocol.transport.write(msg)
 		logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
 
 		# Send entanglement info
-		msg = ent_info.pack()
-		self.protocol.transport.write(msg)
+		ent_info_msg = ent_info.pack()
+		# self.protocol.transport.write(msg)
 		logging.debug("CQC %s: Entanglement information %s", self.name, ent_info.printable())
 
 		logging.debug("CQC %s: EPR Pair ID %d qubit id %d", self.name, cqc_header.app_id, cmd.qubit_id)
 
-		return True
+		return [cqc_msg, notify_msg, ent_info_msg]
 
 	@inlineCallbacks
-	def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False):
+	def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False, return_succ=False):
 		"""
 		Request a new qubit. Since we don't need it, this python CQC just provides very crude timing information.
 		(return_q_id is used internally)
 		"""
 		app_id = cqc_header.app_id
+		return_messages = []
 		try:
 			self.factory._lock.acquire()
 
@@ -783,35 +832,44 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			if not virt:  # if no more qubits
 				raise quantumError("No more qubits available")
 
-			q_id = self.protocol.new_qubit_id(app_id)
+			q_id = self.new_qubit_id(app_id)
 			q = CQCQubit(q_id, int(time.time()), virt)
 			self.factory.qubitList[(app_id, q_id)] = q
 			logging.debug("CQC %s: Requested new qubit (%d,%d)", self.name, app_id, q_id)
+
 			if not return_q_id:
 				# Send message we created a qubit back
 				# logging.debug("GOO")
-				self.protocol._send_back_cqc(cqc_header, CQC_TP_NEW_OK, length=CQC_NOTIFY_LENGTH)
+				cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_NEW_OK, length=CQC_NOTIFY_LENGTH)
+				# self.protocol.transport.write(cqc_msg)
+				return_messages.append(cqc_msg)
 
 				# Send notify header with qubit ID
 				hdr = CQCNotifyHeader()
 				hdr.setVals(q_id, 0, 0, 0, 0, 0)
 				msg = hdr.pack()
-				self.protocol.transport.write(msg)
+				# self.protocol.transport.write(msg)
 				logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
+				return_messages.append(msg)
 
 		except quantumError:  # if no more qubits
 			logging.error("CQC %s: Maximum number of qubits reached.", self.name)
-			self.protocol._send_back_cqc(cqc_header, CQC_ERR_NOQUBIT)
+			msg = self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
+			return_messages.append(msg)
 			self.factory._lock.release()
 			if return_q_id:
-				return False, None
-			else:
+				return return_messages, False, None
+			elif return_succ:
 				return False
+			else:
+				return msg
 		self.factory._lock.release()
 		if return_q_id:
-			return True, q_id
+			return return_messages, True, q_id
+		elif return_succ:
+			return return_messages, True
 		else:
-			return True
+			return return_messages
 
 	@inlineCallbacks
 	def apply_single_qubit_gate(self, cqc_header, qubit_id, gate):
@@ -819,10 +877,10 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		virt_qubit = self.get_virt_qubit(cqc_header, qubit_id)
 		if not virt_qubit:
 			logging.debug("CQC %s: No such qubit", self.name)
-			return False
+			return self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
 
 		yield virt_qubit.callRemote(gate)
-		return True
+		return []
 
 	@inlineCallbacks
 	def apply_two_qubit_gate(self, cqc_header, cmd, xtra, gate):
@@ -838,7 +896,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 		yield control.callRemote(gate, target)
 		# res = yield self.apply_two_qubit_gate(cqc_header, cmd.qubit_id, xtra.qubit.id, "cnot_onto")
-		return True
+		return []
 
 	def get_virt_qubit(self, header, qubit_id):
 		"""
@@ -868,17 +926,46 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# logging.debug("GOT NUMBER %d XXX",num)
 		return num
 
+	@staticmethod
+	def new_qubit_id(app_id):
+		"""
+		Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv
+		"""
+		if app_id in SimulaqronCQCHandler._next_q_id:
+			q_id = SimulaqronCQCHandler._next_q_id[app_id]
+			SimulaqronCQCHandler._next_q_id[app_id] += 1
+			return q_id
+		else:
+			"""
+			Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv
+			"""
+			if app_id in SimulaqronCQCHandler._next_q_id:
+				q_id = SimulaqronCQCHandler._next_q_id[app_id]
+				SimulaqronCQCHandler._next_q_id[app_id] += 1
+				return q_id
+			else:
+				SimulaqronCQCHandler._next_q_id[app_id] = 1
+				return 0
 
-class UnknownCommandError(Exception):
-	def __init__(self, message):
-		self.message = message
+	@staticmethod
+	def new_ent_id(host_app_id, remote_node, remote_app_id):
+		"""
+		Returns a new unique entanglement id for the specified host_app_id, remote_node and remote_app_id. Used by cmd_epr.
+		"""
+		pair_id = (host_app_id, remote_node, remote_app_id)
+		if pair_id in SimulaqronCQCHandler._next_ent_id:
+			ent_id = SimulaqronCQCHandler._next_ent_id[pair_id]
+			SimulaqronCQCHandler._next_ent_id[pair_id] += 1
+			return ent_id
+		else:
+			SimulaqronCQCHandler._next_ent_id[pair_id] = 1
+			return 0
 
 
 class UnknownQubitError(Exception):
+
 	def __init__(self, message):
-		self.message = message
-
-
+		super.__init__(message)
 #######################################################################################################
 #
 # CQC Internal qubit object to translate to the native mode of SimulaQron

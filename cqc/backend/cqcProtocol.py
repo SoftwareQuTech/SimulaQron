@@ -133,7 +133,7 @@ class CQCProtocol(Protocol):
 
 		# Define which entity you use to handle the messages
 		# Could be using the SimulaQron handler, but also just a logger
-		self.messageHandler = SimulaqronCQCHandler(factory, self)
+		self.messageHandler = SimulaqronCQCHandler(factory)
 		# self.messageHandler = CQCLogMessageHandler(factory, self)
 
 		# Flag to determine whether we already received _all_ of the CQC header
@@ -194,12 +194,8 @@ class CQCProtocol(Protocol):
 		self.app_id = self.currHeader.app_id
 
 		# Invoke the relevant message handler, processing the possibly remaining data
-		try:
-			self.messageHandler.handle_cqc_message(self.currHeader, self.buf[0:self.currHeader.length])
-		except UnknownCommandError:
-			self._send_back_cqc(self.currHeader, CQC_ERR_UNSUPP)
-		except UnknownQubitError:
-			self._send_back_cqc(self.currHeader, CQC_ERR_NOQUBIT)
+		self.parseData(self.currHeader, self.buf[0:self.currHeader.length])
+
 		# if self.currHeader.tp in self.messageHandlers:
 		# 	self.messageHandlers[self.currHeader.tp](self.currHeader, )
 		# else:
@@ -214,6 +210,16 @@ class CQCProtocol(Protocol):
 			self.dataReceived(b'')
 		else:
 			self.buf = None
+
+	@inlineCallbacks
+	def parseData(self, header, data):
+		messages = yield self.messageHandler.handle_cqc_message(header, data)
+		print(199, messages)
+		if messages:
+			# self.factory._lock.acquire()
+			for msg in messages:
+				self.transport.write(msg)
+			# self.factory._lock.release()
 
 
 	def _send_back_cqc(self, header, msgType, length=0):

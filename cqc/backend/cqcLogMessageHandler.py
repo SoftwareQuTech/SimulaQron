@@ -43,6 +43,7 @@ from SimulaQron.cqc.backend.entInfoHeader import EntInfoHeader, ENT_INFO_LENGTH
 
 
 class CQCLogMessageHandler(CQCMessageHandler):
+	file = None
 	dir_path = os.path.dirname(os.path.realpath(__file__))
 	cur_qubit_id = 0
 	logData = []
@@ -145,10 +146,10 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		all_succ = True
 		for _ in range(num_iter):
 			if self.has_extra(cmd_header):
-				(succ, should_notify) = self._process_command(header, header.length, data)
+				(msgs, succ, should_notify) = self._process_command(header, header.length, data)
 			else:
 				data = data[:cmd_l] + data[cmd_l + xtra_l:]
-				(succ, should_notify) = self._process_command(header, header.length - xtra_l, data)
+				(msgs, succ, should_notify) = self._process_command(header, header.length - xtra_l, data)
 			all_succ = (all_succ and succ)
 		if all_succ:
 			if should_notify:
@@ -278,12 +279,12 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		remote_app_id = xtra.remote_app_id
 
 		# Create the first qubit
-		(succ, q_id1) = self.cmd_new(cqc_header, cmd, xtra, return_q_id=True)
+		(_, succ, q_id1) = self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
 		if not succ:
 			return False
 
 		# Create the second qubit
-		(succ, q_id2) = self.cmd_new(cqc_header, cmd, xtra, return_q_id=True)
+		(_, succ, q_id2) = self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
 		if not succ:
 			return False
 
@@ -335,18 +336,23 @@ class CQCLogMessageHandler(CQCMessageHandler):
 
 		return True
 
-	def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False):
+	def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False, return_succ=False):
 		self.parse_data(cqc_header, cmd, xtra, "Create new qubit")
 		q_id = CQCLogMessageHandler.cur_qubit_id
 		CQCLogMessageHandler.cur_qubit_id += 1
+		return_messages = []
 		if not return_q_id:
 			# Send message we created a qubit back
 			# logging.debug("GOO")
-			self.protocol._send_back_cqc(cqc_header, CQC_TP_NEW_OK, length=CQC_NOTIFY_LENGTH)
+			cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_NEW_OK, length=CQC_NOTIFY_LENGTH)
+			return_messages.append(cqc_msg)
 			hdr = CQCNotifyHeader()
 			hdr.setVals(q_id, 0, 0, 0, 0, 0)
 			msg = hdr.pack()
-			self.protocol.transport.write(msg)
+			return_messages.append(msg)
 		if return_q_id:
-			return True, q_id
-		return True
+			return return_messages, True, q_id
+		elif return_succ:
+			return return_messages, True
+		else:
+			return return_messages
