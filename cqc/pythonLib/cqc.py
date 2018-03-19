@@ -205,7 +205,7 @@ class CQCConnection:
 			self.openClassicalChannel(name)
 		try:
 			to_send=[int(msg)]
-		except TypeError:
+		except:
 			to_send=msg
 		self._classicalConn[name].send(bytes(to_send))
 
@@ -727,15 +727,15 @@ class progress_bar:
 
 class CQCGeneralError(Exception):
 	pass
-class CQCNoQubitError(Exception):
+class CQCNoQubitError(CQCGeneralError):
 	pass
-class CQCUnsuppError(Exception):
+class CQCUnsuppError(CQCGeneralError):
 	pass
-class CQCTimeoutError(Exception):
+class CQCTimeoutError(CQCGeneralError):
 	pass
-class CQCInuseError(Exception):
+class CQCInuseError(CQCGeneralError):
 	pass
-class QubitNotActiveError(Exception):
+class QubitNotActiveError(CQCGeneralError):
 	pass
 
 
@@ -794,6 +794,17 @@ class qubit:
 
 		# Entanglement information
 		self._entInfo=entInfo
+
+		# Lookup remote entangled node
+		self._remote_entNode=None
+		if self._entInfo:
+			ip=self._entInfo.node_B
+			port=self._entInfo.port_B
+			for node in self._cqc._cqcNet.hostDict.values():
+				if (node.ip==ip) and (node.port==port):
+					self._remote_entNode=node.name
+					break
+
 	def __str__(self):
 		if self._active:
 			return "Qubit at the node {}".format(self._cqc.name)
@@ -811,6 +822,24 @@ class qubit:
 
 	def set_entInfo(self,entInfo):
 		self._entInfo=entInfo
+
+		# Lookup remote entangled node
+		self._remote_entNode=None
+		if self._entInfo:
+			ip=self._entInfo.node_B
+			port=self._entInfo.port_B
+			for node in self.cqcNet.hostDict.values():
+				if (node.ip==ip) and (node.port==port):
+					self._remote_entNode=node.name
+					break
+
+	def is_entangled(self):
+		if self._entInfo:
+			return True
+		return False
+
+	def get_remote_entNode(self):
+		return self._remote_entNode
 
 	def check_active(self):
 		"""
