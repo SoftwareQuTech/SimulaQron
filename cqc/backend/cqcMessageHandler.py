@@ -93,7 +93,6 @@ class CQCMessageHandler(ABC):
 
 		# Convenience
 		self.name = factory.name
-		self.protocol = None
 		# self.protocol = protocol  # ugly, but for now I don't know a better way
 
 	# @inlineCallbacks
@@ -329,7 +328,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		Hello just requires us to return hello - for testing availability.
 		"""
 		msg = self.create_return_message(header.app_id, CQC_TP_HELLO)
-		return msg
+		return [msg]
 
 	@inlineCallbacks
 	def handle_factory(self, header, data):
@@ -709,8 +708,8 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		hdr = CQCNotifyHeader()
 		hdr.setVals(q_id1, 0, 0, 0, 0, 0)
 		msg_notify = hdr.pack()
-
 		return_messages.append(msg_notify)
+
 		# self.protocol.transport.write(msg)
 		logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
 

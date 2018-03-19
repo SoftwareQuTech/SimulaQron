@@ -1,0 +1,1 @@
+[{"comment": "Create new qubit", "cqc_header": {"header_length": 4, "is_set": true, "app_id": 2, "type": 1}, "cmd_header": {"is_set": true, "block": true, "notify": true, "action": false, "instruction": 1, "qubit_id": 0}}]

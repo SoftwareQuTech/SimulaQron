@@ -134,7 +134,7 @@ class CQCProtocol(Protocol):
 		# Define which entity you use to handle the messages
 		# Could be using the SimulaQron handler, but also just a logger
 		self.messageHandler = SimulaqronCQCHandler(factory)
-		# self.messageHandler = CQCLogMessageHandler(factory, self)
+		# self.messageHandler = CQCLogMessageHandler(factory)
 
 		# Flag to determine whether we already received _all_ of the CQC header
 		self.gotCQCHeader = False
