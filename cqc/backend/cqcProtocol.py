@@ -57,7 +57,7 @@ from SimulaQron.cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
 
 class CQCFactory(Factory):
 
-	def __init__(self, host, name, cqc_net):
+	def __init__(self, host, name, cqc_net, backend=SimulaqronCQCHandler):
 		"""
 		Initialize CQC Factory.
 
@@ -69,6 +69,7 @@ class CQCFactory(Factory):
 		self.cqcNet = cqc_net
 		self.virtRoot = None
 		self.qReg = None
+		self.backend = backend
 
 		# Dictionary that keeps qubit dictorionaries for each application
 		self.qubitList = {}
@@ -122,7 +123,7 @@ class CQCProtocol(Protocol):
 	# Dictionary storing the next unique entanglement id for each used (host_app_id,remote_node,remote_app_id)
 	_next_ent_id = {}
 
-	def __init__(self, factory):
+	def __init__(self, factory, messageHandlerClass=SimulaqronCQCHandler):
 
 		# CQC Factory, including our connection to the SimulaQron backend
 		self.factory = factory
@@ -133,7 +134,7 @@ class CQCProtocol(Protocol):
 
 		# Define which entity you use to handle the messages
 		# Could be using the SimulaQron handler, but also just a logger
-		self.messageHandler = SimulaqronCQCHandler(factory)
+		self.messageHandler = factory.backend(factory)
 		# self.messageHandler = CQCLogMessageHandler(factory)
 
 		# Flag to determine whether we already received _all_ of the CQC header
@@ -214,7 +215,6 @@ class CQCProtocol(Protocol):
 	@inlineCallbacks
 	def parseData(self, header, data):
 		messages = yield self.messageHandler.handle_cqc_message(header, data)
-		print(199, messages)
 		if messages:
 			# self.factory._lock.acquire()
 			for msg in messages:

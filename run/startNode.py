@@ -26,18 +26,25 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
+import argparse
 import sys
 # sys.path.insert(0, "..")
 
 from SimulaQron.virtNode.virtual import *
 import logging
 
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+parser = argparse.ArgumentParser()
+parser.add_argument("hostName", help="name of the host")
+parser.add_argument("-v", "--verbose", action="store_true", help="show debug information")
 
-logging.debug("Starting VIRTUAL NODE %s", sys.argv[1])
-be = backEnd(sys.argv[1],"../config/virtualNodes.cfg")
+args = parser.parse_args()
+if args.verbose:
+	logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+else:
+	logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s')
+
+logging.debug("Starting VIRTUAL NODE %s", args.hostName)
+be = backEnd(args.hostName, "../config/virtualNodes.cfg")
 
 node = be.start(20)
 

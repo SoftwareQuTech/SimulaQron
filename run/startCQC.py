@@ -1,4 +1,4 @@
-
+import argparse
 import sys
 import os
 
@@ -14,7 +14,7 @@ from qutip import *
 import logging
 import time
 
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+
 
 ##################################################################################################
 #
@@ -28,7 +28,7 @@ def init_register(resList, myName, lNode):
 
 	logging.debug("LOCAL %s: All connections set up.", myName)
 
- 	# Retrieve the connection to the local virtual node, if successfull
+	# Retrieve the connection to the local virtual node, if successfull
 	j = 0
 	if resList[j][0]:
 		virtRoot = resList[j][1]
@@ -63,7 +63,7 @@ def localError(reason):
 # Start the indicated backend CQC Server
 #
 
-def main(myName):
+def main(myName, backend):
 
 	# This file defines the network of virtual quantum nodes
 	virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
@@ -79,7 +79,7 @@ def main(myName):
 	# to handle remote connections on the classical communication network
 	if myName in cqcNet.hostDict:
 		myHost = cqcNet.hostDict[myName]
-		cqc_factory = CQCFactory(myHost, myName, cqcNet)
+		cqc_factory = CQCFactory(myHost, myName, cqcNet, backend)
 	else:
 		logging.error("LOCAL %s: Cannot start classical communication servers.",myName)
 
@@ -114,6 +114,27 @@ def main(myName):
 
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
-main(sys.argv[1])
+# Parsing comments from the command line
+parser = argparse.ArgumentParser()
+parser.add_argument("hostName", help="The name of the host")
+parser.add_argument("-v", "--verbose", action="store_true", help="show debug information")
+parser.add_argument("-b", "--backend", help="defining which backend you want to use")
+
+args = parser.parse_args()
+if args.verbose:
+	logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+else:
+	logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s')
+
+backend = SimulaqronCQCHandler
+if args.backend:
+	if args.backend.lower() == "simulaqron":
+		backend = SimulaqronCQCHandler
+	elif args.backend.lower() == "log":
+		backend = CQCLogMessageHandler
+	else:
+		raise parser.error("Unknown backend {}".format(args.backend))
+
+
+main(args.hostName, backend)
 
