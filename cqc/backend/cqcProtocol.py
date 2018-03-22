@@ -179,6 +179,7 @@ class CQCProtocol(Protocol):
 			rawHeader = self.buf[0:CQC_HDR_LENGTH]
 			self.currHeader = CQCHeader(rawHeader)
 
+
 			# Remove the header from the buffer
 			self.buf = self.buf[CQC_HDR_LENGTH:len(self.buf)]
 
@@ -195,7 +196,7 @@ class CQCProtocol(Protocol):
 		self.app_id = self.currHeader.app_id
 
 		# Invoke the relevant message handler, processing the possibly remaining data
-		self.parseData(self.currHeader, self.buf[0:self.currHeader.length])
+		self._parseData(self.currHeader, self.buf[0:self.currHeader.length])
 
 		# if self.currHeader.tp in self.messageHandlers:
 		# 	self.messageHandlers[self.currHeader.tp](self.currHeader, )
@@ -213,7 +214,7 @@ class CQCProtocol(Protocol):
 			self.buf = None
 
 	@inlineCallbacks
-	def parseData(self, header, data):
+	def _parseData(self, header, data):
 		messages = yield self.messageHandler.handle_cqc_message(header, data)
 		if messages:
 			# self.factory._lock.acquire()

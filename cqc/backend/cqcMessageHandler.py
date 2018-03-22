@@ -160,60 +160,12 @@ class CQCMessageHandler(ABC):
 			msgs.append(self.create_return_message(header.app_id, CQC_TP_DONE))
 		return msgs
 
-	@inlineCallbacks
+	@abstractmethod
 	def _process_command(self, cqc_header, length, data):
 		"""
 			Process the commands - called recursively to also process additional command lists.
 		"""
-
-		cmd_data = data
-
-		# Read in all the commands sent
-		cur_length = 0
-		should_notify = False
-		return_messages = []
-		while cur_length < length:
-			cmd = CQCCmdHeader(cmd_data[cur_length:cur_length + CQC_CMD_HDR_LENGTH])
-			newl = cur_length + CQC_CMD_HDR_LENGTH
-
-			# Should we notify
-			should_notify = cmd.notify
-
-			# Check if this command includes an additional header
-			if self.has_extra(cmd):
-				if len(cmd_data) < (newl + CQC_CMD_XTRA_LENGTH):
-					logging.debug("CQC %s: Missing XTRA Header", self.name)
-				else:
-					xtra = CQCXtraHeader(cmd_data[newl:newl + CQC_CMD_XTRA_LENGTH])
-					newl = newl + CQC_CMD_XTRA_LENGTH
-					logging.debug("CQC %s: Read XTRA Header: %s", self.name, xtra.printable())
-			else:
-				xtra = None
-
-			# Run this command
-			logging.debug("CQC %s: Executing command: %s", self.name, cmd.printable())
-			if cmd.instr not in self.commandHandlers:
-				logging.debug("CQC {}: Unknown command {}".format(self.name, cmd.instr))
-				return self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
-
-			msgs = yield self.commandHandlers[cmd.instr](cqc_header, cmd, xtra)
-			if msgs is None:
-				return return_messages, False, 0
-
-			return_messages.extend(msgs)
-
-			# Check if there are additional commands to execute afterwards
-			if cmd.action:
-				(msgs, succ, retNotify) = self._process_command(cqc_header, xtra.cmdLength, data[newl:newl + xtra.cmdLength])
-				should_notify = (should_notify or retNotify)
-				if not succ:
-					return return_messages, False, 0
-				return_messages.extend(msgs)
-				newl = newl + xtra.cmdLength
-
-			cur_length = newl
-
-		return return_messages, True, should_notify
+		pass
 
 	@abstractmethod
 	def handle_hello(self, header, data):
@@ -322,6 +274,61 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 		# Dictionary that keeps qubit dictorionaries for each application
 		self.qubitList = {}
+
+	@inlineCallbacks
+	def _process_command(self, cqc_header, length, data):
+		"""
+			Process the commands - called recursively to also process additional command lists.
+		"""
+		cmd_data = data
+
+		# Read in all the commands sent
+		cur_length = 0
+		should_notify = False
+		return_messages = []
+		while cur_length < length:
+			cmd = CQCCmdHeader(cmd_data[cur_length:cur_length + CQC_CMD_HDR_LENGTH])
+			newl = cur_length + CQC_CMD_HDR_LENGTH
+
+			# Should we notify
+			should_notify = cmd.notify
+
+			# Check if this command includes an additional header
+			if self.has_extra(cmd):
+				if len(cmd_data) < (newl + CQC_CMD_XTRA_LENGTH):
+					logging.debug("CQC %s: Missing XTRA Header", self.name)
+				else:
+					xtra = CQCXtraHeader(cmd_data[newl:newl + CQC_CMD_XTRA_LENGTH])
+					newl = newl + CQC_CMD_XTRA_LENGTH
+					logging.debug("CQC %s: Read XTRA Header: %s", self.name, xtra.printable())
+			else:
+				xtra = None
+
+			# Run this command
+			logging.debug("CQC %s: Executing command: %s", self.name, cmd.printable())
+			if cmd.instr not in self.commandHandlers:
+				logging.debug("CQC {}: Unknown command {}".format(self.name, cmd.instr))
+				msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
+				return_messages.append(msg)
+				return return_messages
+
+			msgs = yield self.commandHandlers[cmd.instr](cqc_header, cmd, xtra)
+			if msgs is None:
+				return return_messages, False, 0
+
+			return_messages.extend(msgs)
+
+			# Check if there are additional commands to execute afterwards
+			if cmd.action:
+				(msgs, succ, retNotify) = yield self._process_command(cqc_header, xtra.cmdLength, data[newl:newl + xtra.cmdLength])
+				should_notify = (should_notify or retNotify)
+				if not succ:
+					return return_messages, False, 0
+				return_messages.extend(msgs)
+				newl = newl + xtra.cmdLength
+
+			cur_length = newl
+		return return_messages, True, should_notify
 
 	def handle_hello(self, header, data):
 		"""
