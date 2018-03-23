@@ -421,6 +421,101 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH)
 		self.assertEqual(cqc_header['app_id'], 1)
 		self.assertTrue(q1._active)
+		# Let's destroy the qubit, no need for it
+		q1.measure()
+
+	def testFactoryZero(self):
+		q1 = qubit(self._alice, print_info=False)
+		self._alice.sendFactory(q1._qID, CQC_CMD_X, 0)
+		m1 = q1.measure(inplace=True, print_info=False)
+
+		# Checking the factory and the measure, factory should not log any commands
+		lastEntries = get_last_entries(2)
+		factoryEntry = lastEntries[0]
+		factory_cmd_header = factoryEntry['cmd_header']
+		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_X)
+		self.assertEqual(factory_cmd_header['qubit_id'], q1._qID)
+		factory_cqc_header = factoryEntry['cqc_header']
+		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
+		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH+CQC_CMD_XTRA_LENGTH)
+		x = factoryEntry['xtra_header']
+		self.assertEqual(x['step'], 0)
+
+		measureEntry = lastEntries[1]
+		self.assertEqual(measureEntry['cmd_header']['instruction'], CQC_CMD_MEASURE_INPLACE)
+		self.assertEqual(measureEntry['cmd_header']['qubit_id'], q1._qID)
+
+		q1.measure(print_info=False)
+
+
+	def testFactoryOnce(self):
+		q1 = qubit(self._alice, print_info=False)
+		self._alice.sendFactory(q1._qID, CQC_CMD_X, 1)
+		m1 = q1.measure(inplace=True, print_info=False)
+
+		# Checking the factory and the measure, factory should not log any commands
+		lastEntries = get_last_entries(3)
+		factoryEntry = lastEntries[0]
+		factory_cmd_header = factoryEntry['cmd_header']
+		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_X)
+		self.assertEqual(factory_cmd_header['qubit_id'], q1._qID)
+		factory_cqc_header = factoryEntry['cqc_header']
+		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
+		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
+		factory_xtra_header = factoryEntry['xtra_header']
+		self.assertEqual(factory_xtra_header['step'], 1)
+
+		xEntry = lastEntries[1]
+		x_cmd_cmd_header = xEntry['cmd_header']
+		self.assertEqual(x_cmd_cmd_header['instruction'], CQC_CMD_X)
+		self.assertEqual(x_cmd_cmd_header['qubit_id'], q1._qID)
+		# cqc header is the same as the first.
+
+		measureEntry = lastEntries[2]
+		self.assertEqual(measureEntry['cmd_header']['instruction'], CQC_CMD_MEASURE_INPLACE)
+		self.assertEqual(measureEntry['cmd_header']['qubit_id'], q1._qID)
+
+		q1.measure(print_info=False)
+
+
+	def testFactoryN(self):
+		q1 = qubit(self._alice, print_info=False)
+		self._alice.sendFactory(q1._qID, CQC_CMD_X, 10)
+		m1 = q1.measure(inplace=True, print_info=False)
+
+		# Checking the factory and the measure, factory should not log any commands
+		lastEntries = get_last_entries(12)
+		factoryEntry = lastEntries[0]
+		factory_cmd_header = factoryEntry['cmd_header']
+		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_X)
+		self.assertEqual(factory_cmd_header['qubit_id'], q1._qID)
+		factory_cqc_header = factoryEntry['cqc_header']
+		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
+		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
+		factory_xtra_header = factoryEntry['xtra_header']
+		self.assertEqual(factory_xtra_header['step'], 10)
+
+		for i in range(1, 11):
+			xEntry = lastEntries[i]
+			x_cmd_cmd_header = xEntry['cmd_header']
+			self.assertEqual(x_cmd_cmd_header['instruction'], CQC_CMD_X)
+			self.assertEqual(x_cmd_cmd_header['qubit_id'], q1._qID)
+		# cqc header is the same as the first.
+
+		measureEntry = lastEntries[11]
+		self.assertEqual(measureEntry['cmd_header']['instruction'], CQC_CMD_MEASURE_INPLACE)
+		self.assertEqual(measureEntry['cmd_header']['qubit_id'], q1._qID)
+
+		q1.measure(print_info=False)
+
+	def testFactoryCNOTFalse(self):
+		q1 = qubit(self._alice, print_info=False)
+		q2 = qubit(self._alice, print_info=False)
+		self._alice.sendFactory(q1._qID, CQC_CMD_CNOT, 10)
+
+
+
+
 
 
 if __name__ == '__main__':

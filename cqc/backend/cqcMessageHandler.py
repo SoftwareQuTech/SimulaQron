@@ -360,7 +360,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 		# Perform operation multiple times
 		all_succ = True
-		should_notify = False
+		should_notify = cmd_header.notify
 		return_messages = []
 		for _ in range(num_iter):
 			if self.has_extra(cmd_header):
