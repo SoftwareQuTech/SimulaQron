@@ -341,6 +341,12 @@ class CQCConnection:
 		xtra_msg = xtra_hdr.pack()
 		self._s.send(xtra_msg)
 
+		# Get RECV message
+		message = self.readMessage()
+		if message[0].tp != CQC_TP_DONE:
+			raise CQCUnsuppError("Unexpected message send back from the server")
+
+
 	def readMessage(self, maxsize=192):  # WHAT IS GOOD SIZE?
 		"""
 		Receive the whole message from cqc server.

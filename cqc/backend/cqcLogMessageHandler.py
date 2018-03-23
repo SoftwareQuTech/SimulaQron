@@ -207,7 +207,6 @@ class CQCLogMessageHandler(CQCMessageHandler):
 			else:
 				data = data[:cmd_l] + data[cmd_l + xtra_l:]
 				(msgs, succ, should_notify) = self._process_command(header, header.length - xtra_l, data)
-				print(msgs, succ, should_notify)
 			all_succ = (all_succ and succ)
 			return_messages.extend(msgs)
 		if all_succ:
