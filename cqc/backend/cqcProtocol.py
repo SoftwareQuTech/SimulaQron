@@ -179,7 +179,6 @@ class CQCProtocol(Protocol):
 			rawHeader = self.buf[0:CQC_HDR_LENGTH]
 			self.currHeader = CQCHeader(rawHeader)
 
-
 			# Remove the header from the buffer
 			self.buf = self.buf[CQC_HDR_LENGTH:len(self.buf)]
 
