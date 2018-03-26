@@ -35,7 +35,7 @@ from SimulaQron.cqc.backend.entInfoHeader import *
 
 
 def shouldReturn(command):
-	return command == CQC_CMD_NEW or command == CQC_CMD_RECV
+	return command in {CQC_CMD_NEW, CQC_CMD_MEASURE, CQC_CMD_MEASURE_INPLACE, CQC_CMD_RECV}
 
 
 class CQCConnection:
@@ -356,15 +356,18 @@ class CQCConnection:
 		if shouldReturn(command):
 			for _ in range(num_iter):
 				message = self.readMessage()
-				if message[0].tp == CQC_TP_NEW_OK:
+				if message[0].tp == CQC_TP_NEW_OK or message[0].tp == CQC_TP_RECV:
 					qID = message[1].qubit_id
 					q = qubit(self, createNew=False, q_id=qID, notify=notify, block=block)
 					q._active = True
 					res.append(q)
-
-		message = self.readMessage()
-		if message[0].tp != CQC_TP_DONE:
-			raise CQCUnsuppError("Unexpected message send back from the server. Message type: {}".format(message[0].tp))
+				elif message[0].tp == CQC_TP_MEASOUT:
+					outcome = message[1].outcome
+					res.append(outcome)
+		if notify:
+			message = self.readMessage()
+			if message[0].tp != CQC_TP_DONE:
+				raise CQCUnsuppError("Unexpected message send back from the server. Message type: {}".format(message[0].tp))
 		return res
 
 	def readMessage(self, maxsize=192):  # WHAT IS GOOD SIZE?
