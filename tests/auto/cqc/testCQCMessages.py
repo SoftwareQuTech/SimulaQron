@@ -589,8 +589,8 @@ class CQCMessageTest(unittest.TestCase):
 		# cqc header is the same as the first.
 
 		curID = qubits[0]._qID
-		for q in qubits[2:]:
-			self.assertEqual(q._qID + 1, curID)
+		for q in qubits[1:]:
+			self.assertEqual(q._qID - 1, curID)
 			curID = q._qID
 
 
