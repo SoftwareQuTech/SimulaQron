@@ -34,6 +34,10 @@ from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.backend.entInfoHeader import *
 
 
+def shouldReturn(command):
+	return command == CQC_CMD_NEW or command == CQC_CMD_RECV
+
+
 class CQCConnection:
 	_appIDs = []
 
@@ -304,7 +308,7 @@ class CQCConnection:
 		cmd_msg = cmd_hdr.pack()
 		self._s.send(cmd_msg)
 
-	def sendFactory(self, qID, command, num_iter, notify=1, block=1, action=0, xtra_qID=0, remote_appID=0,
+	def sendFactory(self, qID, command, num_iter, notify=1, block=1, action=0, xtra_qID=-1, remote_appID=0,
 					remote_node=0, remote_port=0, cmd_length=0):
 		"""
 		Sends a factory message
@@ -323,6 +327,11 @@ class CQCConnection:
 			:remote_port:	 port of remote host in cqc network
 			:cmd_length:	 length of extra commands
 		"""
+
+		if xtra_qID == -1:
+			if command == CQC_CMD_CNOT or command == CQC_CMD_CPHASE:
+				raise CQCUnsuppError("Please provide a target qubit")
+			xtra_qID = 0
 		# Send Header
 		hdr = CQCHeader()
 		hdr.setVals(CQC_VERSION, CQC_TP_FACTORY, self._appID, CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
@@ -341,11 +350,22 @@ class CQCConnection:
 		xtra_msg = xtra_hdr.pack()
 		self._s.send(xtra_msg)
 
-		# Get RECV message
+		# Get RECV messages
+		# Some commands expect to get a list of messages back, check those
+		res = []
+		if shouldReturn(command):
+			for _ in range(num_iter):
+				message = self.readMessage()
+				if message[0].tp == CQC_TP_NEW_OK:
+					qID = message[1].qubit_id
+					q = qubit(self, createNew=False, q_id=qID, notify=notify, block=block)
+					q._active = True
+					res.append(q)
+
 		message = self.readMessage()
 		if message[0].tp != CQC_TP_DONE:
-			raise CQCUnsuppError("Unexpected message send back from the server")
-
+			raise CQCUnsuppError("Unexpected message send back from the server. Message type: {}".format(message[0].tp))
+		return res
 
 	def readMessage(self, maxsize=192):  # WHAT IS GOOD SIZE?
 		"""
