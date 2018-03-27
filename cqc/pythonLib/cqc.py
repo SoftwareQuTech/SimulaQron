@@ -35,7 +35,7 @@ from SimulaQron.cqc.backend.entInfoHeader import *
 
 
 def shouldReturn(command):
-	return command in {CQC_CMD_NEW, CQC_CMD_MEASURE, CQC_CMD_MEASURE_INPLACE, CQC_CMD_RECV}
+	return command in {CQC_CMD_NEW, CQC_CMD_MEASURE, CQC_CMD_MEASURE_INPLACE, CQC_CMD_RECV, CQC_CMD_EPR_RECV, CQC_CMD_EPR}
 
 
 class CQCConnection:
@@ -356,7 +356,7 @@ class CQCConnection:
 		if shouldReturn(command):
 			for _ in range(num_iter):
 				message = self.readMessage()
-				if message[0].tp == CQC_TP_NEW_OK or message[0].tp == CQC_TP_RECV:
+				if message[0].tp in {CQC_TP_NEW_OK, CQC_TP_RECV, CQC_TP_EPR_OK}:
 					qID = message[1].qubit_id
 					q = qubit(self, createNew=False, q_id=qID, notify=notify, block=block)
 					q._active = True
