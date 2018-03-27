@@ -894,7 +894,7 @@ class qubit:
 		Checks if the qubit is active
 		"""
 		if not self._active:
-			raise QubitNotActiveError("Qubit is not active, has either been sent, measured or not recieved")
+			raise QubitNotActiveError("Qubit is not active, has either been sent, measured or not received")
 
 	def I(self, notify=True, block=True, print_info=True):
 		"""

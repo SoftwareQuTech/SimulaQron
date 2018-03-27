@@ -186,13 +186,13 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		# Get command header
 		if len(data) < cmd_l:
 			# logging.debug("CQC %s: Missing CMD Header", self.name)
-			return self.create_return_message(header.app_id, CQC_ERR_UNSUPP)
+			return [self.create_return_message(header.app_id, CQC_ERR_UNSUPP)]
 		cmd_header = CQCCmdHeader(data[:cmd_l])
 
 		# Get xtra header
 		if len(data) < (cmd_l + xtra_l):
 			# logging.debug("CQC %s: Missing XTRA Header", self.name)
-			return self.create_return_message(header.app_id, CQC_ERR_UNSUPP)
+			return [self.create_return_message(header.app_id, CQC_ERR_UNSUPP)]
 		xtra_header = CQCXtraHeader(data[cmd_l:cmd_l + xtra_l])
 
 		num_iter = xtra_header.step

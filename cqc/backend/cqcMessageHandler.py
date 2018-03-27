@@ -102,7 +102,8 @@ class CQCMessageHandler(ABC):
 		"""
 		if header.tp in self.messageHandlers:
 			try:
-				return self.messageHandlers[header.tp](header, message)
+				messages = self.messageHandlers[header.tp](header, message)
+				return messages
 			except UnknownQubitError as e:
 				logging.error(str(e))
 				return self.create_return_message(header.app_id, CQC_ERR_NOQUBIT)
@@ -346,13 +347,13 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# Get command header
 		if len(data) < cmd_l:
 			logging.debug("CQC %s: Missing CMD Header", self.name)
-			return self.create_return_message(header.app_id, CQC_ERR_UNSUPP)
+			return [self.create_return_message(header.app_id, CQC_ERR_UNSUPP)]
 		cmd_header = CQCCmdHeader(data[:cmd_l])
 
 		# Get xtra header
 		if len(data) < (cmd_l + xtra_l):
 			logging.debug("CQC %s: Missing XTRA Header", self.name)
-			return self.create_return_message(header.app_id, CQC_ERR_UNSUPP)
+			return [self.create_return_message(header.app_id, CQC_ERR_UNSUPP)]
 		xtra_header = CQCXtraHeader(data[cmd_l:cmd_l + xtra_l])
 
 		command = cmd_header.instr
@@ -363,11 +364,17 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		should_notify = cmd_header.notify
 		return_messages = []
 		for _ in range(num_iter):
-			if self.has_extra(cmd_header):
-				(msgs, succ, should_notify) = yield self._process_command(header, header.length, data)
-			else:
-				data = data[:cmd_l] + data[cmd_l + xtra_l:]
-				(msgs, succ, should_notify) = yield self._process_command(header, header.length - xtra_l, data)
+			try:
+				if self.has_extra(cmd_header):
+					(msgs, succ, should_notify) = yield self._process_command(header, header.length, data)
+				else:
+					data = data[:cmd_l] + data[cmd_l + xtra_l:]
+					(msgs, succ, should_notify) = yield self._process_command(header, header.length - xtra_l, data)
+			except TypeError as e:
+				# A type error can indicate that the qubit is not active
+				msg = self.create_return_message(header.app_id, CQC_ERR_NOQUBIT)
+				# return_messages.add(msg)
+				return [msg]
 			all_succ = (all_succ and succ)
 			return_messages.extend(msgs)
 		if all_succ:
