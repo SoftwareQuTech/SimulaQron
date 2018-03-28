@@ -372,6 +372,8 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 					(msgs, succ, should_notify) = yield self._process_command(header, header.length - xtra_l, data)
 			except TypeError as e:
 				# A type error can indicate that the qubit is not active
+				# this is bad error handling.
+				# Maybe a TODO to check for inactive qubits in _procces_command?
 				msg = self.create_return_message(header.app_id, CQC_ERR_NOQUBIT)
 				# return_messages.add(msg)
 				return [msg]
@@ -507,12 +509,12 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
 		if not virt_qubit:
 			logging.debug("CQC %s: No such qubit", self.name)
-			return self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
 
 		outcome = yield virt_qubit.callRemote("measure", inplace)
 		if outcome is None:
 			logging.debug("CQC %s: Measurement failed", self.name)
-			return self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)]
 
 		logging.debug("CQC %s: Measured outcome %d", self.name, outcome)
 		# Send the outcome back as MEASOUT
@@ -548,7 +550,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
 		if not virt_qubit:
 			logging.debug("CQC %s: No such qubit", self.name)
-			return False
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
 
 		outcome = yield virt_qubit.callRemote("measure", inplace=True)
 
@@ -567,19 +569,19 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		target_name = self.factory.lookup(xtra.remote_node, xtra.remote_port)
 		if target_name is None:
 			logging.debug("CQC %s: Remote node not found %s", self.name, xtra.printable())
-			return False
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)]
 
 		# Check so that it is not the same node
 		if self.name == target_name:
 			logging.debug("CQC %s: Trying to send from node to itself.", self.name)
 			# self.protocol._send_back_cqc(cqc_header, CQC_ERR_GENERAL)
-			return self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)]
 
 		# Lookup the virtual qubit from identifier
 		virt_num = yield self.get_virt_qubit_indep(cqc_header, cmd.qubit_id)
 		if virt_num < 0:
 			logging.debug("CQC %s: No such qubit", self.name)
-			return False
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
 
 		# Send instruction to transfer the qubit
 		yield self.factory.virtRoot.callRemote("cqc_send_qubit", virt_num, target_name, cqc_header.app_id, xtra.remote_app_id)
@@ -671,15 +673,17 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 		# Create the first qubit
 		(msgs, succ, q_id1) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
-		if not succ:
-			return False
+
 		return_messages.extend(msgs)
+		if not succ:
+			return return_messages
 
 		# Create the second qubit
 		(msgs, succ, q_id2) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
-		if not succ:
-			return False
+
 		return_messages.extend(msgs)
+		if not succ:
+			return return_messages
 
 		# Create headers for qubits
 		cmd1 = CQCCmdHeader()
@@ -711,7 +715,12 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# Send second qubit
 		succ = yield self.send_epr_half(cqc_header, cmd2, xtra, ent_info)
 		if not succ:
-			return False
+			# Failed to send the qubit, destroy it instead
+			logging.error("CQC %s: Failed to send epr qubit, destroying qubits", self.name)
+			self.cmd_measure(cqc_header, cmd1, None)
+			self.cmd_measure(cqc_header, cmd2, None)
+			logging.error("CQC %s: Failed to send epr qubit, destroying qubits", self.name)
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)]
 
 		# Send message we created EPR pair
 		msg_ok = self.create_return_message(cqc_header.app_id, CQC_TP_EPR_OK, length=CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH)
