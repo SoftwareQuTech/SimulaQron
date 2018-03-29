@@ -367,13 +367,15 @@ class CQCConnection:
 		if notify:
 			message = self.readMessage()
 			if message[0].tp != CQC_TP_DONE:
-				raise CQCUnsuppError("Unexpected message send back from the server. Message type: {}".format(message[0].tp))
+				raise CQCUnsuppError(
+					"Unexpected message send back from the server. Message type: {}".format(message[0].tp))
 		return res
 
 	def readMessage(self, maxsize=192):  # WHAT IS GOOD SIZE?
 		"""
 		Receive the whole message from cqc server.
-		Returns (CQCHeader,None,None), (CQCHeader,CQCNotifyHeader,None) or (CQCHeader,CQCNotifyHeader,EntInfoHeader) depending on the type of message.
+		Returns (CQCHeader,None,None), (CQCHeader,CQCNotifyHeader,None) or (CQCHeader,CQCNotifyHeader,EntInfoHeader)
+		depending on the type of message.
 		Maxsize is the max size of message.
 		"""
 

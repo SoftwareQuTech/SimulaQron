@@ -126,9 +126,12 @@ class CQCFactoryTest(unittest.TestCase):
 		self.assertEqual(len(qubitsBob), 4)
 		self.assertEqual(len(qubitsAlice), len(qubitsBob))
 		for i in range(4):
+			# Each pair should have the same measurement outcomes
+			# if measured in the same basis, test this
 			self.assertEqual(qubitsAlice[i].measure(print_info=False), qubitsBob[i].measure(print_info=False))
 
 		bob.close()
+
 
 
 if __name__ == '__main__':

@@ -716,10 +716,9 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		succ = yield self.send_epr_half(cqc_header, cmd2, xtra, ent_info)
 		if not succ:
 			# Failed to send the qubit, destroy it instead
-			logging.error("CQC %s: Failed to send epr qubit, destroying qubits", self.name)
+			logging.debug("CQC %s: Failed to send epr qubit, destroying qubits", self.name)
 			self.cmd_measure(cqc_header, cmd1, None)
 			self.cmd_measure(cqc_header, cmd2, None)
-			logging.error("CQC %s: Failed to send epr qubit, destroying qubits", self.name)
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)]
 
 		# Send message we created EPR pair
