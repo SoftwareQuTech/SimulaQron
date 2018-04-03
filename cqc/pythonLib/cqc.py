@@ -33,6 +33,15 @@ from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.backend.entInfoHeader import *
 
+
+def shouldReturn(command):
+	return command in {CQC_CMD_NEW, CQC_CMD_MEASURE, CQC_CMD_MEASURE_INPLACE, CQC_CMD_RECV, CQC_CMD_EPR_RECV, CQC_CMD_EPR}
+
+
+def hasXtraHeader(command):
+	return command in {CQC_CMD_CNOT, CQC_CMD_SEND, CQC_CMD_EPR, CQC_CMD_ROT_X, CQC_CMD_ROT_Y, CQC_CMD_ROT_Z, CQC_CMD_CPHASE}
+
+
 class CQCConnection:
 	_appIDs=[]
 	def __init__(self,name,cqcFile=None,appFile=None,appID=0):
@@ -338,6 +347,81 @@ class CQCConnection:
 		xtra_msg=xtra_hdr.pack()
 		self._s.send(xtra_msg)
 
+	def sendSequence(self, qubits, commands, xtra_qubits=None, steps=None, notify=True, block=True, action=0, print_info=True,
+					 remote_app_id=0, remote_node=0, remote_port=0, length=0):
+		"""
+		Sends a sequence of commands to be performed at once to the server
+		:param qubits: either a single qubit or a list of qubits to perform the commands on
+		:param commands: a list of commands to perform on the the qubit(s)
+		:param xtra_qubits: either a single qubit or a list of qubits (None allowed) to perform double gate operations on
+		:param steps: integer or a list of integers indicating the angle of rotation for rot commands
+				or number of iterations for factory commands
+		:param notify: if a notification should be send back if done.
+		:param block: indicate to block everything until operation is done
+		:param action: Indicate if there are actions to execute when done
+		:param print_info: boolean to indicate if information should be printed to the console
+		:param remote_app_id:
+		:param remote_node:
+		:param remote_port:
+		:param length:
+		:return: a list of everything the commands have returned
+		"""
+		# It probably goes wrong if notify = False
+		n = len(commands)  # amount of commands send
+		# m is the amount of extra commands that have to be send
+		qubit_is_list = isinstance(qubits, list)
+		xtra_qubit_is_list = isinstance(xtra_qubits, list)
+		step_is_list = isinstance(steps, list)
+		m = len([1 for command in commands if hasXtraHeader(command)])
+		header = CQCHeader()
+		header.setVals(CQC_VERSION, CQC_TP_COMMAND, self._appID, n * CQC_CMD_HDR_LENGTH + m * CQC_CMD_XTRA_LENGTH)
+		data_to_send = header.pack()
+		for i in range(n):
+			cmd_header = CQCCmdHeader()
+			if qubit_is_list:
+				q = qubits[i]
+			else:
+				q = qubits
+			if step_is_list:
+				step = steps[i]
+			else:
+				step = steps
+			if xtra_qubit_is_list:
+				xtra_qubit = xtra_qubits[i]
+			else:
+				xtra_qubit = xtra_qubits
+
+			if q is None:
+				qID = 0
+			else:
+				qID = q._qID
+
+			cmd_header.setVals(qID, commands[i], int(notify), int(block), action)
+			data_to_send += cmd_header.pack()
+
+			# Maybe check if xtra header is needed based on the cmd type
+			if hasXtraHeader(commands[i]):
+				xtra_header = CQCXtraHeader()
+				xtra_id = xtra_qubit._qID if xtra_qubit else 0
+				step = step if step else 0
+				xtra_header.setVals(xtra_id, step, remote_app_id, remote_node, remote_port, length)
+				data_to_send += xtra_header.pack()
+
+		self._s.send(data_to_send)
+		res = []
+		for i in range(n):
+			if shouldReturn(commands[i]):
+				message = self.readMessage()
+				res.append(self.parse_CQC_msg(message))
+				if print_info:
+					self.print_CQC_msg(message)
+
+		if notify:
+			message = self.readMessage()
+			if print_info:
+				self.print_CQC_msg(message)
+		return res
+
 	def readMessage(self,maxsize=192): # WHAT IS GOOD SIZE?
 		"""
 		Receive the whole message from cqc server.
@@ -449,6 +533,31 @@ class CQCConnection:
 			print("CQC tells App {}: 'Measurement outcome is {}'".format(self.name,notifyHdr.outcome))
 		elif hdr.tp==CQC_TP_INF_TIME:
 			print("CQC tells App {}: 'Timestamp is {}'".format(self.name,notifyHdr.datetime))
+
+	def parse_CQC_msg(self, message):
+		"""
+		parses the cqc message and returns the relevant value of that measure
+		(qubit, measurement outcome)
+		:param message: the cqc message to be parsed
+		:return: the result of the message (either a qubit, or a measurement outcome. Otherwise None
+		"""
+		hdr=message[0]
+		notifyHdr=message[1]
+		entInfoHdr=message[2]
+
+		if hdr.tp in {CQC_TP_RECV, CQC_TP_NEW_OK}:
+			q = qubit(self, createNew=False, q_id=notifyHdr.qubit_id)
+			q._active = True
+			return q
+		if hdr.tp == CQC_TP_EPR_OK:
+			q = qubit(self, createNew=False, q_id=notifyHdr.qubit_id, entInfo=entInfoHdr)
+			q._active = True
+			return q
+		if hdr.tp in {CQC_TP_MEASOUT, CQC_TP_GET_TIME}:
+			return notifyHdr.outcome
+		if hdr.tp == CQC_TP_INF_TIME:
+			return notifyHdr.datetime
+
 
 	def check_error(self,hdr):
 		"""
