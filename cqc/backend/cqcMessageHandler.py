@@ -128,6 +128,9 @@ class CQCMessageHandler(ABC):
 		"""
 		Check whether this command includes an extra header with additional information.
 		"""
+		if cmd.action == 1:
+			return True
+
 		if cmd.instr == CQC_CMD_SEND:
 			return True
 		if cmd.instr == CQC_CMD_EPR:
@@ -285,12 +288,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 		# Read in all the commands sent
 		cur_length = 0
-		should_notify = False
+		should_notify = True
 		return_messages = []
 		while cur_length < length:
 			cmd = CQCCmdHeader(cmd_data[cur_length:cur_length + CQC_CMD_HDR_LENGTH])
 			newl = cur_length + CQC_CMD_HDR_LENGTH
-
 			# Should we notify
 			should_notify = cmd.notify
 
@@ -321,8 +323,10 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 			# Check if there are additional commands to execute afterwards
 			if cmd.action:
+				logging.debug("CQC %s: Reading extra action commands", self.name)
 				(msgs, succ, retNotify) = yield self._process_command(cqc_header, xtra.cmdLength, data[newl:newl + xtra.cmdLength])
 				should_notify = (should_notify or retNotify)
+				print(332)
 				if not succ:
 					return return_messages, False, 0
 				return_messages.extend(msgs)

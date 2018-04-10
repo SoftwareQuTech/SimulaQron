@@ -62,7 +62,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
 
 		# Read in all the commands sent
 		cur_length = 0
-		should_notify = False
+		should_notify = True
 		return_messages = []
 		while cur_length < length:
 			cmd = CQCCmdHeader(cmd_data[cur_length:cur_length + CQC_CMD_HDR_LENGTH])
