@@ -187,7 +187,7 @@ class CQCProtocol(Protocol):
 		# Check whether we already received all the data
 		if len(self.buf) < self.currHeader.length:
 			# Still waiting for data
-			logging.debug("CQC %s: Incomplete data. Waiting.", self.name)
+			logging.debug("CQC %s: Incomplete data. Waiting. Current length %s, required length %s", self.name, len(self.buf), self.currHeader.length)
 			return
 
 		# We got the header and all the data for this packet. Start processing.
@@ -211,6 +211,7 @@ class CQCProtocol(Protocol):
 			self.dataReceived(b'')
 		else:
 			self.buf = None
+
 
 	@inlineCallbacks
 	def _parseData(self, header, data):

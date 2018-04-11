@@ -28,65 +28,67 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys, logging
+import warnings
+from abc import ABC
 
 from struct import *
 
 # Constant defining CQC version
-CQC_VERSION=0
+CQC_VERSION = 1
 
 # Lengths of the headers in bytes
-CQC_HDR_LENGTH=8		# Length of the CQC Header
-CQC_CMD_HDR_LENGTH=4		# Length of a command header
-CQC_CMD_XTRA_LENGTH=16		# Length of extra command information
-CQC_NOTIFY_LENGTH=20		# Length of a notification send from the CQC upwards
+CQC_HDR_LENGTH = 8  # Length of the CQC Header
+CQC_CMD_HDR_LENGTH = 4  # Length of a command header
+CQC_CMD_XTRA_LENGTH = 16  # Length of extra command information
+CQC_NOTIFY_LENGTH = 20  # Length of a notification send from the CQC upwards
 
 # Constants defining the messages types
-CQC_TP_HELLO=0			# Alive check
-CQC_TP_COMMAND=1		# Execute a command list
-CQC_TP_FACTORY=2 		# Start executing command list repeatedly
-CQC_TP_EXPIRE=3			# Qubit has expired
-CQC_TP_DONE=4			# Done with command
-CQC_TP_RECV=5			# Received qubit
-CQC_TP_EPR_OK=6			# Created EPR pair
-CQC_TP_MEASOUT=7		# Measurement outcome
-CQC_TP_GET_TIME=8		# Get creation time of qubit
-CQC_TP_INF_TIME=9		# Return timinig information
-CQC_TP_NEW_OK=10		# Created a new qubit
+CQC_TP_HELLO = 0  # Alive check
+CQC_TP_COMMAND = 1  # Execute a command list
+CQC_TP_FACTORY = 2  # Start executing command list repeatedly
+CQC_TP_EXPIRE = 3  # Qubit has expired
+CQC_TP_DONE = 4  # Done with command
+CQC_TP_RECV = 5  # Received qubit
+CQC_TP_EPR_OK = 6  # Created EPR pair
+CQC_TP_MEASOUT = 7  # Measurement outcome
+CQC_TP_GET_TIME = 8  # Get creation time of qubit
+CQC_TP_INF_TIME = 9  # Return timinig information
+CQC_TP_NEW_OK = 10  # Created a new qubit
 
-CQC_ERR_GENERAL=20 		# General purpose error (no details
-CQC_ERR_NOQUBIT=21 		# No more qubits available
-CQC_ERR_UNSUPP=22 		# No sequence not supported
-CQC_ERR_TIMEOUT=23 		# Timeout
-CQC_ERR_INUSE = 24		# Qubit already in use
+CQC_ERR_GENERAL = 20  # General purpose error (no details
+CQC_ERR_NOQUBIT = 21  # No more qubits available
+CQC_ERR_UNSUPP = 22  # No sequence not supported
+CQC_ERR_TIMEOUT = 23  # Timeout
+CQC_ERR_INUSE = 24  # Qubit already in use
 
 # Possible commands
-CQC_CMD_I=0			# Identity (do nothing, wait one step)
-CQC_CMD_NEW=1			# Ask for a new qubit
-CQC_CMD_MEASURE=2		# Measure qubit
-CQC_CMD_MEASURE_INPLACE = 3 	# Measure qubit inplace
-CQC_CMD_RESET=4			# Reset qubit to |0>
-CQC_CMD_SEND=5			# Send qubit to another node
-CQC_CMD_RECV=6			# Ask to receive qubit
-CQC_CMD_EPR=7			# Create EPR pair with the specified node
-CQC_CMD_EPR_RECV=8		# Receive half of EPR pair created with other node
+CQC_CMD_I = 0  # Identity (do nothing, wait one step)
+CQC_CMD_NEW = 1  # Ask for a new qubit
+CQC_CMD_MEASURE = 2  # Measure qubit
+CQC_CMD_MEASURE_INPLACE = 3  # Measure qubit inplace
+CQC_CMD_RESET = 4  # Reset qubit to |0>
+CQC_CMD_SEND = 5  # Send qubit to another node
+CQC_CMD_RECV = 6  # Ask to receive qubit
+CQC_CMD_EPR = 7  # Create EPR pair with the specified node
+CQC_CMD_EPR_RECV = 8  # Receive half of EPR pair created with other node
 
-CQC_CMD_X=10			# Pauli X
-CQC_CMD_Z=11			# Pauli Z
-CQC_CMD_Y=12			# Pauli Y
-CQC_CMD_T=13			# T Gate
-CQC_CMD_ROT_X=14		# Rotation over angle around X in 2pi/256 increments
-CQC_CMD_ROT_Y=15		# Rotation over angle around Y in 2pi/256 increments
-CQC_CMD_ROT_Z=16		# Rotation over angle around Z in 2pi/256 increments
-CQC_CMD_H=17			# Hadamard H
-CQC_CMD_K=18			# K Gate - taking computational to Y eigenbasis
+CQC_CMD_X = 10  # Pauli X
+CQC_CMD_Z = 11  # Pauli Z
+CQC_CMD_Y = 12  # Pauli Y
+CQC_CMD_T = 13  # T Gate
+CQC_CMD_ROT_X = 14  # Rotation over angle around X in 2pi/256 increments
+CQC_CMD_ROT_Y = 15  # Rotation over angle around Y in 2pi/256 increments
+CQC_CMD_ROT_Z = 16  # Rotation over angle around Z in 2pi/256 increments
+CQC_CMD_H = 17  # Hadamard H
+CQC_CMD_K = 18  # K Gate - taking computational to Y eigenbasis
 
-CQC_CMD_CNOT=20			# CNOT Gate with this as control
-CQC_CMD_CPHASE=21		# CPHASE Gate with this as control
+CQC_CMD_CNOT = 20  # CNOT Gate with this as control
+CQC_CMD_CPHASE = 21  # CPHASE Gate with this as control
 
 # Command options
-CQC_OPT_NOTIFY=0x01		# Send a notification when cmd done
-CQC_OPT_ACTION=0x02		# On if there are actions to execute when done
-CQC_OPT_BLOCK=0x04		# Block until command is done
+CQC_OPT_NOTIFY = 0x01  # Send a notification when cmd done
+CQC_OPT_ACTION = 0x02  # On if there are actions to execute when done
+CQC_OPT_BLOCK = 0x04  # Block until command is done
 
 
 class CQCHeader:
@@ -142,19 +144,21 @@ class CQCHeader:
 			Produce a printable string for information purposes.
 		"""
 		if not self.is_set:
-			return(" ")
+			return (" ")
 
 		toPrint = "Version: " + str(self.version) + " "
 		toPrint = toPrint + "Type: " + str(self.tp) + " "
-		toPrint = toPrint + "App ID: " + str(self.app_id)
-		return(toPrint)
+		toPrint = toPrint + "App ID: " + str(self.app_id) + " "
+		toPrint += "Length: " + str(self.length)
+		return toPrint
+
 
 class CQCCmdHeader:
 	"""
 		Header for a command instruction packet.
 	"""
 
-	def __init__(self, headerBytes = None):
+	def __init__(self, headerBytes=None):
 		"""
 		Initialize using values received from a packet, if available.
 		"""
@@ -186,7 +190,7 @@ class CQCCmdHeader:
 		"""
 
 		if not self.is_set:
-			return(0)
+			return (0)
 
 		opt = 0
 		if self.notify:
@@ -196,8 +200,8 @@ class CQCCmdHeader:
 		if self.action:
 			opt = opt | CQC_OPT_ACTION
 
-		cmdH = pack("=HBB",self.qubit_id, self.instr, opt)
-		return(cmdH)
+		cmdH = pack("=HBB", self.qubit_id, self.instr, opt)
+		return cmdH
 
 	def unpack(self, headerBytes):
 		"""
@@ -222,24 +226,29 @@ class CQCCmdHeader:
 		Produce a printable string for information purposes.
 		"""
 		if not self.is_set:
-			return(" ")
+			return " "
 
 		toPrint = "Qubit ID: " + str(self.qubit_id) + " "
 		toPrint = toPrint + "Instruction: " + str(self.instr) + " "
 		toPrint = toPrint + "Notify: " + str(self.notify) + " "
 		toPrint = toPrint + "Block: " + str(self.block) + " "
 		toPrint = toPrint + "Action: " + str(self.action)
-		return(toPrint)
+		return toPrint
+
 
 class CQCXtraHeader:
 	"""
 	Optional addtional cmd header information. Only relevant for certain commands.
 	"""
 
-	def __init__(self, headerBytes = None):
+	HDR_LENGTH = 16
+
+	# Deprecated, split into multiple headers
+	def __init__(self, headerBytes=None):
 		"""
 		Initialize using values received from a packet.
 		"""
+		warnings.warn("Xtra Header is deprecated, it is split into different headers", DeprecationWarning)
 		if headerBytes == None:
 			self.is_set = False
 			self.qubit_id = 0
@@ -268,10 +277,11 @@ class CQCXtraHeader:
 			Pack data into packet form. For definitions see cLib/cqc.h
 		"""
 		if not self.is_set:
-			return(0)
+			return 0
 
-		xtraH = pack("=HHLLHBB", self.qubit_id, self.remote_app_id, self.remote_node, self.cmdLength, self.remote_port, self.step, 0)
-		return(xtraH)
+		xtraH = pack("=HHLLHBB", self.qubit_id, self.remote_app_id, self.remote_node, self.cmdLength, self.remote_port,
+					 self.step, 0)
+		return xtraH
 
 	def unpack(self, headerBytes):
 		"""
@@ -292,7 +302,7 @@ class CQCXtraHeader:
 			Produce a printable string for information purposes.
 		"""
 		if not self.is_set:
-			return(" ")
+			return " "
 
 		toPrint = "Xtra Qubit: " + str(self.qubit_id) + " "
 		toPrint = toPrint + "Angle Step: " + str(self.step) + " "
@@ -301,14 +311,151 @@ class CQCXtraHeader:
 		toPrint = toPrint + "Remote Port: " + str(self.remote_port) + " "
 		toPrint = toPrint + "Command Length: " + str(self.cmdLength)
 
-		return(toPrint)
+		return (toPrint)
+
+
+class CQCCommunicationHeader:
+	"""
+		Header used to send information to which node to send information to.
+		Used for example in Send and EPR commands
+		This header has a size of 8
+	"""
+
+	packaging_format = "=HLH"
+	HDR_LENGTH = 8
+
+	def __init__(self, headerBytes=None):
+		"""
+		Initialize from packet data
+		:param headerBytes:  packet data
+		"""
+		if headerBytes is None:
+			self.is_set = False
+			self.remote_app_id = 0
+			self.remote_node = 0
+			self.remote_port = 0
+
+		else:
+			self.unpack(headerBytes)
+
+	def setVals(self, remote_app_id, remote_node, remote_port):
+		"""
+		Set header using given values
+		:param remote_app_id: Application ID of remote host
+		:param remote_node: IP of remote host in cqc network
+		:param remote_port: port of remote hode in cqc network
+		"""
+		self.is_set = True
+		self.remote_app_id = remote_app_id
+		self.remote_node = remote_node
+		self.remote_port = remote_port
+
+	def pack(self):
+		"""
+		Pack data into packet form. For definitions see cLib/cqc.h
+		:returns the packed header
+		"""
+		if not self.is_set:
+			return 0
+
+		com_header = pack(self.packaging_format, self.remote_app_id, self.remote_node, self.remote_port)
+		return com_header
+
+	def unpack(self, headerBytes):
+		"""
+		Unpack packet data. For defnitions see cLib/cqc.h
+		:param headerBytes: The unpacked headers.
+		"""
+		com_header = unpack(self.packaging_format, headerBytes)
+		self.remote_app_id = com_header[0]
+		self.remote_node = com_header[1]
+		self.remote_port = com_header[2]
+		self.is_set = True
+
+	def printable(self):
+		"""
+			Produce a printable string for information purposes.
+		"""
+		if not self.is_set:
+			return " "
+
+		toPrint = "Communication header. "
+		toPrint += "Remote App ID: " + str(self.remote_app_id) + " "
+		toPrint += "Remote Node: " + str(self.remote_node) + " "
+		toPrint += "Remote Port: " + str(self.remote_port) + " "
+
+		return toPrint
+
+
+class CQCFactoryHeader:
+	"""
+	Header used to send factory information
+	"""
+
+	# could maybe include the notify flag in num_iter?
+	# That halfs the amount of possible num_iter from 256 to 128
+	package_format = "=BB"
+	HDR_LENGTH = 2
+
+	def __init__(self, headerBytes=None):
+		"""
+			Initialize from packet data.
+		"""
+		if headerBytes is None:
+			self.is_set = False
+			self.num_iter = 0
+			self.notify = False
+		else:
+			self.unpack(headerBytes)
+
+	def setVals(self, num_iter, notify):
+		"""
+		Set using give values
+		:param num_iter: The amount of iterations to this factory
+		:param notify: 		True if the factory should send a done message back
+		"""
+		self.num_iter = num_iter
+		self.notify = notify
+		self.is_set = True
+
+	def pack(self):
+		"""
+		Pack data into packet form. For definitions see cLib/cqc.h
+		"""
+		if not self.is_set:
+			return 0
+
+		factH = pack(self.package_format, self.num_iter, self.notify)
+		return factH
+
+	def unpack(self, headerBytes):
+		"""
+			Unpack packet data. For defnitions see cLib/cqc.h
+		"""
+		fact_hdr = unpack(self.package_format, headerBytes)
+
+		self.num_iter = fact_hdr[0]
+		self.notify = fact_hdr[1]
+		self.is_set = True
+
+	def printable(self):
+		"""
+			Produce a printable string for information purposes.
+		"""
+		if not self.is_set:
+			return (" ")
+
+		toPrint = "Factory Header "
+		toPrint += "Number of iterations: " + str(self.num_iter) + " "
+		return toPrint
+
 
 class CQCNotifyHeader:
 	"""
 		Header used to specify notification details.
 	"""
 
-	def __init__(self, headerBytes = None):
+	def __init__(self, headerBytes=None):
 		"""
 			Initialize from packet data.
 		"""
@@ -333,7 +480,7 @@ class CQCNotifyHeader:
 		self.remote_node = remote_node
 		self.remote_port = remote_port
 		self.datetime = datetime
-		self.is_set=True
+		self.is_set = True
 
 	def pack(self):
 		"""
@@ -342,8 +489,9 @@ class CQCNotifyHeader:
 		if not self.is_set:
 			return 0
 
-		xtraH = pack("=HHLQHBB", self.qubit_id, self.remote_app_id, self.remote_node, self.datetime, self.remote_port, self.outcome, 0)
-		return(xtraH)
+		xtraH = pack("=HHLQHBB", self.qubit_id, self.remote_app_id, self.remote_node, self.datetime, self.remote_port,
+					 self.outcome, 0)
+		return (xtraH)
 
 	def unpack(self, headerBytes):
 		"""
@@ -364,12 +512,12 @@ class CQCNotifyHeader:
 			Produce a printable string for information purposes.
 		"""
 		if not self.is_set:
-			return(" ")
+			return (" ")
 
-		toPrint = "Qubit ID: "  + str(self.qubit_id) + " "
+		toPrint = "Qubit ID: " + str(self.qubit_id) + " "
 		toPrint = toPrint + "Outcome: " + str(self.outcome) + " "
 		toPrint = toPrint + "Remote App ID: " + str(self.remote_app_id) + " "
 		toPrint = toPrint + "Remote Node: " + str(self.remote_node) + " "
 		toPrint = toPrint + "Remote Port: " + str(self.remote_port) + " "
 		toPrint = toPrint + "Datetime: " + str(self.datetime)
-		return(toPrint)
+		return (toPrint)

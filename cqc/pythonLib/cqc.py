@@ -35,11 +35,13 @@ from SimulaQron.cqc.backend.entInfoHeader import *
 
 
 def shouldReturn(command):
-	return command in {CQC_CMD_NEW, CQC_CMD_MEASURE, CQC_CMD_MEASURE_INPLACE, CQC_CMD_RECV, CQC_CMD_EPR_RECV, CQC_CMD_EPR}
+	return command in {CQC_CMD_NEW, CQC_CMD_MEASURE, CQC_CMD_MEASURE_INPLACE, CQC_CMD_RECV, CQC_CMD_EPR_RECV,
+					   CQC_CMD_EPR}
 
 
 def hasXtraHeader(command):
-	return command in {CQC_CMD_CNOT, CQC_CMD_SEND, CQC_CMD_EPR, CQC_CMD_ROT_X, CQC_CMD_ROT_Y, CQC_CMD_ROT_Z, CQC_CMD_CPHASE}
+	return command in {CQC_CMD_CNOT, CQC_CMD_SEND, CQC_CMD_EPR, CQC_CMD_ROT_X, CQC_CMD_ROT_Y, CQC_CMD_ROT_Z,
+					   CQC_CMD_CPHASE}
 
 
 class CQCConnection:
@@ -270,23 +272,30 @@ class CQCConnection:
 			:remote_port:	 port of remote host in cqc network
 			:cmd_length:	 length of extra commands
 		"""
+
+		# Check what extra header we require
+		xtra_hdr = None
+		if command == CQC_CMD_SEND or command == CQC_CMD_EPR:
+			xtra_hdr = CQCCommunicationHeader()
+			xtra_hdr.setVals(remote_appID, remote_node, remote_port)
+		else:
+			xtra_hdr = CQCXtraHeader()
+			xtra_hdr.setVals(xtra_qID, step, remote_appID, remote_node, remote_port, cmd_length)
+		if xtra_hdr is not None:
+			xtra_msg = xtra_hdr.pack()
+
 		# Send Header
 		hdr = CQCHeader()
-		hdr.setVals(CQC_VERSION, CQC_TP_COMMAND, self._appID, CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
+		hdr.setVals(CQC_VERSION, CQC_TP_COMMAND, self._appID, CQC_CMD_HDR_LENGTH + xtra_hdr.HDR_LENGTH)
 		msg = hdr.pack()
-		self._s.send(msg)
 
 		# Send Command
 		cmd_hdr = CQCCmdHeader()
 		cmd_hdr.setVals(qID, command, notify, block, action)
 		cmd_msg = cmd_hdr.pack()
-		self._s.send(cmd_msg)
 
 		# Send Xtra
-		xtra_hdr = CQCXtraHeader()
-		xtra_hdr.setVals(xtra_qID, step, remote_appID, remote_node, remote_port, cmd_length)
-		xtra_msg = xtra_hdr.pack()
-		self._s.send(xtra_msg)
+		self._s.send(msg + cmd_msg + xtra_msg)
 
 	def sendGetTime(self, qID, notify=1, block=1, action=0):
 		"""
@@ -313,7 +322,7 @@ class CQCConnection:
 		self._s.send(cmd_msg)
 
 	def sendFactory(self, qID, command, num_iter, notify=1, block=1, action=0, xtra_qID=-1, remote_appID=0,
-					remote_node=0, remote_port=0, cmd_length=0):
+					remote_node=0, remote_port=0, cmd_length=0, step_size=0):
 		"""
 		Sends a factory message
 
@@ -336,23 +345,37 @@ class CQCConnection:
 			if command == CQC_CMD_CNOT or command == CQC_CMD_CPHASE:
 				raise CQCUnsuppError("Please provide a target qubit")
 			xtra_qID = 0
+
+		# Check what extra header we require
+		if hasXtraHeader(command):
+			if command == CQC_CMD_SEND or command == CQC_CMD_EPR:
+				xtra_hdr = CQCCommunicationHeader()
+				xtra_hdr.setVals(remote_appID, remote_node, remote_port)
+			else:
+				xtra_hdr = CQCXtraHeader()
+				xtra_hdr.setVals(xtra_qID, step_size, remote_appID, remote_node, remote_port, cmd_length)
+			xtra_msg = xtra_hdr.pack()
+			hdr_length = CQC_CMD_HDR_LENGTH + CQCFactoryHeader.HDR_LENGTH + xtra_hdr.HDR_LENGTH
+		else:
+			xtra_msg = b''
+			hdr_length = CQC_CMD_HDR_LENGTH + CQCFactoryHeader.HDR_LENGTH
+
 		# Send Header
 		hdr = CQCHeader()
-		hdr.setVals(CQC_VERSION, CQC_TP_FACTORY, self._appID, CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
+		hdr.setVals(CQC_VERSION, CQC_TP_FACTORY, self._appID, hdr_length)
 		msg = hdr.pack()
-		self._s.send(msg)
+
+		# Factory header
+		factory_hdr = CQCFactoryHeader()
+		factory_hdr.setVals(num_iter, notify)
+		factory_msg = factory_hdr.pack()
 
 		# Send Command
 		cmd_hdr = CQCCmdHeader()
-		cmd_hdr.setVals(qID, command , 0, block, 1)
+		cmd_hdr.setVals(qID, command, 0, block, action)
 		cmd_msg = cmd_hdr.pack()
-		self._s.send(cmd_msg)
 
-		# Send Xtra
-		xtra_hdr = CQCXtraHeader()
-		xtra_hdr.setVals(xtra_qID, num_iter, remote_appID, remote_node, remote_port, cmd_length)
-		xtra_msg = xtra_hdr.pack()
-		self._s.send(xtra_msg)
+		self._s.send(msg + factory_msg + cmd_msg + xtra_msg)
 
 		# Get RECV messages
 		# Some commands expect to get a list of messages back, check those
@@ -478,7 +501,6 @@ class CQCConnection:
 			checkedBuf = True
 
 		while True:
-
 			# If buf does not contain enough data, read in more
 			if checkedBuf:
 				# Receive data

@@ -1,4 +1,3 @@
-
 # Copyright (c) 2018, Stephanie Wehner and Axel Dahlberg
 # All rights reserved.
 #
@@ -43,7 +42,6 @@ from SimulaQron.local.setup import *
 
 from SimulaQron.cqc.backend.cqcConfig import *
 
-
 from SimulaQron.cqc.backend.entInfoHeader import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from abc import ABC, abstractmethod
@@ -51,9 +49,6 @@ from abc import ABC, abstractmethod
 """
 Abstract class. Classes that inherit this class define how to handle incoming cqc messages. 
 """
-
-
-
 
 
 class CQCMessageHandler(ABC):
@@ -93,7 +88,6 @@ class CQCMessageHandler(ABC):
 
 		# Convenience
 		self.name = factory.name
-		# self.protocol = protocol  # ugly, but for now I don't know a better way
 
 	# @inlineCallbacks
 	def handle_cqc_message(self, header, message):
@@ -128,9 +122,6 @@ class CQCMessageHandler(ABC):
 		"""
 		Check whether this command includes an extra header with additional information.
 		"""
-		if cmd.action == 1:
-			return True
-
 		if cmd.instr == CQC_CMD_SEND:
 			return True
 		if cmd.instr == CQC_CMD_EPR:
@@ -149,6 +140,34 @@ class CQCMessageHandler(ABC):
 			return True
 
 		return False
+
+	@staticmethod
+	def create_extra_header(cmd, cmd_data, version = CQC_VERSION):
+		"""
+		Create the extra header (communication header, rotation header, etc) based on the command
+		"""
+		if version < 1:
+			cmd_length = CQC_CMD_XTRA_LENGTH
+			hdr = CQCXtraHeader(cmd_data[:cmd_length])
+			return hdr
+
+		instruction = cmd.instr
+		if instruction == CQC_CMD_SEND or instruction == CQC_CMD_EPR:
+			cmd_length = CQCCommunicationHeader.HDR_LENGTH
+			hdr = CQCCommunicationHeader(cmd_data[:cmd_length])
+		elif instruction == CQC_CMD_CNOT or instruction == CQC_CMD_CPHASE:
+			cmd_length = CQC_CMD_XTRA_LENGTH
+			hdr = CQCXtraHeader(cmd_data[:cmd_length])
+		elif instruction == CQC_CMD_ROT_X or instruction == CQC_CMD_ROT_Y or instruction == CQC_CMD_ROT_Z:
+			cmd_length = CQC_CMD_XTRA_LENGTH
+			hdr = CQCXtraHeader(cmd_data[:cmd_length])
+		elif cmd.action == 1:
+			cmd_length = CQC_CMD_XTRA_LENGTH
+			hdr = CQCXtraHeader(cmd_data[:cmd_length])
+		else:
+			return None
+		return hdr
+
 
 	@inlineCallbacks
 	def handle_command(self, header, data):
@@ -265,7 +284,6 @@ class CQCMessageHandler(ABC):
 
 
 class SimulaqronCQCHandler(CQCMessageHandler):
-
 	# Dictionary storing the next unique qubit id for each used app_id
 	_next_q_id = {}
 
@@ -296,16 +314,16 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			# Should we notify
 			should_notify = cmd.notify
 
-			# Check if this command includes an additional header
-			if self.has_extra(cmd):
-				if len(cmd_data) < (newl + CQC_CMD_XTRA_LENGTH):
-					logging.debug("CQC %s: Missing XTRA Header", self.name)
-				else:
-					xtra = CQCXtraHeader(cmd_data[newl:newl + CQC_CMD_XTRA_LENGTH])
-					newl = newl + CQC_CMD_XTRA_LENGTH
-					logging.debug("CQC %s: Read XTRA Header: %s", self.name, xtra.printable())
-			else:
+			# Create the extra header if it exist
+			try:
+				xtra = self.create_extra_header(cmd, cmd_data[newl:], cqc_header.version)
+			except IndexError:
 				xtra = None
+				logging.debug("CQC %s: Missing XTRA Header", self.name)
+
+			if xtra is not None:
+				newl += xtra.HDR_LENGTH
+				logging.debug("CQC %s: Read XTRA Header: %s", self.name, xtra.printable())
 
 			# Run this command
 			logging.debug("CQC %s: Executing command: %s", self.name, cmd.printable())
@@ -324,9 +342,9 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			# Check if there are additional commands to execute afterwards
 			if cmd.action:
 				logging.debug("CQC %s: Reading extra action commands", self.name)
-				(msgs, succ, retNotify) = yield self._process_command(cqc_header, xtra.cmdLength, data[newl:newl + xtra.cmdLength])
+				(msgs, succ, retNotify) = yield self._process_command(cqc_header, xtra.cmdLength,
+																	  data[newl:newl + xtra.cmdLength])
 				should_notify = (should_notify or retNotify)
-				print(332)
 				if not succ:
 					return return_messages, False, 0
 				return_messages.extend(msgs)
@@ -344,43 +362,33 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 	@inlineCallbacks
 	def handle_factory(self, header, data):
-
-		cmd_l = CQC_CMD_HDR_LENGTH
-		xtra_l = CQC_CMD_XTRA_LENGTH
-
-		# Get command header
-		if len(data) < cmd_l:
-			logging.debug("CQC %s: Missing CMD Header", self.name)
+		fact_l = CQCFactoryHeader.HDR_LENGTH
+		# Get factory header
+		if len(data) < header.length:
+			logging.debug("CQC %s: Missing header(s) in factory", self.name)
 			return [self.create_return_message(header.app_id, CQC_ERR_UNSUPP)]
-		cmd_header = CQCCmdHeader(data[:cmd_l])
+		fact_header = CQCFactoryHeader(data[:fact_l])
 
-		# Get xtra header
-		if len(data) < (cmd_l + xtra_l):
-			logging.debug("CQC %s: Missing XTRA Header", self.name)
-			return [self.create_return_message(header.app_id, CQC_ERR_UNSUPP)]
-		xtra_header = CQCXtraHeader(data[cmd_l:cmd_l + xtra_l])
-
-		command = cmd_header.instr
-		num_iter = xtra_header.step
-
+		num_iter = fact_header.num_iter
 		# Perform operation multiple times
 		all_succ = True
-		should_notify = cmd_header.notify
+		should_notify = fact_header.notify
 		return_messages = []
+		logging.debug("CQC %s: Performing factory command with %s iterations", self.name, num_iter)
 		for _ in range(num_iter):
 			try:
-				if self.has_extra(cmd_header):
-					(msgs, succ, should_notify) = yield self._process_command(header, header.length, data)
-				else:
-					data = data[:cmd_l] + data[cmd_l + xtra_l:]
-					(msgs, succ, should_notify) = yield self._process_command(header, header.length - xtra_l, data)
+				msgs, succ, _ = yield self._process_command(header, header.length - fact_l, data[fact_l:])
 			except TypeError as e:
+				logging.error("Qubit does not exist")
 				# A type error can indicate that the qubit is not active
 				# this is bad error handling.
 				# Maybe a TODO to check for inactive qubits in _procces_command?
 				msg = self.create_return_message(header.app_id, CQC_ERR_NOQUBIT)
 				# return_messages.add(msg)
 				return [msg]
+			except Exception as e:
+				import traceback
+				traceback.print_exc()
 			all_succ = (all_succ and succ)
 			return_messages.extend(msgs)
 		if all_succ:
@@ -465,13 +473,14 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		Apply a rotation of the qubit specified in cmd with an angle specified in xtra
 		around the axis
 		"""
-		logging.debug("CQC %s: Applying a rotation around %s to App ID %d qubit id %d", self.name, axis, cqc_header.app_id, cmd.qubit_id)
+		logging.debug("CQC %s: Applying a rotation around %s to App ID %d qubit id %d", self.name, axis,
+					  cqc_header.app_id, cmd.qubit_id)
 		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
 		if not virt_qubit:
 			logging.debug("CQC %s: No such qubit", self.name)
 			return self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
 
-		yield virt_qubit.callRemote("apply_rotation", axis , 2 * np.pi/256 * xtra.step)
+		yield virt_qubit.callRemote("apply_rotation", axis, 2 * np.pi / 256 * xtra.step)
 		return []
 
 	def cmd_rotx(self, cqc_header, cmd, xtra):
@@ -588,8 +597,10 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
 
 		# Send instruction to transfer the qubit
-		yield self.factory.virtRoot.callRemote("cqc_send_qubit", virt_num, target_name, cqc_header.app_id, xtra.remote_app_id)
-		logging.debug("CQC %s: Sent App ID %d qubit id %d to %s", self.name, cqc_header.app_id, cmd.qubit_id, target_name)
+		yield self.factory.virtRoot.callRemote("cqc_send_qubit", virt_num, target_name, cqc_header.app_id,
+											   xtra.remote_app_id)
+		logging.debug("CQC %s: Sent App ID %d qubit id %d to %s", self.name, cqc_header.app_id, cmd.qubit_id,
+					  target_name)
 
 		# Remove from active mapped qubits
 		del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
@@ -621,7 +632,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			# self.protocol._send_back_cqc(cqc_header, CQC_ERR_TIMEOUT)
 			return self.create_return_message(cqc_header.app_id, CQC_ERR_TIMEOUT)
 
-		logging.debug("CQC %s: Qubit received for app_id %d",self.name, cqc_header.app_id)
+		logging.debug("CQC %s: Qubit received for app_id %d", self.name, cqc_header.app_id)
 
 		# Once we have the qubit, add it to the local list and send a reply we received it. Note that we will
 		# recheck whether it exists: it could have been added by another connection in the mean time
@@ -715,7 +726,8 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 		# Prepare ent_info header with entanglement information
 		ent_info = EntInfoHeader()
-		ent_info.setVals(host_node, host_port, host_app_id, remote_node, remote_port, remote_app_id, ent_id, int(time.time()), int(time.time()), 0, 1)
+		ent_info.setVals(host_node, host_port, host_app_id, remote_node, remote_port, remote_app_id, ent_id,
+						 int(time.time()), int(time.time()), 0, 1)
 		# Send second qubit
 		succ = yield self.send_epr_half(cqc_header, cmd2, xtra, ent_info)
 		if not succ:
@@ -726,7 +738,8 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)]
 
 		# Send message we created EPR pair
-		msg_ok = self.create_return_message(cqc_header.app_id, CQC_TP_EPR_OK, length=CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH)
+		msg_ok = self.create_return_message(cqc_header.app_id, CQC_TP_EPR_OK,
+											length=CQC_NOTIFY_LENGTH + ENT_INFO_LENGTH)
 
 		return_messages.append(msg_ok)
 
@@ -770,8 +783,10 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		updated_ent_info.switch_nodes()
 		raw_updated_ent_info = updated_ent_info.pack()
 		# Send instruction to transfer the qubit
-		yield self.factory.virtRoot.callRemote("cqc_send_epr_half", virt_num, target_name, cqc_header.app_id, xtra.remote_app_id, raw_updated_ent_info)
-		logging.debug("CQC %s: Sent App ID %d half a EPR pair as qubit id %d to %s", self.name, cqc_header.app_id, cmd.qubit_id, target_name)
+		yield self.factory.virtRoot.callRemote("cqc_send_epr_half", virt_num, target_name, cqc_header.app_id,
+											   xtra.remote_app_id, raw_updated_ent_info)
+		logging.debug("CQC %s: Sent App ID %d half a EPR pair as qubit id %d to %s", self.name, cqc_header.app_id,
+					  cmd.qubit_id, target_name)
 		# Remove from active mapped qubits
 		del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
 
@@ -824,7 +839,8 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			self.factory._lock.release()
 
 		# Send message we received a qubit back
-		cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_EPR_OK, length=CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH)
+		cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_EPR_OK,
+											 length=CQC_NOTIFY_LENGTH + ENT_INFO_LENGTH)
 
 		# Send notify header with qubit ID
 		hdr = CQCNotifyHeader()
@@ -898,7 +914,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 	@inlineCallbacks
 	def apply_single_qubit_gate(self, cqc_header, qubit_id, gate):
-		logging.debug("CQC %s: Applying X to App ID %s qubit id %d", self.name, gate, qubit_id)
+		logging.debug("CQC %s: %s on App ID %d to qubit id %d", self.name, gate, cqc_header.app_id, qubit_id)
 		virt_qubit = self.get_virt_qubit(cqc_header, qubit_id)
 		if not virt_qubit:
 			logging.debug("CQC %s: No such qubit", self.name)
@@ -913,7 +929,8 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			logging.debug("CQC %s: Missing XTRA Header", self.name)
 			return False
 		#
-		logging.debug("CQC %s: Applying %s to App ID %d qubit id %d target %d", self.name, gate, cqc_header.app_id, cmd.qubit_id, xtra.qubit_id)
+		logging.debug("CQC %s: Applying %s to App ID %d qubit id %d target %d", self.name, gate, cqc_header.app_id,
+					  cmd.qubit_id, xtra.qubit_id)
 		control = self.get_virt_qubit(cqc_header, cmd.qubit_id)
 		target = self.get_virt_qubit(cqc_header, xtra.qubit_id)
 		if not control or not target:
@@ -991,6 +1008,8 @@ class UnknownQubitError(Exception):
 
 	def __init__(self, message):
 		super.__init__(message)
+
+
 #######################################################################################################
 #
 # CQC Internal qubit object to translate to the native mode of SimulaQron

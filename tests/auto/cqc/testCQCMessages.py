@@ -308,11 +308,12 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cmd_header['notify'], True)
 		cqc_header = lastEntry['cqc_header']
 		self.assertEqual(cqc_header['type'], CQC_TP_COMMAND)
-		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
+		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQCCommunicationHeader.HDR_LENGTH)
 		self.assertEqual(cqc_header['app_id'], 1)
 		xtra_header = lastEntry['xtra_header']
-		self.assertEqual(xtra_header['step'], 0)
 		self.assertEqual(xtra_header['remote_app_id'], 2)
+		self.assertNotEqual(xtra_header['remote_node'], 0)
+		self.assertNotEqual(xtra_header['remote_port'], 0)
 		bob.close()
 
 	def testSendSelf(self):
@@ -326,11 +327,12 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cmd_header['notify'], True)
 		cqc_header = lastEntry['cqc_header']
 		self.assertEqual(cqc_header['type'], CQC_TP_COMMAND)
-		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
+		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQCCommunicationHeader.HDR_LENGTH)
 		self.assertEqual(cqc_header['app_id'], 1)
 		xtra_header = lastEntry['xtra_header']
-		self.assertEqual(xtra_header['step'], 0)
 		self.assertEqual(xtra_header['remote_app_id'], 1)
+		self.assertNotEqual(xtra_header['remote_node'], 0)
+		self.assertNotEqual(xtra_header['remote_port'], 0)
 
 	def testRecv(self):
 		self._alice.recvQubit(print_info=False)
@@ -357,11 +359,12 @@ class CQCMessageTest(unittest.TestCase):
 		cqc_header_epr = entries[0]['cqc_header']
 		self.assertEqual(cqc_header_epr['type'], CQC_TP_COMMAND)
 		for i in range(5):
-			self.assertEqual(entries[i]['cqc_header']['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
+			self.assertEqual(entries[i]['cqc_header']['header_length'], CQC_CMD_HDR_LENGTH + CQCCommunicationHeader.HDR_LENGTH)
 		self.assertEqual(cqc_header_epr['app_id'], 1)
 		xtra_header_epr = entries[0]['xtra_header']
-		self.assertEqual(xtra_header_epr['step'], 0)
 		self.assertEqual(xtra_header_epr['remote_app_id'], 2)
+		self.assertNotEqual(xtra_header_epr['remote_node'], 0)
+		self.assertNotEqual(xtra_header_epr['remote_port'], 0)
 
 		# Check if the qubits are created correctly
 		# The protocol already knows what do to on EPR, so no new headers are made,
@@ -429,14 +432,11 @@ class CQCMessageTest(unittest.TestCase):
 		# Checking the factory and the measure, factory should not log any commands
 		lastEntries = get_last_entries(2)
 		factoryEntry = lastEntries[0]
-		factory_cmd_header = factoryEntry['cmd_header']
-		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_X)
-		self.assertEqual(factory_cmd_header['qubit_id'], q1._qID)
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH+CQC_CMD_XTRA_LENGTH)
-		x = factoryEntry['xtra_header']
-		self.assertEqual(x['step'], 0)
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH
+		self.assertEqual(factory_cqc_header['header_length'], expected_length)
+		self.assertEqual(factoryEntry['factory_iterations'], 0)
 
 		measureEntry = lastEntries[1]
 		self.assertEqual(measureEntry['cmd_header']['instruction'], CQC_CMD_MEASURE_INPLACE)
@@ -453,14 +453,11 @@ class CQCMessageTest(unittest.TestCase):
 		# Checking the factory and the measure, factory should not log any commands
 		lastEntries = get_last_entries(3)
 		factoryEntry = lastEntries[0]
-		factory_cmd_header = factoryEntry['cmd_header']
-		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_X)
-		self.assertEqual(factory_cmd_header['qubit_id'], q1._qID)
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
-		factory_xtra_header = factoryEntry['xtra_header']
-		self.assertEqual(factory_xtra_header['step'], 1)
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH
+		self.assertEqual(factory_cqc_header['header_length'], expected_length)
+		self.assertEqual(factoryEntry['factory_iterations'], 1)
 
 		xEntry = lastEntries[1]
 		x_cmd_cmd_header = xEntry['cmd_header']
@@ -482,14 +479,11 @@ class CQCMessageTest(unittest.TestCase):
 		# Checking the factory and the measure, factory should not log any commands
 		lastEntries = get_last_entries(12)
 		factoryEntry = lastEntries[0]
-		factory_cmd_header = factoryEntry['cmd_header']
-		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_X)
-		self.assertEqual(factory_cmd_header['qubit_id'], q1._qID)
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
-		factory_xtra_header = factoryEntry['xtra_header']
-		self.assertEqual(factory_xtra_header['step'], 10)
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH
+		self.assertEqual(factory_cqc_header['header_length'], expected_length)
+		self.assertEqual(factoryEntry['factory_iterations'], 10)
 
 		for i in range(1, 11):
 			xEntry = lastEntries[i]
@@ -516,15 +510,11 @@ class CQCMessageTest(unittest.TestCase):
 
 		entries = get_last_entries(11)
 		factoryEntry = entries[0]
-		factory_cmd_header = factoryEntry['cmd_header']
-		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_CNOT)
-		self.assertEqual(factory_cmd_header['qubit_id'], q1._qID)
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
-		factory_xtra_header = factoryEntry['xtra_header']
-		self.assertEqual(factory_xtra_header['step'], 10)
-		self.assertEqual(factory_xtra_header['qubit_id'], q2._qID)
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH + CQCXtraHeader.HDR_LENGTH
+		self.assertEqual(factory_cqc_header['header_length'], expected_length)
+		self.assertEqual(factoryEntry['factory_iterations'], 10)
 
 		for i in range(1, 11):
 			xEntry = entries[i]
@@ -539,26 +529,25 @@ class CQCMessageTest(unittest.TestCase):
 		# equal to the amount of calls to this rotation
 		# So if the extra parameter is x, the rotation done is x*(x*tau/256)
 		q1 = qubit(self._alice, print_info=False)
-		self._alice.sendFactory(q1._qID, CQC_CMD_ROT_X, 10)
+		self._alice.sendFactory(q1._qID, CQC_CMD_ROT_X, 10, step_size=5)
 		m1 = q1.measure(inplace=True, print_info=False)
 
 		# Checking the factory and the measure, factory should not log any commands
 		lastEntries = get_last_entries(12)
 		factoryEntry = lastEntries[0]
-		factory_cmd_header = factoryEntry['cmd_header']
-		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_ROT_X)
-		self.assertEqual(factory_cmd_header['qubit_id'], q1._qID)
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
-		factory_xtra_header = factoryEntry['xtra_header']
-		self.assertEqual(factory_xtra_header['step'], 10)
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH + CQCXtraHeader.HDR_LENGTH
+		self.assertEqual(factory_cqc_header['header_length'], expected_length)
+		self.assertEqual(factoryEntry['factory_iterations'], 10)
 
 		for i in range(1, 11):
 			xEntry = lastEntries[i]
 			x_cmd_cmd_header = xEntry['cmd_header']
 			self.assertEqual(x_cmd_cmd_header['instruction'], CQC_CMD_ROT_X)
 			self.assertEqual(x_cmd_cmd_header['qubit_id'], q1._qID)
+			xtra_header = xEntry['xtra_header']
+			self.assertEqual(xtra_header['step'], 5)
 		# cqc header is the same as the first.
 
 		measureEntry = lastEntries[11]
@@ -571,20 +560,16 @@ class CQCMessageTest(unittest.TestCase):
 		# Checking the factory and the measure, factory should not log any commands
 		lastEntries = get_last_entries(11)
 		factoryEntry = lastEntries[0]
-		factory_cmd_header = factoryEntry['cmd_header']
-		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_NEW)
-		self.assertEqual(factory_cmd_header['qubit_id'], 2)
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
-		factory_xtra_header = factoryEntry['xtra_header']
-		self.assertEqual(factory_xtra_header['step'], 10)
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH
+		self.assertEqual(factory_cqc_header['header_length'], expected_length)
+		self.assertEqual(factoryEntry['factory_iterations'], 10)
 
 		for i in range(1, 11):
 			xEntry = lastEntries[i]
 			x_cmd_cmd_header = xEntry['cmd_header']
 			self.assertEqual(x_cmd_cmd_header['instruction'], CQC_CMD_NEW)
-			self.assertEqual(x_cmd_cmd_header['qubit_id'], 2)  # This id does not matter
 
 
 		curID = qubits[0]._qID
@@ -600,19 +585,17 @@ class CQCMessageTest(unittest.TestCase):
 
 		lastEntries = get_last_entries(11)
 		factoryEntry = lastEntries[0]
-		factory_cmd_header = factoryEntry['cmd_header']
-		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_MEASURE)
-		self.assertEqual(factory_cmd_header['qubit_id'], q1._qID)
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
-		factory_xtra_header = factoryEntry['xtra_header']
-		self.assertEqual(factory_xtra_header['step'], 10)
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH
+		self.assertEqual(factory_cqc_header['header_length'], expected_length)
+		self.assertEqual(factoryEntry['factory_iterations'], 10)
 
 		for i in range(1, 11):
 			xEntry = lastEntries[i]
 			x_cmd_cmd_header = xEntry['cmd_header']
 			self.assertEqual(x_cmd_cmd_header['instruction'], CQC_CMD_MEASURE)
+			self.assertEqual(x_cmd_cmd_header['qubit_id'], q1._qID)
 
 	def testFactoryMeasureInplace(self):
 		# should give the same results as inplace = false
@@ -623,19 +606,17 @@ class CQCMessageTest(unittest.TestCase):
 
 		lastEntries = get_last_entries(11)
 		factoryEntry = lastEntries[0]
-		factory_cmd_header = factoryEntry['cmd_header']
-		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_MEASURE_INPLACE)
-		self.assertEqual(factory_cmd_header['qubit_id'], q1._qID)
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
-		factory_xtra_header = factoryEntry['xtra_header']
-		self.assertEqual(factory_xtra_header['step'], 10)
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH
+		self.assertEqual(factory_cqc_header['header_length'], expected_length)
+		self.assertEqual(factoryEntry['factory_iterations'], 10)
 
 		for i in range(1, 11):
 			xEntry = lastEntries[i]
 			x_cmd_cmd_header = xEntry['cmd_header']
 			self.assertEqual(x_cmd_cmd_header['instruction'], CQC_CMD_MEASURE_INPLACE)
+			self.assertEqual(x_cmd_cmd_header['qubit_id'], q1._qID)
 
 	def testFactoryReset(self):
 
@@ -646,19 +627,17 @@ class CQCMessageTest(unittest.TestCase):
 
 		lastEntries = get_last_entries(11)
 		factoryEntry = lastEntries[0]
-		factory_cmd_header = factoryEntry['cmd_header']
-		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_RESET)
-		self.assertEqual(factory_cmd_header['qubit_id'], q1._qID)
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
-		factory_xtra_header = factoryEntry['xtra_header']
-		self.assertEqual(factory_xtra_header['step'], 10)
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH
+		self.assertEqual(factory_cqc_header['header_length'], expected_length)
+		self.assertEqual(factoryEntry['factory_iterations'], 10)
 
 		for i in range(1, 11):
 			xEntry = lastEntries[i]
 			x_cmd_cmd_header = xEntry['cmd_header']
 			self.assertEqual(x_cmd_cmd_header['instruction'], CQC_CMD_RESET)
+			self.assertEqual(x_cmd_cmd_header['qubit_id'], q1._qID)
 
 	def testFactorySend(self):
 		q1 = qubit(self._alice, print_info=False)
@@ -668,26 +647,24 @@ class CQCMessageTest(unittest.TestCase):
 
 		lastEntries = get_last_entries(11)
 		factoryEntry = lastEntries[0]
-		factory_cmd_header = factoryEntry['cmd_header']
-		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_SEND)
-		self.assertEqual(factory_cmd_header['qubit_id'], q1._qID)
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
-		factory_xtra_header = factoryEntry['xtra_header']
-		self.assertEqual(factory_xtra_header['step'], 10)
-		self.assertEqual(factory_xtra_header['remote_app_id'], 5)
-		self.assertEqual(factory_xtra_header['remote_node'], 6)
-		self.assertEqual(factory_xtra_header['remote_port'], 8088)
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH + CQCCommunicationHeader.HDR_LENGTH
+		self.assertEqual(factory_cqc_header['header_length'], expected_length)
+		self.assertEqual(factoryEntry['factory_iterations'], 10)
 
 		for i in range(1, 11):
 			xEntry = lastEntries[i]
 			x_cmd_cmd_header = xEntry['cmd_header']
 			self.assertEqual(x_cmd_cmd_header['instruction'], CQC_CMD_SEND)
+			self.assertEqual(x_cmd_cmd_header['qubit_id'], q1._qID)
+			xtra_header = xEntry['xtra_header']
+			self.assertEqual(xtra_header['remote_app_id'], 5)
+			self.assertEqual(xtra_header['remote_node'], 6)
+			self.assertEqual(xtra_header['remote_port'], 8088)
 
 	def testFactoryRecv(self):
-		q1 = qubit(self._alice, print_info=False)
-		qubits = self._alice.sendFactory(q1._qID, CQC_CMD_RECV, 10)
+		qubits = self._alice.sendFactory(0, CQC_CMD_RECV, 10)
 
 		curID = qubits[0]._qID
 		for q in qubits[1:]:
@@ -696,14 +673,11 @@ class CQCMessageTest(unittest.TestCase):
 
 		lastEntries = get_last_entries(11)
 		factoryEntry = lastEntries[0]
-		factory_cmd_header = factoryEntry['cmd_header']
-		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_RECV)
-		self.assertEqual(factory_cmd_header['qubit_id'], q1._qID)
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
-		factory_xtra_header = factoryEntry['xtra_header']
-		self.assertEqual(factory_xtra_header['step'], 10)
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH
+		self.assertEqual(factory_cqc_header['header_length'], expected_length)
+		self.assertEqual(factoryEntry['factory_iterations'], 10)
 
 		for i in range(1, 11):
 			xEntry = lastEntries[i]
@@ -714,16 +688,11 @@ class CQCMessageTest(unittest.TestCase):
 		qubits = self._alice.sendFactory(2, CQC_CMD_EPR, 10, remote_appID=5, remote_node=6, remote_port=8088)
 		lastEntries = get_last_entries(51)
 		factoryEntry = lastEntries[0]
-		factory_cmd_header = factoryEntry['cmd_header']
-		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_EPR)
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
-		factory_xtra_header = factoryEntry['xtra_header']
-		self.assertEqual(factory_xtra_header['step'], 10)
-		self.assertEqual(factory_xtra_header['remote_app_id'], 5)
-		self.assertEqual(factory_xtra_header['remote_node'], 6)
-		self.assertEqual(factory_xtra_header['remote_port'], 8088)
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH + CQCCommunicationHeader.HDR_LENGTH
+		self.assertEqual(factory_cqc_header['header_length'], expected_length)
+		self.assertEqual(factoryEntry['factory_iterations'], 10)
 
 		# Check if the qubits are created correctly
 		# The protocol already knows what do to on EPR, so no new headers are made,
@@ -739,6 +708,12 @@ class CQCMessageTest(unittest.TestCase):
 			xEntry = lastEntries[5*i+1]
 			x_cmd_cmd_header = xEntry['cmd_header']
 			self.assertEqual(x_cmd_cmd_header['instruction'], CQC_CMD_EPR)
+
+			xtra_header = xEntry['xtra_header']
+			self.assertEqual(xtra_header['remote_app_id'], 5)
+			self.assertEqual(xtra_header['remote_node'], 6)
+			self.assertEqual(xtra_header['remote_port'], 8088)
+
 			xEntry = lastEntries[5*i+2]
 			x_cmd_cmd_header = xEntry['cmd_header']
 			self.assertEqual(x_cmd_cmd_header['instruction'], CQC_CMD_EPR)
@@ -761,8 +736,7 @@ class CQCMessageTest(unittest.TestCase):
 
 	def testFactoryEPR_RECV(self):
 
-		q1 = qubit(self._alice, print_info=False)
-		qubits = self._alice.sendFactory(q1._qID, CQC_CMD_EPR_RECV, 10)
+		qubits = self._alice.sendFactory(0, CQC_CMD_EPR_RECV, 10)
 
 		curID = qubits[0]._qID
 		for q in qubits[1:]:
@@ -771,14 +745,11 @@ class CQCMessageTest(unittest.TestCase):
 
 		lastEntries = get_last_entries(11)
 		factoryEntry = lastEntries[0]
-		factory_cmd_header = factoryEntry['cmd_header']
-		self.assertEqual(factory_cmd_header['instruction'], CQC_CMD_EPR_RECV)
-		self.assertEqual(factory_cmd_header['qubit_id'], q1._qID)
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		self.assertEqual(factory_cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
-		factory_xtra_header = factoryEntry['xtra_header']
-		self.assertEqual(factory_xtra_header['step'], 10)
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH
+		self.assertEqual(factory_cqc_header['header_length'], expected_length)
+		self.assertEqual(factoryEntry['factory_iterations'], 10)
 
 		for i in range(1, 11):
 			xEntry = lastEntries[i]
