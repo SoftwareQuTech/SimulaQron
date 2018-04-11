@@ -141,6 +141,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		subdata['cqc_header'] = cls.parse_header(header)
 		fact_hdr = CQCFactoryHeader(data[:CQCFactoryHeader.HDR_LENGTH])
 		subdata['factory_iterations'] = fact_hdr.num_iter
+		subdata['notify'] = fact_hdr.notify
 		cls.logData.append(subdata)
 		with open(cls.file, 'w') as outfile:
 			json.dump(cls.logData, outfile)
@@ -169,6 +170,8 @@ class CQCLogMessageHandler(CQCMessageHandler):
 	def parse_xtra(cls, xtra):
 		if isinstance(xtra, CQCCommunicationHeader):
 			return cls.parse_com_hdr(xtra)
+		if isinstance(xtra, CQCXtraQubitHdr):
+			return cls.parse_xtra_qubit_hdr(xtra)
 		xtra_data = {}
 		xtra_data['is_set'] = xtra.is_set
 		xtra_data['qubit_id'] = xtra.qubit_id
@@ -189,6 +192,16 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		com_data['remote_app_id'] = com_hdr.remote_app_id
 		com_data['remote_node'] = com_hdr.remote_node
 		com_data['remote_port'] = com_hdr.remote_port
+		return com_data
+
+	@classmethod
+	def parse_xtra_qubit_hdr(cls, com_hdr):
+		"""
+		Communication header
+		"""
+		com_data = {}
+		com_data['type'] = "Extra qubit header"
+		com_data['qubit_id'] = com_hdr.qubit_id
 		return com_data
 
 	def handle_hello(self, header, data):

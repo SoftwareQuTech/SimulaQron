@@ -278,6 +278,9 @@ class CQCConnection:
 		if command == CQC_CMD_SEND or command == CQC_CMD_EPR:
 			xtra_hdr = CQCCommunicationHeader()
 			xtra_hdr.setVals(remote_appID, remote_node, remote_port)
+		elif command == CQC_CMD_CNOT or command == CQC_CMD_CPHASE:
+			xtra_hdr = CQCXtraQubitHdr()
+			xtra_hdr.setVals(xtra_qID)
 		else:
 			xtra_hdr = CQCXtraHeader()
 			xtra_hdr.setVals(xtra_qID, step, remote_appID, remote_node, remote_port, cmd_length)
@@ -351,6 +354,9 @@ class CQCConnection:
 			if command == CQC_CMD_SEND or command == CQC_CMD_EPR:
 				xtra_hdr = CQCCommunicationHeader()
 				xtra_hdr.setVals(remote_appID, remote_node, remote_port)
+			elif command == CQC_CMD_CNOT or command == CQC_CMD_CPHASE:
+				xtra_hdr = CQCXtraQubitHdr()
+				xtra_hdr.setVals(xtra_qID)
 			else:
 				xtra_hdr = CQCXtraHeader()
 				xtra_hdr.setVals(xtra_qID, step_size, remote_appID, remote_node, remote_port, cmd_length)
@@ -666,7 +672,7 @@ class CQCConnection:
 																						remote_appID))
 
 		self.sendCmdXtra(q._qID, CQC_CMD_SEND, notify=int(notify), block=int(block), remote_appID=remote_appID,
-						 remote_node=recvHost.ip, remote_port=recvHost.port)
+						remote_node=recvHost.ip, remote_port=recvHost.port)
 		if notify:
 			message = self.readMessage()
 			if print_info:

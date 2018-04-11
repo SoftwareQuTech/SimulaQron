@@ -313,6 +313,67 @@ class CQCXtraHeader:
 
 		return (toPrint)
 
+class CQCXtraQubitHdr:
+	"""
+		Header used to send qubit of a secondary qubit for two qubit gates
+	"""
+
+	packaging_format = "=H"
+	HDR_LENGTH = 2
+
+	def __init__(self, headerBytes=None):
+		"""
+		Initialize from packet data
+		:param headerBytes:  packet data
+		"""
+		if headerBytes is None:
+			self.is_set = False
+			self.qubit_id = 0
+
+		else:
+			self.unpack(headerBytes)
+
+	def setVals(self, qubit_id):
+		"""
+		Set header using given values
+		:param qubit_id: The id of the secondary qubit
+		"""
+		self.is_set = True
+		self.qubit_id = qubit_id
+
+	def pack(self):
+		"""
+		Pack data into packet form. For definitions see cLib/cqc.h
+		:returns the packed header
+		"""
+		if not self.is_set:
+			return 0
+
+		q_header = pack(self.packaging_format, self.qubit_id)
+		return q_header
+
+	def unpack(self, headerBytes):
+		"""
+		Unpack packet data. For defnitions see cLib/cqc.h
+		:param headerBytes: The unpacked headers.
+		"""
+		com_header = unpack(self.packaging_format, headerBytes)
+		self.qubit_id = com_header[0]
+		self.is_set = True
+
+	def printable(self):
+		"""
+			Produce a printable string for information purposes.
+		"""
+		if not self.is_set:
+			return " "
+
+		toPrint = "Extra Qubit header. "
+		toPrint += "qubit id: " + str(self.qubit_id) + " "
+
+		return toPrint
+
+
 
 class CQCCommunicationHeader:
 	"""

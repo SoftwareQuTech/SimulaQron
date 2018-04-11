@@ -142,11 +142,11 @@ class CQCMessageHandler(ABC):
 		return False
 
 	@staticmethod
-	def create_extra_header(cmd, cmd_data, version = CQC_VERSION):
+	def create_extra_header(cmd, cmd_data, cqc_version=CQC_VERSION):
 		"""
 		Create the extra header (communication header, rotation header, etc) based on the command
 		"""
-		if version < 1:
+		if cqc_version < 1:
 			cmd_length = CQC_CMD_XTRA_LENGTH
 			hdr = CQCXtraHeader(cmd_data[:cmd_length])
 			return hdr
@@ -156,8 +156,8 @@ class CQCMessageHandler(ABC):
 			cmd_length = CQCCommunicationHeader.HDR_LENGTH
 			hdr = CQCCommunicationHeader(cmd_data[:cmd_length])
 		elif instruction == CQC_CMD_CNOT or instruction == CQC_CMD_CPHASE:
-			cmd_length = CQC_CMD_XTRA_LENGTH
-			hdr = CQCXtraHeader(cmd_data[:cmd_length])
+			cmd_length = CQCXtraQubitHdr.HDR_LENGTH
+			hdr = CQCXtraQubitHdr(cmd_data[:cmd_length])
 		elif instruction == CQC_CMD_ROT_X or instruction == CQC_CMD_ROT_Y or instruction == CQC_CMD_ROT_Z:
 			cmd_length = CQC_CMD_XTRA_LENGTH
 			hdr = CQCXtraHeader(cmd_data[:cmd_length])
@@ -167,7 +167,6 @@ class CQCMessageHandler(ABC):
 		else:
 			return None
 		return hdr
-
 
 	@inlineCallbacks
 	def handle_command(self, header, data):
