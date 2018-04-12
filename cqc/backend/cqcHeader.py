@@ -103,7 +103,7 @@ class CQCHeader:
 		if headerBytes == None:
 			self.is_set = False
 			self.version = 0
-			self.tp = -1
+			self.tp = 0
 			self.app_id = 0
 			self.length = 0
 		else:
@@ -146,7 +146,7 @@ class CQCHeader:
 		if not self.is_set:
 			return (" ")
 
-		toPrint = "Version: " + str(self.version) + " "
+		toPrint = "CQC Header. Version: " + str(self.version) + " "
 		toPrint = toPrint + "Type: " + str(self.tp) + " "
 		toPrint = toPrint + "App ID: " + str(self.app_id) + " "
 		toPrint += "Length: " + str(self.length)
@@ -157,6 +157,7 @@ class CQCCmdHeader:
 	"""
 		Header for a command instruction packet.
 	"""
+	HDR_LENGTH = CQC_CMD_HDR_LENGTH
 
 	def __init__(self, headerBytes=None):
 		"""
@@ -228,7 +229,7 @@ class CQCCmdHeader:
 		if not self.is_set:
 			return " "
 
-		toPrint = "Qubit ID: " + str(self.qubit_id) + " "
+		toPrint = "Command Header. Qubit ID: " + str(self.qubit_id) + " "
 		toPrint = toPrint + "Instruction: " + str(self.instr) + " "
 		toPrint = toPrint + "Notify: " + str(self.notify) + " "
 		toPrint = toPrint + "Block: " + str(self.block) + " "
@@ -313,6 +314,68 @@ class CQCXtraHeader:
 
 		return toPrint
 
+class CQCSequenceHeader:
+	"""
+		Header used to indicate size of a sequence.
+		Currently exactly the same as CQCRotationHeaer.
+		Seperate classes used clearity and for possible future adaptability. (Increase length for example)
+	"""
+
+	packaging_format = "=B"
+	HDR_LENGTH = 1
+
+	def __init__(self, headerBytes=None):
+		"""
+		Initialize from packet data
+		:param headerBytes:  packet data
+		"""
+		if headerBytes is None:
+			self.is_set = False
+			self.step = 0
+
+		else:
+			self.unpack(headerBytes)
+
+	def setVals(self, cmd_length):
+		"""
+		Set header using given values
+		:param cmd_length: The step size of the rotation
+		"""
+		self.is_set = True
+		self.cmd_length = cmd_length
+
+	def pack(self):
+		"""
+		Pack data into packet form. For definitions see cLib/cqc.h
+		:returns the packed header
+		"""
+		if not self.is_set:
+			return 0
+
+		q_header = pack(self.packaging_format, self.step)
+		return q_header
+
+	def unpack(self, headerBytes):
+		"""
+		Unpack packet data. For defnitions see cLib/cqc.h
+		:param headerBytes: The unpacked headers.
+		"""
+		seq_header = unpack(self.packaging_format, headerBytes)
+		self.cmd_length = seq_header[0]
+		self.is_set = True
+
+	def printable(self):
+		"""
+			Produce a printable string for information purposes.
+		"""
+		if not self.is_set:
+			return " "
+
+		toPrint = "Sequence header. "
+		toPrint += "Command length: " + str(self.cmd_length) + " "
+
+		return toPrint
+
 
 class CQCRotationHeader:
 	"""
@@ -358,8 +421,8 @@ class CQCRotationHeader:
 		Unpack packet data. For defnitions see cLib/cqc.h
 		:param headerBytes: The unpacked headers.
 		"""
-		com_header = unpack(self.packaging_format, headerBytes)
-		self.step = com_header[0]
+		rot_header = unpack(self.packaging_format, headerBytes)
+		self.step = rot_header[0]
 		self.is_set = True
 
 	def printable(self):
@@ -434,7 +497,6 @@ class CQCXtraQubitHeader:
 		toPrint += "qubit id: " + str(self.qubit_id) + " "
 
 		return toPrint
-
 
 
 class CQCCommunicationHeader:

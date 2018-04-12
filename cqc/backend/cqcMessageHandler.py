@@ -161,9 +161,6 @@ class CQCMessageHandler(ABC):
 		elif instruction == CQC_CMD_ROT_X or instruction == CQC_CMD_ROT_Y or instruction == CQC_CMD_ROT_Z:
 			cmd_length = CQCRotationHeader.HDR_LENGTH
 			hdr = CQCRotationHeader(cmd_data[:cmd_length])
-		elif cmd.action == 1:
-			cmd_length = CQC_CMD_XTRA_LENGTH
-			hdr = CQCXtraHeader(cmd_data[:cmd_length])
 		else:
 			return None
 		return hdr
@@ -305,13 +302,13 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 		# Read in all the commands sent
 		cur_length = 0
-		should_notify = True
+		should_notify = None
 		return_messages = []
 		while cur_length < length:
 			cmd = CQCCmdHeader(cmd_data[cur_length:cur_length + CQC_CMD_HDR_LENGTH])
-			newl = cur_length + CQC_CMD_HDR_LENGTH
+			newl = cur_length + cmd.HDR_LENGTH
 			# Should we notify
-			should_notify = cmd.notify
+			should_notify = should_notify or cmd.notify
 
 			# Create the extra header if it exist
 			try:
@@ -340,14 +337,16 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 			# Check if there are additional commands to execute afterwards
 			if cmd.action:
+				sequence_header = CQCSequenceHeader(data[newl: newl +CQCSequenceHeader.HDR_LENGTH])
+				newl += sequence_header.HDR_LENGTH
 				logging.debug("CQC %s: Reading extra action commands", self.name)
-				(msgs, succ, retNotify) = yield self._process_command(cqc_header, xtra.cmdLength,
-																	  data[newl:newl + xtra.cmdLength])
+				(msgs, succ, retNotify) = yield self._process_command(cqc_header, sequence_header.cmd_length,
+																	  data[newl:newl + sequence_header.cmd_length])
 				should_notify = (should_notify or retNotify)
 				if not succ:
 					return return_messages, False, 0
 				return_messages.extend(msgs)
-				newl = newl + xtra.cmdLength
+				newl = newl + sequence_header.cmd_length
 
 			cur_length = newl
 		return return_messages, True, should_notify

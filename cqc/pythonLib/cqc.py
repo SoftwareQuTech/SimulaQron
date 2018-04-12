@@ -44,10 +44,25 @@ def hasXtraHeader(command):
 					   CQC_CMD_CPHASE}
 
 
+def createXtraHeader(command, values):
+	if command == CQC_CMD_SEND or command == CQC_CMD_EPR:
+		header = CQCCommunicationHeader()
+		header.setVals(values[0], values[1], values[2])
+	elif command == CQC_CMD_CNOT or command == CQC_CMD_CPHASE:
+		header = CQCXtraQubitHeader()
+		header.setVals(values[0])
+	elif command == CQC_CMD_ROT_Z or command == CQC_CMD_ROT_Y or command == CQC_CMD_ROT_X:
+		header = CQCRotationHeader()
+		header.setVals(values[0])
+	else:
+		header = None
+	return header
+
+
 class CQCConnection:
 	_appIDs = []
 
-	def __init__(self, name, cqcFile=None, appFile=None, appID=0):
+	def __init__(self, name, cqcFile=None, appFile=None, appID=0, pend_messages=False):
 		"""
 		Initialize a connection to the cqc server.
 
@@ -56,6 +71,8 @@ class CQCConnection:
 			:cqcFile:	Path to cqcFile. If None, '$NETSIM/config/cqcNodes.cfg is used.
 			:appFile:	Path to appFile. If None, '$NETSIM/config/appNodes.cfg is used.
 			:appID:		Application ID, defaults to a nonused ID.
+			:pend_messages: True if you want to wait with sending messages to the back end.
+					Use flush() to send all pending messages in one go as a sequence to the server
 		"""
 
 		# Host name
@@ -110,6 +127,10 @@ class CQCConnection:
 
 		# Read configuration files for the application network
 		self._appNet = networkConfig(self.appFile)
+
+		# List of pending messages waiting to be send to the back-end
+		self.pend_messages = pend_messages
+		self.pending_messages = []
 
 	def __str__(self):
 		return "Socket to cqc server '{}'".format(self.name)
@@ -407,92 +428,6 @@ class CQCConnection:
 					"Unexpected message send back from the server. Message: {}".format(message[0].printable()))
 		return res
 
-	def sendSequence(self, qubits, commands, xtra_qubits=None, steps=None, notify=True, block=True, action=0,
-					 print_info=True, remote_name=None, remote_app_id=0, length=0):
-		"""
-		Sends a sequence of commands to be performed at once to the server
-		:param qubits: either a single qubit or a list of qubits to perform the commands on
-		:param commands: a list of commands to perform on the the qubit(s)
-		:param xtra_qubits: either a single qubit or a list of qubits (None allowed) to perform double gate operations on
-		:param steps: integer o
-		r a list of integers indicating the angle of rotation for rot commands
-				or number of iterations for factory commands
-		:param notify: if a notification should be send back if done.
-		:param block: indicate to block everything until operation is done
-		:param action: Indicate if there are actions to execute when done
-		:param print_info: boolean to indicate if information should be printed to the console
-		:param remote_app_id:
-		:param length:
-		:return: a list of everything the commands have returned
-		"""
-		# It probably goes wrong if notify = False
-		n = len(commands)  # amount of commands send
-		# m is the amount of extra commands that have to be send
-		qubit_is_list = isinstance(qubits, list)
-		xtra_qubit_is_list = isinstance(xtra_qubits, list)
-		step_is_list = isinstance(steps, list)
-		m = len([1 for command in commands if hasXtraHeader(command)])
-		header = CQCHeader()
-		header.setVals(CQC_VERSION, CQC_TP_COMMAND, self._appID, n * CQC_CMD_HDR_LENGTH + m * CQC_CMD_XTRA_LENGTH)
-		data_to_send = header.pack()
-
-		hostDict = self._cqcNet.hostDict
-		if remote_name is not None:
-			if remote_name in hostDict:
-				recvHost = hostDict[remote_name]
-				remote_node = recvHost.ip
-				remote_port = recvHost.port
-			else:
-				raise ValueError("Host name '{}' is not in the cqc network".format(self.name))
-		else:
-			remote_node = 0
-			remote_port = 0
-
-		for i in range(n):
-			cmd_header = CQCCmdHeader()
-			if qubit_is_list:
-				q = qubits[i]
-			else:
-				q = qubits
-			if step_is_list:
-				step = steps[i]
-			else:
-				step = steps
-			if xtra_qubit_is_list:
-				xtra_qubit = xtra_qubits[i]
-			else:
-				xtra_qubit = xtra_qubits
-
-			if q is None:
-				qID = 0
-			else:
-				qID = q._qID
-
-			cmd_header.setVals(qID, commands[i], int(notify), int(block), action)
-			data_to_send += cmd_header.pack()
-
-			# Maybe check if xtra header is needed based on the cmd type
-			if hasXtraHeader(commands[i]):
-				xtra_header = CQCXtraHeader()
-				xtra_id = xtra_qubit._qID if xtra_qubit else 0
-				step = step if step else 0
-				xtra_header.setVals(xtra_id, step, remote_app_id, remote_node, remote_port, length)
-				data_to_send += xtra_header.pack()
-
-		self._s.send(data_to_send)
-		res = []
-		for i in range(n):
-			if shouldReturn(commands[i]):
-				message = self.readMessage()
-				res.append(self.parse_CQC_msg(message))
-				if print_info:
-					self.print_CQC_msg(message)
-
-		if notify:
-			message = self.readMessage()
-			if print_info:
-				self.print_CQC_msg(message)
-		return res
 
 	def readMessage(self, maxsize=192):  # WHAT IS GOOD SIZE?
 		"""
@@ -809,6 +744,89 @@ class CQCConnection:
 		q._active = True
 		return q
 
+	def set_pending(self, pend_messages):
+		"""
+			Set the pend_messages flag.
+			If true, flush() has to be called to send all pending_messages in sequence to the backend
+			If false, all commands are directly send to the back_end
+		:param pend_messages: Boolean to indicate if messages should pend or not
+		"""
+		# Check if the list is not empty, give a warning if it isn't
+		if self.pending_messages:
+			logging.warning("List of pending messages is not empty, flushing them")
+			self.flush()
+		self.pend_messages = pend_messages
+
+	def flush(self, sequence=True, print_info=True):
+		"""
+			Flush all pending messages to the backend.
+			:param sequence: boolean to indicate if you want to send the pending messages as a sequence
+			:param print_info: If info should be printed
+			:return: A list of things that are send back from the server. Can be qubits, or outcomes
+		"""
+		# First loop in reverse order over the messages to get their length
+		header_length = 0
+		cqc_messages = []
+		should_notify = False
+
+		for message in reversed(self.pending_messages):
+			qID = message[0]
+			cqc_command = message[1]
+			notify = message[2]
+			should_notify |= notify
+			block = message[3]
+			if len(message) > 4:
+				values = message[4]
+			else:
+				values = []
+
+			if sequence:
+				sequence_header = CQCSequenceHeader()
+				sequence_header.setVals(header_length)
+				header_length += sequence_header.HDR_LENGTH
+				cqc_messages.insert(0, sequence_header)
+			xtra_header = createXtraHeader(cqc_command, values)
+
+			if xtra_header is not None:
+				header_length += xtra_header.HDR_LENGTH
+				cqc_messages.insert(0, xtra_header)
+
+			cmd_header = CQCCmdHeader()
+			cmd_header.setVals(qID, cqc_command, notify, block, int(sequence))
+			header_length += cmd_header.HDR_LENGTH
+			cqc_messages.insert(0, cmd_header)
+
+		# create the cqc header
+		cqc_header = CQCHeader()
+		cqc_header.setVals(CQC_VERSION, CQC_TP_COMMAND, self._appID, header_length)
+		cqc_messages.insert(0, cqc_header)
+
+		# Send all byte messages to the backend, in order
+		for msg in cqc_messages:
+			print("Sending header to the server: %s", msg.printable())
+			self._s.send(msg.pack())
+
+		# Empty the pending messages
+		self.pend_messages = []
+
+		# Read out any returned messages from the backend
+		res = []
+		for data in self.pending_messages:
+			if shouldReturn(data[1]):
+				message = self.readMessage()
+				res.append(self.parse_CQC_msg(message))
+				if print_info:
+					self.print_CQC_msg(message)
+
+		if should_notify:
+			message = self.readMessage()
+			if message[0].tp != CQC_TP_DONE:
+				raise CQCUnsuppError(
+					"Unexpected message send back from the server. Message: {}".format(message[0].printable()))
+		return res
+
+
+
 	def tomography(self, preparation, iterations, progress=True):
 		"""
 		Does a tomography on the output from the preparation specified.
@@ -1061,11 +1079,14 @@ class qubit:
 		if print_info:
 			print("App {} tells CQC: 'Do nothing with qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID, CQC_CMD_I, notify=int(notify), block=int(block))
-		if notify:
-			message = self._cqc.readMessage()
-			if print_info:
-				self._cqc.print_CQC_msg(message)
+		if self._cqc.pend_messages:
+			self._cqc.pending_messages.append([self._qID, CQC_CMD_I, int(notify), int(block)])
+		else:
+			self._cqc.sendCommand(self._qID, CQC_CMD_I, notify=int(notify), block=int(block))
+			if notify:
+				message = self._cqc.readMessage()
+				if print_info:
+					self._cqc.print_CQC_msg(message)
 
 	def X(self, notify=True, block=True, print_info=True):
 		"""
@@ -1085,11 +1106,14 @@ class qubit:
 		if print_info:
 			print("App {} tells CQC: 'Perform X to qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID, CQC_CMD_X, notify=int(notify), block=int(block))
-		if notify:
-			message = self._cqc.readMessage()
-			if print_info:
-				self._cqc.print_CQC_msg(message)
+		if self._cqc.pend_messages:
+			self._cqc.pending_messages.append([self._qID, CQC_CMD_X, int(notify), int(block)])
+		else:
+			self._cqc.sendCommand(self._qID, CQC_CMD_X, notify=int(notify), block=int(block))
+			if notify:
+				message = self._cqc.readMessage()
+				if print_info:
+					self._cqc.print_CQC_msg(message)
 
 	def Y(self, notify=True, block=True, print_info=True):
 		"""
@@ -1109,11 +1133,14 @@ class qubit:
 		if print_info:
 			print("App {} tells CQC: 'Perform Y to qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID, CQC_CMD_Y, notify=int(notify), block=int(block))
-		if notify:
-			message = self._cqc.readMessage()
-			if print_info:
-				self._cqc.print_CQC_msg(message)
+		if self._cqc.pend_messages:
+			self._cqc.pending_messages.append([self._qID, CQC_CMD_Y, int(notify), int(block)])
+		else:
+			self._cqc.sendCommand(self._qID, CQC_CMD_Y, notify=int(notify), block=int(block))
+			if notify:
+				message = self._cqc.readMessage()
+				if print_info:
+					self._cqc.print_CQC_msg(message)
 
 	def Z(self, notify=True, block=True, print_info=True):
 		"""
@@ -1133,11 +1160,14 @@ class qubit:
 		if print_info:
 			print("App {} tells CQC: 'Perform Z to qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID, CQC_CMD_Z, notify=int(notify), block=int(block))
-		if notify:
-			message = self._cqc.readMessage()
-			if print_info:
-				self._cqc.print_CQC_msg(message)
+		if self._cqc.pend_messages:
+			self._cqc.pending_messages.append([self._qID, CQC_CMD_Z, int(notify), int(block)])
+		else:
+			self._cqc.sendCommand(self._qID, CQC_CMD_Z, notify=int(notify), block=int(block))
+			if notify:
+				message = self._cqc.readMessage()
+				if print_info:
+					self._cqc.print_CQC_msg(message)
 
 	def T(self, notify=True, block=True, print_info=True):
 		"""
@@ -1157,11 +1187,14 @@ class qubit:
 		if print_info:
 			print("App {} tells CQC: 'Perform T to qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID, CQC_CMD_T, notify=int(notify), block=int(block))
-		if notify:
-			message = self._cqc.readMessage()
-			if print_info:
-				self._cqc.print_CQC_msg(message)
+		if self._cqc.pend_messages:
+			self._cqc.pending_messages.append([self._qID, CQC_CMD_T, int(notify), int(block)])
+		else:
+			self._cqc.sendCommand(self._qID, CQC_CMD_T, notify=int(notify), block=int(block))
+			if notify:
+				message = self._cqc.readMessage()
+				if print_info:
+					self._cqc.print_CQC_msg(message)
 
 	def H(self, notify=True, block=True, print_info=True):
 		"""
@@ -1181,11 +1214,14 @@ class qubit:
 		if print_info:
 			print("App {} tells CQC: 'Perform H to qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID, CQC_CMD_H, notify=int(notify), block=int(block))
-		if notify:
-			message = self._cqc.readMessage()
-			if print_info:
-				self._cqc.print_CQC_msg(message)
+		if self._cqc.pend_messages:
+			self._cqc.pending_messages.append([self._qID, CQC_CMD_H, int(notify), int(block)])
+		else:
+			self._cqc.sendCommand(self._qID, CQC_CMD_H, notify=int(notify), block=int(block))
+			if notify:
+				message = self._cqc.readMessage()
+				if print_info:
+					self._cqc.print_CQC_msg(message)
 
 	def K(self, notify=True, block=True, print_info=True):
 		"""
@@ -1205,11 +1241,14 @@ class qubit:
 		if print_info:
 			print("App {} tells CQC: 'Perform K to qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID, CQC_CMD_K, notify=int(notify), block=int(block))
-		if notify:
-			message = self._cqc.readMessage()
-			if print_info:
-				self._cqc.print_CQC_msg(message)
+		if self._cqc.pend_messages:
+			self._cqc.pending_messages.append([self._qID, CQC_CMD_K, int(notify), int(block)])
+		else:
+			self._cqc.sendCommand(self._qID, CQC_CMD_K, notify=int(notify), block=int(block))
+			if notify:
+				message = self._cqc.readMessage()
+				if print_info:
+					self._cqc.print_CQC_msg(message)
 
 	def rot_X(self, step, notify=True, block=True, print_info=True):
 		"""
@@ -1231,12 +1270,14 @@ class qubit:
 			print(
 				"App {} tells CQC: 'Perform X-rot (angle {}*2pi/256) to qubit with ID {}'".format(self._cqc.name, step,
 																								  self._qID))
-
-		self._cqc.sendCmdXtra(self._qID, CQC_CMD_ROT_X, step=step, notify=int(notify), block=int(block))
-		if notify:
-			message = self._cqc.readMessage()
-			if print_info:
-				self._cqc.print_CQC_msg(message)
+		if self._cqc.pend_messages:
+			self._cqc.pending_messages.append([self._qID, CQC_CMD_ROT_X, int(notify), int(block), step])
+		else:
+			self._cqc.sendCmdXtra(self._qID, CQC_CMD_ROT_X, step=step, notify=int(notify), block=int(block))
+			if notify:
+				message = self._cqc.readMessage()
+				if print_info:
+					self._cqc.print_CQC_msg(message)
 
 	def rot_Y(self, step, notify=True, block=True, print_info=True):
 		"""
@@ -1258,12 +1299,14 @@ class qubit:
 			print(
 				"App {} tells CQC: 'Perform Y-rot (angle {}*2pi/256) to qubit with ID {}'".format(self._cqc.name, step,
 																								  self._qID))
-
-		self._cqc.sendCmdXtra(self._qID, CQC_CMD_ROT_Y, step=step, notify=int(notify), block=int(block))
-		if notify:
-			message = self._cqc.readMessage()
-			if print_info:
-				self._cqc.print_CQC_msg(message)
+		if self._cqc.pend_messages:
+			self._cqc.pending_messages.append([self._qID, CQC_CMD_ROT_Y, int(notify), int(block), step])
+		else:
+			self._cqc.sendCmdXtra(self._qID, CQC_CMD_ROT_Y, step=step, notify=int(notify), block=int(block))
+			if notify:
+				message = self._cqc.readMessage()
+				if print_info:
+					self._cqc.print_CQC_msg(message)
 
 	def rot_Z(self, step, notify=True, block=True, print_info=True):
 		"""
@@ -1285,12 +1328,14 @@ class qubit:
 			print(
 				"App {} tells CQC: 'Perform Z-rot (angle {}*2pi/256) to qubit with ID {}'".format(self._cqc.name, step,
 																								  self._qID))
-
-		self._cqc.sendCmdXtra(self._qID, CQC_CMD_ROT_Z, step=step, notify=int(notify), block=int(block))
-		if notify:
-			message = self._cqc.readMessage()
-			if print_info:
-				self._cqc.print_CQC_msg(message)
+		if self._cqc.pend_messages:
+			self._cqc.pending_messages.append([self._qID, CQC_CMD_ROT_Z, int(notify), int(block), step])
+		else:
+			self._cqc.sendCmdXtra(self._qID, CQC_CMD_ROT_Z, step=step, notify=int(notify), block=int(block))
+			if notify:
+				message = self._cqc.readMessage()
+				if print_info:
+					self._cqc.print_CQC_msg(message)
 
 	def cnot(self, target, notify=True, block=True, print_info=True):
 		"""
@@ -1313,12 +1358,14 @@ class qubit:
 			print("App {} tells CQC: 'Perform CNOT to qubits with IDs {}(control) {}(target)'".format(self._cqc.name,
 																									  self._qID,
 																									  target._qID))
-
-		self._cqc.sendCmdXtra(self._qID, CQC_CMD_CNOT, notify=int(notify), block=int(block), xtra_qID=target._qID)
-		if notify:
-			message = self._cqc.readMessage()
-			if print_info:
-				self._cqc.print_CQC_msg(message)
+		if self._cqc.pend_messages:
+			self._cqc.pending_messages.append([self._qID, CQC_CMD_CNOT, int(notify), int(block), target._qID])
+		else:
+			self._cqc.sendCmdXtra(self._qID, CQC_CMD_CNOT, notify=int(notify), block=int(block), xtra_qID=target._qID)
+			if notify:
+				message = self._cqc.readMessage()
+				if print_info:
+					self._cqc.print_CQC_msg(message)
 
 	def cphase(self, target, notify=True, block=True, print_info=True):
 		"""
@@ -1341,12 +1388,14 @@ class qubit:
 			print("App {} tells CQC: 'Perform CPHASE to qubits with IDs {}(control) {}(target)'".format(self._cqc.name,
 																										self._qID,
 																										target))
-
-		self._cqc.sendCmdXtra(self._qID, CQC_CMD_CPHASE, notify=int(notify), block=int(block), xtra_qID=target._qID)
-		if notify:
-			message = self._cqc.readMessage()
-			if print_info:
-				self._cqc.print_CQC_msg(message)
+		if self._cqc.pend_messages:
+			self._cqc.pending_messages.append([self._qID, CQC_CMD_CPHASE, int(notify), int(block), target._qID])
+		else:
+			self._cqc.sendCmdXtra(self._qID, CQC_CMD_CPHASE, notify=int(notify), block=int(block), xtra_qID=target._qID)
+			if notify:
+				message = self._cqc.readMessage()
+				if print_info:
+					self._cqc.print_CQC_msg(message)
 
 	def measure(self, inplace=False, block=True, print_info=True):
 		"""
@@ -1369,19 +1418,24 @@ class qubit:
 			print("App {} tells CQC: 'Measure qubit with ID {}'".format(self._cqc.name, self._qID))
 
 		if inplace:
-			self._cqc.sendCommand(self._qID, CQC_CMD_MEASURE_INPLACE, notify=0, block=int(block))
+			command = CQC_CMD_MEASURE_INPLACE
 		else:
-			self._cqc.sendCommand(self._qID, CQC_CMD_MEASURE, notify=0, block=int(block))
+			command = CQC_CMD_MEASURE
 
-		# Return measurement outcome
-		message = self._cqc.readMessage()
-		if not inplace:
-			self._active = False
-		try:
-			notifyHdr = message[1]
-			return notifyHdr.outcome
-		except AttributeError:
-			return None
+		if self._cqc.pend_messages:
+			self._cqc.pending_messages.append([self._qID, command, 0, int(block)])
+		else:
+			self._cqc.sendCommand(self._qID, command, notify=0, block=int(block))
+
+			# Return measurement outcome
+			message = self._cqc.readMessage()
+			if not inplace:
+				self._active = False
+			try:
+				notifyHdr = message[1]
+				return notifyHdr.outcome
+			except AttributeError:
+				return None
 
 	def reset(self, notify=True, block=True, print_info=True):
 		"""
@@ -1401,11 +1455,14 @@ class qubit:
 		if print_info:
 			print("App {} tells CQC: 'Reset qubit with ID {}'".format(self._cqc.name, self._qID))
 
-		self._cqc.sendCommand(self._qID, CQC_CMD_RESET, notify=int(notify), block=int(block))
-		if notify:
-			message = self._cqc.readMessage()
-			if print_info:
-				self._cqc.print_CQC_msg(message)
+		if self._cqc.pend_messages:
+			self._cqc.pending_messages.append([self._qID, CQC_CMD_RESET, int(notify), int(block)])
+		else:
+			self._cqc.sendCommand(self._qID, CQC_CMD_RESET, notify=int(notify), block=int(block))
+			if notify:
+				message = self._cqc.readMessage()
+				if print_info:
+					self._cqc.print_CQC_msg(message)
 
 	def getTime(self, block=True, print_info=True):
 		"""
@@ -1423,6 +1480,7 @@ class qubit:
 		# print info
 		if print_info:
 			print("App {} tells CQC: 'Return time-info of qubit with ID {}'".format(self._cqc.name, self._qID))
+
 
 		self._cqc.sendGetTime(self._qID, notify=0, block=int(block))
 
