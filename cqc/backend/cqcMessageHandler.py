@@ -156,11 +156,11 @@ class CQCMessageHandler(ABC):
 			cmd_length = CQCCommunicationHeader.HDR_LENGTH
 			hdr = CQCCommunicationHeader(cmd_data[:cmd_length])
 		elif instruction == CQC_CMD_CNOT or instruction == CQC_CMD_CPHASE:
-			cmd_length = CQCXtraQubitHdr.HDR_LENGTH
-			hdr = CQCXtraQubitHdr(cmd_data[:cmd_length])
+			cmd_length = CQCXtraQubitHeader.HDR_LENGTH
+			hdr = CQCXtraQubitHeader(cmd_data[:cmd_length])
 		elif instruction == CQC_CMD_ROT_X or instruction == CQC_CMD_ROT_Y or instruction == CQC_CMD_ROT_Z:
-			cmd_length = CQC_CMD_XTRA_LENGTH
-			hdr = CQCXtraHeader(cmd_data[:cmd_length])
+			cmd_length = CQCRotationHeader.HDR_LENGTH
+			hdr = CQCRotationHeader(cmd_data[:cmd_length])
 		elif cmd.action == 1:
 			cmd_length = CQC_CMD_XTRA_LENGTH
 			hdr = CQCXtraHeader(cmd_data[:cmd_length])
@@ -706,8 +706,8 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		cmd2 = CQCCmdHeader()
 		cmd2.setVals(q_id2, 0, 0, 0, 0)
 
-		xtra_cnot = CQCXtraHeader()
-		xtra_cnot.setVals(q_id2, 0, 0, 0, 0, 0)
+		xtra_cnot = CQCXtraQubitHeader()
+		xtra_cnot.setVals(q_id2)
 
 		# Produce EPR-pair
 		msgs = yield self.cmd_h(cqc_header, cmd1, None)

@@ -279,12 +279,15 @@ class CQCConnection:
 			xtra_hdr = CQCCommunicationHeader()
 			xtra_hdr.setVals(remote_appID, remote_node, remote_port)
 		elif command == CQC_CMD_CNOT or command == CQC_CMD_CPHASE:
-			xtra_hdr = CQCXtraQubitHdr()
+			xtra_hdr = CQCXtraQubitHeader()
 			xtra_hdr.setVals(xtra_qID)
+		else:  # should be a rotation command otherwise
+			xtra_hdr = CQCRotationHeader()
+			xtra_hdr.setVals(step)
+
+		if xtra_hdr is None:
+			xtra_msg = b''
 		else:
-			xtra_hdr = CQCXtraHeader()
-			xtra_hdr.setVals(xtra_qID, step, remote_appID, remote_node, remote_port, cmd_length)
-		if xtra_hdr is not None:
 			xtra_msg = xtra_hdr.pack()
 
 		# Send Header
@@ -325,7 +328,7 @@ class CQCConnection:
 		self._s.send(cmd_msg)
 
 	def sendFactory(self, qID, command, num_iter, notify=1, block=1, action=0, xtra_qID=-1, remote_appID=0,
-					remote_node=0, remote_port=0, cmd_length=0, step_size=0):
+					remote_node=0, remote_port=0, step_size=0):
 		"""
 		Sends a factory message
 
@@ -355,11 +358,11 @@ class CQCConnection:
 				xtra_hdr = CQCCommunicationHeader()
 				xtra_hdr.setVals(remote_appID, remote_node, remote_port)
 			elif command == CQC_CMD_CNOT or command == CQC_CMD_CPHASE:
-				xtra_hdr = CQCXtraQubitHdr()
+				xtra_hdr = CQCXtraQubitHeader()
 				xtra_hdr.setVals(xtra_qID)
 			else:
-				xtra_hdr = CQCXtraHeader()
-				xtra_hdr.setVals(xtra_qID, step_size, remote_appID, remote_node, remote_port, cmd_length)
+				xtra_hdr = CQCRotationHeader()
+				xtra_hdr.setVals(step_size)
 			xtra_msg = xtra_hdr.pack()
 			hdr_length = CQC_CMD_HDR_LENGTH + CQCFactoryHeader.HDR_LENGTH + xtra_hdr.HDR_LENGTH
 		else:

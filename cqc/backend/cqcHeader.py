@@ -311,9 +311,71 @@ class CQCXtraHeader:
 		toPrint = toPrint + "Remote Port: " + str(self.remote_port) + " "
 		toPrint = toPrint + "Command Length: " + str(self.cmdLength)
 
-		return (toPrint)
+		return toPrint
 
-class CQCXtraQubitHdr:
+
+class CQCRotationHeader:
+	"""
+		Header used to define the rotation angle of a gate
+	"""
+
+	packaging_format = "=B"
+	HDR_LENGTH = 1
+
+	def __init__(self, headerBytes=None):
+		"""
+		Initialize from packet data
+		:param headerBytes:  packet data
+		"""
+		if headerBytes is None:
+			self.is_set = False
+			self.step = 0
+
+		else:
+			self.unpack(headerBytes)
+
+	def setVals(self, step):
+		"""
+		Set header using given values
+		:param step: The step size of the rotation
+		"""
+		self.is_set = True
+		self.step = step
+
+	def pack(self):
+		"""
+		Pack data into packet form. For definitions see cLib/cqc.h
+		:returns the packed header
+		"""
+		if not self.is_set:
+			return 0
+
+		q_header = pack(self.packaging_format, self.step)
+		return q_header
+
+	def unpack(self, headerBytes):
+		"""
+		Unpack packet data. For defnitions see cLib/cqc.h
+		:param headerBytes: The unpacked headers.
+		"""
+		com_header = unpack(self.packaging_format, headerBytes)
+		self.step = com_header[0]
+		self.is_set = True
+
+	def printable(self):
+		"""
+			Produce a printable string for information purposes.
+		"""
+		if not self.is_set:
+			return " "
+
+		toPrint = "Rotation header. "
+		toPrint += "step size: " + str(self.step) + " "
+
+		return toPrint
+
+
+class CQCXtraQubitHeader:
 	"""
 		Header used to send qubit of a secondary qubit for two qubit gates
 	"""

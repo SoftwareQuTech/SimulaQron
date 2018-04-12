@@ -170,8 +170,10 @@ class CQCLogMessageHandler(CQCMessageHandler):
 	def parse_xtra(cls, xtra):
 		if isinstance(xtra, CQCCommunicationHeader):
 			return cls.parse_com_hdr(xtra)
-		if isinstance(xtra, CQCXtraQubitHdr):
+		if isinstance(xtra, CQCXtraQubitHeader):
 			return cls.parse_xtra_qubit_hdr(xtra)
+		if isinstance(xtra, CQCRotationHeader):
+			return cls.parse_rot_hdr(xtra)
 		xtra_data = {}
 		xtra_data['is_set'] = xtra.is_set
 		xtra_data['qubit_id'] = xtra.qubit_id
@@ -181,6 +183,17 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		xtra_data['remote_port'] = xtra.remote_port
 		xtra_data['cmdLength'] = xtra.cmdLength
 		return xtra_data
+
+
+	@classmethod
+	def parse_rot_hdr(cls, com_hdr):
+		"""
+		Communication header
+		"""
+		rot_data = {}
+		rot_data['type'] = "Rotation header"
+		rot_data['step'] = com_hdr.step
+		return rot_data
 
 	@classmethod
 	def parse_com_hdr(cls, com_hdr):
@@ -385,8 +398,8 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		cmd2 = CQCCmdHeader()
 		cmd2.setVals(q_id2, 0, 0, 0, 0)
 
-		xtra_cnot = CQCXtraHeader()
-		xtra_cnot.setVals(q_id2, 0, 0, 0, 0, 0)
+		xtra_cnot = CQCXtraQubitHeader()
+		xtra_cnot.setVals(q_id2)
 
 		# Produce EPR-pair
 		msgs = self.cmd_h(cqc_header, cmd1, None)

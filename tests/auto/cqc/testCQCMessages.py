@@ -183,7 +183,7 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cmd_header['notify'], True)
 		cqc_header = lastEntry['cqc_header']
 		self.assertEqual(cqc_header['type'], CQC_TP_COMMAND)
-		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
+		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQCRotationHeader.HDR_LENGTH)
 		self.assertEqual(cqc_header['app_id'], 1)
 		xtra_header = lastEntry['xtra_header']
 		self.assertEqual(xtra_header['step'], 200)
@@ -198,7 +198,7 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cmd_header['notify'], True)
 		cqc_header = lastEntry['cqc_header']
 		self.assertEqual(cqc_header['type'], CQC_TP_COMMAND)
-		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
+		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQCRotationHeader.HDR_LENGTH)
 		self.assertEqual(cqc_header['app_id'], 1)
 		xtra_header = lastEntry['xtra_header']
 		self.assertEqual(xtra_header['step'], 200)
@@ -213,7 +213,7 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cmd_header['notify'], True)
 		cqc_header = lastEntry['cqc_header']
 		self.assertEqual(cqc_header['type'], CQC_TP_COMMAND)
-		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH)
+		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQCRotationHeader.HDR_LENGTH)
 		self.assertEqual(cqc_header['app_id'], 1)
 		xtra_header = lastEntry['xtra_header']
 		self.assertEqual(xtra_header['step'], 200)
@@ -254,7 +254,7 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cmd_header['notify'], True)
 		cqc_header = lastEntry['cqc_header']
 		self.assertEqual(cqc_header['type'], CQC_TP_COMMAND)
-		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQCXtraQubitHdr.HDR_LENGTH)
+		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQCXtraQubitHeader.HDR_LENGTH)
 		self.assertEqual(cqc_header['app_id'], 1)
 		xtra_header = lastEntry['xtra_header']
 		self.assertEqual(xtra_header['qubit_id'], cmd_header['qubit_id'] + 1)
@@ -273,7 +273,7 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cmd_header['notify'], True)
 		cqc_header = lastEntry['cqc_header']
 		self.assertEqual(cqc_header['type'], CQC_TP_COMMAND)
-		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQCXtraQubitHdr.HDR_LENGTH)
+		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQCXtraQubitHeader.HDR_LENGTH)
 		self.assertEqual(cqc_header['app_id'], 1)
 		xtra_header = lastEntry['xtra_header']
 		self.assertEqual(xtra_header['qubit_id'], q2._qID)
@@ -290,7 +290,7 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cmd_header['notify'], True)
 		cqc_header = lastEntry['cqc_header']
 		self.assertEqual(cqc_header['type'], CQC_TP_COMMAND)
-		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQCXtraQubitHdr.HDR_LENGTH)
+		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQCXtraQubitHeader.HDR_LENGTH)
 		self.assertEqual(cqc_header['app_id'], 1)
 		xtra_header = lastEntry['xtra_header']
 		self.assertEqual(xtra_header['qubit_id'], cmd_header['qubit_id'] + 1)
@@ -507,7 +507,7 @@ class CQCMessageTest(unittest.TestCase):
 		factoryEntry = entries[0]
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH + CQCXtraQubitHdr.HDR_LENGTH
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH + CQCXtraQubitHeader.HDR_LENGTH
 		self.assertEqual(factory_cqc_header['header_length'], expected_length)
 		self.assertEqual(factoryEntry['factory_iterations'], 10)
 
@@ -528,7 +528,7 @@ class CQCMessageTest(unittest.TestCase):
 		factoryEntry = entries[0]
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH + CQCXtraQubitHdr.HDR_LENGTH
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH + CQCXtraQubitHeader.HDR_LENGTH
 		self.assertEqual(factory_cqc_header['header_length'], expected_length)
 		self.assertEqual(factoryEntry['factory_iterations'], 10)
 
@@ -541,9 +541,6 @@ class CQCMessageTest(unittest.TestCase):
 			self.assertEqual(x['qubit_id'], q2._qID)
 
 	def testFactoryROTX(self):
-		# Issue with this is that the angle of rotation (up to a factor) is
-		# equal to the amount of calls to this rotation
-		# So if the extra parameter is x, the rotation done is x*(x*tau/256)
 		q1 = qubit(self._alice, print_info=False)
 		self._alice.sendFactory(q1._qID, CQC_CMD_ROT_X, 10, step_size=5)
 		m1 = q1.measure(inplace=True, print_info=False)
@@ -553,7 +550,7 @@ class CQCMessageTest(unittest.TestCase):
 		factoryEntry = lastEntries[0]
 		factory_cqc_header = factoryEntry['cqc_header']
 		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH + CQCXtraHeader.HDR_LENGTH
+		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH + CQCRotationHeader.HDR_LENGTH
 		self.assertEqual(factory_cqc_header['header_length'], expected_length)
 		self.assertEqual(factoryEntry['factory_iterations'], 10)
 
