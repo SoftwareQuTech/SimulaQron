@@ -51,6 +51,29 @@ Abstract class. Classes that inherit this class define how to handle incoming cq
 """
 
 
+def has_extra(cmd):
+	"""
+	Check whether this command includes an extra header with additional information.
+	"""
+	if cmd.instr == CQC_CMD_SEND:
+		return True
+	if cmd.instr == CQC_CMD_EPR:
+		return True
+	if cmd.instr == CQC_CMD_CNOT:
+		return True
+	if cmd.instr == CQC_CMD_CPHASE:
+		return True
+	if cmd.instr == CQC_CMD_ROT_X:
+		return True
+	if cmd.instr == CQC_CMD_ROT_Y:
+		return True
+	if cmd.instr == CQC_CMD_ROT_Z:
+		return True
+	if cmd.action:
+		return True
+
+	return False
+
 class CQCMessageHandler(ABC):
 
 	def __init__(self, factory):
@@ -118,38 +141,17 @@ class CQCMessageHandler(ABC):
 		return hdr.pack()
 
 	@staticmethod
-	def has_extra(cmd):
-		"""
-		Check whether this command includes an extra header with additional information.
-		"""
-		if cmd.instr == CQC_CMD_SEND:
-			return True
-		if cmd.instr == CQC_CMD_EPR:
-			return True
-		if cmd.instr == CQC_CMD_CNOT:
-			return True
-		if cmd.instr == CQC_CMD_CPHASE:
-			return True
-		if cmd.instr == CQC_CMD_ROT_X:
-			return True
-		if cmd.instr == CQC_CMD_ROT_Y:
-			return True
-		if cmd.instr == CQC_CMD_ROT_Z:
-			return True
-		if cmd.action:
-			return True
-
-		return False
-
-	@staticmethod
 	def create_extra_header(cmd, cmd_data, cqc_version=CQC_VERSION):
 		"""
 		Create the extra header (communication header, rotation header, etc) based on the command
 		"""
 		if cqc_version < 1:
-			cmd_length = CQC_CMD_XTRA_LENGTH
-			hdr = CQCXtraHeader(cmd_data[:cmd_length])
-			return hdr
+			if has_extra(cmd):
+				cmd_length = CQC_CMD_XTRA_LENGTH
+				hdr = CQCXtraHeader(cmd_data[:cmd_length])
+				return hdr
+			else:
+				return None
 
 		instruction = cmd.instr
 		if instruction == CQC_CMD_SEND or instruction == CQC_CMD_EPR:
