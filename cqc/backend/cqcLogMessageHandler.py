@@ -137,8 +137,6 @@ class CQCLogMessageHandler(CQCMessageHandler):
 
 	@classmethod
 	def parse_handle_factory(cls, header, data, comment):
-		cmd_l = CQC_CMD_HDR_LENGTH
-		xtra_l = CQC_CMD_XTRA_LENGTH
 		subdata = {}
 		subdata['comment'] = comment
 		subdata['cqc_header'] = cls.parse_header(header)

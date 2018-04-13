@@ -1,4 +1,4 @@
-# Copyright (c) 2018, Stephanie Wehner and Axel Dahlberg
+# Copyright (c) 2017-2018, Stephanie Wehner and Axel Dahlberg
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -73,6 +73,7 @@ def has_extra(cmd):
 		return True
 
 	return False
+
 
 class CQCMessageHandler(ABC):
 

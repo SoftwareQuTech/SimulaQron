@@ -331,7 +331,7 @@ class CQCSequenceHeader:
 		"""
 		if headerBytes is None:
 			self.is_set = False
-			self.step = 0
+			self.cmd_length = 0
 
 		else:
 			self.unpack(headerBytes)
@@ -352,7 +352,7 @@ class CQCSequenceHeader:
 		if not self.is_set:
 			return 0
 
-		q_header = pack(self.packaging_format, self.step)
+		q_header = pack(self.packaging_format, self.cmd_length)
 		return q_header
 
 	def unpack(self, headerBytes):
@@ -630,7 +630,7 @@ class CQCFactoryHeader:
 		if not self.is_set:
 			return (" ")
 
-		toPrint = "Factory Header "
+		toPrint = "Factory Header. "
 		toPrint += "Number of iterations: " + str(self.num_iter) + " "
 		return toPrint
 
