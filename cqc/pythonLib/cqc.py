@@ -712,6 +712,7 @@ class CQCConnection:
 
 			self.pending_messages.append(
 				[q, CQC_CMD_EPR, int(notify), int(block), [remote_appID, recvHost.ip, recvHost.port]])
+			return q
 		else:
 			# print info
 			if print_info:
@@ -757,6 +758,7 @@ class CQCConnection:
 			if print_info:
 				print("App {} pends message: 'Receive half of EPR'".format(self.name))
 			self.pending_messages.append([q, CQC_CMD_EPR_RECV, int(notify), int(block)])
+			return q
 		else:
 			# print info
 			if print_info:
@@ -832,7 +834,7 @@ class CQCConnection:
 
 				# Check if the q is active, if it is not, send the current pending_headers
 				# Then check again, if it still not active, throw an error
-				if not q._active and cqc_command not in {CQC_CMD_EPR_RECV, CQC_CMD_RECV, CQC_CMD_NEW}:
+				if not q._active and cqc_command not in {CQC_CMD_EPR_RECV, CQC_CMD_RECV, CQC_CMD_NEW, CQC_CMD_EPR}:
 					if num_iter != 1:
 						raise CQCUnsuppError("Some qubits are non active in the factory, this is not supported (yet)")
 					if not pending_headers:  # If all messages already have been send, the qubit is inactive
