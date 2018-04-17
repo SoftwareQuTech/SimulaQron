@@ -83,13 +83,10 @@ class CQCFactoryTest(unittest.TestCase):
 		bob = CQCConnection("Bob", appID=1)
 		# Get receiving host
 		hostDict = self.cqc._cqcNet.hostDict
-		if "Bob" in hostDict:
-			recvHost = hostDict["Bob"]
-		else:
-			raise ValueError("Host name 'Bob' is not in the cqc network")
+		recvHost = hostDict["Bob"]
 		with self.assertRaises(CQCNoQubitError):
 			self.cqc.sendFactory(q._qID, CQC_CMD_SEND, self.iterations, remote_appID=1, remote_node=recvHost.ip,
-								 remote_port=recvHost.port)
+								 remote_port=recvHost.port, print_info=True)
 
 		self.assertFalse(q.check_active())
 		bob.close()
@@ -131,7 +128,6 @@ class CQCFactoryTest(unittest.TestCase):
 			self.assertEqual(qubitsAlice[i].measure(print_info=False), qubitsBob[i].measure(print_info=False))
 
 		bob.close()
-
 
 
 if __name__ == '__main__':

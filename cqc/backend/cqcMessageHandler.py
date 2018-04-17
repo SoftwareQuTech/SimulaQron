@@ -377,19 +377,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		return_messages = []
 		logging.debug("CQC %s: Performing factory command with %s iterations", self.name, num_iter)
 		for _ in range(num_iter):
-			try:
-				msgs, succ, _ = yield self._process_command(header, header.length - fact_l, data[fact_l:])
-			except TypeError as e:
-				logging.error("Qubit does not exist")
-				# A type error can indicate that the qubit is not active
-				# this is bad error handling.
-				# Maybe a TODO to check for inactive qubits in _procces_command?
-				msg = self.create_return_message(header.app_id, CQC_ERR_NOQUBIT)
-				# return_messages.add(msg)
-				return [msg]
-			except Exception as e:
-				import traceback
-				traceback.print_exc()
+			msgs, succ, _ = yield self._process_command(header, header.length - fact_l, data[fact_l:])
 			all_succ = (all_succ and succ)
 			return_messages.extend(msgs)
 		if all_succ:
@@ -413,7 +401,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			q = q_list[(header.app_id, cmd_hdr.qubit_id)]
 		else:
 			# Specified qubit is unknown
-			return self.create_return_message(header.app_id, CQC_ERR_NOQUBIT)
+			return [self.create_return_message(header.app_id, CQC_ERR_NOQUBIT)]
 
 		# Craft reply
 		# First send an appropriate CQC Header
@@ -476,10 +464,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		"""
 		logging.debug("CQC %s: Applying a rotation around %s to App ID %d qubit id %d", self.name, axis,
 					  cqc_header.app_id, cmd.qubit_id)
-		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
-		if not virt_qubit:
-			logging.debug("CQC %s: No such qubit", self.name)
-			return self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
+		try:
+			virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		except UnknownQubitError as e:
+			logging.debug(e)
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
 
 		yield virt_qubit.callRemote("apply_rotation", axis, 2 * np.pi / 256 * xtra.step)
 		return []
@@ -520,9 +509,10 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		Measure
 		"""
 		logging.debug("CQC %s: Measuring App ID %d qubit id %d", self.name, cqc_header.app_id, cmd.qubit_id)
-		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
-		if not virt_qubit:
-			logging.debug("CQC %s: No such qubit", self.name)
+		try:
+			virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		except UnknownQubitError as e:
+			logging.debug(e)
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
 
 		outcome = yield virt_qubit.callRemote("measure", inplace)
@@ -561,9 +551,10 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		Reset Qubit to |0>
 		"""
 		logging.debug("CQC %s: Reset App ID %d qubit id %d", self.name, cqc_header.app_id, cmd.qubit_id)
-		virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
-		if not virt_qubit:
-			logging.debug("CQC %s: No such qubit", self.name)
+		try:
+			virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		except UnknownQubitError as e:
+			logging.debug(e)
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
 
 		outcome = yield virt_qubit.callRemote("measure", inplace=True)
@@ -592,9 +583,10 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)]
 
 		# Lookup the virtual qubit from identifier
-		virt_num = yield self.get_virt_qubit_indep(cqc_header, cmd.qubit_id)
-		if virt_num < 0:
-			logging.debug("CQC %s: No such qubit", self.name)
+		try:
+			virt_num = yield self.get_virt_qubit_indep(cqc_header, cmd.qubit_id)
+		except UnknownQubitError as e:
+			logging.debug(e)
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
 
 		# Send instruction to transfer the qubit
@@ -631,7 +623,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		if no_qubit:
 			logging.debug("CQC %s: TIMEOUT, no qubit received.", self.name)
 			# self.protocol._send_back_cqc(cqc_header, CQC_ERR_TIMEOUT)
-			return self.create_return_message(cqc_header.app_id, CQC_ERR_TIMEOUT)
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_TIMEOUT)]
 
 		logging.debug("CQC %s: Qubit received for app_id %d", self.name, cqc_header.app_id)
 
@@ -646,7 +638,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			if (app_id, q_id) in self.factory.qubitList:
 				logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
 				# self.protocol._send_back_cqc(cqc_header, CQC_ERR_INUSE)
-				return self.create_return_message(cqc_header.app_id, CQC_ERR_INUSE)
+				return [self.create_return_message(cqc_header.app_id, CQC_ERR_INUSE)]
 
 			q = CQCQubit(q_id, int(time.time()), virt_qubit)
 			self.factory.qubitList[(app_id, q_id)] = q
@@ -714,11 +706,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# Produce EPR-pair
 		msgs = yield self.cmd_h(cqc_header, cmd1, None)
 		# Should not give back any messages, if it does, send it back
-		if msgs is None or len(msgs) > 0:
+		if len(msgs) > 0:
 			return_messages.extend(msgs)
 			return return_messages
 		msgs = yield self.cmd_cnot(cqc_header, cmd1, xtra_cnot)
-		if msgs is None or len(msgs) > 0:
+		if len(msgs) > 0:
 			return_messages.extend(msgs)
 			return return_messages
 
@@ -768,9 +760,10 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		Send qubit to another node.
 		"""
 		# Lookup the virtual qubit from identifier
-		virt_num = yield self.get_virt_qubit_indep(cqc_header, cmd.qubit_id)
-		if virt_num < 0:
-			logging.debug("CQC %s: No such qubit", self.name)
+		try:
+			virt_num = yield self.get_virt_qubit_indep(cqc_header, cmd.qubit_id)
+		except UnknownQubitError as e:
+			logging.debug(e)
 			return False
 
 		# Lookup the name of the remote node used within SimulaQron
@@ -820,7 +813,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		if no_qubit:
 			logging.debug("CQC %s: TIMEOUT, no qubit received.", self.name)
 			# self.protocol._send_back_cqc(cqc_header, CQC_ERR_TIMEOUT)
-			return self.create_return_message(cqc_header.app_id, CQC_ERR_TIMEOUT)
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_TIMEOUT)]
 
 		logging.debug("CQC %s: Qubit received for app_id %d", self.name, cqc_header.app_id)
 
@@ -904,7 +897,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			elif return_succ:
 				return False
 			else:
-				return msg
+				return [msg]
 		self.factory._lock.release()
 		if return_q_id:
 			return return_messages, True, q_id
@@ -916,10 +909,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 	@inlineCallbacks
 	def apply_single_qubit_gate(self, cqc_header, qubit_id, gate):
 		logging.debug("CQC %s: %s on App ID %d to qubit id %d", self.name, gate, cqc_header.app_id, qubit_id)
-		virt_qubit = self.get_virt_qubit(cqc_header, qubit_id)
-		if not virt_qubit:
-			logging.debug("CQC %s: No such qubit", self.name)
-			return self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
+		try:
+			virt_qubit = self.get_virt_qubit(cqc_header, qubit_id)
+		except UnknownQubitError as error:
+			logging.debug(error)
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
 
 		yield virt_qubit.callRemote(gate)
 		return []
@@ -928,14 +922,16 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 	def apply_two_qubit_gate(self, cqc_header, cmd, xtra, gate):
 		if not xtra:
 			logging.debug("CQC %s: Missing XTRA Header", self.name)
-			return False
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)]
 		#
 		logging.debug("CQC %s: Applying %s to App ID %d qubit id %d target %d", self.name, gate, cqc_header.app_id,
 					  cmd.qubit_id, xtra.qubit_id)
-		control = self.get_virt_qubit(cqc_header, cmd.qubit_id)
-		target = self.get_virt_qubit(cqc_header, xtra.qubit_id)
-		if not control or not target:
-			return False
+		try:
+			control = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+			target = self.get_virt_qubit(cqc_header, xtra.qubit_id)
+		except UnknownQubitError as e:
+			logging.debug(e)
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
 
 		yield control.callRemote(gate, target)
 		# res = yield self.apply_two_qubit_gate(cqc_header, cmd.qubit_id, xtra.qubit.id, "cnot_onto")
@@ -962,8 +958,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		"""
 		# First let's get the general virtual qubit reference, if any
 		general_ref = self.get_virt_qubit(header, qubit_id)
-		if not general_ref:
-			return -1
 
 		num = yield general_ref.callRemote("get_virt_num")
 		# logging.debug("GOT NUMBER %d XXX",num)
@@ -1008,7 +1002,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 class UnknownQubitError(Exception):
 
 	def __init__(self, message):
-		super.__init__(message)
+		super().__init__(message)
 
 
 #######################################################################################################

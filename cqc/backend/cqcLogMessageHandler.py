@@ -245,7 +245,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		all_succ = True
 		should_notify = fact_header.notify
 		return_messages = []
-		for i in range(num_iter):
+		for _ in range(num_iter):
 			msgs, succ, _ = self._process_command(header, header.length - fact_l, data[fact_l:])
 			all_succ = all_succ and succ
 			return_messages.extend(msgs)
@@ -383,13 +383,13 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		# Create the first qubit
 		(msgs, succ, q_id1) = self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
 		if not succ:
-			return False
+			return return_messages
 		return_messages.extend(msgs)
 
 		# Create the second qubit
 		(msgs, succ, q_id2) = self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
 		if not succ:
-			return False
+			return return_messages
 		return_messages.extend(msgs)
 
 		# Create headers for qubits
@@ -405,11 +405,11 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		# Produce EPR-pair
 		msgs = self.cmd_h(cqc_header, cmd1, None)
 		# Should not give back any messages, if it does, send it back
-		if msgs is None or len(msgs) > 0:
+		if len(msgs) > 0:
 			return_messages.extend(msgs)
 			return return_messages
 		msgs = self.cmd_cnot(cqc_header, cmd1, xtra_cnot)
-		if msgs is None or len(msgs) > 0:
+		if len(msgs) > 0:
 			return_messages.extend(msgs)
 			return return_messages
 
