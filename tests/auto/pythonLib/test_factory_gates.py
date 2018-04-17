@@ -100,13 +100,19 @@ def prep_I_qutip():
 
 def prep_X_CQC_FACTORY_ODD(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_X, 3)
+	cqc.set_pending(True)
+	q.X(print_info=False)
+	cqc.flush_factory(3, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
 def prep_X_CQC_FACTORY_EVEN(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_X, 4)
+	cqc.set_pending(True)
+	q.X(print_info=False)
+	cqc.flush_factory(4, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
@@ -118,13 +124,19 @@ def prep_X_qutip():
 
 def prep_Y_CQC_FACTORY_ODD(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_Y, 3)
+	cqc.set_pending(True)
+	q.Y(print_info=False)
+	cqc.flush_factory(3, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
 def prep_Y_CQC_FACTORY_EVEN(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_Y, 4)
+	cqc.set_pending(True)
+	q.Y(print_info=False)
+	cqc.flush_factory(4, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
@@ -136,13 +148,19 @@ def prep_Y_qutip():
 
 def prep_Z_CQC_FACTORY_ODD(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_Z, 3)
+	cqc.set_pending(True)
+	q.Z(print_info=False)
+	cqc.flush_factory(3, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
 def prep_Z_CQC_FACTORY_EVEN(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_Z, 4)
+	cqc.set_pending(True)
+	q.Z(print_info=False)
+	cqc.flush_factory(4, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
@@ -154,25 +172,37 @@ def prep_Z_qutip():
 
 def prep_T_CQC_FACTORY_QUARTER(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_T, 5)
+	cqc.set_pending(True)
+	q.T(print_info=False)
+	cqc.flush_factory(5, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
 def prep_T_CQC_FACTORY_HALF(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_T, 6)
+	cqc.set_pending(True)
+	q.T(print_info=False)
+	cqc.flush_factory(6, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
 def prep_T_CQC_FACTORY_THREE_QUARTER(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_T, 7)
+	cqc.set_pending(True)
+	q.T(print_info=False)
+	cqc.flush_factory(7, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
 def prep_T_CQC_FACTORY_FULL(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_T, 8)
+	cqc.set_pending(True)
+	q.T(print_info=False)
+	cqc.flush_factory(8, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
@@ -184,13 +214,19 @@ def prep_T_qutip(amount):
 
 def prep_H_CQC_FACTORY_ODD(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_H, 3)
+	cqc.set_pending(True)
+	q.H(print_info=False)
+	cqc.flush_factory(3, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
 def prep_H_CQC_FACTORY_EVEN(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_H, 4)
+	cqc.set_pending(True)
+	q.H(print_info=False)
+	cqc.flush_factory(4, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
@@ -202,13 +238,19 @@ def prep_H_qutip():
 
 def prep_K_CQC_FACTORY_ODD(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_K, 3)
+	cqc.set_pending(True)
+	q.K(print_info=False)
+	cqc.flush_factory(3, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
 def prep_K_CQC_FACTORY_EVEN(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_K, 4)
+	cqc.set_pending(True)
+	q.K(print_info=False)
+	cqc.flush_factory(4, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
@@ -227,7 +269,10 @@ def prep_CNOT_control_CQC_FACTORY_even(cqc):
 	q1 = qubit(cqc, print_info=False)
 	q2 = qubit(cqc, print_info=False)
 	q1.H(print_info=False)
-	cqc.sendFactory(q1._qID, CQC_CMD_CNOT, 4, xtra_qID=q2._qID)
+	cqc.set_pending(True)
+	q1.cnot(q2, print_info=False)
+	cqc.flush_factory(4, print_info=False)
+	cqc.set_pending(False)
 	q2.measure(print_info=False)
 	return q1
 
@@ -236,7 +281,10 @@ def prep_CNOT_control_CQC_FACTORY_odd(cqc):
 	q1 = qubit(cqc, print_info=False)
 	q2 = qubit(cqc, print_info=False)
 	q1.H(print_info=False)
-	cqc.sendFactory(q1._qID, CQC_CMD_CNOT, 3, xtra_qID=q2._qID)
+	cqc.set_pending(True)
+	q1.cnot(q2, print_info=False)
+	cqc.flush_factory(3, print_info=False)
+	cqc.set_pending(False)
 	q2.measure(print_info=False)
 	return q1
 
@@ -244,7 +292,10 @@ def prep_CNOT_target_CQC_FACTORY_even(cqc):
 	q1 = qubit(cqc, print_info=False)
 	q2 = qubit(cqc, print_info=False)
 	q1.H(print_info=False)
-	cqc.sendFactory(q1._qID, CQC_CMD_CNOT, 4, xtra_qID=q2._qID)
+	cqc.set_pending(True)
+	q1.cnot(q2, print_info=False)
+	cqc.flush_factory(4, print_info=False)
+	cqc.set_pending(False)
 	q1.measure(print_info=False)
 	return q2
 
@@ -253,7 +304,10 @@ def prep_CNOT_target_CQC_FACTORY_odd(cqc):
 	q1 = qubit(cqc, print_info=False)
 	q2 = qubit(cqc, print_info=False)
 	q1.H(print_info=False)
-	cqc.sendFactory(q1._qID, CQC_CMD_CNOT, 3, xtra_qID=q2._qID)
+	cqc.set_pending(True)
+	q1.cnot(q2, print_info=False)
+	cqc.flush_factory(3, print_info=False)
+	cqc.set_pending(False)
 	q1.measure(print_info=False)
 	return q2
 
@@ -262,7 +316,10 @@ def prep_CPHASE_control_CQC_FACTORY_even(cqc):
 	q2 = qubit(cqc, print_info=False)
 	q1.H(print_info=False)
 	q2.H(print_info=False)
-	cqc.sendFactory(q1._qID, CQC_CMD_CPHASE, 4, xtra_qID=q2._qID)
+	cqc.set_pending(True)
+	q1.cphase(q2, print_info=False)
+	cqc.flush_factory(4, print_info=False)
+	cqc.set_pending(False)
 	q2.H(print_info=False)
 	q2.measure(print_info=False)
 	return q1
@@ -273,7 +330,10 @@ def prep_CPHASE_control_CQC_FACTORY_odd(cqc):
 	q2 = qubit(cqc, print_info=False)
 	q1.H(print_info=False)
 	q2.H(print_info=False)
-	cqc.sendFactory(q1._qID, CQC_CMD_CPHASE, 3, xtra_qID=q2._qID)
+	cqc.set_pending(True)
+	q1.cphase(q2, print_info=False)
+	cqc.flush_factory(3, print_info=False)
+	cqc.set_pending(False)
 	q2.H(print_info=False)
 	q2.measure(print_info=False)
 	return q1
@@ -283,7 +343,10 @@ def prep_CPHASE_target_CQC_FACTORY_even(cqc):
 	q2 = qubit(cqc, print_info=False)
 	q1.H(print_info=False)
 	q2.H(print_info=False)
-	cqc.sendFactory(q1._qID, CQC_CMD_CPHASE, 4, xtra_qID=q2._qID)
+	cqc.set_pending(True)
+	q1.cphase(q2, print_info=False)
+	cqc.flush_factory(4, print_info=False)
+	cqc.set_pending(False)
 	q2.H(print_info=False)
 	q1.measure(print_info=False)
 	return q2
@@ -294,7 +357,10 @@ def prep_CPHASE_target_CQC_FACTORY_odd(cqc):
 	q2 = qubit(cqc, print_info=False)
 	q1.H(print_info=False)
 	q2.H(print_info=False)
-	cqc.sendFactory(q1._qID, CQC_CMD_CPHASE, 3, xtra_qID=q2._qID)
+	cqc.set_pending(True)
+	q1.cphase(q2, print_info=False)
+	cqc.flush_factory(3, print_info=False)
+	cqc.set_pending(False)
 	q2.H(print_info=False)
 	q1.measure(print_info=False)
 	return q2
@@ -336,7 +402,7 @@ def main():
 		print("FAIL")
 
 	# Test Y factory odd
-	sys.stdout.write("Testing X factory (odd):")
+	sys.stdout.write("Testing Y factory (odd):")
 	exp_values = calc_exp_values_single(prep_Y_qutip())
 	ans = cqc.test_preparation(prep_Y_CQC_FACTORY_ODD, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
