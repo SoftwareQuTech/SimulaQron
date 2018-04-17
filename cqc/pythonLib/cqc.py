@@ -549,12 +549,13 @@ class CQCConnection:
 		elif hdr.tp == CQC_TP_INF_TIME:
 			print("CQC tells App {}: 'Timestamp is {}'".format(self.name, notifyHdr.datetime))
 
-	def parse_CQC_msg(self, message, q=None):
+	def parse_CQC_msg(self, message, q=None, is_factory=False):
 		"""
 		parses the cqc message and returns the relevant value of that measure
 		(qubit, measurement outcome)
 		:param message: the cqc message to be parsed
 		:param q: the qubit object we should save the qubit to
+		:param is_factory: wether the returned message came from a factory. If so, do not chance the qubit, but create a new one
 		:return: the result of the message (either a qubit, or a measurement outcome. Otherwise None
 		"""
 		hdr = message[0]
@@ -562,6 +563,9 @@ class CQCConnection:
 		entInfoHdr = message[2]
 
 		if hdr.tp in {CQC_TP_RECV, CQC_TP_NEW_OK, CQC_TP_EPR_OK}:
+			if is_factory:
+				q._active = False  # Set qubit to inactive so it can't be used anymore
+				q = qubit(self, createNew=False)
 			q._qID = notifyHdr.qubit_id
 			q.set_entInfo(entInfoHdr)
 			q._active = True
@@ -629,8 +633,8 @@ class CQCConnection:
 				if print_info:
 					self.print_CQC_msg(message)
 
-		# Deactivate qubit
-		q._active = False
+			# Deactivate qubit
+			q._active = False
 
 	def recvQubit(self, notify=True, block=True, print_info=True):
 		"""
@@ -787,17 +791,18 @@ class CQCConnection:
 			q._active = True
 			return q
 
-	def set_pending(self, pend_messages):
+	def set_pending(self, pend_messages, print_info=False):
 		"""
 			Set the pend_messages flag.
 			If true, flush() has to be called to send all pending_messages in sequence to the backend
 			If false, all commands are directly send to the back_end
 		:param pend_messages: Boolean to indicate if messages should pend or not
+		:param print_info: If info should be printed
 		"""
 		# Check if the list is not empty, give a warning if it isn't
 		if self.pending_messages:
 			logging.warning("List of pending messages is not empty, flushing them")
-			self.flush()
+			self.flush(print_info)
 		self.pend_messages = pend_messages
 
 	def flush(self, do_sequence=True, print_info=True):
@@ -840,8 +845,13 @@ class CQCConnection:
 					if not pending_headers:  # If all messages already have been send, the qubit is inactive
 						raise CQCNoQubitError("Qubit is not active")
 					if print_info:
-						print("App {} encountered a non active qubit, sending current pending messages".format(self.name))
+						print(
+							"App {} encountered a non active qubit, sending current pending messages".format(self.name))
 					break  # break out the for loop
+
+				# set qubit to inactive, since we send it away or measured it
+				if cqc_command == CQC_CMD_SEND or cqc_command == CQC_CMD_MEASURE:
+					q._active = False
 
 				q_id = q._qID if q._qID is not None else 0
 
@@ -895,7 +905,6 @@ class CQCConnection:
 			cqc_header.setVals(CQC_VERSION, cqc_type, self._appID, header_length)
 			pending_headers.insert(0, cqc_header)
 
-
 			# send the headers
 			for header in pending_headers:
 				if print_info:
@@ -903,14 +912,14 @@ class CQCConnection:
 				self._s.send(header.pack())
 
 			# Read out any returned messages from the backend
-			for _ in range(num_iter):
+			for i in range(num_iter):
 				for data in ready_messages:
 					q = data[0]
 					cmd = data[1]
 					if shouldReturn(cmd):
 						message = self.readMessage()
 						self.check_error(message[0])
-						res.append(self.parse_CQC_msg(message, q))
+						res.append(self.parse_CQC_msg(message, q, num_iter != 1))
 						if print_info:
 							self.print_CQC_msg(message)
 

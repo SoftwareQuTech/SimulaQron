@@ -44,81 +44,123 @@ class sequenceTest(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		print("Starting testing sendSequence")
-		cls._alice = CQCConnection("Alice")
-		cls._bob = CQCConnection("Bob", appID=1)
+		cls._alice = CQCConnection("Alice", pend_messages=True)
+		cls._bob = CQCConnection("Bob", appID=1, pend_messages=True)
 
 	@classmethod
 	def tearDownClass(cls):
 		cls._alice.close()
 		cls._bob.close()
 
+	def tearDown(self):
+		self.assertEqual(self._alice.pending_messages, [])
+		self.assertEqual(self._bob.pending_messages, [])
+		self._alice.flush(print_info=False)
+		self._bob.flush(print_info=False)
+
 	def testNoSequence(self):
-		q = qubit(self._alice, print_info=False)
-		res = self._alice.sendSequence(q, [], print_info=False)
-		self.assertEqual(q.measure(print_info=False), 0)
+		res = self._alice.flush(print_info=False)
 		self.assertEqual(res, [])
 
 	def testSingleGates(self):
 		q = qubit(self._alice, print_info=False)
-		r = self._alice.sendSequence(q, [CQC_CMD_X], print_info=False)
-		self.assertEqual(q.measure(inplace=True, print_info=False), 1)
-		self.assertEqual(r, [])
+		q.X(print_info=False)
+		q.measure(inplace=True, print_info=False)
+		r = self._alice.flush(print_info=False)
+		self.assertEqual(len(r), 2)
+		self.assertEqual(r[1], 1)
 		q.reset(print_info=False)
-		r = self._alice.sendSequence(q, [CQC_CMD_Y], print_info=False)
 		q.Y(print_info=False)
-		self.assertEqual(q.measure(inplace=True, print_info=False), 0)
-		self.assertEqual(r, [])
+		q.measure(inplace=True, print_info=False)
+		r = self._alice.flush(print_info=False)
+		self.assertEqual(r, [1])
 		q.reset(print_info=False)
-		r = self._alice.sendSequence(q, [CQC_CMD_Z], print_info=False)
 		q.Z(print_info=False)
-		self.assertEqual(q.measure(inplace=True, print_info=False), 0)
-		self.assertEqual(r, [])
+		q.measure(inplace=True, print_info=False)
+		r = self._alice.flush(print_info=False)
+		self.assertEqual(r, [0])
 		q.reset(print_info=False)
-		r = self._alice.sendSequence(q, [CQC_CMD_H], print_info=False)
 		q.H(print_info=False)
-		self.assertEqual(q.measure(inplace=True, print_info=False), 0)
-		self.assertEqual(r, [])
+		q.H(print_info=False)
 		q.measure(print_info=False)
+		r = self._alice.flush(print_info=False)
+		self.assertEqual(r, [0])
 
 	def testSimpleSequence(self):
 		q = qubit(self._alice, print_info=False)
-		self._alice.sendSequence(q, [CQC_CMD_H, CQC_CMD_Z, CQC_CMD_H], print_info=False)
-		self.assertEqual(q.measure(print_info=False), 1)
+		q.H(print_info=False)
+		q.Z(print_info=False)
+		q.H(print_info=False)
+		q.measure(print_info=False)
+		r = self._alice.flush(print_info=False)[1]
+		self.assertEqual(r, 1)
 
 	def testMultipleNewQubits(self):
-		qs = self._alice.sendSequence(None, [CQC_CMD_NEW] * 10, print_info=False)
+		qA = qubit(self._alice, print_info=False)
+		qs = self._alice.flush_factory(10, print_info=False)
 		self.assertEqual(len(qs), 10)
+		self.assertIsNone(qA._qID)
+		self.assertFalse(qA.check_active())
 		for i in range(1, 10):
 			self.assertEqual(qs[i]._qID, qs[i - 1]._qID + 1)
+		self._alice.set_pending(False)
 		for q in qs:
+			self.assertNotEqual(qA, q)
 			self.assertEqual(q.measure(print_info=False), 0)
+		self._alice.set_pending(True)
 
 	def testMeasuringMultipleQubits(self):
-		qs = self._alice.sendSequence(None, [CQC_CMD_NEW] * 10, print_info=False)
-		ms = self._alice.sendSequence(qs, [CQC_CMD_MEASURE] * 10, print_info=False)
+		qA = qubit(self._alice, print_info=False)
+		qs = self._alice.flush_factory(10, print_info=False)
+		self.assertIsNone(qA._qID)
+		self.assertFalse(qA.check_active())
+		for q in qs:
+			q.measure(print_info=False)
+		ms = self._alice.flush(print_info=False)
 		self.assertEqual(ms, [0] * 10)
 
 	def testCNOT(self):
-		qs = self._alice.sendSequence(None, [CQC_CMD_NEW] * 10, print_info=False)
-		self._alice.sendSequence(qs[0], [CQC_CMD_X] + [CQC_CMD_CNOT]*9, xtra_qubits=qs, print_info=False)
-		ms = self._alice.sendSequence(qs, [CQC_CMD_MEASURE] * 10, print_info=False)
+		qA = qubit(self._alice, print_info=False)
+		qs = self._alice.flush_factory(10, print_info=False)
+		self.assertIsNone(qA._qID)
+		self.assertFalse(qA.check_active())
+		qs[0].X(print_info=False)
+		for i in range(1, 10):
+			qs[i-1].cnot(qs[i], print_info=False)
+		[q.measure(print_info=False) for q in qs]
+		ms = self._alice.flush(print_info=False)
 		self.assertEqual(ms, [1]*10)  # all outcomes should be one
 
 	def testCreatingGHZ(self):
-		qs = self._alice.sendSequence(None, [CQC_CMD_NEW] * 10, print_info=False)
-		self._alice.sendSequence(qs[0], [CQC_CMD_H] + [CQC_CMD_CNOT]*9, xtra_qubits=qs, print_info=False)
-		ms = self._alice.sendSequence(qs, [CQC_CMD_MEASURE] * 10, print_info=False)
+		qA = qubit(self._alice, print_info=False)
+		qs = self._alice.flush_factory(10, print_info=False)
+		self.assertIsNone(qA._qID)
+		self.assertFalse(qA.check_active())
+		qs[0].H(print_info=False)
+		for i in range(1, 10):
+			qs[i-1].cnot(qs[i], print_info=False)
+		[q.measure(print_info=False) for q in qs]
+		ms = self._alice.flush(print_info=False)
 		self.assertEqual(len(set(ms)), 1)  # all outcomes should be the same
 
 	def testAlternating(self):
 		q = qubit(self._alice, print_info=False)
-		res = self._alice.sendSequence(q, [CQC_CMD_X, CQC_CMD_MEASURE_INPLACE] * 10, print_info=False)
+		self._alice.flush(print_info=False)
+		q.X(print_info=False)
+		q.measure(inplace=True, print_info=False)
+		res = self._alice.flush_factory(10, print_info=False)
 		q.measure(print_info=False)
+		self._alice.flush(print_info=False)
 		self.assertEqual(res, [1, 0]*5)
 
 	def testMultipleTypes(self):
 		q = qubit(self._alice, print_info=False)
-		res = self._alice.sendSequence(q, [CQC_CMD_X, CQC_CMD_NEW, CQC_CMD_MEASURE_INPLACE] * 8, print_info=False)
+		self._alice.flush(print_info=False)
+		q.X(print_info=False)
+		qubit(self._alice, print_info=False)
+		q.measure(inplace=True, print_info=False)
+		res = self._alice.flush_factory(8, print_info=False)
+		self._alice.set_pending(False)
 		q.measure(print_info=False)
 		ms = res[1::2]
 		qs = res[::2]
@@ -126,19 +168,48 @@ class sequenceTest(unittest.TestCase):
 			self.assertEqual(qu.measure(print_info=False), 0)
 		self.assertEqual(len(res), 16)
 		self.assertEqual(ms, [1, 0] * 4)
+		self._alice.set_pending(True)
 
 	def testEPR(self):
-		qAs = self._alice.sendSequence(None, [CQC_CMD_EPR] * 5, remote_app_id=1, remote_name="Bob", print_info=False)
-		qBs = self._bob.sendSequence(None, [CQC_CMD_EPR_RECV] * 5, print_info=False)
+		self._alice.createEPR(name="Bob", remote_appID=1, print_info=False)
+		self._bob.recvEPR(print_info=False)
+		qAs = self._alice.flush_factory(5, print_info=False)
+		qBs = self._bob.flush_factory(5, print_info=False)
+		self._alice.set_pending(False)
+		self._bob.set_pending(False)
 		for i in range(5):
 			self.assertEqual(qAs[i].measure(print_info=False), qBs[i].measure(print_info=False))
+		self._alice.set_pending(True)
+		self._bob.set_pending(True)
 
 	def testSend(self):
-		qs = self._alice.sendFactory(0, CQC_CMD_NEW, 10)
-		# duplicate every item in the list
-		qs_duplicated = [q for q in qs for _ in (0,1)]
-		res = self._alice.sendSequence(qs_duplicated, [CQC_CMD_X, CQC_CMD_SEND] * 10, remote_app_id=1, remote_name="Bob", print_info=False)
-		qsB = self._bob.sendSequence(None, )
+		qA = qubit(self._alice, print_info=False)
+		qAs = self._alice.flush_factory(10, print_info=False)
+		self.assertIsNone(qA._qID)
+		self.assertFalse(qA.check_active())
+
+		for q in qAs:
+			self.assertTrue(q._active)
+			self._alice.sendQubit(q, name="Bob", remote_appID=1, print_info=False)
+			self.assertTrue(q._active)
+
+		self._alice.flush(print_info=False)
+		qB = self._bob.recvQubit(print_info=False)
+		qBs = self._bob.flush_factory(10, print_info=False)
+		self.assertIsNone(qB._qID)
+		self.assertFalse(qB.check_active())
+
+		for q in qAs:
+			self.assertFalse(q._active)
+
+		for i in range(1, 10):
+			self.assertEqual(qBs[i-1]._qID + 1, qBs[i]._qID)
+		self._bob.set_pending(False)
+		for q in qBs:
+			self.assertEqual(q.measure(print_info=False), 0)
+		self._bob.set_pending(True)
+
+
 
 
 if __name__ == '__main__':
