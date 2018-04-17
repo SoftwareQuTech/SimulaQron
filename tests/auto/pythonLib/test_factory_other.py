@@ -43,90 +43,108 @@ class CQCFactoryTest(unittest.TestCase):
 	iterations = 8
 
 	def tearDown(self):
+		self.assertEqual(len(self.cqc.pending_messages), 0)
 		self.cqc.close()
 
 	def setUp(self):
-		self.cqc = CQCConnection("Alice", appID=0)
+		self.cqc = CQCConnection("Alice", appID=0, pend_messages=True)
 
 	def testNew(self):
-		qubits = self.cqc.sendFactory(2, CQC_CMD_NEW, self.iterations)
+		qubit(self.cqc, print_info=False)
+		qubits = self.cqc.flush_factory(self.iterations, print_info=False)
 		self.assertEqual(len(qubits), self.iterations)
 		for q in qubits:
 			q.X(print_info=False)
-			self.assertEqual(1, q.measure(print_info=False))
+			q.measure(print_info=False)
+		results = self.cqc.flush(print_info=False)
+		self.assertEqual(results, [1]*self.iterations)
 
 	def testMeasure(self):
 		q = qubit(self.cqc, print_info=False)
 		q.X(print_info=False)  # Let's do an X so all measurement outcomes should be 1
 		# (to show no reinitialisation)
+		q2 = self.cqc.flush(print_info=False)
+		self.assertEqual([q], q2)
+		q.measure(print_info=False)
 		with self.assertRaises(CQCNoQubitError):
-			self.cqc.sendFactory(q._qID, CQC_CMD_MEASURE, self.iterations)
-		self.assertFalse(q.check_active())
+			self.cqc.flush_factory(self.iterations, print_info=False)
+		self.assertFalse(q._active)
 
 	def testMeasureInplace(self):
 		q = qubit(self.cqc, print_info=False)
 		q.X(print_info=False)  # Let's do an X so all measurement outcomes should be 1
 		# (to show no reinitialisation)
-		m = self.cqc.sendFactory(q._qID, CQC_CMD_MEASURE_INPLACE, self.iterations)
+		q2 = self.cqc.flush(print_info=False)
+		self.assertEqual([q], q2)
+		q.measure(inplace=True, print_info=False)
+		m = self.cqc.flush_factory(self.iterations, print_info=False)
 		self.assertEqual(len(m), self.iterations)
 		self.assertTrue(x == 1 for x in m)
 		q.measure(print_info=False)
+		self.cqc.flush(print_info=False)
 
 	def testReset(self):
 		q1 = qubit(self.cqc, print_info=False)
+		self.cqc.flush(print_info=False)
 		q1.X(print_info=False)
-		self.cqc.sendFactory(q1._qID, CQC_CMD_RESET, self.iterations)
-		self.assertEqual(q1.measure(print_info=False), 0)
+		q1.reset(print_info=False)
+		self.cqc.flush_factory(self.iterations, print_info=False)
+		q1.measure(print_info=False)
+		m = self.cqc.flush(print_info=False)
+		self.assertEqual(m, [0])
 
 	def testSend(self):
 		q = qubit(self.cqc, print_info=False)
+		q.X(print_info=False)
+		self.cqc.flush(print_info=False)
 		bob = CQCConnection("Bob", appID=1)
 		# Get receiving host
-		hostDict = self.cqc._cqcNet.hostDict
-		recvHost = hostDict["Bob"]
+		self.cqc.sendQubit(q, "Bob", remote_appID=1, print_info=False)
 		with self.assertRaises(CQCNoQubitError):
-			self.cqc.sendFactory(q._qID, CQC_CMD_SEND, self.iterations, remote_appID=1, remote_node=recvHost.ip,
-								 remote_port=recvHost.port, print_info=True)
-
-		self.assertFalse(q.check_active())
+			self.cqc.flush_factory(self.iterations, print_info=False)
+		qB = bob.recvQubit(print_info=False)
+		self.assertTrue(qB.measure(print_info=False), 1)
+		self.assertFalse(q._active)
 		bob.close()
 
 	def testRecv(self):
-		bob = CQCConnection("Bob", appID=1)
+		bob = CQCConnection("Bob", appID=1, pend_messages=True)
 		for _ in range(self.iterations):
 			q = qubit(bob, print_info=False)
 			q.X(print_info=False)
 			bob.sendQubit(q, "Alice", remote_appID=0, print_info=False)
-		qubits = self.cqc.sendFactory(2, CQC_CMD_RECV, self.iterations)
+			bob.flush(print_info=False)
+		self.cqc.recvQubit(print_info=False)
+		qubits = self.cqc.flush_factory(self.iterations, print_info=False)
 		self.assertEqual(self.iterations, len(qubits))
 		for q in qubits:
+			self.assertTrue(q._active)
 			q.X(print_info=False)
-			self.assertEqual(0, q.measure(print_info=False))
+			q.measure(print_info=False)
+		f = self.cqc.flush(self.iterations, print_info=False)
+		self.assertEqual([0]*self.iterations, f)
 		bob.close()
 
-	def testEPRFail(self):
-		with self.assertRaises(CQCUnsuppError):
-			self.cqc.sendFactory(2, CQC_CMD_EPR, 4)
-
 	def testEPR(self):
-		bob = CQCConnection("Bob", appID=1)
-		# Get receiving host
-		hostDict = self.cqc._cqcNet.hostDict
-		if "Bob" in hostDict:
-			recvHost = hostDict["Bob"]
-		else:
-			raise ValueError("Host name 'Bob' is not in the cqc network")
-		# We'll only create 5 EPR pairs, more is not possible
-		qubitsAlice = self.cqc.sendFactory(2, CQC_CMD_EPR, 4, remote_appID=1, remote_node=recvHost.ip,
-										   remote_port=recvHost.port)
-		qubitsBob = bob.sendFactory(2, CQC_CMD_EPR_RECV, 4)
-		self.assertEqual(len(qubitsBob), 4)
+		bob = CQCConnection("Bob", appID=1, pend_messages=True)
+		self.cqc.createEPR("Bob", 1, print_info=False)
+		bob.recvEPR(print_info=False)
+
+		it = int(self.iterations/2)
+
+		qubitsAlice = self.cqc.flush_factory(it, print_info=False)
+		qubitsBob = bob.flush_factory(it, print_info=False)
+		self.assertEqual(len(qubitsBob), it)
 		self.assertEqual(len(qubitsAlice), len(qubitsBob))
-		for i in range(4):
+		for i in range(it):
 			# Each pair should have the same measurement outcomes
 			# if measured in the same basis, test this
-			self.assertEqual(qubitsAlice[i].measure(print_info=False), qubitsBob[i].measure(print_info=False))
-
+			qubitsAlice[i].measure(print_info=False)
+			qubitsBob[i].measure(print_info=False)
+		mAlice = self.cqc.flush(print_info=False)
+		mBob = bob.flush(print_info=False)
+		self.assertEqual(len(mAlice), it)
+		self.assertEqual(mAlice, mBob)
 		bob.close()
 
 
