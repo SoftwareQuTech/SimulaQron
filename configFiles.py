@@ -40,9 +40,6 @@ import os
 nodes=sys.argv[1:]
 nrNodes=len(nodes)
 
-if nrNodes>9:
-    raise ValueError("Cannot have more than 9 nodes")
-
 # Get path from environment variable
 netsim_path=os.environ['NETSIM']+'/'
 
@@ -53,7 +50,7 @@ conf_files=[netsim_path+"config/virtualNodes.cfg",netsim_path+"config/cqcNodes.c
 run_files=[netsim_path+"run/startVNodes.sh",netsim_path+"run/startCQCNodes.sh"]
 
 # What port numbers to start with
-start_nr=[8801,8821,8831]
+start_nr=[8801,8801+nrNodes,8801+2*nrNodes]
 
 # Start of the configuration files
 conf_top=["# Network configuration file","#","# For each host its informal name, as well as its location in the network must","# be listed.","#","# [name], [hostname], [port number]","#"]

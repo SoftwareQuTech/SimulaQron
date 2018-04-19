@@ -82,15 +82,19 @@ class CQCConnection:
 
 		#Connect to cqc server
 		self._s=None
-		try:
-			self._s=socket.socket(socket.AF_INET,socket.SOCK_STREAM,0)
-		except socket.error:
-			raise RuntimeError("Could not connect to cqc server '{}'".format(name))
-		try:
-			self._s.connect((myIP,myHost.port))
-		except socket.error:
-			self._s.close()
-			raise RuntimeError("Could not connect to cqc server '{}'".format(name))
+		while True:
+			try:
+				print("App {} : Trying to connect to CQC server".format(self.name))
+				self._s=socket.socket(socket.AF_INET,socket.SOCK_STREAM,0)
+				self._s.connect((myIP,myHost.port))
+				break
+			except ConnectionRefusedError:
+				print("App {} : Could not connect to  CQC server, trying again...".format(self.name))
+				time.sleep(0.5)
+			except Exception as e:
+				print("App {} : Critical error when connection to CQC server: {}".format(self.name),e)
+				self._s.close()
+				raise e
 
 		# This file defines the application network
 		if appFile==None:

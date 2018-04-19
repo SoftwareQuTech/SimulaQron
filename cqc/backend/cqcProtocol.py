@@ -712,7 +712,7 @@ class CQCProtocol(Protocol):
 		"""
 		Receive qubit from another node. Block until qubit is received.
 		"""
-		logging.debug("CQC %s: Asking to receive for App ID %d",self.name,cqc_header.app_id)
+		logging.debug("CQC %s: Asking to receive qubit for App ID %d",self.name,cqc_header.app_id)
 
 		# First get the app_id
 		app_id = cqc_header.app_id
@@ -877,63 +877,68 @@ class CQCProtocol(Protocol):
 		"""
 		Receive half of epr from another node. Block until qubit is received.
 		"""
-		logging.debug("CQC %s: Asking to receive for App ID %d",self.name,cqc_header.app_id)
+		logging.debug("CQC %s: Asking to receive EPR for App ID %d",self.name,cqc_header.app_id)
 
-		# First get the app_id and q_id
-		app_id = cqc_header.app_id
-		q_id = self.new_qubit_id(app_id)
-
-		# This will block until a qubit is received.
-		noQubit = True
-		for _ in range(CQC_CONF_RECV_EPR_TIMEOUT):
-			data = yield self.factory.virtRoot.callRemote("cqc_get_epr_recv", cqc_header.app_id)
-			if data:
-				noQubit = False
-				(virt_qubit,rawEntInfo)=data
-				entInfo=EntInfoHeader(rawEntInfo)
-				break
-			else:
-				time.sleep(0.1)
-		if noQubit:
-			logging.debug("CQC %s: TIMEOUT, no qubit received.", self.name)
-			self._send_back_cqc(cqc_header, CQC_ERR_TIMEOUT)
-			return False
-
-		logging.debug("CQC %s: Qubit received for app_id %d",self.name, cqc_header.app_id)
-
-		# Once we have the qubit, add it to the local list and send a reply we received it. Note that we will
-		# recheck whether it exists: it could have been added by another connection in the mean time
 		try:
-			self.factory._lock.acquire()
 
-			if (app_id,q_id) in self.factory.qubitList:
-				logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
-				self._send_back_cqc(cqc_header, CQC_ERR_INUSE)
+			# First get the app_id and q_id
+			app_id = cqc_header.app_id
+			q_id = self.new_qubit_id(app_id)
+
+			# This will block until a qubit is received.
+			noQubit = True
+			for _ in range(CQC_CONF_RECV_EPR_TIMEOUT):
+				data = yield self.factory.virtRoot.callRemote("cqc_get_epr_recv", cqc_header.app_id)
+				if data:
+					noQubit = False
+					(virt_qubit,rawEntInfo)=data
+					entInfo=EntInfoHeader(rawEntInfo)
+					break
+				else:
+					time.sleep(0.1)
+			if noQubit:
+				logging.debug("CQC %s: TIMEOUT, no qubit received.", self.name)
+				self._send_back_cqc(cqc_header, CQC_ERR_TIMEOUT)
 				return False
 
-			q = CQCQubit(q_id, int(time.time()), virt_qubit)
-			self.factory.qubitList[(app_id,q_id)] = q
-		finally:
-			self.factory._lock.release()
+			logging.debug("CQC %s: Qubit received for app_id %d",self.name, cqc_header.app_id)
 
-		# Send message we received a qubit back
-		self._send_back_cqc(cqc_header, CQC_TP_EPR_OK,length=CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH)
+			# Once we have the qubit, add it to the local list and send a reply we received it. Note that we will
+			# recheck whether it exists: it could have been added by another connection in the mean time
+			try:
+				self.factory._lock.acquire()
 
-		# Send notify header with qubit ID
-		hdr = CQCNotifyHeader();
-		hdr.setVals(q_id, 0, 0,0,0, 0);
-		msg = hdr.pack()
-		self.transport.write(msg)
-		logging.debug("CQC %s: Notify %s",self.name, hdr.printable())
+				if (app_id,q_id) in self.factory.qubitList:
+					logging.debug("CQC %s: Qubit already in use (%d,%d)", self.name, app_id, q_id)
+					self._send_back_cqc(cqc_header, CQC_ERR_INUSE)
+					return False
 
-		# Send entanglement info
-		msg=entInfo.pack()
-		self.transport.write(msg)
-		logging.debug("CQC %s: Entanglement information %s",self.name, entInfo.printable())
+				q = CQCQubit(q_id, int(time.time()), virt_qubit)
+				self.factory.qubitList[(app_id,q_id)] = q
+			finally:
+				self.factory._lock.release()
 
-		logging.debug("CQC %s: EPR Pair ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+			# Send message we received a qubit back
+			self._send_back_cqc(cqc_header, CQC_TP_EPR_OK,length=CQC_NOTIFY_LENGTH+ENT_INFO_LENGTH)
 
-		return True
+			# Send notify header with qubit ID
+			hdr = CQCNotifyHeader();
+			hdr.setVals(q_id, 0, 0,0,0, 0);
+			msg = hdr.pack()
+			self.transport.write(msg)
+			logging.debug("CQC %s: Notify %s",self.name, hdr.printable())
+
+			# Send entanglement info
+			msg=entInfo.pack()
+			self.transport.write(msg)
+			logging.debug("CQC %s: Entanglement information %s",self.name, entInfo.printable())
+
+			logging.debug("CQC %s: EPR Pair ID %d qubit id %d",self.name,cqc_header.app_id,cmd.qubit_id)
+
+			return True
+		except Exception as e:
+			print(e)
+			raise e
 
 	@inlineCallbacks
 	def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False):
@@ -942,12 +947,19 @@ class CQCProtocol(Protocol):
 		(return_q_id is used internally)
 		"""
 
-		app_id = cqc_header.app_id
-
 		try:
+
+			app_id = cqc_header.app_id
+
 			self.factory._lock.acquire()
 
-			virt = yield self.factory.virtRoot.callRemote("new_qubit_inreg",self.factory.qReg)
+			try:
+
+				virt = yield self.factory.virtRoot.callRemote("new_qubit_inreg",self.factory.qReg)
+
+			except Exception as e:
+				print("cmd_new error: {}".format(e))
+				raise e
 			if not virt: # if no more qubits
 				raise quantumError("No more qubits available")
 

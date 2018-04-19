@@ -1,0 +1,44 @@
+#!/bin/sh
+
+python node_v2.py 0 42 &
+python node_v2.py 1 42 &
+python node_v2.py 2 42 &
+python node_v2.py 3 42 &
+python node_v2.py 4 42 &
+python node_v2.py 5 42 &
+python node_v2.py 6 42 &
+python node_v2.py 7 42 &
+python node_v2.py 8 42 &
+python node_v2.py 9 42 &
+python node_v2.py 10 42 &
+python node_v2.py 11 42 &
+python node_v2.py 12 42 &
+python node_v2.py 13 42 &
+python node_v2.py 14 42 &
+python node_v2.py 15 42 &
+python node_v2.py 16 42 &
+python node_v2.py 17 42 &
+python node_v2.py 18 42 &
+python node_v2.py 19 42 &
+python node_v2.py 20 42 &
+python node_v2.py 21 42 &
+python node_v2.py 22 42 &
+python node_v2.py 23 42 &
+python node_v2.py 24 42 &
+python node_v2.py 25 42 &
+python node_v2.py 26 42 &
+python node_v2.py 27 42 &
+python node_v2.py 28 42 &
+python node_v2.py 29 42 &
+python node_v2.py 30 42 &
+python node_v2.py 31 42 &
+python node_v2.py 32 42 &
+python node_v2.py 33 42 &
+python node_v2.py 34 42 &
+python node_v2.py 35 42 &
+python node_v2.py 36 42 &
+python node_v2.py 37 42 &
+python node_v2.py 38 42 &
+python node_v2.py 39 42 &
+python node_v2.py 40 42 &
+python node_v2.py 41 42

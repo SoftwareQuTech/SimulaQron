@@ -1,0 +1,44 @@
+#!/bin/sh
+
+python node.py 0 42 &
+python node.py 1 42 &
+python node.py 2 42 &
+python node.py 3 42 &
+python node.py 4 42 &
+python node.py 5 42 &
+python node.py 6 42 &
+python node.py 7 42 &
+python node.py 8 42 &
+python node.py 9 42 &
+python node.py 10 42 &
+python node.py 11 42 &
+python node.py 12 42 &
+python node.py 13 42 &
+python node.py 14 42 &
+python node.py 15 42 &
+python node.py 16 42 &
+python node.py 17 42 &
+python node.py 18 42 &
+python node.py 19 42 &
+python node.py 20 42 &
+python node.py 21 42 &
+python node.py 22 42 &
+python node.py 23 42 &
+python node.py 24 42 &
+python node.py 25 42 &
+python node.py 26 42 &
+python node.py 27 42 &
+python node.py 28 42 &
+python node.py 29 42 &
+python node.py 30 42 &
+python node.py 31 42 &
+python node.py 32 42 &
+python node.py 33 42 &
+python node.py 34 42 &
+python node.py 35 42 &
+python node.py 36 42 &
+python node.py 37 42 &
+python node.py 38 42 &
+python node.py 39 42 &
+python node.py 40 42 &
+python node.py 41 42

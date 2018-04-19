@@ -33,6 +33,7 @@ from twisted.spread import pb
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue, DeferredLock, Deferred, DeferredList
 from twisted.internet.task import deferLater
+from twisted.internet.error import ConnectionRefusedError, CannotListenError
 
 from SimulaQron.virtNode.basics import *
 from SimulaQron.virtNode.quantum import *
@@ -40,7 +41,7 @@ from SimulaQron.general.hostConfig import *
 from SimulaQron.virtNode.crudeSimulator import *
 
 import logging
-import random
+import random, time
 
 ######
 #
@@ -49,15 +50,22 @@ import random
 #
 class backEnd(object):
 
-	def __init__(self, name, configName):
+	def __init__(self, name, virtualFile):
 		"""
 		Initialize. This will read the configuration file and populate the name,hostname,port information with the
 		information found in the configuration file for the given name.
 		"""
 
 		# Read the configuration file
-		self.config = networkConfig(configName)
-		self.myID = self.config.hostDict[name]
+		try:
+			self.config = networkConfig(virtualFile)
+			self.myID = self.config.hostDict[name]
+		except KeyError as e:
+			logging.error("LOCAL {}: No such name in the configuration file {}: {}".format(name,virtualFile,e))
+			raise e
+		except Exception as e:
+			logging.error("LOCAL {}: Error reading the configuration file {}: {}".format(name,virtualFile,e))
+			raise e
 
 	def start(self, maxQubits = 10):
 		"""
@@ -67,12 +75,24 @@ class backEnd(object):
 		maxQubits	maximum qubits in the default register
 		"""
 
-		logging.debug("VIRTUAL NODE %s: Starting on port %d", self.myID.name, self.myID.port)
-		node = virtualNode(self.myID, self.config)
-		reactor.listenTCP(self.myID.port, pb.PBServerFactory(node))
+		try:
+			logging.debug("VIRTUAL NODE %s: Starting on port %d", self.myID.name, self.myID.port)
+			node = virtualNode(self.myID, self.config)
+			# print(node.conn)
+			# time.sleep(20)
+			# print(node.conn)
+			# print(node)
+			# print(type(node))
+			reactor.listenTCP(self.myID.port, pb.PBServerFactory(node))
 
-		logging.debug("VIRTUAL NODE %s: running reactor.", self.myID.name)
-		reactor.run()
+			logging.debug("VIRTUAL NODE %s: running reactor.", self.myID.name)
+			reactor.run()
+		except CannotListenError as e:
+			logging.error("LOCAL {}: CQC server address ({}) is already in use.".format(self.myID.name,self.myID.port))
+			return
+		except Exception as e:
+			logging.error("LOCAL {}: Critical error when starting local virtual node server: {}".format(self.myID.name,e))
+			return
 
 #######
 #
@@ -93,49 +113,56 @@ class virtualNode(pb.Root):
 		maxRegister	maximum number of registers
 		"""
 
-		# Store our own host identifiers and configuration
-		self.myID = ID
-		self.myID.root = self
-		self.config = config
+		try:
 
-		# Initialize list of registers we simulate locally
-		# self.simRegisters = []
-		self.maxRegs = maxRegisters
+			# Store our own host identifiers and configuration
+			self.myID = ID
+			self.myID.root = self
+			self.config = config
 
-		# List of connections
-		self.conn = {}
+			# Initialize list of registers we simulate locally
+			# self.simRegisters = []
+			self.maxRegs = maxRegisters
 
-		# Number of registers _created_ at this node
-		# this may not equal the numbers of registers virtually carried
-		self.numRegs = 0
+			# List of connections
+			self.conn = {}
 
-		# Set up the default local register
-		self.defaultReg = self.remote_new_register(maxQubits)
+			# Number of registers _created_ at this node
+			# this may not equal the numbers of registers virtually carried
+			self.numRegs = 0
 
-		# Initialize the list of qubits at this node
-		self.virtQubits = []
-		self.simQubits = []
+			# Set up the default local register
+			self.defaultReg = self.remote_new_register(maxQubits)
 
-		# Set up connections to the neighouring nodes in the network
-		# Wait so servers have time to start
-		reactor.callLater(2,self.connectNet)
+			# Initialize the list of qubits at this node
+			self.virtQubits = []
+			self.simQubits = []
 
-		# Global lock: needs to be acquire whenever we want to manipulate more than one
-		# qubit object
-		self._lock = DeferredLock()
+			# Set up connections to the neighouring nodes in the network
+			# Wait so servers have time to start
+			# reactor.callLater(2,self.connectNet)
+			# time.sleep(2)
+			self.connectNet()
 
-		# Time until retry
-		self._delay = 1
+			# Global lock: needs to be acquire whenever we want to manipulate more than one
+			# qubit object
+			self._lock = DeferredLock()
 
-		# Maximum number of attempts at getting locks
-		self.maxAttempts = 300
+			# Time until retry
+			self._delay = 1
 
-		# List of qubit received to be polled by CQC
-		self.cqcRecv = {}
+			# Maximum number of attempts at getting locks
+			self.maxAttempts = 300
 
-		# List of halves of epr-pairs received to be polled by CQC
-		self.cqcRecvEpr = {}
+			# List of qubit received to be polled by CQC
+			self.cqcRecv = {}
 
+			# List of halves of epr-pairs received to be polled by CQC
+			self.cqcRecvEpr = {}
+
+		except Exception as e:
+			logging.error("VIRTUAL NODE {}: Critical error when initializing virtNode: {}".format(ID.name,e))
+			raise e
 
 	def remote_test(self):
 		logging.debug("VIRTUAL NODE %s: Check call virtualNode.", self.myID.name)
@@ -150,36 +177,65 @@ class virtualNode(pb.Root):
 		configuration.
 		"""
 
-		for key in self.config.hostDict:
-			nb = self.config.hostDict[key]
-			if nb.name != self.myID.name:
-				logging.debug("VIRTUAL NODE %s: Attempting connection to node %s at %s:%d",self.myID.name,nb.name,nb.hostname,nb.port)
-				nb.factory = pb.PBClientFactory()
-				reactor.connectTCP(nb.hostname, nb.port, nb.factory)
-				defer = nb.factory.getRootObject()
-				defer.addCallback(self._gotRoot, nb)
-				defer.addErrback(self._setupError)
-			else:
-				self.conn[nb.name] = nb
+		try:
+			for key in self.config.hostDict:
+				node = self.config.hostDict[key]
+				if node.name != self.myID.name:
+					self.connect_to_node(node)
+				else:
+					self.conn[node.name] = node
+		except Exception as e:
+			logging.error("VIRTUAL NODE {}: Critical error when connection network of virtual nodes: {}".format(self.myID.name,e))
+			raise e
 
-	def _gotRoot(self, obj, nb):
+	def remote_check_connections(self):
 		"""
-		Callback obtaining twisted root object when connection to the node given by the node details nb.
+		Checks if all connections are up.
 		"""
-		logging.debug("VIRTUAL NODE %s: New connection to %s.",self.myID.name,nb.name)
-		# Retrieve the root object: virtualNode on the remote
-		nb.root = obj;
+		return len(self.conn)==len(self.config.hostDict)
 
-		# Add this node to the local connections
-		self.conn[nb.name] = nb
+	def connect_to_node(self,node):
+		logging.debug("VIRTUAL NODE {}: Trying to connect to node {}.".format(self.myID.name,node.name))
+		node.factory = pb.PBClientFactory()
+		reactor.connectTCP(node.hostname, node.port, node.factory)
+		defer = node.factory.getRootObject()
+		defer.addCallback(self.handle_connection, node)
+		defer.addErrback(self.handle_connection_error,node)
 
-	def _setupError(self):
+	def handle_connection(self, obj, node):
 		"""
-		Callback error
+		Callback obtaining twisted root object when connection to the node given by the node details 'node'.
 		"""
-		logging.critical("Cannot connect to node")
-		reactor.stop()
-		return
+		try:
+			logging.debug("VIRTUAL NODE %s: New connection to %s.",self.myID.name,node.name)
+			# Retrieve the root object: virtualNode on the remote
+			node.root = obj;
+
+			# Add this node to the local connections
+			# time.sleep(10)
+			self.conn[node.name] = node
+		except Exception as e:
+			logging.error("VIRTUAL NODE {}: Critical error when handling connection to node {}: {}".format(self.myID.name,node.name,e))
+			raise e
+
+	def handle_connection_error(self,reason,node):
+		"""
+		Handles errors from trying to connect to other node.
+		If a ConnectionRefusedError is raised another try will be made after 'wait_time' (0.5) seconds.
+		Any other error is raised again.
+		"""
+
+		wait_time=0.5
+
+		try:
+			reason.raiseException()
+		except ConnectionRefusedError:
+			logging.debug("VIRTUAL NODE {}: Could not connect to {}, trying again...".format(self.myID.name,node.name))
+			time.sleep(wait_time)
+			self.connect_to_node(node)
+		except Exception as e:
+			logging.error("VIRTUAL NODE {}: Critical error when connection to local virtual node: {}".format(self.myID.name,e))
+			reactor.stop()
 
 	def get_virtual_id(self):
 		"""
@@ -289,16 +345,21 @@ class virtualNode(pb.Root):
 		maxQubits	maximum number of qubits to use in the default engine (default 10)
 		"""
 
-		if self.numRegs >= self.maxRegs:
-			logging.error("%s: Maximum number of registers reached.",self.myID.name)
-			raise quantumError("Maximum number of registers reached.")
+		try:
 
-		self.numRegs = self.numRegs + 1
-		newReg = quantumRegister(self.myID, self.numRegs, maxQubits)
-		# self.simRegisters.append(newReg)
+			if self.numRegs >= self.maxRegs:
+				logging.error("%s: Maximum number of registers reached.",self.myID.name)
+				raise quantumError("Maximum number of registers reached.")
 
-		logging.debug("VIRTUAL NODE %s: Initializing new simulated register.",self.myID.name)
-		return newReg
+			self.numRegs = self.numRegs + 1
+			newReg = quantumRegister(self.myID, self.numRegs, maxQubits)
+			# self.simRegisters.append(newReg)
+
+			logging.debug("VIRTUAL NODE %s: Initializing new simulated register.",self.myID.name)
+			return newReg
+		except Exception as e:
+			logging.error("VIRTUAL NODE {}: Critical error when getting new register: {}".format(self.myID.name,e))
+			raise e
 
 	@inlineCallbacks
 	def remote_new_qubit(self):
@@ -466,22 +527,26 @@ class virtualNode(pb.Root):
 		Retrieve the next qubit (half of an EPR-pair) with the given app ID from the received list.
 		"""
 
-		logging.debug("VIRTUAL NODE %s: Trying to retrieve qubit for app id %d from epr list", self.myID.name, to_app_id)
-		# Get the list corresponding to the specified application ID
-		if not (to_app_id in self.cqcRecvEpr):
-			return None
+		try:
+			logging.debug("VIRTUAL NODE %s: Trying to retrieve qubit for app id %d from epr list", self.myID.name, to_app_id)
+			# Get the list corresponding to the specified application ID
+			if not (to_app_id in self.cqcRecvEpr):
+				return None
 
-		qQueue = self.cqcRecvEpr[to_app_id]
-		if not qQueue:
-			return None
+			qQueue = self.cqcRecvEpr[to_app_id]
+			if not qQueue:
+				return None
 
-		# Retrieve the first element on that list (first in, first out)
-		qc = qQueue.popleft();
-		if not qc:
-			return None
+			# Retrieve the first element on that list (first in, first out)
+			qc = qQueue.popleft();
+			if not qc:
+				return None
 
-		logging.debug("VIRTUAL NODE %s: Returning qubit for app id %d from epr list", self.myID.name, to_app_id)
-		return (self.remote_get_virtual_ref(qc.virt_num),qc.rawEntInfo)
+			logging.debug("VIRTUAL NODE %s: Returning qubit for app id %d from epr list", self.myID.name, to_app_id)
+			return (self.remote_get_virtual_ref(qc.virt_num),qc.rawEntInfo)
+		except Exception as e:
+			print(e)
+			raise e
 
 	@inlineCallbacks
 	def remote_send_qubit(self, qubit, targetName):
