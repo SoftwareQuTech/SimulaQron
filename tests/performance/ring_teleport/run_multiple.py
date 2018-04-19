@@ -28,9 +28,9 @@ with open('times_v2.txt','w') as f:
 for n in range(min_nodes,max_nodes+1):
 	os.system("python configure_ring.py {}".format(n))
 	os.system("sh "+netsim_path+"run/startAll.sh")
-	# time.sleep(5)
+	# time.sleep(30)
 	for _ in range(iterations):
-		os.system("sh donew.sh")
+		os.system("sh doNew.sh")
 		# time.sleep(10)
-		os.system("sh donew_v2.sh")
+		os.system("sh doNew_v2.sh")
 		# time.sleep(10)

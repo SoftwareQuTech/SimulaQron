@@ -263,7 +263,6 @@ class CQCProtocol(Protocol):
 			return(-1)
 
 		num = yield general_ref.callRemote("get_virt_num")
-		# logging.debug("GOT NUMBER %d XXX",num)
 
 		return num
 

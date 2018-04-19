@@ -42,4 +42,4 @@ logging.debug("Starting VIRTUAL NODE %s", sys.argv[1])
 virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
 be = backEnd(sys.argv[1],virtualFile)
 
-node = be.start(maxQubits=CONF_MAXQUBITS)
+node = be.start(maxQubits=CONF_MAXQUBITS,maxRegisters=CONF_MAXREGS)

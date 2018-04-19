@@ -9,6 +9,7 @@ from twisted.internet.error import ConnectionRefusedError, CannotListenError
 
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcProtocol import *
+from SimulaQron.cqc.backend.cqcConfig import *
 
 from qutip import *
 
@@ -73,64 +74,44 @@ def handle_register_error(reason,myName):
 def handle_connection_error(reason,myName,cqc_factory,virtualNet):
 	"""
 	Handles errors from trying to connect to local virtual node.
-	If a ConnectionRefusedError is raised another try will be made after 'wait_time' (0.5) seconds.
+	If a ConnectionRefusedError is raised another try will be made after CQC_CONF_WAIT_TIME seconds.
+	CQC_CONF_WAIT_TIME is set in 'cqc/backend/cqcConfig.py'.
 	Any other error is raised again.
 	"""
-
-	wait_time=0.5
 
 	try:
 		reason.raiseException()
 	except ConnectionRefusedError:
 		logging.debug("LOCAL %s: Could not connect, trying again...",myName)
-		time.sleep(wait_time)
-		connect_to_virtNode(myName,cqc_factory,virtualNet)
+		reactor.callLater(CQC_CONF_LINK_WAIT_TIME,connect_to_virtNode,myName,cqc_factory,virtualNet)
 	except Exception as e:
 		logging.error("LOCAL %s: Critical error when connection to local virtual node: %s",myName,e)
 		reactor.stop()
 
 def handle_check_connections(conn_up,myName,cqc_factory):
-	if conn_up:
-		try:
-			logging.debug("LOCAL %s: Starting local classical communication server.",myName)
-			myHost=cqc_factory.host
-			myHost.root = cqc_factory
-			myHost.factory = cqc_factory
-			reactor.listenTCP(myHost.port, myHost.factory)
-		except CannotListenError as e:
-			logging.error("LOCAL {}: CQC server address ({}) is already in use.".format(myName,myHost.port))
-			reactor.stop()
-		except Exception as e:
-			logging.error("LOCAL {}: Critical error when starting CQC server: {}".format(myName,e))
-			reactor.stop()
-	else:
-		logging.debug("LOCAL %s: Virtual node connections not up yet, trying again...",myName)
-		time.sleep(0.5)
-		setup_CQC_server(myName,cqc_factory)
+	try:
+		logging.debug("LOCAL %s: Starting local classical communication server.",myName)
+		myHost=cqc_factory.host
+		myHost.root = cqc_factory
+		myHost.factory = cqc_factory
+		reactor.listenTCP(myHost.port, myHost.factory)
+	except CannotListenError as e:
+		logging.error("LOCAL {}: CQC server address ({}) is already in use.".format(myName,myHost.port))
+		reactor.stop()
+	except Exception as e:
+		logging.error("LOCAL {}: Critical error when starting CQC server: {}".format(myName,e))
+		reactor.stop()
 
 def setup_CQC_server(myName,cqc_factory):
 	"""
 	Setup CQC server to handle remote connections using CQC on the classical communication network.
 	"""
 	try:
-		logging.debug("LOCAL %s: Checking if we can start classical communication server.",myName)
 		d=cqc_factory.virtRoot.callRemote("check_connections")
 		d.addCallback(handle_check_connections,myName,cqc_factory)
 	except Exception as e:
 		logging.error("LOCAL {}: Critical error when checking if connections are up: {}".format(myName,e))
 		reactor.stop()
-
-		# logging.debug("LOCAL %s: Starting local classical communication server.",myName)
-		# myHost=cqc_factory.host
-		# myHost.root = cqc_factory
-		# myHost.factory = cqc_factory
-		# reactor.listenTCP(myHost.port, myHost.factory)
-	# except CannotListenError as e:
-		# logging.error("LOCAL {}: CQC server address ({}) is already in use.".format(myName,myHost.port))
-		# reactor.stop()
-	# except Exception as e:
-		# logging.error("LOCAL {}: Critical error when starting CQC server: {}".format(myName,e))
-		# reactor.stop()
 
 #####################################################################################################
 #
@@ -161,21 +142,6 @@ def main(myName):
 
 	# Connect to the local virtual node simulating the "local" qubits
 	connect_to_virtNode(myName,cqc_factory,virtualNet)
-	# print("after connect_to: {}".format(cqc_factory.virtRoot))
-
-	# #Start server to handle remote connections using CQC on the classical communication network
-	# try:
-	# 	logging.debug("LOCAL %s: Starting local classical communication server.",myName)
-	# 	myHost.root = cqc_factory
-	# 	myHost.factory = cqc_factory
-	# 	reactor.listenTCP(myHost.port, myHost.factory)
-	# except CannotListenError as e:
-	# 	logging.error("LOCAL {}: CQC server address ({}) is already in use.".format(myName,myHost.port))
-	# 	return
-	# except Exception as e:
-	# 	logging.error("LOCAL {}: Critical error when starting CQC server: {}".format(myName,e))
-	# 	return
-
 
 	# Run reactor
 	reactor.run()

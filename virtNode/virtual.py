@@ -39,6 +39,7 @@ from SimulaQron.virtNode.basics import *
 from SimulaQron.virtNode.quantum import *
 from SimulaQron.general.hostConfig import *
 from SimulaQron.virtNode.crudeSimulator import *
+from SimulaQron.settings import *
 
 import logging
 import random, time
@@ -67,7 +68,7 @@ class backEnd(object):
 			logging.error("LOCAL {}: Error reading the configuration file {}: {}".format(name,virtualFile,e))
 			raise e
 
-	def start(self, maxQubits = 10):
+	def start(self, maxQubits = CONF_MAXQUBITS,maxRegisters = CONF_MAXREGS):
 		"""
 		Start listening to requests from other nodes.
 
@@ -77,12 +78,7 @@ class backEnd(object):
 
 		try:
 			logging.debug("VIRTUAL NODE %s: Starting on port %d", self.myID.name, self.myID.port)
-			node = virtualNode(self.myID, self.config)
-			# print(node.conn)
-			# time.sleep(20)
-			# print(node.conn)
-			# print(node)
-			# print(type(node))
+			node = virtualNode(self.myID, self.config,maxQubits=maxQubits,maxRegisters=maxRegisters)
 			reactor.listenTCP(self.myID.port, pb.PBServerFactory(node))
 
 			logging.debug("VIRTUAL NODE %s: running reactor.", self.myID.name)
@@ -103,7 +99,7 @@ class backEnd(object):
 
 class virtualNode(pb.Root):
 
-	def __init__(self,ID, config, maxQubits = 10, maxRegisters=1000):
+	def __init__(self,ID, config, maxQubits = CONF_MAXQUBITS, maxRegisters=CONF_MAXREGS):
 		"""
 		Initialize storing also our own name, hostname and port.
 
@@ -139,9 +135,6 @@ class virtualNode(pb.Root):
 			self.simQubits = []
 
 			# Set up connections to the neighouring nodes in the network
-			# Wait so servers have time to start
-			# reactor.callLater(2,self.connectNet)
-			# time.sleep(2)
 			self.connectNet()
 
 			# Global lock: needs to be acquire whenever we want to manipulate more than one
@@ -164,13 +157,6 @@ class virtualNode(pb.Root):
 			logging.error("VIRTUAL NODE {}: Critical error when initializing virtNode: {}".format(ID.name,e))
 			raise e
 
-	def remote_test(self):
-		logging.debug("VIRTUAL NODE %s: Check call virtualNode.", self.myID.name)
-
-	def remote_test_arg(self,  newSimNodeName, oldSimNodeName, oldRegNum, newD):
-		# logging.debug("VIRTUAL NODE %s: Check call virtualNode %s.", self.myID.name, arg)
-		logging.debug("VIRTUAL NODE %s: Check call virtualNode %s.", self.myID.name, newSimNodeName)
-
 	def connectNet(self):
 		"""
 		Initialize the connections to the other virtual nodes in the network according to the available
@@ -190,16 +176,19 @@ class virtualNode(pb.Root):
 
 	def remote_check_connections(self):
 		"""
-		Checks if all connections are up.
+		Checks if all connections are up. (Just checks if the number of connections equal the number of nodes in config-file)
 		"""
 		return len(self.conn)==len(self.config.hostDict)
 
 	def connect_to_node(self,node):
+		"""
+		Connects to other node. If node not up yet, waits for CONF_WAIT_TIME seconds.
+		"""
 		logging.debug("VIRTUAL NODE {}: Trying to connect to node {}.".format(self.myID.name,node.name))
 		node.factory = pb.PBClientFactory()
 		reactor.connectTCP(node.hostname, node.port, node.factory)
 		defer = node.factory.getRootObject()
-		defer.addCallback(self.handle_connection, node)
+		defer.addCallback(self.handle_connection,node)
 		defer.addErrback(self.handle_connection_error,node)
 
 	def handle_connection(self, obj, node):
@@ -212,7 +201,6 @@ class virtualNode(pb.Root):
 			node.root = obj;
 
 			# Add this node to the local connections
-			# time.sleep(10)
 			self.conn[node.name] = node
 		except Exception as e:
 			logging.error("VIRTUAL NODE {}: Critical error when handling connection to node {}: {}".format(self.myID.name,node.name,e))
@@ -221,18 +209,16 @@ class virtualNode(pb.Root):
 	def handle_connection_error(self,reason,node):
 		"""
 		Handles errors from trying to connect to other node.
-		If a ConnectionRefusedError is raised another try will be made after 'wait_time' (0.5) seconds.
+		If a ConnectionRefusedError is raised another try will be made after CONF_WAIT_TIME seconds.
+		CONF_WAIT_TIME is set in 'settings.py'.
 		Any other error is raised again.
 		"""
-
-		wait_time=0.5
 
 		try:
 			reason.raiseException()
 		except ConnectionRefusedError:
 			logging.debug("VIRTUAL NODE {}: Could not connect to {}, trying again...".format(self.myID.name,node.name))
-			time.sleep(wait_time)
-			self.connect_to_node(node)
+			reactor.callLater(CONF_WAIT_TIME,self.connect_to_node,node)
 		except Exception as e:
 			logging.error("VIRTUAL NODE {}: Critical error when connection to local virtual node: {}".format(self.myID.name,e))
 			reactor.stop()
@@ -422,13 +408,6 @@ class virtualNode(pb.Root):
 
 		return newQubit
 
-	def remote_reset_reg(self, reg):
-		"""
-		Reset the simulated register, including removing all simulated qubits. Caution: this does not
-		update remote nodes XXX
-		"""
-		pass
-
 	@inlineCallbacks
 	def remote_cqc_send_qubit(self, num, targetName, app_id, remote_app_id):
 		"""
@@ -441,18 +420,25 @@ class virtualNode(pb.Root):
 		remote_app_id	application ID to deliver the qubit to
 		"""
 
-		logging.debug("VIRTUAL NODE %s: request to send qubit %d to %s",self.myID.name, num, targetName)
+		# Check if connections is up yet
+		if (not (targetName in self.conn)) and (targetName in self.config.hostDict):
 
-		virtQubit = self.remote_get_virtual_ref(num)
+			logging.debug("VIRTUAL NODE {}: Connection to {} not up yet, need to wait...".format(self.myID.name, targetName))
+			reactor.callLater(CONF_WAIT_TIME,self.remote_cqc_send_qubit,num,targetName,app_id,remote_app_id)
+		else:
 
-		oldVirtNum = num
-		newVirtNum = yield self.remote_send_qubit(virtQubit, targetName)
+			logging.debug("VIRTUAL NODE %s: request to send qubit %d to %s",self.myID.name, num, targetName)
 
-		# Lookup host ID of node
-		remoteNode = self.conn[targetName]
+			virtQubit = self.remote_get_virtual_ref(num)
 
-		# Ask to add to list
-		yield remoteNode.root.callRemote("cqc_add_recv_list", self.myID.name, app_id, remote_app_id, newVirtNum)
+			oldVirtNum = num
+			newVirtNum = yield self.remote_send_qubit(virtQubit, targetName)
+
+			# Lookup host ID of node
+			remoteNode = self.conn[targetName]
+
+			# Ask to add to list
+			yield remoteNode.root.callRemote("cqc_add_recv_list", self.myID.name, app_id, remote_app_id, newVirtNum)
 
 	def remote_cqc_add_recv_list(self, fromName, from_app_id, to_app_id, new_virt_num):
 		"""
@@ -500,16 +486,24 @@ class virtualNode(pb.Root):
 		entInfo		entanglement information
 		"""
 
-		qubit = self.remote_get_virtual_ref(num)
+		# Check if connections is up yet
+		if (not (targetName in self.conn)) and (targetName in self.config.hostDict):
 
-		oldVirtNum = num
-		newVirtNum = yield self.remote_send_qubit(qubit, targetName)
+			logging.debug("VIRTUAL NODE {}: Connection to {} not up yet, need to wait...".format(self.myID.name, targetName))
+			reactor.callLater(CONF_WAIT_TIME,self.remote_cqc_send_epr_half,num,targetName,app_id,remote_app_id,rawEntInfo)
+		else:
 
-		# Lookup host ID of node
-		remoteNode = self.conn[targetName]
+			qubit = self.remote_get_virtual_ref(num)
 
-		# Ask to add to list
-		yield remoteNode.root.callRemote("cqc_add_epr_list", self.myID.name, app_id, remote_app_id, newVirtNum, rawEntInfo)
+			oldVirtNum = num
+			newVirtNum = yield self.remote_send_qubit(qubit, targetName)
+
+			# Lookup host ID of node
+			remoteNode = self.conn[targetName]
+			# remoteNode = self.get_connection(targetName)
+
+			# Ask to add to list
+			yield remoteNode.root.callRemote("cqc_add_epr_list", self.myID.name, app_id, remote_app_id, newVirtNum, rawEntInfo)
 
 	def remote_cqc_add_epr_list(self, fromName, from_app_id, to_app_id, new_virt_num, rawEntInfo):
 		"""
@@ -564,38 +558,46 @@ class virtualNode(pb.Root):
 			logging.debug("VIRTUAL NODE %s: Attempt to manipulate qubit no longer at this node.",self.myID.name)
 			return
 
+		# Check if connections is up yet
+		if (not (targetName in self.conn)) and (targetName in self.config.hostDict):
 
-		# Lookup host id of node
-		remoteNode = self.conn[targetName]
+			logging.debug("VIRTUAL NODE {}: Connection to {} not up yet, need to wait...".format(self.myID.name, targetName))
+			reactor.callLater(CONF_WAIT_TIME,self.remote_send_qubit,qubit,targetName)
+		else:
 
-		try:
-			# Get lock to prevent access to qubits between sending and manipulating local list
-			self._get_global_lock()
 
-			# Check whether we are just the virtual, or also the simulating node
-			if qubit.virtNode == qubit.simNode:
-				logging.debug("VIRTUAL NODE %s: Sending qubit simulated locally", self.myID.name)
-				# We are both the virtual as well as the simulating node
-				# Pass a reference to our locally simulated qubit object to the remote node
-				newNum = yield remoteNode.root.callRemote("add_qubit", self.myID.name, qubit.simQubit)
-			else:
-				logging.debug("VIRTUAL NODE %s: Sending qubit simulated remotely at %s", self.myID.name, qubit.simNode.name)
-				# We are only the virtual node, not the simulating one. In this case, we need to ask
-				# the actual simulating node to do the transfer for us. Due to the pecularities of Twisted PB
-				# we need to do this by the simulated qubit number
-				simQubitNum = yield qubit.simQubit.callRemote("get_sim_number")
-				newNum = yield qubit.simNode.root.callRemote("transfer_qubit", simQubitNum, targetName)
+			# Lookup host id of node
+			remoteNode = self.conn[targetName]
+			# remoteNode = self.get_connection(targetName)
 
-			# We gave it away so mark as inactive
-			qubit.active = 0
+			try:
+				# Get lock to prevent access to qubits between sending and manipulating local list
+				self._get_global_lock()
 
-			# Remove the qubit from the local virtual list. Note it remains in the simulated
-			# list, since we continue to simulate this qubit if we did so before.
-			self.virtQubits.remove(qubit)
-		finally:
-			self._release_global_lock()
+				# Check whether we are just the virtual, or also the simulating node
+				if qubit.virtNode == qubit.simNode:
+					logging.debug("VIRTUAL NODE %s: Sending qubit simulated locally", self.myID.name)
+					# We are both the virtual as well as the simulating node
+					# Pass a reference to our locally simulated qubit object to the remote node
+					newNum = yield remoteNode.root.callRemote("add_qubit", self.myID.name, qubit.simQubit)
+				else:
+					logging.debug("VIRTUAL NODE %s: Sending qubit simulated remotely at %s", self.myID.name, qubit.simNode.name)
+					# We are only the virtual node, not the simulating one. In this case, we need to ask
+					# the actual simulating node to do the transfer for us. Due to the pecularities of Twisted PB
+					# we need to do this by the simulated qubit number
+					simQubitNum = yield qubit.simQubit.callRemote("get_sim_number")
+					newNum = yield qubit.simNode.root.callRemote("transfer_qubit", simQubitNum, targetName)
 
-		return newNum
+				# We gave it away so mark as inactive
+				qubit.active = 0
+
+				# Remove the qubit from the local virtual list. Note it remains in the simulated
+				# list, since we continue to simulate this qubit if we did so before.
+				self.virtQubits.remove(qubit)
+			finally:
+				self._release_global_lock()
+
+			return newNum
 
 	@inlineCallbacks
 	def remote_transfer_qubit(self, simQubitNum, targetName):
@@ -609,21 +611,29 @@ class virtualNode(pb.Root):
 		targetName	target node to place qubit at (host object)
 		"""
 
-		logging.debug("VIRTUAL NODE %s: Request to transfer qubit to %s.",self.myID.name, targetName)
+		# Check if connections is up yet
+		if (not (targetName in self.conn)) and (targetName in self.config.hostDict):
 
-		# Convert the number into the right local object
-		simQubit = self._q_num_to_obj(simQubitNum)
-
-		# Lookup host id of node
-		remoteNode = self.conn[targetName]
-
-		# Check if we are both the destination node and simulating node
-		if self.myID.name==targetName:
-			newNum = yield remoteNode.root.remote_add_qubit(self.myID.name,simQubit)
+			logging.debug("VIRTUAL NODE {}: Connection to {} not up yet, need to wait...".format(self.myID.name, targetName))
+			reactor.callLater(CONF_WAIT_TIME,self.remote_transfer_qubit,simQubitNum,targetName)
 		else:
-			newNum = yield remoteNode.root.callRemote("add_qubit", self.myID.name, simQubit)
 
-		return newNum
+			logging.debug("VIRTUAL NODE %s: Request to transfer qubit to %s.",self.myID.name, targetName)
+
+			# Convert the number into the right local object
+			simQubit = self._q_num_to_obj(simQubitNum)
+
+			# Lookup host id of node
+			remoteNode = self.conn[targetName]
+			# remoteNode = self.get_connection(targetName)
+
+			# Check if we are both the destination node and simulating node
+			if self.myID.name==targetName:
+				newNum = yield remoteNode.root.remote_add_qubit(self.myID.name,simQubit)
+			else:
+				newNum = yield remoteNode.root.callRemote("add_qubit", self.myID.name, simQubit)
+
+			return newNum
 
 	def remote_add_qubit(self, name, simQubit):
 		"""
@@ -634,25 +644,33 @@ class virtualNode(pb.Root):
 		simQubit 	simulated qubit reference in the backend we're adding
 		"""
 
-		logging.debug("VIRTUAL NODE %s: Request to add qubit from %s.",self.myID.name, name)
+		# Check if connections is up yet
+		if (not (name in self.conn)) and (name in self.config.hostDict):
 
-		# Get the details of the remote node
-		nb = self.conn[name]
+			logging.debug("VIRTUAL NODE {}: Connection to {} not up yet, need to wait...".format(self.myID.name, name))
+			reactor.callLater(CONF_WAIT_TIME,self.remote_add_qubit,name,simQubit)
+		else:
 
-		try:
-			# Get a lock to make sure IDs are assigned correctly
-			self._get_global_lock()
+			logging.debug("VIRTUAL NODE %s: Request to add qubit from %s.",self.myID.name, name)
 
-			# Generate a new virtual qubit object for the qubit now at this node
-			newNum = self.get_virtual_id()
-			newQubit = virtualQubit(self.myID, nb, simQubit, newNum)
+			# Get the details of the remote node
+			nb = self.conn[name]
+			# nb = self.get_connection(name)
 
-			# Add to local list
-			self.virtQubits.append(newQubit)
-		finally:
-			self._release_global_lock()
+			try:
+				# Get a lock to make sure IDs are assigned correctly
+				self._get_global_lock()
 
-		return newNum
+				# Generate a new virtual qubit object for the qubit now at this node
+				newNum = self.get_virtual_id()
+				newQubit = virtualQubit(self.myID, nb, simQubit, newNum)
+
+				# Add to local list
+				self.virtQubits.append(newQubit)
+			finally:
+				self._release_global_lock()
+
+			return newNum
 
 	def remote_get_virtual_ref(self, num):
 		"""
@@ -810,49 +828,61 @@ class virtualNode(pb.Root):
 		localReg	local register to merge with
 		"""
 
-		logging.debug("VIRTUAL NODE %s: Merging from %s", self.myID.name, simNodeName)
+		# Check if connections is up yet
+		if (not (simNodeName in self.conn)) and (simNodeName in self.config.hostDict):
 
-		# This should only be called if lock is acquired
-		assert self._lock.locked
+			logging.debug("VIRTUAL NODE {}: Connection to {} not up yet, need to wait...".format(self.myID.name, simNodeName))
+			reactor.callLater(CONF_WAIT_TIME,self.remote_merge_from,simNodeName,simQubitNum,localReg)
+		elif not self.remote_check_connections():
 
-		logging.debug("VIRTUAL NODE %s: Merging from %s LOCKS PRESENT", self.myID.name, simNodeName)
+			logging.debug("VIRTUAL NODE {}: All connections are not up yet, need to wait to merge from {}...".format(self.myID.name,simNodeName))
+			reactor.callLater(CONF_WAIT_TIME,self.remote_merge_from,simNodeName,simQubitNum,localReg)
+		else:
 
-		# Lookup the local connection for this simulating node
-		simNode = self.conn[simNodeName]
+			logging.debug("VIRTUAL NODE %s: Merging from %s", self.myID.name, simNodeName)
 
-		# Fetch the details of the remote register and qubit, and remove sim qubits at node
-		(R, I, activeQ, oldRegNum, oldQubitNum) = yield simNode.root.callRemote("get_register_del",simQubitNum)
+			# This should only be called if lock is acquired
+			assert self._lock.locked
 
-		# Get numbering offset from previous register: append at end
-		offset = localReg.activeQubits
+			logging.debug("VIRTUAL NODE %s: Merging from %s LOCKS PRESENT", self.myID.name, simNodeName)
 
-		# Allow localReg to absorb the remote register
-		localReg.maxQubits = localReg.maxQubits + activeQ
-		localReg.absorb_parts(R, I, activeQ)
+			# Lookup the local connection for this simulating node
+			simNode = self.conn[simNodeName]
+			# simNode = self.get_connection(simNodeName)
 
-		# Collect mappings between numbers and objects for updating the virtual qubits
-		newD = {}
+			# Fetch the details of the remote register and qubit, and remove sim qubits at node
+			(R, I, activeQ, oldRegNum, oldQubitNum) = yield simNode.root.callRemote("get_register_del",simQubitNum)
 
-		# Make new qubit objects
-		for k in range(activeQ):
-			simNum = self.get_sim_id()
-			newQubit = simulatedQubit(self.myID, localReg, simNum, offset + k)
-			self.simQubits.append(newQubit)
-			newD[k] = newQubit
+			# Get numbering offset from previous register: append at end
+			offset = localReg.activeQubits
 
-		# Issue an update call to all nodes to update their virtual qubits if necessary
-		for name in self.conn:
-			if name != self.myID.name:
-				nb = self.conn[name]
-				yield nb.root.callRemote("update_virtual_merge",self.myID.name, simNodeName, oldRegNum, newD)
+			# Allow localReg to absorb the remote register
+			localReg.maxQubits = localReg.maxQubits + activeQ
+			localReg.absorb_parts(R, I, activeQ)
 
-		# Locally, we might also already have virtual qubits which were in the remote simulated
-		# register. Update them as well
-		logging.debug("VIRTUAL NODE %s: Updating local virtual qubits.",self.myID.name)
-		yield self.remote_update_virtual_merge(self.myID.name, simNodeName, oldRegNum, newD)
+			# Collect mappings between numbers and objects for updating the virtual qubits
+			newD = {}
 
-		# Return the qubit object corresponding to the new physical qubit
-		return newD[oldQubitNum]
+			# Make new qubit objects
+			for k in range(activeQ):
+				simNum = self.get_sim_id()
+				newQubit = simulatedQubit(self.myID, localReg, simNum, offset + k)
+				self.simQubits.append(newQubit)
+				newD[k] = newQubit
+
+			# Issue an update call to all nodes to update their virtual qubits if necessary
+			for name in self.conn:
+				if name != self.myID.name:
+					nb = self.conn[name]
+					yield nb.root.callRemote("update_virtual_merge",self.myID.name, simNodeName, oldRegNum, newD)
+
+			# Locally, we might also already have virtual qubits which were in the remote simulated
+			# register. Update them as well
+			logging.debug("VIRTUAL NODE %s: Updating local virtual qubits.",self.myID.name)
+			yield self.remote_update_virtual_merge(self.myID.name, simNodeName, oldRegNum, newD)
+
+			# Return the qubit object corresponding to the new physical qubit
+			return newD[oldQubitNum]
 
 	@inlineCallbacks
 	def remote_update_virtual_merge(self, newSimNodeName, oldSimNodeName, oldRegNum, newD):
@@ -867,34 +897,47 @@ class virtualNode(pb.Root):
 		newD		dictionary mapping qubit numbers to qubit objects at the new simulating node
 		"""
 
-		logging.debug("VIRTUAL NODE %s: Request to update local virtual qubits.",self.myID.name)
+		# Check if connections is up yet
+		if (not (newSimNodeName in self.conn)) and (newSimNodeName in self.config.hostDict):
 
-		# If this is a third node (not involved in the two qubit gate, but carrying virtual qubits
-		# which were in the simulated register), then they will now be updated. We remark that this function
-		# can only be called from the _simulating node_ now handing over simulation to someone else. Both the simulating
-		# node and the new simulating node are globally locked so there should be no conflicts here in updating:
-		# a third node that may wish to do a 2 qubit gate between the qubits to be updated needs to wait.
+			logging.debug("VIRTUAL NODE {}: Connection to {} not up yet, need to wait...".format(self.myID.name, newSimNodeName))
+			reactor.callLater(CONF_WAIT_TIME,self.remote_update_virtual_merge,newSimNodeName,oldSimNodeName,oldRegNum,newD)
+		if (not (oldSimNodeName in self.conn)) and (oldSimNodeName in self.config.hostDict):
 
-		# Lookup the local connections for the given node names
-		newSimNode = self.conn[newSimNodeName]
-		oldSimNode = self.conn[oldSimNodeName]
+			logging.debug("VIRTUAL NODE {}: Connection to {} not up yet, need to wait...".format(self.myID.name, oldSimNodeName))
+			reactor.callLater(CONF_WAIT_TIME,self.remote_update_virtual_merge,newSimNodeName,oldSimNodeName,oldRegNum,newD)
+		else:
 
-		for q in self.virtQubits:
-			if q.virtNode == q.simNode and q.simNode == oldSimNode:
-				logging.debug("VIRTUAL NODE %s: Simulating node update.",self.myID.name)
-				# We previously simulated this qubit ourselves
-				givenReg = q.simQubit.register.num
-				givenNum = q.simQubit.num
-			elif q.simNode == oldSimNode:
-				logging.debug("VIRTUAL NODE %s: Previously remote simulator node update.",self.myID.name)
-				# We had the virtual qubit but it was simulated elsewhere
-				(givenNum, givenReg) = yield q.simQubit.callRemote("get_numbers")
+			logging.debug("VIRTUAL NODE %s: Request to update local virtual qubits.",self.myID.name)
 
-			# Check if this qubit needs updating
-			if q.simNode == oldSimNode and givenReg == oldRegNum:
-				logging.debug("VIRTUAL NODE %s: Updating virtual qubit %d, previously %s now %s",self.myID.name,q.num, oldSimNode.name,newSimNode.name)
-				q.simNode = newSimNode
-				q.simQubit = newD[givenNum]
+			# If this is a third node (not involved in the two qubit gate, but carrying virtual qubits
+			# which were in the simulated register), then they will now be updated. We remark that this function
+			# can only be called from the _simulating node_ now handing over simulation to someone else. Both the simulating
+			# node and the new simulating node are globally locked so there should be no conflicts here in updating:
+			# a third node that may wish to do a 2 qubit gate between the qubits to be updated needs to wait.
+
+			# Lookup the local connections for the given node names
+			newSimNode = self.conn[newSimNodeName]
+			oldSimNode = self.conn[oldSimNodeName]
+			# newSimNode = self.get_connection(newSimNodeName)
+			# oldSimNode = self.get_connection(oldSimNodeName)
+
+			for q in self.virtQubits:
+				if q.virtNode == q.simNode and q.simNode == oldSimNode:
+					logging.debug("VIRTUAL NODE %s: Simulating node update.",self.myID.name)
+					# We previously simulated this qubit ourselves
+					givenReg = q.simQubit.register.num
+					givenNum = q.simQubit.num
+				elif q.simNode == oldSimNode:
+					logging.debug("VIRTUAL NODE %s: Previously remote simulator node update.",self.myID.name)
+					# We had the virtual qubit but it was simulated elsewhere
+					(givenNum, givenReg) = yield q.simQubit.callRemote("get_numbers")
+
+				# Check if this qubit needs updating
+				if q.simNode == oldSimNode and givenReg == oldRegNum:
+					logging.debug("VIRTUAL NODE %s: Updating virtual qubit %d, previously %s now %s",self.myID.name,q.num, oldSimNode.name,newSimNode.name)
+					q.simNode = newSimNode
+					q.simQubit = newD[givenNum]
 
 	def remote_get_register(self, qubit):
 		"""
@@ -1056,10 +1099,6 @@ class virtualQubit(pb.Referenceable):
 		# Our number at this virtual node. Note that this has nothing to do
 		# with the number of the qubits in the register
 		self.num = num
-
-
-	def remote_test(self):
-		logging.debug("VIRTUAL NODE %s: Check call.", self.virtNode.name)
 
 	@inlineCallbacks
 	def _single_gate(self, name, *args):

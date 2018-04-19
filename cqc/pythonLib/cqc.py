@@ -32,6 +32,7 @@ import socket, struct, os, sys, time, math
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.backend.entInfoHeader import *
+from SimulaQron.cqc.backend.cqcConfig import *
 
 class CQCConnection:
 	_appIDs=[]
@@ -90,9 +91,9 @@ class CQCConnection:
 				break
 			except ConnectionRefusedError:
 				print("App {} : Could not connect to  CQC server, trying again...".format(self.name))
-				time.sleep(0.5)
+				time.sleep(CQC_CONF_LINK_WAIT_TIME)
 			except Exception as e:
-				print("App {} : Critical error when connection to CQC server: {}".format(self.name),e)
+				print("App {} : Critical error when connection to CQC server: {}".format(self.name,e))
 				self._s.close()
 				raise e
 
@@ -156,7 +157,7 @@ class CQCConnection:
 				return msg
 			time.sleep(0.1)
 
-	def openClassicalChannel(self,name,timout=1):
+	def openClassicalChannel(self,name):
 		"""
 		Opens a classical connection to another host in the application network.
 
@@ -171,16 +172,16 @@ class CQCConnection:
 			else:
 				raise ValueError("Host name '{}' is not in the cqc network".format(name))
 			connected=False
-			for _ in range(int(10*timout)):
+			while True:
 				try:
 					s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 					s.connect((remoteHost.hostname,remoteHost.port))
 					connected=True
 					break
-				except:
-					time.sleep(0.1)
-			if not connected:
-				raise RuntimeError("Could not connect to server {}".format(name))
+				except ConnectionRefusedError:
+					time.sleep(CQC_CONF_COM_WAIT_TIME)
+				except Exception as e:
+					print("App {} : Critical error when connection to app node {}: {}".format(self.name,name,e))
 			self._classicalConn[name]=s
 
 	def closeClassicalChannel(self,name):
