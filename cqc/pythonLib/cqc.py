@@ -36,7 +36,7 @@ from SimulaQron.cqc.backend.cqcConfig import *
 
 class CQCConnection:
 	_appIDs=[]
-	def __init__(self,name,cqcFile=None,appFile=None,appID=0):
+	def __init__(self,name,cqcFile=None,appFile=None,appID=0,print_info=True):
 		"""
 		Initialize a connection to the cqc server.
 
@@ -85,7 +85,8 @@ class CQCConnection:
 		self._s=None
 		while True:
 			try:
-				print("App {} : Trying to connect to CQC server".format(self.name))
+				if print_info:
+					print("App {} : Trying to connect to CQC server".format(self.name))
 				self._s=socket.socket(socket.AF_INET,socket.SOCK_STREAM,0)
 				self._s.connect((myIP,myHost.port))
 				break
