@@ -88,7 +88,10 @@ def handle_connection_error(reason,myName,cqc_factory,virtualNet):
 		logging.error("LOCAL %s: Critical error when connection to local virtual node: %s",myName,e)
 		reactor.stop()
 
-def handle_check_connections(conn_up,myName,cqc_factory):
+def setup_CQC_server(myName,cqc_factory):
+	"""
+	Setup CQC server to handle remote connections using CQC on the classical communication network.
+	"""
 	try:
 		logging.debug("LOCAL %s: Starting local classical communication server.",myName)
 		myHost=cqc_factory.host
@@ -100,17 +103,6 @@ def handle_check_connections(conn_up,myName,cqc_factory):
 		reactor.stop()
 	except Exception as e:
 		logging.error("LOCAL {}: Critical error when starting CQC server: {}".format(myName,e))
-		reactor.stop()
-
-def setup_CQC_server(myName,cqc_factory):
-	"""
-	Setup CQC server to handle remote connections using CQC on the classical communication network.
-	"""
-	try:
-		d=cqc_factory.virtRoot.callRemote("check_connections")
-		d.addCallback(handle_check_connections,myName,cqc_factory)
-	except Exception as e:
-		logging.error("LOCAL {}: Critical error when checking if connections are up: {}".format(myName,e))
 		reactor.stop()
 
 #####################################################################################################
