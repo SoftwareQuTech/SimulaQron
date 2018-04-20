@@ -590,17 +590,20 @@ class CQCFactoryHeader:
 			self.is_set = False
 			self.num_iter = 0
 			self.notify = False
+			self.block = False
 		else:
 			self.unpack(headerBytes)
 
-	def setVals(self, num_iter, notify):
+	def setVals(self, num_iter, notify, block):
 		"""
 		Set using give values
 		:param num_iter: The amount of iterations to this factory
 		:param notify: 		True if the factory should send a done message back
+		:param block:		True if all commands in this factory should be blocked
 		"""
 		self.num_iter = num_iter
 		self.notify = notify
+		self.block = block
 		self.is_set = True
 
 	def pack(self):
@@ -610,7 +613,13 @@ class CQCFactoryHeader:
 		if not self.is_set:
 			return 0
 
-		factH = pack(self.package_format, self.num_iter, self.notify)
+		opt = 0
+		if self.notify:
+			opt = opt | CQC_OPT_NOTIFY
+		if self.block:
+			opt = opt | CQC_OPT_BLOCK
+
+		factH = pack(self.package_format, self.num_iter, opt)
 		return factH
 
 	def unpack(self, headerBytes):
@@ -619,8 +628,10 @@ class CQCFactoryHeader:
 		"""
 		fact_hdr = unpack(self.package_format, headerBytes)
 
+		self.notify = fact_hdr[1] & CQC_OPT_NOTIFY
+		self.block = fact_hdr[1] & CQC_OPT_BLOCK
+
 		self.num_iter = fact_hdr[0]
-		self.notify = fact_hdr[1]
 		self.is_set = True
 
 	def printable(self):

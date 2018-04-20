@@ -67,11 +67,11 @@ class CQCConnection:
 		Initialize a connection to the cqc server.
 
 		- **Arguments**
-			:name:		Name of the host.
-			:cqcFile:	Path to cqcFile. If None, '$NETSIM/config/cqcNodes.cfg is used.
-			:appFile:	Path to appFile. If None, '$NETSIM/config/appNodes.cfg is used.
-			:appID:		Application ID, defaults to a nonused ID.
-			:pend_messages: True if you want to wait with sending messages to the back end.
+			:param name:		Name of the host.
+			:param cqcFile:	Path to cqcFile. If None, '$NETSIM/config/cqcNodes.cfg is used.
+			:param appFile:	Path to appFile. If None, '$NETSIM/config/appNodes.cfg is used.
+			:param appID:		Application ID, defaults to a nonused ID.
+			:param pend_messages: True if you want to wait with sending messages to the back end.
 					Use flush() to send all pending messages in one go as a sequence to the server
 		"""
 
@@ -400,7 +400,7 @@ class CQCConnection:
 
 		# Factory header
 		factory_hdr = CQCFactoryHeader()
-		factory_hdr.setVals(num_iter, notify)
+		factory_hdr.setVals(num_iter, notify, block)
 		factory_msg = factory_hdr.pack()
 
 		# Send Command
@@ -814,7 +814,7 @@ class CQCConnection:
 		"""
 		return self.flush_factory(1, do_sequence, print_info)
 
-	def flush_factory(self, num_iter, do_sequence=True, print_info=True):
+	def flush_factory(self, num_iter, do_sequence=True, print_info=True, block_factory=False):
 		"""
 		Flushes the current pending sequence in a factory. It is performed multiple times
 		:param num_iter: The amount of times the current pending sequence is performed
@@ -894,7 +894,7 @@ class CQCConnection:
 
 			if num_iter != 1:
 				factory_header = CQCFactoryHeader()
-				factory_header.setVals(num_iter, should_notify)
+				factory_header.setVals(num_iter, should_notify, block_factory)
 				header_length += factory_header.HDR_LENGTH
 				pending_headers.insert(0, factory_header)
 				cqc_type = CQC_TP_FACTORY

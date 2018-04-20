@@ -192,9 +192,13 @@ class CQCProtocol(Protocol):
 		# We got the header and all the data for this packet. Start processing.
 		# Update our app ID
 		self.app_id = self.currHeader.app_id
-
 		# Invoke the relevant message handler, processing the possibly remaining data
-		self._parseData(self.currHeader, self.buf[0:self.currHeader.length])
+		try:
+			self._parseData(self.currHeader, self.buf[0:self.currHeader.length])
+		except Exception as e:
+			print(e)
+			import traceback
+			traceback.print_exc()
 
 		# if self.currHeader.tp in self.messageHandlers:
 		# 	self.messageHandlers[self.currHeader.tp](self.currHeader, )
