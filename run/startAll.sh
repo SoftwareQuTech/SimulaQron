@@ -9,6 +9,4 @@ else
 	sh "$NETSIM/run/startVNodes.sh" # ugly
 fi
 
-sleep 5s
-
 sh "$NETSIM/run/startCQCNodes.sh" $1 $2 $3 # ugly

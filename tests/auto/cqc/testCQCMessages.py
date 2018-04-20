@@ -68,7 +68,7 @@ class CQCMessageTest(unittest.TestCase):
 		self._alice.close()
 
 	def setUp(self):
-		self._alice = CQCConnection("Alice", appID=1)
+		self._alice = CQCConnection("Alice", appID=1, print_info=False)
 
 	def testNewQubit(self):
 		qubit(self._alice, block=False, notify=False, print_info=False)
@@ -262,7 +262,7 @@ class CQCMessageTest(unittest.TestCase):
 	def testCNotRemote(self):
 		# The appId in xtra_header['app_id'] is not 2 when testing.
 		# In fact, doing this code in a real application result in an error as of 2018-03-12
-		bob = CQCConnection("Bob", appID=2)
+		bob = CQCConnection("Bob", appID=2, print_info=False)
 		q1 = qubit(self._alice, print_info=False)
 		q2 = qubit(bob, print_info=False)
 		q1.cnot(q2, print_info=False)
@@ -297,7 +297,7 @@ class CQCMessageTest(unittest.TestCase):
 
 	def testSend(self):
 		q1 = qubit(self._alice, print_info=False)
-		bob = CQCConnection("Bob", appID=2)
+		bob = CQCConnection("Bob", appID=2, print_info=False)
 		self._alice.sendQubit(q1, "Bob", remote_appID=2, print_info=False)
 		lastEntry = get_last_entries(1)[0]
 		cmd_header = lastEntry['cmd_header']
@@ -345,7 +345,7 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cqc_header['app_id'], 1)
 
 	def testEPRSend(self):
-		bob = CQCConnection("Bob")
+		bob = CQCConnection("Bob", appID=2, print_info=False)
 		self._alice.createEPR("Bob", remote_appID=2, print_info=False)
 
 		entries = get_last_entries(5)
@@ -569,7 +569,10 @@ class CQCMessageTest(unittest.TestCase):
 
 	def testFactoryNew(self):
 		# Should return a list of qubits with consecutive qubit ids
-		qubits = self._alice.sendFactory(2, CQC_CMD_NEW, 10)
+		self._alice.set_pending(True)
+		qubit(self._alice, print_info=False)
+		qubits = self._alice.flush_factory(10, print_info=False, do_sequence=False)
+		self._alice.set_pending(False)
 		# Checking the factory and the measure, factory should not log any commands
 		lastEntries = get_last_entries(11)
 		factoryEntry = lastEntries[0]

@@ -367,7 +367,7 @@ def prep_CPHASE_target_CQC_FACTORY_odd(cqc):
 
 
 def main():
-	cqc = CQCConnection("Alice")
+	cqc = CQCConnection("Alice", print_info=False)
 
 	iterations = 100
 

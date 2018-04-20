@@ -21,33 +21,21 @@
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 # DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
 # DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES
+# LOSS OF USE, DATA, OR PROFITS OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-import argparse
-import sys
-import os
 
-from SimulaQron.virtNode.virtual import *
-from SimulaQron.settings import *
-import logging
+#########################
+# SETTINGS FOR SIMULAQRON
+#########################
 
-parser = argparse.ArgumentParser()
-parser.add_argument("hostName", help="name of the host")
-parser.add_argument("-v", "--verbose", action="store_true", help="show debug information")
+# Sets the maximum number of qubits a node can have
+CONF_MAXQUBITS=20
 
-args = parser.parse_args()
-if args.verbose:
-	logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
-else:
-	logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s')
+# Sets the maximum number of registers a node can have
+CONF_MAXREGS=1000
 
-# args.hostName instead of sys.argv[1] ?
-logging.debug("Starting VIRTUAL NODE %s", sys.argv[1])
-
-virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
-be = backEnd(sys.argv[1], virtualFile)
-
-node = be.start(maxQubits=CONF_MAXQUBITS, maxRegisters=CONF_MAXREGS)
+# Sets the time to wait between attempts to setup the connections of the network
+CONF_WAIT_TIME=0.5

@@ -32,6 +32,7 @@ import socket, struct, os, sys, time, math
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.backend.entInfoHeader import *
+from SimulaQron.cqc.backend.cqcConfig import *
 
 
 def shouldReturn(command):
@@ -62,7 +63,7 @@ def createXtraHeader(command, values):
 class CQCConnection:
 	_appIDs = []
 
-	def __init__(self, name, cqcFile=None, appFile=None, appID=0, pend_messages=False):
+	def __init__(self, name, cqcFile=None, appFile=None, appID=0, print_info=True, pend_messages=False):
 		"""
 		Initialize a connection to the cqc server.
 
@@ -109,17 +110,22 @@ class CQCConnection:
 		# Get IP of correct form
 		myIP = socket.inet_ntoa(struct.pack("!L", myHost.ip))
 
-		# Connect to cqc server
 		self._s = None
-		try:
-			self._s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-		except socket.error:
-			raise RuntimeError("Could not connect to cqc server '{}'".format(name))
-		try:
-			self._s.connect((myIP, myHost.port))
-		except socket.error:
-			self._s.close()
-			raise RuntimeError("Could not connect to cqc server '{}'".format(name))
+		while True:
+			try:
+				if print_info:
+					print("App {} : Trying to connect to CQC server".format(self.name))
+				self._s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+				self._s.connect((myIP, myHost.port))
+				break
+			except ConnectionRefusedError:
+				logging.debug("App {} : Could not connect to  CQC server, trying again...".format(self.name))
+				time.sleep(CQC_CONF_LINK_WAIT_TIME)
+				self._s.close()
+			except Exception as e:
+				logging.warning("App {} : Critical error when connection to CQC server: {}".format(self.name, e))
+				self._s.close()
+				raise e
 
 		# This file defines the application network
 		if appFile == None:
@@ -184,7 +190,7 @@ class CQCConnection:
 				return msg
 			time.sleep(0.1)
 
-	def openClassicalChannel(self, name, timout=1):
+	def openClassicalChannel(self, name):
 		"""
 		Opens a classical connection to another host in the application network.
 
@@ -198,17 +204,17 @@ class CQCConnection:
 				remoteHost = self._appNet.hostDict[name]
 			else:
 				raise ValueError("Host name '{}' is not in the cqc network".format(name))
-			connected = False
-			for _ in range(int(10 * timout)):
+
+			while True:
 				try:
 					s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 					s.connect((remoteHost.hostname, remoteHost.port))
-					connected = True
 					break
-				except:
-					time.sleep(0.1)
-			if not connected:
-				raise RuntimeError("Could not connect to server {}".format(name))
+				except ConnectionRefusedError:
+					time.sleep(CQC_CONF_COM_WAIT_TIME)
+				except Exception as e:
+					print("App {} : Critical error when connection to app node {}: {}".format(self.name, name, e))
+					break
 			self._classicalConn[name] = s
 
 	def closeClassicalChannel(self, name):

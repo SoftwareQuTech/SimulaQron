@@ -1,4 +1,3 @@
-
 # Copyright (c) 2017, Stephanie Wehner and Axel Dahlberg
 # All rights reserved.
 #
@@ -46,6 +45,7 @@ from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.backend.entInfoHeader import *
 from SimulaQron.cqc.backend.cqcMessageHandler import *
 from SimulaQron.cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
+
 
 #####################################################################################################
 #
@@ -116,7 +116,6 @@ class CQCFactory(Factory):
 #
 
 class CQCProtocol(Protocol):
-
 	# Dictionary storing the next unique qubit id for each used app_id
 	_next_q_id = {}
 
@@ -186,7 +185,8 @@ class CQCProtocol(Protocol):
 		# Check whether we already received all the data
 		if len(self.buf) < self.currHeader.length:
 			# Still waiting for data
-			logging.debug("CQC %s: Incomplete data. Waiting. Current length %s, required length %s", self.name, len(self.buf), self.currHeader.length)
+			logging.debug("CQC %s: Incomplete data. Waiting. Current length %s, required length %s", self.name,
+						  len(self.buf), self.currHeader.length)
 			return
 
 		# We got the header and all the data for this packet. Start processing.
@@ -215,7 +215,6 @@ class CQCProtocol(Protocol):
 		else:
 			self.buf = None
 
-
 	@inlineCallbacks
 	def _parseData(self, header, data):
 		messages = yield self.messageHandler.handle_cqc_message(header, data)
@@ -223,8 +222,7 @@ class CQCProtocol(Protocol):
 			# self.factory._lock.acquire()
 			for msg in messages:
 				self.transport.write(msg)
-			# self.factory._lock.release()
-
+		# self.factory._lock.release()
 
 	def _send_back_cqc(self, header, msgType, length=0):
 		"""
@@ -236,39 +234,40 @@ class CQCProtocol(Protocol):
 		"""
 		hdr = CQCHeader()
 		hdr.setVals(CQC_VERSION, msgType, header.app_id, length)
+
 		msg = hdr.pack()
 		self.transport.write(msg)
 
 	def new_qubit_id(self, app_id):
+
 		"""
 		Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv
 		"""
 		if app_id in CQCProtocol._next_q_id:
-			q_id=CQCProtocol._next_q_id[app_id]
-			CQCProtocol._next_q_id[app_id]+=1
+			q_id = CQCProtocol._next_q_id[app_id]
+			CQCProtocol._next_q_id[app_id] += 1
 			return q_id
 		else:
 			"""
 			Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv
 			"""
 			if app_id in CQCProtocol._next_q_id:
-				q_id=CQCProtocol._next_q_id[app_id]
-				CQCProtocol._next_q_id[app_id]+=1
+				q_id = CQCProtocol._next_q_id[app_id]
+				CQCProtocol._next_q_id[app_id] += 1
 				return q_id
 			else:
-				CQCProtocol._next_q_id[app_id]=1
+				CQCProtocol._next_q_id[app_id] = 1
 				return 0
 
-	def new_ent_id(self,host_app_id, remote_node, remote_app_id):
+	def new_ent_id(self, host_app_id, remote_node, remote_app_id):
 		"""
 		Returns a new unique entanglement id for the specified host_app_id, remote_node and remote_app_id. Used by cmd_epr.
 		"""
-		pair_id=(host_app_id,remote_node,remote_app_id)
+		pair_id = (host_app_id, remote_node, remote_app_id)
 		if pair_id in CQCProtocol._next_ent_id:
-			ent_id=CQCProtocol._next_ent_id[pair_id]
-			CQCProtocol._next_ent_id[pair_id]+=1
+			ent_id = CQCProtocol._next_ent_id[pair_id]
+			CQCProtocol._next_ent_id[pair_id] += 1
 			return ent_id
 		else:
-			CQCProtocol._next_ent_id[pair_id]=1
+			CQCProtocol._next_ent_id[pair_id] = 1
 			return 0
-

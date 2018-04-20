@@ -44,8 +44,8 @@ class sequenceTest(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		print("Starting testing sendSequence")
-		cls._alice = CQCConnection("Alice", pend_messages=True)
-		cls._bob = CQCConnection("Bob", appID=1, pend_messages=True)
+		cls._alice = CQCConnection("Alice", pend_messages=True, print_info=False)
+		cls._bob = CQCConnection("Bob", appID=1, pend_messages=True, print_info=False)
 
 	@classmethod
 	def tearDownClass(cls):

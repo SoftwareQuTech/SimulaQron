@@ -47,7 +47,7 @@ class CQCFactoryTest(unittest.TestCase):
 		self.cqc.close()
 
 	def setUp(self):
-		self.cqc = CQCConnection("Alice", appID=0, pend_messages=True)
+		self.cqc = CQCConnection("Alice", appID=0, pend_messages=True, print_info=False)
 
 	def testNew(self):
 		qubit(self.cqc, print_info=False)
@@ -97,7 +97,7 @@ class CQCFactoryTest(unittest.TestCase):
 		q = qubit(self.cqc, print_info=False)
 		q.X(print_info=False)
 		self.cqc.flush(print_info=False)
-		bob = CQCConnection("Bob", appID=1)
+		bob = CQCConnection("Bob", appID=1, print_info=False)
 		# Get receiving host
 		self.cqc.sendQubit(q, "Bob", remote_appID=1, print_info=False)
 		with self.assertRaises(CQCNoQubitError):
@@ -108,7 +108,7 @@ class CQCFactoryTest(unittest.TestCase):
 		bob.close()
 
 	def testRecv(self):
-		bob = CQCConnection("Bob", appID=1, pend_messages=True)
+		bob = CQCConnection("Bob", appID=1, pend_messages=True, print_info=False)
 		for _ in range(self.iterations):
 			q = qubit(bob, print_info=False)
 			q.X(print_info=False)
@@ -126,7 +126,7 @@ class CQCFactoryTest(unittest.TestCase):
 		bob.close()
 
 	def testEPR(self):
-		bob = CQCConnection("Bob", appID=1, pend_messages=True)
+		bob = CQCConnection("Bob", appID=1, pend_messages=True, print_info=False)
 		self.cqc.createEPR("Bob", 1, print_info=False)
 		bob.recvEPR(print_info=False)
 
