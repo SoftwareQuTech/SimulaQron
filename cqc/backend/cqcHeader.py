@@ -144,7 +144,7 @@ class CQCHeader:
 			Produce a printable string for information purposes.
 		"""
 		if not self.is_set:
-			return (" ")
+			return " "
 
 		toPrint = "CQC Header. Version: " + str(self.version) + " "
 		toPrint = toPrint + "Type: " + str(self.tp) + " "
@@ -167,7 +167,7 @@ class CQCCmdHeader:
 		self.block = False
 		self.action = False
 
-		if headerBytes == None:
+		if headerBytes is None:
 			self.is_set = False
 			self.qubit_id = 0
 			self.instr = 0
@@ -191,7 +191,7 @@ class CQCCmdHeader:
 		"""
 
 		if not self.is_set:
-			return (0)
+			return 0
 
 		opt = 0
 		if self.notify:
@@ -639,7 +639,7 @@ class CQCFactoryHeader:
 			Produce a printable string for information purposes.
 		"""
 		if not self.is_set:
-			return (" ")
+			return " "
 
 		toPrint = "Factory Header. "
 		toPrint += "Number of iterations: " + str(self.num_iter) + " "
@@ -687,7 +687,7 @@ class CQCNotifyHeader:
 
 		xtraH = pack("=HHLQHBB", self.qubit_id, self.remote_app_id, self.remote_node, self.datetime, self.remote_port,
 					 self.outcome, 0)
-		return (xtraH)
+		return xtraH
 
 	def unpack(self, headerBytes):
 		"""
@@ -708,7 +708,7 @@ class CQCNotifyHeader:
 			Produce a printable string for information purposes.
 		"""
 		if not self.is_set:
-			return (" ")
+			return " "
 
 		toPrint = "Qubit ID: " + str(self.qubit_id) + " "
 		toPrint = toPrint + "Outcome: " + str(self.outcome) + " "
@@ -716,4 +716,4 @@ class CQCNotifyHeader:
 		toPrint = toPrint + "Remote Node: " + str(self.remote_node) + " "
 		toPrint = toPrint + "Remote Port: " + str(self.remote_port) + " "
 		toPrint = toPrint + "Datetime: " + str(self.datetime)
-		return (toPrint)
+		return toPrint
