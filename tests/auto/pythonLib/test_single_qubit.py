@@ -176,7 +176,7 @@ def prep_I_qutip():
 def main():
 
 	# Initialize the connection
-	cqc=CQCConnection("Alice")
+	cqc=CQCConnection("Alice",print_info=False)
 
 	iterations=100
 
