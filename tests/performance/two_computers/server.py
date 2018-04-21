@@ -62,7 +62,7 @@ def main():
 				q=Bob.recvEPR()
 
 				# Receive info about corrections
-				data=Bob.recvClassical()
+				data=Bob.recvClassical(timout=3600)
 				Bob.closeClassicalServer()
 				message=list(data)
 				a=message[0]

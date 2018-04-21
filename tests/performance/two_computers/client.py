@@ -59,6 +59,10 @@ def main():
 
 	for n in range(min_tel,max_tel+1):
 
+		print("========")
+		print(n)
+		print("========")
+
 		for _ in range(number):
 
 			# start timer
@@ -96,7 +100,7 @@ def main():
 				q=Alice.createEPR("Bob")
 
 				# Receive info about corrections
-				data=Alice.recvClassical()
+				data=Alice.recvClassical(timout=3600)
 				Alice.closeClassicalServer()
 				message=list(data)
 				a=message[0]
