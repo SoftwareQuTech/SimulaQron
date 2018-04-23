@@ -32,10 +32,10 @@
 #########################
 
 # Sets the maximum number of qubits a node can have
-CONF_MAXQUBITS=120
+CONF_MAXQUBITS=20
 
 # Sets the maximum number of registers a node can have
-CONF_MAXREGS=3
+CONF_MAXREGS=1000
 
 # Sets the time to wait between attempts to setup the connections of the network
 CONF_WAIT_TIME=0.5

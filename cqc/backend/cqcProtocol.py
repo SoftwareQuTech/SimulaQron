@@ -86,11 +86,11 @@ class CQCFactory(Factory):
 		"""
 		self.virtRoot = virtRoot
 
-	def set_virtual_reg(self, qReg):
-		"""
-		Set the default register to use on the SimulaQron backend.
-		"""
-		self.qReg = qReg
+	# def set_virtual_reg(self, qReg):
+	# 	"""
+	# 	Set the default register to use on the SimulaQron backend.
+	# 	"""
+	# 	self.qReg = qReg
 
 	def lookup(self, ip, port):
 		"""
