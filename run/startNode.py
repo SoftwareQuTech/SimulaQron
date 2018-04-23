@@ -34,15 +34,8 @@ from SimulaQron.virtNode.virtual import *
 from SimulaQron.settings import *
 import logging
 
-parser = argparse.ArgumentParser()
-parser.add_argument("hostName", help="name of the host")
-parser.add_argument("-v", "--verbose", action="store_true", help="show debug information")
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=Settings.CONF_LOGGING_LEVEL_FRONTEND)
 
-args = parser.parse_args()
-if args.verbose:
-	logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
-else:
-	logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s')
 
 # args.hostName instead of sys.argv[1] ?
 logging.debug("Starting VIRTUAL NODE %s", sys.argv[1])
@@ -50,4 +43,4 @@ logging.debug("Starting VIRTUAL NODE %s", sys.argv[1])
 virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
 be = backEnd(sys.argv[1], virtualFile)
 
-node = be.start(maxQubits=CONF_MAXQUBITS, maxRegisters=CONF_MAXREGS)
+node = be.start(maxQubits=Settings.CONF_MAXQUBITS, maxRegisters=Settings.CONF_MAXREGS)

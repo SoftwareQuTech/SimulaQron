@@ -30,12 +30,53 @@
 #########################
 # SETTINGS FOR SIMULAQRON
 #########################
+import logging
+from configparser import ConfigParser
 
-# Sets the maximum number of qubits a node can have
-CONF_MAXQUBITS=20
+import os
 
-# Sets the maximum number of registers a node can have
-CONF_MAXREGS=1000
+from cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
+from cqc.backend.cqcMessageHandler import SimulaqronCQCHandler
 
-# Sets the time to wait between attempts to setup the connections of the network
-CONF_WAIT_TIME=0.5
+
+class Settings:
+	_settings_file = os.environ["NETSIM"] + "/config/settings.ini"
+
+	_log_levels = {
+		"info": logging.INFO,
+		"debug": logging.DEBUG,
+		"warning": logging.WARNING,
+		"error": logging.ERROR,
+		"critical": logging.CRITICAL
+	}
+	_config = ConfigParser()
+	_config.read(_settings_file)
+	CONF_MAXQUBITS = int(_config['BACKEND']['MaxQubits'])
+	CONF_MAXREGS = int(_config['BACKEND']['MaxRegisters'])
+	CONF_WAIT_TIME = float(_config['BACKEND']['WaitTime'])
+	_log_level = _config['BACKEND']['LogLevel'].lower()
+	try:
+		CONF_LOGGING_LEVEL_BACKEND = _log_levels[_log_level]
+	except KeyError:
+		CONF_LOGGING_LEVEL_BACKEND = logging.DEBUG
+	_log_level = _config['FRONTEND']['LogLevel'].lower()
+	try:
+		CONF_LOGGING_LEVEL_FRONTEND = _log_levels[_log_level]
+	except KeyError:
+		CONF_LOGGING_LEVEL_FRONTEND = logging.DEBUG
+
+	_backend_handler = _config['BACKEND']['BackendHandler']
+	if _backend_handler.lower() == 'log':
+		CONF_BACKEND_HANDLER = CQCLogMessageHandler
+	else:  # default simulqron  (elif backend_handler.lower() == "simulqron")
+		CONF_BACKEND_HANDLER = SimulaqronCQCHandler
+
+	@classmethod
+	def save_settings(cls):
+		with open(cls._settings_file, 'w') as file:
+			cls._config.write(file)
+
+	@classmethod
+	def set_setting(cls, section, key, value):
+		cls._config[section][key] = value
+		cls.save_settings()

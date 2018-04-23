@@ -27,24 +27,8 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-import sys, os, time, logging
-
-from twisted.spread import pb
-from twisted.internet import reactor
-from twisted.internet.protocol import Factory, Protocol
-from twisted.internet.defer import inlineCallbacks, returnValue, DeferredList, Deferred
-
-from SimulaQron.virtNode.basics import *
-from SimulaQron.virtNode.quantum import *
-from SimulaQron.general.hostConfig import *
-from SimulaQron.virtNode.crudeSimulator import *
-
-from SimulaQron.local.setup import *
-
-from SimulaQron.cqc.backend.cqcHeader import *
-from SimulaQron.cqc.backend.entInfoHeader import *
 from SimulaQron.cqc.backend.cqcMessageHandler import *
-from SimulaQron.cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
+from settings import Settings
 
 
 #####################################################################################################
@@ -57,7 +41,7 @@ from SimulaQron.cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
 
 class CQCFactory(Factory):
 
-	def __init__(self, host, name, cqc_net, backend=SimulaqronCQCHandler):
+	def __init__(self, host, name, cqc_net):
 		"""
 		Initialize CQC Factory.
 
@@ -69,7 +53,6 @@ class CQCFactory(Factory):
 		self.cqcNet = cqc_net
 		self.virtRoot = None
 		self.qReg = None
-		self.backend = backend
 
 		# Dictionary that keeps qubit dictorionaries for each application
 		self.qubitList = {}
@@ -131,9 +114,9 @@ class CQCProtocol(Protocol):
 		# deliberately NOT check for that since this is the task of higher layers or an OS
 		self.app_id = 0
 
-		# Define which entity you use to handle the messages
-		# Could be using the SimulaQron handler, but also just a logger
-		self.messageHandler = factory.backend(factory)
+		# Define the backend to use. Is a setting in settings.ini
+		backend = Settings.CONF_BACKEND_HANDLER
+		self.messageHandler = backend(factory)
 
 		# Flag to determine whether we already received _all_ of the CQC header
 		self.gotCQCHeader = False

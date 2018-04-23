@@ -65,22 +65,22 @@ for i in range(len(conf_files)):
         for j in range(nrNodes):
             f.write("{}, localhost, {}\n".format(nodes[j],start_nr[i]+j))
 
-# Write to the virtual nodes run file
-with open(run_files[0],'w') as f:
-	f.write("\n")
-	f.write("# start the nodes {}\n".format(nodes))
-	f.write("\n")
-	f.write("cd \"$NETSIM\"/run\n")
-	f.write("\n")
-	for j in range(nrNodes):
-		f.write("python startNode.py {} &\n".format(nodes[j]))
-
-# Write to the CQC nodes run file
-with open(run_files[1],'w') as f:
-	f.write("\n")
-	f.write("# start the nodes {}\n".format(nodes))
-	f.write("\n")
-	f.write("cd \"$NETSIM\"/run\n")
-	f.write("\n")
-	for j in range(nrNodes):
-		f.write("python startCQC.py {} &\n".format(nodes[j]))
+# # Write to the virtual nodes run file
+# with open(run_files[0],'w') as f:
+# 	f.write("\n")
+# 	f.write("# start the nodes {}\n".format(nodes))
+# 	f.write("\n")
+# 	f.write("cd \"$NETSIM\"/run\n")
+# 	f.write("\n")
+# 	for j in range(nrNodes):
+# 		f.write("python startNode.py {} &\n".format(nodes[j]))
+#
+# # Write to the CQC nodes run file
+# with open(run_files[1],'w') as f:
+# 	f.write("\n")
+# 	f.write("# start the nodes {}\n".format(nodes))
+# 	f.write("\n")
+# 	f.write("cd \"$NETSIM\"/run\n")
+# 	f.write("\n")
+# 	for j in range(nrNodes):
+# 		f.write("python startCQC.py {} &\n".format(nodes[j]))
