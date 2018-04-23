@@ -954,7 +954,8 @@ class CQCProtocol(Protocol):
 
 			try:
 
-				virt = yield self.factory.virtRoot.callRemote("new_qubit_inreg",self.factory.qReg)
+				# virt = yield self.factory.virtRoot.callRemote("new_qubit_inreg",self.factory.qReg)
+				virt = yield self.factory.virtRoot.callRemote("new_qubit")
 
 			except Exception as e:
 				print("cmd_new error: {}".format(e))
