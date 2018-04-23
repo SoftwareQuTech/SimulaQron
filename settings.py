@@ -40,36 +40,77 @@ from cqc.backend.cqcMessageHandler import SimulaqronCQCHandler
 
 
 class Settings:
+
 	_settings_file = os.environ["NETSIM"] + "/config/settings.ini"
-
-	_log_levels = {
-		"info": logging.INFO,
-		"debug": logging.DEBUG,
-		"warning": logging.WARNING,
-		"error": logging.ERROR,
-		"critical": logging.CRITICAL
-	}
 	_config = ConfigParser()
-	_config.read(_settings_file)
-	CONF_MAXQUBITS = int(_config['BACKEND']['MaxQubits'])
-	CONF_MAXREGS = int(_config['BACKEND']['MaxRegisters'])
-	CONF_WAIT_TIME = float(_config['BACKEND']['WaitTime'])
-	_log_level = _config['BACKEND']['LogLevel'].lower()
-	try:
-		CONF_LOGGING_LEVEL_BACKEND = _log_levels[_log_level]
-	except KeyError:
-		CONF_LOGGING_LEVEL_BACKEND = logging.DEBUG
-	_log_level = _config['FRONTEND']['LogLevel'].lower()
-	try:
-		CONF_LOGGING_LEVEL_FRONTEND = _log_levels[_log_level]
-	except KeyError:
-		CONF_LOGGING_LEVEL_FRONTEND = logging.DEBUG
 
-	_backend_handler = _config['BACKEND']['BackendHandler']
-	if _backend_handler.lower() == 'log':
-		CONF_BACKEND_HANDLER = CQCLogMessageHandler
-	else:  # default simulqron  (elif backend_handler.lower() == "simulqron")
-		CONF_BACKEND_HANDLER = SimulaqronCQCHandler
+	@classmethod
+	def init_settings(cls):
+
+		_log_levels = {
+			"info": logging.INFO,
+			"debug": logging.DEBUG,
+			"warning": logging.WARNING,
+			"error": logging.ERROR,
+			"critical": logging.CRITICAL
+		}
+		_config = cls._config
+		_config.read(cls._settings_file)
+
+		if "BACKEND" not in _config:
+			_config['BACKEND'] = {}
+		if "FRONTEND" not in _config:
+			_config['FRONTEND'] = {}
+
+		try:
+			cls.CONF_MAXQUBITS = int(_config['BACKEND']['MaxQubits'])
+		except KeyError:
+			_config['BACKEND']['MaxQubits'] = str(20)
+			cls.CONF_MAXQUBITS = int(_config['BACKEND']['MaxQubits'])
+		try:
+			cls.CONF_MAXREGS = int(_config['BACKEND']['MaxRegisters'])
+		except KeyError:
+			_config['BACKEND']['MaxRegisters'] = str(1000)
+			cls.CONF_MAXREGS = int(_config['BACKEND']['MaxRegisters'])
+
+		try:
+			cls.CONF_WAIT_TIME = float(_config['BACKEND']['WaitTime'])
+		except KeyError:
+			_config['BACKEND']['WaitTime'] = "0.5"
+			cls.CONF_WAIT_TIME = float(_config['BACKEND']['WaitTime'])
+
+		try:
+			_log_level = _config['BACKEND']['LogLevel'].lower()
+		except KeyError:
+			_config['BACKEND']['LogLevel'] = "debug"
+			_log_level = _config['BACKEND']['LogLevel'].lower()
+		try:
+			cls.CONF_LOGGING_LEVEL_BACKEND = _log_levels[_log_level]
+		except KeyError:
+			cls.CONF_LOGGING_LEVEL_BACKEND = logging.DEBUG
+
+		try:
+			_log_level = _config['FRONTEND']['LogLevel'].lower()
+		except KeyError:
+			_config['FRONTEND']['LogLevel'] = "debug"
+			_log_level = _config['FRONTEND']['LogLevel'].lower()
+
+		try:
+			cls.CONF_LOGGING_LEVEL_FRONTEND = _log_levels[_log_level]
+		except KeyError:
+			cls.CONF_LOGGING_LEVEL_FRONTEND = logging.DEBUG
+		try:
+			_backend_handler = _config['BACKEND']['BackendHandler']
+		except KeyError:
+			_config['BACKEND']['BackendHandler'] = "simulaqron"
+			_backend_handler = _config['BACKEND']['BackendHandler']
+
+		if _backend_handler.lower() == 'log':
+			cls.CONF_BACKEND_HANDLER = CQCLogMessageHandler
+		else:  # default simulqron  (elif backend_handler.lower() == "simulqron")
+			cls.CONF_BACKEND_HANDLER = SimulaqronCQCHandler
+
+		cls.save_settings()
 
 	@classmethod
 	def save_settings(cls):
@@ -80,3 +121,6 @@ class Settings:
 	def set_setting(cls, section, key, value):
 		cls._config[section][key] = value
 		cls.save_settings()
+
+
+Settings.init_settings()
