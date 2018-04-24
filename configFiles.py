@@ -37,33 +37,43 @@ import sys
 import os
 
 # Get inputs from terminal
-nodes=sys.argv[1:]
-nrNodes=len(nodes)
+nodes = sys.argv[1:]
+nrNodes = len(nodes)
 
 # Get path from environment variable
-netsim_path=os.environ['NETSIM']+'/'
+netsim_path = os.environ['NETSIM'] + '/'
 
 # Get path to configuration files
-conf_files=[netsim_path+"config/virtualNodes.cfg",netsim_path+"config/cqcNodes.cfg",netsim_path+"config/appNodes.cfg"]
+conf_files = [netsim_path + "config/virtualNodes.cfg",
+				netsim_path + "config/cqcNodes.cfg",
+				netsim_path + "config/appNodes.cfg"]
 
 # Get path to run files
-run_files=[netsim_path+"run/startVNodes.sh",netsim_path+"run/startCQCNodes.sh"]
+run_files = [netsim_path + "run/startVNodes.sh", netsim_path + "run/startCQCNodes.sh"]
 
+# File for just a simple list of the nodes
+node_file = netsim_path + "config/Nodes.cfg"
 # What port numbers to start with
-start_nr=[8801,8801+nrNodes,8801+2*nrNodes]
+start_nr = [8801, 8801 + nrNodes, 8801 + 2 * nrNodes]
 
 # Start of the configuration files
-conf_top=["# Network configuration file","#","# For each host its informal name, as well as its location in the network must","# be listed.","#","# [name], [hostname], [port number]","#"]
+conf_top = ["# Network configuration file", "#",
+			"# For each host its informal name, as well as its location in the network must", "# be listed.", "#",
+			"# [name], [hostname], [port number]", "#"]
 
 # run_top=["","# start the nodes {}".format(nodes),""]
 
 # Write to the configuration files
 for i in range(len(conf_files)):
-    with open(conf_files[i],'w') as f:
-        for line in conf_top:
-            f.write(line+"\n")
-        for j in range(nrNodes):
-            f.write("{}, localhost, {}\n".format(nodes[j],start_nr[i]+j))
+	with open(conf_files[i], 'w') as f:
+		for line in conf_top:
+			f.write(line + "\n")
+		for j in range(nrNodes):
+			f.write("{}, localhost, {}\n".format(nodes[j], start_nr[i] + j))
+
+with open(node_file, 'w') as f:
+	for j in range(nrNodes):
+		f.write("{}\n".format(nodes[j]))
 
 # # Write to the virtual nodes run file
 # with open(run_files[0],'w') as f:
