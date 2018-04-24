@@ -32,6 +32,8 @@ from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.pythonLib.cqc import *
 
+import time
+
 
 #####################################################################################################
 #

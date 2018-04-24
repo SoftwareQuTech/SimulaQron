@@ -794,7 +794,6 @@ class virtualNode(pb.Root):
 			if delRegister.activeQubits == 0:
 				self.remote_delete_register(delRegister)
 			else:
-
 				# When removing a qubit, we need to update the positions of the qubits in the underlying physical register
 				# in all relevant qubit objects.
 				for q in self.simQubits:
@@ -867,11 +866,11 @@ class virtualNode(pb.Root):
 		# Allow reg 1 to absorb reg 2
 		reg1.maxQubits = reg1.maxQubits + reg2.activeQubits
 
+		# For relabelling qubit numbers get the offset
+		offset = reg1.activeQubits
+
 		# Add reg2 to reg1
 		reg1.absorb(reg2)
-
-		# For relabelling qubit numbers get the offset
-		offset = reg1.activeQubits - 1
 
 		# Update the simulated qubit numbering and register
 		for q in self.simQubits:
