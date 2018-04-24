@@ -40,7 +40,7 @@ import time
 def main():
 
 	# Initialize the connection
-	cqc=CQCConnection("Alice")
+	cqc=CQCConnection("Alice", print_info=False)
 
 	# Test Measure inplace
 	print("Testing measure inplace:")
