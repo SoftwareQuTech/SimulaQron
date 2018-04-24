@@ -40,9 +40,16 @@ from cqc.backend.cqcMessageHandler import SimulaqronCQCHandler
 
 
 class Settings:
-
 	_settings_file = os.environ["NETSIM"] + "/config/settings.ini"
 	_config = ConfigParser()
+
+	# default settings for if file is not ready yet
+	CONF_MAXQUBITS = 20
+	CONF_MAXREGS = 1000
+	CONF_WAIT_TIME = 0.5
+	CONF_LOGGING_LEVEL_BACKEND = logging.DEBUG
+	CONF_LOGGING_LEVEL_FRONTEND = logging.DEBUG
+	CONF_BACKEND_HANDLER = SimulaqronCQCHandler
 
 	@classmethod
 	def init_settings(cls):
@@ -57,60 +64,74 @@ class Settings:
 		_config = cls._config
 		_config.read(cls._settings_file)
 
+		config_changed = False
+
 		if "BACKEND" not in _config:
 			_config['BACKEND'] = {}
+			backend = _config['BACKEND']
+
+			if "MaxQubits" in backend:
+				cls.CONF_MAXQUBITS = int(backend['MaxQubits'])
+			else:
+				_config['BACKEND']['MaxQubits'] = str(cls.CONF_MAXQUBITS)
+				config_changed = True
+
+			if "MaxRegisters" in backend:
+				cls.CONF_MAXREGS = int(backend['MaxRegisters'])
+			else:
+				_config['BACKEND']['MaxRegisters'] = str(cls.CONF_MAXREGS)
+				config_changed = True
+
+			if "WaitTime" in backend:
+				cls.CONF_WAIT_TIME = float(backend['WaitTime'])
+			else:
+				backend['WaitTime'] = str(cls.CONF_WAIT_TIME)
+				config_changed = True
+
+			if "LogLevel" in backend:
+				_log_level = backend['LogLevel'].lower()
+				if _log_level in _log_levels:
+					cls.CONF_LOGGING_LEVEL_BACKEND = _log_levels[_log_level]
+				else:
+					backend['LogLevel'] = list(_log_levels.keys())[
+						list(_log_levels.values()).index(cls.CONF_LOGGING_LEVEL_BACKEND)]
+
+			else:
+				backend['LogLevel'] = list(_log_levels.keys())[
+					list(_log_levels.values()).index(cls.CONF_LOGGING_LEVEL_BACKEND)]
+				config_changed = True
+
+			if "BackendHandler" in backend:
+				_backend_handler = backend['BackendHandler']
+			else:
+				backend['BackendHandler'] = "simulaqron"
+				_backend_handler = backend['BackendHandler']
+				config_changed = True
+
+			if _backend_handler.lower() == 'log':
+				cls.CONF_BACKEND_HANDLER = CQCLogMessageHandler
+			else:  # default simulqron  (elif backend_handler.lower() == "simulqron")
+				cls.CONF_BACKEND_HANDLER = SimulaqronCQCHandler
+
 		if "FRONTEND" not in _config:
 			_config['FRONTEND'] = {}
+			frontend = _config['FRONTEND']
 
-		try:
-			cls.CONF_MAXQUBITS = int(_config['BACKEND']['MaxQubits'])
-		except KeyError:
-			_config['BACKEND']['MaxQubits'] = str(20)
-			cls.CONF_MAXQUBITS = int(_config['BACKEND']['MaxQubits'])
-		try:
-			cls.CONF_MAXREGS = int(_config['BACKEND']['MaxRegisters'])
-		except KeyError:
-			_config['BACKEND']['MaxRegisters'] = str(1000)
-			cls.CONF_MAXREGS = int(_config['BACKEND']['MaxRegisters'])
+			if "LogLevel" in frontend:
+				_log_level = frontend['LogLevel'].lower()
+				if _log_level in _log_levels:
+					cls.CONF_LOGGING_LEVEL_FRONTEND = _log_levels[_log_level]
+				else:
+					frontend['LogLevel'] = list(_log_levels.keys())[
+						list(_log_levels.values()).index(cls.CONF_LOGGING_LEVEL_FRONTEND)]
 
-		try:
-			cls.CONF_WAIT_TIME = float(_config['BACKEND']['WaitTime'])
-		except KeyError:
-			_config['BACKEND']['WaitTime'] = "0.5"
-			cls.CONF_WAIT_TIME = float(_config['BACKEND']['WaitTime'])
+			else:
+				frontend['LogLevel'] = list(_log_levels.keys())[
+					list(_log_levels.values()).index(cls.CONF_LOGGING_LEVEL_FRONTEND)]
+				config_changed = True
 
-		try:
-			_log_level = _config['BACKEND']['LogLevel'].lower()
-		except KeyError:
-			_config['BACKEND']['LogLevel'] = "debug"
-			_log_level = _config['BACKEND']['LogLevel'].lower()
-		try:
-			cls.CONF_LOGGING_LEVEL_BACKEND = _log_levels[_log_level]
-		except KeyError:
-			cls.CONF_LOGGING_LEVEL_BACKEND = logging.DEBUG
-
-		try:
-			_log_level = _config['FRONTEND']['LogLevel'].lower()
-		except KeyError:
-			_config['FRONTEND']['LogLevel'] = "debug"
-			_log_level = _config['FRONTEND']['LogLevel'].lower()
-
-		try:
-			cls.CONF_LOGGING_LEVEL_FRONTEND = _log_levels[_log_level]
-		except KeyError:
-			cls.CONF_LOGGING_LEVEL_FRONTEND = logging.DEBUG
-		try:
-			_backend_handler = _config['BACKEND']['BackendHandler']
-		except KeyError:
-			_config['BACKEND']['BackendHandler'] = "simulaqron"
-			_backend_handler = _config['BACKEND']['BackendHandler']
-
-		if _backend_handler.lower() == 'log':
-			cls.CONF_BACKEND_HANDLER = CQCLogMessageHandler
-		else:  # default simulqron  (elif backend_handler.lower() == "simulqron")
-			cls.CONF_BACKEND_HANDLER = SimulaqronCQCHandler
-
-		cls.save_settings()
+		if config_changed:
+			cls.save_settings()
 
 	@classmethod
 	def save_settings(cls):
