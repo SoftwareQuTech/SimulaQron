@@ -1,6 +1,13 @@
-from SimulaQron.cqc.backend.cqcProtocol import *
-from qutip import *
+import logging
+
+import sys
+from cqc.backend.cqcConfig import CQC_CONF_LINK_WAIT_TIME
+from cqc.backend.cqcProtocol import CQCFactory
+from general.hostConfig import networkConfig
+from settings import Settings
+from twisted.internet import reactor
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
+import os
 
 
 ##################################################################################################
@@ -10,6 +17,8 @@ from twisted.internet.error import ConnectionRefusedError, CannotListenError
 # Called if all servers are started and all connections are made. Retrieves the relevant
 # root objects to talk to such remote connections
 #
+from twisted.spread import pb
+
 
 def init_register(virtRoot, myName, node):
 	logging.debug("LOCAL %s: All connections set up.", myName)
