@@ -26,25 +26,13 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import sys, os, time, logging
-
-from twisted.spread import pb
-from twisted.internet import reactor
-from twisted.internet.protocol import Factory, Protocol
-from twisted.internet.defer import inlineCallbacks
-
-from SimulaQron.virtNode.basics import *
-from SimulaQron.virtNode.quantum import *
-from SimulaQron.general.hostConfig import *
-from SimulaQron.virtNode.crudeSimulator import *
-
-from SimulaQron.local.setup import *
+from abc import ABC, abstractmethod
 
 from SimulaQron.cqc.backend.cqcConfig import *
-
-from SimulaQron.cqc.backend.entInfoHeader import *
 from SimulaQron.cqc.backend.cqcHeader import *
-from abc import ABC, abstractmethod
+from SimulaQron.cqc.backend.entInfoHeader import *
+from SimulaQron.local.setup import *
+from SimulaQron.virtNode.crudeSimulator import *
 
 """
 Abstract class. Classes that inherit this class define how to handle incoming cqc messages. 

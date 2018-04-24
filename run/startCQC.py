@@ -1,21 +1,6 @@
-import argparse
-import sys
-import os
-
-from settings import Settings
-from twisted.spread import pb
-from twisted.internet import reactor
-from twisted.internet.defer import inlineCallbacks, returnValue, DeferredList, Deferred
-from twisted.internet.error import ConnectionRefusedError, CannotListenError
-
-from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcProtocol import *
-from SimulaQron.cqc.backend.cqcConfig import *
-
 from qutip import *
-
-import logging
-import time
+from twisted.internet.error import ConnectionRefusedError, CannotListenError
 
 
 ##################################################################################################
