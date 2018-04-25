@@ -34,138 +34,161 @@ import qutip
 import numpy as np
 import sys
 
+
 def calc_exp_values(q):
 	"""
 	Calculates the expected value for measurements in the X,Y and Z basis and returns these in a tuple.
 	q should be a qutip object
 	"""
-	#eigenvectors
-	z0=qutip.basis(2,0)
-	z1=qutip.basis(2,1)
-	x1=1/np.sqrt(2)*(z0-z1)
-	y1=1/np.sqrt(2)*(z0-1j*z1)
+	# eigenvectors
+	z0 = qutip.basis(2, 0)
+	z1 = qutip.basis(2, 1)
+	x1 = 1 / np.sqrt(2) * (z0 - z1)
+	y1 = 1 / np.sqrt(2) * (z0 - 1j * z1)
 
-	#projectors
-	P_X1=x1*x1.dag()
-	P_Y1=y1*y1.dag()
-	P_Z1=z1*z1.dag()
+	# projectors
+	P_X1 = x1 * x1.dag()
+	P_Y1 = y1 * y1.dag()
+	P_Z1 = z1 * z1.dag()
 
-	#probabilities
-	p_x=(q.dag()*P_X1*q).tr()
-	p_y=(q.dag()*P_Y1*q).tr()
-	p_z=(q.dag()*P_Z1*q).tr()
+	# probabilities
+	p_x = (q.dag() * P_X1 * q).tr()
+	p_y = (q.dag() * P_Y1 * q).tr()
+	p_z = (q.dag() * P_Z1 * q).tr()
 
-	return (p_x,p_y,p_z)
+	return (p_x, p_y, p_z)
+
 
 def prep_I_CQC(cqc):
-	q=qubit(cqc,print_info=False)
+	q = qubit(cqc, print_info=False)
 	q.I(print_info=False)
 	return q
 
+
 def prep_X_CQC(cqc):
-	q=qubit(cqc,print_info=False)
+	q = qubit(cqc, print_info=False)
 	q.X(print_info=False)
 	return q
 
+
 def prep_X_qutip():
-	q=qutip.basis(2)
-	X=qutip.sigmax()
-	return X*q
+	q = qutip.basis(2)
+	X = qutip.sigmax()
+	return X * q
+
 
 def prep_Y_CQC(cqc):
-	q=qubit(cqc,print_info=False)
+	q = qubit(cqc, print_info=False)
 	q.Y(print_info=False)
 	return q
 
+
 def prep_Y_qutip():
-	q=qutip.basis(2)
-	Y=qutip.sigmay()
-	return Y*q
+	q = qutip.basis(2)
+	Y = qutip.sigmay()
+	return Y * q
+
 
 def prep_Z_CQC(cqc):
-	q=qubit(cqc,print_info=False)
+	q = qubit(cqc, print_info=False)
 	q.Z(print_info=False)
 	return q
 
+
 def prep_Z_qutip():
-	q=qutip.basis(2)
-	Z=qutip.sigmaz()
-	return Z*q
+	q = qutip.basis(2)
+	Z = qutip.sigmaz()
+	return Z * q
+
 
 def prep_H_CQC(cqc):
-	q=qubit(cqc,print_info=False)
+	q = qubit(cqc, print_info=False)
 	q.H(print_info=False)
 	return q
 
+
 def prep_H_qutip():
-	q=qutip.basis(2)
-	X=1/np.sqrt(2)*(qutip.sigmax()+qutip.sigmaz())
-	return X*q
+	q = qutip.basis(2)
+	X = 1 / np.sqrt(2) * (qutip.sigmax() + qutip.sigmaz())
+	return X * q
+
 
 def prep_T_CQC(cqc):
-	q=qubit(cqc,print_info=False)
+	q = qubit(cqc, print_info=False)
 	q.T(print_info=False)
 	return q
 
+
 def prep_T_qutip():
-	q=qutip.basis(2)
-	T=qutip.Qobj([[1,0],[0,np.exp(1j*np.pi/4)]],dims=[[2],[2]])
-	return T*q
+	q = qutip.basis(2)
+	T = qutip.Qobj([[1, 0], [0, np.exp(1j * np.pi / 4)]], dims=[[2], [2]])
+	return T * q
+
 
 def prep_K_CQC(cqc):
-	q=qubit(cqc,print_info=False)
+	q = qubit(cqc, print_info=False)
 	q.K(print_info=False)
 	return q
 
+
 def prep_K_qutip():
-	q=qutip.basis(2)
-	K=1/np.sqrt(2)*(qutip.sigmay()+qutip.sigmaz())
-	return K*q
+	q = qutip.basis(2)
+	K = 1 / np.sqrt(2) * (qutip.sigmay() + qutip.sigmaz())
+	return K * q
 
-def prep_rotx1_CQC(cqc): #pi/8
-	q=qubit(cqc,print_info=False)
-	q.rot_X(16,print_info=False)
+
+def prep_rotx1_CQC(cqc):  # pi/8
+	q = qubit(cqc, print_info=False)
+	q.rot_X(16, print_info=False)
 	return q
 
-def prep_rotx2_CQC(cqc): #5*pi/8
-	q=qubit(cqc,print_info=False)
-	q.rot_X(80,print_info=False)
+
+def prep_rotx2_CQC(cqc):  # 5*pi/8
+	q = qubit(cqc, print_info=False)
+	q.rot_X(80, print_info=False)
 	return q
 
-def prep_roty1_CQC(cqc): #pi/8
-	q=qubit(cqc,print_info=False)
-	q.rot_Y(16,print_info=False)
+
+def prep_roty1_CQC(cqc):  # pi/8
+	q = qubit(cqc, print_info=False)
+	q.rot_Y(16, print_info=False)
 	return q
 
-def prep_roty2_CQC(cqc): #5*pi/8
-	q=qubit(cqc,print_info=False)
-	q.rot_Y(80,print_info=False)
+
+def prep_roty2_CQC(cqc):  # 5*pi/8
+	q = qubit(cqc, print_info=False)
+	q.rot_Y(80, print_info=False)
 	return q
 
-def prep_rotz1_CQC(cqc): #pi/8
-	q=qubit(cqc,print_info=False)
-	q.rot_Z(16,print_info=False)
+
+def prep_rotz1_CQC(cqc):  # pi/8
+	q = qubit(cqc, print_info=False)
+	q.rot_Z(16, print_info=False)
 	return q
 
-def prep_rotz2_CQC(cqc): #5*pi/8
-	q=qubit(cqc,print_info=False)
-	q.rot_Z(80,print_info=False)
+
+def prep_rotz2_CQC(cqc):  # 5*pi/8
+	q = qubit(cqc, print_info=False)
+	q.rot_Z(80, print_info=False)
 	return q
 
-def prep_rot_qutip(n,a):
-	q=qutip.basis(2)
-	nNorm=np.linalg.norm(n)
-	R=(-1j*a/(2*nNorm)*(n[0]*qutip.sigmax()+n[1]*qutip.sigmay()+n[2]*qutip.sigmaz())).expm()
-	return R*q
+
+def prep_rot_qutip(n, a):
+	q = qutip.basis(2)
+	nNorm = np.linalg.norm(n)
+	R = (-1j * a / (2 * nNorm) * (n[0] * qutip.sigmax() + n[1] * qutip.sigmay() + n[2] * qutip.sigmaz())).expm()
+	return R * q
+
 
 def prep_reset_CQC(cqc):
-	q=qubit(cqc,print_info=False)
+	q = qubit(cqc, print_info=False)
 	q.H(print_info=False)
 	q.reset(print_info=False)
 	return q
 
+
 def prep_I_qutip():
-	q=qutip.basis(2)
+	q = qutip.basis(2)
 	return q
 
 
@@ -174,16 +197,15 @@ def prep_I_qutip():
 # main
 #
 def main():
-
 	# Initialize the connection
-	cqc=CQCConnection("Alice",print_info=False)
+	cqc=CQCConnection("Alice", print_info=False)
 
-	iterations=100
+	iterations = 100
 
 	# Test I
 	sys.stdout.write("Testing I gate:")
-	exp_values=calc_exp_values(prep_I_qutip())
-	ans=cqc.test_preparation(prep_I_CQC,exp_values,iterations=iterations)
+	exp_values = calc_exp_values(prep_I_qutip())
+	ans = cqc.test_preparation(prep_I_CQC, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -191,8 +213,8 @@ def main():
 		print("FAIL")
 	# Test X
 	sys.stdout.write("Testing X gate:")
-	exp_values=calc_exp_values(prep_X_qutip())
-	ans=cqc.test_preparation(prep_X_CQC,exp_values,iterations=iterations)
+	exp_values = calc_exp_values(prep_X_qutip())
+	ans = cqc.test_preparation(prep_X_CQC, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -201,8 +223,8 @@ def main():
 
 	# Test Y
 	sys.stdout.write("Testing Y gate:")
-	exp_values=calc_exp_values(prep_Y_qutip())
-	ans=cqc.test_preparation(prep_Y_CQC,exp_values,iterations=iterations)
+	exp_values = calc_exp_values(prep_Y_qutip())
+	ans = cqc.test_preparation(prep_Y_CQC, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -211,8 +233,8 @@ def main():
 
 	# Test Z
 	sys.stdout.write("Testing Z gate:")
-	exp_values=calc_exp_values(prep_Z_qutip())
-	ans=cqc.test_preparation(prep_Z_CQC,exp_values,iterations=iterations)
+	exp_values = calc_exp_values(prep_Z_qutip())
+	ans = cqc.test_preparation(prep_Z_CQC, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -221,8 +243,8 @@ def main():
 
 	# Test H
 	sys.stdout.write("Testing H gate:")
-	exp_values=calc_exp_values(prep_H_qutip())
-	ans=cqc.test_preparation(prep_H_CQC,exp_values,iterations=iterations)
+	exp_values = calc_exp_values(prep_H_qutip())
+	ans = cqc.test_preparation(prep_H_CQC, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -231,8 +253,8 @@ def main():
 
 	# Test T
 	sys.stdout.write("Testing T gate:")
-	exp_values=calc_exp_values(prep_T_qutip())
-	ans=cqc.test_preparation(prep_T_CQC,exp_values,iterations=iterations)
+	exp_values = calc_exp_values(prep_T_qutip())
+	ans = cqc.test_preparation(prep_T_CQC, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -241,8 +263,8 @@ def main():
 
 	# Test K
 	sys.stdout.write("Testing K gate:")
-	exp_values=calc_exp_values(prep_K_qutip())
-	ans=cqc.test_preparation(prep_K_CQC,exp_values,iterations=iterations)
+	exp_values = calc_exp_values(prep_K_qutip())
+	ans = cqc.test_preparation(prep_K_CQC, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -251,8 +273,8 @@ def main():
 
 	# Test ROT_X pi/8
 	sys.stdout.write("Testing rotation (X,pi/8) gate:")
-	exp_values=calc_exp_values(prep_rot_qutip([1,0,0],np.pi/8))
-	ans=cqc.test_preparation(prep_rotx1_CQC,exp_values,iterations=iterations)
+	exp_values = calc_exp_values(prep_rot_qutip([1, 0, 0], np.pi / 8))
+	ans = cqc.test_preparation(prep_rotx1_CQC, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -261,8 +283,8 @@ def main():
 
 	# Test ROT_X 5*pi/8
 	sys.stdout.write("Testing rotation (X,5*pi/8) gate:")
-	exp_values=calc_exp_values(prep_rot_qutip([1,0,0],5*np.pi/8))
-	ans=cqc.test_preparation(prep_rotx2_CQC,exp_values,iterations=iterations)
+	exp_values = calc_exp_values(prep_rot_qutip([1, 0, 0], 5 * np.pi / 8))
+	ans = cqc.test_preparation(prep_rotx2_CQC, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -271,8 +293,8 @@ def main():
 
 	# Test ROT_Y pi/8
 	sys.stdout.write("Testing rotation (Y,pi/8) gate:")
-	exp_values=calc_exp_values(prep_rot_qutip([0,1,0],np.pi/8))
-	ans=cqc.test_preparation(prep_roty1_CQC,exp_values,iterations=iterations)
+	exp_values = calc_exp_values(prep_rot_qutip([0, 1, 0], np.pi / 8))
+	ans = cqc.test_preparation(prep_roty1_CQC, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -281,8 +303,8 @@ def main():
 
 	# Test ROT_Y 5*pi/8
 	sys.stdout.write("Testing rotation (Y,5*pi/8) gate:")
-	exp_values=calc_exp_values(prep_rot_qutip([0,1,0],5*np.pi/8))
-	ans=cqc.test_preparation(prep_roty2_CQC,exp_values,iterations=iterations)
+	exp_values = calc_exp_values(prep_rot_qutip([0, 1, 0], 5 * np.pi / 8))
+	ans = cqc.test_preparation(prep_roty2_CQC, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -291,8 +313,8 @@ def main():
 
 	# Test ROT_Z pi/8
 	sys.stdout.write("Testing rotation (Z,pi/8) gate:")
-	exp_values=calc_exp_values(prep_rot_qutip([0,0,1],np.pi/8))
-	ans=cqc.test_preparation(prep_rotz1_CQC,exp_values,iterations=iterations)
+	exp_values = calc_exp_values(prep_rot_qutip([0, 0, 1], np.pi / 8))
+	ans = cqc.test_preparation(prep_rotz1_CQC, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -301,8 +323,8 @@ def main():
 
 	# Test ROT_Z 5*pi/8
 	sys.stdout.write("Testing rotation (Z,5*pi/8) gate:")
-	exp_values=calc_exp_values(prep_rot_qutip([0,0,1],5*np.pi/8))
-	ans=cqc.test_preparation(prep_rotz2_CQC,exp_values,iterations=iterations)
+	exp_values = calc_exp_values(prep_rot_qutip([0, 0, 1], 5 * np.pi / 8))
+	ans = cqc.test_preparation(prep_rotz2_CQC, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -311,8 +333,8 @@ def main():
 
 	# Test RESET
 	sys.stdout.write("Testing RESET:")
-	exp_values=calc_exp_values(prep_I_qutip())
-	ans=cqc.test_preparation(prep_reset_CQC,exp_values,iterations=iterations)
+	exp_values = calc_exp_values(prep_I_qutip())
+	ans = cqc.test_preparation(prep_reset_CQC, exp_values, iterations=iterations)
 	sys.stdout.write('\r')
 	if ans:
 		print("OK")
@@ -325,4 +347,3 @@ def main():
 
 ##################################################################################################
 main()
-
