@@ -1,11 +1,10 @@
-
-
-# start the node Alice, Bob and Charlie 
+#!/usr/bin/env bash
+# start the nodes specified by the arguments
+# the arguments should be a list of the informal names of hosts
 
 cd "$NETSIM"/run
 
-python startNode.py Alice &
-python startNode.py Bob &
-python startNode.py Charlie &
-python startNode.py David &
-python startNode.py Eve &
+for name in "$@"
+do
+    python startNode.py "$name" &
+done
