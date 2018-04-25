@@ -68,67 +68,67 @@ class Settings:
 
 		if "BACKEND" not in _config:
 			_config['BACKEND'] = {}
-			backend = _config['BACKEND']
+		backend = _config['BACKEND']
 
-			if "MaxQubits" in backend:
-				cls.CONF_MAXQUBITS = int(backend['MaxQubits'])
-			else:
-				_config['BACKEND']['MaxQubits'] = str(cls.CONF_MAXQUBITS)
-				config_changed = True
+		if "MaxQubits" in backend:
+			cls.CONF_MAXQUBITS = int(backend['MaxQubits'])
+		else:
+			_config['BACKEND']['MaxQubits'] = str(cls.CONF_MAXQUBITS)
+			config_changed = True
 
-			if "MaxRegisters" in backend:
-				cls.CONF_MAXREGS = int(backend['MaxRegisters'])
-			else:
-				_config['BACKEND']['MaxRegisters'] = str(cls.CONF_MAXREGS)
-				config_changed = True
+		if "MaxRegisters" in backend:
+			cls.CONF_MAXREGS = int(backend['MaxRegisters'])
+		else:
+			_config['BACKEND']['MaxRegisters'] = str(cls.CONF_MAXREGS)
+			config_changed = True
 
-			if "WaitTime" in backend:
-				cls.CONF_WAIT_TIME = float(backend['WaitTime'])
-			else:
-				backend['WaitTime'] = str(cls.CONF_WAIT_TIME)
-				config_changed = True
+		if "WaitTime" in backend:
+			cls.CONF_WAIT_TIME = float(backend['WaitTime'])
+		else:
+			backend['WaitTime'] = str(cls.CONF_WAIT_TIME)
+			config_changed = True
 
-			if "LogLevel" in backend:
-				_log_level = backend['LogLevel'].lower()
-				if _log_level in _log_levels:
-					cls.CONF_LOGGING_LEVEL_BACKEND = _log_levels[_log_level]
-				else:
-					backend['LogLevel'] = list(_log_levels.keys())[
-						list(_log_levels.values()).index(cls.CONF_LOGGING_LEVEL_BACKEND)]
-
+		if "LogLevel" in backend:
+			_log_level = backend['LogLevel'].lower()
+			if _log_level in _log_levels:
+				cls.CONF_LOGGING_LEVEL_BACKEND = _log_levels[_log_level]
 			else:
 				backend['LogLevel'] = list(_log_levels.keys())[
 					list(_log_levels.values()).index(cls.CONF_LOGGING_LEVEL_BACKEND)]
-				config_changed = True
 
-			if "BackendHandler" in backend:
-				_backend_handler = backend['BackendHandler']
-			else:
-				backend['BackendHandler'] = "simulaqron"
-				_backend_handler = backend['BackendHandler']
-				config_changed = True
+		else:
+			backend['LogLevel'] = list(_log_levels.keys())[
+				list(_log_levels.values()).index(cls.CONF_LOGGING_LEVEL_BACKEND)]
+			config_changed = True
 
-			if _backend_handler.lower() == 'log':
-				cls.CONF_BACKEND_HANDLER = CQCLogMessageHandler
-			else:  # default simulqron  (elif backend_handler.lower() == "simulqron")
-				cls.CONF_BACKEND_HANDLER = SimulaqronCQCHandler
+		if "BackendHandler" in backend:
+			_backend_handler = backend['BackendHandler']
+		else:
+			backend['BackendHandler'] = "simulaqron"
+			_backend_handler = backend['BackendHandler']
+			config_changed = True
+
+		if _backend_handler.lower() == 'log':
+			cls.CONF_BACKEND_HANDLER = CQCLogMessageHandler
+		else:  # default simulqron  (elif backend_handler.lower() == "simulqron")
+			cls.CONF_BACKEND_HANDLER = SimulaqronCQCHandler
 
 		if "FRONTEND" not in _config:
 			_config['FRONTEND'] = {}
-			frontend = _config['FRONTEND']
+		frontend = _config['FRONTEND']
 
-			if "LogLevel" in frontend:
-				_log_level = frontend['LogLevel'].lower()
-				if _log_level in _log_levels:
-					cls.CONF_LOGGING_LEVEL_FRONTEND = _log_levels[_log_level]
-				else:
-					frontend['LogLevel'] = list(_log_levels.keys())[
-						list(_log_levels.values()).index(cls.CONF_LOGGING_LEVEL_FRONTEND)]
-
+		if "LogLevel" in frontend:
+			_log_level = frontend['LogLevel'].lower()
+			if _log_level in _log_levels:
+				cls.CONF_LOGGING_LEVEL_FRONTEND = _log_levels[_log_level]
 			else:
 				frontend['LogLevel'] = list(_log_levels.keys())[
 					list(_log_levels.values()).index(cls.CONF_LOGGING_LEVEL_FRONTEND)]
-				config_changed = True
+
+		else:
+			frontend['LogLevel'] = list(_log_levels.keys())[
+				list(_log_levels.values()).index(cls.CONF_LOGGING_LEVEL_FRONTEND)]
+			config_changed = True
 
 		if config_changed:
 			cls.save_settings()
