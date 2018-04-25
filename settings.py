@@ -21,57 +21,21 @@
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 # DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
 # DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES
+# LOSS OF USE, DATA, OR PROFITS OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#########################
+# SETTINGS FOR SIMULAQRON
+#########################
 
-from SimulaQron.general.hostConfig import *
-from SimulaQron.cqc.backend.cqcHeader import *
-from SimulaQron.cqc.pythonLib.cqc import *
+# Sets the maximum number of qubits a node can have
+CONF_MAXQUBITS=20
 
-import time
+# Sets the maximum number of registers a node can have
+CONF_MAXREGS=1000
 
-
-#####################################################################################################
-#
-# main
-#
-def main():
-
-	# Initialize the connection
-	Alice=CQCConnection("Alice")
-
-	# Make an EPR pair with Bob
-	qA=Alice.createEPR("Bob")
-
-	# Create a qubit to teleport
-	q=qubit(Alice)
-
-	# Prepare the qubit to teleport in |+>
-	q.H()
-
-	# Apply the local teleportation operations
-	q.cnot(qA)
-	q.H()
-
-	# Measure the qubits
-	a=q.measure()
-	b=qA.measure()
-	to_print="App {}: Measurement outcomes are: a={}, b={}".format(Alice.name,a,b)
-	print("|"+"-"*(len(to_print)+2)+"|")
-	print("| "+to_print+" |")
-	print("|"+"-"*(len(to_print)+2)+"|")
-
-	# Send corrections to Bob
-	Alice.sendClassical("Bob",[a,b])
-
-	# Stop the connections
-	Alice.close()
-
-
-##################################################################################################
-main()
-
+# Sets the time to wait between attempts to setup the connections of the network
+CONF_WAIT_TIME=0.5

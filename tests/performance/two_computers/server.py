@@ -27,12 +27,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.pythonLib.cqc import *
 
-import time
+import sys
 
 
 #####################################################################################################
@@ -41,35 +40,61 @@ import time
 #
 def main():
 
+	input_data=sys.argv[1:]
+
+	# Set node numbers
+	min_tel=int(input_data[0])
+	max_tel=int(input_data[1])
+	number=int(input_data[2])
+
 	# Initialize the connection
-	Alice=CQCConnection("Alice")
+	Bob=CQCConnection("Bob")
 
-	# Make an EPR pair with Bob
-	qA=Alice.createEPR("Bob")
+	for n in range(min_tel,max_tel+1):
 
-	# Create a qubit to teleport
-	q=qubit(Alice)
+		for _ in range(number):
 
-	# Prepare the qubit to teleport in |+>
-	q.H()
+			# Start teleporting back and fourth
 
-	# Apply the local teleportation operations
-	q.cnot(qA)
-	q.H()
+			for _ in range(n):
 
-	# Measure the qubits
-	a=q.measure()
-	b=qA.measure()
-	to_print="App {}: Measurement outcomes are: a={}, b={}".format(Alice.name,a,b)
-	print("|"+"-"*(len(to_print)+2)+"|")
-	print("| "+to_print+" |")
-	print("|"+"-"*(len(to_print)+2)+"|")
+				# Make an EPR pair with other node
+				q=Bob.recvEPR()
 
-	# Send corrections to Bob
-	Alice.sendClassical("Bob",[a,b])
+				# Receive info about corrections
+				data=Bob.recvClassical(timout=3600)
+				Bob.closeClassicalServer()
+				message=list(data)
+				a=message[0]
+				b=message[1]
 
-	# Stop the connections
-	Alice.close()
+				# Apply corrections
+				if b==1:
+					q.X()
+				if a==1:
+					q.Z()
+
+				# Make an EPR pair with next node
+				qEPR=Bob.recvEPR()
+
+				# Apply the local teleportation operations
+				q.cnot(qEPR)
+				q.H()
+
+				# Measure the qubits
+				a=q.measure()
+				b=qEPR.measure()
+				to_print="App {}: Measurement outcomes are: a={}, b={}".format(Bob.name,a,b)
+				print("|"+"-"*(len(to_print)+2)+"|")
+				print("| "+to_print+" |")
+				print("|"+"-"*(len(to_print)+2)+"|")
+
+				# Send corrections to other node
+				Bob.sendClassical("Alice",[a,b])
+				Bob.closeClassicalChannel("Alice")
+
+	# Stop the connection
+	Bob.close()
 
 
 ##################################################################################################

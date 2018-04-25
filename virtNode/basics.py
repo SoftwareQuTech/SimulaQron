@@ -38,6 +38,12 @@ class quantumError(Exception):
 	def __str__(self):
 		return repr(self.value)
 
+class virtNetError(Exception):
+	def __init__(self, value):
+		self.value = value
+	def __str__(self):
+		return repr(self.value)
+
 class quantumEngine(pb.Referenceable):
 	"""
 	Basic quantum engine. This by itself does nothing.

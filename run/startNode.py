@@ -29,16 +29,17 @@
 
 
 import sys
-# sys.path.insert(0, "..")
+import os
 
 from SimulaQron.virtNode.virtual import *
+from SimulaQron.settings import *
 import logging
 
 logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
 
 logging.debug("Starting VIRTUAL NODE %s", sys.argv[1])
-be = backEnd(sys.argv[1],"../config/virtualNodes.cfg")
 
-node = be.start(20)
+virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
+be = backEnd(sys.argv[1],virtualFile)
 
-
+node = be.start(maxQubits=CONF_MAXQUBITS,maxRegisters=CONF_MAXREGS)

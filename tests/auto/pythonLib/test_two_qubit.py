@@ -94,7 +94,7 @@ def prep_CPHASE_target_CQC(cqc):
 	return q2
 
 def prep_EPR1_CQC(cqc):
-	Alice=CQCConnection("Alice",appID=1)
+	Alice=CQCConnection("Alice",appID=1,print_info=False)
 	qA=Alice.createEPR("Bob",print_info=False)
 	qB=cqc.recvEPR(print_info=False)
 	qA.measure(print_info=False)
@@ -102,7 +102,7 @@ def prep_EPR1_CQC(cqc):
 	return qB
 
 def prep_EPR2_CQC(cqc):
-	Alice=CQCConnection("Alice",appID=1)
+	Alice=CQCConnection("Alice",appID=1,print_info=False)
 	qB=cqc.createEPR("Alice",remote_appID=1,print_info=False)
 	qA=Alice.recvEPR(print_info=False)
 	qA.measure(print_info=False)
@@ -110,7 +110,7 @@ def prep_EPR2_CQC(cqc):
 	return qB
 
 def prep_send_CQC(cqc):
-	Alice=CQCConnection("Alice",appID=1)
+	Alice=CQCConnection("Alice",appID=1,print_info=False)
 	qA=qubit(cqc,print_info=False)
 	qB=qubit(cqc,print_info=False)
 	qA.H(print_info=False)
@@ -125,7 +125,7 @@ def prep_send_CQC(cqc):
 	return qB
 
 def prep_recv_CQC(cqc):
-	Alice=CQCConnection("Alice",appID=1)
+	Alice=CQCConnection("Alice",appID=1,print_info=False)
 	qA=qubit(Alice,print_info=False)
 	qA.H(print_info=False)
 	Alice.sendQubit(qA,"Bob",print_info=False)
@@ -149,7 +149,7 @@ def prep_H_qutip():
 def main():
 
 	# Initialize the connection
-	cqc=CQCConnection("Bob")
+	cqc=CQCConnection("Bob",print_info=False)
 
 	iterations=100
 
