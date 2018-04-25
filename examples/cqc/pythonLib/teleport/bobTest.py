@@ -40,7 +40,7 @@ def main():
 
 	# Initialize the connection
 	Bob=CQCConnection("Bob")
-	Bob.startClassicalServer()
+	# Bob.startClassicalServer()
 
 	# Make an EPR pair with Alice
 	qB=Bob.recvEPR()

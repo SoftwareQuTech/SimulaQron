@@ -181,16 +181,17 @@ class CQCConnection:
 			self._classicalServer.close()
 			self._classicalServer = None
 
-	def recvClassical(self, timout=1, msg_size=1024,close_after=True):
+	def recvClassical(self,timout=1, msg_size=1024,close_after=True):
 		if not self._classicalServer:
 			self.startClassicalServer()
-		for _ in range(10 * timout):
-			msg = self._classicalServer.recv(msg_size)
-			if len(msg) > 0:
+		for _ in range(10*timout):
+			msg=self._classicalServer.recv(msg_size)
+			if len(msg)>0:
 				if close_after:
 					self.closeClassicalServer()
 				return msg
 			time.sleep(0.1)
+		raise RuntimeError("Timeout: No message received")
 
 	def openClassicalChannel(self, name):
 		"""
@@ -248,6 +249,8 @@ class CQCConnection:
 		except:
 			to_send = msg
 		self._classicalConn[name].send(bytes(to_send))
+		if close_after:
+			self.closeClassicalChannel(name)
 
 	def sendSimple(self, tp):
 		"""
@@ -550,6 +553,8 @@ class CQCConnection:
 				if (node.ip == remote_node) and (node.port == remote_port):
 					remote_name = node.name
 					break
+			if remote_name==None:
+				raise RuntimeError("Remote node ({},{}) is not in config-file.".format(remote_node,remote_port))
 
 			print("CQC tells App {}: 'EPR created with node {}, using qubit with ID {}'".format(self.name, remote_name,
 																								notifyHdr.qubit_id))

@@ -76,7 +76,7 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 
 	logging.debug("LOCAL %s: Runing client side program.",myName)
 	# Create a second register
-	newReg = yield virtRoot.callRemote("new_register")
+	newReg = yield virtRoot.callRemote("add_register")
 
 	# Create 2 qubits
 	qA = yield virtRoot.callRemote("new_qubit_inreg",qReg)
