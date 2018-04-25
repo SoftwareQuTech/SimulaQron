@@ -377,7 +377,7 @@ class virtualNode(pb.Root):
 		self._next_reg_num += 1
 		return reg_num
 
-	def remote_new_register(self, maxQubits = 10):
+	def remote_new_register(self, maxQubits=10):
 		"""
 		Initialize a local register. Right now, this simple creates a register according to the simple engine backend
 		using qubit.
