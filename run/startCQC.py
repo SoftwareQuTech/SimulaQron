@@ -1,10 +1,10 @@
 import logging
 
 import sys
-from cqc.backend.cqcConfig import CQC_CONF_LINK_WAIT_TIME
-from cqc.backend.cqcProtocol import CQCFactory
-from general.hostConfig import networkConfig
-from settings import Settings
+from SimulaQron.cqc.backend.cqcConfig import CQC_CONF_LINK_WAIT_TIME
+from SimulaQron.cqc.backend.cqcProtocol import CQCFactory
+from SimulaQron.general.hostConfig import networkConfig
+from SimulaQron.settings import Settings
 from twisted.internet import reactor
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
 import os
@@ -27,7 +27,7 @@ def init_register(virtRoot, myName, node):
 	node.set_virtual_node(virtRoot)
 
 	# Start listening to CQC messages
-	setup_CQC_server(myName,node)
+	setup_CQC_server(myName, node)
 
 	# On the local virtual node, we still want to initialize a qubit register
 	# defer = virtRoot.callRemote("new_register")

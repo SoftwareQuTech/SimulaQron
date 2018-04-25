@@ -866,7 +866,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		try:
 			self.factory._lock.acquire()
 
-			virt = yield self.factory.virtRoot.callRemote("new_qubit_inreg", self.factory.qReg)
+			virt = yield self.factory.virtRoot.callRemote("new_qubit")
 			if not virt:  # if no more qubits
 				raise quantumError("No more qubits available")
 

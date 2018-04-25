@@ -1,4 +1,5 @@
 import sys
-from settings import Settings
+
+from SimulaQron.settings import Settings
 
 Settings.set_setting("BACKEND", "BackendHandler", sys.argv[1])

@@ -29,6 +29,7 @@
 """
 This class interfaces cqcMessageHandler, and is for testing purposes only
 """
+import logging
 
 from SimulaQron.cqc.backend.cqcMessageHandler import CQCMessageHandler
 from SimulaQron.cqc.backend.cqcHeader import *

@@ -35,8 +35,8 @@ from configparser import ConfigParser
 
 import os
 
-from cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
-from cqc.backend.cqcMessageHandler import SimulaqronCQCHandler
+from SimulaQron.cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
+from SimulaQron.cqc.backend.cqcMessageHandler import SimulaqronCQCHandler
 
 
 class Settings:

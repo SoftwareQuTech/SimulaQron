@@ -350,7 +350,7 @@ class virtualNode(pb.Root):
 
 		yield self._unlock_reg_qubits(self._q_num_to_obj(qubitNum))
 
-	def remote_add_register(self, maxQubits = CONF_MAXQUBITS):
+	def remote_add_register(self, maxQubits=Settings.CONF_MAXQUBITS):
 		"""
 		Adds a new register to the node..
 
@@ -1247,7 +1247,7 @@ class virtualQubit(pb.Referenceable):
 
 			# If we did not get a lock on an active qubit, wait for update and try again
 			if waiting:
-				yield deferLater(reactor, self._delay, lambda: none)
+				yield deferLater(reactor, self._delay, lambda: None)
 
 		return outcome
 
@@ -1361,9 +1361,9 @@ class virtualQubit(pb.Referenceable):
 
 			# If we did not get a lock on an active qubit, wait for update and try again
 			if waiting:
-				yield deferLater(reactor, self._delay, lambda: none)
+				yield deferLater(reactor, self._delay, lambda: None)
 
-		return (outcome)
+		return outcome
 
 	def _lock_nodes(self, target):
 		"""
