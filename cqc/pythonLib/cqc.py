@@ -450,10 +450,13 @@ class CQCConnection:
 			# Lookup host name
 			remote_node=entInfoHdr.node_B
 			remote_port=entInfoHdr.port_B
+			remote_name=None
 			for node in self._cqcNet.hostDict.values():
 				if (node.ip==remote_node) and (node.port==remote_port):
 					remote_name=node.name
 					break
+			if remote_name==None:
+				raise RuntimeError("Remote node ({},{}) is not in config-file.".format(remote_node,remote_port))
 
 			print("CQC tells App {}: 'EPR created with node {}, using qubit with ID {}'".format(self.name,remote_name, notifyHdr.qubit_id))
 		elif hdr.tp==CQC_TP_MEASOUT:
