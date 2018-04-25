@@ -86,11 +86,11 @@ class CQCFactory(Factory):
 		"""
 		self.virtRoot = virtRoot
 
-	def set_virtual_reg(self, qReg):
-		"""
-		Set the default register to use on the SimulaQron backend.
-		"""
-		self.qReg = qReg
+	# def set_virtual_reg(self, qReg):
+	# 	"""
+	# 	Set the default register to use on the SimulaQron backend.
+	# 	"""
+	# 	self.qReg = qReg
 
 	def lookup(self, ip, port):
 		"""
@@ -954,7 +954,8 @@ class CQCProtocol(Protocol):
 
 			try:
 
-				virt = yield self.factory.virtRoot.callRemote("new_qubit_inreg",self.factory.qReg)
+				# virt = yield self.factory.virtRoot.callRemote("new_qubit_inreg",self.factory.qReg)
+				virt = yield self.factory.virtRoot.callRemote("new_qubit")
 
 			except Exception as e:
 				print("cmd_new error: {}".format(e))

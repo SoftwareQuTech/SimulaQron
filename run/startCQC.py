@@ -33,19 +33,22 @@ def init_register(virtRoot, myName, node):
 	# Set the virtual node
 	node.set_virtual_node(virtRoot)
 
-	# On the local virtual node, we still want to initialize a qubit register
-	defer = virtRoot.callRemote("new_register")
-	defer.addCallback(fill_register, myName, node, virtRoot)
-	defer.addErrback(handle_register_error,myName)
-
-def fill_register(obj, myName, node, virtRoot):
-	logging.debug("LOCAL %s: Created quantum register at virtual node.",myName)
-	qReg = obj
-
-	# Record the handle to the local virtual register
-	node.set_virtual_reg(qReg)
-
+	# Start listening to CQC messages
 	setup_CQC_server(myName,node)
+
+	# On the local virtual node, we still want to initialize a qubit register
+	# defer = virtRoot.callRemote("new_register")
+	# defer.addCallback(fill_register, myName, node, virtRoot)
+	# defer.addErrback(handle_register_error,myName)
+
+# def fill_register(obj, myName, node, virtRoot):
+# 	logging.debug("LOCAL %s: Created quantum register at virtual node.",myName)
+# 	qReg = obj
+
+# 	# Record the handle to the local virtual register
+# 	node.set_virtual_reg(qReg)
+
+# 	setup_CQC_server(myName,node)
 
 def connect_to_virtNode(myName,cqc_factory,virtualNet):
 	"""
@@ -64,12 +67,12 @@ def connect_to_virtNode(myName,cqc_factory,virtualNet):
 	# If connection fails do:
 	deferVirtual.addErrback(handle_connection_error,myName,cqc_factory,virtualNet)
 
-def handle_register_error(reason,myName):
-	"""
-	Handles errors from remote call to new register.
-	"""
-	logging.error("LOCAL %s: Critical error when making new register: %s",myName,reason.getErrorMessage())
-	reactor.stop()
+# def handle_register_error(reason,myName):
+# 	"""
+# 	Handles errors from remote call to new register.
+# 	"""
+# 	logging.error("LOCAL %s: Critical error when making new register: %s",myName,reason.getErrorMessage())
+# 	reactor.stop()
 
 def handle_connection_error(reason,myName,cqc_factory,virtualNet):
 	"""

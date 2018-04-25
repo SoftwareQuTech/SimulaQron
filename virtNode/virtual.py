@@ -127,8 +127,13 @@ class virtualNode(pb.Root):
 			# this may not equal the numbers of registers virtually carried
 			self.numRegs = 0
 
+			# Counter for used register numbers
+			self._next_reg_num = 0
+
 			# Set up the default local register
-			self.defaultReg = self.remote_new_register(maxQubits)
+			# self.defaultReg = self.remote_new_register(maxQubits)
+			# self.registers = [self.remote_new_register(maxQubits)
+			self.registers = {}
 
 			# Initialize the list of qubits at this node
 			self.virtQubits = []
@@ -337,6 +342,41 @@ class virtualNode(pb.Root):
 
 		yield self._unlock_reg_qubits(self._q_num_to_obj(qubitNum))
 
+	def remote_add_register(self, maxQubits = CONF_MAXQUBITS):
+		"""
+		Adds a new register to the node..
+
+		Arguments:
+		maxQubits	maximum number of qubits to use in the default engine
+		"""
+
+		try:
+
+			if self.numRegs >= self.maxRegs:
+				logging.error("%s: Maximum number of registers reached.",self.myID.name)
+				raise quantumError("Maximum number of registers reached.")
+
+			self.numRegs = self.numRegs + 1
+			regNum=self.get_new_reg_num()
+			newReg = quantumRegister(self.myID, regNum, maxQubits)
+			self.registers[regNum]=newReg
+			# self.simRegisters.append(newReg)
+
+			logging.debug("VIRTUAL NODE %s: Initializing new simulated register.",self.myID.name)
+
+			return newReg
+		except Exception as e:
+			logging.error("VIRTUAL NODE {}: Critical error when getting new register: {}".format(self.myID.name,e))
+			raise e
+
+	def get_new_reg_num(self):
+		"""
+		Returns an unused register number.
+		"""
+		reg_num=self._next_reg_num
+		self._next_reg_num += 1
+		return reg_num
+
 	def remote_new_register(self, maxQubits = 10):
 		"""
 		Initialize a local register. Right now, this simple creates a register according to the simple engine backend
@@ -362,6 +402,19 @@ class virtualNode(pb.Root):
 			logging.error("VIRTUAL NODE {}: Critical error when getting new register: {}".format(self.myID.name,e))
 			raise e
 
+	def remote_delete_register(self,reg):
+		"""
+		Removes the register from the node.
+		Happens if the last qubit in the register is measured out.
+		"""
+
+		# Get register number
+		regnum=reg.num
+
+		# Remove register
+		self.registers.pop(regnum)
+		self.numRegs -= 1
+
 	@inlineCallbacks
 	def remote_new_qubit(self):
 		"""
@@ -375,7 +428,14 @@ class virtualNode(pb.Root):
 
 			# Qubit in the simulation backend, initialized to |0>
 			simNum = self.get_sim_id()
-			simQubit = simulatedQubit(self.myID, self.defaultReg, simNum)
+
+			# Create a new register
+			# new_reg=self.remote_new_register(maxQubits=CONF_MAXQUBITS)
+			# self.registers.append(new_reg)
+			newReg = self.remote_add_register()
+
+			# simQubit = simulatedQubit(self.myID, self.defaultReg, simNum)
+			simQubit = simulatedQubit(self.myID, newReg, simNum)
 			simQubit.make_fresh()
 			self.simQubits.append(simQubit)
 
@@ -718,8 +778,6 @@ class virtualNode(pb.Root):
 		delNum = delQubit.num
 		delRegister = delQubit.register
 
-		delQubit.register
-
 		try:
 			# We need to manipulate multiple qubits, get global lock
 			yield self._get_global_lock()
@@ -732,13 +790,18 @@ class virtualNode(pb.Root):
 			# First we remove the physical qubit from the register
 			delRegister.remove_qubit(delNum)
 
-			# When removing a qubit, we need to update the positions of the qubits in the underlying physical register
-			# in all relevant qubit objects.
-			for q in self.simQubits:
-				# If they are in the same engine, and update is required
-				if q.register == delRegister:
-					if q.num > delNum:
-						q.num = q.num - 1
+			# Check if this was the last qubit
+			if delRegister.activeQubits == 0:
+				self.remote_delete_register(delRegister)
+			else:
+				# When removing a qubit, we need to update the positions of the qubits in the underlying physical register
+				# in all relevant qubit objects.
+				for q in self.simQubits:
+					# If they are in the same engine, and update is required
+					if q.register == delRegister:
+						if q.num > delNum:
+							q.num = q.num - 1
+
 			# Remove the qubit form the list of simulated qubits
 			self.simQubits.remove(delQubit)
 
@@ -803,11 +866,11 @@ class virtualNode(pb.Root):
 		# Allow reg 1 to absorb reg 2
 		reg1.maxQubits = reg1.maxQubits + reg2.activeQubits
 
+		# For relabelling qubit numbers get the offset
+		offset = reg1.activeQubits
+
 		# Add reg2 to reg1
 		reg1.absorb(reg2)
-
-		# For relabelling qubit numbers get the offset
-		offset = reg1.activeQubits - 1
 
 		# Update the simulated qubit numbering and register
 		for q in self.simQubits:
@@ -816,7 +879,8 @@ class virtualNode(pb.Root):
 				q.register = reg1
 				q.num = q.num + offset
 
-		reg2.reset()
+		# reg2.reset()
+		self.remote_delete_register(reg2)
 
 	@inlineCallbacks
 	def remote_merge_from(self, simNodeName, simQubitNum, localReg):
@@ -969,6 +1033,7 @@ class virtualNode(pb.Root):
 		activeQ = gotQ.register.activeQubits
 		oldRegNum = gotQ.register.num
 		oldQubitNum = gotQ.num
+		delRegister=gotQ.register
 
 		# Remove all simulated qubits and the register
 		# Need to iterate of simQubits in reverse, otherwise wrong elements are removed
@@ -976,8 +1041,8 @@ class virtualNode(pb.Root):
 			if q.register.num == oldRegNum:
 				self.simQubits.remove(q)
 				gotQ.register.activeQubits-=1
-				toRemove = q.register
 
+		self.remote_delete_register(delRegister)
 
 		return (realM, imagM, activeQ, oldRegNum, oldQubitNum)
 
@@ -1540,7 +1605,7 @@ class virtualQubit(pb.Referenceable):
 					logging.debug("VIRTUAL NODE %s: 2qubit command demands total remote merge from %s and %s.",self.virtNode.name, target.simNode.name, self.simNode.name)
 
 					# Create a new local register
-					newLocalReg = self.virtNode.root.remote_new_register()
+					newLocalReg = self.virtNode.root.remote_add_register()
 
 					# Fetch the detail of the two registers from remote
 					(fNum, fNode) = yield self.simQubit.callRemote("get_details")
