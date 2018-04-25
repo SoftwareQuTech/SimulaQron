@@ -27,12 +27,14 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import socket, struct, os, sys, time, math
+import math
+import os
+import time
 
-from SimulaQron.general.hostConfig import *
+from SimulaQron.cqc.backend.cqcConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.backend.entInfoHeader import *
-from SimulaQron.cqc.backend.cqcConfig import *
+from SimulaQron.general.hostConfig import *
 
 
 def shouldReturn(command):

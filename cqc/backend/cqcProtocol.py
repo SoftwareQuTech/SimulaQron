@@ -29,6 +29,8 @@
 
 from SimulaQron.cqc.backend.cqcMessageHandler import *
 from settings import Settings
+from twisted.internet.defer import DeferredLock
+from twisted.internet.protocol import Factory, Protocol
 
 
 #####################################################################################################
