@@ -181,12 +181,14 @@ class CQCConnection:
 			self._classicalServer.close()
 			self._classicalServer = None
 
-	def recvClassical(self, timout=1, msg_size=1024):
+	def recvClassical(self, timout=1, msg_size=1024,close_after=True):
 		if not self._classicalServer:
 			self.startClassicalServer()
 		for _ in range(10 * timout):
 			msg = self._classicalServer.recv(msg_size)
 			if len(msg) > 0:
+				if close_after:
+					self.closeClassicalServer()
 				return msg
 			time.sleep(0.1)
 
@@ -229,7 +231,7 @@ class CQCConnection:
 			s = self._classicalConn.pop(name)
 			s.close()
 
-	def sendClassical(self, name, msg, timout=1):
+	def sendClassical(self,name,msg,close_after=True):
 		"""
 		Sends a classical message to another host in the application network.
 
@@ -543,6 +545,7 @@ class CQCConnection:
 			# Lookup host name
 			remote_node = entInfoHdr.node_B
 			remote_port = entInfoHdr.port_B
+			remote_name=None
 			for node in self._cqcNet.hostDict.values():
 				if (node.ip == remote_node) and (node.port == remote_port):
 					remote_name = node.name
