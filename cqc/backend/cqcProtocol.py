@@ -202,7 +202,11 @@ class CQCProtocol(Protocol):
 
 	@inlineCallbacks
 	def _parseData(self, header, data):
-		messages = yield self.messageHandler.handle_cqc_message(header, data)
+		try:
+			messages = yield self.messageHandler.handle_cqc_message(header, data)
+		except Exception as e:
+			raise e
+
 		if messages:
 			# self.factory._lock.acquire()
 			for msg in messages:
