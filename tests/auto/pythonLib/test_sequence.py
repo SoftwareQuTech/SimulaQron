@@ -33,8 +33,7 @@
 #
 import unittest
 
-from cqc.backend.cqcHeader import *
-from cqc.pythonLib.cqc import CQCConnection, qubit
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
 
 
 class sequenceTest(unittest.TestCase):
@@ -208,8 +207,6 @@ class sequenceTest(unittest.TestCase):
 		for q in qBs:
 			self.assertEqual(q.measure(print_info=False), 0)
 		self._bob.set_pending(True)
-
-
 
 
 if __name__ == '__main__':
