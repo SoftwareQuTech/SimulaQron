@@ -33,6 +33,7 @@ from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.backend.entInfoHeader import *
 from SimulaQron.local.setup import *
 from SimulaQron.virtNode.crudeSimulator import *
+from twisted.internet.defer import DeferredLock
 
 """
 Abstract class. Classes that inherit this class define how to handle incoming cqc messages. 
@@ -64,6 +65,7 @@ def has_extra(cmd):
 
 
 class CQCMessageHandler(ABC):
+	_sequence_lock = DeferredLock()
 
 	def __init__(self, factory):
 		# Functions to invoke when receiving a CQC Header of a certain type
@@ -175,19 +177,121 @@ class CQCMessageHandler(ABC):
 			msgs.append(self.create_return_message(header.app_id, CQC_TP_DONE))
 		return msgs
 
-	@abstractmethod
-	def _process_command(self, cqc_header, length, data):
+	@inlineCallbacks
+	def _process_command(self, cqc_header, length, data, is_locked=False):
 		"""
 			Process the commands - called recursively to also process additional command lists.
 		"""
-		pass
+		cmd_data = data
+		# Read in all the commands sent
+		cur_length = 0
+		should_notify = None
+		return_messages = []
+		while cur_length < length:
+			cmd = CQCCmdHeader(cmd_data[cur_length:cur_length + CQC_CMD_HDR_LENGTH])
+			logging.debug("CQC %s got got command header %s", self.name, cmd.printable())
+
+			newl = cur_length + cmd.HDR_LENGTH
+			# Should we notify
+			should_notify = should_notify or cmd.notify
+
+			# Create the extra header if it exist
+			try:
+				xtra = self.create_extra_header(cmd, cmd_data[newl:], cqc_header.version)
+			except IndexError:
+				xtra = None
+				logging.debug("CQC %s: Missing XTRA Header", self.name)
+
+			if xtra is not None:
+				newl += xtra.HDR_LENGTH
+				logging.debug("CQC %s: Read XTRA Header: %s", self.name, xtra.printable())
+
+			# Run this command
+			logging.debug("CQC %s: Executing command: %s", self.name, cmd.printable())
+			if cmd.instr not in self.commandHandlers:
+				logging.debug("CQC {}: Unknown command {}".format(self.name, cmd.instr))
+				msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
+				return_messages.append(msg)
+				return return_messages
+			try:
+				msgs = yield self.commandHandlers[cmd.instr](cqc_header, cmd, xtra)
+			except Exception as e:
+				raise e
+
+			if msgs is None:
+				return return_messages, False, 0
+
+			return_messages.extend(msgs)
+
+			# Check if there are additional commands to execute afterwards
+			if cmd.action:
+				# lock the sequence
+				if not is_locked:
+					self._sequence_lock.acquire()
+				sequence_header = CQCSequenceHeader(data[newl: newl + CQCSequenceHeader.HDR_LENGTH])
+				newl += sequence_header.HDR_LENGTH
+				logging.debug("CQC %s: Reading extra action commands", self.name)
+				try:
+					(msgs, succ, retNotify) = yield self._process_command(cqc_header, sequence_header.cmd_length,
+																		  data[newl:newl + sequence_header.cmd_length],
+																		  is_locked=True)
+				except Exception as e:
+					raise e
+
+				should_notify = (should_notify or retNotify)
+				if not succ:
+					return return_messages, False, 0
+				return_messages.extend(msgs)
+				newl = newl + sequence_header.cmd_length
+				if not is_locked:
+					logging.debug("CQC %s: Reasing lock", self.name)
+					# unlock
+					self._sequence_lock.release()
+
+			cur_length = newl
+		return return_messages, True, should_notify
+
+	@inlineCallbacks
+	def handle_factory(self, header, data):
+		fact_l = CQCFactoryHeader.HDR_LENGTH
+		# Get factory header
+		if len(data) < header.length:
+			logging.debug("CQC %s: Missing header(s) in factory", self.name)
+			return [self.create_return_message(header.app_id, CQC_ERR_UNSUPP)]
+		fact_header = CQCFactoryHeader(data[:fact_l])
+		num_iter = fact_header.num_iter
+		# Perform operation multiple times
+		all_succ = True
+		should_notify = fact_header.notify
+		block_factory = fact_header.block
+		return_messages = []
+		logging.debug("CQC %s: Performing factory command with %s iterations", self.name, num_iter)
+		if block_factory:
+			logging.debug("CQC %s: Acquire lock for factory", self.name)
+			self._sequence_lock.acquire()
+
+		for _ in range(num_iter):
+			try:
+				msgs, succ, _ = yield self._process_command(header, header.length - fact_l, data[fact_l:], block_factory)
+			except Exception as e:
+				raise e
+
+			all_succ = (all_succ and succ)
+			return_messages.extend(msgs)
+		if block_factory:
+			logging.debug("CQC %s: Releasing lock for factory", self.name)
+			self._sequence_lock.release()
+
+		if all_succ:
+			if should_notify:
+				# Send a notification that we are done if successful
+				logging.debug("CQC %s: Command successful, sent done.", self.name)
+				return_messages.append(self.create_return_message(header.app_id, CQC_TP_DONE))
+		return return_messages
+
 
 	@abstractmethod
 	def handle_hello(self, header, data):
-		pass
-
-	@abstractmethod
-	def handle_factory(self, header, data):
 		pass
 
 	@abstractmethod
@@ -289,121 +393,12 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# Dictionary that keeps qubit dictorionaries for each application
 		self.qubitList = {}
 
-	@inlineCallbacks
-	def _process_command(self, cqc_header, length, data):
-		"""
-			Process the commands - called recursively to also process additional command lists.
-		"""
-		cmd_data = data
-		# Read in all the commands sent
-		cur_length = 0
-		should_notify = None
-		return_messages = []
-		while cur_length < length:
-			cmd = CQCCmdHeader(cmd_data[cur_length:cur_length + CQC_CMD_HDR_LENGTH])
-			logging.debug("CQC %s got got command header %s", self.name, cmd.printable())
-
-			newl = cur_length + cmd.HDR_LENGTH
-			# Should we notify
-			should_notify = should_notify or cmd.notify
-
-			# Create the extra header if it exist
-			try:
-				xtra = self.create_extra_header(cmd, cmd_data[newl:], cqc_header.version)
-			except IndexError:
-				xtra = None
-				logging.debug("CQC %s: Missing XTRA Header", self.name)
-
-			if xtra is not None:
-				newl += xtra.HDR_LENGTH
-				logging.debug("CQC %s: Read XTRA Header: %s", self.name, xtra.printable())
-
-			# Run this command
-			logging.debug("CQC %s: Executing command: %s", self.name, cmd.printable())
-			if cmd.instr not in self.commandHandlers:
-				logging.debug("CQC {}: Unknown command {}".format(self.name, cmd.instr))
-				msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
-				return_messages.append(msg)
-				return return_messages
-			try:
-				msgs = yield self.commandHandlers[cmd.instr](cqc_header, cmd, xtra)
-			except Exception as e:
-				raise e
-
-			if msgs is None:
-				return return_messages, False, 0
-
-			return_messages.extend(msgs)
-
-			# Check if there are additional commands to execute afterwards
-			if cmd.action:
-				# lock the sequence
-				self.factory._lock.acquire()
-				sequence_header = CQCSequenceHeader(data[newl: newl +CQCSequenceHeader.HDR_LENGTH])
-				newl += sequence_header.HDR_LENGTH
-				logging.debug("CQC %s: Reading extra action commands", self.name)
-				try:
-					(msgs, succ, retNotify) = yield self._process_command(cqc_header, sequence_header.cmd_length,
-																	  data[newl:newl + sequence_header.cmd_length])
-				except Exception as e:
-					raise e
-
-				should_notify = (should_notify or retNotify)
-				if not succ:
-					return return_messages, False, 0
-				return_messages.extend(msgs)
-				newl = newl + sequence_header.cmd_length
-				logging.debug("CQC %s: Reasing lock", self.name)
-				# unlock
-				self.factory._lock.release()
-
-			cur_length = newl
-		return return_messages, True, should_notify
-
 	def handle_hello(self, header, data):
 		"""
 		Hello just requires us to return hello - for testing availability.
 		"""
 		msg = self.create_return_message(header.app_id, CQC_TP_HELLO)
 		return [msg]
-
-	@inlineCallbacks
-	def handle_factory(self, header, data):
-		fact_l = CQCFactoryHeader.HDR_LENGTH
-		# Get factory header
-		if len(data) < header.length:
-			logging.debug("CQC %s: Missing header(s) in factory", self.name)
-			return [self.create_return_message(header.app_id, CQC_ERR_UNSUPP)]
-		fact_header = CQCFactoryHeader(data[:fact_l])
-		num_iter = fact_header.num_iter
-		# Perform operation multiple times
-		all_succ = True
-		should_notify = fact_header.notify
-		block_factory = fact_header.block
-		return_messages = []
-		logging.debug("CQC %s: Performing factory command with %s iterations", self.name, num_iter)
-		if block_factory:
-			logging.debug("CQC %s: Acquire lock for factory", self.name)
-			self.factory._lock.acquire()
-
-		for _ in range(num_iter):
-			try:
-				msgs, succ, _ = yield self._process_command(header, header.length - fact_l, data[fact_l:])
-			except Exception as e:
-				raise e
-
-			all_succ = (all_succ and succ)
-			return_messages.extend(msgs)
-		if block_factory:
-			logging.debug("CQC %s: Releasing lock for factory", self.name)
-			self.factory._lock.release()
-
-		if all_succ:
-			if should_notify:
-				# Send a notification that we are done if successful
-				logging.debug("CQC %s: Command successful, sent done.", self.name)
-				return_messages.append(self.create_return_message(header.app_id, CQC_TP_DONE))
-		return return_messages
 
 	def handle_time(self, header, data):
 
@@ -570,7 +565,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		except Exception as e:
 			raise e
 
-
 		return succ
 
 	@inlineCallbacks
@@ -589,7 +583,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			outcome = yield virt_qubit.callRemote("measure", inplace=True)
 		except Exception as e:
 			raise e
-
 
 		# If state is |1> do correction
 		if outcome:
@@ -630,7 +623,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# Send instruction to transfer the qubit
 		try:
 			yield self.factory.virtRoot.callRemote("cqc_send_qubit", virt_num, target_name, cqc_header.app_id,
-											   xtra.remote_app_id)
+												   xtra.remote_app_id)
 		except Exception as e:
 			raise e
 
@@ -845,7 +838,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# Send instruction to transfer the qubit
 		try:
 			yield self.factory.virtRoot.callRemote("cqc_send_epr_half", virt_num, target_name, cqc_header.app_id,
-											   xtra.remote_app_id, raw_updated_ent_info)
+												   xtra.remote_app_id, raw_updated_ent_info)
 		except Exception as e:
 			raise e
 
@@ -1045,7 +1038,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			num = yield general_ref.callRemote("get_virt_num")
 		except Exception as e:
 			raise e
-
 
 		return num
 

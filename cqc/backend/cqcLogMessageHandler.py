@@ -52,63 +52,6 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		self.factory = factory
 		CQCLogMessageHandler.file = "{}/logFile{}.json".format(CQCLogMessageHandler.dir_path, factory.name)
 
-	def _process_command(self, cqc_header, length, data):
-		"""
-			Process the commands - called recursively to also process additional command lists.
-		"""
-		cmd_data = data
-
-		# Read in all the commands sent
-		cur_length = 0
-		should_notify = None
-		return_messages = []
-		while cur_length < length:
-			cmd = CQCCmdHeader(cmd_data[cur_length:cur_length + CQC_CMD_HDR_LENGTH])
-			newl = cur_length + cmd.HDR_LENGTH
-
-			# Should we notify
-			should_notify = should_notify or cmd.notify
-
-			# Create the extra header if it exist
-			try:
-				xtra = self.create_extra_header(cmd, cmd_data[newl:], cqc_header.version)
-			except IndexError:
-				xtra = None
-				logging.debug("CQC %s: Missing XTRA Header", self.name)
-
-			if xtra is not None:
-				newl += xtra.HDR_LENGTH
-				logging.debug("CQC %s: Read XTRA Header: %s", self.name, xtra.printable())
-
-			# Run this command
-			logging.debug("CQC %s: Executing command: %s", self.name, cmd.printable())
-			if cmd.instr not in self.commandHandlers:
-				logging.debug("CQC {}: Unknown command {}".format(self.name, cmd.instr))
-				msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
-				return_messages.append(msg)
-				return return_messages
-			msgs = self.commandHandlers[cmd.instr](cqc_header, cmd, xtra)
-			if msgs is None:
-				return return_messages, False, 0
-
-			return_messages.extend(msgs)
-
-			# Check if there are additional commands to execute afterwards
-			if cmd.action:
-				sequence_header = CQCSequenceHeader(data[newl: newl +CQCSequenceHeader.HDR_LENGTH])
-				newl += sequence_header.HDR_LENGTH
-				logging.debug("CQC %s: Reading extra action commands", self.name)
-				(msgs, succ, retNotify) = self._process_command(cqc_header, sequence_header.cmd_length,
-																	  data[newl:newl + sequence_header.cmd_length])
-				should_notify = (should_notify or retNotify)
-				if not succ:
-					return return_messages, False, 0
-				return_messages.extend(msgs)
-				newl = newl + sequence_header.cmd_length
-
-			cur_length = newl
-		return return_messages, True, should_notify
-
 	@classmethod
 	def parse_data(cls, header, cmd, xtra, comment):
 		subdata = {}
@@ -224,39 +167,12 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		Hello just requires us to return hello - for testing availability.
 		"""
 		self.parse_handle_data(header, data, "Handle Hello")
-		hdr = CQCHeader()
-		hdr.setVals(CQC_VERSION, CQC_TP_HELLO, header.app_id, 0)
-		msg = hdr.pack()
-		return [msg]
+		return super().handle_hello(header, data)
 
 	def handle_factory(self, header, data):
 		# Calls process_command, which should also log
 		self.parse_handle_factory(header, data, "Handle factory")
-		fact_l = CQCFactoryHeader.HDR_LENGTH
-
-		# Get factory header
-		if len(data) < header.length:
-			# logging.debug("CQC %s: Missing factory Header", self.name)
-			return [self.create_return_message(header.app_id, CQC_ERR_UNSUPP)]
-		fact_header = CQCFactoryHeader(data[:fact_l])
-
-		num_iter = fact_header.num_iter
-
-		# Perform operation multiple times
-		all_succ = True
-		should_notify = fact_header.notify
-		return_messages = []
-		for _ in range(num_iter):
-			msgs, succ, _ = self._process_command(header, header.length - fact_l, data[fact_l:])
-			all_succ = all_succ and succ
-			return_messages.extend(msgs)
-		if all_succ:
-			if should_notify:
-				# Send a notification that we are done if successful
-				return_messages.append(self.create_return_message(header.app_id, CQC_TP_DONE))
-				# logging.debug("CQC %s: Command successful, sent done.", self.name)
-
-		return return_messages
+		return super().handle_factory(header, data)
 
 	def handle_time(self, header, data):
 		self.parse_handle_data(header, data, "Handle time")

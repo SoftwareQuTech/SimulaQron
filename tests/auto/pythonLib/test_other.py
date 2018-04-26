@@ -27,9 +27,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from SimulaQron.general.hostConfig import *
-from SimulaQron.cqc.backend.cqcHeader import *
-from SimulaQron.cqc.pythonLib.cqc import *
 import time
 
 
@@ -37,6 +34,9 @@ import time
 #
 # main
 #
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
+
+
 def main():
 
 	# Initialize the connection
