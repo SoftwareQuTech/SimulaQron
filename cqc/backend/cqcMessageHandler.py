@@ -97,7 +97,9 @@ class CQCMessageHandler(ABC):
 			CQC_CMD_RECV: self.cmd_recv,
 			CQC_CMD_EPR: self.cmd_epr,
 			CQC_CMD_EPR_RECV: self.cmd_epr_recv,
-			CQC_CMD_NEW: self.cmd_new
+			CQC_CMD_NEW: self.cmd_new,
+			CQC_CMD_ALLOCATE: self.cmd_allocate,
+			CQC_CMD_RELEASE: self.cmd_release
 		}
 
 		# Convenience
@@ -378,8 +380,17 @@ class CQCMessageHandler(ABC):
 	def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False, return_succ=False):
 		pass
 
+	@abstractmethod
+	def cmd_allocate(self, cqc_header, cmd, xtra):
+		pass
+
+	@abstractmethod
+	def cmd_release(self, cqc_header, cmd, xtra):
+		pass
+
 
 class SimulaqronCQCHandler(CQCMessageHandler):
+
 	# Dictionary storing the next unique qubit id for each used app_id
 	_next_q_id = {}
 
@@ -975,6 +986,26 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			return return_messages, True
 		else:
 			return return_messages
+
+	@inlineCallbacks
+	def cmd_allocate(self, cqc_header, cmd, xtra):
+		"""
+		Allocate multipe qubits.
+		"""
+		num_qubits = cmd.qubit_id
+		cmd.qubit_id = 0
+		msgs = []
+		logging.debug("CQC %s: Allocating %d qubits", self.name, num_qubits)
+		try:
+			for _ in range(num_qubits):
+				new_msgs = yield self.cmd_new(cqc_header, cmd, xtra)
+				msgs.extend(new_msgs)
+		except Exception as e:
+			raise e
+		return msgs
+
+	def cmd_release(self, cqc_header, cmd, xtra):
+		pass
 
 	@inlineCallbacks
 	def apply_single_qubit_gate(self, cqc_header, qubit_id, gate):

@@ -373,14 +373,14 @@ class CQCConnection:
 		# CQC header
 		hdr = CQCHeader()
 		hdr.setVals(CQC_VERSION, CQC_TP_COMMAND, self._appID, CQC_CMD_HDR_LENGTH)
-		msg = hdr.pack()
+		cqc_msg = hdr.pack()
 
 		# Command header
 		cmd_hdr = CQCCmdHeader()
 		cmd_hdr.setVals(num_qubits, CQC_CMD_ALLOCATE, 0, 1, 0)
 		cmd_msg = cmd_hdr.pack()
 
-		self._s.send(msg + cmd_msg)
+		self._s.send(cqc_msg + cmd_msg)
 		qubits = []
 		for _ in range(num_qubits):
 			msg = self.readMessage()
@@ -612,6 +612,8 @@ class CQCConnection:
 		if hdr.tp in {CQC_TP_RECV, CQC_TP_NEW_OK, CQC_TP_EPR_OK}:
 			if is_factory:
 				q._active = False  # Set qubit to inactive so it can't be used anymore
+				q = qubit(self, createNew=False)
+			if q is None:
 				q = qubit(self, createNew=False)
 			q._qID = notifyHdr.qubit_id
 			q.set_entInfo(entInfoHdr)
