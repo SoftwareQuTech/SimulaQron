@@ -164,7 +164,11 @@ class CQCMessageHandler(ABC):
 		"""
 		logging.debug("CQC %s: Command received", self.name)
 		# Run the entire command list, incl. actions after completion which here we will do instantly
-		msgs, success, should_notify = yield self._process_command(header, header.length, data)
+		try:
+			msgs, success, should_notify = yield self._process_command(header, header.length, data)
+		except Exception as e:
+			raise e
+
 		if success and should_notify:
 			# Send a notification that we are done if successful
 			logging.debug("CQC %s: Command successful, sent done.", self.name)
@@ -321,8 +325,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 				msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
 				return_messages.append(msg)
 				return return_messages
+			try:
+				msgs = yield self.commandHandlers[cmd.instr](cqc_header, cmd, xtra)
+			except Exception as e:
+				raise e
 
-			msgs = yield self.commandHandlers[cmd.instr](cqc_header, cmd, xtra)
 			if msgs is None:
 				return return_messages, False, 0
 
@@ -335,8 +342,12 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 				sequence_header = CQCSequenceHeader(data[newl: newl +CQCSequenceHeader.HDR_LENGTH])
 				newl += sequence_header.HDR_LENGTH
 				logging.debug("CQC %s: Reading extra action commands", self.name)
-				(msgs, succ, retNotify) = yield self._process_command(cqc_header, sequence_header.cmd_length,
+				try:
+					(msgs, succ, retNotify) = yield self._process_command(cqc_header, sequence_header.cmd_length,
 																	  data[newl:newl + sequence_header.cmd_length])
+				except Exception as e:
+					raise e
+
 				should_notify = (should_notify or retNotify)
 				if not succ:
 					return return_messages, False, 0
@@ -376,7 +387,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			self.factory._lock.acquire()
 
 		for _ in range(num_iter):
-			msgs, succ, _ = yield self._process_command(header, header.length - fact_l, data[fact_l:])
+			try:
+				msgs, succ, _ = yield self._process_command(header, header.length - fact_l, data[fact_l:])
+			except Exception as e:
+				raise e
+
 			all_succ = (all_succ and succ)
 			return_messages.extend(msgs)
 		if block_factory:
@@ -472,8 +487,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		except UnknownQubitError as e:
 			logging.debug(e)
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
+		try:
+			yield virt_qubit.callRemote("apply_rotation", axis, 2 * np.pi / 256 * xtra.step)
+		except Exception as e:
+			raise e
 
-		yield virt_qubit.callRemote("apply_rotation", axis, 2 * np.pi / 256 * xtra.step)
 		return []
 
 	def cmd_rotx(self, cqc_header, cmd, xtra):
@@ -517,8 +535,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		except UnknownQubitError as e:
 			logging.debug(e)
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
+		try:
+			outcome = yield virt_qubit.callRemote("measure", inplace)
+		except Exception as e:
+			raise e
 
-		outcome = yield virt_qubit.callRemote("measure", inplace)
 		if outcome is None:
 			logging.debug("CQC %s: Measurement failed", self.name)
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)]
@@ -544,7 +565,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 	def cmd_measure_inplace(self, cqc_header, cmd, xtra):
 
 		# Call measure with inplace=True
-		succ = yield self.cmd_measure(cqc_header, cmd, xtra, inplace=True)
+		try:
+			succ = yield self.cmd_measure(cqc_header, cmd, xtra, inplace=True)
+		except Exception as e:
+			raise e
+
 
 		return succ
 
@@ -560,11 +585,19 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			logging.debug(e)
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
 
-		outcome = yield virt_qubit.callRemote("measure", inplace=True)
+		try:
+			outcome = yield virt_qubit.callRemote("measure", inplace=True)
+		except Exception as e:
+			raise e
+
 
 		# If state is |1> do correction
 		if outcome:
-			yield virt_qubit.callRemote("apply_X")
+			try:
+				yield virt_qubit.callRemote("apply_X")
+			except Exception as e:
+				raise e
+
 		return []
 
 	@inlineCallbacks
@@ -591,10 +624,16 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		except UnknownQubitError as e:
 			logging.debug(e)
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
+		except Exception as e:
+			raise e
 
 		# Send instruction to transfer the qubit
-		yield self.factory.virtRoot.callRemote("cqc_send_qubit", virt_num, target_name, cqc_header.app_id,
+		try:
+			yield self.factory.virtRoot.callRemote("cqc_send_qubit", virt_num, target_name, cqc_header.app_id,
 											   xtra.remote_app_id)
+		except Exception as e:
+			raise e
+
 		logging.debug("CQC %s: Sent App ID %d qubit id %d to %s", self.name, cqc_header.app_id, cmd.qubit_id,
 					  target_name)
 
@@ -617,7 +656,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		no_qubit = True
 		virt_qubit = None
 		for _ in range(CQC_CONF_RECV_TIMEOUT):
-			virt_qubit = yield self.factory.virtRoot.callRemote("cqc_get_recv", cqc_header.app_id)
+			try:
+				virt_qubit = yield self.factory.virtRoot.callRemote("cqc_get_recv", cqc_header.app_id)
+			except Exception as e:
+				raise e
+
 			if virt_qubit:
 				no_qubit = False
 				break
@@ -683,14 +726,20 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		return_messages = []
 
 		# Create the first qubit
-		(msgs, succ, q_id1) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
+		try:
+			(msgs, succ, q_id1) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
+		except Exception as e:
+			raise e
 
 		return_messages.extend(msgs)
 		if not succ:
 			return return_messages
 
 		# Create the second qubit
-		(msgs, succ, q_id2) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
+		try:
+			(msgs, succ, q_id2) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
+		except Exception as e:
+			raise e
 
 		return_messages.extend(msgs)
 		if not succ:
@@ -707,12 +756,20 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		xtra_cnot.setVals(q_id2)
 
 		# Produce EPR-pair
-		msgs = yield self.cmd_h(cqc_header, cmd1, None)
+		try:
+			msgs = yield self.cmd_h(cqc_header, cmd1, None)
+		except Exception as e:
+			raise e
+
 		# Should not give back any messages, if it does, send it back
 		if len(msgs) > 0:
 			return_messages.extend(msgs)
 			return return_messages
-		msgs = yield self.cmd_cnot(cqc_header, cmd1, xtra_cnot)
+		try:
+			msgs = yield self.cmd_cnot(cqc_header, cmd1, xtra_cnot)
+		except Exception as e:
+			raise e
+
 		if len(msgs) > 0:
 			return_messages.extend(msgs)
 			return return_messages
@@ -725,7 +782,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		ent_info.setVals(host_node, host_port, host_app_id, remote_node, remote_port, remote_app_id, ent_id,
 						 int(time.time()), int(time.time()), 0, 1)
 		# Send second qubit
-		succ = yield self.send_epr_half(cqc_header, cmd2, xtra, ent_info)
+		try:
+			succ = yield self.send_epr_half(cqc_header, cmd2, xtra, ent_info)
+		except Exception as e:
+			raise e
+
 		if not succ:
 			# Failed to send the qubit, destroy it instead
 			logging.debug("CQC %s: Failed to send epr qubit, destroying qubits", self.name)
@@ -768,6 +829,8 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		except UnknownQubitError as e:
 			logging.debug(e)
 			return False
+		except Exception as e:
+			raise e
 
 		# Lookup the name of the remote node used within SimulaQron
 		target_name = self.factory.lookup(xtra.remote_node, xtra.remote_port)
@@ -780,8 +843,12 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		updated_ent_info.switch_nodes()
 		raw_updated_ent_info = updated_ent_info.pack()
 		# Send instruction to transfer the qubit
-		yield self.factory.virtRoot.callRemote("cqc_send_epr_half", virt_num, target_name, cqc_header.app_id,
+		try:
+			yield self.factory.virtRoot.callRemote("cqc_send_epr_half", virt_num, target_name, cqc_header.app_id,
 											   xtra.remote_app_id, raw_updated_ent_info)
+		except Exception as e:
+			raise e
+
 		logging.debug("CQC %s: Sent App ID %d half a EPR pair as qubit id %d to %s", self.name, cqc_header.app_id,
 					  cmd.qubit_id, target_name)
 		# Remove from active mapped qubits
@@ -805,7 +872,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		virt_qubit = None
 		ent_info = None
 		for _ in range(CQC_CONF_RECV_EPR_TIMEOUT):
-			data = yield self.factory.virtRoot.callRemote("cqc_get_epr_recv", cqc_header.app_id)
+			try:
+				data = yield self.factory.virtRoot.callRemote("cqc_get_epr_recv", cqc_header.app_id)
+			except Exception as e:
+				raise e
+
 			if data:
 				no_qubit = False
 				(virt_qubit, rawEntInfo) = data
@@ -865,8 +936,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		return_messages = []
 		try:
 			self.factory._lock.acquire()
+			try:
+				virt = yield self.factory.virtRoot.callRemote("new_qubit")
+			except Exception as e:
+				raise e
 
-			virt = yield self.factory.virtRoot.callRemote("new_qubit")
 			if not virt:  # if no more qubits
 				raise quantumError("No more qubits available")
 
@@ -917,8 +991,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		except UnknownQubitError as error:
 			logging.debug(error)
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
+		try:
+			yield virt_qubit.callRemote(gate)
+		except Exception as e:
+			raise e
 
-		yield virt_qubit.callRemote(gate)
 		return []
 
 	@inlineCallbacks
@@ -935,9 +1012,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		except UnknownQubitError as e:
 			logging.debug(e)
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
+		try:
+			yield control.callRemote(gate, target)
+		except Exception as e:
+			raise e
 
-		yield control.callRemote(gate, target)
-		# res = yield self.apply_two_qubit_gate(cqc_header, cmd.qubit_id, xtra.qubit.id, "cnot_onto")
 		return []
 
 	def get_virt_qubit(self, header, qubit_id):
@@ -962,7 +1041,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# First let's get the general virtual qubit reference, if any
 		general_ref = self.get_virt_qubit(header, qubit_id)
 
-		num = yield general_ref.callRemote("get_virt_num")
+		try:
+			num = yield general_ref.callRemote("get_virt_num")
+		except Exception as e:
+			raise e
+
 
 		return num
 
