@@ -31,11 +31,9 @@
 #
 # main
 #
-import sys
 import unittest
 
-from cqc.backend.cqcHeader import *
-from cqc.pythonLib.cqc import CQCConnection, qubit, CQCNoQubitError, CQCGeneralError, CQCUnsuppError
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection, CQCNoQubitError, qubit
 
 
 class CQCFactoryTest(unittest.TestCase):

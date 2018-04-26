@@ -35,8 +35,7 @@ import sys
 
 import numpy as np
 import qutip
-from cqc.backend.cqcHeader import *
-from cqc.pythonLib.cqc import CQCConnection, qubit
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
 
 
 def calc_exp_values_single(q):
@@ -89,7 +88,10 @@ def calc_exp_values_two(q):
 
 def prep_I_CQC_FACTORY(cqc):
 	q = qubit(cqc, print_info=False)
-	cqc.sendFactory(q._qID, CQC_CMD_I, 4)
+	cqc.set_pending(True)
+	q.I(print_info=False)
+	cqc.flush_factory(3, print_info=False)
+	cqc.set_pending(False)
 	return q
 
 
@@ -288,6 +290,7 @@ def prep_CNOT_control_CQC_FACTORY_odd(cqc):
 	q2.measure(print_info=False)
 	return q1
 
+
 def prep_CNOT_target_CQC_FACTORY_even(cqc):
 	q1 = qubit(cqc, print_info=False)
 	q2 = qubit(cqc, print_info=False)
@@ -310,6 +313,7 @@ def prep_CNOT_target_CQC_FACTORY_odd(cqc):
 	cqc.set_pending(False)
 	q1.measure(print_info=False)
 	return q2
+
 
 def prep_CPHASE_control_CQC_FACTORY_even(cqc):
 	q1 = qubit(cqc, print_info=False)
@@ -337,6 +341,7 @@ def prep_CPHASE_control_CQC_FACTORY_odd(cqc):
 	q2.H(print_info=False)
 	q2.measure(print_info=False)
 	return q1
+
 
 def prep_CPHASE_target_CQC_FACTORY_even(cqc):
 	q1 = qubit(cqc, print_info=False)
