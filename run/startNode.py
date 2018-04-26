@@ -29,7 +29,7 @@
 
 from SimulaQron.virtNode.virtual import *
 
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=Settings.CONF_LOGGING_LEVEL_FRONTEND)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=Settings.CONF_LOGGING_LEVEL_BACKEND)
 
 
 # args.hostName instead of sys.argv[1] ?

@@ -362,6 +362,37 @@ class CQCConnection:
 		cmd_msg = cmd_hdr.pack()
 		self._s.send(cmd_msg)
 
+	def allocate_qubits(self, num_qubits, print_info=False):
+		"""
+		Requests the backend to reserve some qubits
+		:param num_qubits: The amount of qubits to reserve
+		:param print_info: If info should be printed
+		:return: A list of qubits
+		"""
+
+		# CQC header
+		hdr = CQCHeader()
+		hdr.setVals(CQC_VERSION, CQC_TP_COMMAND, self._appID, CQC_CMD_HDR_LENGTH)
+		msg = hdr.pack()
+
+		# Command header
+		cmd_hdr = CQCCmdHeader()
+		cmd_hdr.setVals(num_qubits, CQC_CMD_ALLOCATE, 0, 1, 0)
+		cmd_msg = cmd_hdr.pack()
+
+		self._s.send(msg + cmd_msg)
+		qubits = []
+		for _ in range(num_qubits):
+			msg = self.readMessage()
+			self.check_error(msg[0])
+			if msg[0].tp != CQC_TP_NEW_OK:
+				raise CQCUnsuppError("Unexpected message send back from backend")
+			qubits.append(self.parse_CQC_msg(msg))
+			if print_info:
+				self.print_CQC_msg(msg)
+		return qubits
+
+
 	def sendFactory(self, qID, command, num_iter, notify=1, block=1, action=0, xtra_qID=-1, remote_appID=0,
 					remote_node=0, remote_port=0, step_size=0, print_info=False):
 		"""
@@ -373,7 +404,7 @@ class CQCConnection:
 			:command:	 Command to be executed, eg CQC_CMD_H
 			:num_iter:	 Number of times to execute command
 			:nofify:	 Do we wish to be notified when done.
-			:block:		 Do we want the qubit to be blocked
+			:block:		 Do we want the factory to be blocked
 			:action:	 Are there more commands to be executed
 			:xtra_qID:	 Extra qubit ID for for example CNOT
 			:remote_appID:	 Application ID of remote host

@@ -324,7 +324,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 				logging.debug("CQC {}: Unknown command {}".format(self.name, cmd.instr))
 				msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
 				return_messages.append(msg)
-				return return_messages
+				return return_messages, False, 0
 			try:
 				msgs = yield self.commandHandlers[cmd.instr](cqc_header, cmd, xtra)
 			except Exception as e:
