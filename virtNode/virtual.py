@@ -1664,7 +1664,8 @@ class virtualQubit(pb.Referenceable):
 					logging.debug("RUN GATE")
 					getattr(self.simQubit, localName)(targetNum)
 		except Exception as e:
-			logging.error("VIRTUAL NODE %s: Cannot perform two qubit gate %s", self.virtNode.name, e)
+			logging.error("VIRTUAL NODE %s: Cannot perform two qubit gate %s:", self.virtNode.name, e)
+			raise e
 
 		finally:
 			# We need to release all the locks, no matter what happened

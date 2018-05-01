@@ -1036,6 +1036,10 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		except UnknownQubitError as e:
 			logging.debug(e)
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
+		# Return an error if the control and target are equal, can not do this
+		if control == target:
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)]
+
 		try:
 			yield control.callRemote(gate, target)
 		except Exception as e:

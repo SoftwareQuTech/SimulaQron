@@ -183,12 +183,12 @@ class CQCConnection:
 			self._classicalServer.close()
 			self._classicalServer = None
 
-	def recvClassical(self,timout=1, msg_size=1024,close_after=True):
+	def recvClassical(self, timout=1, msg_size=1024, close_after=True):
 		if not self._classicalServer:
 			self.startClassicalServer()
-		for _ in range(10*timout):
-			msg=self._classicalServer.recv(msg_size)
-			if len(msg)>0:
+		for _ in range(10 * timout):
+			msg = self._classicalServer.recv(msg_size)
+			if len(msg) > 0:
 				if close_after:
 					self.closeClassicalServer()
 				return msg
@@ -234,7 +234,7 @@ class CQCConnection:
 			s = self._classicalConn.pop(name)
 			s.close()
 
-	def sendClassical(self,name,msg,close_after=True):
+	def sendClassical(self, name, msg, close_after=True):
 		"""
 		Sends a classical message to another host in the application network.
 
@@ -391,7 +391,6 @@ class CQCConnection:
 			if print_info:
 				self.print_CQC_msg(msg)
 		return qubits
-
 
 	def sendFactory(self, qID, command, num_iter, notify=1, block=1, action=0, xtra_qID=-1, remote_appID=0,
 					remote_node=0, remote_port=0, step_size=0, print_info=False):
@@ -581,13 +580,13 @@ class CQCConnection:
 			# Lookup host name
 			remote_node = entInfoHdr.node_B
 			remote_port = entInfoHdr.port_B
-			remote_name=None
+			remote_name = None
 			for node in self._cqcNet.hostDict.values():
 				if (node.ip == remote_node) and (node.port == remote_port):
 					remote_name = node.name
 					break
-			if remote_name==None:
-				raise RuntimeError("Remote node ({},{}) is not in config-file.".format(remote_node,remote_port))
+			if remote_name == None:
+				raise RuntimeError("Remote node ({},{}) is not in config-file.".format(remote_node, remote_port))
 
 			print("CQC tells App {}: 'EPR created with node {}, using qubit with ID {}'".format(self.name, remote_name,
 																								notifyHdr.qubit_id))
@@ -1427,15 +1426,29 @@ class qubit:
 		"""
 		# check if qubit is active
 		self.check_active()
+		target.check_active()
 
-		# print info
-		if print_info:
-			print("App {} tells CQC: 'Perform CNOT to qubits with IDs {}(control) {}(target)'".format(self._cqc.name,
-																									  self._qID,
-																									  target._qID))
+		if self._cqc != target._cqc:
+			raise CQCUnsuppError("Multi qubit operations can only operate on qubits in the same process")
+
+		if self == target:
+			raise CQCUnsuppError("Cannot perform multi qubit operation where control and target are the same")
+
 		if self._cqc.pend_messages:
+			# print info
+			if print_info:
+				print("App {} pends message: 'Perform CNOT to qubits with IDs {}(control) {}(target)'".format(
+					self._cqc.name,
+					self._qID,
+					target._qID))
 			self._cqc.pending_messages.append([self, command, int(notify), int(block), target._qID])
 		else:
+			# print info
+			if print_info:
+				print(
+					"App {} tells CQC: 'Perform CNOT to qubits with IDs {}(control) {}(target)'".format(self._cqc.name,
+																										self._qID,
+																										target._qID))
 			self._cqc.sendCmdXtra(self._qID, command, notify=int(notify), block=int(block), xtra_qID=target._qID)
 			if notify:
 				message = self._cqc.readMessage()
