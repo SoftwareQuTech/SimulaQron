@@ -365,8 +365,9 @@ class CQCLogMessageHandler(CQCMessageHandler):
 
 		return [cqc_msg, msg]
 
-	def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False, return_succ=False):
-		self.parse_data(cqc_header, cmd, xtra, "Create new qubit")
+	def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False, return_succ=False, to_file=True):
+		if to_file:
+			self.parse_data(cqc_header, cmd, xtra, "Create new qubit")
 		q_id = CQCLogMessageHandler.cur_qubit_id
 		CQCLogMessageHandler.cur_qubit_id += 1
 		return_messages = []
@@ -395,7 +396,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		cmd.qubit_id = 0
 		msgs = []
 		for _ in range(num_qubits):
-			new_msgs = self.cmd_new(cqc_header, cmd, xtra)
+			new_msgs = self.cmd_new(cqc_header, cmd, xtra, to_file=False)
 			msgs.extend(new_msgs)
 		return msgs
 

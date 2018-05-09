@@ -52,7 +52,6 @@ class CQCMessageTest(unittest.TestCase):
 		try:
 			os.remove("{}/logFileAlice.json".format(CQCLogMessageHandler.dir_path))
 			os.remove("{}/logFileBob.json".format(CQCLogMessageHandler.dir_path))
-
 		except OSError:
 			pass
 
@@ -265,18 +264,8 @@ class CQCMessageTest(unittest.TestCase):
 		bob = CQCConnection("Bob", appID=2, print_info=False)
 		q1 = qubit(self._alice, print_info=False)
 		q2 = qubit(bob, print_info=False)
-		q1.cnot(q2, print_info=False)
-		lastEntry = get_last_entries(1)[0]
-		cmd_header = lastEntry['cmd_header']
-		self.assertEqual(cmd_header['instruction'], CQC_CMD_CNOT)
-		self.assertEqual(cmd_header['block'], True)
-		self.assertEqual(cmd_header['notify'], True)
-		cqc_header = lastEntry['cqc_header']
-		self.assertEqual(cqc_header['type'], CQC_TP_COMMAND)
-		self.assertEqual(cqc_header['header_length'], CQC_CMD_HDR_LENGTH + CQCXtraQubitHeader.HDR_LENGTH)
-		self.assertEqual(cqc_header['app_id'], 1)
-		xtra_header = lastEntry['xtra_header']
-		self.assertEqual(xtra_header['qubit_id'], q2._qID)
+		with self.assertRaises(CQCUnsuppError):
+			q1.cnot(q2, print_info=False)
 		bob.close()
 
 	def testCPhase(self):
@@ -770,6 +759,42 @@ class CQCMessageTest(unittest.TestCase):
 			xEntry = lastEntries[i]
 			x_cmd_cmd_header = xEntry['cmd_header']
 			self.assertEqual(x_cmd_cmd_header['instruction'], CQC_CMD_EPR_RECV)
+
+	def testAllocate0(self):
+		qubits = self._alice.allocate_qubits(0, print_info=False)
+
+		self.assertEqual(qubits, [])
+
+		entry = get_last_entries(1)[0]
+		cqc_hdr = entry['cqc_header']
+		self.assertEqual(cqc_hdr['type'], CQC_TP_COMMAND)
+		self.assertEqual(cqc_hdr['header_length'], CQCCmdHeader.HDR_LENGTH)
+
+		cmd_hdr = entry['cmd_header']
+		self.assertEqual(cmd_hdr['instruction'], CQC_CMD_ALLOCATE)
+		self.assertEqual(cmd_hdr['qubit_id'], 0)
+
+	def testAllocate10(self):
+		qubits = self._alice.allocate_qubits(10, print_info=False)
+
+		self.assertEqual(len(qubits), 10)
+
+		curID = qubits[0]._qID
+		for q in qubits[1:]:
+			self.assertEqual(q._qID, curID + 1)
+			curID = q._qID
+
+		entry = get_last_entries(1)[0]
+		cqc_hdr = entry['cqc_header']
+		self.assertEqual(cqc_hdr['type'], CQC_TP_COMMAND)
+		self.assertEqual(cqc_hdr['header_length'], CQCCmdHeader.HDR_LENGTH)
+
+		cmd_hdr = entry['cmd_header']
+		self.assertEqual(cmd_hdr['instruction'], CQC_CMD_ALLOCATE)
+		self.assertEqual(cmd_hdr['qubit_id'], 10)
+
+
+
 
 
 if __name__ == '__main__':

@@ -362,12 +362,14 @@ class CQCConnection:
 		cmd_msg = cmd_hdr.pack()
 		self._s.send(cmd_msg)
 
-	def allocate_qubits(self, num_qubits, print_info=False):
+	def allocate_qubits(self, num_qubits, print_info=False, notify=True, block=True):
 		"""
 		Requests the backend to reserve some qubits
 		:param num_qubits: The amount of qubits to reserve
 		:param print_info: If info should be printed
 		:return: A list of qubits
+		:param notify:	 Do we wish to be notified when done.
+		:param block:		 Do we want the qubit to be blocked
 		"""
 
 		# CQC header
@@ -377,7 +379,7 @@ class CQCConnection:
 
 		# Command header
 		cmd_hdr = CQCCmdHeader()
-		cmd_hdr.setVals(num_qubits, CQC_CMD_ALLOCATE, 0, 1, 0)
+		cmd_hdr.setVals(num_qubits, CQC_CMD_ALLOCATE, int(notify), int(block), 0)
 		cmd_msg = cmd_hdr.pack()
 
 		self._s.send(cqc_msg + cmd_msg)
@@ -390,6 +392,12 @@ class CQCConnection:
 			qubits.append(self.parse_CQC_msg(msg))
 			if print_info:
 				self.print_CQC_msg(msg)
+		if notify:
+			message = self.readMessage()
+			if message[0].tp != CQC_TP_DONE:
+				raise CQCUnsuppError(
+					"Unexpected message send back from the server. Message: {}".format(message[0].printable()))
+
 		return qubits
 
 	def release_qubits(self, qubits, print_info=False, notify=True, block=False, action=False):
