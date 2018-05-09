@@ -1004,8 +1004,30 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			raise e
 		return msgs
 
+	@inlineCallbacks
 	def cmd_release(self, cqc_header, cmd, xtra):
-		pass
+		"""
+		Release
+		"""
+		logging.debug("CQC %s: Releasing App ID %d qubit id %d", self.name, cqc_header.app_id, cmd.qubit_id)
+		try:
+			virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
+		except UnknownQubitError as e:
+			logging.debug(e)
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)]
+		except Exception as e:
+			raise e
+
+		try:
+			outcome = yield virt_qubit.callRemote("measure", False)
+		except Exception as e:
+			raise e
+
+		if outcome is None:
+			logging.debug("CQC %s: Release failed", self.name)
+			return [self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)]
+
+		return []
 
 	@inlineCallbacks
 	def apply_single_qubit_gate(self, cqc_header, qubit_id, gate):

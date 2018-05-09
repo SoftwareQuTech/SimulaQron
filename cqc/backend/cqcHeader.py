@@ -101,7 +101,7 @@ class CQCHeader:
 		"""
 			Initialize using values received from a packet.
 		"""
-		if headerBytes == None:
+		if headerBytes is None:
 			self.is_set = False
 			self.version = 0
 			self.tp = 0
@@ -314,6 +314,7 @@ class CQCXtraHeader:
 		toPrint = toPrint + "Command Length: " + str(self.cmdLength)
 
 		return toPrint
+
 
 class CQCSequenceHeader:
 	"""

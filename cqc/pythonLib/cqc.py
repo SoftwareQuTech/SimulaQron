@@ -346,7 +346,7 @@ class CQCConnection:
 
 			:qID:		 qubit ID
 			:command:	 Command to be executed, eg CQC_CMD_H
-			:nofify:	 Do we wish to be notified when done.
+			:notify:	 Do we wish to be notified when done.
 			:block:		 Do we want the qubit to be blocked
 			:action:	 Are there more commands to be executed
 		"""
@@ -391,6 +391,56 @@ class CQCConnection:
 			if print_info:
 				self.print_CQC_msg(msg)
 		return qubits
+
+	def release_qubits(self, qubits, print_info=False, notify=True, block=False, action=False):
+		"""
+		Release qubits so backend can free them up for other uses
+		:param qubits: a list of qubits to be released
+		:param print_info: If info should be printed
+		:param notify:	 Do we wish to be notified when done.
+		:param block:		 Do we want the qubit to be blocked
+		:param action:	 Execute the releases recursively or sequencely
+		"""
+		if isinstance(qubits, qubit):
+			qubits = [qubits]
+		assert isinstance(qubits, list)
+		n = len(qubits)
+		if action:
+			hdr_length = CQCCmdHeader.HDR_LENGTH + CQCSequenceHeader.HDR_LENGTH
+		else:
+			hdr_length = CQCCmdHeader.HDR_LENGTH
+		hdr = CQCHeader()
+		hdr.setVals(CQC_VERSION, CQC_TP_COMMAND, self._appID, hdr_length * n)
+		cqc_msg = hdr.pack()
+
+		release_messages = b''
+
+		for i in range(n):
+			q = qubits[i]
+			try:
+				q.check_active()
+			except QubitNotActiveError as e:
+				raise QubitNotActiveError(str(e) + ". Qubit {} is not active. None of the qubits are released".format(q._qID))
+			q._active = False
+			cmd_hdr = CQCCmdHeader()
+			cmd_hdr.setVals(q._qID, CQC_CMD_RELEASE, int(notify), int(block), int(action))
+			release_messages += cmd_hdr.pack()
+			if action:
+				seq_hdr = CQCSequenceHeader()
+				# After this one we are sending n-i-1 more releases
+				seq_hdr.setVals(hdr_length*(n-i-1))
+				release_messages += seq_hdr.pack()
+
+		self._s.send(cqc_msg + release_messages)
+
+		if notify:
+			msg = self.readMessage()
+			self.check_error(msg[0])
+			if msg[0].tp != CQC_TP_DONE:
+				raise CQCUnsuppError(
+					"Unexpected message send back from the server. Message: {}".format(msg[0].printable()))
+
+
 
 	def sendFactory(self, qID, command, num_iter, notify=1, block=1, action=0, xtra_qID=-1, remote_appID=0,
 					remote_node=0, remote_port=0, step_size=0, print_info=False):
@@ -1218,7 +1268,7 @@ class qubit:
 		if self._cqc.pend_messages:
 			return  # will be handled in the flush, not here
 		if not self._active:
-			raise QubitNotActiveError("Qubit is not active, has either been sent, measured or not received")
+			raise QubitNotActiveError("Qubit is not active, has either been sent, measured, released or not received")
 
 	def _single_qubit_gate(self, command, notify, block, print_info):
 		"""
