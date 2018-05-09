@@ -385,3 +385,20 @@ class CQCLogMessageHandler(CQCMessageHandler):
 			return return_messages, True
 		else:
 			return return_messages
+
+	def cmd_allocate(self, cqc_header, cmd, xtra):
+		"""
+		Allocate multipe qubits.
+		"""
+		self.parse_data(cqc_header, cmd, xtra, "Allocating qubits")
+		num_qubits = cmd.qubit_id
+		cmd.qubit_id = 0
+		msgs = []
+		for _ in range(num_qubits):
+			new_msgs = self.cmd_new(cqc_header, cmd, xtra)
+			msgs.extend(new_msgs)
+		return msgs
+
+	def cmd_release(self, cqc_header, cmd, xtra):
+		self.parse_data(cqc_header, cmd, xtra, "Releasing qubit")
+		return []
