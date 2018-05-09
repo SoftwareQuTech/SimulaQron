@@ -401,10 +401,13 @@ class CQCConnection:
 		:param block:		 Do we want the qubit to be blocked
 		:param action:	 Execute the releases recursively or sequencely
 		"""
+
 		if isinstance(qubits, qubit):
 			qubits = [qubits]
 		assert isinstance(qubits, list)
 		n = len(qubits)
+		if print_info:
+			print("App {} tells CQC: Release {} qubits".format(self.name, n))
 		if action:
 			hdr_length = CQCCmdHeader.HDR_LENGTH + CQCSequenceHeader.HDR_LENGTH
 		else:
@@ -420,7 +423,8 @@ class CQCConnection:
 			try:
 				q.check_active()
 			except QubitNotActiveError as e:
-				raise QubitNotActiveError(str(e) + ". Qubit {} is not active. None of the qubits are released".format(q._qID))
+				raise QubitNotActiveError(
+					str(e) + ". Qubit {} is not active. None of the qubits are released".format(q._qID))
 			q._active = False
 			cmd_hdr = CQCCmdHeader()
 			cmd_hdr.setVals(q._qID, CQC_CMD_RELEASE, int(notify), int(block), int(action))
@@ -428,7 +432,7 @@ class CQCConnection:
 			if action:
 				seq_hdr = CQCSequenceHeader()
 				# After this one we are sending n-i-1 more releases
-				seq_hdr.setVals(hdr_length*(n-i-1))
+				seq_hdr.setVals(hdr_length * (n - i - 1))
 				release_messages += seq_hdr.pack()
 
 		self._s.send(cqc_msg + release_messages)
@@ -439,8 +443,8 @@ class CQCConnection:
 			if msg[0].tp != CQC_TP_DONE:
 				raise CQCUnsuppError(
 					"Unexpected message send back from the server. Message: {}".format(msg[0].printable()))
-
-
+			if print_info:
+				self.print_CQC_msg(msg)
 
 	def sendFactory(self, qID, command, num_iter, notify=1, block=1, action=0, xtra_qID=-1, remote_appID=0,
 					remote_node=0, remote_port=0, step_size=0, print_info=False):
@@ -1609,6 +1613,16 @@ class qubit:
 				message = self._cqc.readMessage()
 				if print_info:
 					self._cqc.print_CQC_msg(message)
+
+	def release(self, notify=True, block=False, print_info=False):
+		"""
+		Release the current qubit
+		:param notify: Do we wish to be notified when done
+		:param block: Do we want the qubit to be blocked
+		:param print_info: If info should be printend
+		:return:
+		"""
+		return self._cqc.release_qubits([self], notify=notify, block=block, print_info=print_info)
 
 	def getTime(self, block=True, print_info=True):
 		"""
