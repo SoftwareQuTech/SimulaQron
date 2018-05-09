@@ -781,6 +781,7 @@ class CQCMessageTest(unittest.TestCase):
 
 		curID = qubits[0]._qID
 		for q in qubits[1:]:
+			self.assertTrue(q._active)
 			self.assertEqual(q._qID, curID + 1)
 			curID = q._qID
 
@@ -793,8 +794,30 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cmd_hdr['instruction'], CQC_CMD_ALLOCATE)
 		self.assertEqual(cmd_hdr['qubit_id'], 10)
 
+	def testRelease(self):
+		qubits = self._alice.allocate_qubits(10, print_info=False)
+		self._alice.release_qubits(qubits, print_info=False)
 
+		for q in qubits:
+			self.assertFalse(q._active)
 
+		entries = get_last_entries(10)
+		for i in range(10):
+			entry = entries[i]
+			cqc_hdr = entry['cqc_header']
+			self.assertEqual(cqc_hdr['type'], CQC_TP_COMMAND)
+			self.assertEqual(cqc_hdr['header_length'], 10*CQCCmdHeader.HDR_LENGTH)
+
+			cmd_hdr = entry['cmd_header']
+			self.assertEqual(cmd_hdr['instruction'], CQC_CMD_RELEASE)
+			self.assertEqual(cmd_hdr['qubit_id'], qubits[i]._qID)
+
+	def testReleaseWhenAlreadyReleased(self):
+		qubits = self._alice.allocate_qubits(10, print_info=False)
+		qubits[0].measure(print_info=False)
+		with self.assertRaises(QubitNotActiveError):
+			self._alice.release_qubits(qubits, print_info=False)
+		self.assertTrue(qubits[1]._active)
 
 
 if __name__ == '__main__':
