@@ -27,6 +27,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from abc import ABC, abstractmethod
+from heapq import heappush, heappop, heapify
 
 from SimulaQron.cqc.backend.cqcConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
@@ -291,7 +292,6 @@ class CQCMessageHandler(ABC):
 				return_messages.append(self.create_return_message(header.app_id, CQC_TP_DONE))
 		return return_messages
 
-
 	@abstractmethod
 	def handle_hello(self, header, data):
 		pass
@@ -390,9 +390,8 @@ class CQCMessageHandler(ABC):
 
 
 class SimulaqronCQCHandler(CQCMessageHandler):
-
 	# Dictionary storing the next unique qubit id for each used app_id
-	_next_q_id = {}
+	_available_q_ids = {}
 
 	# Dictionary storing the next unique entanglement id for each used (host_app_id,remote_node,remote_app_id)
 	_next_ent_id = {}
@@ -563,6 +562,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 		if not inplace:
 			# Remove from active mapped qubits
+			self.remove_qubit_id(cqc_header.app_id, cmd.qubit_id)
 			del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
 
 		return [cqc_msg, msg]
@@ -642,6 +642,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 					  target_name)
 
 		# Remove from active mapped qubits
+		self.remove_qubit_id(cqc_header.app_id, cmd.qubit_id)
 		del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
 
 		return []
@@ -856,6 +857,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		logging.debug("CQC %s: Sent App ID %d half a EPR pair as qubit id %d to %s", self.name, cqc_header.app_id,
 					  cmd.qubit_id, target_name)
 		# Remove from active mapped qubits
+		self.remove_qubit_id(cqc_header.app_id, cmd.qubit_id)
 		del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
 
 		return True
@@ -1027,6 +1029,8 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			logging.debug("CQC %s: Release failed", self.name)
 			return [self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)]
 
+		self.remove_qubit_id(cqc_header.app_id, cmd.qubit_id)
+
 		return []
 
 	@inlineCallbacks
@@ -1103,21 +1107,28 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		"""
 		Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv
 		"""
-		if app_id in SimulaqronCQCHandler._next_q_id:
-			q_id = SimulaqronCQCHandler._next_q_id[app_id]
-			SimulaqronCQCHandler._next_q_id[app_id] += 1
+		if app_id in SimulaqronCQCHandler._available_q_ids:
+			q_ids = SimulaqronCQCHandler._available_q_ids[app_id]
+			q_id = heappop(q_ids)
+			if not q_ids:
+				heappush(q_ids, q_id+1)
 			return q_id
 		else:
-			"""
-			Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv
-			"""
-			if app_id in SimulaqronCQCHandler._next_q_id:
-				q_id = SimulaqronCQCHandler._next_q_id[app_id]
-				SimulaqronCQCHandler._next_q_id[app_id] += 1
-				return q_id
-			else:
-				SimulaqronCQCHandler._next_q_id[app_id] = 1
-				return 0
+			SimulaqronCQCHandler._available_q_ids[app_id] = []
+			heappush(SimulaqronCQCHandler._available_q_ids[app_id], 2)
+
+			return 1
+
+	@staticmethod
+	def remove_qubit_id(app_id, qubit_id):
+		"""
+		Remove qubit id from current used qubit_id so it can be reused
+		:param app_id: The app id of the current qubit_id
+		:param qubit_id: The qubit id to be removed
+		"""
+		if app_id in SimulaqronCQCHandler._available_q_ids:
+			q_ids = SimulaqronCQCHandler._available_q_ids[app_id]
+			heappush(q_ids, qubit_id)
 
 	@staticmethod
 	def new_ent_id(host_app_id, remote_node, remote_app_id):
@@ -1132,6 +1143,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		else:
 			SimulaqronCQCHandler._next_ent_id[pair_id] = 1
 			return 0
+
 
 
 class UnknownQubitError(Exception):

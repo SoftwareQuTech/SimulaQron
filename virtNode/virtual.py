@@ -428,7 +428,7 @@ class virtualNode(pb.Root):
 		"""
 		Create a new qubit in the default local register.
 		"""
-		logging.debug("%s: Request to create new qubit.", self.myID.name)
+		logging.debug("VIRTUAL NODE %s: Request to create new qubit.", self.myID.name)
 
 		try:
 			# Get a lock to assure IDs are assigned correctly

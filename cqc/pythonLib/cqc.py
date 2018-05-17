@@ -454,7 +454,7 @@ class CQCConnection:
 			if print_info:
 				self.print_CQC_msg(msg)
 
-	def sendactory(self, qID, command, num_iter, notify=1, block=1, action=0, xtra_qID=-1, remote_appID=0,
+	def sendFactory(self, qID, command, num_iter, notify=1, block=1, action=0, xtra_qID=-1, remote_appID=0,
 					remote_node=0, remote_port=0, step_size=0, print_info=False):
 		"""
 		Sends a factory message
