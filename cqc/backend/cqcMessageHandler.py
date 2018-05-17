@@ -192,7 +192,7 @@ class CQCMessageHandler(ABC):
 		return_messages = []
 		while cur_length < length:
 			cmd = CQCCmdHeader(cmd_data[cur_length:cur_length + CQC_CMD_HDR_LENGTH])
-			logging.debug("CQC %s got got command header %s", self.name, cmd.printable())
+			logging.debug("CQC %s got command header %s", self.name, cmd.printable())
 
 			newl = cur_length + cmd.HDR_LENGTH
 			# Should we notify

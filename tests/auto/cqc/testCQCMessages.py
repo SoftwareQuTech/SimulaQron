@@ -443,22 +443,22 @@ class CQCMessageTest(unittest.TestCase):
 		self._alice.set_pending(False)
 		m1 = q1.measure(inplace=True, print_info=False)
 
-		# Checking the factory and the measure, factory should not log any commands
-		lastEntries = get_last_entries(3)
-		factoryEntry = lastEntries[0]
-		factory_cqc_header = factoryEntry['cqc_header']
-		self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
-		expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH
-		self.assertEqual(factory_cqc_header['header_length'], expected_length)
-		self.assertEqual(factoryEntry['factory_iterations'], 1)
+		# Doing a factory once is equal to doing a sequence, so the factory header is not send
+		lastEntries = get_last_entries(2)
+		# factoryEntry = lastEntries[0]
+		# factory_cqc_header = factoryEntry['cqc_header']
+		# self.assertEqual(factory_cqc_header['type'], CQC_TP_FACTORY)
+		# expected_length = CQCFactoryHeader.HDR_LENGTH + CQC_CMD_HDR_LENGTH
+		# self.assertEqual(factory_cqc_header['header_length'], expected_length)
+		# self.assertEqual(factoryEntry['factory_iterations'], 1)
 
-		xEntry = lastEntries[1]
+		xEntry = lastEntries[0]
 		x_cmd_cmd_header = xEntry['cmd_header']
 		self.assertEqual(x_cmd_cmd_header['instruction'], CQC_CMD_X)
 		self.assertEqual(x_cmd_cmd_header['qubit_id'], q1._qID)
 		# cqc header is the same as the first.
 
-		measureEntry = lastEntries[2]
+		measureEntry = lastEntries[1]
 		self.assertEqual(measureEntry['cmd_header']['instruction'], CQC_CMD_MEASURE_INPLACE)
 		self.assertEqual(measureEntry['cmd_header']['qubit_id'], q1._qID)
 

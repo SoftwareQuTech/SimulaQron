@@ -140,6 +140,9 @@ class CQCConnection:
 		self.pend_messages = pend_messages
 		self.pending_messages = []
 
+		# All qubits active for this connection
+		self.active_qubits = []
+
 	def __str__(self):
 		return "Socket to cqc server '{}'".format(self.name)
 
@@ -149,10 +152,12 @@ class CQCConnection:
 		"""
 		return self._appID
 
-	def close(self):
+	def close(self, release_qubits=True):
 		"""
-		Closes the connection.
+		Closes the connection. Releases all qubits
 		"""
+		if release_qubits:
+			self.release_all_qubits()
 		self._s.close()
 		self._appIDs.remove(self._appID)
 
@@ -414,6 +419,10 @@ class CQCConnection:
 			qubits = [qubits]
 		assert isinstance(qubits, list)
 		n = len(qubits)
+
+		if n == 0: # then we don't need to do anything
+			return
+
 		if print_info:
 			print("App {} tells CQC: Release {} qubits".format(self.name, n))
 		if action:
@@ -433,7 +442,7 @@ class CQCConnection:
 			except QubitNotActiveError as e:
 				raise QubitNotActiveError(
 					str(e) + ". Qubit {} is not active. None of the qubits are released".format(q._qID))
-			q._active = False
+			q._set_active(False)
 			cmd_hdr = CQCCmdHeader()
 			cmd_hdr.setVals(q._qID, CQC_CMD_RELEASE, int(notify), int(block), int(action))
 			release_messages += cmd_hdr.pack()
@@ -453,6 +462,13 @@ class CQCConnection:
 					"Unexpected message send back from the server. Message: {}".format(msg[0].printable()))
 			if print_info:
 				self.print_CQC_msg(msg)
+
+	def release_all_qubits(self):
+		"""
+		Releases all qubits off this connection
+		"""
+		return self.release_qubits(self.active_qubits[:])
+
 
 	def sendFactory(self, qID, command, num_iter, notify=1, block=1, action=0, xtra_qID=-1, remote_appID=0,
 					remote_node=0, remote_port=0, step_size=0, print_info=False):
@@ -530,7 +546,7 @@ class CQCConnection:
 				if message[0].tp in {CQC_TP_NEW_OK, CQC_TP_RECV, CQC_TP_EPR_OK}:
 					qID = message[1].qubit_id
 					q = qubit(self, createNew=False, q_id=qID, notify=notify, block=block)
-					q._active = True
+					q._set_active(True)
 					res.append(q)
 				elif message[0].tp == CQC_TP_MEASOUT:
 					outcome = message[1].outcome
@@ -663,7 +679,7 @@ class CQCConnection:
 		(qubit, measurement outcome)
 		:param message: the cqc message to be parsed
 		:param q: the qubit object we should save the qubit to
-		:param is_factory: wether the returned message came from a factory. If so, do not chance the qubit, but create a new one
+		:param is_factory: whether the returned message came from a factory. If so, do not change the qubit, but create a new one
 		:return: the result of the message (either a qubit, or a measurement outcome. Otherwise None
 		"""
 		hdr = message[0]
@@ -672,13 +688,13 @@ class CQCConnection:
 
 		if hdr.tp in {CQC_TP_RECV, CQC_TP_NEW_OK, CQC_TP_EPR_OK}:
 			if is_factory:
-				q._active = False  # Set qubit to inactive so it can't be used anymore
+				q._set_active(False)  # Set qubit to inactive so it can't be used anymore
 				q = qubit(self, createNew=False)
 			if q is None:
 				q = qubit(self, createNew=False)
 			q._qID = notifyHdr.qubit_id
 			q.set_entInfo(entInfoHdr)
-			q._active = True
+			q._set_active(True)
 			return q
 		if hdr.tp in {CQC_TP_MEASOUT, CQC_TP_GET_TIME}:
 			return notifyHdr.outcome
@@ -744,7 +760,7 @@ class CQCConnection:
 					self.print_CQC_msg(message)
 
 			# Deactivate qubit
-			q._active = False
+			q._set_active(False)
 
 	def recvQubit(self, notify=True, block=True, print_info=True):
 		"""
@@ -792,7 +808,7 @@ class CQCConnection:
 			q._qID = q_id
 
 			# Activate and return qubit
-			q._active = True
+			q._set_active(True)
 			return q
 
 	def createEPR(self, name, remote_appID=0, notify=True, block=True, print_info=True):
@@ -851,7 +867,7 @@ class CQCConnection:
 			q.set_entInfo(entInfoHdr)
 			q._qID = q_id
 			# Activate and return qubit
-			q._active = True
+			q._set_active(True)
 			return q
 
 	def recvEPR(self, notify=True, block=True, print_info=True):
@@ -898,7 +914,7 @@ class CQCConnection:
 			q._qID = q_id
 
 			# Activate and return qubit
-			q._active = True
+			q._set_active(True)
 			return q
 
 	def set_pending(self, pend_messages, print_info=False):
@@ -961,7 +977,7 @@ class CQCConnection:
 
 				# set qubit to inactive, since we send it away or measured it
 				if cqc_command == CQC_CMD_SEND or cqc_command == CQC_CMD_MEASURE:
-					q._active = False
+					q._set_active(False)
 
 				q_id = q._qID if q._qID is not None else 0
 
@@ -1188,6 +1204,9 @@ class qubit:
 		# Cqc connection
 		self._cqc = cqc
 
+		# Whether the qubit is active. Will be set in the first run
+		self._active = None
+
 		if createNew:
 			if cqc.pend_messages:
 				# print info
@@ -1197,7 +1216,7 @@ class qubit:
 				cqc.pending_messages.append([self, CQC_CMD_NEW, int(notify), int(block)])
 				# Set q id, None by default
 				self._qID = q_id
-				self._active = False
+				self._set_active(False)
 			else:
 				# print info
 				if print_info:
@@ -1207,7 +1226,7 @@ class qubit:
 				self._cqc.sendCommand(0, CQC_CMD_NEW, notify=int(notify), block=int(block))
 
 				# Activate qubit
-				self._active = True
+				self._set_active(True)
 				# Get qubit id
 				message = self._cqc.readMessage()
 				try:
@@ -1222,7 +1241,7 @@ class qubit:
 						self._cqc.print_CQC_msg(message)
 		else:
 			self._qID = q_id
-			self._active = False  # Why?
+			self._set_active(False)  # Why?
 
 		# Entanglement information
 		self._entInfo = entInfo
@@ -1281,6 +1300,18 @@ class qubit:
 			return  # will be handled in the flush, not here
 		if not self._active:
 			raise QubitNotActiveError("Qubit is not active, has either been sent, measured, released or not received")
+
+	def _set_active(self, be_active):
+		# Check if not already new state
+		if self._active == be_active:
+			return
+		if be_active:
+			self._cqc.active_qubits.append(self)
+		else:
+			if self in self._cqc.active_qubits:
+				self._cqc.active_qubits.remove(self)
+
+		self._active = be_active
 
 	def _single_qubit_gate(self, command, notify, block, print_info):
 		"""
@@ -1584,7 +1615,7 @@ class qubit:
 			# Return measurement outcome
 			message = self._cqc.readMessage()
 			if not inplace:
-				self._active = False
+				self._set_active(False)
 			try:
 				notifyHdr = message[1]
 				return notifyHdr.outcome
