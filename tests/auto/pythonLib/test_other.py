@@ -39,7 +39,7 @@ from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
 
 
 class OthersTest(unittest.TestCase):
-	
+
 	@classmethod
 	def setUpClass(cls):
 		print("Testing others (measure inplace and get time)")

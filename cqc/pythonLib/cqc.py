@@ -1111,7 +1111,7 @@ class CQCConnection:
 		freqs = map(lambda x: x / iterations, accum_outcomes)
 		return list(freqs)
 
-	def test_preparation(self, preparation, exp_values, conf=1, iterations=100, progress=True):
+	def test_preparation(self, preparation, exp_values, conf=2, iterations=100, progress=True):
 		"""
 		Test the preparation of a qubit.
 		Returns True if the expected values are inside the confidence interval produced from the data received from the tomography function
@@ -1129,6 +1129,7 @@ class CQCConnection:
 		freqs = self.tomography(preparation, iterations, progress=progress)
 		for i in range(3):
 			if abs(freqs[i] - exp_values[i]) > epsilon:
+				print(freqs, exp_values, epsilon)
 				return False
 		return True
 

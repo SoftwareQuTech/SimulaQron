@@ -157,7 +157,7 @@ def prep_H_qutip():
 
 #####################################################################################################
 class TwoQubitGateTest(unittest.TestCase):
-	# Initialize the connection
+
 	@classmethod
 	def setUpClass(cls):
 		cls.iterations = 100
@@ -167,6 +167,7 @@ class TwoQubitGateTest(unittest.TestCase):
 		self.cqc.close()
 
 	def setUp(self):
+		# Initialize the connection
 		self.cqc = CQCConnection("Bob", appID=0, print_info=False)
 
 
