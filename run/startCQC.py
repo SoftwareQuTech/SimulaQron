@@ -2,7 +2,7 @@ import logging
 
 import sys
 from SimulaQron.cqc.backend.cqcConfig import CQC_CONF_LINK_WAIT_TIME
-from SimulaQron.cqc.backend.cqcProtocol import CQCFactory
+from SimulaQron.cqc.backend.cqcProtocol import CQCFactory, SimulaqronCQCHandler
 from SimulaQron.general.hostConfig import networkConfig
 from SimulaQron.settings import Settings
 from twisted.internet import reactor
@@ -127,7 +127,7 @@ def main(myName):
 	# Check if we are in the host-dictionary
 	if myName in cqcNet.hostDict:
 		myHost = cqcNet.hostDict[myName]
-		cqc_factory = CQCFactory(myHost, myName, cqcNet)
+		cqc_factory = CQCFactory(myHost, myName, cqcNet, SimulaqronCQCHandler)
 	else:
 		logging.error("LOCAL %s: Cannot start classical communication servers.", myName)
 		return
