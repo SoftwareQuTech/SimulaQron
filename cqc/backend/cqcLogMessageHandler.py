@@ -50,11 +50,12 @@ class CQCLogMessageHandler(CQCMessageHandler):
 	def __init__(self, factory):
 		super().__init__(factory)
 		self.factory = factory
-		CQCLogMessageHandler.file = "{}/logFile{}.json".format(CQCLogMessageHandler.dir_path, factory.name)
+		CQCLogMessageHandler.file = "{}/logFile.json".format(CQCLogMessageHandler.dir_path)
 
 	@classmethod
-	def parse_data(cls, header, cmd, xtra, comment):
+	def parse_data(cls, header, cmd, xtra, comment, node_name):
 		subdata = {}
+		subdata['node_name'] = node_name
 		subdata['comment'] = comment
 		subdata['cqc_header'] = cls.parse_header(header)
 		subdata['cmd_header'] = cls.parse_cmd(cmd)
@@ -65,10 +66,11 @@ class CQCLogMessageHandler(CQCMessageHandler):
 			json.dump(cls.logData, outfile)
 
 	@classmethod
-	def parse_handle_data(cls, header, data, comment):
+	def parse_handle_data(cls, header, data, comment, node_name):
 		cmd_l = CQC_CMD_HDR_LENGTH
 		xtra_l = CQC_CMD_XTRA_LENGTH
 		subdata = {}
+		subdata['node_name'] = node_name
 		subdata['comment'] = comment
 		subdata['cqc_header'] = cls.parse_header(header)
 		if len(data) >= cmd_l:
@@ -80,8 +82,9 @@ class CQCLogMessageHandler(CQCMessageHandler):
 			json.dump(cls.logData, outfile)
 
 	@classmethod
-	def parse_handle_factory(cls, header, data, comment):
+	def parse_handle_factory(cls, header, data, comment, node_name):
 		subdata = {}
+		subdata['node_name'] = node_name
 		subdata['comment'] = comment
 		subdata['cqc_header'] = cls.parse_header(header)
 		fact_hdr = CQCFactoryHeader(data[:CQCFactoryHeader.HDR_LENGTH])
@@ -166,16 +169,16 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		"""
 		Hello just requires us to return hello - for testing availability.
 		"""
-		self.parse_handle_data(header, data, "Handle Hello")
+		self.parse_handle_data(header, data, "Handle Hello", self.factory.name)
 		return super().handle_hello(header, data)
 
 	def handle_factory(self, header, data):
 		# Calls process_command, which should also log
-		self.parse_handle_factory(header, data, "Handle factory")
+		self.parse_handle_factory(header, data, "Handle factory", self.factory.name)
 		return super().handle_factory(header, data)
 
 	def handle_time(self, header, data):
-		self.parse_handle_data(header, data, "Handle time")
+		self.parse_handle_data(header, data, "Handle time", self.factory.name)
 		# Read the command header to learn the qubit ID
 		raw_cmd_header = data[:CQC_CMD_HDR_LENGTH]
 		cmd_hdr = CQCCmdHeader(raw_cmd_header)
@@ -193,55 +196,55 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		return [cqc_msg, msg]
 
 	def cmd_i(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "Identity")
+		self.parse_data(cqc_header, cmd, xtra, "Identity", self.factory.name)
 		return []
 
 	def cmd_x(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "X gate")
+		self.parse_data(cqc_header, cmd, xtra, "X gate", self.factory.name)
 		return []
 
 	def cmd_y(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "Y gate")
+		self.parse_data(cqc_header, cmd, xtra, "Y gate", self.factory.name)
 		return []
 
 	def cmd_z(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "Z gate")
+		self.parse_data(cqc_header, cmd, xtra, "Z gate", self.factory.name)
 		return []
 
 	def cmd_t(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "T gate")
+		self.parse_data(cqc_header, cmd, xtra, "T gate", self.factory.name)
 		return []
 
 	def cmd_h(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "H gate")
+		self.parse_data(cqc_header, cmd, xtra, "H gate", self.factory.name)
 		return []
 
 	def cmd_k(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "K gate")
+		self.parse_data(cqc_header, cmd, xtra, "K gate", self.factory.name)
 		return []
 
 	def cmd_rotx(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "Rotate x")
+		self.parse_data(cqc_header, cmd, xtra, "Rotate x", self.factory.name)
 		return []
 
 	def cmd_roty(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "Rotate y")
+		self.parse_data(cqc_header, cmd, xtra, "Rotate y", self.factory.name)
 		return []
 
 	def cmd_rotz(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "Rotate z")
+		self.parse_data(cqc_header, cmd, xtra, "Rotate z", self.factory.name)
 		return []
 
 	def cmd_cnot(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "CNOT gate")
+		self.parse_data(cqc_header, cmd, xtra, "CNOT gate", self.factory.name)
 		return []
 
 	def cmd_cphase(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "CPhase gate")
+		self.parse_data(cqc_header, cmd, xtra, "CPhase gate", self.factory.name)
 		return []
 
 	def cmd_measure(self, cqc_header, cmd, xtra, inplace=False):
-		self.parse_data(cqc_header, cmd, xtra, "Measure")
+		self.parse_data(cqc_header, cmd, xtra, "Measure", self.factory.name)
 		# We'll always have 2 as outcome
 		cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_MEASOUT, length=CQC_NOTIFY_LENGTH)
 
@@ -252,7 +255,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		return [cqc_msg, msg]
 
 	def cmd_measure_inplace(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "Measure in place")
+		self.parse_data(cqc_header, cmd, xtra, "Measure in place", self.factory.name)
 		# We'll always have 2 as outcome
 		cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_MEASOUT, length=CQC_NOTIFY_LENGTH)
 
@@ -263,15 +266,15 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		return [cqc_msg, msg]
 
 	def cmd_reset(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "Rest")
+		self.parse_data(cqc_header, cmd, xtra, "Rest", self.factory.name)
 		return []
 
 	def cmd_send(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "Send")
+		self.parse_data(cqc_header, cmd, xtra, "Send", self.factory.name)
 		return []
 
 	def cmd_recv(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "Receive")
+		self.parse_data(cqc_header, cmd, xtra, "Receive", self.factory.name)
 		q_id = CQCLogMessageHandler.cur_qubit_id
 		CQCLogMessageHandler.cur_qubit_id += 1
 
@@ -282,7 +285,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		return [recv_msg, msg]
 
 	def cmd_epr(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "Create EPR")
+		self.parse_data(cqc_header, cmd, xtra, "Create EPR", self.factory.name)
 
 		# Get ip and port of this host
 		host_node = self.factory.host.ip
@@ -352,7 +355,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		return return_messages
 
 	def cmd_epr_recv(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "Receive EPR")
+		self.parse_data(cqc_header, cmd, xtra, "Receive EPR", self.factory.name)
 		q_id = CQCLogMessageHandler.cur_qubit_id
 		CQCLogMessageHandler.cur_qubit_id += 1
 
@@ -367,7 +370,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
 
 	def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False, return_succ=False, to_file=True):
 		if to_file:
-			self.parse_data(cqc_header, cmd, xtra, "Create new qubit")
+			self.parse_data(cqc_header, cmd, xtra, "Create new qubit", self.factory.name)
 		q_id = CQCLogMessageHandler.cur_qubit_id
 		CQCLogMessageHandler.cur_qubit_id += 1
 		return_messages = []
@@ -391,7 +394,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		"""
 		Allocate multipe qubits.
 		"""
-		self.parse_data(cqc_header, cmd, xtra, "Allocating qubits")
+		self.parse_data(cqc_header, cmd, xtra, "Allocating qubits", self.factory.name)
 		num_qubits = cmd.qubit_id
 		cmd.qubit_id = 0
 		msgs = []
@@ -401,5 +404,5 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		return msgs
 
 	def cmd_release(self, cqc_header, cmd, xtra):
-		self.parse_data(cqc_header, cmd, xtra, "Releasing qubit")
+		self.parse_data(cqc_header, cmd, xtra, "Releasing qubit", self.factory.name)
 		return []
