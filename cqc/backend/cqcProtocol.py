@@ -43,7 +43,7 @@ from twisted.internet.protocol import Factory, Protocol
 
 class CQCFactory(Factory):
 
-	def __init__(self, host, name, cqc_net):
+	def __init__(self, host, name, cqc_net, backend):
 		"""
 		Initialize CQC Factory.
 
@@ -55,6 +55,7 @@ class CQCFactory(Factory):
 		self.cqcNet = cqc_net
 		self.virtRoot = None
 		self.qReg = None
+		self.backend = backend
 
 		# Dictionary that keeps qubit dictorionaries for each application
 		self.qubitList = {}
@@ -117,8 +118,7 @@ class CQCProtocol(Protocol):
 		self.app_id = 0
 
 		# Define the backend to use. Is a setting in settings.ini
-		backend = Settings.CONF_BACKEND_HANDLER
-		self.messageHandler = backend(factory)
+		self.messageHandler = factory.backend(factory)
 
 		# Flag to determine whether we already received _all_ of the CQC header
 		self.gotCQCHeader = False
