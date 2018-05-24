@@ -26,6 +26,7 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+import unittest
 
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
@@ -193,157 +194,135 @@ def prep_I_qutip():
 
 
 #####################################################################################################
-#
-# main
-#
-def main():
-	# Initialize the connection
-	cqc=CQCConnection("Alice", print_info=False)
+class TwoQubitGateTest(unittest.TestCase):
 
-	iterations = 100
+	@classmethod
+	def setUpClass(cls):
+		cls.iterations = 100
+		sys.stdout.write("Testing two qubit gates gates with {} iterations \r\n".format(cls.iterations))
 
-	# Test I
-	sys.stdout.write("Testing I gate:")
-	exp_values = calc_exp_values(prep_I_qutip())
-	ans = cqc.test_preparation(prep_I_CQC, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
-	# Test X
-	sys.stdout.write("Testing X gate:")
-	exp_values = calc_exp_values(prep_X_qutip())
-	ans = cqc.test_preparation(prep_X_CQC, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def tearDown(self):
+		self.cqc.close()
 
-	# Test Y
-	sys.stdout.write("Testing Y gate:")
-	exp_values = calc_exp_values(prep_Y_qutip())
-	ans = cqc.test_preparation(prep_Y_CQC, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def setUp(self):
+		# Initialize the connection
+		self.cqc = CQCConnection("Alice", appID=0, print_info=False)
 
-	# Test Z
-	sys.stdout.write("Testing Z gate:")
-	exp_values = calc_exp_values(prep_Z_qutip())
-	ans = cqc.test_preparation(prep_Z_CQC, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testIGate(self):
+		# Test I
+		sys.stdout.write("Testing I gate:")
+		exp_values = calc_exp_values(prep_I_qutip())
+		ans = self.cqc.test_preparation(prep_I_CQC, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test H
-	sys.stdout.write("Testing H gate:")
-	exp_values = calc_exp_values(prep_H_qutip())
-	ans = cqc.test_preparation(prep_H_CQC, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testXGate(self):
+		# Test X
+		sys.stdout.write("Testing X gate:")
+		exp_values = calc_exp_values(prep_X_qutip())
+		ans = self.cqc.test_preparation(prep_X_CQC, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test T
-	sys.stdout.write("Testing T gate:")
-	exp_values = calc_exp_values(prep_T_qutip())
-	ans = cqc.test_preparation(prep_T_CQC, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testYGate(self):
+		# Test Y
+		sys.stdout.write("Testing Y gate:")
+		exp_values = calc_exp_values(prep_Y_qutip())
+		ans = self.cqc.test_preparation(prep_Y_CQC, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test K
-	sys.stdout.write("Testing K gate:")
-	exp_values = calc_exp_values(prep_K_qutip())
-	ans = cqc.test_preparation(prep_K_CQC, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testZGate(self):
+		# Test Z
+		sys.stdout.write("Testing Z gate:")
+		exp_values = calc_exp_values(prep_Z_qutip())
+		ans = self.cqc.test_preparation(prep_Z_CQC, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test ROT_X pi/8
-	sys.stdout.write("Testing rotation (X,pi/8) gate:")
-	exp_values = calc_exp_values(prep_rot_qutip([1, 0, 0], np.pi / 8))
-	ans = cqc.test_preparation(prep_rotx1_CQC, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testHGate(self):
+		# Test H
+		sys.stdout.write("Testing H gate:")
+		exp_values = calc_exp_values(prep_H_qutip())
+		ans = self.cqc.test_preparation(prep_H_CQC, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test ROT_X 5*pi/8
-	sys.stdout.write("Testing rotation (X,5*pi/8) gate:")
-	exp_values = calc_exp_values(prep_rot_qutip([1, 0, 0], 5 * np.pi / 8))
-	ans = cqc.test_preparation(prep_rotx2_CQC, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testTGate(self):
+		# Test T
+		sys.stdout.write("Testing T gate:")
+		exp_values = calc_exp_values(prep_T_qutip())
+		ans = self.cqc.test_preparation(prep_T_CQC, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test ROT_Y pi/8
-	sys.stdout.write("Testing rotation (Y,pi/8) gate:")
-	exp_values = calc_exp_values(prep_rot_qutip([0, 1, 0], np.pi / 8))
-	ans = cqc.test_preparation(prep_roty1_CQC, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testKGate(self):
+		# Test K
+		sys.stdout.write("Testing K gate:")
+		exp_values = calc_exp_values(prep_K_qutip())
+		ans = self.cqc.test_preparation(prep_K_CQC, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test ROT_Y 5*pi/8
-	sys.stdout.write("Testing rotation (Y,5*pi/8) gate:")
-	exp_values = calc_exp_values(prep_rot_qutip([0, 1, 0], 5 * np.pi / 8))
-	ans = cqc.test_preparation(prep_roty2_CQC, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testXpi8Rot(self):
+		# Test ROT_X pi/8
+		sys.stdout.write("Testing rotation (X,pi/8) gate:")
+		exp_values = calc_exp_values(prep_rot_qutip([1, 0, 0], np.pi / 8))
+		ans = self.cqc.test_preparation(prep_rotx1_CQC, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test ROT_Z pi/8
-	sys.stdout.write("Testing rotation (Z,pi/8) gate:")
-	exp_values = calc_exp_values(prep_rot_qutip([0, 0, 1], np.pi / 8))
-	ans = cqc.test_preparation(prep_rotz1_CQC, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testX5pi8Rot(self):
+		# Test ROT_X 5*pi/8
+		sys.stdout.write("Testing rotation (X,5*pi/8) gate:")
+		exp_values = calc_exp_values(prep_rot_qutip([1, 0, 0], 5 * np.pi / 8))
+		ans = self.cqc.test_preparation(prep_rotx2_CQC, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test ROT_Z 5*pi/8
-	sys.stdout.write("Testing rotation (Z,5*pi/8) gate:")
-	exp_values = calc_exp_values(prep_rot_qutip([0, 0, 1], 5 * np.pi / 8))
-	ans = cqc.test_preparation(prep_rotz2_CQC, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testYpi8Rot(self):
+		# Test ROT_Y pi/8
+		sys.stdout.write("Testing rotation (Y,pi/8) gate:")
+		exp_values = calc_exp_values(prep_rot_qutip([0, 1, 0], np.pi / 8))
+		ans = self.cqc.test_preparation(prep_roty1_CQC, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test RESET
-	sys.stdout.write("Testing RESET:")
-	exp_values = calc_exp_values(prep_I_qutip())
-	ans = cqc.test_preparation(prep_reset_CQC, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testY5pi8Rot(self):
+		# Test ROT_Y 5*pi/8
+		sys.stdout.write("Testing rotation (Y,5*pi/8) gate:")
+		exp_values = calc_exp_values(prep_rot_qutip([0, 1, 0], 5 * np.pi / 8))
+		ans = self.cqc.test_preparation(prep_roty2_CQC, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Stop the connection
-	cqc.close()
+	def testZpi8Rot(self):
+		# Test ROT_Z pi/8
+		sys.stdout.write("Testing rotation (Z,pi/8) gate:")
+		exp_values = calc_exp_values(prep_rot_qutip([0, 0, 1], np.pi / 8))
+		ans = self.cqc.test_preparation(prep_rotz1_CQC, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
+
+	def testZ5pi8Rot(self):
+		# Test ROT_Z 5*pi/8
+		sys.stdout.write("Testing rotation (Z,5*pi/8) gate:")
+		exp_values = calc_exp_values(prep_rot_qutip([0, 0, 1], 5 * np.pi / 8))
+		ans = self.cqc.test_preparation(prep_rotz2_CQC, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
+
+	def testReset(self):
+		# Test RESET
+		sys.stdout.write("Testing RESET:")
+		exp_values = calc_exp_values(prep_I_qutip())
+		ans = self.cqc.test_preparation(prep_reset_CQC, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
 
 ##################################################################################################
-main()
+
+if __name__ == '__main__':
+	unittest.main()
+

@@ -32,6 +32,7 @@
 # main
 #
 import sys
+import unittest
 
 import numpy as np
 import qutip
@@ -262,6 +263,24 @@ def prep_K_qutip():
 	return K * q
 
 
+def prep_ROT_X(cqc):
+	q = qubit(cqc, print_info=False)
+	cqc.set_pending(True)
+	q.rot_X(step=4, print_info=False)
+	cqc.flush_factory(4, print_info=False)
+	cqc.set_pending(False)
+	return q
+
+
+def prep_ROT_X_qutip():
+	q = qutip.basis(2)
+	theta = np.pi / 8
+	sint = np.sin(theta / 2)
+	cost = np.cos(theta / 2)
+	rot_x_one_eight = cost * qutip.identity(2) - 1j * sint * qutip.sigmax()
+	return rot_x_one_eight * q
+
+
 def prep_mixed_qutip():
 	q = qutip.qeye(2) / 2
 	return q
@@ -371,245 +390,202 @@ def prep_CPHASE_target_CQC_FACTORY_odd(cqc):
 	return q2
 
 
-def main():
-	cqc = CQCConnection("Alice", print_info=False)
+class FactoryGateTest(unittest.TestCase):
 
-	iterations = 100
+	@classmethod
+	def setUpClass(cls):
+		cls.iterations = 100
+		sys.stdout.write("Testing factory gates with {} iterations \r\n".format(cls.iterations))
 
-	# Test I factory
-	sys.stdout.write("Testing I factory:")
-	exp_values = calc_exp_values_single(prep_I_qutip())
-	ans = cqc.test_preparation(prep_I_CQC_FACTORY, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def tearDown(self):
+		self.cqc.close()
 
-	# Test X factory odd
-	sys.stdout.write("Testing X factory (odd):")
-	exp_values = calc_exp_values_single(prep_X_qutip())
-	ans = cqc.test_preparation(prep_X_CQC_FACTORY_ODD, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def setUp(self):
+		self.cqc = CQCConnection("Alice", appID=1, print_info=False)
 
-	# Test X factory even
-	sys.stdout.write("Testing X factory (even):")
-	exp_values = calc_exp_values_single(prep_I_qutip())
-	ans = cqc.test_preparation(prep_X_CQC_FACTORY_EVEN, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testIFactory(self):
+		# Test I factory
+		sys.stdout.write("Testing I factory:")
+		exp_values = calc_exp_values_single(prep_I_qutip())
+		ans = self.cqc.test_preparation(prep_I_CQC_FACTORY, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test Y factory odd
-	sys.stdout.write("Testing Y factory (odd):")
-	exp_values = calc_exp_values_single(prep_Y_qutip())
-	ans = cqc.test_preparation(prep_Y_CQC_FACTORY_ODD, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testXFactory(self):
+		sys.stdout.write("Testing X factory (odd):")
+		exp_values = calc_exp_values_single(prep_X_qutip())
+		ans = self.cqc.test_preparation(prep_X_CQC_FACTORY_ODD, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test Y factory even
-	sys.stdout.write("Testing Y factory (even):")
-	exp_values = calc_exp_values_single(prep_I_qutip())
-	ans = cqc.test_preparation(prep_Y_CQC_FACTORY_EVEN, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+		# Test X factory even
+		sys.stdout.write("Testing X factory (even):")
+		exp_values = calc_exp_values_single(prep_I_qutip())
+		ans = self.cqc.test_preparation(prep_X_CQC_FACTORY_EVEN, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test Z factory odd
-	sys.stdout.write("Testing Z factory (odd):")
-	exp_values = calc_exp_values_single(prep_Z_qutip())
-	ans = cqc.test_preparation(prep_Z_CQC_FACTORY_ODD, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testYFactory(self):
+		# Test Y factory odd
+		sys.stdout.write("Testing Y factory (odd):")
+		exp_values = calc_exp_values_single(prep_Y_qutip())
+		ans = self.cqc.test_preparation(prep_Y_CQC_FACTORY_ODD, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test Z factory even
-	sys.stdout.write("Testing Z factory (even):")
-	exp_values = calc_exp_values_single(prep_I_qutip())
-	ans = cqc.test_preparation(prep_Z_CQC_FACTORY_EVEN, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+		# Test Y factory even
+		sys.stdout.write("Testing Y factory (even):")
+		exp_values = calc_exp_values_single(prep_I_qutip())
+		ans = self.cqc.test_preparation(prep_Y_CQC_FACTORY_EVEN, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test T factory quarter
-	sys.stdout.write("Testing T factory (quarter):")
-	exp_values = calc_exp_values_single(prep_T_qutip(1))
-	ans = cqc.test_preparation(prep_T_CQC_FACTORY_QUARTER, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testZFactory(self):
 
-	# Test T factory half
-	sys.stdout.write("Testing T factory (half):")
-	exp_values = calc_exp_values_single(prep_T_qutip(2))
-	ans = cqc.test_preparation(prep_T_CQC_FACTORY_HALF, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+		# Test Z factory odd
+		sys.stdout.write("Testing Z factory (odd):")
+		exp_values = calc_exp_values_single(prep_Z_qutip())
+		ans = self.cqc.test_preparation(prep_Z_CQC_FACTORY_ODD, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test T factory half
-	sys.stdout.write("Testing T factory (three quarters):")
-	exp_values = calc_exp_values_single(prep_T_qutip(3))
-	ans = cqc.test_preparation(prep_T_CQC_FACTORY_THREE_QUARTER, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+		# Test Z factory even
+		sys.stdout.write("Testing Z factory (even):")
+		exp_values = calc_exp_values_single(prep_I_qutip())
+		ans = self.cqc.test_preparation(prep_Z_CQC_FACTORY_EVEN, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test T factory half
-	sys.stdout.write("Testing T factory (full):")
-	exp_values = calc_exp_values_single(prep_I_qutip())
-	ans = cqc.test_preparation(prep_T_CQC_FACTORY_FULL, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testTFactory(self):
 
-	# Test H factory odd
-	sys.stdout.write("Testing H factory (odd):")
-	exp_values = calc_exp_values_single(prep_H_qutip())
-	ans = cqc.test_preparation(prep_H_CQC_FACTORY_ODD, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+		# Test T factory quarter
+		sys.stdout.write("Testing T factory (quarter):")
+		exp_values = calc_exp_values_single(prep_T_qutip(1))
+		ans = self.cqc.test_preparation(prep_T_CQC_FACTORY_QUARTER, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test H factory even
-	sys.stdout.write("Testing H factory (even):")
-	exp_values = calc_exp_values_single(prep_I_qutip())
-	ans = cqc.test_preparation(prep_H_CQC_FACTORY_EVEN, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+		# Test T factory half
+		sys.stdout.write("Testing T factory (half):")
+		exp_values = calc_exp_values_single(prep_T_qutip(2))
+		ans = self.cqc.test_preparation(prep_T_CQC_FACTORY_HALF, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test K factory odd
-	sys.stdout.write("Testing K factory (odd):")
-	exp_values = calc_exp_values_single(prep_K_qutip())
-	ans = cqc.test_preparation(prep_K_CQC_FACTORY_ODD, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+		# Test T factory half
+		sys.stdout.write("Testing T factory (three quarters):")
+		exp_values = calc_exp_values_single(prep_T_qutip(3))
+		ans = self.cqc.test_preparation(prep_T_CQC_FACTORY_THREE_QUARTER, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test K factory even
-	sys.stdout.write("Testing K factory (even):")
-	exp_values = calc_exp_values_single(prep_I_qutip())
-	ans = cqc.test_preparation(prep_K_CQC_FACTORY_EVEN, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+		# Test T factory half
+		sys.stdout.write("Testing T factory (full):")
+		exp_values = calc_exp_values_single(prep_I_qutip())
+		ans = self.cqc.test_preparation(prep_T_CQC_FACTORY_FULL, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test ROT_X factory pi/8
-	# TODO, add these tests when decided that we make it possible to do this
-	# (As of writing at 2018/03/27 the angle of rotation is (up to a factor 2pi/256)
-	# To the amount of times this rotation is done
+	def testHFactory(self):
+		# Test H factory odd
+		sys.stdout.write("Testing H factory (odd):")
+		exp_values = calc_exp_values_single(prep_H_qutip())
+		ans = self.cqc.test_preparation(prep_H_CQC_FACTORY_ODD, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test CNOT Factory Control even
-	sys.stdout.write("Testing CNOT factory control even:")
-	exp_values = calc_exp_values_single(prep_H_qutip())
-	ans = cqc.test_preparation(prep_CNOT_control_CQC_FACTORY_even, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+		# Test H factory even
+		sys.stdout.write("Testing H factory (even):")
+		exp_values = calc_exp_values_single(prep_I_qutip())
+		ans = self.cqc.test_preparation(prep_H_CQC_FACTORY_EVEN, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test CNOT Factory Control odd
-	sys.stdout.write("Testing CNOT factory control odd:")
-	exp_values = calc_exp_values_two(prep_mixed_qutip())
-	ans = cqc.test_preparation(prep_CNOT_control_CQC_FACTORY_odd, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testKFactory(self):
+		# Test K factory odd
+		sys.stdout.write("Testing K factory (odd):")
+		exp_values = calc_exp_values_single(prep_K_qutip())
+		ans = self.cqc.test_preparation(prep_K_CQC_FACTORY_ODD, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test CNOT Factory target even
-	sys.stdout.write("Testing CNOT factory target even:")
-	exp_values = calc_exp_values_single(prep_I_qutip())
-	ans = cqc.test_preparation(prep_CNOT_target_CQC_FACTORY_even, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+		# Test K factory even
+		sys.stdout.write("Testing K factory (even):")
+		exp_values = calc_exp_values_single(prep_I_qutip())
+		ans = self.cqc.test_preparation(prep_K_CQC_FACTORY_EVEN, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
-	# Test CNOT Factory target odd
-	sys.stdout.write("Testing CNOT factory target odd:")
-	exp_values = calc_exp_values_two(prep_mixed_qutip())
-	ans = cqc.test_preparation(prep_CNOT_target_CQC_FACTORY_odd, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
-
-	# Test CPHASE Factory Control even
-	sys.stdout.write("Testing CPHASE factory control even:")
-	exp_values = calc_exp_values_single(prep_H_qutip())
-	ans = cqc.test_preparation(prep_CPHASE_control_CQC_FACTORY_even, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
-
-	# Test CPHASE Factory Control odd
-	sys.stdout.write("Testing CPHASE factory control odd:")
-	exp_values = calc_exp_values_two(prep_mixed_qutip())
-	ans = cqc.test_preparation(prep_CPHASE_control_CQC_FACTORY_odd, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
-
-	# Test CPHASE Factory target even
-	sys.stdout.write("Testing CPHASE factory target even:")
-	exp_values = calc_exp_values_single(prep_I_qutip())
-	ans = cqc.test_preparation(prep_CPHASE_target_CQC_FACTORY_even, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
-
-	# Test CPHASE Factory target odd
-	sys.stdout.write("Testing CPHASE factory target odd:")
-	exp_values = calc_exp_values_two(prep_mixed_qutip())
-	ans = cqc.test_preparation(prep_CPHASE_target_CQC_FACTORY_odd, exp_values, iterations=iterations)
-	sys.stdout.write('\r')
-	if ans:
-		print("OK")
-	else:
-		print("FAIL")
+	def testRot_X_Factory(self):
+		# Test ROT_X factory pi/8
+		# TODO, add these tests when decided that we make it possible to do this
+		# (As of writing at 2018/03/27 the angle of rotation is (up to a factor 2pi/256)
+		# To the amount of times this rotation is done
+		sys.stdout.write("Testing CNOT rotation of 4 times 1/32:")
+		exp_values = calc_exp_values_single(prep_ROT_X_qutip())
+		ans = self.cqc.test_preparation(prep_ROT_X, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
 
 
-main()
+	def testCNOTFactory(self):
+		# Test CNOT Factory Control even
+		sys.stdout.write("Testing CNOT factory control even:")
+		exp_values = calc_exp_values_single(prep_H_qutip())
+		ans = self.cqc.test_preparation(prep_CNOT_control_CQC_FACTORY_even, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
+
+		# Test CNOT Factory Control odd
+		sys.stdout.write("Testing CNOT factory control odd:")
+		exp_values = calc_exp_values_two(prep_mixed_qutip())
+		ans = self.cqc.test_preparation(prep_CNOT_control_CQC_FACTORY_odd, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
+
+		# Test CNOT Factory target even
+		sys.stdout.write("Testing CNOT factory target even:")
+		exp_values = calc_exp_values_single(prep_I_qutip())
+		ans = self.cqc.test_preparation(prep_CNOT_target_CQC_FACTORY_even, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
+
+		# Test CNOT Factory target odd
+		sys.stdout.write("Testing CNOT factory target odd:")
+		exp_values = calc_exp_values_two(prep_mixed_qutip())
+		ans = self.cqc.test_preparation(prep_CNOT_target_CQC_FACTORY_odd, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
+
+	def testCPhaseFactory(self):
+		# Test CPHASE Factory Control even
+		sys.stdout.write("Testing CPHASE factory control even:")
+		exp_values = calc_exp_values_single(prep_H_qutip())
+		ans = self.cqc.test_preparation(prep_CPHASE_control_CQC_FACTORY_even, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
+
+		# Test CPHASE Factory Control odd
+		sys.stdout.write("Testing CPHASE factory control odd:")
+		exp_values = calc_exp_values_two(prep_mixed_qutip())
+		ans = self.cqc.test_preparation(prep_CPHASE_control_CQC_FACTORY_odd, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
+
+		# Test CPHASE Factory target even
+		sys.stdout.write("Testing CPHASE factory target even:")
+		exp_values = calc_exp_values_single(prep_I_qutip())
+		ans = self.cqc.test_preparation(prep_CPHASE_target_CQC_FACTORY_even, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
+
+		# Test CPHASE Factory target odd
+		sys.stdout.write("Testing CPHASE factory target odd:")
+		exp_values = calc_exp_values_two(prep_mixed_qutip())
+		ans = self.cqc.test_preparation(prep_CPHASE_target_CQC_FACTORY_odd, exp_values, iterations=self.iterations)
+		sys.stdout.write('\r')
+		self.assertTrue(ans)
+
+
+if __name__ == '__main__':
+	unittest.main()
