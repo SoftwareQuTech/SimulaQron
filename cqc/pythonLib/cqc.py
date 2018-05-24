@@ -1129,6 +1129,7 @@ class CQCConnection:
 		freqs = self.tomography(preparation, iterations, progress=progress)
 		for i in range(3):
 			if abs(freqs[i] - exp_values[i]) > epsilon:
+				print(freqs, exp_values, epsilon)
 				return False
 		return True
 

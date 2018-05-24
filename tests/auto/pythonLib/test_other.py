@@ -29,53 +29,50 @@
 
 import time
 
-
 #####################################################################################################
 #
 # main
 #
+import unittest
+
 from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
 
 
-def main():
+class OthersTest(unittest.TestCase):
 
-	# Initialize the connection
-	cqc=CQCConnection("Alice", print_info=False)
+	@classmethod
+	def setUpClass(cls):
+		print("Testing others (measure inplace and get time)")
 
-	# Test Measure inplace
-	print("Testing measure inplace:")
-	q=qubit(cqc,print_info=False)
-	q.H(print_info=False)
-	m1=q.measure(inplace=True,print_info=False)
-	failed=False
-	for _ in range(10):
-		m2=q.measure(inplace=True,print_info=False)
-		if m1!=m2:
-			print("OK")
-			failed=True
-			break
-	if not failed:
-		print("OK")
-	q.measure(print_info=False)
+	def tearDown(self):
+		self.cqc.close()
 
-	# Test Get time
-	print("Testing getTime:")
-	q1=qubit(cqc,print_info=False)
-	time.sleep(3)
-	q2=qubit(cqc,print_info=False)
-	t1=q1.getTime(print_info=False)
-	t2=q2.getTime(print_info=False)
-	if (t2-t1)==3:
-		print("OK")
-	else:
-		print("FAIL")
-	q1.measure(print_info=False)
-	q2.measure(print_info=False)
+	def setUp(self):
+		self.cqc = CQCConnection("Alice", appID=1, print_info=False)
 
-	# Stop the connection
-	cqc.close()
+	def testMeasureInplace(self):
+		q = qubit(self.cqc, print_info=False)
+		q.H(print_info=False)
+		m1 = q.measure(inplace=True, print_info=False)
+		failed = False
+		for _ in range(10):
+			m2 = q.measure(inplace=True, print_info=False)
+			self.assertEqual(m1, m2)
+		q.measure(print_info=False)
 
+	def testGetTime(self):
+		# Test Get time
+		q1 = qubit(self.cqc, print_info=False)
+		time.sleep(3)
+		q2 = qubit(self.cqc, print_info=False)
+		t1 = q1.getTime(print_info=False)
+		t2 = q2.getTime(print_info=False)
+		self.assertEqual(t2-t1, 3)
+		q1.measure(print_info=False)
+		q2.measure(print_info=False)
 
 ##################################################################################################
-main()
+
+if __name__ == '__main__':
+	unittest.main()
 
