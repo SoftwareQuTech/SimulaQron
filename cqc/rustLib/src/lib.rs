@@ -9,8 +9,11 @@ use bincode::{deserialize_from, serialize_into};
 mod error;
 use error::CqcError;
 
-mod cqc_api;
+pub mod cqc_api;
 use cqc_api::*;
+
+mod cqc_headers;
+use cqc_headers::*;
 
 pub struct Cqc {
     app_id: u16,
@@ -106,6 +109,7 @@ impl Cqc {
             r_node,
             r_port,
             cmd_length,
+            ..Default::default()
         };
 
         // Send message to the server.
@@ -268,6 +272,6 @@ mod tests {
 
     #[test]
     fn connect() {
-        let cqc = cqc_init();
+        // let cqc = cqc_init();
     }
 }

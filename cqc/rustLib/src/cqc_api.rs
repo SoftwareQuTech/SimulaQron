@@ -3,14 +3,6 @@
 // Basic CQC Header format.
 pub const CQC_HDR_LENGTH: u32 = 8;
 
-#[derive(Serialize, Deserialize)]
-pub struct CqcHeader {
-    pub version: u8,   // CQC API version.
-    pub ctrl_type: u8, // Packet control type.
-    pub app_id: u16,   // Application ID.
-    pub length: u32,   // Total length of command instructions to send.
-}
-
 // CQC Version.
 pub const CQC_VERSION: u8 = 0;
 
@@ -34,13 +26,6 @@ pub const CQC_ERR_TIMEOUT: u8 = 23; // Timeout.
 
 // Definition for the command header and commands.
 pub const CQC_CMD_HDR_LENGTH: u32 = 4;
-
-#[derive(Serialize, Deserialize)]
-pub struct CmdHeader {
-    pub qubit_id: u16, // Qubit to perform operation on
-    pub instr: u8,     // Instruction to execute.
-    pub options: u8,   // Options when executing the command.
-}
 
 // Possible commands.
 pub const CQC_CMD_I: u8 = 0; // Identity (do nothing, wait one step).
@@ -75,25 +60,5 @@ pub const CQC_OPT_IFTHEN: u8 = 0x08; // Execute commands depending on outcome.
 // Additional cmd details (optional)
 pub const CQC_CMD_XTRA_LENGTH: u32 = 16;
 
-#[derive(Serialize, Deserialize)]
-pub struct XtraCmdHeader {
-    pub xtra_qubit_id: u16, // ID of the additional qubit.
-    pub r_app_id: u16,      // Remote application ID.
-    pub r_node: u32,        // IP of the remote node.
-    pub cmd_length: u32,    // Length of the cmds to exectute upon completion.
-    pub r_port: u16,        // Port of the remote node for control info.
-    pub steps: u8,          // Angle step of rotation (ROT) OR number of repetitions (FACTORY).
-}
-
 // Definitions for the packet sent upon notifications.
 pub const CQC_NOTIFY_LENGTH: u32 = 20;
-
-#[derive(Serialize, Deserialize)]
-pub struct NotifyHeader {
-    pub qubit_id: u16,
-    pub r_app_id: u16,
-    pub r_node: u32,
-    pub datetime: u64,
-    pub r_port: u16,
-    pub outcome: u8,
-}
