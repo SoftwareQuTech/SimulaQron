@@ -1,13 +1,20 @@
+use std::net;
+use std::error::Error;
+
+mod error;
+use error::CqcError;
+
 pub struct Cqc {
     app_id: u16,
+    stream: net::TcpStream,
 }
 
 impl Cqc {
-    pub fn new(app_id: u16) -> Cqc {
-        Cqc { app_id }
+    pub fn new(app_id: u16, hostname: &str, portno: u16) -> Result<Cqc, CqcError> {
+        let stream = net::TcpStream::connect((hostname, portno))?;
+        Ok(Cqc { app_id, stream })
     }
 
-    pub fn connect(&mut self, hostname: &str, portno: u16) {}
     pub fn simple_cmd(&self, command: u8, qubit_id: u16, notify: u8) {}
     pub fn full_cmd(
         &self,
@@ -50,6 +57,13 @@ impl Cqc {
         F: Fn(&Cqc) -> u16,
     {
     }
+
+}
+
+impl Drop for Cqc {
+    fn drop(&mut self) {
+        let _ = self.stream.shutdown(net::Shutdown::Both);
+    }
 }
 
 #[cfg(test)]
@@ -57,12 +71,18 @@ mod tests {
     use super::*;
 
     fn cqc_init() -> Cqc {
-        Cqc::new(10)
+        match Cqc::new(10, "localhost", 8821) {
+            Ok(cqc) => cqc,
+            Err(CqcError::Io(ref io_err)) => {
+                println!("{}", io_err);
+                panic!();
+            }
+            _ => panic!(),
+        }
     }
 
     #[test]
     fn connect() {
-        let mut cqc = cqc_init();
-        cqc.connect("localhost", 8821);
+        let cqc = cqc_init();
     }
 }
