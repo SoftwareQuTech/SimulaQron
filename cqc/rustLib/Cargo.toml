@@ -5,3 +5,6 @@ authors = ["Wojciech Kozlowski <wk@wojciechkozlowski.eu>",
            "Marco Lam <cylammarco@gmail.com"]
 
 [dependencies]
+serde = "1.0.0"
+serde_derive = "1.0.0"
+bincode = "1.0.0"
