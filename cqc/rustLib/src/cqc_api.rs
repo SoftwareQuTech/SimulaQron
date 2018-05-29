@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 // Basic CQC Header format.
 pub const CQC_HDR_LENGTH: u32 = 8;
 
