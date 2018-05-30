@@ -6,7 +6,7 @@ use std::net;
 
 use bincode::{deserialize_from, serialize_into};
 
-mod error;
+pub mod error;
 use error::CqcError;
 
 pub mod cqc_api;
