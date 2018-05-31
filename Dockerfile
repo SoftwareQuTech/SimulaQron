@@ -46,6 +46,9 @@ LABEL author="Wojciech Kozlowski <wk@wojciechkozlowski.eu>"
 # Update docker image
 RUN apt-get update && apt-get upgrade -y
 
+# Install Rust and cargo
+RUN apt install -y rustc cargo
+
 # Install Python 3
 RUN apt-get install -y python3 python3-pip
 RUN ln -s /usr/bin/python3 /usr/bin/python
