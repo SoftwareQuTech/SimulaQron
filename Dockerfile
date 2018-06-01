@@ -47,7 +47,7 @@ LABEL author="Wojciech Kozlowski <wk@wojciechkozlowski.eu>"
 RUN apt-get update && apt-get upgrade -y
 
 # Install Rust and cargo
-RUN apt install -y rustc cargo
+RUN apt-get install -y rustc cargo
 
 # Install Python 3
 RUN apt-get install -y python3 python3-pip
