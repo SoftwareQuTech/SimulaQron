@@ -36,14 +36,14 @@ fn cqc_tomography_dir(
     // 0 => Indetity
     // 1 => Hadamard Gate
     // 2 => K-Gate
-    let mut cmd: u8;
+    let mut cmd: u8 = CQC_CMD_I;
     match dir {
         0 => {},
         1 => cmd = CQC_CMD_H,
         2 => cmd = CQC_CMD_K,
-        _ => println!("Direction can be 0 (Identity), 1 (Hadamard) or 2 (K-Gate).\
-                       You have {}.\n \
-                       No gate is applied to the qubit in this instance.", dir),
+        _ => panic!("Direction can be 0 (Identity), 1 (Hadamard) or 2 (K-Gate).\
+                     You have {}.\n \
+                     No gate is applied to the qubit in this instance.", dir),
     }
 
     // Measure in the given direction n_iter times to gather statistics
@@ -97,9 +97,7 @@ pub fn cqc_test_qubit(
     exp_z   expected value for <Z>
 
     Returns:
-    ret     1  for success - state lies in desired interval
-            0  for no functional failure but state does not lie in desired interval
-            -1 functional error
+    0       for success - state lies in desired interval
     **/
 
     // Run tomography in the X, Y and Z directions
@@ -113,19 +111,15 @@ pub fn cqc_test_qubit(
     let diff_y = (tomo_y - exp_y).abs();
     let diff_z = (tomo_z - exp_z).abs();
 
-    let mut ret = 1;
     if diff_x > epsilon {
-        println!("X target precision not met, got {:?} expected {:?}.\n", tomo_x, exp_x);
-        ret = 0;
+        panic!("X target precision not met, got {:?} expected {:?}.\n", tomo_x, exp_x);
     }
     if diff_y > epsilon {
-        println!("Y target precision not met, got {:?} expected {:?}.\n", tomo_y, exp_y);
-        ret = 0;
+        panic!("Y target precision not met, got {:?} expected {:?}.\n", tomo_y, exp_y);
     }
     if diff_z > epsilon {
-        println!("Z target precision not met, got {:?} expected {:?}.\n", tomo_z, exp_z);
-        ret = 0;
+        panic!("Z target precision not met, got {:?} expected {:?}.\n", tomo_z, exp_z);
     }
 
-    Ok(ret)
+    Ok(1)
 }

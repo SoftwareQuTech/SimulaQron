@@ -60,27 +60,16 @@ fn test_gates() {
     // Test whether we can make the zero state
     let outcome: i32 = cqc_test_qubit(&cqc, &make_zero, 500, 0.1, 0., 0., 1.).unwrap();
     println!("Testing |0> preparation......................");
-    if outcome == 0 {
-        println!(" failed.\n");
-    } else {
-        println!(" OK\n");
-    }
+    assert_ne!(outcome, 0);
 
     // Test whether we can make the plus state
     let outcome: i32 = cqc_test_qubit(&cqc, &make_plus, 500, 0.1, 1., 0., 0.).unwrap();
     println!("Testing |+> preparation......................");
-    if outcome == 0 {
-        println!(" failed.\n");
-    } else {
-        println!(" OK\n");
-    }
+    assert_ne!(outcome, 0);
 
     // Test whether we can make the y_0 eigenstate
     let outcome: i32 = cqc_test_qubit(&cqc, &make_k, 500, 0.1, 0., 1., 0.).unwrap();
     println!("Testing |1> preparation......................");
-    if outcome == 0 {
-        println!(" failed.\n");
-    } else {
-        println!(" OK\n");
-    }
+    assert_ne!(outcome, 0);
+
 }
