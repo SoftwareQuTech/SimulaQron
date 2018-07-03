@@ -254,24 +254,3 @@ impl Drop for Cqc {
         let _ = self.stream.shutdown(net::Shutdown::Both);
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn cqc_init() -> Cqc {
-        match Cqc::new(10, "localhost", 8821) {
-            Ok(cqc) => cqc,
-            Err(CqcError::Io(ref io_err)) => {
-                println!("{}", io_err);
-                panic!();
-            }
-            _ => panic!(),
-        }
-    }
-
-    #[test]
-    fn connect() {
-        // let cqc = cqc_init();
-    }
-}

@@ -4,7 +4,6 @@ use rust_lib::Cqc;
 use rust_lib::cqc_api::*;
 use std::net::Ipv4Addr;
 
-#[test]
 fn test_send() {
     // Initialise the host name, port number, remote host address,
     // remote host port number and application id
@@ -27,4 +26,25 @@ fn test_send() {
     // Non-blocking send qubit to the given remote host
     cqc.send(qubit, app_id, remote_host, remote_port).unwrap();
     cqc.wait_until_done(1).unwrap();
+}
+
+fn test_recv() {
+    // Initialise the host name, port number and application id
+    let hostname = String::from("localhost");
+    let portno: u16 = 8822;
+    let app_id: u16 = 10;
+
+    // In this example, we will not check for errors.
+    // Initialise a CQC service.
+    let cqc = Cqc::new(app_id, &hostname, portno).unwrap();
+
+    // Receive qubit from any source
+    let qubit: u16 = cqc.recv().unwrap();
+    println!("The qubit received is {:?}", qubit);
+}
+
+#[test]
+fn test_send_recv() {
+    test_send();
+    test_recv();
 }
