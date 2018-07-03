@@ -1,7 +1,7 @@
 extern crate rust_lib;
 
-use rust_lib::Cqc;
 use rust_lib::cqc_api::*;
+use rust_lib::Cqc;
 use std::net::Ipv4Addr;
 
 fn test_send() {

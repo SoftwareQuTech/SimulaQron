@@ -1,7 +1,7 @@
 extern crate rust_lib;
 
-use rust_lib::Cqc;
 use rust_lib::cqc_api::*;
+use rust_lib::Cqc;
 
 #[test]
 fn test_init() {

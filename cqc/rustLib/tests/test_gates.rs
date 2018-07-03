@@ -1,7 +1,7 @@
 extern crate rust_lib;
 
-use rust_lib::Cqc;
 use rust_lib::cqc_api::*;
+use rust_lib::Cqc;
 
 // cqc_tomography_dir
 //
@@ -15,25 +15,22 @@ use rust_lib::cqc_api::*;
 //
 // Returns:
 // ratio   average (in [-1,1] interval).
-fn cqc_tomography_dir(
-    cqc: &Cqc,
-    func: &Fn(&Cqc) -> u16,
-    n_iter: u32,
-    dir: u8,
-) -> f64 {
-
+fn cqc_tomography_dir(cqc: &Cqc, func: &Fn(&Cqc) -> u16, n_iter: u32, dir: u8) -> f64 {
     // Translate the direction into a rotation command
     // 0 => Indetity
     // 1 => Hadamard Gate
     // 2 => K-Gate
-    let mut cmd: u8 = CQC_CMD_I;
+    let cmd: u8;
     match dir {
-        0 => {},
+        0 => cmd = CQC_CMD_I,
         1 => cmd = CQC_CMD_H,
         2 => cmd = CQC_CMD_K,
-        _ => panic!("Direction can be 0 (Identity), 1 (Hadamard) or 2 (K-Gate).\
-                     You have {}.\n \
-                     No gate is applied to the qubit in this instance.", dir),
+        _ => panic!(
+            "Direction can be 0 (Identity), 1 (Hadamard) or 2 (K-Gate).\
+             You have {}.\n \
+             No gate is applied to the qubit in this instance.",
+            dir
+        ),
     }
 
     // Measure in the given direction n_iter times to gather statistics
@@ -96,12 +93,27 @@ fn cqc_test_qubit(
     let diff_y = (tomo_y - exp_y).abs();
     let diff_z = (tomo_z - exp_z).abs();
 
-    assert!(diff_x <= epsilon,
-            format!("X target precision not met, got {:?} expected {:?}.\n", tomo_x, exp_x));
-    assert!(diff_y <= epsilon,
-            format!("Y target precision not met, got {:?} expected {:?}.\n", tomo_y, exp_y));
-    assert!(diff_z <= epsilon,
-            format!("Z target precision not met, got {:?} expected {:?}.\n", tomo_z, exp_z));
+    assert!(
+        diff_x <= epsilon,
+        format!(
+            "X target precision not met, got {:?} expected {:?}.\n",
+            tomo_x, exp_x
+        )
+    );
+    assert!(
+        diff_y <= epsilon,
+        format!(
+            "Y target precision not met, got {:?} expected {:?}.\n",
+            tomo_y, exp_y
+        )
+    );
+    assert!(
+        diff_z <= epsilon,
+        format!(
+            "Z target precision not met, got {:?} expected {:?}.\n",
+            tomo_z, exp_z
+        )
+    );
 }
 
 // Prepares a plus state
@@ -165,5 +177,4 @@ fn test_gates() {
     // Test whether we can make the y_0 eigenstate
     println!("Testing |1> preparation......................");
     cqc_test_qubit(&cqc, &make_k, 500, 0.1, 0., 1., 0.);
-
 }
