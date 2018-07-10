@@ -50,10 +50,13 @@ def hasXtraHeader(command):
 def createXtraHeader(command, values):
 	if command == CQC_CMD_SEND or command == CQC_CMD_EPR:
 		header = CQCCommunicationHeader()
-		header.setVals(values[0], values[1], values[2])
+		header.setVals(remote_app_id=values[0], remote_node=values[1], remote_port=values[2])
 	elif command == CQC_CMD_CNOT or command == CQC_CMD_CPHASE:
 		header = CQCXtraQubitHeader()
-		header.setVals(values)
+		xtra_qubit_id = values._qID
+		if xtra_qubit_id is None:
+			raise QubitNotActiveError("Qubit in extra header is not active")
+		header.setVals(xtra_qubit_id)
 	elif command == CQC_CMD_ROT_Z or command == CQC_CMD_ROT_Y or command == CQC_CMD_ROT_X:
 		header = CQCRotationHeader()
 		header.setVals(values)
@@ -97,7 +100,7 @@ class CQCConnection:
 		self._classicalConn = {}
 
 		# This file defines the network of CQC servers interfacing to virtual quantum nodes
-		if cqcFile == None:
+		if cqcFile is None:
 			self.cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
 
 		# Read configuration files for the cqc network
@@ -116,7 +119,7 @@ class CQCConnection:
 		while True:
 			try:
 				if print_info:
-					print("App {} : Trying to connect to CQC server".format(self.name))
+					print("App {} : Trying to connect to CQC server on port {}".format(self.name, myHost.port))
 				self._s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
 				self._s.connect((myIP, myHost.port))
 				break
@@ -393,7 +396,8 @@ class CQCConnection:
 			msg = self.readMessage()
 			self.check_error(msg[0])
 			if msg[0].tp != CQC_TP_NEW_OK:
-				raise CQCUnsuppError("Unexpected message send back from backend")
+				print(len(msg))
+				raise CQCUnsuppError("Unexpected message of type {} send back from backend".format(msg[0].tp))
 			qubits.append(self.parse_CQC_msg(msg))
 			if print_info:
 				self.print_CQC_msg(msg)
@@ -420,7 +424,7 @@ class CQCConnection:
 		assert isinstance(qubits, list)
 		n = len(qubits)
 
-		if n == 0: # then we don't need to do anything
+		if n == 0:  # then we don't need to do anything
 			return
 
 		if print_info:
@@ -468,7 +472,6 @@ class CQCConnection:
 		Releases all qubits off this connection
 		"""
 		return self.release_qubits(self.active_qubits[:])
-
 
 	def sendFactory(self, qID, command, num_iter, notify=1, block=1, action=0, xtra_qID=-1, remote_appID=0,
 					remote_node=0, remote_port=0, step_size=0, print_info=False):
@@ -718,7 +721,7 @@ class CQCConnection:
 		if cqc_err == CQC_ERR_UNSUPP:
 			raise CQCUnsuppError("Sequence not supported")
 		if cqc_err == CQC_ERR_TIMEOUT:
-			raise CQCTimeoutError("Timout")
+			raise CQCTimeoutError("Timeout")
 
 	def sendQubit(self, q, name, remote_appID=0, notify=True, block=True, print_info=True):
 		"""
@@ -948,8 +951,8 @@ class CQCConnection:
 		"""
 		# Because of new/recv we might have to send headers multiple times
 		# Loop over the pending_messages until there are no more
-		# It should only enter the while loop ones if num_iter == 1
-		# Otherwise it loops for every non active qubit it encouters
+		# It should only enter the while loop once if num_iter == 1
+		# Otherwise it loops for every non active qubit it encounters
 		res = []
 		while self.pending_messages:
 			if print_info:
@@ -963,11 +966,23 @@ class CQCConnection:
 				q = message[0]
 				cqc_command = message[1]
 
+				qubits_not_active = not q._active and \
+									cqc_command not in {CQC_CMD_EPR_RECV, CQC_CMD_RECV, CQC_CMD_NEW, CQC_CMD_EPR}
+
+				if len(message) > 4:
+					values = message[4]
+				else:
+					values = []
+				try:
+					xtra_header = createXtraHeader(cqc_command, values)
+				except QubitNotActiveError:
+					qubits_not_active = True
+
 				# Check if the q is active, if it is not, send the current pending_headers
 				# Then check again, if it still not active, throw an error
-				if not q._active and cqc_command not in {CQC_CMD_EPR_RECV, CQC_CMD_RECV, CQC_CMD_NEW, CQC_CMD_EPR}:
+				if qubits_not_active:
 					if num_iter != 1:
-						raise CQCUnsuppError("Some qubits are non active in the factory, this is not supported (yet)")
+						raise CQCUnsuppError("Some qubits are non active in the factory, this is not supported (yet?)")
 					if not pending_headers:  # If all messages already have been send, the qubit is inactive
 						raise CQCNoQubitError("Qubit is not active")
 					if print_info:
@@ -987,17 +1002,12 @@ class CQCConnection:
 				notify = message[2]
 				should_notify = should_notify or notify
 				block = message[3]
-				if len(message) > 4:
-					values = message[4]
-				else:
-					values = []
 
 				cmd_header = CQCCmdHeader()
 				cmd_header.setVals(q_id, cqc_command, notify, block, int(do_sequence))
 				header_length += cmd_header.HDR_LENGTH
 				pending_headers.append(cmd_header)
 
-				xtra_header = createXtraHeader(cqc_command, values)
 
 				if xtra_header is not None:
 					header_length += xtra_header.HDR_LENGTH
@@ -1040,7 +1050,7 @@ class CQCConnection:
 			# Read out any returned messages from the backend
 			for i in range(num_iter):
 				for data in ready_messages:
-					q = data[0]
+					q = data[0]  # qubit object that might be adjusted
 					cmd = data[1]
 					if shouldReturn(cmd):
 						message = self.readMessage()
@@ -1535,7 +1545,7 @@ class qubit:
 					self._cqc.name,
 					self._qID,
 					target._qID))
-			self._cqc.pending_messages.append([self, command, int(notify), int(block), target._qID])
+			self._cqc.pending_messages.append([self, command, int(notify), int(block), target])
 		else:
 			# print info
 			if print_info:

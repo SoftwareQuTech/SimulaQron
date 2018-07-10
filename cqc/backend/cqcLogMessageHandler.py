@@ -185,7 +185,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		# Craft reply
 		# First send an appropriate CQC Header
 		cqc_msg = self.create_return_message(header.app_id, CQC_TP_INF_TIME, length=CQC_NOTIFY_LENGTH)
-
+		self.return_messages.append(cqc_msg)
 		# Then we send a notify header with the timing details
 		# We do not have a qubit, so no timestamp either.
 		# So let's send back some random date
@@ -193,55 +193,45 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		notify = CQCNotifyHeader()
 		notify.setVals(cmd_hdr.qubit_id, 0, 0, 0, 0, datetime)
 		msg = notify.pack()
-		return [cqc_msg, msg]
+		self.return_messages.append(msg)
+
+		return
 
 	def cmd_i(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Identity", self.factory.name)
-		return []
 
 	def cmd_x(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "X gate", self.factory.name)
-		return []
 
 	def cmd_y(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Y gate", self.factory.name)
-		return []
 
 	def cmd_z(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Z gate", self.factory.name)
-		return []
 
 	def cmd_t(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "T gate", self.factory.name)
-		return []
 
 	def cmd_h(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "H gate", self.factory.name)
-		return []
 
 	def cmd_k(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "K gate", self.factory.name)
-		return []
 
 	def cmd_rotx(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Rotate x", self.factory.name)
-		return []
 
 	def cmd_roty(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Rotate y", self.factory.name)
-		return []
 
 	def cmd_rotz(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Rotate z", self.factory.name)
-		return []
 
 	def cmd_cnot(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "CNOT gate", self.factory.name)
-		return []
 
 	def cmd_cphase(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "CPhase gate", self.factory.name)
-		return []
 
 	def cmd_measure(self, cqc_header, cmd, xtra, inplace=False):
 		self.parse_data(cqc_header, cmd, xtra, "Measure", self.factory.name)
@@ -252,7 +242,8 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		hdr = CQCNotifyHeader()
 		hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0)
 		msg = hdr.pack()
-		return [cqc_msg, msg]
+		self.return_messages.append(cqc_msg)
+		self.return_messages.append(msg)
 
 	def cmd_measure_inplace(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Measure in place", self.factory.name)
@@ -263,15 +254,14 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		hdr = CQCNotifyHeader()
 		hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0)
 		msg = hdr.pack()
-		return [cqc_msg, msg]
+		self.return_messages.append(cqc_msg)
+		self.return_messages.append(msg)
 
 	def cmd_reset(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Rest", self.factory.name)
-		return []
 
 	def cmd_send(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Send", self.factory.name)
-		return []
 
 	def cmd_recv(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Receive", self.factory.name)
@@ -282,7 +272,8 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		hdr = CQCNotifyHeader()
 		hdr.setVals(q_id, 0, 0, 0, 0, 0)
 		msg = hdr.pack()
-		return [recv_msg, msg]
+		self.return_messages.append(recv_msg)
+		self.return_messages.append(msg)
 
 	def cmd_epr(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Create EPR", self.factory.name)
@@ -297,20 +288,16 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		remote_port = xtra.remote_port
 		remote_app_id = xtra.remote_app_id
 
-		# Messages to write back
-		return_messages = []
 
 		# Create the first qubit
-		(msgs, succ, q_id1) = self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
+		(succ, q_id1) = self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
 		if not succ:
-			return return_messages
-		return_messages.extend(msgs)
+			return
 
 		# Create the second qubit
-		(msgs, succ, q_id2) = self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
+		(succ, q_id2) = self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
 		if not succ:
-			return return_messages
-		return_messages.extend(msgs)
+			return
 
 		# Create headers for qubits
 		cmd1 = CQCCmdHeader()
@@ -323,24 +310,18 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		xtra_cnot.setVals(q_id2)
 
 		# Produce EPR-pair
-		msgs = self.cmd_h(cqc_header, cmd1, None)
-		# Should not give back any messages, if it does, send it back
-		if len(msgs) > 0:
-			return_messages.extend(msgs)
-			return return_messages
-		msgs = self.cmd_cnot(cqc_header, cmd1, xtra_cnot)
-		if len(msgs) > 0:
-			return_messages.extend(msgs)
-			return return_messages
+		self.cmd_h(cqc_header, cmd1, None)
+
+		self.cmd_cnot(cqc_header, cmd1, xtra_cnot)
 
 		msg_ok = self.create_return_message(cqc_header.app_id, CQC_TP_EPR_OK,
 											length=CQC_NOTIFY_LENGTH + ENT_INFO_LENGTH)
-		return_messages.append(msg_ok)
+		self.return_messages.append(msg_ok)
 
 		hdr = CQCNotifyHeader()
 		hdr.setVals(q_id1, 0, 0, 0, 0, 0)
 		msg_notify = hdr.pack()
-		return_messages.append(msg_notify)
+		self.return_messages.append(msg_notify)
 
 		logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
 
@@ -350,9 +331,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		ent_info.setVals(host_node, host_port, host_app_id, remote_node, remote_port, remote_app_id, ent_id,
 						 int(time.time()), int(time.time()), 0, 1)
 		msg_ent_info = ent_info.pack()
-		return_messages.append(msg_ent_info)
-
-		return return_messages
+		self.return_messages.append(msg_ent_info)
 
 	def cmd_epr_recv(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Receive EPR", self.factory.name)
@@ -365,30 +344,29 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		hdr = CQCNotifyHeader()
 		hdr.setVals(q_id, 0, 0, 0, 0, 0)
 		msg = hdr.pack()
-
-		return [cqc_msg, msg]
+		self.return_messages.append(cqc_msg)
+		self.return_messages.append(msg)
 
 	def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False, return_succ=False, to_file=True):
 		if to_file:
 			self.parse_data(cqc_header, cmd, xtra, "Create new qubit", self.factory.name)
 		q_id = CQCLogMessageHandler.cur_qubit_id
 		CQCLogMessageHandler.cur_qubit_id += 1
-		return_messages = []
 		if not return_q_id:
 			# Send message we created a qubit back
 			# logging.debug("GOO")
 			cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_NEW_OK, length=CQC_NOTIFY_LENGTH)
-			return_messages.append(cqc_msg)
+			self.return_messages.append(cqc_msg)
 			hdr = CQCNotifyHeader()
 			hdr.setVals(q_id, 0, 0, 0, 0, 0)
 			msg = hdr.pack()
-			return_messages.append(msg)
+			self.return_messages.append(msg)
 		if return_q_id:
-			return return_messages, True, q_id
+			return True, q_id
 		elif return_succ:
-			return return_messages, True
+			return True
 		else:
-			return return_messages
+			return
 
 	def cmd_allocate(self, cqc_header, cmd, xtra):
 		"""
@@ -397,12 +375,8 @@ class CQCLogMessageHandler(CQCMessageHandler):
 		self.parse_data(cqc_header, cmd, xtra, "Allocating qubits", self.factory.name)
 		num_qubits = cmd.qubit_id
 		cmd.qubit_id = 0
-		msgs = []
 		for _ in range(num_qubits):
-			new_msgs = self.cmd_new(cqc_header, cmd, xtra, to_file=False)
-			msgs.extend(new_msgs)
-		return msgs
+			self.cmd_new(cqc_header, cmd, xtra, to_file=False)
 
 	def cmd_release(self, cqc_header, cmd, xtra):
 		self.parse_data(cqc_header, cmd, xtra, "Releasing qubit", self.factory.name)
-		return []
