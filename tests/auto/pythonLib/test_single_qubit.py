@@ -61,14 +61,14 @@ def calc_exp_values(q):
 
 
 def prep_I_CQC(cqc):
-	q = qubit(cqc, print_info=False)
-	q.I(print_info=False)
+	q = qubit(cqc)
+	q.I()
 	return q
 
 
 def prep_X_CQC(cqc):
-	q = qubit(cqc, print_info=False)
-	q.X(print_info=False)
+	q = qubit(cqc)
+	q.X()
 	return q
 
 
@@ -79,8 +79,8 @@ def prep_X_qutip():
 
 
 def prep_Y_CQC(cqc):
-	q = qubit(cqc, print_info=False)
-	q.Y(print_info=False)
+	q = qubit(cqc)
+	q.Y()
 	return q
 
 
@@ -91,8 +91,8 @@ def prep_Y_qutip():
 
 
 def prep_Z_CQC(cqc):
-	q = qubit(cqc, print_info=False)
-	q.Z(print_info=False)
+	q = qubit(cqc)
+	q.Z()
 	return q
 
 
@@ -103,8 +103,8 @@ def prep_Z_qutip():
 
 
 def prep_H_CQC(cqc):
-	q = qubit(cqc, print_info=False)
-	q.H(print_info=False)
+	q = qubit(cqc)
+	q.H()
 	return q
 
 
@@ -115,8 +115,8 @@ def prep_H_qutip():
 
 
 def prep_T_CQC(cqc):
-	q = qubit(cqc, print_info=False)
-	q.T(print_info=False)
+	q = qubit(cqc)
+	q.T()
 	return q
 
 
@@ -127,8 +127,8 @@ def prep_T_qutip():
 
 
 def prep_K_CQC(cqc):
-	q = qubit(cqc, print_info=False)
-	q.K(print_info=False)
+	q = qubit(cqc)
+	q.K()
 	return q
 
 
@@ -139,38 +139,38 @@ def prep_K_qutip():
 
 
 def prep_rotx1_CQC(cqc):  # pi/8
-	q = qubit(cqc, print_info=False)
-	q.rot_X(16, print_info=False)
+	q = qubit(cqc)
+	q.rot_X(16)
 	return q
 
 
 def prep_rotx2_CQC(cqc):  # 5*pi/8
-	q = qubit(cqc, print_info=False)
-	q.rot_X(80, print_info=False)
+	q = qubit(cqc)
+	q.rot_X(80)
 	return q
 
 
 def prep_roty1_CQC(cqc):  # pi/8
-	q = qubit(cqc, print_info=False)
-	q.rot_Y(16, print_info=False)
+	q = qubit(cqc)
+	q.rot_Y(16)
 	return q
 
 
 def prep_roty2_CQC(cqc):  # 5*pi/8
-	q = qubit(cqc, print_info=False)
-	q.rot_Y(80, print_info=False)
+	q = qubit(cqc)
+	q.rot_Y(80)
 	return q
 
 
 def prep_rotz1_CQC(cqc):  # pi/8
-	q = qubit(cqc, print_info=False)
-	q.rot_Z(16, print_info=False)
+	q = qubit(cqc)
+	q.rot_Z(16)
 	return q
 
 
 def prep_rotz2_CQC(cqc):  # 5*pi/8
-	q = qubit(cqc, print_info=False)
-	q.rot_Z(80, print_info=False)
+	q = qubit(cqc)
+	q.rot_Z(80)
 	return q
 
 
@@ -182,9 +182,9 @@ def prep_rot_qutip(n, a):
 
 
 def prep_reset_CQC(cqc):
-	q = qubit(cqc, print_info=False)
-	q.H(print_info=False)
-	q.reset(print_info=False)
+	q = qubit(cqc)
+	q.H()
+	q.reset()
 	return q
 
 
@@ -206,7 +206,7 @@ class TwoQubitGateTest(unittest.TestCase):
 
 	def setUp(self):
 		# Initialize the connection
-		self.cqc = CQCConnection("Alice", appID=0, print_info=False)
+		self.cqc = CQCConnection("Alice", appID=0)
 
 	def testIGate(self):
 		# Test I

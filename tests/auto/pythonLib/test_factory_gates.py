@@ -88,10 +88,10 @@ def calc_exp_values_two(q):
 
 
 def prep_I_CQC_FACTORY(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.I(print_info=False)
-	cqc.flush_factory(3, print_info=False)
+	q.I()
+	cqc.flush_factory(3)
 	cqc.set_pending(False)
 	return q
 
@@ -102,19 +102,19 @@ def prep_I_qutip():
 
 
 def prep_X_CQC_FACTORY_ODD(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.X(print_info=False)
-	cqc.flush_factory(3, print_info=False)
+	q.X()
+	cqc.flush_factory(3)
 	cqc.set_pending(False)
 	return q
 
 
 def prep_X_CQC_FACTORY_EVEN(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.X(print_info=False)
-	cqc.flush_factory(4, print_info=False)
+	q.X()
+	cqc.flush_factory(4)
 	cqc.set_pending(False)
 	return q
 
@@ -126,19 +126,19 @@ def prep_X_qutip():
 
 
 def prep_Y_CQC_FACTORY_ODD(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.Y(print_info=False)
-	cqc.flush_factory(3, print_info=False)
+	q.Y()
+	cqc.flush_factory(3)
 	cqc.set_pending(False)
 	return q
 
 
 def prep_Y_CQC_FACTORY_EVEN(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.Y(print_info=False)
-	cqc.flush_factory(4, print_info=False)
+	q.Y()
+	cqc.flush_factory(4)
 	cqc.set_pending(False)
 	return q
 
@@ -150,19 +150,19 @@ def prep_Y_qutip():
 
 
 def prep_Z_CQC_FACTORY_ODD(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.Z(print_info=False)
-	cqc.flush_factory(3, print_info=False)
+	q.Z()
+	cqc.flush_factory(3)
 	cqc.set_pending(False)
 	return q
 
 
 def prep_Z_CQC_FACTORY_EVEN(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.Z(print_info=False)
-	cqc.flush_factory(4, print_info=False)
+	q.Z()
+	cqc.flush_factory(4)
 	cqc.set_pending(False)
 	return q
 
@@ -174,37 +174,37 @@ def prep_Z_qutip():
 
 
 def prep_T_CQC_FACTORY_QUARTER(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.T(print_info=False)
-	cqc.flush_factory(5, print_info=False)
+	q.T()
+	cqc.flush_factory(5)
 	cqc.set_pending(False)
 	return q
 
 
 def prep_T_CQC_FACTORY_HALF(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.T(print_info=False)
-	cqc.flush_factory(6, print_info=False)
+	q.T()
+	cqc.flush_factory(6)
 	cqc.set_pending(False)
 	return q
 
 
 def prep_T_CQC_FACTORY_THREE_QUARTER(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.T(print_info=False)
-	cqc.flush_factory(7, print_info=False)
+	q.T()
+	cqc.flush_factory(7)
 	cqc.set_pending(False)
 	return q
 
 
 def prep_T_CQC_FACTORY_FULL(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.T(print_info=False)
-	cqc.flush_factory(8, print_info=False)
+	q.T()
+	cqc.flush_factory(8)
 	cqc.set_pending(False)
 	return q
 
@@ -216,19 +216,19 @@ def prep_T_qutip(amount):
 
 
 def prep_H_CQC_FACTORY_ODD(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.H(print_info=False)
-	cqc.flush_factory(3, print_info=False)
+	q.H()
+	cqc.flush_factory(3)
 	cqc.set_pending(False)
 	return q
 
 
 def prep_H_CQC_FACTORY_EVEN(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.H(print_info=False)
-	cqc.flush_factory(4, print_info=False)
+	q.H()
+	cqc.flush_factory(4)
 	cqc.set_pending(False)
 	return q
 
@@ -240,19 +240,19 @@ def prep_H_qutip():
 
 
 def prep_K_CQC_FACTORY_ODD(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.K(print_info=False)
-	cqc.flush_factory(3, print_info=False)
+	q.K()
+	cqc.flush_factory(3)
 	cqc.set_pending(False)
 	return q
 
 
 def prep_K_CQC_FACTORY_EVEN(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.K(print_info=False)
-	cqc.flush_factory(4, print_info=False)
+	q.K()
+	cqc.flush_factory(4)
 	cqc.set_pending(False)
 	return q
 
@@ -264,10 +264,10 @@ def prep_K_qutip():
 
 
 def prep_ROT_X(cqc):
-	q = qubit(cqc, print_info=False)
+	q = qubit(cqc)
 	cqc.set_pending(True)
-	q.rot_X(step=4, print_info=False)
-	cqc.flush_factory(4, print_info=False)
+	q.rot_X(step=4)
+	cqc.flush_factory(4)
 	cqc.set_pending(False)
 	return q
 
@@ -287,106 +287,106 @@ def prep_mixed_qutip():
 
 
 def prep_CNOT_control_CQC_FACTORY_even(cqc):
-	q1 = qubit(cqc, print_info=False)
-	q2 = qubit(cqc, print_info=False)
-	q1.H(print_info=False)
+	q1 = qubit(cqc)
+	q2 = qubit(cqc)
+	q1.H()
 	cqc.set_pending(True)
-	q1.cnot(q2, print_info=False)
-	cqc.flush_factory(4, print_info=False)
+	q1.cnot(q2)
+	cqc.flush_factory(4)
 	cqc.set_pending(False)
-	q2.measure(print_info=False)
+	q2.measure()
 	return q1
 
 
 def prep_CNOT_control_CQC_FACTORY_odd(cqc):
-	q1 = qubit(cqc, print_info=False)
-	q2 = qubit(cqc, print_info=False)
-	q1.H(print_info=False)
+	q1 = qubit(cqc)
+	q2 = qubit(cqc)
+	q1.H()
 	cqc.set_pending(True)
-	q1.cnot(q2, print_info=False)
-	cqc.flush_factory(3, print_info=False)
+	q1.cnot(q2)
+	cqc.flush_factory(3)
 	cqc.set_pending(False)
-	q2.measure(print_info=False)
+	q2.measure()
 	return q1
 
 
 def prep_CNOT_target_CQC_FACTORY_even(cqc):
-	q1 = qubit(cqc, print_info=False)
-	q2 = qubit(cqc, print_info=False)
-	q1.H(print_info=False)
+	q1 = qubit(cqc)
+	q2 = qubit(cqc)
+	q1.H()
 	cqc.set_pending(True)
-	q1.cnot(q2, print_info=False)
-	cqc.flush_factory(4, print_info=False)
+	q1.cnot(q2)
+	cqc.flush_factory(4)
 	cqc.set_pending(False)
-	q1.measure(print_info=False)
+	q1.measure()
 	return q2
 
 
 def prep_CNOT_target_CQC_FACTORY_odd(cqc):
-	q1 = qubit(cqc, print_info=False)
-	q2 = qubit(cqc, print_info=False)
-	q1.H(print_info=False)
+	q1 = qubit(cqc)
+	q2 = qubit(cqc)
+	q1.H()
 	cqc.set_pending(True)
-	q1.cnot(q2, print_info=False)
-	cqc.flush_factory(3, print_info=False)
+	q1.cnot(q2)
+	cqc.flush_factory(3)
 	cqc.set_pending(False)
-	q1.measure(print_info=False)
+	q1.measure()
 	return q2
 
 
 def prep_CPHASE_control_CQC_FACTORY_even(cqc):
-	q1 = qubit(cqc, print_info=False)
-	q2 = qubit(cqc, print_info=False)
-	q1.H(print_info=False)
-	q2.H(print_info=False)
+	q1 = qubit(cqc)
+	q2 = qubit(cqc)
+	q1.H()
+	q2.H()
 	cqc.set_pending(True)
-	q1.cphase(q2, print_info=False)
-	cqc.flush_factory(4, print_info=False)
+	q1.cphase(q2)
+	cqc.flush_factory(4)
 	cqc.set_pending(False)
-	q2.H(print_info=False)
-	q2.measure(print_info=False)
+	q2.H()
+	q2.measure()
 	return q1
 
 
 def prep_CPHASE_control_CQC_FACTORY_odd(cqc):
-	q1 = qubit(cqc, print_info=False)
-	q2 = qubit(cqc, print_info=False)
-	q1.H(print_info=False)
-	q2.H(print_info=False)
+	q1 = qubit(cqc)
+	q2 = qubit(cqc)
+	q1.H()
+	q2.H()
 	cqc.set_pending(True)
-	q1.cphase(q2, print_info=False)
-	cqc.flush_factory(3, print_info=False)
+	q1.cphase(q2)
+	cqc.flush_factory(3)
 	cqc.set_pending(False)
-	q2.H(print_info=False)
-	q2.measure(print_info=False)
+	q2.H()
+	q2.measure()
 	return q1
 
 
 def prep_CPHASE_target_CQC_FACTORY_even(cqc):
-	q1 = qubit(cqc, print_info=False)
-	q2 = qubit(cqc, print_info=False)
-	q1.H(print_info=False)
-	q2.H(print_info=False)
+	q1 = qubit(cqc)
+	q2 = qubit(cqc)
+	q1.H()
+	q2.H()
 	cqc.set_pending(True)
-	q1.cphase(q2, print_info=False)
-	cqc.flush_factory(4, print_info=False)
+	q1.cphase(q2)
+	cqc.flush_factory(4)
 	cqc.set_pending(False)
-	q2.H(print_info=False)
-	q1.measure(print_info=False)
+	q2.H()
+	q1.measure()
 	return q2
 
 
 def prep_CPHASE_target_CQC_FACTORY_odd(cqc):
-	q1 = qubit(cqc, print_info=False)
-	q2 = qubit(cqc, print_info=False)
-	q1.H(print_info=False)
-	q2.H(print_info=False)
+	q1 = qubit(cqc)
+	q2 = qubit(cqc)
+	q1.H()
+	q2.H()
 	cqc.set_pending(True)
-	q1.cphase(q2, print_info=False)
-	cqc.flush_factory(3, print_info=False)
+	q1.cphase(q2)
+	cqc.flush_factory(3)
 	cqc.set_pending(False)
-	q2.H(print_info=False)
-	q1.measure(print_info=False)
+	q2.H()
+	q1.measure()
 	return q2
 
 
@@ -401,7 +401,7 @@ class FactoryGateTest(unittest.TestCase):
 		self.cqc.close()
 
 	def setUp(self):
-		self.cqc = CQCConnection("Alice", appID=1, print_info=False)
+		self.cqc = CQCConnection("Alice", appID=1)
 
 	def testIFactory(self):
 		# Test I factory

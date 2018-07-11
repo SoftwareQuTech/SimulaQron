@@ -61,85 +61,85 @@ def calc_exp_values(q):
 
 
 def prep_CNOT_control_CQC(cqc):
-	q1 = qubit(cqc, print_info=False)
-	q2 = qubit(cqc, print_info=False)
-	q1.H(print_info=False)
-	q1.cnot(q2, print_info=False)
-	q2.measure(print_info=False)
+	q1 = qubit(cqc)
+	q2 = qubit(cqc)
+	q1.H()
+	q1.cnot(q2)
+	q2.measure()
 	return q1
 
 
 def prep_CNOT_target_CQC(cqc):
-	q1 = qubit(cqc, print_info=False)
-	q2 = qubit(cqc, print_info=False)
-	q1.H(print_info=False)
-	q1.cnot(q2, print_info=False)
-	q1.measure(print_info=False)
+	q1 = qubit(cqc)
+	q2 = qubit(cqc)
+	q1.H()
+	q1.cnot(q2)
+	q1.measure()
 	return q2
 
 
 def prep_CPHASE_control_CQC(cqc):
-	q1 = qubit(cqc, print_info=False)
-	q2 = qubit(cqc, print_info=False)
-	q1.H(print_info=False)
-	q2.H(print_info=False)
-	q1.cphase(q2, print_info=False)
-	q2.H(print_info=False)
-	q2.measure(print_info=False)
+	q1 = qubit(cqc)
+	q2 = qubit(cqc)
+	q1.H()
+	q2.H()
+	q1.cphase(q2)
+	q2.H()
+	q2.measure()
 	return q1
 
 
 def prep_CPHASE_target_CQC(cqc):
-	q1 = qubit(cqc, print_info=False)
-	q2 = qubit(cqc, print_info=False)
-	q1.H(print_info=False)
-	q2.H(print_info=False)
-	q1.cphase(q2, print_info=False)
-	q2.H(print_info=False)
-	q1.measure(print_info=False)
+	q1 = qubit(cqc)
+	q2 = qubit(cqc)
+	q1.H()
+	q2.H()
+	q1.cphase(q2)
+	q2.H()
+	q1.measure()
 	return q2
 
 
 def prep_EPR1_CQC(cqc):
-	Alice = CQCConnection("Alice", appID=1, print_info=False)
-	qA = Alice.createEPR("Bob", print_info=False)
-	qB = cqc.recvEPR(print_info=False)
-	qA.measure(print_info=False)
+	Alice = CQCConnection("Alice", appID=1)
+	qA = Alice.createEPR("Bob")
+	qB = cqc.recvEPR()
+	qA.measure()
 	Alice.close()
 	return qB
 
 
 def prep_EPR2_CQC(cqc):
-	Alice = CQCConnection("Alice", appID=1, print_info=False)
-	qB = cqc.createEPR("Alice", remote_appID=1, print_info=False)
-	qA = Alice.recvEPR(print_info=False)
-	qA.measure(print_info=False)
+	Alice = CQCConnection("Alice", appID=1)
+	qB = cqc.createEPR("Alice", remote_appID=1)
+	qA = Alice.recvEPR()
+	qA.measure()
 	Alice.close()
 	return qB
 
 
 def prep_send_CQC(cqc):
-	Alice = CQCConnection("Alice", appID=1, print_info=False)
-	qA = qubit(cqc, print_info=False)
-	qB = qubit(cqc, print_info=False)
-	qA.H(print_info=False)
-	qA.cnot(qB, print_info=False)
-	cqc.sendQubit(qA, "Alice", remote_appID=1, print_info=False)
-	qA = Alice.recvQubit(print_info=False)
-	m = qA.measure(print_info=False)
+	Alice = CQCConnection("Alice", appID=1)
+	qA = qubit(cqc)
+	qB = qubit(cqc)
+	qA.H()
+	qA.cnot(qB)
+	cqc.sendQubit(qA, "Alice", remote_appID=1)
+	qA = Alice.recvQubit()
+	m = qA.measure()
 	Alice.close()
 	if m == 1:
-		qB.X(print_info=False)
-	qB.H(print_info=False)
+		qB.X()
+	qB.H()
 	return qB
 
 
 def prep_recv_CQC(cqc):
-	Alice = CQCConnection("Alice", appID=1, print_info=False)
-	qA = qubit(Alice, print_info=False)
-	qA.H(print_info=False)
-	Alice.sendQubit(qA, "Bob", print_info=False)
-	qB = cqc.recvQubit(print_info=False)
+	Alice = CQCConnection("Alice", appID=1)
+	qA = qubit(Alice)
+	qA.H()
+	Alice.sendQubit(qA, "Bob")
+	qB = cqc.recvQubit()
 	Alice.close()
 	return qB
 
@@ -168,7 +168,7 @@ class TwoQubitGateTest(unittest.TestCase):
 
 	def setUp(self):
 		# Initialize the connection
-		self.cqc = CQCConnection("Bob", appID=0, print_info=False)
+		self.cqc = CQCConnection("Bob", appID=0)
 
 
 	def testCNOTControl(self):

@@ -65,10 +65,10 @@ class CQCMessageTest(unittest.TestCase):
 		self._alice.close()
 
 	def setUp(self):
-		self._alice = CQCConnection("Alice", appID=1, print_info=False)
+		self._alice = CQCConnection("Alice", appID=1)
 
 	def testNewQubit(self):
-		qubit(self._alice, block=False, notify=False, print_info=False)
+		qubit(self._alice, block=False, notify=False)
 		lastEntry = get_last_entries(1)[0]
 		cmd_header = lastEntry['cmd_header']
 		self.assertEqual(lastEntry['node_name'], "Alice")
@@ -81,8 +81,8 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cqc_header['app_id'], 1)
 
 	def testI(self):
-		q1 = qubit(self._alice, print_info=False)
-		q1.I(print_info=False)
+		q1 = qubit(self._alice)
+		q1.I()
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -95,8 +95,8 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cqc_header['app_id'], 1)
 
 	def testX(self):
-		q1 = qubit(self._alice, print_info=False)
-		q1.X(print_info=False)
+		q1 = qubit(self._alice)
+		q1.X()
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -109,8 +109,8 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cqc_header['app_id'], 1)
 
 	def testY(self):
-		q1 = qubit(self._alice, print_info=False)
-		q1.Y(print_info=False)
+		q1 = qubit(self._alice)
+		q1.Y()
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -123,8 +123,8 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cqc_header['app_id'], 1)
 
 	def testZ(self):
-		q1 = qubit(self._alice, print_info=False)
-		q1.Z(print_info=False)
+		q1 = qubit(self._alice)
+		q1.Z()
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -137,8 +137,8 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cqc_header['app_id'], 1)
 
 	def testH(self):
-		q1 = qubit(self._alice, print_info=False)
-		q1.H(print_info=False)
+		q1 = qubit(self._alice)
+		q1.H()
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -151,8 +151,8 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cqc_header['app_id'], 1)
 
 	def testT(self):
-		q1 = qubit(self._alice, print_info=False)
-		q1.T(print_info=False)
+		q1 = qubit(self._alice)
+		q1.T()
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -165,8 +165,8 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cqc_header['app_id'], 1)
 
 	def testK(self):
-		q1 = qubit(self._alice, print_info=False)
-		q1.K(print_info=False)
+		q1 = qubit(self._alice)
+		q1.K()
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -179,8 +179,8 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cqc_header['app_id'], 1)
 
 	def testRotX(self):
-		q1 = qubit(self._alice, print_info=False)
-		q1.rot_X(200, print_info=False)
+		q1 = qubit(self._alice)
+		q1.rot_X(200)
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -195,8 +195,8 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(xtra_header['step'], 200)
 
 	def testRotY(self):
-		q1 = qubit(self._alice, print_info=False)
-		q1.rot_Y(200, print_info=False)
+		q1 = qubit(self._alice)
+		q1.rot_Y(200)
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -211,8 +211,8 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(xtra_header['step'], 200)
 
 	def testRotZ(self):
-		q1 = qubit(self._alice, print_info=False)
-		q1.rot_Z(200, print_info=False)
+		q1 = qubit(self._alice)
+		q1.rot_Z(200)
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -227,34 +227,34 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(xtra_header['step'], 200)
 
 	def testRotXFail(self):
-		q1 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
 		with self.assertRaises(struct.error):
-			q1.rot_X(256, print_info=False)
+			q1.rot_X(256)
 
 	def testRotXFailNone(self):
-		q1 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
 		with self.assertRaises(struct.error):
-			q1.rot_X(None, print_info=False)
+			q1.rot_X(None)
 
 	def testRotXFailNaN(self):
-		q1 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
 		with self.assertRaises(struct.error):
-			q1.rot_X("four", print_info=False)
+			q1.rot_X("four")
 
 	def testRotXFailNegative(self):
-		q1 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
 		with self.assertRaises(struct.error):
-			q1.rot_X(-1, print_info=False)
+			q1.rot_X(-1)
 
 	def testRotXFailFloat(self):
-		q1 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
 		with self.assertRaises(struct.error):
-			q1.rot_X(1.1, print_info=False)
+			q1.rot_X(1.1)
 
 	def testCNot(self):
-		q1 = qubit(self._alice, print_info=False)
-		q2 = qubit(self._alice, print_info=False)
-		q1.cnot(q2, print_info=False)
+		q1 = qubit(self._alice)
+		q2 = qubit(self._alice)
+		q1.cnot(q2)
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -271,17 +271,17 @@ class CQCMessageTest(unittest.TestCase):
 	def testCNotRemote(self):
 		# The appId in xtra_header['app_id'] is not 2 when testing.
 		# In fact, doing this code in a real application result in an error as of 2018-03-12
-		bob = CQCConnection("Bob", appID=2, print_info=False)
-		q1 = qubit(self._alice, print_info=False)
-		q2 = qubit(bob, print_info=False)
+		bob = CQCConnection("Bob", appID=2)
+		q1 = qubit(self._alice)
+		q2 = qubit(bob)
 		with self.assertRaises(CQCUnsuppError):
-			q1.cnot(q2, print_info=False)
+			q1.cnot(q2)
 		bob.close()
 
 	def testCPhase(self):
-		q1 = qubit(self._alice, print_info=False)
-		q2 = qubit(self._alice, print_info=False)
-		q1.cphase(q2, print_info=False)
+		q1 = qubit(self._alice)
+		q2 = qubit(self._alice)
+		q1.cphase(q2)
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -296,9 +296,9 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(xtra_header['qubit_id'], cmd_header['qubit_id'] + 1)
 
 	def testSend(self):
-		q1 = qubit(self._alice, print_info=False)
-		bob = CQCConnection("Bob", appID=2, print_info=False)
-		self._alice.sendQubit(q1, "Bob", remote_appID=2, print_info=False)
+		q1 = qubit(self._alice)
+		bob = CQCConnection("Bob", appID=2)
+		self._alice.sendQubit(q1, "Bob", remote_appID=2)
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -317,8 +317,8 @@ class CQCMessageTest(unittest.TestCase):
 
 	def testSendSelf(self):
 		# Should not work in a real application
-		q1 = qubit(self._alice, print_info=False)
-		self._alice.sendQubit(q1, "Alice", remote_appID=1, print_info=False)
+		q1 = qubit(self._alice)
+		self._alice.sendQubit(q1, "Alice", remote_appID=1)
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -335,7 +335,7 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertNotEqual(xtra_header['remote_port'], 0)
 
 	def testRecv(self):
-		self._alice.recvQubit(print_info=False)
+		self._alice.recvQubit()
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -348,8 +348,8 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cqc_header['app_id'], 1)
 
 	def testEPRSend(self):
-		bob = CQCConnection("Bob", appID=2, print_info=False)
-		self._alice.createEPR("Bob", remote_appID=2, print_info=False)
+		bob = CQCConnection("Bob", appID=2)
+		self._alice.createEPR("Bob", remote_appID=2)
 
 		entries = get_last_entries(5)
 
@@ -382,7 +382,7 @@ class CQCMessageTest(unittest.TestCase):
 		bob.close()
 
 	def testEPRRecv(self):
-		self._alice.recvEPR(print_info=False)
+		self._alice.recvEPR()
 		lastEntry = get_last_entries(1)[0]
 		self.assertEqual(lastEntry['node_name'], "Alice")
 		cmd_header = lastEntry['cmd_header']
@@ -395,8 +395,8 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cqc_header['app_id'], 1)
 
 	def testMeasure(self):
-		q1 = qubit(self._alice, print_info=False)
-		m1 = q1.measure(print_info=False)
+		q1 = qubit(self._alice)
+		m1 = q1.measure()
 		# We've set that for this testing purposes, the measurement outcome is
 		# always 2
 		self.assertEqual(m1, 2)
@@ -413,8 +413,8 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertFalse(q1._active)
 
 	def testMeasureInplace(self):
-		q1 = qubit(self._alice, print_info=False)
-		m1 = q1.measure(inplace=True, print_info=False)
+		q1 = qubit(self._alice)
+		m1 = q1.measure(inplace=True)
 		# We've set that for this testing purposes, the measurement outcome is
 		# always 2
 		self.assertEqual(m1, 2)
@@ -431,12 +431,12 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertTrue(q1._active)
 
 	def testFactoryZero(self):
-		q1 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
 		self._alice.set_pending(True)
-		q1.X(print_info=False)
-		self._alice.flush_factory(0, print_info=False, do_sequence=False)
+		q1.X()
+		self._alice.flush_factory(0, do_sequence=False)
 		self._alice.set_pending(False)
-		m1 = q1.measure(inplace=True, print_info=False)
+		m1 = q1.measure(inplace=True)
 
 		# Checking the factory and the measure, factory should not log any commands
 		lastEntries = get_last_entries(2)
@@ -453,15 +453,15 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(measureEntry['cmd_header']['instruction'], CQC_CMD_MEASURE_INPLACE)
 		self.assertEqual(measureEntry['cmd_header']['qubit_id'], q1._qID)
 
-		q1.measure(print_info=False)
+		q1.measure()
 
 	def testFactoryOnce(self):
-		q1 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
 		self._alice.set_pending(True)
-		q1.X(print_info=False)
-		self._alice.flush_factory(1, print_info=False, do_sequence=False)
+		q1.X()
+		self._alice.flush_factory(1, do_sequence=False)
 		self._alice.set_pending(False)
-		m1 = q1.measure(inplace=True, print_info=False)
+		m1 = q1.measure(inplace=True)
 
 		# Doing a factory once is equal to doing a sequence, so the factory header is not send
 		lastEntries = get_last_entries(2)
@@ -479,12 +479,12 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(measureEntry['cmd_header']['qubit_id'], q1._qID)
 
 	def testFactoryN(self):
-		q1 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
 		self._alice.set_pending(True)
-		q1.X(print_info=False)
-		self._alice.flush_factory(10, print_info=False, do_sequence=False)
+		q1.X()
+		self._alice.flush_factory(10, do_sequence=False)
 		self._alice.set_pending(False)
-		m1 = q1.measure(inplace=True, print_info=False)
+		m1 = q1.measure(inplace=True)
 
 		# Checking the factory and the measure, factory should not log any commands
 		lastEntries = get_last_entries(12)
@@ -508,20 +508,20 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(measureEntry['cmd_header']['qubit_id'], q1._qID)
 
 	def testFactoryCNOTFalse(self):
-		q1 = qubit(self._alice, print_info=False)
-		q2 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
+		q2 = qubit(self._alice)
 		with self.assertRaises(CQCUnsuppError):
 			self._alice.set_pending(True)
-			q1.cnot(q1, print_info=False)
-			self._alice.flush_factory(10, print_info=False, do_sequence=False)
+			q1.cnot(q1)
+			self._alice.flush_factory(10, do_sequence=False)
 			self._alice.set_pending(False)
 
 	def testFactoryCNOT(self):
-		q1 = qubit(self._alice, print_info=False)
-		q2 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
+		q2 = qubit(self._alice)
 		self._alice.set_pending(True)
-		q1.cnot(q2, print_info=False)
-		self._alice.flush_factory(10, print_info=False, do_sequence=False)
+		q1.cnot(q2)
+		self._alice.flush_factory(10, do_sequence=False)
 		self._alice.set_pending(False)
 
 		entries = get_last_entries(11)
@@ -542,11 +542,11 @@ class CQCMessageTest(unittest.TestCase):
 			self.assertEqual(x['qubit_id'], q2._qID)
 
 	def testFactoryCPHASE(self):
-		q1 = qubit(self._alice, print_info=False)
-		q2 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
+		q2 = qubit(self._alice)
 		self._alice.set_pending(True)
-		q1.cphase(q2, print_info=False)
-		self._alice.flush_factory(10, print_info=False, do_sequence=False)
+		q1.cphase(q2)
+		self._alice.flush_factory(10, do_sequence=False)
 		self._alice.set_pending(False)
 
 		entries = get_last_entries(11)
@@ -567,12 +567,12 @@ class CQCMessageTest(unittest.TestCase):
 			self.assertEqual(x['qubit_id'], q2._qID)
 
 	def testFactoryROTX(self):
-		q1 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
 		self._alice.set_pending(True)
-		q1.rot_X(step=5, print_info=False)
-		self._alice.flush_factory(10, print_info=False, do_sequence=False)
+		q1.rot_X(step=5)
+		self._alice.flush_factory(10, do_sequence=False)
 		self._alice.set_pending(False)
-		m1 = q1.measure(inplace=True, print_info=False)
+		m1 = q1.measure(inplace=True)
 
 		# Checking the factory and the measure, factory should not log any commands
 		lastEntries = get_last_entries(12)
@@ -600,10 +600,10 @@ class CQCMessageTest(unittest.TestCase):
 	def testFactoryNew(self):
 		# Should return a list of qubits with consecutive qubit ids
 		self._alice.set_pending(True)
-		qubit(self._alice, print_info=False)
-		qubits = self._alice.flush_factory(10, print_info=False, do_sequence=False)
+		qubit(self._alice)
+		qubits = self._alice.flush_factory(10, do_sequence=False)
 		# It is preferable to use the following however:
-		# qubits = self._alice.allocate_qubits(10, print_info=False)
+		# qubits = self._alice.allocate_qubits(10)
 		self._alice.set_pending(False)
 		# Checking the factory and the measure, factory should not log any commands
 		lastEntries = get_last_entries(11)
@@ -627,11 +627,11 @@ class CQCMessageTest(unittest.TestCase):
 
 	def testFactoryMeasure(self):
 		# this one will go wrong in actual environment
-		q1 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
 		self._alice.set_pending(True)
-		q1.measure(inplace=False, print_info=False)
+		q1.measure(inplace=False)
 		# with self.assertRaises(QubitNotActiveError):
-		measurements = self._alice.flush_factory(10, print_info=False, do_sequence=False)
+		measurements = self._alice.flush_factory(10, do_sequence=False)
 		self._alice.set_pending(False)
 		# All measurements should be equal to 2
 		self.assertTrue(all(x == 2 for x in measurements))
@@ -653,10 +653,10 @@ class CQCMessageTest(unittest.TestCase):
 
 	def testFactoryMeasureInplace(self):
 		# should give the same results as inplace = false
-		q1 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
 		self._alice.set_pending(True)
-		q1.measure(inplace=True, print_info=False)
-		measurements = self._alice.flush_factory(10, print_info=False, do_sequence=False)
+		q1.measure(inplace=True)
+		measurements = self._alice.flush_factory(10, do_sequence=False)
 		self._alice.set_pending(False)
 		# All measurements should be equal to 2
 		self.assertTrue(all(x == 2 for x in measurements))
@@ -678,10 +678,10 @@ class CQCMessageTest(unittest.TestCase):
 
 	def testFactoryReset(self):
 
-		q1 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
 		self._alice.set_pending(True)
-		q1.reset(print_info=False)
-		res = self._alice.flush_factory(10, print_info=False, do_sequence=False)
+		q1.reset()
+		res = self._alice.flush_factory(10, do_sequence=False)
 		self._alice.set_pending(False)
 
 		self.assertListEqual(res, [])
@@ -702,10 +702,10 @@ class CQCMessageTest(unittest.TestCase):
 			self.assertEqual(x_cmd_cmd_header['qubit_id'], q1._qID)
 
 	def testFactorySend(self):
-		q1 = qubit(self._alice, print_info=False)
+		q1 = qubit(self._alice)
 		self._alice.set_pending(True)
-		self._alice.sendQubit(q1, name="Bob", remote_appID=5, print_info=False)
-		res = self._alice.flush_factory(10, print_info=False, do_sequence=False)
+		self._alice.sendQubit(q1, name="Bob", remote_appID=5)
+		res = self._alice.flush_factory(10, do_sequence=False)
 		self._alice.set_pending(False)
 
 		self.assertListEqual(res, [])
@@ -731,8 +731,8 @@ class CQCMessageTest(unittest.TestCase):
 
 	def testFactoryRecv(self):
 		self._alice.set_pending(True)
-		self._alice.recvQubit(print_info=False)
-		qubits = self._alice.flush_factory(10, print_info=False, do_sequence=False)
+		self._alice.recvQubit()
+		qubits = self._alice.flush_factory(10, do_sequence=False)
 		self._alice.set_pending(False)
 
 		curID = qubits[0]._qID
@@ -756,8 +756,8 @@ class CQCMessageTest(unittest.TestCase):
 
 	def testFactoryEPR(self):
 		self._alice.set_pending(True)
-		self._alice.createEPR(name="Bob", remote_appID=5, print_info=False)
-		qubits = self._alice.flush_factory(10, print_info=False, do_sequence=False)
+		self._alice.createEPR(name="Bob", remote_appID=5)
+		qubits = self._alice.flush_factory(10, do_sequence=False)
 		self._alice.set_pending(False)
 
 		lastEntries = get_last_entries(51)
@@ -812,8 +812,8 @@ class CQCMessageTest(unittest.TestCase):
 	def testFactoryEPR_RECV(self):
 
 		self._alice.set_pending(True)
-		self._alice.recvEPR(print_info=False)
-		qubits = self._alice.flush_factory(10, print_info=False, do_sequence=False)
+		self._alice.recvEPR()
+		qubits = self._alice.flush_factory(10, do_sequence=False)
 		self._alice.set_pending(False)
 
 		curID = qubits[0]._qID
@@ -836,7 +836,7 @@ class CQCMessageTest(unittest.TestCase):
 			self.assertEqual(x_cmd_cmd_header['instruction'], CQC_CMD_EPR_RECV)
 
 	def testAllocate0(self):
-		qubits = self._alice.allocate_qubits(0, print_info=False)
+		qubits = self._alice.allocate_qubits(0)
 
 		self.assertEqual(qubits, [])
 
@@ -851,7 +851,7 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cmd_hdr['qubit_id'], 0)
 
 	def testAllocate10(self):
-		qubits = self._alice.allocate_qubits(10, print_info=False)
+		qubits = self._alice.allocate_qubits(10)
 
 		self.assertEqual(len(qubits), 10)
 
@@ -872,8 +872,8 @@ class CQCMessageTest(unittest.TestCase):
 		self.assertEqual(cmd_hdr['qubit_id'], 10)
 
 	def testRelease(self):
-		qubits = self._alice.allocate_qubits(10, print_info=False)
-		self._alice.release_qubits(qubits, print_info=False)
+		qubits = self._alice.allocate_qubits(10)
+		self._alice.release_qubits(qubits)
 
 		for q in qubits:
 			self.assertFalse(q._active)
@@ -891,10 +891,10 @@ class CQCMessageTest(unittest.TestCase):
 			self.assertEqual(cmd_hdr['qubit_id'], qubits[i]._qID)
 
 	def testReleaseWhenAlreadyReleased(self):
-		qubits = self._alice.allocate_qubits(10, print_info=False)
-		qubits[0].measure(print_info=False)
+		qubits = self._alice.allocate_qubits(10)
+		qubits[0].measure()
 		with self.assertRaises(QubitNotActiveError):
-			self._alice.release_qubits(qubits, print_info=False)
+			self._alice.release_qubits(qubits)
 		self.assertTrue(qubits[1]._active)
 
 
