@@ -37,7 +37,7 @@ from SimulaQron.virtNode.crudeSimulator import *
 from twisted.internet.defer import DeferredLock
 
 """
-Abstract class. Classes that inherit this class define how to handle incoming cqc messages. 
+Abstract class. Classes that inherit this class define how to handle incoming cqc messages.
 """
 
 
@@ -373,7 +373,7 @@ class CQCMessageHandler(ABC):
         pass
 
     @abstractmethod
-    def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False, return_succ=False):
+    def cmd_new(self, cqc_header, cmd, xtra, return_q_id=False):
         pass
 
     @abstractmethod
@@ -740,7 +740,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
         # Create the first qubit
         try:
-            (succ, q_id1) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
+            (succ, q_id1) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True)
         except Exception as e:
             raise e
 
@@ -749,7 +749,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
         # Create the second qubit
         try:
-            (succ, q_id2) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, return_succ=True)
+            (succ, q_id2) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True)
         except Exception as e:
             raise e
 
