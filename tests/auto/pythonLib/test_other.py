@@ -48,28 +48,28 @@ class OthersTest(unittest.TestCase):
 		self.cqc.close()
 
 	def setUp(self):
-		self.cqc = CQCConnection("Alice", appID=1, print_info=False)
+		self.cqc = CQCConnection("Alice", appID=1)
 
 	def testMeasureInplace(self):
-		q = qubit(self.cqc, print_info=False)
-		q.H(print_info=False)
-		m1 = q.measure(inplace=True, print_info=False)
+		q = qubit(self.cqc)
+		q.H()
+		m1 = q.measure(inplace=True)
 		failed = False
 		for _ in range(10):
-			m2 = q.measure(inplace=True, print_info=False)
+			m2 = q.measure(inplace=True)
 			self.assertEqual(m1, m2)
-		q.measure(print_info=False)
+		q.measure()
 
 	def testGetTime(self):
 		# Test Get time
-		q1 = qubit(self.cqc, print_info=False)
+		q1 = qubit(self.cqc)
 		time.sleep(3)
-		q2 = qubit(self.cqc, print_info=False)
-		t1 = q1.getTime(print_info=False)
-		t2 = q2.getTime(print_info=False)
+		q2 = qubit(self.cqc)
+		t1 = q1.getTime()
+		t2 = q2.getTime()
 		self.assertEqual(t2-t1, 3)
-		q1.measure(print_info=False)
-		q2.measure(print_info=False)
+		q1.measure()
+		q2.measure()
 
 ##################################################################################################
 
