@@ -55,7 +55,7 @@ class CQCFactory(Factory):
 		self.cqcNet = cqc_net
 		self.virtRoot = None
 		self.qReg = None
-		self.backend = backend
+		self.backend = backend(self)
 
 		# Dictionary that keeps qubit dictorionaries for each application
 		self.qubitList = {}
@@ -118,7 +118,7 @@ class CQCProtocol(Protocol):
 		self.app_id = 0
 
 		# Define the backend to use. Is a setting in settings.ini
-		self.messageHandler = factory.backend(factory)
+		self.messageHandler = factory.backend
 
 		# Flag to determine whether we already received _all_ of the CQC header
 		self.gotCQCHeader = False
@@ -203,7 +203,8 @@ class CQCProtocol(Protocol):
 	@inlineCallbacks
 	def _parseData(self, header, data):
 		try:
-			messages = yield self.messageHandler.handle_cqc_message(header, data)
+			yield self.messageHandler.handle_cqc_message(header, data)
+			messages = self.messageHandler.retrieve_return_messages()
 		except Exception as e:
 			raise e
 
