@@ -9,22 +9,15 @@ then
     # check if the file with current nodes exist. Otherwise use Alice - Eve
     if [ -f "$NETSIM/config/Nodes.cfg" ]
     then
-        while IFS='' read -r name; do
-            python "$NETSIM/run/startNode.py" "$name" &
-            python "$NETSIM/run/startCQC.py" "$name" &
-        done < "$NETSIM/config/Nodes.cfg"
+        python "$NETSIM/run/log/startCQCLog.py"
     else
         python "$NETSIM/configFiles.py" Alice Bob Charlie David Eve
 
-        sh "$NETSIM/run/startVNodes.sh" Alice Bob Charlie David Eve
-
-        sh "$NETSIM/run/startCQCNodes.sh" Alice Bob Charlie David Eve
+        python "$NETSIM/run/log/startCQCLog.py" Alice Bob Charlie David Eve
     fi
 
 else  # if arguments were given, create the new nodes and start them
     python "$NETSIM/configFiles.py" $@
 
-    sh "$NETSIM/run/startVNodes.sh" $@
-
-    sh "$NETSIM/run/startCQCNodes.sh" $@
+    python "$NETSIM/run/log/startCQCLog.py" $@
 fi

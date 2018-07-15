@@ -2,6 +2,7 @@
 *.swp
 *.DS_Store
 /docs/_build/*
-/config/*
-/run/startVNodes.sh
-/run/startCQCNodes.sh
+
+.idea/*
+
+cqc/backend/logFile*

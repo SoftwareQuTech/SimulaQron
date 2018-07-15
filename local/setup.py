@@ -137,7 +137,7 @@ def init_register(resList, myName, virtualNet, classicalNet, lNode, func):
 				reactor.stop()
 
 	# On the local virtual node, we still want to initialize a qubit register
-	defer = virtRoot.callRemote("new_register")
+	defer = virtRoot.callRemote("add_register")
 	defer.addCallback(fill_register, myName, lNode, virtRoot, classicalNet, func)
 	defer.addErrback(localError)
 
