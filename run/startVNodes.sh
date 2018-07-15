@@ -1,6 +1,5 @@
 
-
-# start the node Alice, Bob and Charlie 
+# start the nodes ['Alice', 'Bob', 'Charlie', 'David', 'Eve']
 
 cd "$NETSIM"/run
 
