@@ -31,7 +31,7 @@
 # This file can be used to configure the nodes used in the simulation of SimulaQron.
 # To setup a network with the nodes Alice, Bob and Charlie, simply type 'python configFiles.py Alice Bob Charlie'.
 # This will make changes to the files 'config/{virtual,cqc,app}Nodes.cfg' and 'run/start{V,CQC}Nodes.sh'.
-# Port numbers will between 8801 and 8839 depending on the number of nodes used.
+# Port numbers will start at 8801 and depend on the number of nodes used.
 
 import sys
 import os
