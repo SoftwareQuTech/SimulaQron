@@ -569,7 +569,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         if not inplace:
             # Remove from active mapped qubits
             self.remove_qubit_id(cqc_header.app_id, cmd.qubit_id)
-            del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
 
         return True
 
@@ -648,7 +647,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
         # Remove from active mapped qubits
         self.remove_qubit_id(cqc_header.app_id, cmd.qubit_id)
-        del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
         return True
 
     @inlineCallbacks
@@ -858,7 +856,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
                       cmd.qubit_id, target_name)
         # Remove from active mapped qubits
         self.remove_qubit_id(cqc_header.app_id, cmd.qubit_id)
-        del self.factory.qubitList[(cqc_header.app_id, cmd.qubit_id)]
 
         return True
 
@@ -1132,8 +1129,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
             return 1
 
-    @staticmethod
-    def remove_qubit_id(app_id, qubit_id):
+    def remove_qubit_id(self, app_id, qubit_id):
         """
         Remove qubit id from current used qubit_id so it can be reused
         :param app_id: The app id of the current qubit_id
@@ -1142,6 +1138,8 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         if app_id in SimulaqronCQCHandler._available_q_ids:
             q_ids = SimulaqronCQCHandler._available_q_ids[app_id]
             heappush(q_ids, qubit_id)
+        del self.factory.qubitList[(app_id, qubit_id)]
+
 
     @staticmethod
     def new_ent_id(host_app_id, remote_node, remote_app_id):
