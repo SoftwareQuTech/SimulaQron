@@ -384,7 +384,7 @@ class virtualNode(pb.Root):
 		reg_num=self._next_reg_num
 		self._next_reg_num += 1
 		return reg_num
-  
+
 	def remote_new_register(self, maxQubits=10):
 		"""
 		Initialize a local register. Right now, this simple creates a register according to the simple engine backend
@@ -1071,7 +1071,7 @@ class virtualNode(pb.Root):
 				gotQ.register.activeQubits-=1
 
 		self.remote_delete_register(delRegister)
-    
+
 		return (realM, imagM, activeQ, oldRegNum, oldQubitNum)
 
 	@inlineCallbacks
@@ -1218,36 +1218,39 @@ class virtualQubit(pb.Referenceable):
 		outcome = False
 		while (waiting):
 			if self.virtNode == self.simNode:
-				try:
-					yield self.simQubit.lock()
-					if self.simQubit.active:
-						getattr(self.simQubit, localName)(*args)
+				if not self.simQubit.isLocked():
+					try:
+						yield self.simQubit.lock()
+						if self.simQubit.active:
+							getattr(self.simQubit, localName)(*args)
+							waiting = False
+							outcome = True
+					except Exception as e:
+						logging.error("VIRTUAL NODE %s: Cannot apply %s - %s", e, name)
 						waiting = False
-						outcome = True
-				except Exception as e:
-					logging.error("VIRTUAL NODE %s: Cannot apply %s - %s", e, name)
-					waiting = False
-				finally:
-					self.simQubit.unlock()
+					finally:
+						self.simQubit.unlock()
 			else:
-				try:
-					defer = yield self.simQubit.callRemote("lock")
-					active = yield self.simQubit.callRemote("isActive")
-					if active:
-						logging.debug("VIRTUAL NODE %s: Calling %s remotely to apply %s.", self.virtNode.name,
-									  self.simNode.name, name)
-						defer = yield self.simQubit.callRemote(name, *args)
+				isLocked = yield self.simQubit.callRemote("isLocked")
+				if not isLocked:
+					try:
+						defer = yield self.simQubit.callRemote("lock")
+						active = yield self.simQubit.callRemote("isActive")
+						if active:
+							logging.debug("VIRTUAL NODE %s: Calling %s remotely to apply %s.", self.virtNode.name,
+										  self.simNode.name, name)
+							defer = yield self.simQubit.callRemote(name, *args)
+							waiting = False
+							outcome = True
+					except Exception as e:
+						logging.error("VIRTUAL NODE %s: Cannot apply %s - %s", e, name)
 						waiting = False
-						outcome = True
-				except Exception as e:
-					logging.error("VIRTUAL NODE %s: Cannot apply %s - %s", e, name)
-					waiting = False
-				finally:
-					defer = yield self.simQubit.callRemote("unlock")
+					finally:
+						defer = yield self.simQubit.callRemote("unlock")
 
 			# If we did not get a lock on an active qubit, wait for update and try again
 			if waiting:
-				yield deferLater(reactor, self._delay, lambda: None)
+				yield deferLater(reactor, self.virtNode.root._delay, lambda: None)
 
 		return outcome
 
@@ -1322,46 +1325,49 @@ class virtualQubit(pb.Referenceable):
 		outcome = None
 		while (waiting):
 			if self.virtNode == self.simNode:
-				try:
-					yield self.simQubit.lock()
-					if self.simQubit.active:
-						logging.debug("VIRTUAL NODE %s: Measuring local qubit", self.virtNode.name)
-						outcome = self.simQubit.remote_measure_inplace()
-						if not inplace:
-							self.virtNode.root._remove_sim_qubit(self.simQubit)
+				if not self.simQubit.isLocked():
+					try:
+						yield self.simQubit.lock()
+						if self.simQubit.active:
+							logging.debug("VIRTUAL NODE %s: Measuring local qubit", self.virtNode.name)
+							outcome = self.simQubit.remote_measure_inplace()
+							if not inplace:
+								self.virtNode.root._remove_sim_qubit(self.simQubit)
 
-							# Delete from virtual qubits
-							self.virtNode.root.virtQubits.remove(self)
+								# Delete from virtual qubits
+								self.virtNode.root.virtQubits.remove(self)
+							waiting = False
+					except Exception as e:
+						logging.error("VIRTUAL NODE {}: Cannot remove local qubit. Error: {}".format(self.virtNode.name, e))
 						waiting = False
-				except Exception as e:
-					logging.error("VIRTUAL NODE %s: Cannot remove qubit", self.virtNode.name)
-					waiting = False
-				finally:
-					self.simQubit.unlock()
+					finally:
+						self.simQubit.unlock()
 			else:
-				try:
-					defer = yield self.simQubit.callRemote("lock")
-					active = yield self.simQubit.callRemote("isActive")
-					if active:
-						logging.debug("VIRTUAL NODE %s: Measuring remote qubit at %s.", self.virtNode.name,
-									  self.simNode.name)
-						outcome = yield self.simQubit.callRemote("measure_inplace")
-						if not inplace:
-							num = yield self.simQubit.callRemote("get_sim_number")
-							defer = yield self.simNode.root.callRemote("remove_sim_qubit_num", num)
+				isLocked = yield self.simQubit.callRemote("isLocked")
+				if not isLocked:
+					try:
+						defer = yield self.simQubit.callRemote("lock")
+						active = yield self.simQubit.callRemote("isActive")
+						if active:
+							logging.debug("VIRTUAL NODE %s: Measuring remote qubit at %s.", self.virtNode.name,
+										  self.simNode.name)
+							outcome = yield self.simQubit.callRemote("measure_inplace")
+							if not inplace:
+								num = yield self.simQubit.callRemote("get_sim_number")
+								defer = yield self.simNode.root.callRemote("remove_sim_qubit_num", num)
 
-							# Delete from virtual qubits
-							self.virtNode.root.virtQubits.remove(self)
+								# Delete from virtual qubits
+								self.virtNode.root.virtQubits.remove(self)
+							waiting = False
+					except Exception as e:
+						logging.error("VIRTUAL NODE {}: Cannot remove remote qubit. Error: {}".format(self.virtNode.name, e))
 						waiting = False
-				except Exception as e:
-					logging.error("VIRTUAL NODE %s: Cannot remove qubit", self.virtNode.name)
-					waiting = False
-				finally:
-					defer = yield self.simQubit.callRemote("unlock")
+					finally:
+						defer = yield self.simQubit.callRemote("unlock")
 
 			# If we did not get a lock on an active qubit, wait for update and try again
 			if waiting:
-				yield deferLater(reactor, self._delay, lambda: None)
+				yield deferLater(reactor, self.virtNode.root._delay, lambda: None)
 
 		return outcome
 
