@@ -53,7 +53,8 @@ class simpleEngine(quantumEngine):
 		self.maxQubits = maxQubits
 
 		# We start with no active qubits
-		self.reset()
+		self.activeQubits = 0
+		self.qubitReg = Qobj()
 
 	def reset(self):
 		"""
@@ -68,17 +69,11 @@ class simpleEngine(quantumEngine):
 		"""
 
 		# Prepare a clean qubit state in |0>
-		v = basis(2,0)
+		v = basis(2, 0)
 		newQubit = v * v.dag()
 
-
-		try:
-			num = self.add_qubit(newQubit)
-			return num
-		except quantumError:
-			raise quantumError("Out of qubits.")
-			return(-1)
-
+		num = self.add_qubit(newQubit)
+		return num
 
 	def add_qubit(self, newQubit):
 		"""
@@ -99,9 +94,9 @@ class simpleEngine(quantumEngine):
 		num = self.activeQubits
 
 		# Increment the number of qubits
-		self.activeQubits = self.activeQubits + 1
+		self.activeQubits += 1
 
-		return(num)
+		return num
 
 	def remove_qubit(self, qubitNum):
 		"""
@@ -126,17 +121,26 @@ class simpleEngine(quantumEngine):
 		self.qubitReg = self.qubitReg.ptrace(keepList)
 
 		# Update the number of qubits
-		self.activeQubits = self.activeQubits - 1
+		self.activeQubits -= 1
 
-	def get_qubits(self, qList):
+	def get_qubits(self, l):
 		"""
-		Retrieves a the qubits in the list. This traces out the rest of the qubits.
+		Retrieves the qubits in the list. This traces out the rest of the qubits.
 
 		Arguments
 		qList		list of qubits to retrieve, e.g. [1, 4]
 		"""
+		# Qutip distinguishes between system dimensionality and matrix dimensionality
+		# so we need to make sure it knows we are talking about multiple qubits
+		k = int(log2(self.qubitReg.shape[0]))
+		dimL = []
+		for j in range(k):
+			dimL.append(2)
 
-		return self.qubitReg.ptrace(qList)
+		self.qubitReg.dims = [dimL, dimL]
+
+		logging.debug("Dimensions %s", self.qubitReg.dims)
+		return self.qubitReg.ptrace(l)
 
 	def get_qubits_RI(self, qList):
 		"""
@@ -151,7 +155,7 @@ class simpleEngine(quantumEngine):
 		R = rho.full().real.tolist()
 		I = rho.full().imag.tolist()
 
-		return (R,I)
+		return R, I
 
 	def get_register_RI(self):
 		"""
@@ -161,15 +165,15 @@ class simpleEngine(quantumEngine):
 		R = self.qubitReg.full().real.tolist()
 		I = self.qubitReg.full().imag.tolist()
 
-		return (R,I)
+		return R, I
 
 	def apply_H(self, qubitNum):
 		"""
 		Applies a Hadamard gate to the qubits with number qubitNum.
 		"""
 
-		f = sqrt(2);
-		H = Qobj([[1/f, 1/f],[1/f, -1/f]], dims=[[2],[2]])
+		f = sqrt(2)
+		H = Qobj([[1/f, 1/f],[1/f, -1/f]], dims=[[2], [2]])
 		self.apply_onequbit_gate(H, qubitNum)
 
 	def apply_K(self, qubitNum):
@@ -177,9 +181,9 @@ class simpleEngine(quantumEngine):
 		Applies a K gate to the qubits with number qubitNum. Maps computational basis to Y eigenbasis.
 		"""
 
-		f = sqrt(2);
-		i = complex(0,1);
-		K = Qobj([[1/f, -i/f],[i/f, -1/f]], dims=[[2],[2]])
+		f = sqrt(2)
+		i = complex(0, 1)
+		K = Qobj([[1/f, -i/f], [i/f, -1/f]], dims=[[2], [2]])
 		self.apply_onequbit_gate(K, qubitNum)
 
 	def apply_X(self, qubitNum):
@@ -187,7 +191,7 @@ class simpleEngine(quantumEngine):
 		Applies a X gate to the qubits with number qubitNum.
 		"""
 
-		X = Qobj([[0, 1],[1, 0]], dims=[[2],[2]])
+		X = Qobj([[0, 1], [1, 0]], dims=[[2], [2]])
 		self.apply_onequbit_gate(X, qubitNum)
 
 	def apply_Z(self, qubitNum):
@@ -195,7 +199,7 @@ class simpleEngine(quantumEngine):
 		Applies a Z gate to the qubits with number qubitNum.
 		"""
 
-		Z = Qobj([[1, 0],[0, -1]], dims=[[2],[2]])
+		Z = Qobj([[1, 0], [0, -1]], dims=[[2], [2]])
 		self.apply_onequbit_gate(Z, qubitNum)
 
 	def apply_Y(self, qubitNum):
@@ -203,31 +207,31 @@ class simpleEngine(quantumEngine):
 		Applies a Y gate to the qubits with number qubitNum.
 		"""
 
-		i = complex(0,1);
-		Y = Qobj([[0, -i],[i, 0]], dims=[[2],[2]])
+		i = complex(0, 1)
+		Y = Qobj([[0, -i], [i, 0]], dims=[[2], [2]])
 		self.apply_onequbit_gate(Y, qubitNum)
 
 	def apply_T(self, qubitNum):
 		"""
 		Applies a T gate to the qubits with number qubitNum.
 		"""
-		i = complex(0,1)
-		Y = Qobj([[1, 0],[0, exp(i * pi/4)]], dims=[[2],[2]])
+		i = complex(0, 1)
+		Y = Qobj([[1, 0], [0, exp(i * pi/4)]], dims=[[2], [2]])
 		self.apply_onequbit_gate(Y, qubitNum)
 
-	def apply_rotation(self,qubitNum,n,a):
+	def apply_rotation(self, qubitNum, n, a):
 		"""
 		Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError is raised
 		Arguments:
-                qubitNum    Qubit number
+				qubitNum    Qubit number
 		n	    A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
 		a	    The rotation angle in radians.
 		"""
-		nNorm=np.linalg.norm(n)
-		if nNorm==0:
+		nNorm = np.linalg.norm(n)
+		if nNorm == 0:
 			raise ValueError("Rotation vector n can't be 0")
 		R=(-1j*a/(2*nNorm)*(n[0]*sigmax()+n[1]*sigmay()+n[2]*sigmaz())).expm()
-		self.apply_onequbit_gate(R,qubitNum)
+		self.apply_onequbit_gate(R, qubitNum)
 
 	def apply_CNOT(self, qubitNum1, qubitNum2):
 		"""
@@ -236,14 +240,13 @@ class simpleEngine(quantumEngine):
 
 		# Construct the CNOT matrix
 		cnot = Qobj([[1, 0, 0, 0],
-                     	[0, 1, 0, 0],
-                     	[0, 0, 0, 1],
-                     	[0, 0, 1, 0]],
-                    	dims=[[2, 2], [2, 2]])
+						[0, 1, 0, 0],
+						[0, 0, 0, 1],
+						[0, 0, 1, 0]],
+						dims=[[2, 2], [2, 2]])
 
 		# Apply it to the desired qubits
 		self.apply_twoqubit_gate(cnot, qubitNum1, qubitNum2)
-
 
 	def apply_CPHASE(self, qubitNum1, qubitNum2):
 		"""
@@ -252,31 +255,13 @@ class simpleEngine(quantumEngine):
 
 		# Construct the CPHASE matrix
 		cphase = Qobj([[1, 0, 0, 0],
-                     	[0, 1, 0, 0],
-                     	[0, 0, 1, 0],
-                     	[0, 0, 0, -1]],
-                    	dims=[[2, 2], [2, 2]])
+					   [0, 1, 0, 0],
+						[0, 0, 1, 0],
+						[0, 0, 0, -1]],
+						dims=[[2, 2], [2, 2]])
 
 		# Apply it to the desired qubits
-		self.apply_twoqubit_gate(cphase,qubitNum1, qubitNum2)
-
-	def get_qubits(self, list):
-		"""
-		Returns the qubits with numbers in list.
-		"""
-
-		# Qutip distinguishes between system dimensionality and matrix dimensionality
-		# so we need to make sure it knows we are talking about multiple qubits
-		k = int(log2(self.qubitReg.shape[0]))
-		dimL = []
-		for j in range(k):
-			dimL.append(2)
-
-		self.qubitReg.dims = [dimL, dimL]
-
-		logging.debug("Dimensions %s",self.qubitReg.dims)
-		return self.qubitReg.ptrace(list)
-
+		self.apply_twoqubit_gate(cphase, qubitNum1, qubitNum2)
 
 	def apply_onequbit_gate(self, gateU, qubitNum):
 		"""
@@ -289,7 +274,6 @@ class simpleEngine(quantumEngine):
 
 		# Compute the overall unitary, identity everywhere with gateU at position qubitNum
 		overallU = gate_expand_1toN(gateU, self.activeQubits, qubitNum)
-
 
 		# Qutip distinguishes between system dimensionality and matrix dimensionality
 		# so we need to make sure it knows we are talking about multiple qubits
@@ -344,28 +328,28 @@ class simpleEngine(quantumEngine):
 			raise quantumError("No such qubit to be measured.")
 
 		# Construct the two measurement operators, and put them at the right position
-		v0 = basis(2,0);
-		P0 = v0 * v0.dag();
+		v0 = basis(2, 0)
+		P0 = v0 * v0.dag()
 		M0 = gate_expand_1toN(P0, self.activeQubits, qubitNum)
 
-		v1 = basis(2,1);
-		P1 = v1 * v1.dag();
+		v1 = basis(2, 1)
+		P1 = v1 * v1.dag()
 		M1 = gate_expand_1toN(P1, self.activeQubits, qubitNum)
 
 		# Compute the success probabilities
-		obj = M0 * self.qubitReg;
+		obj = M0 * self.qubitReg
 		p0 = obj.tr().real
-		obj = M1 * self.qubitReg;
+		obj = M1 * self.qubitReg
 		p1 = obj.tr().real
 
 		# Sample the measurement outcome from these probabilities
-		outcome = int(np.random.choice([0,1], 1, p=[p0, p1]))
+		outcome = int(np.random.choice([0, 1], 1, p=[p0, p1]))
 
 		# Compute the post-measurement state, getting rid of the measured qubit
 		if outcome == 0:
-			self.qubitReg = M0 * self.qubitReg * M0.dag()/p0;
+			self.qubitReg = M0 * self.qubitReg * M0.dag()/p0
 		else:
-			self.qubitReg = M1 * self.qubitReg * M1.dag()/p1;
+			self.qubitReg = M1 * self.qubitReg * M1.dag()/p1
 
 		# return measurement outcome
 		return outcome
@@ -382,7 +366,7 @@ class simpleEngine(quantumEngine):
 
 		return outcome
 
-	def replace_qubit(self,qubitNum, state):
+	def replace_qubit(self, qubitNum, state):
 		"""
 		Replaces the qubit at position qubitNum with the one given by state.
 		"""
@@ -463,7 +447,7 @@ class quantumRegister(simpleEngine):
 	different quantum nodes.
 	"""
 
-	def __init__(self, node, num, maxQubits = 10):
+	def __init__(self, node, num, maxQubits=10):
 		"""
 		Initialize the quantum register at the given node.
 

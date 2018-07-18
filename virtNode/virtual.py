@@ -1585,7 +1585,7 @@ class virtualQubit(pb.Referenceable):
 		q2simNode = target.simNode
 		q2virtNode = target.virtNode
 
-		# Todo a 2 qubit gate, both qubits must be in the same simulated register. We will merge
+		# To do a 2 qubit gate, both qubits must be in the same simulated register. We will merge
 		# registers if this is not already the case.
 		try:
 			if self.simNode == target.simNode:
