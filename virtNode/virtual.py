@@ -291,6 +291,9 @@ class virtualNode(pb.Root):
 				return q
 		return None
 
+	def remote_isLocked(self):
+		return self._lock.locked
+
 	@inlineCallbacks
 	def _get_global_lock(self):
 		logging.debug("VIRTUAL NODE %s: Local GETTING LOCK", self.myID.name)
@@ -1525,27 +1528,49 @@ class virtualQubit(pb.Referenceable):
 			timeoutD = Deferred()
 			timeup = reactor.callLater(random.uniform(1, 4), timeoutD.callback, None)
 
-			# Set up the lock acquisition
-			lockD = self._lock_nodes(target)
-
-			try:
-				# Yield on both of them
-				gotLock, timeoutRes = yield DeferredList([lockD, timeoutD], fireOnOneCallback=True,
-														 fireOnOneErrback=True, consumeErrors=True)
-			except Exception as e:
-				logging.debug("VIRTUAL NODE %s: Cannot get lock %s", self.virtNode.name, e)
-				yield self._unlock_nodes(self.simNode, self.virtNode, target.simNode, target.virtNode)
-				timeup.cancel()
-				return
+			# Check if self simNode is locked
+			if self.simNode == self.virtNode:
+				self_isLocked = self.simNode.root._lock.locked
 			else:
-				if timeoutD.called:
-					logging.debug("VIRTUAL NODE %s: Timing out getting locks.", self.virtNode.name)
-					lockD.cancel()
+				self_isLocked = yield self.simNode.root.callRemote("isLocked")
+			# Check if other simNode is locked
+			if target.simNode == target.virtNode:
+				other_isLocked = target.simNode.root._lock.locked
+			else:
+				other_isLocked = yield target.simNode.root.callRemote("isLocked")
+
+			if self_isLocked:
+				logging.debug("VIRTUAL NODE {}: This SimNode {} already locked. Need to wait.".format(self.virtNode.name, self.simNode.name))
+				yield timeoutD
+				attempts += 1
+			elif other_isLocked:
+				logging.debug("VIRTUAL NODE {}: Other SimNode {} already locked. Need to wait.".format(self.virtNode.name, target.simNode.name))
+				yield timeoutD
+				attempts += 1
+
+			else:
+
+				# Set up the lock acquisition
+				lockD = self._lock_nodes(target)
+
+				try:
+					# Yield on both of them
+					gotLock, timeoutRes = yield DeferredList([lockD, timeoutD], fireOnOneCallback=True,
+															 fireOnOneErrback=True, consumeErrors=True)
+				except Exception as e:
+					logging.debug("VIRTUAL NODE %s: Cannot get lock %s", self.virtNode.name, e)
 					yield self._unlock_nodes(self.simNode, self.virtNode, target.simNode, target.virtNode)
-					attempts = attempts + 1
-				elif lockD.called:
-					waiting = False
 					timeup.cancel()
+					return
+				else:
+					if timeoutD.called:
+						logging.debug("VIRTUAL NODE %s: Timing out getting locks.", self.virtNode.name)
+						lockD.cancel()
+						yield self._unlock_nodes(self.simNode, self.virtNode, target.simNode, target.virtNode)
+						attempts = attempts + 1
+					elif lockD.called:
+						waiting = False
+						timeup.cancel()
 
 		# We have now acquired the two relevant global node locks. If more than one qubit is locked, all code
 		# will first acquire the global lock, so this should be safe from deadlocks now, so we will not timeout
