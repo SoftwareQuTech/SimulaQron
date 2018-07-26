@@ -41,11 +41,12 @@ from SimulaQron.virtNode.crudeSimulator import *
 
 from SimulaQron.local.setup import *
 
+
 def assemble_qubit(realM, imagM):
 	"""
-        Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
-        We need this since Twisted PB does not support sending complex valued object natively.
-        """
+	Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
+	We need this since Twisted PB does not support sending complex valued object natively.
+	"""
 	M = realM
 	for s in range(len(M)):
 		for t in range(len(M)):
@@ -74,25 +75,25 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 	classicalNet	servers in the classical communication network (dictionary of hosts)
 	"""
 
-	logging.debug("LOCAL %s: Runing client side program.",myName)
+	logging.debug("LOCAL %s: Running client side program.", myName)
 
 	# Create 2 qubits
-	qA = yield virtRoot.callRemote("new_qubit_inreg",qReg)
-	qB = yield virtRoot.callRemote("new_qubit_inreg",qReg)
+	qA = yield virtRoot.callRemote("new_qubit_inreg", qReg)
+	qB = yield virtRoot.callRemote("new_qubit_inreg", qReg)
 
 	# Put qubits A and B in an EPR state
 	yield qA.callRemote("apply_H")
-	yield qA.callRemote("cnot_onto",qB)
+	yield qA.callRemote("cnot_onto", qB)
 
 	# Output state
-	(realRho, imagRho) = yield virtRoot.callRemote("get_multiple_qubits",[qA,qB])
+	(realRho, imagRho) = yield virtRoot.callRemote("get_multiple_qubits", [qA, qB])
 	rho = assemble_qubit(realRho,imagRho)
-	expectedRho = Qobj([[0.5,0,0,0.5],[0,0,0,0],[0,0,0,0],[0.5,0,0,0.5]])
+	expectedRho = Qobj([[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]])
 
 	if rho == expectedRho:
 		print("Testing register merge, both local, same register............ok")
 	else:
-		print("Testing register merge, both local, same register............fail")
+		print("Testing register merge, both local, same register............fail, got", rho)
 
 	reactor.stop()
 
@@ -104,7 +105,7 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 # This will be run if the local node acts as a server on the classical communication network,
 # accepting remote method calls from the other nodes.
 
-class localNode(pb.Root):
+class LocalNode(pb.Root):
 
 	def __init__(self, node, classicalNet):
 
@@ -139,13 +140,13 @@ def main():
 	classicalFile = os.path.join(os.path.dirname(__file__), 'classicalNet.cfg')
 
 	# Read configuration files for the virtual quantum, as well as the classical network
-	virtualNet = networkConfig(virtualFile)
-	classicalNet = networkConfig(classicalFile)
+	virtualNet = NetworkConfig(virtualFile)
+	classicalNet = NetworkConfig(classicalFile)
 
 	# Check if we should run a local classical server. If so, initialize the code
 	# to handle remote connections on the classical communication network
 	if myName in classicalNet.hostDict:
-		lNode = localNode(classicalNet.hostDict[myName], classicalNet)
+		lNode = LocalNode(classicalNet.hostDict[myName], classicalNet)
 	else:
 		lNode = None
 

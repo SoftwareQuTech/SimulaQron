@@ -108,7 +108,7 @@ class CQCConnection:
 			self.cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
 
 		# Read configuration files for the cqc network
-		self._cqcNet = networkConfig(self.cqcFile)
+		self._cqcNet = NetworkConfig(self.cqcFile)
 
 		# Host data
 		if self.name in self._cqcNet.hostDict:
@@ -141,7 +141,7 @@ class CQCConnection:
 			self.appFile = os.environ.get('NETSIM') + "/config/appNodes.cfg"
 
 		# Read configuration files for the application network
-		self._appNet = networkConfig(self.appFile)
+		self._appNet = NetworkConfig(self.appFile)
 
 		# List of pending messages waiting to be send to the back-end
 		self.pend_messages = pend_messages

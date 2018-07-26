@@ -5,16 +5,16 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 # 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
+#   notice, this list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the distribution.
+#   notice, this list of conditions and the following disclaimer in the
+#   documentation and/or other materials provided with the distribution.
 # 3. All advertising materials mentioning features or use of this software
-#    must display the following acknowledgement:
-#    This product includes software developed by Stephanie Wehner, QuTech.
+#   must display the following acknowledgement:
+#   This product includes software developed by Stephanie Wehner, QuTech.
 # 4. Neither the name of the QuTech organization nor the
-#    names of its contributors may be used to endorse or promote products
-#    derived from this software without specific prior written permission.
+#   names of its contributors may be used to endorse or promote products
+#   derived from this software without specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,16 +27,15 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from qutip import *;
-from math import *;
-from cmath import *;
-
-import numpy as np;
+import numpy as np
 import logging
 
-from SimulaQron.virtNode.basics import *;
+from SimulaQron.virtNode.basics import *
+from qutip import basis, tensor, Qobj, sigmax, sigmay, sigmaz, gate_expand_1toN, gate_expand_2toN
+from twisted.internet.defer import Deferred
 
-class simpleEngine(quantumEngine):
+
+class SimpleEngine(QuantumEngine):
 	"""
 	Basic quantum engine which uses QuTip. Works with density matrices and in principle allows full quantum
 	dynamics via QuTip. Subsequently, this is quite slow.
@@ -45,15 +44,12 @@ class simpleEngine(quantumEngine):
 		maxQubits:	maximum number of qubits this engine will support.
 	"""
 
-	def __init__(self, maxQubits = 10):
+	def __init__(self, maxQubits=10):
 		"""
 		Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.
 		"""
 
-		self.maxQubits = maxQubits
-
-		# We start with no active qubits
-		self.activeQubits = 0
+		super().__init__(maxQubits)
 		self.qubitReg = Qobj()
 
 	def reset(self):
@@ -82,7 +78,7 @@ class simpleEngine(quantumEngine):
 
 		# Check if we are still allowed to add qubits
 		if self.activeQubits == self.maxQubits:
-			raise quantumError("No more qubits available.")
+			raise QuantumError("No more qubits available.")
 
 		# Append to the existing state at the end
 		if self.activeQubits > 0:
@@ -102,13 +98,16 @@ class simpleEngine(quantumEngine):
 		"""
 		Removes the qubit with the desired number qubitNum
 		"""
-		if (qubitNum+1) > self.activeQubits:
-			raise quantumError("No such qubit to remove")
+		print(101, qubitNum+1, self.activeQubits)
+		if (qubitNum + 1) > self.activeQubits:
+			raise QuantumError("No such qubit to remove")
 
 		# Check if this the only qubit
+		print(105, self.activeQubits)
 		if self.activeQubits == 1:
 			self.activeQubits = 0
 			self.qubitReg = Qobj()
+			print(108)
 			return
 
 		# Compute the list of qubits to keep
@@ -132,7 +131,7 @@ class simpleEngine(quantumEngine):
 		"""
 		# Qutip distinguishes between system dimensionality and matrix dimensionality
 		# so we need to make sure it knows we are talking about multiple qubits
-		k = int(log2(self.qubitReg.shape[0]))
+		k = int(np.log2(self.qubitReg.shape[0]))
 		dimL = []
 		for j in range(k):
 			dimL.append(2)
@@ -171,19 +170,21 @@ class simpleEngine(quantumEngine):
 		"""
 		Applies a Hadamard gate to the qubits with number qubitNum.
 		"""
-
-		f = sqrt(2)
-		H = Qobj([[1/f, 1/f],[1/f, -1/f]], dims=[[2], [2]])
+		print(170, "PSSSSSSSS, HI!")
+		f = np.sqrt(2)
+		H = Qobj([[1 / f, 1 / f], [1 / f, -1 / f]], dims=[[2], [2]])
+		print(173, "PSSSSSSSS, HI2!")
 		self.apply_onequbit_gate(H, qubitNum)
+		print(175, "PSSSSSSSS, HI3!")
 
 	def apply_K(self, qubitNum):
 		"""
 		Applies a K gate to the qubits with number qubitNum. Maps computational basis to Y eigenbasis.
 		"""
 
-		f = sqrt(2)
+		f = np.sqrt(2)
 		i = complex(0, 1)
-		K = Qobj([[1/f, -i/f], [i/f, -1/f]], dims=[[2], [2]])
+		K = Qobj([[1 / f, -i / f], [i / f, -1 / f]], dims=[[2], [2]])
 		self.apply_onequbit_gate(K, qubitNum)
 
 	def apply_X(self, qubitNum):
@@ -216,21 +217,21 @@ class simpleEngine(quantumEngine):
 		Applies a T gate to the qubits with number qubitNum.
 		"""
 		i = complex(0, 1)
-		Y = Qobj([[1, 0], [0, exp(i * pi/4)]], dims=[[2], [2]])
+		Y = Qobj([[1, 0], [0, np.exp(i * np.pi / 4)]], dims=[[2], [2]])
 		self.apply_onequbit_gate(Y, qubitNum)
 
 	def apply_rotation(self, qubitNum, n, a):
 		"""
 		Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError is raised
 		Arguments:
-				qubitNum    Qubit number
-		n	    A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
-		a	    The rotation angle in radians.
+				qubitNum	Qubit number
+		n		A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+		a		The rotation angle in radians.
 		"""
 		nNorm = np.linalg.norm(n)
 		if nNorm == 0:
 			raise ValueError("Rotation vector n can't be 0")
-		R=(-1j*a/(2*nNorm)*(n[0]*sigmax()+n[1]*sigmay()+n[2]*sigmaz())).expm()
+		R = (-1j * a / (2 * nNorm) * (n[0] * sigmax() + n[1] * sigmay() + n[2] * sigmaz())).expm()
 		self.apply_onequbit_gate(R, qubitNum)
 
 	def apply_CNOT(self, qubitNum1, qubitNum2):
@@ -255,7 +256,7 @@ class simpleEngine(quantumEngine):
 
 		# Construct the CPHASE matrix
 		cphase = Qobj([[1, 0, 0, 0],
-					   [0, 1, 0, 0],
+						[0, 1, 0, 0],
 						[0, 0, 1, 0],
 						[0, 0, 0, -1]],
 						dims=[[2, 2], [2, 2]])
@@ -272,12 +273,14 @@ class simpleEngine(quantumEngine):
 		qubitNum 	the number of the qubit this gate is applied to
 		"""
 
+		logging.warning("Applying one qubit gate to %d", qubitNum)
+
 		# Compute the overall unitary, identity everywhere with gateU at position qubitNum
 		overallU = gate_expand_1toN(gateU, self.activeQubits, qubitNum)
 
 		# Qutip distinguishes between system dimensionality and matrix dimensionality
 		# so we need to make sure it knows we are talking about multiple qubits
-		k = int(log2(overallU.shape[0]))
+		k = int(np.log2(overallU.shape[0]))
 		dimL = []
 		for j in range(k):
 			dimL.append(2)
@@ -287,6 +290,7 @@ class simpleEngine(quantumEngine):
 
 		# Apply the unitary
 		self.qubitReg = overallU * self.qubitReg * overallU.dag()
+		logging.warning("Done applying one qubit gate to %d", qubitNum)
 
 	def apply_twoqubit_gate(self, gateU, qubit1, qubit2):
 		"""
@@ -303,7 +307,7 @@ class simpleEngine(quantumEngine):
 
 		# Qutip distinguishes between system dimensionality and matrix dimensionality
 		# so we need to make sure it knows we are talking about multiple qubits
-		k = int(log2(overallU.shape[0]))
+		k = int(np.log2(overallU.shape[0]))
 		dimL = []
 		for j in range(k):
 			dimL.append(2)
@@ -324,8 +328,8 @@ class simpleEngine(quantumEngine):
 		"""
 
 		# Check we have such a qubit...
-		if (qubitNum+1) > self.activeQubits:
-			raise quantumError("No such qubit to be measured.")
+		if (qubitNum + 1) > self.activeQubits:
+			raise QuantumError("No such qubit to be measured.")
 
 		# Construct the two measurement operators, and put them at the right position
 		v0 = basis(2, 0)
@@ -347,9 +351,9 @@ class simpleEngine(quantumEngine):
 
 		# Compute the post-measurement state, getting rid of the measured qubit
 		if outcome == 0:
-			self.qubitReg = M0 * self.qubitReg * M0.dag()/p0
+			self.qubitReg = M0 * self.qubitReg * M0.dag() / p0
 		else:
-			self.qubitReg = M1 * self.qubitReg * M1.dag()/p1
+			self.qubitReg = M1 * self.qubitReg * M1.dag() / p1
 
 		# return measurement outcome
 		return outcome
@@ -380,7 +384,7 @@ class simpleEngine(quantumEngine):
 		# Put the new qubit in the correct position
 		qList = list(range(self.activeQubits))
 		qList[qubitNum] = self.activeQubits
-		qList[self.activeQubits-1] = qubitNum
+		qList[self.activeQubits - 1] = qubitNum
 		self.qubitReg.permute(qList)
 
 	def absorb(self, other):
@@ -391,7 +395,7 @@ class simpleEngine(quantumEngine):
 		# Check whether there is space
 		newNum = self.activeQubits + other.activeQubits
 		if newNum > self.maxQubits:
-			raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
+			raise QuantumError("Cannot merge: qubits exceed the maximum available.\n")
 
 		# Check whether there are in fact qubits to tensor up....
 		if self.activeQubits == 0:
@@ -422,7 +426,7 @@ class simpleEngine(quantumEngine):
 		# Check whether there is space
 		newNum = self.activeQubits + activeQ
 		if newNum > self.maxQubits:
-			raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
+			raise QuantumError("Cannot merge: qubits exceed the maximum available.\n")
 
 		# Check whether there are in fact qubits to tensor up....
 		if self.activeQubits == 0:
@@ -434,14 +438,15 @@ class simpleEngine(quantumEngine):
 
 		# Qutip distinguishes between system dimensionality and matrix dimensionality
 		# so we need to make sure it knows we are talking about multiple qubits
-		k = int(log2(self.qubitReg.shape[0]))
+		k = int(np.log2(self.qubitReg.shape[0]))
 		dimL = []
 		for j in range(k):
 			dimL.append(2)
 
 		self.qubitReg.dims = [dimL, dimL]
 
-class quantumRegister(simpleEngine):
+
+class QuantumRegister(SimpleEngine):
 	"""
 	A simulated quantum register. The qubits who are simulated in this register may be distributed over
 	different quantum nodes.
@@ -467,4 +472,3 @@ class quantumRegister(simpleEngine):
 
 		# Node that actually simulates this register
 		self.simNode = node
-

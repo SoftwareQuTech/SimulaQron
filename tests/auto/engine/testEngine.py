@@ -29,7 +29,7 @@
 import logging
 import unittest
 
-from SimulaQron.virtNode.crudeSimulator import simpleEngine
+from SimulaQron.virtNode.crudeSimulator import SimpleEngine
 
 from qutip import *
 
@@ -38,8 +38,8 @@ class EngineTest(unittest.TestCase):
 
 	def test_tracing(self):
 		logging.debug("Testing the partial trace...")
-		se = simpleEngine(10)
-		se2 = simpleEngine(10)
+		se = SimpleEngine(10)
+		se2 = SimpleEngine(10)
 
 		se.add_fresh_qubit()
 		se.add_fresh_qubit()
@@ -60,7 +60,7 @@ class EngineTest(unittest.TestCase):
 		self.assertEqual(se.qubitReg, se2.qubitReg)
 
 	def test_gate(self):
-		se = simpleEngine(10)
+		se = SimpleEngine(10)
 		se.add_fresh_qubit()
 		savedQubit = se.qubitReg
 
@@ -72,7 +72,7 @@ class EngineTest(unittest.TestCase):
 		self.assertTrue(isequal(savedQubit, se.qubitReg))
 
 	def test_gate_fail(self):
-		se = simpleEngine(10)
+		se = SimpleEngine(10)
 		se.add_fresh_qubit()
 		savedQubit = se.qubitReg
 
@@ -81,7 +81,7 @@ class EngineTest(unittest.TestCase):
 		self.assertFalse(isequal(savedQubit, se.qubitReg))
 
 	def test_measure(self):
-		se = simpleEngine()
+		se = SimpleEngine()
 
 		se.add_fresh_qubit()
 		outcome = se.measure_qubit(0)

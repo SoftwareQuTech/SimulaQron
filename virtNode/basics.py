@@ -32,19 +32,25 @@ from collections import deque
 from twisted.spread import pb
 from twisted.internet import reactor
 
-class quantumError(Exception):
+
+class QuantumError(Exception):
 	def __init__(self, value):
 		self.value = value
+		super().__init__(value)
+
 	def __str__(self):
 		return repr(self.value)
 
-class virtNetError(Exception):
+
+class VirtNetError(Exception):
 	def __init__(self, value):
 		self.value = value
+
 	def __str__(self):
 		return repr(self.value)
 
-class quantumEngine(pb.Referenceable):
+
+class QuantumEngine(pb.Referenceable):
 	"""
 	Basic quantum engine. This by itself does nothing.
 
@@ -52,7 +58,7 @@ class quantumEngine(pb.Referenceable):
 		maxQubits:	maximum number of qubits this engine will support.
 	"""
 
-	def __init__(self, maxQubits = 10):
+	def __init__(self, maxQubits=10):
 		"""
 		Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.
 		"""
@@ -61,5 +67,3 @@ class quantumEngine(pb.Referenceable):
 
 		# We start with no active qubits
 		self.activeQubits = 0;
-
-

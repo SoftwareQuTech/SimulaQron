@@ -544,14 +544,17 @@ class SimulaqronCQCHandler(CQCMessageHandler):
             return False
         try:
             outcome = yield virt_qubit.callRemote("measure", inplace)
+            print(547, "outcome", outcome)
         except Exception as e:
             raise e
 
         if outcome is None:
-            logging.debug("CQC %s: Measurement failed", self.name)
+            logging.warning("CQC %s: Measurement failed", self.name)
             err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
             self.return_messages.append(err_msg)
             return False
+
+        print(outcome)
 
         logging.debug("CQC %s: Measured outcome %d", self.name, outcome)
         # Send the outcome back as MEASOUT
@@ -618,7 +621,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
         # Check so that it is not the same node
         if self.name == target_name:
-            logging.debug("CQC %s: Trying to send from node to itself.", self.name)
+            logging.warning("CQC %s: Trying to send from node to itself.", self.name)
             # self.protocol._send_back_cqc(cqc_header, CQC_ERR_GENERAL)
             err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
             self.return_messages.append(err_msg)
@@ -790,7 +793,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
         if not succ:
             # Failed to send the qubit, destroy it instead
-            logging.debug("CQC %s: Failed to send epr qubit, destroying qubits", self.name)
+            logging.warning("CQC %s: Failed to send epr qubit, destroying qubits", self.name)
             self.cmd_measure(cqc_header, cmd1, None)
             self.cmd_measure(cqc_header, cmd2, None)
             err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
@@ -946,14 +949,14 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         """
         app_id = cqc_header.app_id
         try:
-            self.factory._lock.acquire()
+            yield self.factory._lock.acquire()
             try:
                 virt = yield self.factory.virtRoot.callRemote("new_qubit")
             except Exception as e:
                 raise e
 
             if not virt:  # if no more qubits
-                raise quantumError("No more qubits available")
+                raise QuantumError("No more qubits available")
 
             q_id = self.new_qubit_id(app_id)
             q = CQCQubit(q_id, int(time.time()), virt)
@@ -975,7 +978,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
                 logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
                 self.return_messages.append(msg)
 
-        except quantumError:  # if no more qubits
+        except QuantumError:  # if no more qubits
             logging.error("CQC %s: Maximum number of qubits reached.", self.name)
             msg = self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
             self.return_messages.append(msg)
@@ -1027,7 +1030,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
             raise e
 
         if outcome is None:
-            logging.debug("CQC %s: Release failed", self.name)
+            logging.warning("CQC %s: Release failed", self.name)
             err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
             self.return_messages.append(err_msg)
             return False

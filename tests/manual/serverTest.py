@@ -42,7 +42,7 @@ from itertools import repeat
 def main():
 
 	# Read config file
-	config = networkConfig("../../config/virtualNodes.cfg")
+	config = NetworkConfig("../../config/virtualNodes.cfg")
 
 	# We are Alice
 	myName = "Alice"

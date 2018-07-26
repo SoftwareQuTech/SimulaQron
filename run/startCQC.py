@@ -3,7 +3,7 @@ import logging
 import sys
 from SimulaQron.cqc.backend.cqcConfig import CQC_CONF_LINK_WAIT_TIME
 from SimulaQron.cqc.backend.cqcProtocol import CQCFactory, SimulaqronCQCHandler
-from SimulaQron.general.hostConfig import networkConfig
+from SimulaQron.general.hostConfig import NetworkConfig
 from SimulaQron.settings import Settings
 from twisted.internet import reactor
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
@@ -121,8 +121,8 @@ def main(myName):
 	cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
 
 	# Read configuration files for the virtual quantum, as well as the classical network
-	virtualNet = networkConfig(virtualFile)
-	cqcNet = networkConfig(cqcFile)
+	virtualNet = NetworkConfig(virtualFile)
+	cqcNet = NetworkConfig(cqcFile)
 
 	# Check if we are in the host-dictionary
 	if myName in cqcNet.hostDict:

@@ -57,7 +57,7 @@ class CQCFactory(Factory):
 		self.qReg = None
 		self.backend = backend(self)
 
-		# Dictionary that keeps qubit dictorionaries for each application
+		# Dictionary that keeps qubit dictionaries for each application
 		self.qubitList = {}
 
 		# Lock governing access to the qubitList

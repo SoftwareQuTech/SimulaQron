@@ -27,56 +27,13 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import socket
-import sys
-import os
-import struct
-
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.pythonLib.cqc import *
+from SimulaQron.toolbox.measurements import parity_meas
 
+import random
 
-#####################################################################################################
-#
-# init
-#
-def init(name,cqcFile=None):
-	"""
-	Initialize a connection to the cqc server with the name given as input.
-	A path to a configure file for the cqc network can be given,
-	if it's not given the config file '$NETSIM/config/cqcNodes.cfg' will be used.
-	Returns a socket object.
-	"""
-
-	# This file defines the network of CQC servers interfacing to virtual quantum nodes
-	if cqcFile==None:
-		cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
-
-	# Read configuration files for the cqc network
-	cqcNet = NetworkConfig(cqcFile)
-
-	# Host data
-	if name in cqcNet.hostDict:
-		myHost = cqcNet.hostDict[name]
-	else:
-		logging.error("The name '%s' is not in the cqc network.",name)
-
-	#Get IP of correct form
-	myIP=socket.inet_ntoa(struct.pack("!L",myHost.ip))
-
-	#Connect to cqc server and run protocol
-	cqc=None
-	try:
-		cqc=socket.socket(socket.AF_INET,socket.SOCK_STREAM,0)
-	except socket.error:
-		logging.error("Could not connect to cqc server: %s",name)
-	try:
-		cqc.connect((myIP,myHost.port))
-	except socket.error:
-		cqc.close()
-		logging.error("Could not connect to cqc server: %s",name)
-	return cqc
 
 
 #####################################################################################################
@@ -85,28 +42,63 @@ def init(name,cqcFile=None):
 #
 def main():
 
-	# In this example, we are Alice.
-	myName="Alice"
-
 	# Initialize the connection
-	cqc=init(myName)
+	Bob=CQCConnection("Bob")
 
-	#Send Hello message
-	hdr=CQCHeader()
-	hdr.setVals(CQC_VERSION,CQC_TP_HELLO,0,0)
-	msg=hdr.pack()
-	cqc.send(msg)
+	# Create EPR pairs
+	q1=Bob.recvEPR()
+	q2=Bob.recvEPR()
 
-	#Receive return message
-	data=cqc.recv(192)
-	hdr=CQCHeader(data)
-	if hdr.tp==CQC_TP_HELLO:
-		print("CQC tells App {}: 'HELLO'".format(myName))
+	# Make sure we order the qubits consistently with Alice
+	# Get entanglement IDs
+	q1_ID = q1.get_entInfo().id_AB
+	q2_ID = q2.get_entInfo().id_AB
+
+	if q1_ID < q2_ID:
+		qb=q1
+		qd=q2
 	else:
-		print("Did not receive a hello message, but rather: {}".format(hdr.printable()))
+		qb=q2
+		qd=q1
 
-	#Close the connection
-	cqc.close()
+	# Put the qubits in the correct state (|++> + |-->)
+	qb.H()
+	qd.H()
+
+	# Get col
+	col = random.randint(0,2)
+
+	# Perform the three measurements
+	if col == 0:
+		m0 = parity_meas([qb, qd], "XI", Bob)
+		m1 = parity_meas([qb, qd], "XZ", Bob, negative=True)
+		m2 = parity_meas([qb, qd], "IZ", Bob)
+	elif col == 1:
+		m0 = parity_meas([qb, qd], "XX", Bob)
+		m1 = parity_meas([qb, qd], "YY", Bob)
+		m2 = parity_meas([qb, qd], "ZZ", Bob)
+	elif col == 2:
+		m0 = parity_meas([qb, qd], "IX", Bob)
+		m1 = parity_meas([qb, qd], "ZX", Bob, negative=True)
+		m2 = parity_meas([qb, qd], "ZI", Bob)
+	else:
+		raise RuntimeError("Invalid row")
+
+	print("\n")
+	print("==========================")
+	print("App {}: column is:".format(Bob.name))
+	print("(" + "_"*col + str(m0) + "_"*(2-col) + ")")
+	print("(" + "_"*col + str(m1) + "_"*(2-col) + ")")
+	print("(" + "_"*col + str(m2) + "_"*(2-col) + ")")
+	print("==========================")
+	print("\n")
+
+	# Clear qubits
+	qb.measure()
+	qd.measure()
+
+	# Stop the connection
+	Bob.close()
 
 
 ##################################################################################################

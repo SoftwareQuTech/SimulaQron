@@ -4,7 +4,7 @@ import sys
 
 import re
 from SimulaQron.settings import Settings
-from SimulaQron.general.hostConfig import networkConfig
+from SimulaQron.general.hostConfig import NetworkConfig
 from SimulaQron.cqc.backend.cqcProtocol import CQCFactory, reactor
 from SimulaQron.cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
@@ -37,7 +37,7 @@ def main(names):
 	cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
 
 	# Read configuration files for the virtual quantum, as well as the classical network
-	cqcNet = networkConfig(cqcFile)
+	cqcNet = NetworkConfig(cqcFile)
 
 	# Check if we are in the host-dictionary
 	myHosts = {}

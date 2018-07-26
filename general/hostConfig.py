@@ -30,7 +30,8 @@
 import sys, socket, struct
 from twisted.spread import pb
 
-class networkConfig(pb.Referenceable):
+
+class NetworkConfig(pb.Referenceable):
 
 	def __init__(self, filename):
 		"""
@@ -55,7 +56,7 @@ class networkConfig(pb.Referenceable):
 
 					# We will simply ignore lines which are not of the right form
 					if len(words) == 3:
-						newHost = host(words[0].strip(), words[1].strip(), words[2].strip())
+						newHost = Host(words[0].strip(), words[1].strip(), words[2].strip())
 						self.hostDict[words[0]] = newHost
 
 	def print_details(self, name):
@@ -66,7 +67,7 @@ class networkConfig(pb.Referenceable):
 		print("Host details of ", name, ": ", host.hostname, ":", host.port)
 
 
-class host(pb.Referenceable):
+class Host(pb.Referenceable):
 
 	def __init__(self, name, hostname, port):
 		"""

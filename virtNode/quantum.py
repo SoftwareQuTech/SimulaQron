@@ -8,7 +8,7 @@
 #    notice, this list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the distribution.
+# 	 documentation and/or other materials provided with the distribution.
 # 3. All advertising materials mentioning features or use of this software
 #    must display the following acknowledgement:
 #    This product includes software developed by Stephanie Wehner, QuTech.
@@ -27,13 +27,17 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from SimulaQron.virtNode.crudeSimulator import simpleEngine
+from SimulaQron.virtNode.crudeSimulator import SimpleEngine
 from twisted.spread import pb
 from twisted.internet.defer import *
 
 import logging
 
-class simulatedQubit(pb.Referenceable):
+def qubit_error(reason):
+	logging.error("An error occurred when applying a gate. Reason: %s", str(reason))
+
+
+class SimulatedQubit(pb.Referenceable):
 	"""
 	Simulated qubit object in the specified local simulation engine.
 
@@ -46,9 +50,8 @@ class simulatedQubit(pb.Referenceable):
 		A qubit object provides the backing for a virtual qubit, which may be at another node.
 	"""
 
-
-	def __init__(self, node, register, simNum, num = 0):
-			# Node where this qubit is located
+	def __init__(self, node, register, simNum, num=0):
+		# Node where this qubit is located
 		self.node = node
 
 		# Register where this qubit is simulated
@@ -67,17 +70,27 @@ class simulatedQubit(pb.Referenceable):
 		self.active = True
 
 	def lock(self):
-		self._lock.acquire()
+		logging.warning("Locking local %s", self.num)
+		return self._lock.acquire()
+
 	def remote_lock(self):
-		self._lock.acquire()
+		logging.warning("Locking remotely %s", self.num)
+		return self._lock.acquire()
+
 	def unlock(self):
+		logging.warning("Unlocking local %s", self.num)
 		self._lock.release()
+
 	def remote_unlock(self):
+		logging.warning("Unlocking remotely %s", self.num)
 		self._lock.release()
+
 	def isLocked(self):
 		return self._lock.locked
+
 	def remote_isLocked(self):
 		return self._lock.locked
+
 	def remote_isActive(self):
 		return self.active
 
@@ -85,67 +98,73 @@ class simulatedQubit(pb.Referenceable):
 		"""
 		Make this a fresh qubit.
 		"""
-
-
 		# Create a fresh qubit in the |0> state
 		num = self.register.add_fresh_qubit()
 		self.num = num
 
-		logging.debug("QUANTUM %s: Adding qubit number %d to register %d",self.node.name, num,self.register.num)
+		logging.debug("QUANTUM %s: Adding qubit number %d to register %d", self.node.name, num, self.register.num)
+
+	def _do_operation(self, name, func, **kwargs):
+		logging.warning("QUANTUM NODE %s: applying %s to number %d. Active: %s", self.node.name, name, self.num, self.active)
+		res = func(self.num, **kwargs)
+		logging.warning("DONE Applying!")
+		print(res)
+		return res
+
+	def _apply_single_gate(self, gate_name, gate, **kwargs):
+		logging.warning("Locking %s to do %s", self.num, gate_name)
+		d = self._lock.run(self._do_operation, gate_name, gate, **kwargs)
+		d.addErrback(qubit_error)
+		logging.warning("%s to do %s Done", self.num, gate_name)
+		return d
 
 	def remote_apply_X(self):
 		"""
 		Apply X gate to itself by passing it onto the underlying register.
 		"""
-		logging.debug("VIRTUAL NODE %s: applying X to number %d",self.node.name, self.num)
-		self.register.apply_X(self.num)
+		return self._apply_single_gate("X", self.register.apply_X)
 
 	def remote_apply_K(self):
 		"""
 		Apply K gate to itself by passing it onto the underlying register. Maps computational to Y eigenbasis.
 		"""
-		logging.debug("VIRTUAL NODE %s: applying K to number %d",self.node.name, self.num)
-		self.register.apply_K(self.num)
+		return self._apply_single_gate("K", self.register.apply_K)
 
 	def remote_apply_Y(self):
 		"""
 		Apply Y gate.
 		"""
-		logging.debug("VIRTUAL NODE %s: applying Y to number %d",self.node.name, self.num)
-		self.register.apply_Y(self.num)
+		return self._apply_single_gate("Y", self.register.apply_Y)
 
 	def remote_apply_Z(self):
 		"""
 		Apply Z gate.
 		"""
-		logging.debug("VIRTUAL NODE %s: applying Z to number %d",self.node.name, self.num)
-		self.register.apply_Z(self.num)
+		return self._apply_single_gate("Z", self.register.apply_Z)
 
 	def remote_apply_H(self):
 		"""
 		Apply H gate.
 		"""
-		logging.debug("VIRTUAL NODE %s: applying H to number %d",self.node.name, self.num)
-		self.register.apply_H(self.num)
+		return self._apply_single_gate("H", self.register.apply_H)
 
 	def remote_apply_T(self):
 		"""
 		Apply T gate.
 		"""
-		logging.debug("VIRTUAL NODE %s: applying T to number %d",self.node.name, self.num)
-		self.register.apply_T(self.num)
+		return self._apply_single_gate("T", self.register.apply_T)
 
-	def remote_apply_rotation(self,*args):
+	def remote_apply_rotation(self, *args):
 		"""
 		Apply rotation around axis n with angle a.
 		Arguments:
 		n	A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
 		a	The rotation angle in radians.
 		"""
-		n=args[0]
-		a=args[1]
-		logging.debug("VIRTUAL NODE %s: applying rotation to number %d. Axis=%s,angle=%s",self.node.name, self.num,str(tuple(n)),str(a))
-		self.register.apply_rotation(self.num,n,a)
+		n = args[0]
+		a = args[1]
+		return self._apply_single_gate("rotation. Axis={},angle={}".format(str(tuple(n)), a),
+										self.register.apply_rotation, n=n, a=a)
 
 	def remote_measure_inplace(self):
 		"""
@@ -154,8 +173,7 @@ class simulatedQubit(pb.Referenceable):
 
 		Returns the measurement outcome.
 		"""
-		outcome = self.register.measure_qubit_inplace(self.num)
-		return outcome
+		return self._apply_single_gate("Measure inplace", self.register.measure_qubit_inplace)
 
 	def remote_measure(self):
 		"""
@@ -165,8 +183,7 @@ class simulatedQubit(pb.Referenceable):
 		"""
 
 		# Measure the qubit
-		outcome = self.register.measure_qubit(self.num)
-		return outcome
+		return self._apply_single_gate("Measure", self.register.measure_qubit)
 
 	def remote_cnot_onto(self, targetNum):
 		"""
@@ -176,7 +193,7 @@ class simulatedQubit(pb.Referenceable):
 		targetNum	the qubit to use as the target of the CNOT
 		"""
 
-		logging.debug("VIRTUAL NODE %s: CNOT from %d to %d", self.node.name, self.num, targetNum)
+		logging.debug("QUANTUM NODE %s: CNOT from %d to %d", self.node.name, self.num, targetNum)
 		self.register.apply_CNOT(self.num, targetNum)
 
 	def remote_cphase_onto(self, targetNum):
@@ -186,7 +203,6 @@ class simulatedQubit(pb.Referenceable):
 		Arguments
 		targetNum	the qubit to use as the target of the CPHASE
 		"""
-
 
 		self.register.apply_CPHASE(self.num, targetNum)
 
@@ -212,21 +228,17 @@ class simulatedQubit(pb.Referenceable):
 		"""
 		Returns the number of the simulating register.
 		"""
-		return (self.num, self.register.num)
+		return self.num, self.register.num
 
 	def remote_get_qubit(self):
 		"""
 		Returns the state of the qubits in the list qList by tracing out the rest.
 		"""
-		logging.debug("VIRTUAL NODE %s: Returning qubit %d", self.node.name, self.num)
+		logging.debug("QUANTUM NODE %s: Returning qubit %d", self.node.name, self.num)
 		return self.register.get_qubits_RI([self.num])
 
 	def remote_get_details(self):
 		"""
 		Returns out simulation number as well as the details of this simulating node.
 		"""
-		return (self.simNum, self.node.name)
-
-
-
-
+		return self.simNum, self.node.name

@@ -122,8 +122,8 @@ def main():
 	classicalFile = os.path.join(os.path.dirname(__file__), 'classicalNet.cfg')
 
 	# Read configuration files for the virtual quantum, as well as the classical network
-	virtualNet = networkConfig(virtualFile)
-	classicalNet = networkConfig(classicalFile)
+	virtualNet = NetworkConfig(virtualFile)
+	classicalNet = NetworkConfig(classicalFile)
 
 	# Check if we should run a local classical server. If so, initialize the code
 	# to handle remote connections on the classical communication network
