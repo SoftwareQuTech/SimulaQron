@@ -517,7 +517,7 @@ class VirtualNode(pb.Root):
 		try:
 			if not (targetName in self.config.hostDict):
 				raise VirtNetError(
-					"Trying to get conncetion to virtual node {}, but this is not in configuration file".format(
+					"Trying to get connection to virtual node {}, but this is not in configuration file".format(
 						targetName))
 			remoteNode = yield self.get_connection(targetName)
 		except Exception as e:
@@ -760,7 +760,7 @@ class VirtualNode(pb.Root):
 
 	def remote_get_virtual_ref(self, num):
 		"""
-		Return a virual qubit object for the given number.
+		Return a virtual qubit object for the given number.
 
 		Arguments
 		num		number of the virtual qubit
@@ -1233,6 +1233,8 @@ class VirtualQubit(pb.Referenceable):
 		if self.virtNode == self.simNode:
 			return getattr(self.simQubit, localName)(**kwargs)
 		else:
+			logging.debug("VIRTUAL NODE %s: Calling %s remotely to apply %s.", self.virtNode.name,
+						  self.simNode.name, name)
 			return self.simQubit.callRemote(name, **kwargs)
 		# while waiting:
 		# 	if self.virtNode == self.simNode:
