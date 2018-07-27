@@ -1067,7 +1067,6 @@ class VirtualNode(pb.Root):
 
 		# If nothing is found, return
 		if gotQ is None:
-			print(1064, qubitNum)
 			logging.error("VIRTUAL NODE %s: No simulated qubit with ID %d.", qubitNum)
 			return [], [], 0, 0, 0
 
@@ -1343,29 +1342,23 @@ class VirtualQubit(pb.Referenceable):
 		outcome = None
 		if self.virtNode == self.simNode:
 			outcome = yield self.simQubit.remote_measure_inplace()
-			print(1335, outcome)
 			if not inplace:
 				self.virtNode.root._remove_sim_qubit(self.simQubit)
 		else:
 			if inplace:
 				outcome = yield self.simQubit.callRemote("measure_inplace")
 			else:
-				print(1342)
 				outcome = self.simQubit.callRemote("measure")
 				if isinstance(outcome, Deferred):
 					outcome.addErrback(print)
 					outcome = yield outcome
-				print(1356, outcome)
 				num = yield self.simQubit.callRemote("get_sim_number")
-				print(1358, num)
 				d = self.simNode.root.callRemote("remove_sim_qubit_num", num)
 				d.addErrback(print)
 				yield d
-				print(1360)
 
 				# Delete from virtual qubits
 				self.virtNode.root.virtQubits.remove(self)
-			print(1348, outcome)
 		#
 		# while (waiting):
 		# 	if self.virtNode == self.simNode:
@@ -1555,7 +1548,7 @@ class VirtualQubit(pb.Referenceable):
 			return
 
 		localName = ''.join(["remote_", name])
-		logging.warning("VIRTUAL NODE %s: Doing 2 qubit gate name %s and local call %s", self.virtNode.name, name,
+		logging.debug("VIRTUAL NODE %s: Doing 2 qubit gate name %s and local call %s", self.virtNode.name, name,
 					  localName)
 
 		# Before we proceed, we need to acquire the gobal locks of the nodes holding the

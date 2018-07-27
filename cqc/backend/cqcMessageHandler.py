@@ -544,7 +544,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
             return False
         try:
             outcome = yield virt_qubit.callRemote("measure", inplace)
-            print(547, "outcome", outcome)
         except Exception as e:
             raise e
 
@@ -554,7 +553,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
             self.return_messages.append(err_msg)
             return False
 
-        print(outcome)
 
         logging.debug("CQC %s: Measured outcome %d", self.name, outcome)
         # Send the outcome back as MEASOUT

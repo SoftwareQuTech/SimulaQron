@@ -70,19 +70,19 @@ class SimulatedQubit(pb.Referenceable):
 		self.active = True
 
 	def lock(self):
-		logging.warning("Locking local %s", self.num)
+		logging.debug("Locking local %s", self.num)
 		return self._lock.acquire()
 
 	def remote_lock(self):
-		logging.warning("Locking remotely %s", self.num)
+		logging.debug("Locking remotely %s", self.num)
 		return self._lock.acquire()
 
 	def unlock(self):
-		logging.warning("Unlocking local %s", self.num)
+		logging.debug("Unlocking local %s", self.num)
 		self._lock.release()
 
 	def remote_unlock(self):
-		logging.warning("Unlocking remotely %s", self.num)
+		logging.debug("Unlocking remotely %s", self.num)
 		self._lock.release()
 
 	def isLocked(self):
@@ -105,10 +105,8 @@ class SimulatedQubit(pb.Referenceable):
 		logging.debug("QUANTUM %s: Adding qubit number %d to register %d", self.node.name, num, self.register.num)
 
 	def _do_operation(self, name, func, **kwargs):
-		logging.warning("QUANTUM NODE %s: applying %s to number %d. Active: %s", self.node.name, name, self.num, self.active)
+		logging.debug("QUANTUM NODE %s: applying %s to number %d. Active: %s", self.node.name, name, self.num, self.active)
 		res = func(self.num, **kwargs)
-		logging.warning("DONE Applying!")
-		print(res)
 		return res
 
 	def _apply_single_gate(self, gate_name, gate, **kwargs):

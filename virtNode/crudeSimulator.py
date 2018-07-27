@@ -98,16 +98,13 @@ class SimpleEngine(QuantumEngine):
 		"""
 		Removes the qubit with the desired number qubitNum
 		"""
-		print(101, qubitNum+1, self.activeQubits)
 		if (qubitNum + 1) > self.activeQubits:
 			raise QuantumError("No such qubit to remove")
 
 		# Check if this the only qubit
-		print(105, self.activeQubits)
 		if self.activeQubits == 1:
 			self.activeQubits = 0
 			self.qubitReg = Qobj()
-			print(108)
 			return
 
 		# Compute the list of qubits to keep
@@ -170,12 +167,9 @@ class SimpleEngine(QuantumEngine):
 		"""
 		Applies a Hadamard gate to the qubits with number qubitNum.
 		"""
-		print(170, "PSSSSSSSS, HI!")
 		f = np.sqrt(2)
 		H = Qobj([[1 / f, 1 / f], [1 / f, -1 / f]], dims=[[2], [2]])
-		print(173, "PSSSSSSSS, HI2!")
 		self.apply_onequbit_gate(H, qubitNum)
-		print(175, "PSSSSSSSS, HI3!")
 
 	def apply_K(self, qubitNum):
 		"""
