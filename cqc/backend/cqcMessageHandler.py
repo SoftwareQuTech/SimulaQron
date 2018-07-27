@@ -128,7 +128,7 @@ class CQCMessageHandler(ABC):
                 logging.error(str(e))
                 self.return_messages.append(self.create_return_message(header.app_id, CQC_ERR_NOQUBIT))
         else:
-            logging.error("CQC %s: Cound not find cqc type %d in handlers.", self.name, header.yp)
+            logging.error("CQC %s: Could not find cqc type %d in handlers.", self.name, header.yp)
             self.return_messages.append(self.create_return_message(header.app_id, CQC_ERR_UNSUPP))
 
     def retrieve_return_messages(self):

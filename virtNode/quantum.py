@@ -34,7 +34,7 @@ from twisted.internet.defer import *
 import logging
 
 def qubit_error(reason):
-	logging.error("An error occurred when applying a gate. Reason: %s", str(reason))
+	logging.error("An error occurred when applying an operation. Reason: %s", str(reason))
 
 
 class SimulatedQubit(pb.Referenceable):
@@ -70,19 +70,19 @@ class SimulatedQubit(pb.Referenceable):
 		self.active = True
 
 	def lock(self):
-		logging.debug("Locking local %s", self.num)
+		logging.debug("QUANTUM %s: Locking local %s", self.node.name, self.num)
 		return self._lock.acquire()
 
 	def remote_lock(self):
-		logging.debug("Locking remotely %s", self.num)
+		logging.debug("QUANTUM %s: Locking remotely %s", self.node.name, self.num)
 		return self._lock.acquire()
 
 	def unlock(self):
-		logging.debug("Unlocking local %s", self.num)
+		logging.debug("QUANTUM %s: Unlocking local %s", self.node.name, self.num)
 		self._lock.release()
 
 	def remote_unlock(self):
-		logging.debug("Unlocking remotely %s", self.num)
+		logging.debug("QUANTUM %s: Unlocking remotely %s", self.node.name, self.num)
 		self._lock.release()
 
 	def isLocked(self):
@@ -110,10 +110,10 @@ class SimulatedQubit(pb.Referenceable):
 		return res
 
 	def _apply_single_gate(self, gate_name, gate, **kwargs):
-		logging.warning("Locking %s to do %s", self.num, gate_name)
+		logging.debug("QUANTUM NODE %s: Locking %s to do %s", self.node.name, self.num, gate_name)
 		d = self._lock.run(self._do_operation, gate_name, gate, **kwargs)
 		d.addErrback(qubit_error)
-		logging.warning("%s to do %s Done", self.num, gate_name)
+		logging.debug("QUANTUM NODE %s: %s on %d one", self.node.name, gate_name, self.num)
 		return d
 
 	def remote_apply_X(self):

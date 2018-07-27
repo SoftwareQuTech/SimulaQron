@@ -284,7 +284,7 @@ class SimpleEngine(QuantumEngine):
 
 		# Apply the unitary
 		self.qubitReg = overallU * self.qubitReg * overallU.dag()
-		logging.warning("Done applying one qubit gate to %d", qubitNum)
+		logging.debug("Done applying one qubit gate to %d", qubitNum)
 
 	def apply_twoqubit_gate(self, gateU, qubit1, qubit2):
 		"""
