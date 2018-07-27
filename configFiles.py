@@ -46,7 +46,8 @@ netsim_path = os.environ['NETSIM'] + '/'
 # Get path to configuration files
 conf_files = [netsim_path + "config/virtualNodes.cfg",
 				netsim_path + "config/cqcNodes.cfg",
-				netsim_path + "config/appNodes.cfg"]
+				netsim_path + "config/appNodes.cfg",
+				netsim_path + "config/classicalNet.cfg"]
 
 # Get path to run files
 run_files = [netsim_path + "run/startVNodes.sh", netsim_path + "run/startCQCNodes.sh"]
@@ -54,7 +55,7 @@ run_files = [netsim_path + "run/startVNodes.sh", netsim_path + "run/startCQCNode
 # File for just a simple list of the nodes
 node_file = netsim_path + "config/Nodes.cfg"
 # What port numbers to start with
-start_nr = [8801, 8801 + nrNodes, 8801 + 2 * nrNodes]
+start_nr = [8801, 8801 + nrNodes, 8801 + 2 * nrNodes, 8801 + 3 * nrNodes]
 
 # Start of the configuration files
 conf_top = ["# Network configuration file", "#",
