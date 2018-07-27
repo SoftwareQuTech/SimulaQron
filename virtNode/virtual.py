@@ -1350,19 +1350,21 @@ class VirtualQubit(pb.Referenceable):
 			if inplace:
 				outcome = yield self.simQubit.callRemote("measure_inplace")
 			else:
-				outcome = self.simQubit.callRemote("measure")
+				outcome = self.simQubit.callRemote("measure_inplace")
 				if isinstance(outcome, Deferred):
 					outcome.addErrback(print)
 					outcome = yield outcome
 				num = yield self.simQubit.callRemote("get_sim_number")
 				d = self.simNode.root.callRemote("remove_sim_qubit_num", num)
+				# Delete from virtual qubits
+				# self.virtNode.root.virtQubits.remove(self)
 				d.addErrback(print)
 				yield d
 
 				# Delete from virtual qubits
 				self.virtNode.root.virtQubits.remove(self)
 		#
-		# while (waiting):
+		# while waitingre:
 		# 	if self.virtNode == self.simNode:
 		# 		if not self.simQubit.isLocked():
 		# 			try:
