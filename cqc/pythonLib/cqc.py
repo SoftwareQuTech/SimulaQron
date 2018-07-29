@@ -179,6 +179,7 @@ class CQCConnection:
 		"""
 
 		if not self._classicalServer:
+			logging.debug("App {}: Starting classical server".format(self.name))
 			# Get host data
 			myHost = self._appNet.hostDict[self.name]
 
@@ -188,19 +189,24 @@ class CQCConnection:
 			s.bind((myHost.hostname, myHost.port))
 			s.listen(1)
 			(conn, addr) = s.accept()
+			logging.debug("App {}: Classical server started".format(self.name))
 			self._classicalServer = conn
 
 	def closeClassicalServer(self):
 		if self._classicalServer:
+			logging.debug("App {}: Closing classical server".format(self.name))
 			self._classicalServer.close()
+			logging.debug("App {}: Classical server closed".format(self.name))
 			self._classicalServer = None
 
 	def recvClassical(self, timout=1, msg_size=1024, close_after=True):
 		if not self._classicalServer:
 			self.startClassicalServer()
 		for _ in range(10 * timout):
+			logging.debug("App {}: Trying to receive classical message".format(self.name))
 			msg = self._classicalServer.recv(msg_size)
 			if len(msg) > 0:
+				logging.debug("App {}: Received classical message".format(self.name))
 				if close_after:
 					self.closeClassicalServer()
 				return msg
@@ -217,6 +223,7 @@ class CQCConnection:
 			:timout:	The time to try to connect to the server. When timout is reached an RuntimeError is raised.
 		"""
 		if name not in self._classicalConn:
+			logging.debug("App {}: Opening classical channel to {}".format(self.name, name))
 			if name in self._appNet.hostDict:
 				remoteHost = self._appNet.hostDict[name]
 			else:
@@ -226,8 +233,10 @@ class CQCConnection:
 				try:
 					s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 					s.connect((remoteHost.hostname, remoteHost.port))
+					logging.debug("App {}: Classical channel to {} opened".format(self.name, name))
 					break
 				except ConnectionRefusedError:
+					logging.debug("App {}: Could not open classical channel to {}, trying again..".format(self.name, name))
 					time.sleep(CQC_CONF_COM_WAIT_TIME)
 				except Exception as e:
 					logging.warning("App {} : Critical error when connection to app node {}: {}".format(self.name, name, e))
@@ -243,8 +252,10 @@ class CQCConnection:
 			:name:		The name of the host in the application network.
 		"""
 		if name in self._classicalConn:
+			logging.debug("App {}: Closing classical channel to {}".format(self.name, name))
 			s = self._classicalConn.pop(name)
 			s.close()
+			logging.debug("App {}: Classical channel to {} closed".format(self.name, name))
 
 	def sendClassical(self, name, msg, close_after=True):
 		"""
@@ -262,7 +273,9 @@ class CQCConnection:
 			to_send = [int(msg)]
 		except:
 			to_send = msg
+		logging.debug("App {}: Sending classical message {} to {}".format(self.name, to_send, name))
 		self._classicalConn[name].send(bytes(to_send))
+		logging.debug("App {}: Classical message {} to {} sent".format(self.name, to_send, name))
 		if close_after:
 			self.closeClassicalChannel(name)
 
