@@ -194,12 +194,12 @@ def prep_I_qutip():
 
 
 #####################################################################################################
-class TwoQubitGateTest(unittest.TestCase):
+class SingleQubitGateTest(unittest.TestCase):
 
 	@classmethod
 	def setUpClass(cls):
 		cls.iterations = 100
-		sys.stdout.write("Testing two qubit gates gates with {} iterations \r\n".format(cls.iterations))
+		sys.stdout.write("Testing single qubit gates gates with {} iterations \r\n".format(cls.iterations))
 
 	def tearDown(self):
 		self.cqc.close()
