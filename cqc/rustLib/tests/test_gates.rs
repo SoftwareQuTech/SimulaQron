@@ -1,6 +1,7 @@
+extern crate cqc;
 extern crate rust_lib;
 
-use rust_lib::cqc_api::*;
+use cqc::hdr;
 use rust_lib::Cqc;
 
 // cqc_tomography_dir
@@ -15,16 +16,16 @@ use rust_lib::Cqc;
 //
 // Returns:
 // ratio   average (in [-1,1] interval).
-fn cqc_tomography_dir(cqc: &Cqc, func: &Fn(&Cqc) -> u16, n_iter: u32, dir: u8) -> f64 {
+fn cqc_tomography_dir(cqc: &mut Cqc, func: &Fn(&mut Cqc) -> u16, n_iter: u32, dir: u8) -> f64 {
     // Translate the direction into a rotation command
     // 0 => Indetity
     // 1 => Hadamard Gate
     // 2 => K-Gate
     let cmd: u8;
     match dir {
-        0 => cmd = CQC_CMD_I,
-        1 => cmd = CQC_CMD_H,
-        2 => cmd = CQC_CMD_K,
+        0 => cmd = hdr::Cmd::I as u8,
+        1 => cmd = hdr::Cmd::H as u8,
+        2 => cmd = hdr::Cmd::K as u8,
         _ => panic!(
             "Direction can be 0 (Identity), 1 (Hadamard) or 2 (K-Gate).\
              You have {}.\n \
@@ -74,8 +75,8 @@ fn cqc_tomography_dir(cqc: &Cqc, func: &Fn(&Cqc) -> u16, n_iter: u32, dir: u8) -
 // exp_y   expted value for <Y>
 // exp_z   expected value for <Z>
 fn cqc_test_qubit(
-    cqc: &Cqc,
-    func: &Fn(&Cqc) -> u16,
+    cqc: &mut Cqc,
+    func: &Fn(&mut Cqc) -> u16,
     n_iter: u32,
     epsilon: f64,
     exp_x: f64,
@@ -117,39 +118,39 @@ fn cqc_test_qubit(
 }
 
 // Prepares a plus state
-fn make_plus(cqc: &Cqc) -> u16 {
+fn make_plus(cqc: &mut Cqc) -> u16 {
     // Create a new qubit in |0>
-    cqc.simple_cmd(CQC_CMD_NEW, 0, false).unwrap();
+    cqc.simple_cmd(hdr::Cmd::New as u8, 0, false).unwrap();
     let qubit: u16 = cqc.wait_until_newok().unwrap();
 
     // Turn it into |+>
-    cqc.simple_cmd(CQC_CMD_H, qubit, true).unwrap();
+    cqc.simple_cmd(hdr::Cmd::H as u8, qubit, true).unwrap();
     cqc.wait_until_done(1).unwrap();
 
     qubit
 }
 
 // Prepares a zero state
-fn make_zero(cqc: &Cqc) -> u16 {
+fn make_zero(cqc: &mut Cqc) -> u16 {
     // Create a new qubit in |0>
-    cqc.simple_cmd(CQC_CMD_NEW, 0, false).unwrap();
+    cqc.simple_cmd(hdr::Cmd::New as u8, 0, false).unwrap();
     let qubit: u16 = cqc.wait_until_newok().unwrap();
 
     // Keep it as |0>
-    cqc.simple_cmd(CQC_CMD_I, qubit, true).unwrap();
+    cqc.simple_cmd(hdr::Cmd::I as u8, qubit, true).unwrap();
     cqc.wait_until_done(1).unwrap();
 
     qubit
 }
 
 // Prepares a y_0 eigenstate
-fn make_k(cqc: &Cqc) -> u16 {
+fn make_k(cqc: &mut Cqc) -> u16 {
     // Create a new qubit in |0>
-    cqc.simple_cmd(CQC_CMD_NEW, 0, false).unwrap();
+    cqc.simple_cmd(hdr::Cmd::New as u8, 0, false).unwrap();
     let qubit: u16 = cqc.wait_until_newok().unwrap();
 
     // Turn it into |+>
-    cqc.simple_cmd(CQC_CMD_K, qubit, true).unwrap();
+    cqc.simple_cmd(hdr::Cmd::K as u8, qubit, true).unwrap();
     cqc.wait_until_done(1).unwrap();
 
     qubit
@@ -164,17 +165,17 @@ fn test_gates() {
 
     // In this example, we will not check for errors.
     // Initialise a CQC service.
-    let cqc = Cqc::new(app_id, &hostname, portno).unwrap();
+    let mut cqc = Cqc::new(app_id, &hostname, portno).unwrap();
 
     // Test whether we can make the zero state
     println!("Testing |0> preparation......................");
-    cqc_test_qubit(&cqc, &make_zero, 500, 0.1, 0., 0., 1.);
+    cqc_test_qubit(&mut cqc, &make_zero, 500, 0.1, 0., 0., 1.);
 
     // Test whether we can make the plus state
     println!("Testing |+> preparation......................");
-    cqc_test_qubit(&cqc, &make_plus, 500, 0.1, 1., 0., 0.);
+    cqc_test_qubit(&mut cqc, &make_plus, 500, 0.1, 1., 0., 0.);
 
     // Test whether we can make the y_0 eigenstate
     println!("Testing |1> preparation......................");
-    cqc_test_qubit(&cqc, &make_k, 500, 0.1, 0., 1., 0.);
+    cqc_test_qubit(&mut cqc, &make_k, 500, 0.1, 0., 1., 0.);
 }

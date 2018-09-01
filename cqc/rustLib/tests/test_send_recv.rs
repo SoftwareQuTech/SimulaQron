@@ -1,6 +1,7 @@
+extern crate cqc;
 extern crate rust_lib;
 
-use rust_lib::cqc_api::*;
+use cqc::hdr;
 use rust_lib::Cqc;
 use std::net::Ipv4Addr;
 
@@ -15,10 +16,10 @@ fn test_send() {
 
     // In this example, we will not check for errors.
     // Initialise a CQC service.
-    let cqc = Cqc::new(app_id, &hostname, portno).unwrap();
+    let mut cqc = Cqc::new(app_id, &hostname, portno).unwrap();
 
     // Execute a simple CQC command to create a new qubit
-    cqc.simple_cmd(CQC_CMD_NEW, 0, false).unwrap();
+    cqc.simple_cmd(hdr::Cmd::New as u8, 0, false).unwrap();
 
     // Get the qubit id
     let qubit = cqc.wait_until_newok().unwrap();
@@ -36,7 +37,7 @@ fn test_recv() {
 
     // In this example, we will not check for errors.
     // Initialise a CQC service.
-    let cqc = Cqc::new(app_id, &hostname, portno).unwrap();
+    let mut cqc = Cqc::new(app_id, &hostname, portno).unwrap();
 
     // Receive qubit from any source
     let qubit: u16 = cqc.recv().unwrap();

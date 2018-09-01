@@ -1,6 +1,7 @@
+extern crate cqc;
 extern crate rust_lib;
 
-use rust_lib::cqc_api::*;
+use cqc::hdr;
 use rust_lib::Cqc;
 
 #[test]
@@ -11,16 +12,16 @@ fn test_init() {
     let app_id: u16 = 10;
 
     // Initialise a CQC service
-    let cqc = Cqc::new(app_id, &hostname, portno).unwrap();
+    let mut cqc = Cqc::new(app_id, &hostname, portno).unwrap();
 
     // Execute a simple CQC command to create a new qubit
-    cqc.simple_cmd(CQC_CMD_NEW, 0, false).unwrap();
+    cqc.simple_cmd(hdr::Cmd::New as u8, 0, false).unwrap();
 
     // Get the qubit id
     let qubit = cqc.wait_until_newok().unwrap();
 
     // Execute a simple CQC command to apply a H-gate to the qubit
-    cqc.simple_cmd(CQC_CMD_H, qubit, true).unwrap();
+    cqc.simple_cmd(hdr::Cmd::H as u8, qubit, true).unwrap();
 
     // Blocking process until H-gate is applied to the qubit
     cqc.wait_until_done(1).unwrap();

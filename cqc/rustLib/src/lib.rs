@@ -1,62 +1,67 @@
-extern crate bincode;
-#[macro_use]
-extern crate serde_derive;
+extern crate cqc;
 
+use cqc::decode;
+use cqc::encode;
+use cqc::hdr;
+use cqc::hdr::CmdOpt;
+use cqc::Request;
+use std::error::Error;
+use std::io;
+use std::io::{Read, Write};
 use std::net;
-
-use bincode::{deserialize_from, serialize_into};
-
-pub mod error;
-use error::CqcError;
-
-pub mod cqc_api;
-use cqc_api::*;
-
-mod cqc_headers;
-use cqc_headers::*;
 
 pub struct Cqc {
     app_id: u16,
     stream: net::TcpStream,
+    encoder: encode::Encoder,
+    decoder: decode::Decoder,
 }
 
 impl Cqc {
-    pub fn new(app_id: u16, hostname: &str, portno: u16) -> Result<Cqc, CqcError> {
+    pub fn new(app_id: u16, hostname: &str, portno: u16) -> Result<Cqc, io::Error> {
         let stream = net::TcpStream::connect((hostname, portno))?;
-        Ok(Cqc { app_id, stream })
+        let encoder = encode::Encoder::new();
+        let decoder = decode::Decoder::new();
+        Ok(Cqc {
+            app_id,
+            stream,
+            encoder,
+            decoder,
+        })
     }
 
-    pub fn simple_cmd(&self, command: u8, qubit_id: u16, notify: bool) -> Result<(), CqcError> {
-        // Prepare CQC message indicating a command.
-        let cqc_header = CqcHeader {
-            version: CQC_VERSION,
-            ctrl_type: CQC_TP_COMMAND,
-            app_id: self.app_id,
-            length: CQC_CMD_HDR_LENGTH,
-        };
+    fn encode_and_send(&mut self, request: &cqc::Request) -> Result<(), io::Error> {
+        let buf_len = encode::Encoder::encode_request_len(&request);
+        let mut buffer = vec![0; buf_len];
+        self.encoder.encode_request(&request, &mut buffer);
 
-        // Send message to the server.
-        serialize_into(&self.stream, &cqc_header)?;
-
-        // Prepare message for the specific command.
-        let cmd_header = CmdHeader {
-            qubit_id,
-            instr: command,
-            options: if notify {
-                CQC_OPT_NOTIFY | CQC_OPT_BLOCK
-            } else {
-                0x00
-            },
-        };
-
-        // Send message to the server.
-        serialize_into(&self.stream, &cmd_header)?;
+        self.stream.write(&buffer)?;
 
         Ok(())
     }
 
+    pub fn simple_cmd(
+        &mut self,
+        command: u8,
+        qubit_id: u16,
+        notify: bool,
+    ) -> Result<(), io::Error> {
+        let options = if notify {
+            CmdOpt::NOTIFY | CmdOpt::BLOCK
+        } else {
+            CmdOpt::empty()
+        };
+
+        let cmd = hdr::Cmd::get_cmd(command).unwrap();
+
+        let mut request = Request::command(self.app_id);
+        request.build_req_cmd(qubit_id, cmd, options, None);
+
+        self.encode_and_send(&request)
+    }
+
     pub fn full_cmd(
-        &self,
+        &mut self,
         command: u8,
         qubit_id: u16,
         notify: bool,
@@ -68,80 +73,50 @@ impl Cqc {
         r_node: u32,
         r_port: u16,
         cmd_length: u32,
-    ) -> Result<(), CqcError> {
-        // Prepare a CQC message indicating a command
-        let cqc_header = CqcHeader {
-            version: CQC_VERSION,
-            ctrl_type: CQC_TP_COMMAND,
-            app_id: self.app_id,
-            length: CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH,
-        };
-
-        // Send message to the server.
-        serialize_into(&self.stream, &cqc_header)?;
-
-        // Prepare message for the specific command.
-        let mut options: u8 = 0;
+    ) -> Result<(), io::Error> {
+        let mut options = CmdOpt::empty();
         if notify {
-            options = options | CQC_OPT_NOTIFY;
+            options.set_notify();
         }
         if action {
-            options = options | CQC_OPT_ACTION;
+            options.set_action();
         }
         if block {
-            options = options | CQC_OPT_BLOCK;
+            options.set_block();
         }
 
-        let cmd_header = CmdHeader {
-            qubit_id,
-            instr: command,
-            options,
-        };
-
-        // Send message to the server.
-        serialize_into(&self.stream, &cmd_header)?;
-
-        // Prepare extra header.
-        let xtra_header = XtraCmdHeader {
+        let xtra_hdr = hdr::XtraHdr {
             xtra_qubit_id: xtra_id,
-            steps,
-            r_app_id,
-            r_node,
-            r_port,
-            cmd_length,
-            ..Default::default()
+            remote_app_id: r_app_id,
+            remote_node: r_node,
+            cmd_length: cmd_length,
+            remote_port: r_port,
+            steps: steps,
+            align: 0,
         };
 
-        // Send message to the server.
-        serialize_into(&self.stream, &xtra_header)?;
+        let cmd = hdr::Cmd::get_cmd(command).unwrap();
 
-        Ok(())
+        let mut request = Request::command(self.app_id);
+        request.build_req_cmd(qubit_id, cmd, options, Some(xtra_hdr));
+
+        self.encode_and_send(&request)
     }
 
-    pub fn hello(&self) -> Result<(), CqcError> {
-        // Prepare a CQC message indicating a command.
-        let cqc_header = CqcHeader {
-            version: CQC_VERSION,
-            ctrl_type: CQC_TP_HELLO,
-            app_id: self.app_id,
-            length: CQC_CMD_HDR_LENGTH,
-        };
-
-        // Send message to the server.
-        serialize_into(&self.stream, &cqc_header)?;
-
-        Ok(())
+    pub fn hello(&mut self) -> Result<(), io::Error> {
+        let request = Request::hello(self.app_id);
+        self.encode_and_send(&request)
     }
 
     pub fn send(
-        &self,
+        &mut self,
         qubit_id: u16,
         r_app_id: u16,
         r_node: u32,
         r_port: u16,
-    ) -> Result<(), CqcError> {
+    ) -> Result<(), io::Error> {
         self.full_cmd(
-            CQC_CMD_SEND,
+            hdr::Cmd::Send as u8,
             qubit_id,
             true,
             false,
@@ -155,26 +130,33 @@ impl Cqc {
         )
     }
 
-    pub fn recv(&self) -> Result<u16, CqcError> {
+    pub fn recv(&mut self) -> Result<u16, Box<Error>> {
         // Send out a request to receive a qubit.
-        self.simple_cmd(CQC_CMD_RECV, 0, false)?;
+        self.simple_cmd(hdr::Cmd::Recv as u8, 0, false)?;
+
+        // Prepare a buffer for a receive of a CQC and Notify headers.
+        let buf_len: usize = (hdr::CQC_HDR_LENGTH + hdr::NOTIFY_HDR_LENGTH) as usize;
+        let mut buffer = vec![0; buf_len];
 
         // Now read CQC header from server response.
-        let reply: CqcHeader = deserialize_from(&self.stream)?;
+        self.stream.read(&mut buffer[..])?;
+        let (_, status) = self.decoder.decode(&buffer)?;
+        let response = status.unwrap().get_response().unwrap();
 
-        if reply.ctrl_type != CQC_TP_RECV {
-            return Err(CqcError::General);
+        // Check if the return type is correct.
+        if !response.cqc_hdr.msg_type.is_recv() {
+            return Err(From::from(format!("Unexpected response")));
         }
 
-        // Read qubit id from the notify header.
-        let note: NotifyHeader = deserialize_from(&self.stream)?;
+        // Extract the Notify header.
+        let note = response.notify.unwrap().get_notify_hdr().unwrap();
 
         Ok(note.qubit_id)
     }
 
-    pub fn epr(&self, r_app_id: u16, r_node: u32, r_port: u16) -> Result<(), CqcError> {
+    pub fn epr(&mut self, r_app_id: u16, r_node: u32, r_port: u16) -> Result<(), io::Error> {
         self.full_cmd(
-            CQC_CMD_RECV,
+            hdr::Cmd::Recv as u8,
             0,
             false,
             false,
@@ -188,63 +170,77 @@ impl Cqc {
         )
     }
 
-    pub fn measure(&self, qubit_id: u16) -> Result<u8, CqcError> {
+    pub fn measure(&mut self, qubit_id: u16) -> Result<u8, Box<Error>> {
         // Send a CQC message to request measurement.
-        self.simple_cmd(CQC_CMD_MEASURE, qubit_id, false)?;
+        self.simple_cmd(hdr::Cmd::Measure as u8, qubit_id, false)?;
 
-        // Read the response.
-        let reply: CqcHeader = deserialize_from(&self.stream)?;
+        // Prepare a buffer for a receive of a CQC and Notify headers.
+        let buf_len: usize = (hdr::CQC_HDR_LENGTH + hdr::NOTIFY_HDR_LENGTH) as usize;
+        let mut buffer = vec![0; buf_len];
 
-        if reply.ctrl_type != CQC_TP_MEASOUT {
-            return Err(CqcError::General);
+        // Now read the response.
+        self.stream.read(&mut buffer[..])?;
+        let (_, status) = self.decoder.decode(&buffer)?;
+        let response = status.unwrap().get_response().unwrap();
+
+        // Check if the return type is correct.
+        if !response.cqc_hdr.msg_type.is_measout() {
+            return Err(From::from(format!("Unexpected response")));
         }
 
-        // Read measurement outcome.
-        let note: NotifyHeader = deserialize_from(&self.stream)?;
+        // Extract the Notify header.
+        let note = response.notify.unwrap().get_notify_hdr().unwrap();
 
         Ok(note.outcome)
     }
 
-    pub fn wait_until_done(&self, reps: usize) -> Result<(), CqcError> {
-        // Read the CQC header from the server response.
-        for _ in 0..reps {
-            let reply: CqcHeader = deserialize_from(&self.stream)?;
+    pub fn wait_until_done(&mut self, reps: usize) -> Result<(), Box<Error>> {
+        // Prepare a buffer for a receive of a CQC and Notify headers.
+        let buf_len: usize = hdr::CQC_HDR_LENGTH as usize;
+        let mut buffer = vec![0; buf_len];
 
-            if reply.ctrl_type >= CQC_ERR_GENERAL || reply.ctrl_type != CQC_TP_DONE {
-                return Err(CqcError::General);
+        for _ in 0..reps {
+            self.stream.read(&mut buffer[..])?;
+            let (_, status) = self.decoder.decode(&buffer)?;
+            let response = status.unwrap().get_response().unwrap();
+
+            if !response.cqc_hdr.msg_type.is_done() {
+                return Err(From::from(format!("Unexpected response")));
             }
         }
 
         Ok(())
     }
 
-    pub fn wait_until_newok(&self) -> Result<u16, CqcError> {
-        // Read the CQC header from the server response.
-        let reply: CqcHeader = deserialize_from(&self.stream)?;
+    pub fn wait_until_newok(&mut self) -> Result<u16, Box<Error>> {
+        // Prepare a buffer for a receive of a CQC and Notify headers.
+        let buf_len: usize = (hdr::CQC_HDR_LENGTH + hdr::NOTIFY_HDR_LENGTH) as usize;
+        let mut buffer = vec![0; buf_len];
 
-        if reply.ctrl_type >= CQC_ERR_GENERAL || reply.ctrl_type != CQC_TP_NEW_OK {
-            return Err(CqcError::General);
+        // Now read CQC header from server response.
+        self.stream.read(&mut buffer[..])?;
+        let (_, status) = self.decoder.decode(&buffer)?;
+        let response = status.unwrap().get_response().unwrap();
+
+        // Check if the return type is correct.
+        if !response.cqc_hdr.msg_type.is_new_ok() {
+            return Err(From::from(format!("Unexpected response")));
         }
 
-        // Read the qubit id.
-        let note: NotifyHeader = deserialize_from(&self.stream)?;
+        // Extract the Notify header.
+        let note = response.notify.unwrap().get_notify_hdr().unwrap();
 
         Ok(note.qubit_id)
     }
 
-    pub fn two_qubit(&self, command: u8, qubit_1_id: u16, qubit_2_id: u16) -> Result<(), CqcError> {
+    pub fn two_qubit(
+        &mut self,
+        command: u8,
+        qubit_1_id: u16,
+        qubit_2_id: u16,
+    ) -> Result<(), io::Error> {
         self.full_cmd(
-            command,
-            qubit_1_id,
-            false,
-            false,
-            true,
-            qubit_2_id,
-            0,
-            0,
-            0,
-            0,
-            0,
+            command, qubit_1_id, false, false, true, qubit_2_id, 0, 0, 0, 0, 0,
         )
     }
 }
