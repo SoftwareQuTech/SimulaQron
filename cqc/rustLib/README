@@ -1,0 +1,16 @@
+
+This is a sample integration of the Rust library for accessing the CQC backend.  This integration uses the CQC crate which can be found on [crates.io](https://crates.io/crates/cqc).
+
+To build the library (do not forget to include `--release` for an optimised build)
+
+```console
+cargo build
+```
+
+To run tests
+
+```console
+./tests/run_test.sh
+```
+
+It is recommended to run the tests in the Docker container.  The Dockerfile is available in the root of the repository.
