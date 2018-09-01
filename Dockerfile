@@ -65,6 +65,9 @@ ARG WORKSPACE=/workspace
 ADD . $WORKSPACE/SimulaQron
 WORKDIR $WORKSPACE/SimulaQron
 
+# Fetch rustLib dependencies
+RUN cd cqc/rustLib && cargo update
+
 # Setup the necessary environment variables
 ENV NETSIM=$WORKSPACE/SimulaQron
 ENV PYTHONPATH=$WORKSPACE:$PYTHONPATH
