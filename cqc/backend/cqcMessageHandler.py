@@ -625,7 +625,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
             return False
 
         # Check that other node is adjacent to us
-        if not self.factory._is_adjacent(target_name):
+        if not self.factory.is_adjacent(target_name):
             logging.debug("CQC {}: Node {} is not adjacent to {} in the specified topology.".format(self.name,
                                                                                                     target_name,
                                                                                                     self.name))

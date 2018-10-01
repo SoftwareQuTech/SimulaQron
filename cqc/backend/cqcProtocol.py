@@ -32,7 +32,7 @@ from SimulaQron.settings import Settings
 from twisted.internet.defer import DeferredLock
 from twisted.internet.protocol import Factory, Protocol
 
-import json
+import os, json
 
 
 #####################################################################################################
@@ -115,9 +115,14 @@ class CQCFactory(Factory):
 			abs_path = os.environ["NETSIM"] + "/" + topology_file
 			try:
 				with open(abs_path, 'r') as top_file:
-					self.topology = json.load(top_file)
+					try:
+						self.topology = json.load(top_file)
+					except json.JSONDecodeError:
+						raise RuntimeError("Could not parse the json file: {}".format(abs_path))
 			except FileNotFoundError:
-				raise FileNotFoundError("Could not find the specifying the topology: {}".format(abs_path))
+				raise FileNotFoundError("Could not find the file specifying the topology: {}".format(abs_path))
+			except IsADirectoryError:
+				raise FileNotFoundError("Could not find the file specifying the topology: {}".format(abs_path))
 
 	def is_adjacent(self, remote_host_name):
 		"""
