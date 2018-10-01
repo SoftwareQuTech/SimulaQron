@@ -624,6 +624,15 @@ class SimulaqronCQCHandler(CQCMessageHandler):
             self.return_messages.append(err_msg)
             return False
 
+        # Check that other node is adjacent to us
+        if not self.factory._is_adjacent(target_name):
+            logging.debug("CQC {}: Node {} is not adjacent to {} in the specified topology.".format(self.name,
+                                                                                                    target_name,
+                                                                                                    self.name))
+            err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
+            self.return_messages.append(err_msg)
+            return False
+
         # Lookup the virtual qubit from identifier
         try:
             virt_num = yield self.get_virt_qubit_indep(cqc_header, cmd.qubit_id)
