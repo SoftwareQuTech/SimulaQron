@@ -50,6 +50,7 @@ class Settings:
 	CONF_LOGGING_LEVEL_BACKEND = logging.DEBUG
 	CONF_LOGGING_LEVEL_FRONTEND = logging.DEBUG
 	CONF_BACKEND_HANDLER = SimulaqronCQCHandler
+	CONF_TOPOLOGY_FILE = ""
 
 	@classmethod
 	def init_settings(cls):
@@ -112,6 +113,12 @@ class Settings:
 			cls.CONF_BACKEND_HANDLER = CQCLogMessageHandler
 		else:  # default simulqron  (elif backend_handler.lower() == "simulqron")
 			cls.CONF_BACKEND_HANDLER = SimulaqronCQCHandler
+
+		if "Topology_File" in backend:
+			cls.CONF_TOPOLOGY_FILE = backend['Topology_File']
+		else:
+			backend['Topology_File'] = cls.CONF_TOPOLOGY_FILE
+			config_changed = True
 
 		if "FRONTEND" not in _config:
 			_config['FRONTEND'] = {}
