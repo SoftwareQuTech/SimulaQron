@@ -131,6 +131,10 @@ class CQCFactory(Factory):
 			The name of the remote host
 		:return:
 		"""
+		# Check if a topology is defined, otherwise use fully connected
+		if self.topology is None:
+			return True
+
 		if remote_host_name in self.topology[self.name]:
 			return True
 		else:
