@@ -32,7 +32,7 @@ from SimulaQron.settings import Settings
 from twisted.internet.defer import DeferredLock
 from twisted.internet.protocol import Factory, Protocol
 
-import os, json
+import os, json, logging
 
 
 #####################################################################################################
@@ -135,9 +135,14 @@ class CQCFactory(Factory):
 		if self.topology is None:
 			return True
 
-		if remote_host_name in self.topology[self.name]:
-			return True
+		if self.name in self.topology:
+			if remote_host_name in self.topology[self.name]:
+				return True
+			else:
+				return False
 		else:
+			logging.warning("Node {} is not in the specified topology"
+							"and is therefore assumed to have no neighbors".format(self.name))
 			return False
 
 
