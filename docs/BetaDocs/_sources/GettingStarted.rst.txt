@@ -14,9 +14,9 @@ Assuming you have python 3 etc already installed already, do::
 
 For detailed instructions on how to install QuTip and Twisted, please refer to their respective installations instructions. 
 
-To install SimulaQron itself, you can clone the BetaRelease branch of the git repository. Do::
+To install SimulaQron itself, you can clone the PreBeta git repository. Do::
 
-	git clone https://github.com/StephanieWehner/SimulaQron -b BetaRelease
+	git clone https://github.com/StephanieWehner/SimulaQron -b PreBeta
 
 You will then 
 need to set the following environment variables in order to execute the code. I am assuming here
@@ -117,6 +117,25 @@ The script startCQCNodes.sh starts any number of desired CQC servers::
 	python startCQC.py Charlie &
 
 Provided the CQC servers started successfully you now have a network of 3 simulated quantum nodes that accept connections on the ports indicated above and takes messages specified by the CQC header.
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Configuring the nodes of the network
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A convinient way to quickly change the number of nodes used and their name is to use the provided 'configFiles.py' file.
+To setup a network with the nodes Alice, Bob and Charlie, simply type::
+
+    python configFiles.py Alice Bob Charlie
+
+in the SimulaQron folder. If you wish to simulate a network with for example the nodes n0, n1, n2, n3 and n4, type::
+
+    python configFiles.py n0 n1 n2 n3 n4
+
+This will make changes to the three configuration files 'config/virtualNodes.cfg', 'config/cqcNodes.cfg' and 'config/appNodes.cfg' together with the files 'run/startVNodes.sh' and 'run/startCQCNodes.sh'.
+
+You can currently set maximally 9 nodes using the 'configFiles.py'.
+Node `j` (starting from 0) will make use of port numbers `8801+j`, `8821+j` and  `8831+j` for its virtual-, cqc- and appNode respectively.
+
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Running automated test

@@ -624,6 +624,15 @@ class SimulaqronCQCHandler(CQCMessageHandler):
             self.return_messages.append(err_msg)
             return False
 
+        # Check that other node is adjacent to us
+        if not self.factory.is_adjacent(target_name):
+            logging.debug("CQC {}: Node {} is not adjacent to {} in the specified topology.".format(self.name,
+                                                                                                    target_name,
+                                                                                                    self.name))
+            err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
+            self.return_messages.append(err_msg)
+            return False
+
         # Lookup the virtual qubit from identifier
         try:
             virt_num = yield self.get_virt_qubit_indep(cqc_header, cmd.qubit_id)
@@ -735,6 +744,31 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         remote_node = xtra.remote_node
         remote_port = xtra.remote_port
         remote_app_id = xtra.remote_app_id
+
+        # Lookup the name of the remote node used within SimulaQron
+        target_name = self.factory.lookup(remote_node, remote_port)
+        if target_name is None:
+            logging.debug("CQC %s: Remote node not found %s", self.name, xtra.printable())
+            err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
+            self.return_messages.append(err_msg)
+            return False
+
+        # Check so that it is not the same node
+        if self.name == target_name:
+            logging.debug("CQC %s: Trying to create EPR from node to itself.", self.name)
+            # self.protocol._send_back_cqc(cqc_header, CQC_ERR_GENERAL)
+            err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
+            self.return_messages.append(err_msg)
+            return False
+
+        # Check that other node is adjacent to us
+        if not self.factory.is_adjacent(target_name):
+            logging.debug("CQC {}: Node {} is not adjacent to {} in the specified topology.".format(self.name,
+                                                                                                    target_name,
+                                                                                                    self.name))
+            err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
+            self.return_messages.append(err_msg)
+            return False
 
         # Create the first qubit
         try:
