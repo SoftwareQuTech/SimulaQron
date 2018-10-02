@@ -179,6 +179,12 @@
 
 <div class="viewcode-block" id="CQCProtocol"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol">[docs]</a><span class="k">class</span> <span class="nc">CQCProtocol</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 
+	<span class="c1"># Dictionary storing the next unique qubit id for each used app_id</span>
+	<span class="n">_next_q_id</span><span class="o">=</span><span class="p">{}</span>
+
+	<span class="c1"># Dictionary storing the next unique entanglement id for each used (host_app_id,remote_node,remote_app_id)</span>
+	<span class="n">_next_ent_id</span><span class="o">=</span><span class="p">{}</span>
+
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory</span><span class="p">):</span>
 
 		<span class="c1"># CQC Factory, including our connection to the SimulaQron backend</span>
@@ -232,12 +238,6 @@
 
 		<span class="c1"># Convenience</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">;</span>
-
-		<span class="c1"># Dictionary storing the next unique qubit id for each used app_id</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">next_q_id</span><span class="o">=</span><span class="p">{}</span>
-
-		<span class="c1"># Dictionary storing the next unique entanglement id for each used (host_app_id,remote_node,remote_app_id)</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">next_ent_id</span><span class="o">=</span><span class="p">{}</span>
 
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Initialized Protocol&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
@@ -744,16 +744,22 @@
 <span class="sd">		Send qubit to another node.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
-		<span class="c1"># Lookup the virtual qubit form identifier</span>
-		<span class="n">virt_num</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_virt_qubit_indep</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
-		<span class="k">if</span> <span class="n">virt_num</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: No such qubit&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-			<span class="k">return</span> <span class="kc">False</span>
-
 		<span class="c1"># Lookup the name of the remote node used within SimulaQron</span>
 		<span class="n">targetName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">xtra</span><span class="o">.</span><span class="n">remote_node</span><span class="p">,</span> <span class="n">xtra</span><span class="o">.</span><span class="n">remote_port</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">targetName</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Remote node not found </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">xtra</span><span class="o">.</span><span class="n">printable</span><span class="p">())</span>
+			<span class="k">return</span> <span class="kc">False</span>
+
+		<span class="c1"># Check so that it is not the same node</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">targetName</span><span class="p">:</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Trying to send from node to itself.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_send_back_cqc</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">CQC_ERR_GENERAL</span><span class="p">)</span>
+			<span class="k">return</span> <span class="kc">False</span>
+
+		<span class="c1"># Lookup the virtual qubit from identifier</span>
+		<span class="n">virt_num</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_virt_qubit_indep</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">virt_num</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: No such qubit&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 			<span class="k">return</span> <span class="kc">False</span>
 
 		<span class="c1"># Send instruction to transfer the qubit</span>
@@ -772,9 +778,8 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Asking to receive for App ID </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">)</span>
 
-		<span class="c1"># First get the app_id and q_id</span>
+		<span class="c1"># First get the app_id</span>
 		<span class="n">app_id</span> <span class="o">=</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span>
-		<span class="n">q_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_qubit_id</span><span class="p">(</span><span class="n">app_id</span><span class="p">)</span>
 
 		<span class="c1"># This will block until a qubit is received.</span>
 		<span class="n">noQubit</span> <span class="o">=</span> <span class="kc">True</span>
@@ -791,6 +796,9 @@
 		<span class="c1"># recheck whether it exists: it could have been added by another connection in the mean time</span>
 		<span class="k">try</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+
+			<span class="c1"># Get new qubit ID</span>
+			<span class="n">q_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_qubit_id</span><span class="p">(</span><span class="n">app_id</span><span class="p">)</span>
 
 			<span class="k">if</span> <span class="p">(</span><span class="n">app_id</span><span class="p">,</span><span class="n">q_id</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">qubitList</span><span class="p">:</span>
 				<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Qubit already in use (</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">app_id</span><span class="p">,</span> <span class="n">q_id</span><span class="p">)</span>
@@ -861,7 +869,7 @@
 		<span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
 			<span class="k">return</span> <span class="kc">False</span>
 
-		<span class="c1"># Get entanglement id</span>
+		<span class="c1"># Get entanglement id XXX lock here?</span>
 		<span class="n">ent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">new_ent_id</span><span class="p">(</span><span class="n">host_app_id</span><span class="p">,</span><span class="n">remote_node</span><span class="p">,</span><span class="n">remote_app_id</span><span class="p">)</span>
 
 		<span class="c1"># Prepare ent_info header with entanglement information</span>
@@ -1033,12 +1041,12 @@
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="k">if</span> <span class="n">app_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_q_id</span><span class="p">:</span>
-			<span class="n">q_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">next_q_id</span><span class="p">[</span><span class="n">app_id</span><span class="p">]</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">next_q_id</span><span class="p">[</span><span class="n">app_id</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
+		<span class="k">if</span> <span class="n">app_id</span> <span class="ow">in</span> <span class="n">CQCProtocol</span><span class="o">.</span><span class="n">_next_q_id</span><span class="p">:</span>
+			<span class="n">q_id</span><span class="o">=</span><span class="n">CQCProtocol</span><span class="o">.</span><span class="n">_next_q_id</span><span class="p">[</span><span class="n">app_id</span><span class="p">]</span>
+			<span class="n">CQCProtocol</span><span class="o">.</span><span class="n">_next_q_id</span><span class="p">[</span><span class="n">app_id</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
 			<span class="k">return</span> <span class="n">q_id</span>
 		<span class="k">else</span><span class="p">:</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">next_q_id</span><span class="p">[</span><span class="n">app_id</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+			<span class="n">CQCProtocol</span><span class="o">.</span><span class="n">_next_q_id</span><span class="p">[</span><span class="n">app_id</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
 			<span class="k">return</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="CQCProtocol.new_ent_id"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.new_ent_id">[docs]</a>	<span class="k">def</span> <span class="nf">new_ent_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">host_app_id</span><span class="p">,</span> <span class="n">remote_node</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="p">):</span>
@@ -1046,12 +1054,12 @@
 <span class="sd">		Returns a new unique entanglement id for the specified host_app_id, remote_node and remote_app_id. Used by cmd_epr.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">pair_id</span><span class="o">=</span><span class="p">(</span><span class="n">host_app_id</span><span class="p">,</span><span class="n">remote_node</span><span class="p">,</span><span class="n">remote_app_id</span><span class="p">)</span>
-		<span class="k">if</span> <span class="n">pair_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_ent_id</span><span class="p">:</span>
-			<span class="n">ent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">next_ent_id</span><span class="p">[</span><span class="n">pair_id</span><span class="p">]</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">next_ent_id</span><span class="p">[</span><span class="n">pair_id</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
+		<span class="k">if</span> <span class="n">pair_id</span> <span class="ow">in</span> <span class="n">CQCProtocol</span><span class="o">.</span><span class="n">_next_ent_id</span><span class="p">:</span>
+			<span class="n">ent_id</span><span class="o">=</span><span class="n">CQCProtocol</span><span class="o">.</span><span class="n">_next_ent_id</span><span class="p">[</span><span class="n">pair_id</span><span class="p">]</span>
+			<span class="n">CQCProtocol</span><span class="o">.</span><span class="n">_next_ent_id</span><span class="p">[</span><span class="n">pair_id</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
 			<span class="k">return</span> <span class="n">ent_id</span>
 		<span class="k">else</span><span class="p">:</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">next_ent_id</span><span class="p">[</span><span class="n">pair_id</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+			<span class="n">CQCProtocol</span><span class="o">.</span><span class="n">_next_ent_id</span><span class="p">[</span><span class="n">pair_id</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
 			<span class="k">return</span> <span class="mi">0</span></div></div>
 
 
