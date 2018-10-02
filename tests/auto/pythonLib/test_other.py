@@ -27,55 +27,52 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from SimulaQron.general.hostConfig import *
-from SimulaQron.cqc.backend.cqcHeader import *
-from SimulaQron.cqc.pythonLib.cqc import *
 import time
-
 
 #####################################################################################################
 #
 # main
 #
-def main():
+import unittest
 
-	# Initialize the connection
-	cqc=CQCConnection("Alice")
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
 
-	# Test Measure inplace
-	print("Testing measure inplace:")
-	q=qubit(cqc,print_info=False)
-	q.H(print_info=False)
-	m1=q.measure(inplace=True,print_info=False)
-	failed=False
-	for _ in range(10):
-		m2=q.measure(inplace=True,print_info=False)
-		if m1!=m2:
-			print("OK")
-			failed=True
-			break
-	if not failed:
-		print("OK")
-	q.measure(print_info=False)
 
-	# Test Get time
-	print("Testing getTime:")
-	q1=qubit(cqc,print_info=False)
-	time.sleep(3)
-	q2=qubit(cqc,print_info=False)
-	t1=q1.getTime(print_info=False)
-	t2=q2.getTime(print_info=False)
-	if (t2-t1)==3:
-		print("OK")
-	else:
-		print("FAIL")
-	q1.measure(print_info=False)
-	q2.measure(print_info=False)
+class OthersTest(unittest.TestCase):
 
-	# Stop the connection
-	cqc.close()
+	@classmethod
+	def setUpClass(cls):
+		print("Testing others (measure inplace and get time)")
 
+	def tearDown(self):
+		self.cqc.close()
+
+	def setUp(self):
+		self.cqc = CQCConnection("Alice", appID=1)
+
+	def testMeasureInplace(self):
+		q = qubit(self.cqc)
+		q.H()
+		m1 = q.measure(inplace=True)
+		failed = False
+		for _ in range(10):
+			m2 = q.measure(inplace=True)
+			self.assertEqual(m1, m2)
+		q.measure()
+
+	def testGetTime(self):
+		# Test Get time
+		q1 = qubit(self.cqc)
+		time.sleep(3)
+		q2 = qubit(self.cqc)
+		t1 = q1.getTime()
+		t2 = q2.getTime()
+		self.assertEqual(t2-t1, 3)
+		q1.measure()
+		q2.measure()
 
 ##################################################################################################
-main()
+
+if __name__ == '__main__':
+	unittest.main()
 

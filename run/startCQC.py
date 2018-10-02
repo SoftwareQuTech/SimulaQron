@@ -1,20 +1,14 @@
+import logging
 
 import sys
+from SimulaQron.cqc.backend.cqcConfig import CQC_CONF_LINK_WAIT_TIME
+from SimulaQron.cqc.backend.cqcProtocol import CQCFactory, SimulaqronCQCHandler
+from SimulaQron.general.hostConfig import networkConfig
+from SimulaQron.settings import Settings
+from twisted.internet import reactor
+from twisted.internet.error import ConnectionRefusedError, CannotListenError
 import os
 
-from twisted.spread import pb
-from twisted.internet import reactor
-from twisted.internet.defer import inlineCallbacks, returnValue, DeferredList, Deferred
-
-from SimulaQron.general.hostConfig import *
-from SimulaQron.cqc.backend.cqcProtocol import *
-
-from qutip import *
-
-import logging
-import time
-
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
 
 ##################################################################################################
 #
@@ -23,38 +17,94 @@ logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=loggin
 # Called if all servers are started and all connections are made. Retrieves the relevant
 # root objects to talk to such remote connections
 #
+from twisted.spread import pb
 
-def init_register(resList, myName, lNode):
 
+def init_register(virtRoot, myName, node):
 	logging.debug("LOCAL %s: All connections set up.", myName)
 
- 	# Retrieve the connection to the local virtual node, if successfull
-	j = 0
-	if resList[j][0]:
-		virtRoot = resList[j][1]
-		lNode.set_virtual_node(virtRoot)
-	else:
-		logging.error("LOCAL %s: Connection to virtual server failed!",myName)
-		reactor.stop()
+	# Set the virtual node
+	node.set_virtual_node(virtRoot)
+
+	# Start listening to CQC messages
+	setup_CQC_server(myName, node)
 
 	# On the local virtual node, we still want to initialize a qubit register
-	defer = virtRoot.callRemote("new_register")
-	defer.addCallback(fill_register, myName, lNode, virtRoot)
-	defer.addErrback(localError)
+	# defer = virtRoot.callRemote("new_register")
+	# defer.addCallback(fill_register, myName, node, virtRoot)
+	# defer.addErrback(handle_register_error,myName)
 
-def fill_register(obj, myName, lNode, virtRoot):
-	logging.debug("LOCAL %s: Created quantum register at virtual node.",myName)
-	qReg = obj
+# def fill_register(obj, myName, node, virtRoot):
+# 	logging.debug("LOCAL %s: Created quantum register at virtual node.",myName)
+# 	qReg = obj
 
-	# Record the handle to the local virtual register
-	lNode.set_virtual_reg(qReg)
+# 	# Record the handle to the local virtual register
+# 	node.set_virtual_reg(qReg)
 
-def localError(reason):
-	'''
-	Error handling for the connection.
-	'''
-	print("Critical error: ",reason)
-	reactor.stop()
+# 	setup_CQC_server(myName,node)
+
+
+def connect_to_virtNode(myName, cqc_factory, virtualNet):
+	"""
+	Trys to connect to local virtual node.
+	If connection is refused, we try again after a set amount of time (specified in handle_connection_error)
+	"""
+
+	logging.debug("LOCAL %s: Trying to connect to local virtual node.", myName)
+	virtual_node = virtualNet.hostDict[myName]
+	factory = pb.PBClientFactory()
+	# Connect
+	reactor.connectTCP(virtual_node.hostname, virtual_node.port, factory)
+	deferVirtual = factory.getRootObject()
+	# If connection succeeds do:
+	deferVirtual.addCallback(init_register, myName, cqc_factory)
+	# If connection fails do:
+	deferVirtual.addErrback(handle_connection_error, myName, cqc_factory, virtualNet)
+
+
+# def handle_register_error(reason,myName):
+# 	"""
+# 	Handles errors from remote call to new register.
+# 	"""
+# 	logging.error("LOCAL %s: Critical error when making new register: %s",myName,reason.getErrorMessage())
+# 	reactor.stop()
+
+
+def handle_connection_error(reason, myName, cqc_factory, virtualNet):
+	"""
+	Handles errors from trying to connect to local virtual node.
+	If a ConnectionRefusedError is raised another try will be made after CQC_CONF_WAIT_TIME seconds.
+	CQC_CONF_WAIT_TIME is set in 'cqc/backend/cqcConfig.py'.
+	Any other error is raised again.
+	"""
+
+	try:
+		reason.raiseException()
+	except ConnectionRefusedError:
+		logging.debug("LOCAL %s: Could not connect, trying again...", myName)
+		reactor.callLater(CQC_CONF_LINK_WAIT_TIME, connect_to_virtNode, myName, cqc_factory, virtualNet)
+	except Exception as e:
+		logging.error("LOCAL %s: Critical error when connection to local virtual node: %s", myName, e)
+		reactor.stop()
+
+
+def setup_CQC_server(myName, cqc_factory):
+	"""
+	Setup CQC server to handle remote connections using CQC on the classical communication network.
+	"""
+	try:
+		logging.debug("LOCAL %s: Starting local classical communication server.", myName)
+		myHost = cqc_factory.host
+		myHost.root = cqc_factory
+		myHost.factory = cqc_factory
+		reactor.listenTCP(myHost.port, myHost.factory)
+	except CannotListenError as e:
+		logging.error("LOCAL {}: CQC server address ({}) is already in use.".format(myName, myHost.port))
+		reactor.stop()
+	except Exception as e:
+		logging.error("LOCAL {}: Critical error when starting CQC server: {}".format(myName, e))
+		reactor.stop()
+
 
 #####################################################################################################
 #
@@ -64,7 +114,6 @@ def localError(reason):
 #
 
 def main(myName):
-
 	# This file defines the network of virtual quantum nodes
 	virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
 
@@ -75,45 +124,22 @@ def main(myName):
 	virtualNet = networkConfig(virtualFile)
 	cqcNet = networkConfig(cqcFile)
 
-	# Check if we should run a local classical server. If so, initialize the code
-	# to handle remote connections on the classical communication network
+	# Check if we are in the host-dictionary
 	if myName in cqcNet.hostDict:
 		myHost = cqcNet.hostDict[myName]
-		cqc_factory = CQCFactory(myHost, myName, cqcNet)
+		cqc_factory = CQCFactory(myHost, myName, cqcNet, SimulaqronCQCHandler)
 	else:
-		logging.error("LOCAL %s: Cannot start classical communication servers.",myName)
-
-	# Initialize Twisted callback framework
-	dList = []
-
-	try:
-		logging.debug("LOCAL %s: Starting local classical communication server.",myName)
-		myHost.root = cqc_factory
-		myHost.factory = cqc_factory
-		reactor.listenTCP(myHost.port, myHost.factory)
-	except Exception as e:
-		logging.error("LOCAL %s: Cannot start CQC server.",myName)
+		logging.error("LOCAL %s: Cannot start classical communication servers.", myName)
 		return
 
 	# Connect to the local virtual node simulating the "local" qubits
-	try:
-		logging.debug("LOCAL %s: Connecting to local virtual node.",myName)
-		virtual_node = virtualNet.hostDict[myName]
-		factory = pb.PBClientFactory()
-		reactor.connectTCP(virtual_node.hostname, virtual_node.port, factory)
-		deferVirtual = factory.getRootObject()
-		dList.append(deferVirtual)
+	connect_to_virtNode(myName, cqc_factory, virtualNet)
 
-		deferList = DeferredList(dList, consumeErrors=True)
-		deferList.addCallback(init_register, myName, cqc_factory)
-		deferList.addErrback(localError)
-		reactor.run()
-	except Exception as e:
-		logging.error("LOCAL %s: Cannot connect to SimulaQron backend.",myName)
-		return
+	# Run reactor
+	reactor.run()
 
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
-main(sys.argv[1])
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=Settings.CONF_LOGGING_LEVEL_BACKEND)
 
+main(sys.argv[1])

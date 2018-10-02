@@ -76,6 +76,8 @@ class simulatedQubit(pb.Referenceable):
 		self._lock.release()
 	def isLocked(self):
 		return self._lock.locked
+	def remote_isLocked(self):
+		return self._lock.locked
 	def remote_isActive(self):
 		return self.active
 

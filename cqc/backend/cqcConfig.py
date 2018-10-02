@@ -33,5 +33,12 @@
 
 # Sets how long a node waits for receiving a qubit.
 # Raises a CQC_ERR_TIMEOUT when times is up.
-CQC_CONF_RECV_TIMEOUT=10 # (x 100ms)
-CQC_CONF_RECV_EPR_TIMEOUT=10 # (x 100ms)
+CQC_CONF_RECV_TIMEOUT = 100  # (x 100 ms)
+CQC_CONF_RECV_EPR_TIMEOUT = 100  # (x 100 ms)
+CQC_CONF_WAIT_TIME_RECV = 0.1  # (seconds)  sets the time in seconds to wait before each recheck when receiving qubits
+
+# Sets the time to wait between attempts to setup the connections to the virtual node, cqc node
+CQC_CONF_LINK_WAIT_TIME = 0.5
+
+# Sets the time to wait between attempts to setup the connections to other nodes for classical communication
+CQC_CONF_COM_WAIT_TIME = 0.1
