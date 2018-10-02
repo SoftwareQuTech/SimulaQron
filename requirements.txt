@@ -1,4 +1,5 @@
 scipy>=1.1.0
 twisted>=18.7.0
-matplotlib>=2.2.2
+matplotlib>=2.2.0,<3.0.0
 qutip>=4.3.1
+networkx>=2.2

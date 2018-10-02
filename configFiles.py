@@ -41,10 +41,12 @@
 
 import os
 import json
+import random
 from argparse import ArgumentParser
+import networkx as nx
+import matplotlib.pyplot as plt
 
 from SimulaQron.settings import Settings
-# from configparser import ConfigParser
 
 
 def construct_node_configs(nodes):
@@ -88,13 +90,15 @@ def construct_node_configs(nodes):
 			f.write("{}\n".format(nodes[j]))
 
 
-def construct_topology_config(topology, nodes):
+def construct_topology_config(topology, nodes, save_fig=True):
 	"""
 	Constructs a json file at $NETSIM/config/topology.json, used to define the topology of the network.
 	:param topology: str
 		Should be one of the following: None, 'complete', 'ring', 'random_tree'.
 	:param nodes: list of str
 		List of the names of the nodes.
+	:param save_fig: bool
+		Whether to save a picture of the network
 	:return: None
 	"""
 	if topology:
@@ -123,34 +127,91 @@ def construct_topology_config(topology, nodes):
 					adjacency_dct[node] = [nodes[(i-1) % nn], nodes[(i+1) % nn]]
 
 		elif topology == 'random_tree':
-			raise NotImplementedError("Not implemented yet")
+			adjacency_dct = get_random_tree(nodes)
+
+		elif topology[:16] == 'random_connected':
+			try:
+				nr_edges = int(topology[17:])
+			except ValueError:
+				raise ValueError("When specifying a random connected graph use the format 'random_connected_{nr_edges}',"
+								"where 'nr_edges' is the number of edges of the graph.")
+			except IndexError:
+				raise ValueError("When specifying a random connected graph use the format 'random_connected_{nr_edges}',"
+								 "where 'nr_edges' is the number of edges of the graph.")
+			adjacency_dct = get_random_connected(nodes, nr_edges)
 
 		else:
 			raise ValueError("Unknown topology name")
 
+		if save_fig:
+			network = nx.from_dict_of_lists(adjacency_dct)
+			nx.draw(network, with_labels=True)
+			plt.savefig(os.environ["NETSIM"] + "/config/topology.png")
 
-		# settings_file = os.environ["NETSIM"] + "/config/settings.ini"
+
 		topology_file = os.environ["NETSIM"] + "/config/topology.json"
 		with open(topology_file, 'w') as top_file:
 			json.dump(adjacency_dct, top_file)
 
-		# config = ConfigParser()
-		# config.read(settings_file)
-		# config["BACKEND"]["topology_file"] = "config/topology.json"
-		# with open(settings_file, 'w') as set_file:
-		# 	config.write(set_file)
-
 		Settings.set_setting("BACKEND", "topology_file", "config/topology.json")
 	else:
-		# settings_file = os.environ["NETSIM"] + "/config/settings.ini"
-		#
-		# config = ConfigParser()
-		# config.read(settings_file)
-		# config["BACKEND"]["topology_file"] = ""
-		# with open(settings_file, 'w') as set_file:
-		# 	config.write(set_file)
-
 		Settings.set_setting("BACKEND", "topology_file", "")
+
+
+def get_random_tree(nodes):
+	"""
+	Constructs a dictionary describing a random tree, with the name of the vertices are taken from the 'nodes'
+	:param nodes: list of str
+		Name of the nodes to be used
+	:return: dct
+		keys are the names of the nodes and values their neighbors
+	"""
+	tree = nx.random_tree(len(nodes))
+
+	# Construct mapping to relabel nodes
+	mapping = {i: nodes[i] for i in range(len(nodes))}
+	nx.relabel_nodes(G=tree, mapping=mapping, copy=False)
+
+	# Get the dictionary from the graph
+	adjacency_dct = nx.to_dict_of_lists(tree)
+
+	return adjacency_dct
+
+
+def get_random_connected(nodes, nr_edges):
+	"""
+	Constructs a dictionary describing a random connected graph with a specified number of edges,
+	with the name of the vertices are taken from the 'nodes'
+	:param nodes: list of str
+		Name of the nodes to be used
+	:param nr_edges: int
+		The number of edges that the graph should have.
+	:return: dct
+		keys are the names of the nodes and values their neighbors
+	"""
+	nn = len(nodes)
+	min_edges = nn - 1
+	max_edges = nn * (nn - 1) / 2
+	if (nr_edges < min_edges) or (nr_edges > max_edges):
+		raise ValueError("Number of edges cannot be less than #vertices-1 or greater then #vertices * (#vertices-1)/2")
+
+	G = nx.random_tree(nn)
+
+	non_edges = list(nx.non_edges(G))
+
+	for _ in range(min_edges, nr_edges):
+		random_edge = random.choice(non_edges)
+		G.add_edge(random_edge[0], random_edge[1])
+		non_edges.remove(random_edge)
+
+	# Construct mapping to relabel nodes
+	mapping = {i: nodes[i] for i in range(len(nodes))}
+	nx.relabel_nodes(G=G, mapping=mapping, copy=False)
+
+	# Get the dictionary from the graph
+	adjacency_dct = nx.to_dict_of_lists(G)
+
+	return adjacency_dct
 
 
 def parse_input():
