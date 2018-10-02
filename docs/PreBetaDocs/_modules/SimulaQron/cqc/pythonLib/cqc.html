@@ -197,6 +197,7 @@
 
 			<span class="c1"># Setup server</span>
 			<span class="n">s</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span><span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+			<span class="n">s</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span><span class="n">socket</span><span class="o">.</span><span class="n">SO_REUSEADDR</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
 			<span class="n">s</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="n">myHost</span><span class="o">.</span><span class="n">hostname</span><span class="p">,</span><span class="n">myHost</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
 			<span class="n">s</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 			<span class="p">(</span><span class="n">conn</span><span class="p">,</span><span class="n">addr</span><span class="p">)</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
@@ -269,7 +270,7 @@
 			<span class="bp">self</span><span class="o">.</span><span class="n">openClassicalChannel</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 		<span class="k">try</span><span class="p">:</span>
 			<span class="n">to_send</span><span class="o">=</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">msg</span><span class="p">)]</span>
-		<span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+		<span class="k">except</span><span class="p">:</span>
 			<span class="n">to_send</span><span class="o">=</span><span class="n">msg</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_classicalConn</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">to_send</span><span class="p">))</span></div>
 
@@ -791,15 +792,15 @@
 
 <div class="viewcode-block" id="CQCGeneralError"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCGeneralError">[docs]</a><span class="k">class</span> <span class="nc">CQCGeneralError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 	<span class="k">pass</span></div>
-<div class="viewcode-block" id="CQCNoQubitError"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCNoQubitError">[docs]</a><span class="k">class</span> <span class="nc">CQCNoQubitError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="CQCNoQubitError"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCNoQubitError">[docs]</a><span class="k">class</span> <span class="nc">CQCNoQubitError</span><span class="p">(</span><span class="n">CQCGeneralError</span><span class="p">):</span>
 	<span class="k">pass</span></div>
-<div class="viewcode-block" id="CQCUnsuppError"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCUnsuppError">[docs]</a><span class="k">class</span> <span class="nc">CQCUnsuppError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="CQCUnsuppError"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCUnsuppError">[docs]</a><span class="k">class</span> <span class="nc">CQCUnsuppError</span><span class="p">(</span><span class="n">CQCGeneralError</span><span class="p">):</span>
 	<span class="k">pass</span></div>
-<div class="viewcode-block" id="CQCTimeoutError"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCTimeoutError">[docs]</a><span class="k">class</span> <span class="nc">CQCTimeoutError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="CQCTimeoutError"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCTimeoutError">[docs]</a><span class="k">class</span> <span class="nc">CQCTimeoutError</span><span class="p">(</span><span class="n">CQCGeneralError</span><span class="p">):</span>
 	<span class="k">pass</span></div>
-<div class="viewcode-block" id="CQCInuseError"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCInuseError">[docs]</a><span class="k">class</span> <span class="nc">CQCInuseError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="CQCInuseError"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCInuseError">[docs]</a><span class="k">class</span> <span class="nc">CQCInuseError</span><span class="p">(</span><span class="n">CQCGeneralError</span><span class="p">):</span>
 	<span class="k">pass</span></div>
-<div class="viewcode-block" id="QubitNotActiveError"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.QubitNotActiveError">[docs]</a><span class="k">class</span> <span class="nc">QubitNotActiveError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="QubitNotActiveError"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.QubitNotActiveError">[docs]</a><span class="k">class</span> <span class="nc">QubitNotActiveError</span><span class="p">(</span><span class="n">CQCGeneralError</span><span class="p">):</span>
 	<span class="k">pass</span></div>
 
 
@@ -858,6 +859,17 @@
 
 		<span class="c1"># Entanglement information</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="o">=</span><span class="n">entInfo</span>
+
+		<span class="c1"># Lookup remote entangled node</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_remote_entNode</span><span class="o">=</span><span class="kc">None</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="p">:</span>
+			<span class="n">ip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="o">.</span><span class="n">node_B</span>
+			<span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="o">.</span><span class="n">port_B</span>
+			<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">ip</span><span class="o">==</span><span class="n">ip</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">port</span><span class="o">==</span><span class="n">port</span><span class="p">):</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">_remote_entNode</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">name</span>
+					<span class="k">break</span>
+
 	<span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active</span><span class="p">:</span>
 			<span class="k">return</span> <span class="s2">&quot;Qubit at the node </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -874,7 +886,25 @@
 			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No entanglement information&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="qubit.set_entInfo"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.qubit.set_entInfo">[docs]</a>	<span class="k">def</span> <span class="nf">set_entInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">entInfo</span><span class="p">):</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="o">=</span><span class="n">entInfo</span></div>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="o">=</span><span class="n">entInfo</span>
+
+		<span class="c1"># Lookup remote entangled node</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_remote_entNode</span><span class="o">=</span><span class="kc">None</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="p">:</span>
+			<span class="n">ip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="o">.</span><span class="n">node_B</span>
+			<span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="o">.</span><span class="n">port_B</span>
+			<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cqcNet</span><span class="o">.</span><span class="n">hostDict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">ip</span><span class="o">==</span><span class="n">ip</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">port</span><span class="o">==</span><span class="n">port</span><span class="p">):</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">_remote_entNode</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">name</span>
+					<span class="k">break</span></div>
+
+<div class="viewcode-block" id="qubit.is_entangled"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.qubit.is_entangled">[docs]</a>	<span class="k">def</span> <span class="nf">is_entangled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="p">:</span>
+			<span class="k">return</span> <span class="kc">True</span>
+		<span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="qubit.get_remote_entNode"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.qubit.get_remote_entNode">[docs]</a>	<span class="k">def</span> <span class="nf">get_remote_entNode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_remote_entNode</span></div>
 
 <div class="viewcode-block" id="qubit.check_active"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.qubit.check_active">[docs]</a>	<span class="k">def</span> <span class="nf">check_active</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>

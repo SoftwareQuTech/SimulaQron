@@ -109,6 +109,7 @@
 
 <span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.cqcHeader</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.entInfoHeader</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.cqcConfig</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
@@ -783,12 +784,17 @@
 
 		<span class="c1"># This will block until a qubit is received.</span>
 		<span class="n">noQubit</span> <span class="o">=</span> <span class="kc">True</span>
-		<span class="k">while</span><span class="p">(</span><span class="n">noQubit</span><span class="p">):</span>
+		<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">CQC_CONF_RECV_TIMEOUT</span><span class="p">):</span>
 			<span class="n">virt_qubit</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">virtRoot</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;cqc_get_recv&quot;</span><span class="p">,</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">)</span>
 			<span class="k">if</span> <span class="n">virt_qubit</span><span class="p">:</span>
 				<span class="n">noQubit</span> <span class="o">=</span> <span class="kc">False</span>
+				<span class="k">break</span>
 			<span class="k">else</span><span class="p">:</span>
 				<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">noQubit</span><span class="p">:</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: TIMEOUT, no qubit received.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_send_back_cqc</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">CQC_ERR_TIMEOUT</span><span class="p">)</span>
+			<span class="k">return</span> <span class="kc">False</span>
 
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Qubit received for app_id </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">)</span>
 
@@ -944,14 +950,19 @@
 
 		<span class="c1"># This will block until a qubit is received.</span>
 		<span class="n">noQubit</span> <span class="o">=</span> <span class="kc">True</span>
-		<span class="k">while</span><span class="p">(</span><span class="n">noQubit</span><span class="p">):</span>
+		<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">CQC_CONF_RECV_EPR_TIMEOUT</span><span class="p">):</span>
 			<span class="n">data</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">virtRoot</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;cqc_get_epr_recv&quot;</span><span class="p">,</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">)</span>
 			<span class="k">if</span> <span class="n">data</span><span class="p">:</span>
 				<span class="n">noQubit</span> <span class="o">=</span> <span class="kc">False</span>
 				<span class="p">(</span><span class="n">virt_qubit</span><span class="p">,</span><span class="n">rawEntInfo</span><span class="p">)</span><span class="o">=</span><span class="n">data</span>
 				<span class="n">entInfo</span><span class="o">=</span><span class="n">EntInfoHeader</span><span class="p">(</span><span class="n">rawEntInfo</span><span class="p">)</span>
+				<span class="k">break</span>
 			<span class="k">else</span><span class="p">:</span>
 				<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">noQubit</span><span class="p">:</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: TIMEOUT, no qubit received.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_send_back_cqc</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">CQC_ERR_TIMEOUT</span><span class="p">)</span>
+			<span class="k">return</span> <span class="kc">False</span>
 
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Qubit received for app_id </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">)</span>
 
