@@ -297,26 +297,38 @@ class virtualNode(pb.Root):
 	@inlineCallbacks
 	def _get_global_lock(self):
 		logging.debug("VIRTUAL NODE %s: Local GETTING LOCK", self.myID.name)
-		yield self._lock.acquire()
+		try:
+			yield self._lock.acquire()
+		except Exception as e:
+			raise e
 		logging.debug("VIRTUAL NODE %s: Local GOT LOCK", self.myID.name)
 
 	@inlineCallbacks
 	def remote_get_global_lock(self):
 		logging.debug("VIRTUAL NODE %s: Remote GETTING LOCK", self.myID.name)
-		yield self._lock.acquire()
+		try:
+			yield self._lock.acquire()
+		except Exception as e:
+			raise e
 		logging.debug("VIRTUAL NODE %s: Remote GOT LOCK", self.myID.name)
 
 	@inlineCallbacks
 	def _release_global_lock(self):
 		logging.debug("VIRTUAL NODE %s: Local RELEASE LOCK", self.myID.name)
 		if self._lock.locked:
-			yield self._lock.release()
+			try:
+				yield self._lock.release()
+			except Exception as e:
+				raise e
 
 	@inlineCallbacks
 	def remote_release_global_lock(self):
 		logging.debug("VIRTUAL NODE %s: Remote RELEASE LOCK", self.myID.name)
 		if self._lock.locked:
-			yield self._lock.release()
+			try:
+				yield self._lock.release()
+			except Exception as e:
+				raise e
 
 	@inlineCallbacks
 	def _lock_reg_qubits(self, qubit):
@@ -489,6 +501,8 @@ class virtualNode(pb.Root):
 		except quantumError:  # if no more qubits
 			newQubit = None
 			logging.error("VIRTUAL NODE %s: Maximum number of qubits reached.", self.myID.name)
+		except Exception as e:
+			raise e
 		finally:
 			self._release_global_lock()
 
