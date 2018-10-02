@@ -123,13 +123,13 @@ class Settings:
 			config_changed = True
 
 		if "noisy_qubits" in backend:
-			cls.CONF_NOISY_QUBITS = bool(backend['noisy_qubits'])
+			cls.CONF_NOISY_QUBITS = backend['noisy_qubits'] == 'True'
 		else:
 			backend['noisy_qubits'] = str(cls.CONF_NOISY_QUBITS)
 			config_changed = True
 
 		if "T1" in backend:
-			cls.CONF_NOISY_QUBITS = float(backend['T1'])
+			cls.CONF_T1 = float(backend['T1'])
 		else:
 			backend['T1'] = str(cls.CONF_T1)
 			config_changed = True
