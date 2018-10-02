@@ -6,7 +6,7 @@ if [ -f "${NETSIM}/config/settings.ini" ]; then
 fi
 
 echo "Creating a new temporary settings file with restricted topology"
-cp "resources/settings.ini" "${NETSIM}/config/settings.ini"
+#cp "resources/settings.ini" "${NETSIM}/config/settings.ini"
 #SETTINGS_FILE="${NETSIM}/config/settings.ini"
 #touch "${SETTINGS_FILE}"
 #echo "[BACKEND]" >> "${SETTINGS_FILE}"
@@ -21,16 +21,16 @@ cp "resources/settings.ini" "${NETSIM}/config/settings.ini"
 #echo "loglevel = warning" >> "${SETTINGS_FILE}"
 
 echo "Starting SimulaQron sever (restricted topology)"
-sh "${NETSIM}/run/startAll.sh" Alice Bob Charlie &
+sh "${NETSIM}/run/startAll.sh" -nd "Alice Bob Charlie" -tp "path" &
 sleep 1s
 echo "Started SimulaQron sever (restricted topology)"
 python "${NETSIM}/tests/auto/network_topology/test_restricted_topology.py"
 
-echo "Removing temporary settings file"
-rm "${NETSIM}/config/settings.ini"
+#echo "Removing temporary settings file"
+#rm "${NETSIM}/config/settings.ini"
 
 echo "Starting SimulaQron sever (default settings)"
-sh "${NETSIM}/run/startAll.sh" Alice Bob Charlie &
+sh "${NETSIM}/run/startAll.sh" -nd "Alice Bob Charlie" &
 sleep 1s
 echo "Started SimulaQron sever (default settings)"
 python "${NETSIM}/tests/auto/network_topology/test_default_topology.py"
@@ -43,6 +43,6 @@ fi
 
 # Start servers again for future tests
 echo "Starting SimulaQron sever (default settings)"
-sh "${NETSIM}/run/startAll.sh" Alice Bob Charlie David Eve &
+sh "${NETSIM}/run/startAll.sh" -nd "Alice Bob Charlie David Eve" &
 sleep 1s
 echo "Started SimulaQron sever (default settings)"
