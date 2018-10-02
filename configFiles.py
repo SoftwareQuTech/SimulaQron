@@ -93,4 +93,4 @@ with open(node_file, 'w') as f:
 # 	f.write("cd \"$NETSIM\"/run\n")
 # 	f.write("\n")
 # 	for j in range(nrNodes):
-# 		f.write("python startCQC.py {} &\n".format(nodes[j]))
+# 		f.write("python startCQC.py {} &\n".format(nodes[j]))r
