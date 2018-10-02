@@ -51,6 +51,8 @@ class Settings:
 	CONF_LOGGING_LEVEL_FRONTEND = logging.WARNING
 	CONF_BACKEND_HANDLER = SimulaqronCQCHandler
 	CONF_TOPOLOGY_FILE = ""
+	CONF_NOISY_QUBITS = False
+	CONF_T1 = 1
 
 	@classmethod
 	def init_settings(cls):
@@ -118,6 +120,18 @@ class Settings:
 			cls.CONF_TOPOLOGY_FILE = backend['Topology_File']
 		else:
 			backend['Topology_File'] = cls.CONF_TOPOLOGY_FILE
+			config_changed = True
+
+		if "noisy_qubits" in backend:
+			cls.CONF_NOISY_QUBITS = bool(backend['noisy_qubits'])
+		else:
+			backend['noisy_qubits'] = str(cls.CONF_NOISY_QUBITS)
+			config_changed = True
+
+		if "T1" in backend:
+			cls.CONF_NOISY_QUBITS = float(backend['T1'])
+		else:
+			backend['T1'] = str(cls.CONF_T1)
 			config_changed = True
 
 		if "FRONTEND" not in _config:

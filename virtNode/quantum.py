@@ -71,8 +71,8 @@ class simulatedQubit(pb.Referenceable):
 		self.active = True
 
 		# Optional parameters for when the simulation is noise
-		self.noisy = settings.noisy_qubits
-		self.T1 = settings.T1
+		self.noisy = settings.Settings.CONF_NOISY_QUBITS
+		self.T1 = settings.Settings.CONF_T1
 		self.last_accessed = time.time()
 
 	def lock(self):
