@@ -32,6 +32,8 @@ from SimulaQron.settings import Settings
 from twisted.internet.defer import DeferredLock
 from twisted.internet.protocol import Factory, Protocol
 
+import os, json, logging
+
 
 #####################################################################################################
 #
@@ -63,6 +65,10 @@ class CQCFactory(Factory):
 		# Lock governing access to the qubitList
 		self._lock = DeferredLock()
 
+		# Read in topology, if specified. topology=None means fully connected topology
+		self.topology = None
+		self._setup_topology(Settings.CONF_TOPOLOGY_FILE)
+
 	def buildProtocol(self, addr):
 		"""
 		Return an instance of CQCProtocol when a connection is made.
@@ -92,6 +98,52 @@ class CQCFactory(Factory):
 
 		logging.debug("CQC %s: No such node", self.name)
 		return None
+
+	def _setup_topology(self, topology_file):
+		"""
+		Sets up the topology, if specified.
+		:param topology_file: str
+			The relative path to the json-file defining the topology. It will be assumed that the absolute
+			path to the file is $NETSIM / topology_file.
+			If topology is an empty string then a fully connected topology will be used.
+		:return: None
+		"""
+		if topology_file == "":
+			return
+		else:
+			# Get the absolute path to the file
+			abs_path = os.environ["NETSIM"] + "/" + topology_file
+			try:
+				with open(abs_path, 'r') as top_file:
+					try:
+						self.topology = json.load(top_file)
+					except json.JSONDecodeError:
+						raise RuntimeError("Could not parse the json file: {}".format(abs_path))
+			except FileNotFoundError:
+				raise FileNotFoundError("Could not find the file specifying the topology: {}".format(abs_path))
+			except IsADirectoryError:
+				raise FileNotFoundError("Could not find the file specifying the topology: {}".format(abs_path))
+
+	def is_adjacent(self, remote_host_name):
+		"""
+		Checks if remote host is adjacent to this node, according to the specified topology.
+		:param remote_host_name: str
+			The name of the remote host
+		:return:
+		"""
+		# Check if a topology is defined, otherwise use fully connected
+		if self.topology is None:
+			return True
+
+		if self.name in self.topology:
+			if remote_host_name in self.topology[self.name]:
+				return True
+			else:
+				return False
+		else:
+			logging.warning("Node {} is not in the specified topology"
+							"and is therefore assumed to have no neighbors".format(self.name))
+			return False
 
 
 #####################################################################################################
