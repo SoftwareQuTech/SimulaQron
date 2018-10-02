@@ -1,5 +1,32 @@
 #!/bin/bash
 
+while [ "$#" -gt 0 ]; do
+    key="$1"
+    case $key in
+        --quick)
+        QUICK="y"
+        shift
+        ;;
+        --full)
+        FULL="y"
+        shift
+        ;;
+        *)
+        echo "Unknown argument ${key}"
+        exit 1
+    esac
+done
+
+if [ "${QUICK}" == "y" ]; then
+    if [ "${FULL}" == "y" ]; then
+        echo "Cannot specify both --quick and --full"
+        exit 1
+    else
+        echo "Since --quick is specified we skip tests of optional noise."
+        exit 1
+    fi
+fi
+
 if [ -f "${NETSIM}/config/settings.ini" ]; then
     echo "Temporarily moving settings.ini to use noisy settings..."
     mv "${NETSIM}/config/settings.ini" "${NETSIM}/config/_settings.ini"
