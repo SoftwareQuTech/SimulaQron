@@ -26,7 +26,11 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+import random
+import time
 
+import numpy as np
+import settings
 from SimulaQron.virtNode.crudeSimulator import simpleEngine
 from twisted.spread import pb
 from twisted.internet.defer import *
@@ -66,6 +70,11 @@ class simulatedQubit(pb.Referenceable):
 		# Mark this qubit as active (still connected to a register)
 		self.active = True
 
+		# Optional parameters for when the simulation is noise
+		self.noisy = settings.Settings.CONF_NOISY_QUBITS
+		self.T1 = settings.Settings.CONF_T1
+		self.last_accessed = time.time()
+
 	def lock(self):
 		self._lock.acquire()
 	def remote_lock(self):
@@ -85,8 +94,6 @@ class simulatedQubit(pb.Referenceable):
 		"""
 		Make this a fresh qubit.
 		"""
-
-
 		# Create a fresh qubit in the |0> state
 		num = self.register.add_fresh_qubit()
 		self.num = num
@@ -99,6 +106,7 @@ class simulatedQubit(pb.Referenceable):
 		"""
 		logging.debug("VIRTUAL NODE %s: applying X to number %d",self.node.name, self.num)
 		self.register.apply_X(self.num)
+		self._apply_random_pauli_noise()
 
 	def remote_apply_K(self):
 		"""
@@ -106,6 +114,7 @@ class simulatedQubit(pb.Referenceable):
 		"""
 		logging.debug("VIRTUAL NODE %s: applying K to number %d",self.node.name, self.num)
 		self.register.apply_K(self.num)
+		self._apply_random_pauli_noise()
 
 	def remote_apply_Y(self):
 		"""
@@ -113,6 +122,7 @@ class simulatedQubit(pb.Referenceable):
 		"""
 		logging.debug("VIRTUAL NODE %s: applying Y to number %d",self.node.name, self.num)
 		self.register.apply_Y(self.num)
+		self._apply_random_pauli_noise()
 
 	def remote_apply_Z(self):
 		"""
@@ -120,6 +130,7 @@ class simulatedQubit(pb.Referenceable):
 		"""
 		logging.debug("VIRTUAL NODE %s: applying Z to number %d",self.node.name, self.num)
 		self.register.apply_Z(self.num)
+		self._apply_random_pauli_noise()
 
 	def remote_apply_H(self):
 		"""
@@ -127,6 +138,7 @@ class simulatedQubit(pb.Referenceable):
 		"""
 		logging.debug("VIRTUAL NODE %s: applying H to number %d",self.node.name, self.num)
 		self.register.apply_H(self.num)
+		self._apply_random_pauli_noise()
 
 	def remote_apply_T(self):
 		"""
@@ -134,6 +146,7 @@ class simulatedQubit(pb.Referenceable):
 		"""
 		logging.debug("VIRTUAL NODE %s: applying T to number %d",self.node.name, self.num)
 		self.register.apply_T(self.num)
+		self._apply_random_pauli_noise()
 
 	def remote_apply_rotation(self,*args):
 		"""
@@ -146,6 +159,7 @@ class simulatedQubit(pb.Referenceable):
 		a=args[1]
 		logging.debug("VIRTUAL NODE %s: applying rotation to number %d. Axis=%s,angle=%s",self.node.name, self.num,str(tuple(n)),str(a))
 		self.register.apply_rotation(self.num,n,a)
+		self._apply_random_pauli_noise()
 
 	def remote_measure_inplace(self):
 		"""
@@ -154,6 +168,7 @@ class simulatedQubit(pb.Referenceable):
 
 		Returns the measurement outcome.
 		"""
+		self._apply_random_pauli_noise()
 		outcome = self.register.measure_qubit_inplace(self.num)
 		return outcome
 
@@ -165,6 +180,7 @@ class simulatedQubit(pb.Referenceable):
 		"""
 
 		# Measure the qubit
+		self._apply_random_pauli_noise()
 		outcome = self.register.measure_qubit(self.num)
 		return outcome
 
@@ -178,6 +194,7 @@ class simulatedQubit(pb.Referenceable):
 
 		logging.debug("VIRTUAL NODE %s: CNOT from %d to %d", self.node.name, self.num, targetNum)
 		self.register.apply_CNOT(self.num, targetNum)
+		self._apply_random_pauli_noise()
 
 	def remote_cphase_onto(self, targetNum):
 		"""
@@ -186,9 +203,8 @@ class simulatedQubit(pb.Referenceable):
 		Arguments
 		targetNum	the qubit to use as the target of the CPHASE
 		"""
-
-
 		self.register.apply_CPHASE(self.num, targetNum)
+		self._apply_random_pauli_noise()
 
 	def remote_get_sim_number(self):
 		"""
@@ -227,6 +243,23 @@ class simulatedQubit(pb.Referenceable):
 		"""
 		return (self.simNum, self.node.name)
 
-
-
-
+	def _apply_random_pauli_noise(self):
+		"""
+		Applies random pauli gate if required
+		"""
+		if not self.noisy:
+			return
+		# Assumes qubit is locked and active
+		t = time.time() - self.last_accessed
+		self.last_accessed = time.time()
+		p = (1 - np.exp(-t/self.T1)) / 4
+		x = random.random()
+		if x < p:
+			logging.debug("VIRTUAL NODE %s: random pauli X applied on %d", self.node.name, self.num)
+			self.register.apply_X(self.num)
+		elif x < 2*p:
+			logging.debug("VIRTUAL NODE %s: random pauli Y applied on %d", self.node.name, self.num)
+			self.register.apply_Y(self.num)
+		elif x < 3*p:
+			logging.debug("VIRTUAL NODE %s: random pauli Z applied on %d", self.node.name, self.num)
+			self.register.apply_Z(self.num)

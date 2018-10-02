@@ -20,7 +20,7 @@ then
         sh "$NETSIM/run/startAll.sh"
     fi
 else  # if arguments were given, create the new nodes and start them
-    while [[ "$#" -gt 0 ]]; do
+    while [ "$#" -gt 0 ]; do
         key="$1"
         case $key in
             -nn|--nrnodes)
