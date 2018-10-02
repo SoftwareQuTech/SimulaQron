@@ -72,7 +72,7 @@ def createXtraHeader(command, values):
 class CQCConnection:
 	_appIDs = []
 
-	def __init__(self, name, cqcFile=None, appFile=None, appID=0, pend_messages=False):
+	def __init__(self, name, cqcFile=None, appFile=None, appID=None, pend_messages=False):
 		"""
 		Initialize a connection to the cqc server.
 
@@ -80,7 +80,7 @@ class CQCConnection:
 			:param name:		Name of the host.
 			:param cqcFile:	Path to cqcFile. If None, '$NETSIM/config/cqcNodes.cfg is used.
 			:param appFile:	Path to appFile. If None, '$NETSIM/config/appNodes.cfg is used.
-			:param appID:		Application ID, defaults to a nonused ID.
+			:param appID:		Application ID. If set to None, defaults to a nonused ID.
 			:param pend_messages: True if you want to wait with sending messages to the back end.
 					Use flush() to send all pending messages in one go as a sequence to the server
 		"""
@@ -89,10 +89,22 @@ class CQCConnection:
 		self.name = name
 
 		# Which appID
-		if appID in self._appIDs:
-			raise ValueError("appID={} is already in use".format(appID))
-		self._appID = appID
-		self._appIDs.append(self._appID)
+		if appID is None:
+			if len(self._appIDs) == 0:
+				self._appID = 0
+			else:
+				for i in range(min(self._appIDs) + 1, max(self._appIDs)):
+					if i not in self._appIDs:
+						self._appID = i
+						break
+				else:
+					self._appID = max(self._appIDs) + 1
+			self._appIDs.append(self._appID)
+		else:
+			if appID in self._appIDs:
+				raise ValueError("appID={} is already in use".format(appID))
+			self._appID = appID
+			self._appIDs.append(self._appID)
 
 		# Buffer received data
 		self.buf = None
