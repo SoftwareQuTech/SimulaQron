@@ -610,13 +610,18 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: Request to transfer qubit to </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
-	
-		<span class="c1"># Convert the number into the right local object	</span>
+
+		<span class="c1"># Convert the number into the right local object</span>
 		<span class="n">simQubit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_q_num_to_obj</span><span class="p">(</span><span class="n">simQubitNum</span><span class="p">)</span>
 
 		<span class="c1"># Lookup host id of node</span>
 		<span class="n">remoteNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="p">[</span><span class="n">targetName</span><span class="p">]</span>
-		<span class="n">newNum</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">remoteNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;add_qubit&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">simQubit</span><span class="p">)</span>
+
+		<span class="c1"># Check if we are both the destination node and simulating node</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="o">==</span><span class="n">targetName</span><span class="p">:</span>
+			<span class="n">newNum</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">remoteNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">remote_add_qubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">simQubit</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">newNum</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">remoteNode</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">callRemote</span><span class="p">(</span><span class="s2">&quot;add_qubit&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myID</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">simQubit</span><span class="p">)</span>
 
 		<span class="k">return</span> <span class="n">newNum</span></div>
 

@@ -47,9 +47,12 @@ class Settings:
 	CONF_MAXQUBITS = 20
 	CONF_MAXREGS = 1000
 	CONF_WAIT_TIME = 0.5
-	CONF_LOGGING_LEVEL_BACKEND = logging.DEBUG
-	CONF_LOGGING_LEVEL_FRONTEND = logging.DEBUG
+	CONF_LOGGING_LEVEL_BACKEND = logging.WARNING
+	CONF_LOGGING_LEVEL_FRONTEND = logging.WARNING
 	CONF_BACKEND_HANDLER = SimulaqronCQCHandler
+	CONF_TOPOLOGY_FILE = ""
+	CONF_NOISY_QUBITS = False
+	CONF_T1 = 1
 
 	@classmethod
 	def init_settings(cls):
@@ -112,6 +115,24 @@ class Settings:
 			cls.CONF_BACKEND_HANDLER = CQCLogMessageHandler
 		else:  # default simulqron  (elif backend_handler.lower() == "simulqron")
 			cls.CONF_BACKEND_HANDLER = SimulaqronCQCHandler
+
+		if "Topology_File" in backend:
+			cls.CONF_TOPOLOGY_FILE = backend['Topology_File']
+		else:
+			backend['Topology_File'] = cls.CONF_TOPOLOGY_FILE
+			config_changed = True
+
+		if "noisy_qubits" in backend:
+			cls.CONF_NOISY_QUBITS = backend['noisy_qubits'] == 'True'
+		else:
+			backend['noisy_qubits'] = str(cls.CONF_NOISY_QUBITS)
+			config_changed = True
+
+		if "T1" in backend:
+			cls.CONF_T1 = float(backend['T1'])
+		else:
+			backend['T1'] = str(cls.CONF_T1)
+			config_changed = True
 
 		if "FRONTEND" not in _config:
 			_config['FRONTEND'] = {}
