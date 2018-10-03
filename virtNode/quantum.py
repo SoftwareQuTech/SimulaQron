@@ -30,7 +30,7 @@ import random
 import time
 
 import numpy as np
-import settings
+from SimulaQron import settings
 from SimulaQron.virtNode.crudeSimulator import simpleEngine
 from twisted.spread import pb
 from twisted.internet.defer import *
