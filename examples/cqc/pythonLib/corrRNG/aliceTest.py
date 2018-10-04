@@ -42,19 +42,11 @@ def main():
 	# Initialize the connection
 	Alice=CQCConnection("Alice")
 
-	# Create qubits
-	q1=qubit(Alice)
-	q2=qubit(Alice)
-
-	# Create Bell-pair
-	q1.H()
-	q1.cnot(q2)
-
-	#Send second qubit to Bob
-	Alice.sendQubit(q2,"Bob")
+	# Create an EPR pair
+	q = Alice.createEPR("Bob")
 
 	# Measure qubit
-	m=q1.measure()
+	m=q.measure()
 	to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
 	print("|"+"-"*(len(to_print)+2)+"|")
 	print("| "+to_print+" |")

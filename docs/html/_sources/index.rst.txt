@@ -28,6 +28,7 @@ The documentation below assumes familiarity with classical network programming c
 
    Overview
    GettingStarted
+   ConfNodes
    CQCInterface
    PythonLib
    Examples
