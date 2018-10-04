@@ -12,7 +12,7 @@ The second way to run applications is via a higher level interface bundled with 
 
 .. note:: The C library is currently out of date but is being updated. See corresponding `issue <https://github.com/SoftwareQuTech/SimulaQron/issues/61>`_ at GitHub.
 
-.. image:: figs/CQC_schematic_v3.pdf
+.. image:: figs/CQC_schematic_v3.png
     :width: 400px
     :align: center
     :alt: Programming SimulaQrons Interfaces
@@ -69,7 +69,7 @@ Nevertheless, as a guide to the backend, it consists of three essential componen
 
 * backEnd - starts up the virtual node backend
 
-.. image:: figs/simulated_virtualQubits_v7.pdf
+.. image:: figs/simulated_virtualQubits_v7.png
     :width: 550px
     :align: center
     :alt: Virtual and simulated qubit

@@ -102,7 +102,7 @@ In the light of the alternate interface below it may appear inefficient to expor
 <p class="first admonition-title">Note</p>
 <p class="last">The C library is currently out of date but is being updated. See corresponding <a class="reference external" href="https://github.com/SoftwareQuTech/SimulaQron/issues/61">issue</a> at GitHub.</p>
 </div>
-<a class="reference internal image-reference" href="_images/CQC_schematic_v3.pdf"><img alt="Programming SimulaQrons Interfaces" class="align-center" src="_images/CQC_schematic_v3.pdf" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="_images/CQC_schematic_v3.png"><img alt="Programming SimulaQrons Interfaces" class="align-center" src="_images/CQC_schematic_v3.png" style="width: 400px;" /></a>
 <p>Practically, SimulaQron’s Backend is a server process running on each local classical computer (or on a single classical computer), emulating quantum hardware. The backend can be programmed directly using Twisted PB aka native mode. For clarity, not efficiency, the CQC Backend is a separate server process, which connects to the SimulaQron backend using Twisted PB. It accepts incoming connections, and using a general packet format can be programmed using any programming language. Libraries for C and Python are provided. If you are starting out, programming in the Python CQC library is by far the easiest way to get going! Further information about the Python library can be found in <a class="reference internal" href="PythonLib.html"><span class="doc">Using the Python library</span></a>: and explicit examples using this library in <a class="reference internal" href="ExamplespythonLib.html"><span class="doc">Examples using the python library</span></a>:.</p>
 </div>
 <div class="section" id="how-simulaqron-works-internally">
@@ -143,7 +143,7 @@ deal with this backend simulation.</p>
 <li>virtualNode - this is the local virtual node which accepts requests to get a virtual qubit object, send qubits to other nodes, read out the state of qubits, perform gates etc.</li>
 <li>backEnd - starts up the virtual node backend</li>
 </ul>
-<a class="reference internal image-reference" href="_images/simulated_virtualQubits_v7.pdf"><img alt="Virtual and simulated qubit" class="align-center" src="_images/simulated_virtualQubits_v7.pdf" style="width: 550px;" /></a>
+<a class="reference internal image-reference" href="_images/simulated_virtualQubits_v7.png"><img alt="Virtual and simulated qubit" class="align-center" src="_images/simulated_virtualQubits_v7.png" style="width: 550px;" /></a>
 </div>
 <div class="section" id="the-local-client-engine">
 <h3>The local client engine<a class="headerlink" href="#the-local-client-engine" title="Permalink to this headline">¶</a></h3>
