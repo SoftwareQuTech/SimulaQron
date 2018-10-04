@@ -50,7 +50,7 @@ Possible message types are listed below. Depending on the message type additiona
 	#define	CQC_ERR_NOQUBIT		21	/* No more qubits available */
 	#define	CQC_ERR_UNSUPP		22	/* Command sequence not supported */
 	#define	CQC_ERR_TIMEOUT		23	/* Timeout */
-    #define CQC_ERR_INUSE       24  /* Qubit already in use */
+	#define CQC_ERR_INUSE		24	/* Qubit already in use */
 
 """"""""""""""""""
 CQC Command Header
@@ -126,7 +126,7 @@ The value of instr can be any of the following::
 	#define CQC_OPT_NOTIFY		0x01	/* Send a notification when cmd done */
 	#define CQC_OPT_ACTION		0x02	/* On if there are actions to execute when done */
 	#define CQC_OPT_BLOCK 		0x04	/* Block until command is done */
-	#define CQC_OPT_IFTHEN      0x08   /* Execute command after done */
+	#define CQC_OPT_IFTHEN		0x08	/* Execute command after done */
 
 """""""""""""""
 CQC Xtra Header
