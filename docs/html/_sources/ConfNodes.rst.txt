@@ -1,0 +1,114 @@
+Configuring the simulated network
+=================================
+
+-------------------------------
+Starting the SimulaQron backend
+-------------------------------
+
+-----------------------
+Configuring the network
+-----------------------
+
+------------
+Manual setup
+------------
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Starting the virtual node servers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By default SimulaQron uses the five nodes Alice, Bob, Charlie, David and Eve on your local computers.
+
+You may do so by executing::
+
+	sh run/startVNodes.sh
+
+Let us now see in detail what happens when you execute this example script. 
+The configuration for the test network is read from config/virtualNodes.cfg. This file defines which virtualNodes to start up and what their names are. The example runs them all locally, but you can as well run them on remote hosts by using one such file on each host.
+
+For the example, this file is::
+
+	# Network configuration file
+	# 
+	# For each host its informal name, as well as its location in the network must
+	# be listed.
+	#
+	# [name], [hostname], [port number]
+	#
+
+	Alice, localhost, 8801
+	Bob, localhost, 8802
+	Charlie, localhost, 8803
+
+Provided a configuration in the file above, you can run::
+	python run/startNode.py Alice & 
+
+To start the virtual node for Alice. The script startVNodes.sh then simply starts any number of desired virtual nodes::
+
+	# startVNodes.sh - start the node Alice, Bob and Charlie 
+
+	cd "$NETSIM"/run
+	python startNode.py Alice &
+	python startNode.py Bob &
+	python startNode.py Charlie &
+
+Provided the virtual nodes started successfully you now have a network of 3 simulated quantum nodes that accept connections on the ports indicated above to allow an application program to access qubits on the virtual node servers. The 3 virtual nodes have also established connections to each other in order to exchange simulated quantum traffic. 
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Starting the CQC servers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Similarly to the virtual nodes we also need to start the CQC servers, which provide the possibility to talk to SimulaQron using the CQC interface.
+A test configuration of CQC servers will start 3 nodes, Alice, Bob and Charlie on your local computers. You may do so by executing::
+
+	sh run/startCQCNodes.sh
+
+The configuration for the CQC network is read from config/cqcNodes.cfg. This file defines which CQC servers to start up and what their names are.
+**Note that the names for the virtual nodes and the CQC servers have to be the same at the moment.**
+
+For the example, this file is::
+
+	# Network configuration file
+	# 
+	# For each host its informal name, as well as its location in the network must
+	# be listed.
+	#
+	# [name], [hostname], [port number]
+	#
+
+	Alice, localhost, 8821
+	Bob, localhost, 8822
+	Charlie, localhost, 8823
+
+The script startCQCNodes.sh starts any number of desired CQC servers::
+
+	# startCQCNodes.sh - start the node Alice, Bob and Charlie 
+
+	cd "$NETSIM"/run
+	python startCQC.py Alice &
+	python startCQC.py Bob &
+	python startCQC.py Charlie &
+
+Provided the CQC servers started successfully you now have a network of 3 simulated quantum nodes that accept connections on the ports indicated above and takes messages specified by the CQC header.
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Configuring the nodes of the network
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A convinient way to quickly change the number of nodes used and their name is to use the provided 'configFiles.py' file.
+To setup a network with the nodes Alice, Bob and Charlie, simply type::
+
+    python configFiles.py Alice Bob Charlie
+
+in the SimulaQron folder. If you wish to simulate a network with for example the nodes n0, n1, n2, n3 and n4, type::
+
+    python configFiles.py n0 n1 n2 n3 n4
+
+This will make changes to the three configuration files 'config/virtualNodes.cfg', 'config/cqcNodes.cfg' and 'config/appNodes.cfg' together with the files 'run/startVNodes.sh' and 'run/startCQCNodes.sh'.
+
+You can currently set maximally 9 nodes using the 'configFiles.py'.
+Node `j` (starting from 0) will make use of port numbers `8801+j`, `8821+j` and  `8831+j` for its virtual-, cqc- and appNode respectively.
+
+----------------------------------------
+Connecting to a remote simulated network
+----------------------------------------

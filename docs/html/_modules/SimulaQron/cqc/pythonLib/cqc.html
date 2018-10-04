@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>SimulaQron.cqc.pythonLib.cqc &#8212; SimulaQron 0.1 beta documentation</title>
+    <title>SimulaQron.cqc.pythonLib.cqc &#8212; SimulaQron 1.0 documentation</title>
     <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
@@ -26,7 +26,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">SimulaQron 0.1 beta documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -970,9 +970,9 @@
 
 <div class="viewcode-block" id="CQCConnection.set_pending"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.set_pending">[docs]</a>	<span class="k">def</span> <span class="nf">set_pending</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pend_messages</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">			Set the pend_messages flag.</span>
-<span class="sd">			If true, flush() has to be called to send all pending_messages in sequence to the backend</span>
-<span class="sd">			If false, all commands are directly send to the back_end</span>
+<span class="sd">		Set the pend_messages flag.</span>
+<span class="sd">		If true, flush() has to be called to send all pending_messages in sequence to the backend</span>
+<span class="sd">		If false, all commands are directly send to the back_end</span>
 <span class="sd">		:param pend_messages: Boolean to indicate if messages should pend or not</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="c1"># Check if the list is not empty, give a warning if it isn&#39;t</span>
@@ -983,9 +983,9 @@
 
 <div class="viewcode-block" id="CQCConnection.flush"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.flush">[docs]</a>	<span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do_sequence</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">			Flush all pending messages to the backend.</span>
-<span class="sd">			:param do_sequence: boolean to indicate if you want to send the pending messages as a sequence</span>
-<span class="sd">			:return: A list of things that are send back from the server. Can be qubits, or outcomes</span>
+<span class="sd">		Flush all pending messages to the backend.</span>
+<span class="sd">		:param do_sequence: boolean to indicate if you want to send the pending messages as a sequence</span>
+<span class="sd">		:return: A list of things that are send back from the server. Can be qubits, or outcomes</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">flush_factory</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">do_sequence</span><span class="p">)</span></div>
 
@@ -1716,7 +1716,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">SimulaQron 0.1 beta documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
