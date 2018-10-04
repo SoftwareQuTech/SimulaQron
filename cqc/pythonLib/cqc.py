@@ -72,7 +72,7 @@ def createXtraHeader(command, values):
 class CQCConnection:
 	_appIDs = []
 
-	def __init__(self, name, cqcFile=None, appFile=None, appID=0, pend_messages=False):
+	def __init__(self, name, cqcFile=None, appFile=None, appID=None, pend_messages=False):
 		"""
 		Initialize a connection to the cqc server.
 
@@ -80,7 +80,7 @@ class CQCConnection:
 			:param name:		Name of the host.
 			:param cqcFile:	Path to cqcFile. If None, '$NETSIM/config/cqcNodes.cfg is used.
 			:param appFile:	Path to appFile. If None, '$NETSIM/config/appNodes.cfg is used.
-			:param appID:		Application ID, defaults to a nonused ID.
+			:param appID:		Application ID. If set to None, defaults to a nonused ID.
 			:param pend_messages: True if you want to wait with sending messages to the back end.
 					Use flush() to send all pending messages in one go as a sequence to the server
 		"""
@@ -89,10 +89,22 @@ class CQCConnection:
 		self.name = name
 
 		# Which appID
-		if appID in self._appIDs:
-			raise ValueError("appID={} is already in use".format(appID))
-		self._appID = appID
-		self._appIDs.append(self._appID)
+		if appID is None:
+			if len(self._appIDs) == 0:
+				self._appID = 0
+			else:
+				for i in range(min(self._appIDs) + 1, max(self._appIDs)):
+					if i not in self._appIDs:
+						self._appID = i
+						break
+				else:
+					self._appID = max(self._appIDs) + 1
+			self._appIDs.append(self._appID)
+		else:
+			if appID in self._appIDs:
+				raise ValueError("appID={} is already in use".format(appID))
+			self._appID = appID
+			self._appIDs.append(self._appID)
 
 		# Buffer received data
 		self.buf = None
@@ -915,9 +927,9 @@ class CQCConnection:
 
 	def set_pending(self, pend_messages):
 		"""
-			Set the pend_messages flag.
-			If true, flush() has to be called to send all pending_messages in sequence to the backend
-			If false, all commands are directly send to the back_end
+		Set the pend_messages flag.
+		If true, flush() has to be called to send all pending_messages in sequence to the backend
+		If false, all commands are directly send to the back_end
 		:param pend_messages: Boolean to indicate if messages should pend or not
 		"""
 		# Check if the list is not empty, give a warning if it isn't
@@ -928,9 +940,9 @@ class CQCConnection:
 
 	def flush(self, do_sequence=True):
 		"""
-			Flush all pending messages to the backend.
-			:param do_sequence: boolean to indicate if you want to send the pending messages as a sequence
-			:return: A list of things that are send back from the server. Can be qubits, or outcomes
+		Flush all pending messages to the backend.
+		:param do_sequence: boolean to indicate if you want to send the pending messages as a sequence
+		:return: A list of things that are send back from the server. Can be qubits, or outcomes
 		"""
 		return self.flush_factory(1, do_sequence)
 

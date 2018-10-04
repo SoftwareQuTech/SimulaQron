@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Getting started &#8212; SimulaQron 0.1 beta documentation</title>
+    <title>Getting started &#8212; SimulaQron 1.0 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -16,7 +16,7 @@
     <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="CQC Interface" href="CQCInterface.html" />
+    <link rel="next" title="Configuring the simulated network" href="ConfNodes.html" />
     <link rel="prev" title="Overview" href="Overview.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -29,12 +29,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="CQCInterface.html" title="CQC Interface"
+          <a href="ConfNodes.html" title="Configuring the simulated network"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="Overview.html" title="Overview"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 beta documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 1.0 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -42,16 +42,18 @@
   <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Getting started</a><ul>
+<li><a class="reference internal" href="#setup">Setup</a><ul>
+<li><a class="reference internal" href="#setting-up-a-virtual-environment">Setting up a virtual environment</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#testing-a-simple-example">Testing a simple example</a><ul>
-<li><a class="reference internal" href="#starting-the-virtual-node-servers">Starting the virtual node servers</a></li>
-<li><a class="reference internal" href="#starting-the-cqc-servers">Starting the CQC servers</a></li>
-<li><a class="reference internal" href="#configuring-the-nodes-of-the-network">Configuring the nodes of the network</a></li>
-<li><a class="reference internal" href="#running-automated-test">Running automated test</a></li>
-<li><a class="reference internal" href="#running-a-protocol">Running a protocol</a></li>
-<li><a class="reference internal" href="#logging-and-debug-output">Logging and debug output</a></li>
+<li><a class="reference internal" href="#verifying-the-installation">Verifying the installation</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#testing-a-simple-example">Testing a simple example</a><ul>
+<li><a class="reference internal" href="#starting-the-simulaqron-backend">Starting the SimulaQron backend</a></li>
+<li><a class="reference internal" href="#running-a-protocol">Running a protocol</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#settings">Settings</a></li>
 </ul>
 </li>
 </ul>
@@ -60,8 +62,8 @@
   <p class="topless"><a href="Overview.html"
                         title="previous chapter">Overview</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="CQCInterface.html"
-                        title="next chapter">CQC Interface</a></p>
+  <p class="topless"><a href="ConfNodes.html"
+                        title="next chapter">Configuring the simulated network</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -91,28 +93,57 @@
             
   <div class="section" id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>SimulaQron requires <a class="reference external" href="https://python.org/">Python 3</a> , <a class="reference external" href="http://twistedmatrix.com/trac/">Twisted</a> and <a class="reference external" href="http://qutip.org/">QuTip</a>
-Assuming you have python 3 etc already installed already, do:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">twisted</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="n">service_identity</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="n">qutip</span>
-</pre></div>
+<div class="section" id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
+<p>SimulaQron requires <a class="reference external" href="https://python.org/">Python 3</a> , <a class="reference external" href="http://twistedmatrix.com/trac/">Twisted</a> and <a class="reference external" href="http://qutip.org/">QuTip</a> along with the packages <em>scipy</em>, <em>matplotlib</em> and <em>networkx</em>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">It is assumed that if you type <code class="code docutils literal notranslate"><span class="pre">python</span></code> in a terminal Python 3.x starts. If typing <code class="code docutils literal notranslate"><span class="pre">python</span></code> starts Python 2.x for you and you do not know how to fix this, see below:</p>
 </div>
-<p>For detailed instructions on how to install QuTip and Twisted, please refer to their respective installations instructions.</p>
+<div class="section" id="setting-up-a-virtual-environment">
+<h3>Setting up a virtual environment<a class="headerlink" href="#setting-up-a-virtual-environment" title="Permalink to this headline">¶</a></h3>
+<p>A virtual environment can be setup using <a class="reference external" href="https://virtualenv.pypa.io/en/stable/">virtualenv</a> or <a class="reference external" href="https://conda.io/docs/">conda</a>. For someone new to Python, using conda is the easy option and we give a brief description here. Further details can be found at <a class="reference external" href="https://conda.io/docs/user-guide/getting-started.html#managing-environments">https://conda.io/docs/user-guide/getting-started.html#managing-environments</a>.</p>
+<p>To install conda, follow the link below that corresponds to your operating system:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://conda.io/docs/user-guide/install/linux.html">Linux</a></li>
+<li><a class="reference external" href="https://conda.io/docs/user-guide/install/macos.html">OSX</a></li>
+<li><a class="reference external" href="https://conda.io/docs/user-guide/install/windows.html">Windows</a></li>
+</ul>
+<p>and go through the instructions to install conda. When you download the installer, make sure to choose the 3.x version.</p>
+</div>
+<div class="section" id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h3>
 <p>To install SimulaQron itself, you can clone the PreBeta git repository. Do:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">StephanieWehner</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="o">-</span><span class="n">b</span> <span class="n">PreBeta</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">SoftwareQuTech</span><span class="o">/</span><span class="n">SimulaQron</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
 <p>You will then
-need to set the following environment variables in order to execute the code. I am assuming here
+need to set the following environment variables in order to execute the code. Assuming that
 you use bash (e.g., standard on OSX or the GIT Bash install on Windows 10), otherwise set the same variables using your favorite shell.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export NETSIM=yourPath/SimulaQron
 export PYTHONPATH=yourPath:$PYTHONPATH
 </pre></div>
 </div>
-<p>where yourPath is the directory containing SimulaQron.</p>
+<p>where yourPath is the directory containing SimulaQron. You can add this to your ~/.bashrc or ~/.bash_profile file.</p>
+</div>
+<div class="section" id="verifying-the-installation">
+<h3>Verifying the installation<a class="headerlink" href="#verifying-the-installation" title="Permalink to this headline">¶</a></h3>
+<p>To run SimulaQron you need to following Python packages:</p>
+<ul class="simple">
+<li>scipy</li>
+<li>service_identity</li>
+<li>twisted</li>
+<li>qutip</li>
+<li>matplotlib</li>
+<li>networkx</li>
+</ul>
+<p>To verify that that SimulaQron is working on your computer, type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">verify</span>
+</pre></div>
+</div>
+<p>in a terminal at the root of the repository. This command will clear any .pyc files in this directory, check that the needed python packages are installed (and if not install these using pip) and run the automated tests. By default a shorter version of the tests are run. If you wish to run the full tests type <code class="code docutils literal notranslate"><span class="pre">make</span> <span class="pre">full_tests</span></code>. Not however that the full tests can take quite some time since they perform quantum tomography to tests operations on the qubits.</p>
+<p>If <code class="code docutils literal notranslate"><span class="pre">make</span></code> does not work for you, you can also run the test by typing <code class="code docutils literal notranslate"><span class="pre">sh</span> <span class="pre">tests/runTests.sh</span> <span class="pre">--quick</span></code> (not including tomography tests) or <code class="code docutils literal notranslate"><span class="pre">sh</span> <span class="pre">tests/runTests.sh</span> <span class="pre">--full</span></code> (full tests).</p>
+</div>
 </div>
 <div class="section" id="testing-a-simple-example">
 <h2>Testing a simple example<a class="headerlink" href="#testing-a-simple-example" title="Permalink to this headline">¶</a></h2>
@@ -121,110 +152,24 @@ Remember from the Overview that SimulaQron has two parts: the first are the virt
 The second are the applications themselves which can be written in two ways, the direct way is to use the native mode using the Python Twisted framework connecting to the virtual node servers, see <a class="reference internal" href="ExamplesDirect.html"><span class="doc">Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)</span></a>.
 Another way is the use the provided Python library that calls the virtual nodes by making use of the classical/quantum combiner interface.
 We will here illustrate how to use SimulaQron with the Python library.</p>
-<div class="section" id="starting-the-virtual-node-servers">
-<h3>Starting the virtual node servers<a class="headerlink" href="#starting-the-virtual-node-servers" title="Permalink to this headline">¶</a></h3>
-<p>A test configuration of virtual node servers will start 3 nodes, Alice, Bob and Charlie on your local computers. You may do so by executing:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startVNodes</span><span class="o">.</span><span class="n">sh</span>
+<div class="section" id="starting-the-simulaqron-backend">
+<h3>Starting the SimulaQron backend<a class="headerlink" href="#starting-the-simulaqron-backend" title="Permalink to this headline">¶</a></h3>
+<p>By default SimulaQron uses the five nodes Alice, Bob, Charlie, David and Eve on your local computers. In this example there will be two processes for each node listening to incoming messages on a certain port number. These make up the simulation backend and the CQC server. To start the processes and thus the backend of SimulaQron simply type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startAll</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
-<p>Let us now see in detail what happens when you execute this example script.
-The configuration for the test network is read from config/virtualNodes.cfg. This file defines which virtualNodes to start up and what their names are. The example runs them all locally, but you can as well run them on remote hosts by using one such file on each host.</p>
-<p>For the example, this file is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Network configuration file</span>
-<span class="c1">#</span>
-<span class="c1"># For each host its informal name, as well as its location in the network must</span>
-<span class="c1"># be listed.</span>
-<span class="c1">#</span>
-<span class="c1"># [name], [hostname], [port number]</span>
-<span class="c1">#</span>
-
-<span class="n">Alice</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8801</span>
-<span class="n">Bob</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8802</span>
-<span class="n">Charlie</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8803</span>
-</pre></div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Running <code class="code docutils literal notranslate"><span class="pre">sh</span> <span class="pre">run/startAll.sh</span></code> will be default start up servers on localhost (i.e., your own computer), using port numbers 8801-8811, to form the simulated quantum internet hardware. SimulaQron does not provide any access control to its simulated hardware, so you are responsible to securing access should this be relevant for you. You can also run the different simulated nodes on different computers. We do not take any responsibility for problems caused by SimulaQron.</p>
 </div>
-<dl class="docutils">
-<dt>Provided a configuration in the file above, you can run::</dt>
-<dd>python run/startNode.py Alice &amp;</dd>
-</dl>
-<p>To start the virtual node for Alice. The script startVNodes.sh then simply starts any number of desired virtual nodes:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># startVNodes.sh - start the node Alice, Bob and Charlie</span>
-
-<span class="n">cd</span> <span class="s2">&quot;$NETSIM&quot;</span><span class="o">/</span><span class="n">run</span>
-<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Alice</span> <span class="o">&amp;</span>
-<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Bob</span> <span class="o">&amp;</span>
-<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Charlie</span> <span class="o">&amp;</span>
-</pre></div>
-</div>
-<p>Provided the virtual nodes started successfully you now have a network of 3 simulated quantum nodes that accept connections on the ports indicated above to allow an application program to access qubits on the virtual node servers. The 3 virtual nodes have also established connections to each other in order to exchange simulated quantum traffic.</p>
-</div>
-<div class="section" id="starting-the-cqc-servers">
-<h3>Starting the CQC servers<a class="headerlink" href="#starting-the-cqc-servers" title="Permalink to this headline">¶</a></h3>
-<p>Similarly to the virtual nodes we also need to start the CQC servers, which provide the possibility to talk to SimulaQron using the CQC interface.
-A test configuration of CQC servers will start 3 nodes, Alice, Bob and Charlie on your local computers. You may do so by executing:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startCQCNodes</span><span class="o">.</span><span class="n">sh</span>
-</pre></div>
-</div>
-<p>The configuration for the CQC network is read from config/cqcNodes.cfg. This file defines which CQC servers to start up and what their names are.
-<strong>Note that the names for the virtual nodes and the CQC servers have to be the same at the moment.</strong></p>
-<p>For the example, this file is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Network configuration file</span>
-<span class="c1">#</span>
-<span class="c1"># For each host its informal name, as well as its location in the network must</span>
-<span class="c1"># be listed.</span>
-<span class="c1">#</span>
-<span class="c1"># [name], [hostname], [port number]</span>
-<span class="c1">#</span>
-
-<span class="n">Alice</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8821</span>
-<span class="n">Bob</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8822</span>
-<span class="n">Charlie</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8823</span>
-</pre></div>
-</div>
-<p>The script startCQCNodes.sh starts any number of desired CQC servers:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># startCQCNodes.sh - start the node Alice, Bob and Charlie</span>
-
-<span class="n">cd</span> <span class="s2">&quot;$NETSIM&quot;</span><span class="o">/</span><span class="n">run</span>
-<span class="n">python</span> <span class="n">startCQC</span><span class="o">.</span><span class="n">py</span> <span class="n">Alice</span> <span class="o">&amp;</span>
-<span class="n">python</span> <span class="n">startCQC</span><span class="o">.</span><span class="n">py</span> <span class="n">Bob</span> <span class="o">&amp;</span>
-<span class="n">python</span> <span class="n">startCQC</span><span class="o">.</span><span class="n">py</span> <span class="n">Charlie</span> <span class="o">&amp;</span>
-</pre></div>
-</div>
-<p>Provided the CQC servers started successfully you now have a network of 3 simulated quantum nodes that accept connections on the ports indicated above and takes messages specified by the CQC header.</p>
-</div>
-<div class="section" id="configuring-the-nodes-of-the-network">
-<h3>Configuring the nodes of the network<a class="headerlink" href="#configuring-the-nodes-of-the-network" title="Permalink to this headline">¶</a></h3>
-<p>A convinient way to quickly change the number of nodes used and their name is to use the provided ‘configFiles.py’ file.
-To setup a network with the nodes Alice, Bob and Charlie, simply type:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">configFiles</span><span class="o">.</span><span class="n">py</span> <span class="n">Alice</span> <span class="n">Bob</span> <span class="n">Charlie</span>
-</pre></div>
-</div>
-<p>in the SimulaQron folder. If you wish to simulate a network with for example the nodes n0, n1, n2, n3 and n4, type:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">configFiles</span><span class="o">.</span><span class="n">py</span> <span class="n">n0</span> <span class="n">n1</span> <span class="n">n2</span> <span class="n">n3</span> <span class="n">n4</span>
-</pre></div>
-</div>
-<p>This will make changes to the three configuration files ‘config/virtualNodes.cfg’, ‘config/cqcNodes.cfg’ and ‘config/appNodes.cfg’ together with the files ‘run/startVNodes.sh’ and ‘run/startCQCNodes.sh’.</p>
-<p>You can currently set maximally 9 nodes using the ‘configFiles.py’.
-Node <cite>j</cite> (starting from 0) will make use of port numbers <cite>8801+j</cite>, <cite>8821+j</cite> and  <cite>8831+j</cite> for its virtual-, cqc- and appNode respectively.</p>
-</div>
-<div class="section" id="running-automated-test">
-<h3>Running automated test<a class="headerlink" href="#running-automated-test" title="Permalink to this headline">¶</a></h3>
-<p>Before turning to an actual protocol it is a good idea to run some tests to see that everything is working.
-It is a good idea to open a new terminal at this point, since the outputs will otherwise be hidden by the debugging information from the virtual nodes and CQC servers.
-Do not forget to set the environment variables.
-To run the test in the new terminal just type:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">tests</span><span class="o">/</span><span class="n">runAll</span><span class="o">.</span><span class="n">sh</span>
-</pre></div>
-</div>
-<p>Recall that some of these tests use quantum tomography and are inherently probabilistic. If one of the tests therefore fails, try to run it again and see if the error persists.</p>
+<p>For more information on what <code class="code docutils literal notranslate"><span class="pre">sh</span> <span class="pre">run/startAll.sh</span></code> does, how to change the nodes and the ports of the network, the topology etc, see <a class="reference internal" href="ConfNodes.html"><span class="doc">Configuring the simulated network</span></a>.</p>
 </div>
 <div class="section" id="running-a-protocol">
 <h3>Running a protocol<a class="headerlink" href="#running-a-protocol" title="Permalink to this headline">¶</a></h3>
-<p>Having started the virtual quantum nodes, let us now run a simple test application, which already illustrates some of the aspects in realizing protocols.
+<p>Having started the virtual quantum nodes as above, let us now run a simple test application, which already illustrates some of the aspects in realizing protocols.
 Our objective will be to realize the following protocol which will generate 1 shared random bit between Alice and Bob. Evidently, there would be classical means to achieve this trivial task chosen for illustration.</p>
 <ul class="simple">
-<li>Alice generates 1 EPR pair, that is, two maximally entangled qubits <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span> of the form <span class="math notranslate nohighlight">\(|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)\)</span></li>
-<li>She sends qubit <span class="math notranslate nohighlight">\(B\)</span> to Bob.</li>
+<li>Alice and Bob generates one EPR pair, that is, two maximally entangled qubits <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span> of the form <span class="math notranslate nohighlight">\(|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)\)</span></li>
 <li>Both Alice and Bob measure their respective qubits to obtain a classical random number <span class="math notranslate nohighlight">\(x \in \{0,1\}\)</span>.</li>
 </ul>
 <p>Before seeing how this example works, let us again simply run the code:</p>
@@ -232,20 +177,19 @@ Our objective will be to realize the following protocol which will generate 1 sh
 <span class="n">sh</span> <span class="n">doNew</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
-<p>Next to a considerable about of debugging information, you should be seeing the following two lines:</p>
+<p>You should be seeing the following two lines:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">App</span> <span class="n">Alice</span><span class="p">:</span> <span class="n">Measurement</span> <span class="n">outcome</span> <span class="ow">is</span><span class="p">:</span> <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>
 <span class="n">App</span> <span class="n">Bob</span><span class="p">:</span> <span class="n">Measurement</span> <span class="n">outcome</span> <span class="ow">is</span><span class="p">:</span> <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>
 </pre></div>
 </div>
-<p>Note that the order of these two lines may differ, as it does not matter who measures first. So what is actually going on here ? Let us first look at how we will realize the example by making an additional step (3) explicit:</p>
+<p>Note that the order of these two lines may differ, as it does not matter who measures first. So what is actually going on here? Let us first look at how we will realize the example by making an additional step (3) explicit:</p>
 <ul class="simple">
-<li>Alice generates 1 EPR pair, that is, two maximally entangled qubits <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span> of the form <span class="math notranslate nohighlight">\(|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)\)</span></li>
-<li>She sends qubit <span class="math notranslate nohighlight">\(B\)</span> to Bob.</li>
-<li>Bob is informed of the identifier of the qubit and is informed it has arrived.</li>
+<li>Alice and Bob generate one EPR pair, that is, two maximally entangled qubits <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span> of the form <span class="math notranslate nohighlight">\(|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)\)</span></li>
+<li>Alice and Bob are informed of the identifiers of the qubits and are informed that entanglement was generated.</li>
 <li>Both Alice and Bob measure their respective qubits to obtain a classical random number <span class="math notranslate nohighlight">\(x \in \{0,1\}\)</span>.</li>
 </ul>
 <p>While the task we want to realize here is completely trivial, the addition of step 3 does however already highlight a range of choices on how to realize step 3 and the need to find good abstractions to allow easy application development.
-One way to realize step 3 would be to hardwire Bobs measurement: if the hardware can identify the correct qubit from Alice, then we could instruct it to measure it immediately without asking for a notification from Alice. It is clear that in a network that is a bit larger than our tiny three node setup, identifying the right setup requires a link between the underlying qubits and classical control information: this is the objective of the classical/quantum combiner.</p>
+One way to realize step 3 would be to hardwire Alices and Bobs measurements: if the hardware can identify the correct qubits from the entanglement generation, then we could instruct it to measure it immediately without asking for a notification from the entanglement generation process. It is clear that in a network that is a bit larger than our tiny three node setup, identifying the right setup requires a link between the underlying qubits and classical control information: this is the objective of the classical/quantum combiner.</p>
 <p>The first thing that happens if we execute the script doNew.sh is that after some setting up it will call run.sh, executing:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
 
@@ -258,29 +202,21 @@ We first initialize an object of the class <code class="docutils literal notrans
 Qubits can then be created by initializing a qubit-object, which takes a <code class="docutils literal notranslate"><span class="pre">CQCConnection</span></code> as an input.
 On these qubits operations can be applied and they can also be sent to other nodes in the network by use of the <code class="docutils literal notranslate"><span class="pre">CQCConnection</span></code>.
 The full code in aliceTest.py is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Initialize the connection</span>
-<span class="n">Alice</span><span class="o">=</span><span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="c1"># Initialize the connection</span>
+    <span class="n">Alice</span><span class="o">=</span><span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span>
 
-<span class="c1"># Create qubits</span>
-<span class="n">q1</span><span class="o">=</span><span class="n">qubit</span><span class="p">(</span><span class="n">Alice</span><span class="p">)</span>
-<span class="n">q2</span><span class="o">=</span><span class="n">qubit</span><span class="p">(</span><span class="n">Alice</span><span class="p">)</span>
+<span class="c1"># Create an EPR pair</span>
+<span class="n">q</span> <span class="o">=</span> <span class="n">Alice</span><span class="o">.</span><span class="n">createEPR</span><span class="p">(</span><span class="s2">&quot;Bob&quot;</span><span class="p">)</span>
 
-<span class="c1"># Create Bell-pair</span>
-<span class="n">q1</span><span class="o">.</span><span class="n">H</span><span class="p">()</span>
-<span class="n">q1</span><span class="o">.</span><span class="n">cnot</span><span class="p">(</span><span class="n">q2</span><span class="p">)</span>
+    <span class="c1"># Measure qubit</span>
+    <span class="n">m</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
+    <span class="n">to_print</span><span class="o">=</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2">: Measurement outcome is: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Alice</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| &quot;</span><span class="o">+</span><span class="n">to_print</span><span class="o">+</span><span class="s2">&quot; |&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
 
-<span class="c1">#Send second qubit to Bob</span>
-<span class="n">Alice</span><span class="o">.</span><span class="n">sendQubit</span><span class="p">(</span><span class="n">q2</span><span class="p">,</span><span class="s2">&quot;Bob&quot;</span><span class="p">)</span>
-
-<span class="c1"># Measure qubit</span>
-<span class="n">m</span><span class="o">=</span><span class="n">q1</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
-<span class="n">to_print</span><span class="o">=</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2">: Measurement outcome is: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Alice</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| &quot;</span><span class="o">+</span><span class="n">to_print</span><span class="o">+</span><span class="s2">&quot; |&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
-
-<span class="c1"># Stop the connections</span>
-<span class="n">Alice</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="c1"># Stop the connections</span>
+    <span class="n">Alice</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Similarly the code in bobTest.py read:</p>
@@ -288,7 +224,7 @@ The full code in aliceTest.py is:</p>
 <span class="n">Bob</span><span class="o">=</span><span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Bob&quot;</span><span class="p">)</span>
 
 <span class="c1"># Receive qubit</span>
-<span class="n">q</span><span class="o">=</span><span class="n">Bob</span><span class="o">.</span><span class="n">recvQubit</span><span class="p">()</span>
+<span class="n">q</span><span class="o">=</span><span class="n">Bob</span><span class="o">.</span><span class="n">recvEPR</span><span class="p">()</span>
 
 <span class="c1"># Measure qubit</span>
 <span class="n">m</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
@@ -303,13 +239,43 @@ The full code in aliceTest.py is:</p>
 </div>
 <p>For further examples, see the examples/ folder.</p>
 </div>
-<div class="section" id="logging-and-debug-output">
-<h3>Logging and debug output<a class="headerlink" href="#logging-and-debug-output" title="Permalink to this headline">¶</a></h3>
-<p>In this Pre Beta, the default is for all code - the SimulaQron Backend, the CQC Backend, and any examples - to produce very detailed logging information. You may set the detail of this output using the Python logging module, by setting logging.DEBUG, logging.ERROR, etc depending on your desired level of detail. The default everywhere is full debug output, ile</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1">:</span><span class="si">%(levelname)s</span><span class="s1">:</span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
-</pre></div>
 </div>
-</div>
+<div class="section" id="settings">
+<h2>Settings<a class="headerlink" href="#settings" title="Permalink to this headline">¶</a></h2>
+<p>In the file config/settings.ini you can set the following parameters for SimulaQron:</p>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt><code class="code docutils literal notranslate"><span class="pre">[BACKEND]</span></code></dt>
+<dd><ul class="first last">
+<li><code class="code docutils literal notranslate"><span class="pre">maxqubits</span></code> (default 20): This is the maximum virtual qubits a node can store. Note that a node can still have more simulated qubits.</li>
+<li><code class="code docutils literal notranslate"><span class="pre">maxregisters</span></code> (default 1000): This is the maximum of qubit registers a virtual node can store.</li>
+<li><code class="code docutils literal notranslate"><span class="pre">waittime</span></code> (default 0.5): This is the amount of time that the virtual nodes will wait to try to set up connection between them (when running <code class="code docutils literal notranslate"><span class="pre">sh</span> <span class="pre">run/startAll.sh</span></code>. If you’re setting up SimulaQron between multiple computers, you may wish to increase this.</li>
+<li><code class="code docutils literal notranslate"><span class="pre">loglevel</span></code> (default <cite>warning</cite>): Determines which logging messages should be printed from the backend. Options are <cite>critical</cite>, <cite>error</cite>, <cite>warning</cite>, <cite>info</cite> and <cite>debug</cite>, with increasing amount of logging. Setting the log-level to <cite>debug</cite> will print a lot of messages.</li>
+<li><code class="code docutils literal notranslate"><span class="pre">backendhandler</span></code> (default <cite>simulaqron</cite>): This is to set different types of backends for parsing the CQC messages. Current options are <cite>simulaqron</cite> and <cite>log</cite> (simply log the CQC messages). Unless you know what you’re doing don’t change this!</li>
+<li><code class="code docutils literal notranslate"><span class="pre">topology_file</span></code> (default <cite>&lt;empty_string&gt;</cite>): Set this to the relative path (seen from root of the repo) of a .json file describing the topology of the network to be used. For more details on how to configure a network with a specific topology, see <a class="reference internal" href="ConfNodes.html"><span class="doc">Configuring the simulated network</span></a>.</li>
+<li><code class="code docutils literal notranslate"><span class="pre">noisy_qubits</span></code> (default <cite>False</cite>): Setting this to <cite>True</cite> will add probabilistic Pauli noise to the simulated qubits, with a rate specified with the <code class="code docutils literal notranslate"><span class="pre">T1</span></code> parameter below.</li>
+<li><code class="code docutils literal notranslate"><span class="pre">T1</span></code> (default 1): If <code class="code docutils literal notranslate"><span class="pre">noisy_qubits</span></code> above is <cite>True</cite> then for each qubit one of the Pauli operators <span class="math notranslate nohighlight">\(X=\begin{pmatrix}0 &amp; 1 \\ 1 &amp; 0\end{pmatrix}\)</span>, <span class="math notranslate nohighlight">\(Y=\begin{pmatrix}0 &amp; -i \\ i &amp; 0\end{pmatrix}\)</span> or <span class="math notranslate nohighlight">\(Z=\begin{pmatrix}1 &amp; 0 \\ 0 &amp; -1\end{pmatrix}\)</span> will be applied with probability <span class="math notranslate nohighlight">\(1-exp(-t/T1)\)</span>, where <span class="math notranslate nohighlight">\(t\)</span> is the time the qubit spent at a node. NOTE, this is not an accurate model of noise in a quantum network but simply an option to be able run and explore protocols in a noisy setting. A major drawback with this noise model is that the amount of noise during a protocol depends on how fast your computer is, since the only time in SimulaQron is the runtime of your computer.</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><code class="code docutils literal notranslate"><span class="pre">[FRONTEND]</span></code></dt>
+<dd><ul class="first last">
+<li><code class="code docutils literal notranslate"><span class="pre">loglevel</span></code> (default <cite>warning</cite>): Determines which logging messages should be printed from the Python library. Options are <cite>critical</cite>, <cite>error</cite>, <cite>warning</cite>, <cite>info</cite> and <cite>debug</cite>, with increasing amount of logging. Setting the log-level to <cite>debug</cite> will print a lot of messages.</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>There are also additional settings for CQC backend which can be set in the file cqc/backend/cqcConfig.py:</p>
+<ul class="simple">
+<li><code class="code docutils literal notranslate"><span class="pre">CQC_CONF_RECV_TIMEOUT</span></code> (default 10 s): The time a node will wait for receiving a qubit before sending back an error message using CQC.</li>
+<li><code class="code docutils literal notranslate"><span class="pre">CQC_CONF_RECV_EPR_TIMEOUT</span></code> (default 10 s): The time a node will wait for receiving a qubit part of an EPR pair before sending back an error message using CQC.</li>
+<li><code class="code docutils literal notranslate"><span class="pre">CQC_CONF_WAIT_TIME_RECV</span></code> (default 0.1 s): The time between every check if a qubit has been received.</li>
+<li><code class="code docutils literal notranslate"><span class="pre">CQC_CONF_LINK_WAIT_TIME</span></code> (default 0.5 s): The time between every try to connect to the CQC server.</li>
+<li><code class="code docutils literal notranslate"><span class="pre">CQC_CONF_COM_WAIT_TIME</span></code> (default 0.1 s): The time between every try to connect applications at other nodes for classical communication.</li>
+</ul>
 </div>
 </div>
 
@@ -329,12 +295,12 @@ The full code in aliceTest.py is:</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="CQCInterface.html" title="CQC Interface"
+          <a href="ConfNodes.html" title="Configuring the simulated network"
              >next</a> |</li>
         <li class="right" >
           <a href="Overview.html" title="Overview"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 beta documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 1.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Classical Communication &#8212; SimulaQron 0.1 beta documentation</title>
+    <title>Classical Communication &#8212; SimulaQron 1.0 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="PythonLib.html" title="Using the Python library"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 beta documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="PythonLib.html" accesskey="U">Using the Python library</a> &#187;</li> 
       </ul>
     </div>
@@ -82,27 +82,25 @@ CQC is an interface between the classical control information in the network and
 The communication between the nodes needed to simulate the quantum hardware is handled by the SimulaQron servers, denoted SimulaQron internal communication in the figure.
 Note that such communication is needed since entanglement cannot be simulated locally.
 SimulaQron comes with a Python library that handles all the communication between the application and the CQC server.
-In this library, the object <code class="docutils literal notranslate"><span class="pre">CQCConnection</span></code> takes care of this communication.
-Any operation applied to the qubits in this Python library is translated to a message sent to the CQC server, by the <code class="docutils literal notranslate"><span class="pre">CQCConnection</span></code>.</p>
+In this library, the object <code class="code docutils literal notranslate"><span class="pre">CQCConnection</span></code> takes care of this communication.
+Any operation applied to the qubits in this Python library is translated to a message sent to the CQC server, by the <code class="code docutils literal notranslate"><span class="pre">CQCConnection</span></code>.</p>
 <p>On top of the quantum network there will be classical communication between the applications, denoted Application communication in the figure.
 This communication include for example the case where Alice can sends Bob an encoded classical message or a measurement outcome.
 Such communication would also be present in a real implementation of a quantum network.
-There is a built-in feature in the Python library that realize this functionality, which have been developed for ease of use for someone not familiar with a client/server setup.
-This communication is also handled by the object <code class="docutils literal notranslate"><span class="pre">CQCConnection</span></code>.
-Let assume that Alice wants to send a classical message to Bob and that <code class="docutils literal notranslate"><span class="pre">Alice</span></code> and <code class="docutils literal notranslate"><span class="pre">Bob</span></code> are instances of <code class="docutils literal notranslate"><span class="pre">CQCConnection</span></code> at the respective nodes.
-For Alice to be able to send a message to Bob, Bob needs to first start a server by running <code class="docutils literal notranslate"><span class="pre">Bob.startClassicalServer()</span></code>.
-Alice would then apply the method <code class="docutils literal notranslate"><span class="pre">Alice.sendClassical(&quot;Bob&quot;,msg)</span></code>, where <code class="docutils literal notranslate"><span class="pre">msg</span></code> is the message she wish to send to Bob.
-The method checks if a socket connection is already opened to Bob and if not opens one and sends the message.
+There is a built-in feature in the Python library that realize this functionality, which have been developed for ease of use for someone not familiar with a client/server setup.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">To have classical communication between the applications, one is not forced to use the built-in functionality realized by the <code class="docutils literal notranslate"><span class="pre">CQCConnection</span></code>. You can just as well setup your own client/server communication using the method of your preference. More information and a template for setting up a client/server interaction can be found in <a class="reference internal" href="NativeModeTemplate.html"><span class="doc">Template for programming in native mode</span></a>:.</p>
+</div>
+<p>The built-in classical communication of the Python library is handled by the object <code class="code docutils literal notranslate"><span class="pre">CQCConnection</span></code>.
+Let assume that Alice wants to send a classical message to Bob and that Alice and Bob are instances of <code class="code docutils literal notranslate"><span class="pre">CQCConnection</span></code> at the respective nodes.
+This can be done by simply executing <code class="code docutils literal notranslate"><span class="pre">Alice.sendClassical(&quot;Bob&quot;,</span> <span class="pre">msg)</span></code>, where <code class="code docutils literal notranslate"><span class="pre">msg</span></code> is the message to be sent from Alice to Bob.
+The method <code class="code docutils literal notranslate"><span class="pre">sendClassical</span></code> tries to open a socket connection to Bob and to sent the message.
 Note that if this method is never called, a socket connection is never opened.
-Both the socket connection on Alice’s side and the server on Bob’s side can be closed by the methods <code class="docutils literal notranslate"><span class="pre">closeClassicalChannel</span></code> and <code class="docutils literal notranslate"><span class="pre">closeClassicalServer</span></code>, respectively.
-Alternatetively all connections set up by the <code class="docutils literal notranslate"><span class="pre">CQCConnection</span></code>, including the connection to the CQC server, can be closed by the method <code class="docutils literal notranslate"><span class="pre">close</span></code>
-Note that if this method is never called a socket connections never opened.
-Both the socket connection on Alice’s side and the server on Bob’s side can be closed by the methods <code class="docutils literal notranslate"><span class="pre">closeClassicalChannel</span></code> and <code class="docutils literal notranslate"><span class="pre">closeClassicalServer</span></code>, respectively.
-Alternatetively all connections set up by the <code class="docutils literal notranslate"><span class="pre">CQCConnection</span></code>, including the connection to the CQC server, can be closed by the method <code class="docutils literal notranslate"><span class="pre">close</span></code>.</p>
-<p>We emphasise that to have classical communication between the applications, one is not forced to use the built-in functionality realized by the <code class="docutils literal notranslate"><span class="pre">CQCConnection</span></code>.
-You can just as well setup your own client/server communication using the method of your preference.
-More information and a template for setting up a client/server interaction can be found in <a class="reference internal" href="NativeModeTemplate.html"><span class="doc">Template for programming in native mode</span></a>:.</p>
-<a class="reference internal image-reference" href="_images/servers.pdf"><img alt="Programming SimulaQrons Interfaces" class="align-center" src="_images/servers.pdf" style="width: 600px;" /></a>
+The socket connection between Alice and Bob are closed after the message is sent.
+This classical communication is thus not built for efficiency but for easy of use for someone not familiar with client/server setup.</p>
+<p>The socket addresses used by the built-in classical communication are taken from the file specified by the path in the argument <code class="code docutils literal notranslate"><span class="pre">appFile</span></code> when instantiating the <code class="code docutils literal notranslate"><span class="pre">CQCConnection</span></code>. If this argument is not specified, the file config/appNodes.cfg is used by default.</p>
+<a class="reference internal image-reference" href="_images/servers.png"><img alt="Programming SimulaQrons Interfaces" class="align-center" src="_images/servers.png" style="width: 600px;" /></a>
 </div>
 
 
@@ -126,7 +124,7 @@ More information and a template for setting up a client/server interaction can b
         <li class="right" >
           <a href="PythonLib.html" title="Using the Python library"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 0.1 beta documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="PythonLib.html" >Using the Python library</a> &#187;</li> 
       </ul>
     </div>
