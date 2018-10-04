@@ -927,9 +927,9 @@ class CQCConnection:
 
 	def set_pending(self, pend_messages):
 		"""
-			Set the pend_messages flag.
-			If true, flush() has to be called to send all pending_messages in sequence to the backend
-			If false, all commands are directly send to the back_end
+		Set the pend_messages flag.
+		If true, flush() has to be called to send all pending_messages in sequence to the backend
+		If false, all commands are directly send to the back_end
 		:param pend_messages: Boolean to indicate if messages should pend or not
 		"""
 		# Check if the list is not empty, give a warning if it isn't
@@ -940,9 +940,9 @@ class CQCConnection:
 
 	def flush(self, do_sequence=True):
 		"""
-			Flush all pending messages to the backend.
-			:param do_sequence: boolean to indicate if you want to send the pending messages as a sequence
-			:return: A list of things that are send back from the server. Can be qubits, or outcomes
+		Flush all pending messages to the backend.
+		:param do_sequence: boolean to indicate if you want to send the pending messages as a sequence
+		:return: A list of things that are send back from the server. Can be qubits, or outcomes
 		"""
 		return self.flush_factory(1, do_sequence)
 

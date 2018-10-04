@@ -43,7 +43,7 @@ def main():
 	Bob=CQCConnection("Bob")
 
 	# Receive qubit
-	q=Bob.recvQubit()
+	q=Bob.recvEPR()
 
 	# Measure qubit
 	m=q.measure()
