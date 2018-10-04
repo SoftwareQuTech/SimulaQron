@@ -5,7 +5,7 @@ Getting started
 Setup
 -----
 
-SimulaQron requires `Python 3 <https://python.org/>`_ , `Twisted <http://twistedmatrix.com/trac/>`_ and `QuTip <http://qutip.org/>`_ along with the packages *scipy*, *matplotlib* and *networkx*.
+SimulaQron requires `Python 3 <https://python.org/>`_ , `Twisted <http://twistedmatrix.com/trac/>`_ and `QuTip <http://qutip.org/>`_ along with the packages *scipy*, *cython*, *matplotlib* and *networkx*.
 
 .. note:: It is assumed that if you type :code:`python` in a terminal Python 3.x starts. If typing :code:`python` starts Python 2.x for you and you do not know how to fix this, see below:
 
@@ -27,7 +27,7 @@ and go through the instructions to install conda. When you download the installe
 Installation
 ^^^^^^^^^^^^
 
-To install SimulaQron itself, you can clone the PreBeta git repository. Do::
+To install SimulaQron itself, you can clone the git repository. Do::
 
 	git clone https://github.com/SoftwareQuTech/SimulaQron.git
 
@@ -47,6 +47,7 @@ Verifying the installation
 To run SimulaQron you need to following Python packages:
 
 * scipy
+* cython
 * service_identity
 * twisted
 * qutip
