@@ -25,7 +25,7 @@ CQC Header
 =========== ============================  =========  ===============================================================
 Function    Type                          Length     Comment
 =========== ============================  =========  ===============================================================
-version     unsigned integer (uint8_t)    1 byte      Current version is 0
+version     unsigned integer (uint8_t)    1 byte      Current version is 1
 type        unsigned integer (uint8_t)    1 byte      Message type (see below)
 app_id      unsigned integer (uint16_t)   2 bytes     Application ID, return messages will be tagged appropriately 
 length      unsigned integer (uint32_t)   4 bytes     Total length of the CQC instruction packet
@@ -50,19 +50,43 @@ Possible message types are listed below. Depending on the message type additiona
 	#define	CQC_ERR_NOQUBIT		21	/* No more qubits available */
 	#define	CQC_ERR_UNSUPP		22	/* Command sequence not supported */
 	#define	CQC_ERR_TIMEOUT		23	/* Timeout */
+    #define CQC_ERR_INUSE       24  /* Qubit already in use */
 
 """"""""""""""""""
 CQC Command Header
 """"""""""""""""""
 
-If the message type is CQC_TP_COMMAND, CQC_TP_FACTORY or CQC_TP_GET_TIME, then the following additional command header must be supplied. It identifies the specific instruction to execute, as well as the qubit ID on which to perform this instructions. For rotations, two qubit gates, request to send or receive, and produce entanglement, the CQC Xtra Header is required supplying further information.
+If the message type is `CQC_TP_COMMAND`, `CQC_TP_FACTORY` or `CQC_TP_GET_TIME`, then the following additional command header must be supplied. It identifies the specific instruction to execute, as well as the qubit ID on which to perform this instructions. For rotations, two qubit gates, request to send or receive, and produce entanglement, the additional headers are required supplying further information.
 
 If `CQC_OPT_NOTIFY` set to true, each of these commmands return a CQC message of type `CQC_TP_DONE`. Some commands also return additional messages before the optional done-message, as described below:
 
 * `CQC_CMD_NEW`: Returns `CQC_TP_NEW_OK` followed by a notify header containing the qubit ID.
 * `CQC_CMD_MEASURE(_INPLACE)`: Returns `CQC_TP_MEASOUT` followed by a notify header containing the measurement outcome.
 * `CQC_CMD_RECV`: Returns `CQC_TP_RECV` followed by a notify header containing the qubit ID.
-* `CQC_CMD_EPR(_RECV)`: Returns `CQC_TP_EPR_OK` followed by a entanglement information header.
+* `CQC_CMD_EPR(_RECV)`: Returns `CQC_TP_EPR_OK` followed by an entanglement information header.
+
+Example sequences of headers:
+
+* `CQCHeader` (type `CQC_TP_COMMAND`)
+* `CQCCmdHeader` (instr `CQC_CMD_ROT_X`)
+* `CQCRotationHeader` (specifying the angle)
+* `CQCSequenceHeader` (Telling more commands after this one will come)
+* `CQCCmdHeader` (instr `CQC_CMD_Z`)
+
+(Can also use the action=1 flag in the first Command Header instead of using the sequence header)
+
+An example with factory that does X rotation, then a Z gate, 4 times:
+
+* `CQCHeader` (type `CQC_TP_FACTORY`)
+* `CQCFactoryHeader` (num_iter = 4)
+* `CQCCmdHeader` (instr `CQC_CMD_ROT_X`)
+* `CQCRotationHeader` (specifying the angle)
+* `CQCSequenceHeader` (Telling more commands after this one will come)
+* `CQCCmdHeader` (instr `CQC_CMD_Z`)
+
+
+
+
 
 =========== ============================  ==========  ===============================================================
 Function    Type                          Length      Comment
@@ -102,12 +126,13 @@ The value of instr can be any of the following::
 	#define CQC_OPT_NOTIFY		0x01	/* Send a notification when cmd done */
 	#define CQC_OPT_ACTION		0x02	/* On if there are actions to execute when done */
 	#define CQC_OPT_BLOCK 		0x04	/* Block until command is done */
-	#define CQC_OPT_IFTHEN		0x08	/* Execute command after done */
+	#define CQC_OPT_IFTHEN      0x08   /* Execute command after done */
 
 """""""""""""""
 CQC Xtra Header
 """""""""""""""
 
+**The CQCXtraHeader is deprecated and will be removed in the future. It is split up in multiple headers now.**
 Additional header containing further information. 
 The following commands require an xtra header when issued to the CQC Backend: CQC_CMD_SEND, CQC_CMD_RECV, CQC_CMD_CPHASE, CQC_CMD_CNOT, CQC_CMD_ROT_X, CQC_CMD_ROT_Y, CQC_CMD_ROT_Z
 
@@ -122,6 +147,69 @@ remote_port    unsigned int (uint16_t)       2 bytes     Port of the remode node
 steps          unsigned int (uint8_t)        1 byte      Angle step of rotation (ROT) OR number of repetitions (FACTORY)
 unused         unsigned int (uint8_t)        1 byte      4 byte align
 ============== ============================  ==========  ===============================================================
+
+"""""""""""""""""""
+CQC Sequence Header
+"""""""""""""""""""
+Additional header used to indicate size of a sequence. Used when sending multiple commands at once. It tells the backend how many more messages are coming.
+
+============== ============================  ==========  ===============================================================
+Function       Type                          Length      Comments
+============== ============================  ==========  ===============================================================
+cmd_length     unsigned int (uint8_t)        1 bytes     The length (in bytes) of messages still to come
+============== ============================  ==========  ===============================================================
+
+"""""""""""""""""""
+CQC Rotation Header
+"""""""""""""""""""
+Additional header used to define the rotation angle of a rotation gate.
+
+============== ============================  ==========  ===============================================================
+Function       Type                          Length      Comments
+============== ============================  ==========  ===============================================================
+step            unsigned int (uint8_t)        1 bytes    Angle step of rotation (increments in 1/256 per step)
+============== ============================  ==========  ===============================================================
+
+""""""""""""""""""""""
+CQC Extra Qubit Header
+""""""""""""""""""""""
+Additional header used to send the qubit_id of a secondary qubit for two qubit gates
+
+============== ============================  ==========  ===============================================================
+Function       Type                          Length      Comments
+============== ============================  ==========  ===============================================================
+qubit_id       unsigned int (uint8_t)        2 bytes     Qubit_id of the target qubit
+============== ============================  ==========  ===============================================================
+
+""""""""""""""""""""""""
+CQC Communication Header
+""""""""""""""""""""""""
+Additional header used to send to which node to send information to. Used in send and EPR commands.
+
+============== ============================  ==========  ===============================================================
+Function       Type                          Length      Comments
+============== ============================  ==========  ===============================================================
+remote_app_id  unsigned int (uint16_t)       2 bytes     Remote Application ID
+remote_node    unsigned int (uint32_t)       4 bytes     IP of the remote node (IPv4)
+remote_port    unsigned int (uint16_t)       2 bytes     Port of the remode node for sending classical control info
+============== ============================  ==========  ===============================================================
+
+""""""""""""""""""""""""
+CQC Factory Header
+""""""""""""""""""""""""
+Additional header used to send factory information. Factory commands are used to tell the backend to do the following command or a sequence of commands multiple times.
+
+============== ============================  ==========  ===============================================================
+Function       Type                          Length      Comments
+============== ============================  ==========  ===============================================================
+num_iter       unsigned int (uint8_t)        1 bytes     Number of iterations to do the sequence
+options	       unsigned int (uint8_t)        1 byte      Options when executing the factory
+============== ============================  ==========  ===============================================================
+
+The value of options can be any of the following::
+
+#define CQC_OPT_NOTIFY		0x01	/* Send a notification when cmd is done */
+#define CQC_OPT_BLOCK 		0x04	/* Block until factory is done */
 
 """""""""""""""""
 CQC Notify Header
