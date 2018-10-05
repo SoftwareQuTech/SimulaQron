@@ -867,6 +867,7 @@ class CQCConnection:
 							 remote_node=recvHost.ip, remote_port=recvHost.port)
 			# Get RECV message
 			message = self.readMessage()
+			print("message: {}".format(message))
 			notifyHdr = message[1]
 			entInfoHdr = message[2]
 			q_id = notifyHdr.qubit_id

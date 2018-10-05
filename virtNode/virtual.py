@@ -119,9 +119,9 @@ class virtualNode(pb.Root):
 			self.myID.root = self
 			self.config = config
 
-			# Initialize list of registers we simulate locally
-			# self.simRegisters = []
+			# Set max nr of registers and virtual qubits
 			self.maxRegs = maxRegisters
+			self.maxQubits = maxQubits
 
 			# List of connections
 			self.conn = {}
@@ -133,9 +133,7 @@ class virtualNode(pb.Root):
 			# Counter for used register numbers
 			self._next_reg_num = 0
 
-			# Set up the default local register
-			# self.defaultReg = self.remote_new_register(maxQubits)
-			# self.registers = [self.remote_new_register(maxQubits)
+			# Set up the dictionary of registers
 			self.registers = {}
 
 			# Initialize the list of qubits at this node
@@ -365,7 +363,7 @@ class virtualNode(pb.Root):
 
 		yield self._unlock_reg_qubits(self._q_num_to_obj(qubitNum))
 
-	def remote_add_register(self, maxQubits=Settings.CONF_MAXQUBITS):
+	def remote_add_register(self, maxQubits=10):
 		"""
 		Adds a new register to the node..
 
@@ -416,8 +414,8 @@ class virtualNode(pb.Root):
 				raise quantumError("Maximum number of registers reached.")
 
 			self.numRegs = self.numRegs + 1
-			newReg = quantumRegister(self.myID, self.numRegs, maxQubits)
-			# self.simRegisters.append(newReg)
+			regNum=self.get_new_reg_num()
+			newReg = quantumRegister(self.myID, regNum, maxQubits)
 
 			logging.debug("VIRTUAL NODE %s: Initializing new simulated register.", self.myID.name)
 			return newReg
@@ -439,36 +437,41 @@ class virtualNode(pb.Root):
 		self.numRegs -= 1
 
 	@inlineCallbacks
-	def remote_new_qubit(self):
+	def remote_new_qubit(self, ignore_max_qubits=False):
 		"""
 		Create a new qubit in the default local register.
+		:param ignore_max_qubits: bool
+			Used to ignore the check if max virtual qubits is reached. This is used when creating EPR pairs
+			to be able to temporarily create a qubit.
 		"""
 		logging.debug("VIRTUAL NODE %s: Request to create new qubit.", self.myID.name)
 
 		try:
-			# Get a lock to assure IDs are assigned correctly
+			# Get a lock to assure IDs are assigned correctly and maxQubits is consitently checked
 			yield self._get_global_lock()
 
-			# Qubit in the simulation backend, initialized to |0>
-			simNum = self.get_sim_id()
+			if (len(self.virtQubits) >= self.maxQubits) and (not ignore_max_qubits):
+				newQubit = None
+				logging.error("VIRTUAL NODE %s: Maximum number of virtual qubits reached.", self.myID.name)
+			else:
+				# Qubit in the simulation backend, initialized to |0>
+				simNum = self.get_sim_id()
 
-			# Create a new register
-			# new_reg=self.remote_new_register(maxQubits=CONF_MAXQUBITS)
-			# self.registers.append(new_reg)
-			newReg = self.remote_add_register()
+				# Create a new register
+				newReg = self.remote_add_register()
 
-			# simQubit = simulatedQubit(self.myID, self.defaultReg, simNum)
-			simQubit = simulatedQubit(self.myID, newReg, simNum)
-			simQubit.make_fresh()
-			self.simQubits.append(simQubit)
+				# simQubit = simulatedQubit(self.myID, self.defaultReg, simNum)
+				simQubit = simulatedQubit(self.myID, newReg, simNum)
+				simQubit.make_fresh()
+				self.simQubits.append(simQubit)
 
-			# Virtual qubit
-			newNum = self.get_virtual_id()
-			newQubit = virtualQubit(self.myID, self.myID, simQubit, newNum)
-			self.virtQubits.append(newQubit)
+				# Virtual qubit
+				newNum = self.get_virtual_id()
+				newQubit = virtualQubit(self.myID, self.myID, simQubit, newNum)
+				self.virtQubits.append(newQubit)
 		except quantumError:
 			newQubit = None
-			logging.error("VIRTUAL NODE %s: Maximum number of qubits reached.", self.myID.name)
+			logging.error("VIRTUAL NODE %s: Max qubits for register reached.", self.myID.name)
 		finally:
 			self._release_global_lock()
 
@@ -485,22 +488,27 @@ class virtualNode(pb.Root):
 			raise quantumError("Can only create qubits registers simulated locally by this node.")
 
 		try:
-			# Get a lock to assure IDs are assigned correctly
+			# Get a lock to assure IDs are assigned correctly and maxQubits is consitently checked
 			yield self._get_global_lock()
 
-			# Qubit in the local simulation backend, initialized to |0>
-			simNum = self.get_sim_id()
-			simQubit = simulatedQubit(self.myID, reg, simNum)
-			simQubit.make_fresh()
-			self.simQubits.append(simQubit)
+			if len(self.virtQubits) >= self.maxQubits:
+				newQubit = None
+				logging.error("VIRTUAL NODE %s: Maximum number of virtual qubits reached.", self.myID.name)
 
-			# Virtual qubit
-			newNum = self.get_virtual_id()
-			newQubit = virtualQubit(self.myID, self.myID, simQubit, newNum)
-			self.virtQubits.append(newQubit)
+			else:
+				# Qubit in the local simulation backend, initialized to |0>
+				simNum = self.get_sim_id()
+				simQubit = simulatedQubit(self.myID, reg, simNum)
+				simQubit.make_fresh()
+				self.simQubits.append(simQubit)
+
+				# Virtual qubit
+				newNum = self.get_virtual_id()
+				newQubit = virtualQubit(self.myID, self.myID, simQubit, newNum)
+				self.virtQubits.append(newQubit)
 		except quantumError:  # if no more qubits
 			newQubit = None
-			logging.error("VIRTUAL NODE %s: Maximum number of qubits reached.", self.myID.name)
+			logging.error("VIRTUAL NODE %s: Max qubits for register reached.", self.myID.name)
 		except Exception as e:
 			raise e
 		finally:
@@ -519,13 +527,20 @@ class virtualNode(pb.Root):
 		app_id		application asking to have this qubit delivered
 		remote_app_id	application ID to deliver the qubit to
 		"""
+		def raise_error(err):
+			raise quantumError("Max virtual qubits reached")
 
 		logging.debug("VIRTUAL NODE %s: request to send qubit %d to %s", self.myID.name, num, targetName)
 
 		virtQubit = self.remote_get_virtual_ref(num)
 
 		oldVirtNum = num
-		newVirtNum = yield self.remote_send_qubit(virtQubit, targetName)
+		try:
+			defer = self.remote_send_qubit(virtQubit, targetName)
+			defer.addErrback(raise_error)
+			newVirtNum = yield defer
+		except Exception as err:
+			raise err
 
 		# Lookup host ID of node
 		try:
@@ -586,11 +601,18 @@ class virtualNode(pb.Root):
 		remote_app_id	application ID to deliver the qubit to
 		entInfo		entanglement information
 		"""
+		def raise_error(err):
+			raise quantumError("Max virtual qubits reached")
 
 		qubit = self.remote_get_virtual_ref(num)
 
 		oldVirtNum = num
-		newVirtNum = yield self.remote_send_qubit(qubit, targetName)
+		try:
+			defer = self.remote_send_qubit(qubit, targetName)
+			defer.addErrback(raise_error)
+			newVirtNum = yield defer
+		except Exception as err:
+			raise err
 
 		# Lookup host ID of node
 		try:
@@ -655,6 +677,11 @@ class virtualNode(pb.Root):
 		qubit		virtual qubit to be sent
 		targetName	target ndoe to place qubit at (host object)
 		"""
+		def raise_error(err):
+			print("raise err in remote send qubit")
+			print(err)
+			print(type(err))
+			raise quantumError("Max virtual qubits reached")
 
 		logging.debug("VIRTUAL NODE %s: Request to send qubit sim Num %d to %s.", self.myID.name, qubit.num, targetName)
 		if qubit.active != 1:
@@ -680,7 +707,13 @@ class virtualNode(pb.Root):
 				logging.debug("VIRTUAL NODE %s: Sending qubit simulated locally", self.myID.name)
 				# We are both the virtual as well as the simulating node
 				# Pass a reference to our locally simulated qubit object to the remote node
-				newNum = yield remoteNode.root.callRemote("add_qubit", self.myID.name, qubit.simQubit)
+				try:
+					defer = remoteNode.root.callRemote("add_qubit", self.myID.name, qubit.simQubit)
+					defer.addErrback(raise_error)
+					newNum = yield defer
+				except Exception as err:
+					print("exception from adding")
+					raise err
 			else:
 				logging.debug("VIRTUAL NODE %s: Sending qubit simulated remotely at %s", self.myID.name,
 							  qubit.simNode.name)
@@ -688,7 +721,12 @@ class virtualNode(pb.Root):
 				# the actual simulating node to do the transfer for us. Due to the pecularities of Twisted PB
 				# we need to do this by the simulated qubit number
 				simQubitNum = yield qubit.simQubit.callRemote("get_sim_number")
-				newNum = yield qubit.simNode.root.callRemote("transfer_qubit", simQubitNum, targetName)
+				try:
+					defer = qubit.simNode.root.callRemote("transfer_qubit", simQubitNum, targetName)
+					defer.addErrback(raise_error)
+					newNum = yield defer
+				except Exception as err:
+					raise err
 
 			# We gave it away so mark as inactive
 			qubit.active = 0
@@ -712,6 +750,8 @@ class virtualNode(pb.Root):
 		simQubitNum	simulated qubit number to be sent
 		targetName	target node to place qubit at (host object)
 		"""
+		def raise_error(err):
+			raise quantumError("Max virtual qubits reached")
 
 		logging.debug("VIRTUAL NODE %s: Request to transfer qubit to %s.", self.myID.name, targetName)
 
@@ -730,9 +770,19 @@ class virtualNode(pb.Root):
 
 		# Check if we are both the destination node and simulating node
 		if self.myID.name == targetName:
-			newNum = yield remoteNode.root.remote_add_qubit(self.myID.name, simQubit)
+			try:
+				defer = remoteNode.root.remote_add_qubit(self.myID.name, simQubit)
+				defer.addErrback(raise_error)
+				newNum = yield defer
+			except Exception as err:
+				raise err
 		else:
-			newNum = yield remoteNode.root.callRemote("add_qubit", self.myID.name, simQubit)
+			try:
+				defer = remoteNode.root.callRemote("add_qubit", self.myID.name, simQubit)
+				defer.addErrback(raise_error)
+				newNum = yield defer
+			except Exception as err:
+				raise err
 
 		return newNum
 
@@ -761,6 +811,9 @@ class virtualNode(pb.Root):
 			# Get a lock to make sure IDs are assigned correctly
 			self._get_global_lock()
 
+			if len(self.virtQubits) >= self.maxQubits:
+				raise quantumError("Max virtual qubits reached")
+
 			# Generate a new virtual qubit object for the qubit now at this node
 			newNum = self.get_virtual_id()
 			newQubit = virtualQubit(self.myID, nb, simQubit, newNum)
@@ -768,6 +821,7 @@ class virtualNode(pb.Root):
 			# Add to local list
 			self.virtQubits.append(newQubit)
 		finally:
+			print("finally in adding")
 			self._release_global_lock()
 
 		return newNum

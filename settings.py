@@ -73,10 +73,10 @@ class Settings:
 			_config['BACKEND'] = {}
 		backend = _config['BACKEND']
 
-		if "MaxQubits" in backend:
-			cls.CONF_MAXQUBITS = int(backend['MaxQubits'])
+		if "MaxQubits_Per_Node" in backend:
+			cls.CONF_MAXQUBITS = int(backend['MaxQubits_Per_Node'])
 		else:
-			_config['BACKEND']['MaxQubits'] = str(cls.CONF_MAXQUBITS)
+			_config['BACKEND']['MaxQubits_Per_Node'] = str(cls.CONF_MAXQUBITS)
 			config_changed = True
 
 		if "MaxRegisters" in backend:
