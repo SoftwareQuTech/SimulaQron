@@ -112,7 +112,10 @@ class CQCFactory(Factory):
 			return
 		else:
 			# Get the absolute path to the file
-			abs_path = os.environ["NETSIM"] + "/" + topology_file
+			if os.path.isabs(topology_file):
+				abs_path = topology_file
+			else:
+				abs_path = os.environ["NETSIM"] + "/" + topology_file
 			try:
 				with open(abs_path, 'r') as top_file:
 					try:

@@ -548,7 +548,7 @@ class virtualNode(pb.Root):
 		if not (to_app_id in self.cqcRecv):
 			self.cqcRecv[to_app_id] = deque([])
 
-		self.cqcRecv[to_app_id].append(QubitCQC(fromName, self.myID.name, from_app_id, to_app_id, new_virt_num));
+		self.cqcRecv[to_app_id].append(QubitCQC(fromName, self.myID.name, from_app_id, to_app_id, new_virt_num))
 		logging.debug("VIRTUAL NODE %s: Added a qubit for app id %d to recv list", self.myID.name, to_app_id)
 
 	def remote_cqc_get_recv(self, to_app_id):
@@ -567,7 +567,7 @@ class virtualNode(pb.Root):
 			return None
 
 		# Retrieve the first element on that list (first in, first out)
-		qc = qQueue.popleft();
+		qc = qQueue.popleft()
 		if not qc:
 			return None
 
@@ -615,7 +615,7 @@ class virtualNode(pb.Root):
 			self.cqcRecvEpr[to_app_id] = deque([])
 
 		self.cqcRecvEpr[to_app_id].append(
-			QubitCQC(fromName, self.myID.name, from_app_id, to_app_id, new_virt_num, rawEntInfo=rawEntInfo));
+			QubitCQC(fromName, self.myID.name, from_app_id, to_app_id, new_virt_num, rawEntInfo=rawEntInfo))
 		logging.debug("VIRTUAL NODE %s: Added a qubit for app id %d to epr list", self.myID.name, to_app_id)
 
 	def remote_cqc_get_epr_recv(self, to_app_id):
@@ -635,7 +635,7 @@ class virtualNode(pb.Root):
 				return None
 
 			# Retrieve the first element on that list (first in, first out)
-			qc = qQueue.popleft();
+			qc = qQueue.popleft()
 			if not qc:
 				return None
 

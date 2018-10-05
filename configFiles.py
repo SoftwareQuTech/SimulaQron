@@ -32,10 +32,10 @@
 # To setup a network with the nodes Alice, Bob and Charlie, simply type:
 # 	'python configFiles.py --nodes "Alice Bob Charlie"'
 # If you simply want a network with 10 nodes you can type:
-#	'python configFiles.py --nrnodes 10
+#    'python configFiles.py --nrnodes 10
 # Node names will then be 'Node0' until 'Node9'.
 # If you want a specific topology you can also add:
-#	'python configFiles.py --nrnodes 10 --topology "ring".
+#    'python configFiles.py --nrnodes 10 --topology "ring".
 # This will make changes to the files 'config/{virtual,cqc,app}Nodes.cfg' and 'config/topology.json'.
 # Port numbers will start at 8801 and depend on the number of nodes used.
 
@@ -63,9 +63,9 @@ def construct_node_configs(nodes):
 	netsim_path = os.environ['NETSIM'] + '/'
 
 	# Get path to configuration files
-	conf_files = [Settings.CONF_VIRTUALNODES_FILE,
-				  Settings.CONF_CQCNODES_FILE,
-				  Settings.CONF_APPNODES_FILE]
+	conf_files = [netsim_path + "config/virtualNodes.cfg",
+				  netsim_path + "config/cqcNodes.cfg",
+				  netsim_path + "config/appNodes.cfg"]
 
 	# File for just a simple list of the nodes
 	node_file = netsim_path + "config/Nodes.cfg"
@@ -89,6 +89,11 @@ def construct_node_configs(nodes):
 		for j in range(nrNodes):
 			f.write("{}\n".format(nodes[j]))
 
+	Settings.set_setting("CONFIG", "appnodes_file", "config/appNodes.cfg")
+	Settings.set_setting("CONFIG", "cqcnodes_file", "config/cqcNodes.cfg")
+	Settings.set_setting("CONFIG", "virtualnodes_file", "config/virtualNodes.cfg")
+	Settings.set_setting("CONFIG", "nodes_file", "config/Nodes.cfg")
+
 
 def construct_topology_config(topology, nodes, save_fig=True):
 	"""
@@ -107,13 +112,13 @@ def construct_topology_config(topology, nodes, save_fig=True):
 		if topology == "complete":
 			adjacency_dct = {}
 			for i, node in enumerate(nodes):
-				adjacency_dct[node] = nodes[:i] + nodes[i+1:]
+				adjacency_dct[node] = nodes[:i] + nodes[i + 1:]
 
 		elif topology == "ring":
 			adjacency_dct = {}
 			nn = len(nodes)
 			for i, node in enumerate(nodes):
-				adjacency_dct[node] = [nodes[(i-1) % nn], nodes[(i+1) % nn]]
+				adjacency_dct[node] = [nodes[(i - 1) % nn], nodes[(i + 1) % nn]]
 
 		elif topology == "path":
 			adjacency_dct = {}
@@ -124,7 +129,7 @@ def construct_topology_config(topology, nodes, save_fig=True):
 				elif i == (nn - 1):
 					adjacency_dct[node] = [nodes[i - 1]]
 				else:
-					adjacency_dct[node] = [nodes[(i-1) % nn], nodes[(i+1) % nn]]
+					adjacency_dct[node] = [nodes[(i - 1) % nn], nodes[(i + 1) % nn]]
 
 		elif topology == 'random_tree':
 			adjacency_dct = get_random_tree(nodes)
@@ -133,11 +138,13 @@ def construct_topology_config(topology, nodes, save_fig=True):
 			try:
 				nr_edges = int(topology[17:])
 			except ValueError:
-				raise ValueError("When specifying a random connected graph use the format 'random_connected_{nr_edges}',"
-								"where 'nr_edges' is the number of edges of the graph.")
+				raise ValueError(
+					"When specifying a random connected graph use the format 'random_connected_{nr_edges}',"
+					"where 'nr_edges' is the number of edges of the graph.")
 			except IndexError:
-				raise ValueError("When specifying a random connected graph use the format 'random_connected_{nr_edges}',"
-								 "where 'nr_edges' is the number of edges of the graph.")
+				raise ValueError(
+					"When specifying a random connected graph use the format 'random_connected_{nr_edges}',"
+					"where 'nr_edges' is the number of edges of the graph.")
 			adjacency_dct = get_random_connected(nodes, nr_edges)
 
 		else:
@@ -146,16 +153,15 @@ def construct_topology_config(topology, nodes, save_fig=True):
 		if save_fig:
 			network = nx.from_dict_of_lists(adjacency_dct)
 			nx.draw(network, with_labels=True)
-			plt.savefig(os.environ["NETSIM"] + "/config/topology.png")
+			plt.savefig(netsim_path + "config/topology.png")
 
-
-		topology_file = Settings.CONF_TOPOLOGY_CONFIG_FILE
+		topology_file = netsim_path + "config/topology.json"
 		with open(topology_file, 'w') as top_file:
 			json.dump(adjacency_dct, top_file)
 
-		Settings.set_setting("BACKEND", "topology_file", "config/topology.json")
+		Settings.set_setting("CONFIG", "topology_file", "/config/topology.json")
 	else:
-		Settings.set_setting("BACKEND", "topology_file", "")
+		Settings.set_setting("CONFIG", "topology_file", "")
 
 
 def get_random_tree(nodes):
@@ -227,7 +233,7 @@ def parse_input():
 
 	# Get the pre set node names
 	if args.nodes:
-		nodes=args.nodes.split(' ')
+		nodes = args.nodes.split(' ')
 	else:
 		nodes = []
 

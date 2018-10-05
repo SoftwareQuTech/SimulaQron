@@ -4,7 +4,7 @@ ps aux | grep python | grep setup | awk {'print $2'} | xargs kill -9
 ps aux | grep python | grep start | awk {'print $2'} | xargs kill -9
 
 # Read in some settings
-nodes_file=$(sed -nr "/^\[CONFIG\]/ { :l /^nodes_file[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $NETSIM/config/settings.ini)
+nodes_file=$NETSIM/$(sed -nr "/^\[CONFIG\]/ { :l /^nodes_file[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $NETSIM/config/settings.ini)
 if [ -z "$nodes_file" ]
 then
 nodes_file="$NETSIM/config/Nodes.cfg"
@@ -20,7 +20,7 @@ then
             python "$NETSIM/run/startCQC.py" "$name" &
         done < ${nodes_file}
     else
-        python "$NETSIM/configFiles.py" --nd "Alice Bob Charlie David Eve"
+        python "$NETSIM/configFiles.py" --nodes "Alice Bob Charlie David Eve"
 
         # We call this script again, without arguments, to use the newly created config-files
         sh "$NETSIM/run/startAll.sh"

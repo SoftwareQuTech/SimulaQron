@@ -119,6 +119,9 @@ class CQCConnection:
 		if cqcFile is None:
 			self.cqcFile = Settings.CONF_CQCNODES_FILE
 
+		if not os.path.isabs(self.cqcFile):
+			self.cqcFile = os.environ["NETSIM"] + "/" + self.cqcFile
+
 		# Read configuration files for the cqc network
 		self._cqcNet = networkConfig(self.cqcFile)
 
@@ -134,7 +137,7 @@ class CQCConnection:
 		self._s = None
 		while True:
 			try:
-				logging.debug("App {} : Trying to connect to CQC server".format(self.name))
+				logging.debug("App {} : Trying to connect to CQC server on port {}".format(self.name, myHost.port))
 
 				self._s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
 				self._s.connect((myIP, myHost.port))

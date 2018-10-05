@@ -11,6 +11,7 @@ from twisted.internet.error import ConnectionRefusedError, CannotListenError
 
 
 def setup_CQC_server(names, hosts, factories):
+	print("HMM")
 	logging.debug("LOCAL: Starting CQC Log server.")
 	for myName in names:
 		cqc_factory = factories[myName]
@@ -20,6 +21,7 @@ def setup_CQC_server(names, hosts, factories):
 			myHost = cqc_factory.host
 			myHost.root = cqc_factory
 			myHost.factory = cqc_factory
+			print(myName, " listening to port", myHost.port)
 			reactor.listenTCP(myHost.port, myHost.factory)
 		except CannotListenError as e:
 			logging.error("LOCAL {}: CQC server address ({}) is already in use.".format(myName, myHost.port))
@@ -34,7 +36,7 @@ def setup_CQC_server(names, hosts, factories):
 
 def main(names):
 	# This file defines the network of CQC servers interfacing to virtual quantum nodes
-	cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
+	cqcFile = Settings.CONF_CQCNODES_FILE
 
 	# Read configuration files for the virtual quantum, as well as the classical network
 	cqcNet = networkConfig(cqcFile)
@@ -62,7 +64,7 @@ logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=Settin
 
 names = sys.argv[1:]
 if not names:
-	nodeFile = os.environ.get('NETSIM') + "/config/Nodes.cfg"
+	nodeFile = Settings.CONF_NODES_FILE
 	with open(nodeFile) as file:
 		for line in file:
 			if line:

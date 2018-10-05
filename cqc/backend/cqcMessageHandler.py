@@ -646,6 +646,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
         # Send instruction to transfer the qubit
         try:
+            print(649, cqc_header.app_id, xtra.remote_app_id)
             yield self.factory.virtRoot.callRemote("cqc_send_qubit", virt_num, target_name, cqc_header.app_id,
                                                    xtra.remote_app_id)
         except Exception as e:

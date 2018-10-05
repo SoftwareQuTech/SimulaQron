@@ -50,22 +50,19 @@ class Settings:
 	CONF_LOGGING_LEVEL_BACKEND = logging.WARNING
 	CONF_LOGGING_LEVEL_FRONTEND = logging.WARNING
 	CONF_BACKEND_HANDLER = SimulaqronCQCHandler
-	CONF_TOPOLOGY_FILE = ""
 	CONF_NOISY_QUBITS = False
 	CONF_T1 = 1
 
 	_default_appnodes_file = "config/appNodes.cfg"
-	_default_classicalnet_file = "config/classicalNet.cfg"
 	_default_cqcnodes_file = "config/cqcNodes.cfg"
 	_default_nodes_file = "config/Nodes.cfg"
 	_default_topology_config_file = "config/topology.json"
 	_default_virtualnodes_file = "config/virtualNodes.cfg"
 	
 	CONF_APPNODES_FILE = os.environ['NETSIM'] + '/' + _default_appnodes_file
-	CONF_CLASSICALNET_FILE = os.environ['NETSIM'] + '/' + _default_classicalnet_file
 	CONF_CQCNODES_FILE = os.environ['NETSIM'] + '/' + _default_cqcnodes_file
 	CONF_NODES_FILE = os.environ['NETSIM'] + '/' + _default_nodes_file
-	CONF_TOPOLOGY_CONFIG_FILE = os.environ['NETSIM'] + '/' + _default_topology_config_file
+	CONF_TOPOLOGY_FILE = os.environ['NETSIM'] + '/' + _default_topology_config_file
 	CONF_VIRTUALNODES_FILE = os.environ['NETSIM'] + '/' + _default_virtualnodes_file
 
 	@classmethod
@@ -130,12 +127,6 @@ class Settings:
 		else:  # default simulaqron  (elif backend_handler.lower() == "simulaqron")
 			cls.CONF_BACKEND_HANDLER = SimulaqronCQCHandler
 
-		if "Topology_File" in backend:
-			cls.CONF_TOPOLOGY_FILE = backend['Topology_File']
-		else:
-			backend['Topology_File'] = cls.CONF_TOPOLOGY_FILE
-			config_changed = True
-
 		if "noisy_qubits" in backend:
 			cls.CONF_NOISY_QUBITS = backend['noisy_qubits'] == 'True'
 		else:
@@ -154,22 +145,34 @@ class Settings:
 		node_configs = _config["CONFIG"]
 
 		if "appnodes_file" in node_configs and node_configs["appnodes_file"] != "":
-			cls.CONF_APPNODES_FILE = node_configs["appnodes_file"]
-
-		if "classicalnet_file" in node_configs and node_configs["classicalnet_file"] != "":
-			cls.CONF_CLASSICALNET_FILE = node_configs["classicalnet_file"]
+			file = node_configs["appnodes_file"]
+			if not os.path.isabs(file):
+				file = os.environ["NETSIM"] + "/" + file
+			cls.CONF_APPNODES_FILE = file
 
 		if "virtualnodes_file" in node_configs and node_configs["virtualnodes_file"] != "":
-			cls.CONF_VIRTUALNODES_FILE = node_configs["virtualnodes_file"]
+			file = node_configs["virtualnodes_file"]
+			if not os.path.isabs(file):
+				file = os.environ["NETSIM"] + "/" + file
+			cls.CONF_VIRTUALNODES_FILE = file
 
 		if "nodes_file" in node_configs and node_configs["nodes_file"] != "":
-			cls.CONF_NODES_FILE = node_configs["nodes_file"]
+			file = node_configs["nodes_file"]
+			if not os.path.isabs(file):
+				file = os.environ["NETSIM"] + "/" + file
+			cls.CONF_NODES_FILE = file
 
 		if "topology_file" in node_configs and node_configs["topology_file"] != "":
-			cls.CONF_TOPOLOGY_CONFIG_FILE = node_configs["topology_file"]
+			file = node_configs["topology_file"]
+			if not os.path.isabs(file):
+				file = os.environ["NETSIM"] + "/" + file
+			cls.CONF_TOPOLOGY_FILE = file
 
 		if "cqcnodes_file" in node_configs and node_configs["cqcnodes_file"] != "":
-			cls.CONF_CQCNODES_FILE = node_configs["cqcnodes_file"]
+			file = node_configs["cqcnodes_file"]
+			if not os.path.isabs(file):
+				file = os.environ["NETSIM"] + "/" + file
+			cls.CONF_CQCNODES_FILE = file
 
 		# Front end stuff
 		if "FRONTEND" not in _config:
