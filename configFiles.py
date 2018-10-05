@@ -63,9 +63,9 @@ def construct_node_configs(nodes):
 	netsim_path = os.environ['NETSIM'] + '/'
 
 	# Get path to configuration files
-	conf_files = [netsim_path + "config/virtualNodes.cfg",
-				  netsim_path + "config/cqcNodes.cfg",
-				  netsim_path + "config/appNodes.cfg"]
+	conf_files = [Settings.CONF_VIRTUALNODES_FILE,
+				  Settings.CONF_CQCNODES_FILE,
+				  Settings.CONF_APPNODES_FILE]
 
 	# File for just a simple list of the nodes
 	node_file = netsim_path + "config/Nodes.cfg"
@@ -149,7 +149,7 @@ def construct_topology_config(topology, nodes, save_fig=True):
 			plt.savefig(os.environ["NETSIM"] + "/config/topology.png")
 
 
-		topology_file = os.environ["NETSIM"] + "/config/topology.json"
+		topology_file = Settings.CONF_TOPOLOGY_CONFIG_FILE
 		with open(topology_file, 'w') as top_file:
 			json.dump(adjacency_dct, top_file)
 

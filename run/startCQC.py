@@ -115,10 +115,10 @@ def setup_CQC_server(myName, cqc_factory):
 
 def main(myName):
 	# This file defines the network of virtual quantum nodes
-	virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
+	virtualFile = Settings.CONF_VIRTUALNODES_FILE
 
 	# This file defines the network of CQC servers interfacing to virtual quantum nodes
-	cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
+	cqcFile = Settings.CONF_CQCNODES_FILE
 
 	# Read configuration files for the virtual quantum, as well as the classical network
 	virtualNet = networkConfig(virtualFile)

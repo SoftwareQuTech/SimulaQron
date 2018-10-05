@@ -54,6 +54,20 @@ class Settings:
 	CONF_NOISY_QUBITS = False
 	CONF_T1 = 1
 
+	_default_appnodes_file = "config/appNodes.cfg"
+	_default_classicalnet_file = "config/classicalNet.cfg"
+	_default_cqcnodes_file = "config/cqcNodes.cfg"
+	_default_nodes_file = "config/Nodes.cfg"
+	_default_topology_config_file = "config/topology.json"
+	_default_virtualnodes_file = "config/virtualNodes.cfg"
+	
+	CONF_APPNODES_FILE = os.environ['NETSIM'] + '/' + _default_appnodes_file
+	CONF_CLASSICALNET_FILE = os.environ['NETSIM'] + '/' + _default_classicalnet_file
+	CONF_CQCNODES_FILE = os.environ['NETSIM'] + '/' + _default_cqcnodes_file
+	CONF_NODES_FILE = os.environ['NETSIM'] + '/' + _default_nodes_file
+	CONF_TOPOLOGY_CONFIG_FILE = os.environ['NETSIM'] + '/' + _default_topology_config_file
+	CONF_VIRTUALNODES_FILE = os.environ['NETSIM'] + '/' + _default_virtualnodes_file
+
 	@classmethod
 	def init_settings(cls):
 
@@ -113,7 +127,7 @@ class Settings:
 
 		if _backend_handler.lower() == 'log':
 			cls.CONF_BACKEND_HANDLER = CQCLogMessageHandler
-		else:  # default simulqron  (elif backend_handler.lower() == "simulqron")
+		else:  # default simulaqron  (elif backend_handler.lower() == "simulaqron")
 			cls.CONF_BACKEND_HANDLER = SimulaqronCQCHandler
 
 		if "Topology_File" in backend:
@@ -134,6 +148,30 @@ class Settings:
 			backend['T1'] = str(cls.CONF_T1)
 			config_changed = True
 
+		# config files for connecting nodes
+		if "CONFIG" not in _config:
+			_config["CONFIG"] = {}
+		node_configs = _config["CONFIG"]
+
+		if "appnodes_file" in node_configs and node_configs["appnodes_file"] != "":
+			cls.CONF_APPNODES_FILE = node_configs["appnodes_file"]
+
+		if "classicalnet_file" in node_configs and node_configs["classicalnet_file"] != "":
+			cls.CONF_CLASSICALNET_FILE = node_configs["classicalnet_file"]
+
+		if "virtualnodes_file" in node_configs and node_configs["virtualnodes_file"] != "":
+			cls.CONF_VIRTUALNODES_FILE = node_configs["virtualnodes_file"]
+
+		if "nodes_file" in node_configs and node_configs["nodes_file"] != "":
+			cls.CONF_NODES_FILE = node_configs["nodes_file"]
+
+		if "topology_file" in node_configs and node_configs["topology_file"] != "":
+			cls.CONF_TOPOLOGY_CONFIG_FILE = node_configs["topology_file"]
+
+		if "cqcnodes_file" in node_configs and node_configs["cqcnodes_file"] != "":
+			cls.CONF_CQCNODES_FILE = node_configs["cqcnodes_file"]
+
+		# Front end stuff
 		if "FRONTEND" not in _config:
 			_config['FRONTEND'] = {}
 		frontend = _config['FRONTEND']

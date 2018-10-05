@@ -3,16 +3,22 @@ ps aux | grep python | grep Test | awk {'print $2'} | xargs kill -9
 ps aux | grep python | grep setup | awk {'print $2'} | xargs kill -9
 ps aux | grep python | grep start | awk {'print $2'} | xargs kill -9
 
+# Read in some settings
+nodes_file=$(sed -nr "/^\[CONFIG\]/ { :l /^nodes_file[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $NETSIM/config/settings.ini)
+if [ -z "$nodes_file" ]
+then
+nodes_file="$NETSIM/config/Nodes.cfg"
+fi
 # if no arguments were given we take the list of current Nodes
 if [ "$#" -eq 0 ] ;
 then
     # check if the file with current nodes exist. Otherwise use Alice - Eve
-    if [ -f "$NETSIM/config/Nodes.cfg" ]
+    if [ -f ${nodes_file} ]
     then
         while IFS='' read -r name; do
             python "$NETSIM/run/startNode.py" "$name" &
             python "$NETSIM/run/startCQC.py" "$name" &
-        done < "$NETSIM/config/Nodes.cfg"
+        done < ${nodes_file}
     else
         python "$NETSIM/configFiles.py" --nd "Alice Bob Charlie David Eve"
 

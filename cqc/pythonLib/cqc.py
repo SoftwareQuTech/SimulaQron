@@ -117,7 +117,7 @@ class CQCConnection:
 
 		# This file defines the network of CQC servers interfacing to virtual quantum nodes
 		if cqcFile is None:
-			self.cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
+			self.cqcFile = Settings.CONF_CQCNODES_FILE
 
 		# Read configuration files for the cqc network
 		self._cqcNet = networkConfig(self.cqcFile)
@@ -150,7 +150,7 @@ class CQCConnection:
 
 		# This file defines the application network
 		if appFile == None:
-			self.appFile = os.environ.get('NETSIM') + "/config/appNodes.cfg"
+			self.appFile = Settings.CONF_APPNODES_FILE
 
 		# Read configuration files for the application network
 		self._appNet = networkConfig(self.appFile)

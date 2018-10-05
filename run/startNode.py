@@ -35,7 +35,7 @@ logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=Settin
 # args.hostName instead of sys.argv[1] ?
 logging.debug("Starting VIRTUAL NODE %s", sys.argv[1])
 
-virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
+virtualFile = Settings.CONF_VIRTUALNODES_FILE
 be = backEnd(sys.argv[1], virtualFile)
 
 node = be.start(maxQubits=Settings.CONF_MAXQUBITS, maxRegisters=Settings.CONF_MAXREGS)
