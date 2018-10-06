@@ -170,10 +170,11 @@ class CQCConnection:
 		# This flag is used to check if CQCConnection is opened using a 'with' statement.
 		# Otherwise an deprecation warning is printed when instantiating qubits.
 		self._opened_with_with = True
+		return self
 
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		# All qubits should now be released
-		self.release_all_qubits()
+		self.close(release_qubits=True)
 
 	def __str__(self):
 		return "Socket to cqc server '{}'".format(self.name)
@@ -756,7 +757,7 @@ class CQCConnection:
 		if cqc_err == CQC_ERR_GENERAL:
 			raise CQCGeneralError("General error")
 		if cqc_err == CQC_ERR_NOQUBIT:
-			raise CQCNoQubitError("Qubit not available or no more qubits available")
+			raise CQCNoQubitError("No more qubits available")
 		if cqc_err == CQC_ERR_UNSUPP:
 			raise CQCUnsuppError("Sequence not supported")
 		if cqc_err == CQC_ERR_TIMEOUT:
