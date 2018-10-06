@@ -145,6 +145,6 @@ def main():
 	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.WARNING)
 main()
 
