@@ -1162,7 +1162,6 @@ class CQCConnection:
 				return False
 		return True
 
-
 class ProgressBar:
 	def __init__(self, maxitr):
 		self.maxitr = maxitr
