@@ -1,13 +1,11 @@
 from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
 
-cqc = CQCConnection("Alice")
 for _ in range(100):
 
+	with CQCConnection("Alice") as cqc:
 
-	q = qubit(cqc)
+		q = qubit(cqc)
 
-	q.H()
-
-	# m = q.measure()
+	# q.H()
 	#
-	# print(m)
+	# q.measure()
