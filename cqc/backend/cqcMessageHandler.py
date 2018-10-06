@@ -35,6 +35,7 @@ from SimulaQron.cqc.backend.entInfoHeader import *
 from SimulaQron.local.setup import *
 from SimulaQron.virtNode.crudeSimulator import *
 from twisted.internet.defer import DeferredLock
+from twisted.spread.pb import RemoteError
 
 """
 Abstract class. Classes that inherit this class define how to handle incoming cqc messages.
@@ -111,6 +112,20 @@ class CQCMessageHandler(ABC):
 		self.name = factory.name
 		self.return_messages = []  # List of all cqc messages to return
 
+	def get_error_class(self, remote_err):
+		"""
+		This is a function to get the error class of a remote thrown error when using callRemote.
+		:param remote_err: :obj:`twisted.spread.pb.RemoteError`
+		:return: class
+		"""
+		# Get name of remote error
+		error_name = remote_err.remoteType.split(b'.')[-1].decode()
+
+		# Get class of remote error
+		error_class = eval(error_name)
+
+		return error_class
+
 	@inlineCallbacks
 	def handle_cqc_message(self, header, message):
 		"""
@@ -125,10 +140,13 @@ class CQCMessageHandler(ABC):
 					logging.debug("CQC %s: Command successful, sent done.", self.name)
 					self.return_messages.append(self.create_return_message(header.app_id, CQC_TP_DONE))
 			except UnknownQubitError as e:
-				logging.error(str(e))
-				self.return_messages.append(self.create_return_message(header.app_id, CQC_ERR_NOQUBIT))
+				logging.error("CQC {}: Couldn't find qubit with given ID".format(self.name))
+				self.return_messages.append(self.create_return_message(header.app_id, CQC_ERR_UNKNOWN))
+			except Exception as err:
+				logging.error("CQC {}: Got the following unexpected error when handling CQC message: {}".format(self.name, err))
+				self.return_messages.append(self.create_return_message(header.app_id, CQC_ERR_GENERAL))
 		else:
-			logging.error("CQC %s: Cound not find cqc type %d in handlers.", self.name, header.yp)
+			logging.error("CQC %s: Could not find cqc type %d in handlers.", self.name, header.yp)
 			self.return_messages.append(self.create_return_message(header.app_id, CQC_ERR_UNSUPP))
 
 	def retrieve_return_messages(self):
@@ -181,10 +199,11 @@ class CQCMessageHandler(ABC):
 		"""
 		logging.debug("CQC %s: Command received", self.name)
 		# Run the entire command list, incl. actions after completion which here we will do instantly
-		res = self._process_command(header, header.length, data)
-		assert isinstance(res, Deferred)
-		res.addErrback(print_error)
-		success, should_notify = yield res
+		try:
+			success, should_notify = yield self._process_command(header, header.length, data)
+		except Exception as err:
+			print_error(err)
+			return False
 		return success and should_notify
 
 	@inlineCallbacks
@@ -222,10 +241,11 @@ class CQCMessageHandler(ABC):
 				msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP)
 				self.return_messages.append(msg)
 				return False, 0
-			succ = self.commandHandlers[cmd.instr](cqc_header, cmd, xtra)
-			if isinstance(succ, Deferred):
-				succ.addErrback(print_error)
-				succ = yield succ
+			try:
+				succ = yield self.commandHandlers[cmd.instr](cqc_header, cmd, xtra)
+			except Exception as err:
+				logging.error("CQC {}: Got the following unexpected error when process command {}: {}".format(self.name, cmd.instr, err))
+				return False, 0
 			if succ is False:  # only if it explicitly is false, if succ is None then we assume it went fine
 				return False, 0
 
@@ -241,8 +261,9 @@ class CQCMessageHandler(ABC):
 					(succ, retNotify) = yield self._process_command(cqc_header, sequence_header.cmd_length,
 																	data[newl:newl + sequence_header.cmd_length],
 																	is_locked=True)
-				except Exception as e:
-					raise e
+				except Exception as err:
+					logging.error("CQC {}: Got the following unexpected error when process commands: {}".format(self.name, err))
+					return False, 0
 
 				should_notify = (should_notify or retNotify)
 				if not succ:
@@ -278,8 +299,10 @@ class CQCMessageHandler(ABC):
 		for _ in range(num_iter):
 			try:
 				succ, _ = yield self._process_command(header, header.length - fact_l, data[fact_l:], block_factory)
-			except Exception as e:
-				raise e
+			except Exception as err:
+				logging.error("CQC {}: Got the following unexpected error when processing factory: {}".format(self.name, err))
+				self.return_messages.append(self.create_return_message(header.app_id, CQC_ERR_GENERAL))
+				return False
 
 			all_succ = (all_succ and succ)
 		if block_factory:
@@ -444,37 +467,67 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		"""
 		Apply X Gate
 		"""
-		return self.apply_single_qubit_gate(cqc_header, cmd.qubit_id, "apply_X")
+		try:
+			return self.apply_single_qubit_gate(cqc_header, cmd.qubit_id, "apply_X")
+		except Exception as err:
+			logging.error("Following error occurred when trying to apply a X gate to qubit {}: Error: {}".format(cmd.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 	def cmd_y(self, cqc_header, cmd, xtra):
 		"""
 		Apply Y Gate
 		"""
-		return self.apply_single_qubit_gate(cqc_header, cmd.qubit_id, "apply_Y")
+		try:
+			return self.apply_single_qubit_gate(cqc_header, cmd.qubit_id, "apply_Y")
+		except Exception as err:
+			logging.error("Following error occurred when trying to apply a Y gate to qubit {}: Error: {}".format(cmd.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 	def cmd_z(self, cqc_header, cmd, xtra):
 		"""
 		Apply Z Gate
 		"""
-		return self.apply_single_qubit_gate(cqc_header, cmd.qubit_id, "apply_Z")
+		try:
+			return self.apply_single_qubit_gate(cqc_header, cmd.qubit_id, "apply_Z")
+		except Exception as err:
+			logging.error("Following error occurred when trying to apply a Z gate to qubit {}: Error: {}".format(cmd.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 	def cmd_t(self, cqc_header, cmd, xtra):
 		"""
 		Apply T Gate
 		"""
-		return self.apply_single_qubit_gate(cqc_header, cmd.qubit_id, "apply_T")
+		try:
+			return self.apply_single_qubit_gate(cqc_header, cmd.qubit_id, "apply_T")
+		except Exception as err:
+			logging.error("Following error occurred when trying to apply a T gate to qubit {}: Error: {}".format(cmd.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 	def cmd_h(self, cqc_header, cmd, xtra):
 		"""
 		Apply H Gate
 		"""
-		return self.apply_single_qubit_gate(cqc_header, cmd.qubit_id, "apply_H")
+		try:
+			return self.apply_single_qubit_gate(cqc_header, cmd.qubit_id, "apply_H")
+		except Exception as err:
+			logging.error("Following error occurred when trying to apply a H gate to qubit {}: Error: {}".format(cmd.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 	def cmd_k(self, cqc_header, cmd, xtra):
 		"""
 		Apply K Gate
 		"""
-		return self.apply_single_qubit_gate(cqc_header, cmd.qubit_id, "apply_K")
+		try:
+			return self.apply_single_qubit_gate(cqc_header, cmd.qubit_id, "apply_K")
+		except Exception as err:
+			logging.error("Following error occurred when trying to apply a K gate to qubit {}: Error: {}".format(cmd.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 	@inlineCallbacks
 	def apply_rotation(self, cqc_header, cmd, xtra, axis):
@@ -492,8 +545,10 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			return False
 		try:
 			yield virt_qubit.callRemote("apply_rotation", axis, 2 * np.pi / 256 * xtra.step)
-		except Exception as e:
-			raise e
+		except Exception as err:
+			logging.error("Following error occurred when trying to apply a rotation gate to qubit {}: Error: {}".format(cmd.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 		return True
 
@@ -501,31 +556,56 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		"""
 		Rotate around x axis
 		"""
-		return self.apply_rotation(cqc_header, cmd, xtra, [1, 0, 0])
+		try:
+			return self.apply_rotation(cqc_header, cmd, xtra, [1, 0, 0])
+		except Exception as err:
+			logging.error("Following error occurred when trying to apply a ROTX gate to qubit {}: Error: {}".format(cmd.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 	def cmd_roty(self, cqc_header, cmd, xtra):
 		"""
 		Rotate around y axis
 		"""
-		return self.apply_rotation(cqc_header, cmd, xtra, [0, 1, 0])
+		try:
+			return self.apply_rotation(cqc_header, cmd, xtra, [0, 1, 0])
+		except Exception as err:
+			logging.error("Following error occurred when trying to apply a ROTY gate to qubit {}: Error: {}".format(cmd.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 	def cmd_rotz(self, cqc_header, cmd, xtra):
 		"""
 		Rotate around z axis
 		"""
-		return self.apply_rotation(cqc_header, cmd, xtra, [0, 0, 1])
+		try:
+			return self.apply_rotation(cqc_header, cmd, xtra, [0, 0, 1])
+		except Exception as err:
+			logging.error("Following error occurred when trying to apply a ROTZ gate to qubit {}: Error: {}".format(cmd.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 	def cmd_cnot(self, cqc_header, cmd, xtra):
 		"""
 		Apply CNOT Gate
 		"""
-		return self.apply_two_qubit_gate(cqc_header, cmd, xtra, "cnot_onto")
+		try:
+			return self.apply_two_qubit_gate(cqc_header, cmd, xtra, "cnot_onto")
+		except Exception as err:
+			logging.error("Following error occurred when trying to apply a CNOT gate to qubit {} and {}: Error: {}".format(cmd.qubit_id, xtra.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 	def cmd_cphase(self, cqc_header, cmd, xtra):
 		"""
 		Apply CPHASE Gate
 		"""
-		return self.apply_two_qubit_gate(cqc_header, cmd, xtra, "cphase_onto")
+		try:
+			return self.apply_two_qubit_gate(cqc_header, cmd, xtra, "cphase_onto")
+		except Exception as err:
+			logging.error("Following error occurred when trying to apply a CPHASE gate to qubit {} and {}: Error: {}".format(cmd.qubit_id, xtra.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 	@inlineCallbacks
 	def cmd_measure(self, cqc_header, cmd, xtra, inplace=False):
@@ -542,8 +622,10 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			return False
 		try:
 			outcome = yield virt_qubit.callRemote("measure", inplace)
-		except Exception as e:
-			raise e
+		except Exception as err:
+			logging.error("CQC {}: Got the following unexpected error when trying to measure qubit {}: {}".format(self.name, cmd.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 		if outcome is None:
 			logging.warning("CQC %s: Measurement failed", self.name)
@@ -589,15 +671,19 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
 		try:
 			outcome = yield virt_qubit.callRemote("measure", inplace=True)
-		except Exception as e:
-			raise e
+		except Exception as err:
+			logging.error("CQC {}: Got the following unexpected error when trying to reset qubit {}: {}".format(self.name, cmd.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 		# If state is |1> do correction
 		if outcome:
 			try:
 				yield virt_qubit.callRemote("apply_X")
-			except Exception as e:
-				raise e
+			except Exception as err:
+				logging.error("CQC {}: Got the following unexpected error when trying to correct a the reset qubit {}: {}".format(self.name, cmd.qubit_id, err))
+				self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+				return False
 		return True
 
 	@inlineCallbacks
@@ -605,9 +691,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		"""
 		Send qubit to another node.
 		"""
-		def raise_error(err):
-			raise quantumError("Max virtual qubits reached")
-
 		# Lookup the name of the remote node used within SimulaQron
 		target_name = self.factory.lookup(xtra.remote_node, xtra.remote_port)
 		if target_name is None:
@@ -641,17 +724,31 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
 			self.return_messages.append(err_msg)
 			return False
-		except Exception as e:
-			raise e
 
 		# Send instruction to transfer the qubit
 		try:
-			defer = self.factory.virtRoot.callRemote("cqc_send_qubit", virt_num, target_name, cqc_header.app_id,
+			yield self.factory.virtRoot.callRemote("cqc_send_qubit", virt_num, target_name, cqc_header.app_id,
 												   xtra.remote_app_id)
-			defer.addErrback(raise_error)
-			yield defer
-		except Exception as e:
-			raise e
+		except RemoteError as remote_err:
+			error_class = self.get_error_class(remote_err)
+			if error_class == noQubitError:
+				logging.error("CQC {}: Trying to send qubit but remote node is out of qubits".format(self.name))
+				err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
+				self.return_messages.append(err_msg)
+				return False
+			elif error_class == quantumError:
+				logging.error("CQC {}: Unknown quantum error occurred when trying to send qubit.".format(self.name))
+				err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
+				self.return_messages.append(err_msg)
+				return False
+			else:
+				logging.error("CQC {}: Got the following unexpected error when trying to send qubit {}: {}".format(self.name, cmd.qubit_id, remote_err))
+				self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+				return False
+		except Exception as err:
+			logging.error("CQC {}: Got the following unexpected error when trying to send qubit {}: {}".format(self.name, cmd.qubit_id, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 		logging.debug("CQC %s: Sent App ID %d qubit id %d to %s", self.name, cqc_header.app_id, cmd.qubit_id,
 					  target_name)
@@ -678,8 +775,21 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		for _ in range(int(CQC_CONF_RECV_TIMEOUT * 0.1 / sleep_time)):
 			try:
 				virt_qubit = yield self.factory.virtRoot.callRemote("cqc_get_recv", cqc_header.app_id)
-			except Exception as e:
-				raise e
+			except RemoteError as remote_err:
+				error_class = self.get_error_class(remote_err)
+				if error_class == quantumError:
+					logging.error("CQC {}: Unknown quantum error occurred when trying to recv qubit.".format(self.name))
+					err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
+					self.return_messages.append(err_msg)
+					return False
+				else:
+					logging.error("CQC {}: Got the following unexpected error when trying to recv a qubit: {}".format(self.name, remote_err))
+					self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+					return False
+			except Exception as err:
+				logging.error("CQC {}: Got the following unexpected error when trying to recv a qubit: {}".format(self.name, err))
+				self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+				return False
 
 			if virt_qubit:
 				no_qubit = False
@@ -736,9 +846,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		Create EPR pair with another node.
 		Depending on the ips and ports this will either create an EPR-pair and send one part, or just receive.
 		"""
-		def raise_error(err):
-			raise quantumError("Max virtual qubits reached")
-
 		# Get ip and port of this host
 		host_node = self.factory.host.ip
 		host_port = self.factory.host.port
@@ -777,9 +884,25 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# Create the first qubit
 		try:
 			(succ, q_id1) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True)
-		except Exception as e:
-			logging.warning("No more qubits")
-			raise e
+		except RemoteError as remote_err:
+			error_class = self.get_error_class(remote_err)
+			succ = False
+			if error_class == noQubitError:
+				logging.error("CQC {}: Trying to create qubit for EPR but out of qubits".format(self.name))
+				err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
+				self.return_messages.append(err_msg)
+			elif error_class == quantumError:
+				logging.error("CQC {}: Unknown quantum error occurred when trying to create qubit for EPR.".format(self.name))
+				err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
+				self.return_messages.append(err_msg)
+			else:
+				logging.error("CQC {}: Got the following unexpected error when trying to create qubit for EPR: {}".format(self.name, remote_err))
+				self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
+		except Exception as err:
+			logging.error("CQC {}: Got the following unexpected error when trying to create qubit for EPR: {}".format(self.name, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 		if not succ:
 			return False
@@ -787,10 +910,21 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# Create the second qubit
 		try:
 			(succ, q_id2) = yield self.cmd_new(cqc_header, cmd, xtra, return_q_id=True, ignore_max_qubits=True)
-		except Exception as e:
-			raise e
+		except Exception as err:
+			logging.error("CQC {}: Got the following unexpected error when trying to create qubit for EPR: {}".format(self.name, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 		if not succ:
+			# Failed to create the second qubit, destroy the first
+			logging.warning("CQC %s: Failed to create second qubit, destroying the first", self.name)
+			try:
+				cmd1 = CQCCmdHeader()
+				cmd1.setVals(q_id1, 0, 0, 0, 0)
+				yield self.cmd_release(cqc_header, cmd1, None)
+			except Exception as err:
+				logging.warning("CQC %s: Failed to destroy qubits", self.name)
+				logging.error(err)
 			return False
 
 		# Create headers for qubits
@@ -806,13 +940,47 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		# Produce EPR-pair
 		try:
 			yield self.cmd_h(cqc_header, cmd1, None)
-		except Exception as e:
-			raise e
+		except Exception as err:
+			logging.error("CQC {}: Got the following unexpected error when trying to apply H to EPR qubit: {}".format(self.name, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			succ = False
+
+		if not succ:
+			# Failed to perform H, destroy qubits
+			logging.warning("CQC %s: Failed to perform H, destroying qubits", self.name)
+			try:
+				yield self.cmd_release(cqc_header, cmd1, None)
+			except Exception as err:
+				logging.warning("CQC %s: Failed to destroy qubits", self.name)
+				logging.error(err)
+			try:
+				yield self.cmd_release(cqc_header, cmd2, None)
+			except Exception as err:
+				logging.warning("CQC %s: Failed to destroy qubits", self.name)
+				logging.error(err)
+			return False
 
 		try:
 			yield self.cmd_cnot(cqc_header, cmd1, xtra_cnot)
-		except Exception as e:
-			raise e
+		except Exception as err:
+			logging.error("CQC {}: Got the following unexpected error when trying to apply CNOT to EPR qubit: {}".format(self.name, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			succ = False
+
+		if not succ:
+			# Failed to perform CNOT, destroy qubits
+			logging.warning("CQC %s: Failed to perform CNOT, destroying qubits", self.name)
+			try:
+				yield self.cmd_release(cqc_header, cmd1, None)
+			except Exception as err:
+				logging.warning("CQC %s: Failed to destroy qubits", self.name)
+				logging.error(err)
+			try:
+				yield self.cmd_release(cqc_header, cmd2, None)
+			except Exception as err:
+				logging.warning("CQC %s: Failed to destroy qubits", self.name)
+				logging.error(err)
+			return False
 
 		# Get entanglement id XXX lock here?
 		ent_id = self.new_ent_id(host_app_id, remote_node, remote_app_id)
@@ -823,12 +991,24 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 						 int(time.time()), int(time.time()), 0, 1)
 		# Send second qubit
 		try:
-			defer = self.send_epr_half(cqc_header, cmd2, xtra, ent_info)
-			defer.addErrback(raise_error)
-			succ = yield defer
-			print("succ: {}".format(succ))
-		except Exception as e:
+			succ = yield self.send_epr_half(cqc_header, cmd2, xtra, ent_info)
+		except RemoteError as remote_err:
+			error_class = self.get_error_class(remote_err)
 			succ = False
+			if error_class == noQubitError:
+				logging.error("CQC {}: Trying to send qubit of EPR but remote node is out of qubits".format(self.name))
+				err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
+				self.return_messages.append(err_msg)
+			elif error_class == quantumError:
+				logging.error("CQC {}: Unknown quantum error occurred when trying to send qubit of EPR.".format(self.name))
+				err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
+				self.return_messages.append(err_msg)
+			else:
+				logging.error("CQC {}: Got the following unexpected error when trying to send EPR qubit: {}".format(self.name, remote_err))
+				self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+		except Exception as err:
+			logging.error("CQC {}: Got the following unexpected error when trying to send EPR qubit: {}".format(self.name, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
 
 		if not succ:
 			# Failed to send the qubit, destroy it instead
@@ -836,13 +1016,13 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 			try:
 				yield self.cmd_release(cqc_header, cmd1, None)
 			except Exception as err:
-				raise err
+				logging.warning("CQC %s: Failed to destroy qubits", self.name)
+				logging.error(err)
 			try:
 				yield self.cmd_release(cqc_header, cmd2, None)
 			except Exception as err:
-				raise err
-			err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
-			self.return_messages.append(err_msg)
+				logging.warning("CQC %s: Failed to destroy qubits", self.name)
+				logging.error(err)
 			return False
 
 		# Send message we created EPR pair
@@ -874,9 +1054,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		"""
 		Send qubit to another node.
 		"""
-		def raise_error(err):
-			raise quantumError("Max virtual qubits reached")
-
 		# Lookup the virtual qubit from identifier
 		try:
 			virt_num = yield self.get_virt_qubit_indep(cqc_header, cmd.qubit_id)
@@ -898,15 +1075,9 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		raw_updated_ent_info = updated_ent_info.pack()
 		# Send instruction to transfer the qubit
 		try:
-			print("sending half")
-			defer = self.factory.virtRoot.callRemote("cqc_send_epr_half", virt_num, target_name, cqc_header.app_id,
+			yield self.factory.virtRoot.callRemote("cqc_send_epr_half", virt_num, target_name, cqc_header.app_id,
 												   xtra.remote_app_id, raw_updated_ent_info)
-			defer.addErrback(raise_error)
-			yield defer
-			print("send half")
 		except Exception as e:
-			print("send half exception")
-			print(e)
 			raise e
 
 		logging.debug("CQC %s: Sent App ID %d half a EPR pair as qubit id %d to %s", self.name, cqc_header.app_id,
@@ -936,8 +1107,21 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		for _ in range(int(CQC_CONF_RECV_EPR_TIMEOUT * 0.1 / sleep_time)):
 			try:
 				data = yield self.factory.virtRoot.callRemote("cqc_get_epr_recv", cqc_header.app_id)
-			except Exception as e:
-				raise e
+			except RemoteError as remote_err:
+				error_class = self.get_error_class(remote_err)
+				if error_class == quantumError:
+					logging.error("CQC {}: Unknown quantum error occurred when trying to recv qubit of EPR.".format(self.name))
+					err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
+					self.return_messages.append(err_msg)
+					return False
+				else:
+					logging.error("CQC {}: Got the following unexpected error when trying to recv EPR qubit: {}".format(self.name, remote_err))
+					self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+					return False
+			except Exception as err:
+				logging.error("CQC {}: Got the following unexpected error when trying to send EPR qubit: {}".format(self.name, err))
+				self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+				return False
 
 			if data:
 				no_qubit = False
@@ -1002,66 +1186,79 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		(ignore_max_qubits is used internally to ignore the check of number of virtual qubits at the node
 		such that the node can temporarily create a qubit for EPR creation.)
 		"""
+
 		app_id = cqc_header.app_id
 		try:
 			self.factory._lock.acquire()
 			try:
 				virt = yield self.factory.virtRoot.callRemote("new_qubit", ignore_max_qubits=ignore_max_qubits)
-			except Exception as e:
-				raise e
+				succ = True
+			except RemoteError as remote_err:
+				error_class = self.get_error_class(remote_err)
+				succ = False
+				if error_class == noQubitError:
+					logging.error("CQC {}: Out of simulated qubits in register or virtual qubits in node".format(self.name))
+					err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
+					self.return_messages.append(err_msg)
+				elif error_class == quantumError:
+					logging.error("CQC {}: Unknown quantum error occurred when trying to create new qubit.".format(self.name))
+					err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
+					self.return_messages.append(err_msg)
+				else:
+					logging.error("CQC {}: Got the following unexpected error when trying to create new qubit: {}".format(self.name, remote_err))
+					self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			except Exception as err:
+				logging.error("CQC {}: Got the following unexpected error when trying to create new qubit: {}".format(self.name, err))
+				self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
 
-			if not virt:  # if no more qubits
-				raise quantumError("No more qubits available")
+			if succ:
+				q_id = self.new_qubit_id(app_id)
+				q = CQCQubit(q_id, int(time.time()), virt)
+				self.factory.qubitList[(app_id, q_id)] = q
+				logging.debug("CQC %s: Requested new qubit (%d,%d)", self.name, app_id, q_id)
 
-			q_id = self.new_qubit_id(app_id)
-			q = CQCQubit(q_id, int(time.time()), virt)
-			self.factory.qubitList[(app_id, q_id)] = q
-			logging.debug("CQC %s: Requested new qubit (%d,%d)", self.name, app_id, q_id)
+				if not return_q_id:
+					# Send message we created a qubit back
+					# logging.debug("GOO")
+					cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_NEW_OK, length=CQC_NOTIFY_LENGTH)
+					# self.protocol.transport.write(cqc_msg)
+					self.return_messages.append(cqc_msg)
 
-			if not return_q_id:
-				# Send message we created a qubit back
-				# logging.debug("GOO")
-				cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_NEW_OK, length=CQC_NOTIFY_LENGTH)
-				# self.protocol.transport.write(cqc_msg)
-				self.return_messages.append(cqc_msg)
-
-				# Send notify header with qubit ID
-				hdr = CQCNotifyHeader()
-				hdr.setVals(q_id, 0, 0, 0, 0, 0)
-				msg = hdr.pack()
-				# self.protocol.transport.write(msg)
-				logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
-				self.return_messages.append(msg)
-
-		except quantumError:  # if no more qubits
-			logging.error("CQC %s: Maximum number of qubits reached.", self.name)
-			msg = self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
-			self.return_messages.append(msg)
+					# Send notify header with qubit ID
+					hdr = CQCNotifyHeader()
+					hdr.setVals(q_id, 0, 0, 0, 0, 0)
+					msg = hdr.pack()
+					# self.protocol.transport.write(msg)
+					logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
+					self.return_messages.append(msg)
+		finally:
 			self.factory._lock.release()
-			if return_q_id:
-				return False, None
-			else:
-				return False
-		self.factory._lock.release()
 		if return_q_id:
-			return True, q_id
+			if succ:
+				return succ, q_id
+			else:
+				return succ, None
 		else:
-			return True
+			return succ
 
 	@inlineCallbacks
 	def cmd_allocate(self, cqc_header, cmd, xtra):
 		"""
-		Allocate multipe qubits.
+		Allocate multiple qubits.
 		"""
 		num_qubits = cmd.qubit_id
 		cmd.qubit_id = 0
 		logging.debug("CQC %s: Allocating %d qubits", self.name, num_qubits)
+		succ = True
 		try:
 			for _ in range(num_qubits):
-				yield self.cmd_new(cqc_header, cmd, xtra)
-		except Exception as e:
-			raise e
-		return True
+				succ_tmp = yield self.cmd_new(cqc_header, cmd, xtra)
+				succ = succ and succ_tmp
+		except Exception as err:
+			logging.error("CQC {}: Got the following unexpected error when trying to create allocate qubits: {}".format(self.name, err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
+		return succ
 
 	@inlineCallbacks
 	def cmd_release(self, cqc_header, cmd, xtra):
@@ -1071,18 +1268,23 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		logging.debug("CQC %s: Releasing App ID %d qubit id %d", self.name, cqc_header.app_id, cmd.qubit_id)
 		try:
 			virt_qubit = self.get_virt_qubit(cqc_header, cmd.qubit_id)
-		except UnknownQubitError as e:
-			logging.debug(e)
+		except UnknownQubitError as err:
+			logging.debug(err)
 			err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_NOQUBIT)
 			self.return_messages.append(err_msg)
 			return False
-		except Exception as e:
-			raise e
+		except Exception as err:
+			logging.debug(err)
+			err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
+			self.return_messages.append(err_msg)
+			return False
 
 		try:
 			outcome = yield virt_qubit.callRemote("measure", False)
-		except Exception as e:
-			raise e
+		except Exception as err:
+			logging.error("Following unknown error occurred when trying to release qubit by measuring: {}".format(err))
+			self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
+			return False
 
 		if outcome is None:
 			logging.debug("CQC %s: Release failed", self.name)
