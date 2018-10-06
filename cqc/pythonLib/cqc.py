@@ -745,6 +745,8 @@ class CQCConnection:
 			raise CQCUnsuppError("Sequence not supported")
 		if cqc_err == CQC_ERR_TIMEOUT:
 			raise CQCTimeoutError("Timeout")
+		if cqc_err == CQC_ERR_UNKNOWN:
+			raise CQCUnknownError("Unknown qubit ID")
 
 	def sendQubit(self, q, name, remote_appID=0, notify=True, block=True):
 		"""
@@ -1183,6 +1185,9 @@ class CQCTimeoutError(CQCGeneralError):
 class CQCInuseError(CQCGeneralError):
 	pass
 
+class CQCUnknownError(CQCGeneralError):
+	pass
+
 
 class QubitNotActiveError(CQCGeneralError):
 	pass
@@ -1231,8 +1236,6 @@ class qubit:
 				# Create new qubit at the cqc server
 				self._cqc.sendCommand(0, CQC_CMD_NEW, notify=int(notify), block=int(block))
 
-				# Activate qubit
-				self._set_active(True)
 				# Get qubit id
 				message = self._cqc.readMessage()
 				try:
@@ -1240,6 +1243,8 @@ class qubit:
 					self._qID = notifyHdr.qubit_id
 				except AttributeError:
 					raise CQCGeneralError("Didn't receive the qubit id")
+				# Activate qubit
+				self._set_active(True)
 
 				if notify:
 					message = self._cqc.readMessage()

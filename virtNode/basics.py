@@ -32,11 +32,14 @@ from collections import deque
 from twisted.spread import pb
 from twisted.internet import reactor
 
-class quantumError(Exception):
+class quantumError(pb.Error):
 	def __init__(self, value):
 		self.value = value
 	def __str__(self):
 		return repr(self.value)
+
+class noQubitError(quantumError):
+	pass
 
 class virtNetError(Exception):
 	def __init__(self, value):
