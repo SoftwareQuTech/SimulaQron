@@ -128,39 +128,33 @@ Qubits can then be created by initializing a qubit-object, which takes a ``CQCCo
 On these qubits operations can be applied and they can also be sent to other nodes in the network by use of the ``CQCConnection``.
 The full code in aliceTest.py is::
 
-	# Initialize the connection
-	Alice=CQCConnection("Alice")
+    # Initialize the connection
+    with CQCConnection("Alice") as Alice:
 
-    # Create an EPR pair
-    q = Alice.createEPR("Bob")
+        # Create an EPR pair
+        q = Alice.createEPR("Bob")
 
-	# Measure qubit
-	m=q.measure()
-	to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
-	print("|"+"-"*(len(to_print)+2)+"|")
-	print("| "+to_print+" |")
-	print("|"+"-"*(len(to_print)+2)+"|")
-
-	# Stop the connections
-	Alice.close()
+        # Measure qubit
+        m=q.measure()
+        to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
+        print("|"+"-"*(len(to_print)+2)+"|")
+        print("| "+to_print+" |")
+        print("|"+"-"*(len(to_print)+2)+"|")
 
 Similarly the code in bobTest.py read::
 
-	# Initialize the connection
-	Bob=CQCConnection("Bob")
+    # Initialize the connection
+    with CQCConnection("Bob") as Bob:
 
-	# Receive qubit
-	q=Bob.recvEPR()
+        # Receive qubit
+        q=Bob.recvEPR()
 
-	# Measure qubit
-	m=q.measure()
-	to_print="App {}: Measurement outcome is: {}".format(Bob.name,m)
-	print("|"+"-"*(len(to_print)+2)+"|")
-	print("| "+to_print+" |")
-	print("|"+"-"*(len(to_print)+2)+"|")
-
-	# Stop the connection
-	Bob.close()
+        # Measure qubit
+        m=q.measure()
+        to_print="App {}: Measurement outcome is: {}".format(Bob.name,m)
+        print("|"+"-"*(len(to_print)+2)+"|")
+        print("| "+to_print+" |")
+        print("|"+"-"*(len(to_print)+2)+"|")
 
 For further examples, see the examples/ folder.
 

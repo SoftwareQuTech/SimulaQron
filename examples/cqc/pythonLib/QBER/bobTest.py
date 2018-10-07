@@ -27,42 +27,49 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from SimulaQron.cqc.pythonLib.cqc import *
+import sys
+import json
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection
 
-import random
 
-
-
-#####################################################################################################
-#
-# main
-#
-def main():
+def main(nr_runs):
+	meas_outcomes = {}
 
 	# Initialize the connection
-	with CQCConnection("Alice") as Alice:
+	with CQCConnection("Bob") as Bob:
 
-		#Generate a key
-		k=random.randint(0,1)
+		for _ in range(nr_runs):
 
-		# Create a qubit
-		q=qubit(Alice)
+			# Create an EPR pair
+			q = Bob.recvEPR()
 
-		# Encode the key in the qubit
-		if k==1:
-			q.X()
+			# Get the identifier of this EPR pair such that Alice can relate the measuement outcomes to hers
+			sequence_nr = q.get_entInfo().id_AB
 
-		#Send qubit to Bob (via Eve)
-		Alice.sendQubit(q,"Eve")
+			if (sequence_nr % 3) == 0:
+				# Measure in Z
+				pass
+			elif (sequence_nr % 3) == 1:
+				# Measure in X
+				q.H()
+			else:
+				# Measure in Y
+				q.K()
 
-		# Encode and send a classical message m to Bob
-		m=0
-		enc=(m+k)%2
-		Alice.sendClassical("Bob",enc)
+			m = q.measure()
+			meas_outcomes[sequence_nr] = m
 
-		print("Alice send the message m={} to Bob".format(m))
+	# Encode the measurement outcomes to bytes, such that we can send them
+	msg = json.dumps(meas_outcomes).encode('utf-8')
 
+	# Send the measurement outcomes to Alice
+	Bob.sendClassical(name="Alice", msg=msg)
 
-##################################################################################################
-main()
-
+if __name__ == '__main__':
+	try:
+		nr_runs = int(sys.argv[1])
+	except Exception:
+		nr_runs = 500
+	if nr_runs > 1000:
+		raise ValueError("Number of EPR pairs for this example is currently restricted to less than 1000")
+	main(nr_runs)

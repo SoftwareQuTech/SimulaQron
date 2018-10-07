@@ -101,46 +101,42 @@ def prep_CPHASE_target_CQC(cqc):
 
 
 def prep_EPR1_CQC(cqc):
-	Alice = CQCConnection("Alice", appID=1)
-	qA = Alice.createEPR("Bob")
-	qB = cqc.recvEPR()
-	qA.measure()
-	Alice.close()
+	with CQCConnection("Alice", appID=1) as Alice:
+		qA = Alice.createEPR("Bob")
+		qB = cqc.recvEPR()
+		qA.measure()
 	return qB
 
 
 def prep_EPR2_CQC(cqc):
-	Alice = CQCConnection("Alice", appID=1)
-	qB = cqc.createEPR("Alice", remote_appID=1)
-	qA = Alice.recvEPR()
-	qA.measure()
-	Alice.close()
+	with CQCConnection("Alice", appID=1) as Alice:
+		qB = cqc.createEPR("Alice", remote_appID=1)
+		qA = Alice.recvEPR()
+		qA.measure()
 	return qB
 
 
 def prep_send_CQC(cqc):
-	Alice = CQCConnection("Alice", appID=1)
-	qA = qubit(cqc)
-	qB = qubit(cqc)
-	qA.H()
-	qA.cnot(qB)
-	cqc.sendQubit(qA, "Alice", remote_appID=1)
-	qA = Alice.recvQubit()
-	m = qA.measure()
-	Alice.close()
-	if m == 1:
-		qB.X()
-	qB.H()
+	with CQCConnection("Alice", appID=1) as Alice:
+		qA = qubit(cqc)
+		qB = qubit(cqc)
+		qA.H()
+		qA.cnot(qB)
+		cqc.sendQubit(qA, "Alice", remote_appID=1)
+		qA = Alice.recvQubit()
+		m = qA.measure()
+		if m == 1:
+			qB.X()
+		qB.H()
 	return qB
 
 
 def prep_recv_CQC(cqc):
-	Alice = CQCConnection("Alice", appID=1)
-	qA = qubit(Alice)
-	qA.H()
-	Alice.sendQubit(qA, "Bob")
-	qB = cqc.recvQubit()
-	Alice.close()
+	with CQCConnection("Alice", appID=1) as Alice:
+		qA = qubit(Alice)
+		qA.H()
+		Alice.sendQubit(qA, "Bob")
+		qB = cqc.recvQubit()
 	return qB
 
 
@@ -163,77 +159,77 @@ class TwoQubitGateTest(unittest.TestCase):
 		cls.iterations = 100
 		sys.stdout.write("Testing two qubit gates gates with {} iterations \r\n".format(cls.iterations))
 
-	def tearDown(self):
-		self.cqc.close()
-
-	def setUp(self):
-		# Initialize the connection
-		self.cqc = CQCConnection("Bob", appID=0)
-
-
 	def testCNOTControl(self):
-		# Test CNOT control
-		sys.stdout.write("Testing CNOT control:")
-		exp_values = calc_exp_values(prep_mixed_qutip())
-		ans = self.cqc.test_preparation(prep_CNOT_control_CQC, exp_values, iterations=self.iterations)
-		sys.stdout.write('\r')
-		self.assertTrue(ans)
+		with CQCConnection("Bob", appID=0) as cqc:
+			# Test CNOT control
+			sys.stdout.write("Testing CNOT control:")
+			exp_values = calc_exp_values(prep_mixed_qutip())
+			ans = cqc.test_preparation(prep_CNOT_control_CQC, exp_values, iterations=self.iterations)
+			sys.stdout.write('\r')
+			self.assertTrue(ans)
 
 	def testCNOTTarget(self):
-		# Test CNOT target
-		sys.stdout.write("Testing CNOT target:")
-		exp_values = calc_exp_values(prep_mixed_qutip())
-		ans = self.cqc.test_preparation(prep_CNOT_target_CQC, exp_values, iterations=self.iterations)
-		sys.stdout.write('\r')
-		self.assertTrue(ans)
+		with CQCConnection("Bob", appID=0) as cqc:
+			# Test CNOT target
+			sys.stdout.write("Testing CNOT target:")
+			exp_values = calc_exp_values(prep_mixed_qutip())
+			ans = cqc.test_preparation(prep_CNOT_target_CQC, exp_values, iterations=self.iterations)
+			sys.stdout.write('\r')
+			self.assertTrue(ans)
 
 	def testCPHASEControl(self):
-		# Test CPHASE control
-		sys.stdout.write("Testing CPHASE control:")
-		exp_values = calc_exp_values(prep_mixed_qutip())
-		ans = self.cqc.test_preparation(prep_CPHASE_control_CQC, exp_values, iterations=self.iterations)
-		sys.stdout.write('\r')
-		self.assertTrue(ans)
+		with CQCConnection("Bob", appID=0) as cqc:
+			# Test CPHASE control
+			sys.stdout.write("Testing CPHASE control:")
+			exp_values = calc_exp_values(prep_mixed_qutip())
+			ans = cqc.test_preparation(prep_CPHASE_control_CQC, exp_values, iterations=self.iterations)
+			sys.stdout.write('\r')
+			self.assertTrue(ans)
 
 	def testCPHASETarget(self):
-		# Test CPHASE target
-		sys.stdout.write("Testing CPHASE target:")
-		exp_values = calc_exp_values(prep_mixed_qutip())
-		ans = self.cqc.test_preparation(prep_CPHASE_target_CQC, exp_values, iterations=self.iterations)
-		sys.stdout.write('\r')
-		self.assertTrue(ans)
+		with CQCConnection("Bob", appID=0) as cqc:
+			# Test CPHASE target
+			sys.stdout.write("Testing CPHASE target:")
+			exp_values = calc_exp_values(prep_mixed_qutip())
+			ans = cqc.test_preparation(prep_CPHASE_target_CQC, exp_values, iterations=self.iterations)
+			sys.stdout.write('\r')
+			self.assertTrue(ans)
 
 	def testEPR1(self):
-		# Test EPR1
-		sys.stdout.write("Testing EPR1:")
-		exp_values = calc_exp_values(prep_mixed_qutip())
-		ans = self.cqc.test_preparation(prep_EPR1_CQC, exp_values, iterations=self.iterations)
-		sys.stdout.write('\r')
-		self.assertTrue(ans)
+		with CQCConnection("Bob", appID=0) as cqc:
+			# Test EPR1
+			sys.stdout.write("Testing EPR1:")
+			exp_values = calc_exp_values(prep_mixed_qutip())
+			ans = cqc.test_preparation(prep_EPR1_CQC, exp_values, iterations=self.iterations)
+			sys.stdout.write('\r')
+			self.assertTrue(ans)
 
 	def testEPR2(self):
-		# Test EPR2
-		sys.stdout.write("Testing EPR2:")
-		exp_values = calc_exp_values(prep_mixed_qutip())
-		ans = self.cqc.test_preparation(prep_EPR2_CQC, exp_values, iterations=self.iterations)
-		sys.stdout.write('\r')
-		self.assertTrue(ans)
+		with CQCConnection("Bob", appID=0) as cqc:
+			# Test EPR2
+			sys.stdout.write("Testing EPR2:")
+			exp_values = calc_exp_values(prep_mixed_qutip())
+			ans = cqc.test_preparation(prep_EPR2_CQC, exp_values, iterations=self.iterations)
+			sys.stdout.write('\r')
+			self.assertTrue(ans)
 
 	def testSendControl(self):
-		# Test send control
-		sys.stdout.write("Testing send:")
-		exp_values = calc_exp_values(prep_H_qutip())
-		ans = self.cqc.test_preparation(prep_send_CQC, exp_values, iterations=self.iterations)
-		sys.stdout.write('\r')
-		self.assertTrue(ans)
+		with CQCConnection("Bob", appID=0) as cqc:
+			# Test send control
+			sys.stdout.write("Testing send:")
+			exp_values = calc_exp_values(prep_H_qutip())
+			ans = cqc.test_preparation(prep_send_CQC, exp_values, iterations=self.iterations)
+			sys.stdout.write('\r')
+			self.assertTrue(ans)
 
 	def testRevTarget(self):
-		# Test recv target
-		sys.stdout.write("Testing recv:")
-		exp_values = calc_exp_values(prep_H_qutip())
-		ans = self.cqc.test_preparation(prep_recv_CQC, exp_values, iterations=self.iterations)
-		sys.stdout.write('\r')
-		self.assertTrue(ans)
+		with CQCConnection("Bob", appID=0) as cqc:
+			# Test recv target
+			sys.stdout.write("Testing recv:")
+			exp_values = calc_exp_values(prep_H_qutip())
+			ans = cqc.test_preparation(prep_recv_CQC, exp_values, iterations=self.iterations)
+			sys.stdout.write('\r')
+			self.assertTrue(ans)
 
 
 ##################################################################################################

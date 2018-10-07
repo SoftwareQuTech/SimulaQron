@@ -44,32 +44,28 @@ class OthersTest(unittest.TestCase):
 	def setUpClass(cls):
 		print("Testing others (measure inplace and get time)")
 
-	def tearDown(self):
-		self.cqc.close()
-
-	def setUp(self):
-		self.cqc = CQCConnection("Alice", appID=1)
-
 	def testMeasureInplace(self):
-		q = qubit(self.cqc)
-		q.H()
-		m1 = q.measure(inplace=True)
-		failed = False
-		for _ in range(10):
-			m2 = q.measure(inplace=True)
-			self.assertEqual(m1, m2)
-		q.measure()
+		with CQCConnection("Alice", appID=1) as cqc:
+			q = qubit(cqc)
+			q.H()
+			m1 = q.measure(inplace=True)
+			failed = False
+			for _ in range(10):
+				m2 = q.measure(inplace=True)
+				self.assertEqual(m1, m2)
+			q.measure()
 
 	def testGetTime(self):
-		# Test Get time
-		q1 = qubit(self.cqc)
-		time.sleep(3)
-		q2 = qubit(self.cqc)
-		t1 = q1.getTime()
-		t2 = q2.getTime()
-		self.assertEqual(t2-t1, 3)
-		q1.measure()
-		q2.measure()
+		with CQCConnection("Alice", appID=1) as cqc:
+			# Test Get time
+			q1 = qubit(cqc)
+			time.sleep(3)
+			q2 = qubit(cqc)
+			t1 = q1.getTime()
+			t2 = q2.getTime()
+			self.assertEqual(t2-t1, 3)
+			q1.measure()
+			q2.measure()
 
 ##################################################################################################
 

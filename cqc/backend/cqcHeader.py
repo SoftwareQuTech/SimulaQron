@@ -58,6 +58,7 @@ CQC_ERR_NOQUBIT = 21  # No more qubits available
 CQC_ERR_UNSUPP = 22  # No sequence not supported
 CQC_ERR_TIMEOUT = 23  # Timeout
 CQC_ERR_INUSE = 24  # Qubit already in use
+CQC_ERR_UNKNOWN = 25  # Unknown qubit ID
 
 # Possible commands
 CQC_CMD_I = 0  # Identity (do nothing, wait one step)
