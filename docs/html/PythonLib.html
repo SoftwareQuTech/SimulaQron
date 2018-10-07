@@ -75,8 +75,27 @@
   <div class="section" id="using-the-python-library">
 <h1>Using the Python library<a class="headerlink" href="#using-the-python-library" title="Permalink to this headline">¶</a></h1>
 <p>The python library provides a way to program a protocol on a network where the nodes listen to instructions through the classical-quantum combiner (CQC) interface. In the following examples the network is simulated by SimulaQron. But the same examples could be executed on a network with real quantum hardware which allows for instructions through the CQC interface, which is the aim for the 2020 quantum internet demonstrator.</p>
+<p>To use the Python library you first need instantiate an object from the class <code class="code docutils literal notranslate"><span class="pre">SimulaQron.cqc.pythonLib.cqc.CQCConnection</span></code>. This should be done in a <a class="reference external" href="https://docs.python.org/3/library/contextlib.html">context</a>, that is using a <code class="code docutils literal notranslate"><span class="pre">with</span></code>-statement as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">alice</span><span class="p">:</span>
+    <span class="c1"># your program</span>
+</pre></div>
+</div>
+<p>This is to make sure the CQCConnection is correctly closed by the end of the program and that the qubits in the backend are released, even if an error occurs in your program.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">It is still possible to initialize a <code class="code docutils literal notranslate"><span class="pre">CQCConnection</span></code> in the old way, i.e. without <code class="code docutils literal notranslate"><span class="pre">with</span></code>, however you will receive a warning message everytime you create a qubit.</p>
+</div>
+<p>Let’s look at an extremely trivial example were we have the node <cite>Alice</cite> allocate a qubit, perform a Hadamard gate and measure the qubit:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">alice</span><span class="p">:</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">qubit</span><span class="p">(</span><span class="n">Alice</span><span class="p">)</span>
+    <span class="n">q</span><span class="o">.</span><span class="n">H</span><span class="p">()</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A object from the <code class="code docutils literal notranslate"><span class="pre">qubit</span></code>-class is created with the <code class="code docutils literal notranslate"><span class="pre">CQCConnection</span></code> as argument, such that whenever an operation is applied to the qubit a CQC message will be sent to the simulation backend to actually perform this operation on the simulated qubit.
+For more examples using the Python library see <a class="reference internal" href="GettingStarted.html"><span class="doc">Getting started</span></a> and <a class="reference internal" href="ExamplespythonLib.html"><span class="doc">Examples using the python library</span></a>.</p>
 <p>We give some more detailed information below on how the classical communication between nodes in the application layer can be realized and also provide some useful commands to program a protocol using the Python library.</p>
-<p>Explicit examples on how to program protocols using the Python library can be found in <a class="reference internal" href="ExamplespythonLib.html"><span class="doc">Examples using the python library</span></a>:.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="ClassicalCommunication.html">Classical Communication</a></li>

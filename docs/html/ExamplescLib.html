@@ -101,8 +101,12 @@
 <div class="section" id="code-for-alice">
 <h2>Code for Alice<a class="headerlink" href="#code-for-alice" title="Permalink to this headline">¶</a></h2>
 <p>The following code can be found in cqc/cLib and be compiled using make; make send. After compilation, run the code using:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">testSend</span> <span class="n">localhost</span> <span class="mi">8821</span> <span class="n">localhost</span> <span class="mi">8822</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">send</span> <span class="n">localhost</span> <span class="mi">8821</span> <span class="n">localhost</span> <span class="mi">8822</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">It the compiling fails for you (in particular on macOS). Try using <cite>clang</cite> instead of <cite>gcc</cite>, by changing the entry <code class="code docutils literal notranslate"><span class="pre">CC</span></code> in the file <cite>MakeFile</cite>.</p>
 </div>
 <p>Here, both Alice and Bob run on the same host (localhost) but on different ports for testing purposes. To allow the transmission of associated classical control information, the port of Bob’s CQC Backend must also be specified.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#include &lt;stdio.h&gt;</span>

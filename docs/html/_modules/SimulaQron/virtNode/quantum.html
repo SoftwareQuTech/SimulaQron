@@ -81,7 +81,11 @@
 <span class="c1"># ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
 <span class="c1"># (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS</span>
 <span class="c1"># SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">time</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">SimulaQron</span> <span class="k">import</span> <span class="n">settings</span>
 <span class="kn">from</span> <span class="nn">SimulaQron.virtNode.crudeSimulator</span> <span class="k">import</span> <span class="n">simpleEngine</span>
 <span class="kn">from</span> <span class="nn">twisted.spread</span> <span class="k">import</span> <span class="n">pb</span>
 <span class="kn">from</span> <span class="nn">twisted.internet.defer</span> <span class="k">import</span> <span class="o">*</span>
@@ -121,6 +125,11 @@
 		<span class="c1"># Mark this qubit as active (still connected to a register)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>
 
+		<span class="c1"># Optional parameters for when the simulation is noise</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">noisy</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">Settings</span><span class="o">.</span><span class="n">CONF_NOISY_QUBITS</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">T1</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">Settings</span><span class="o">.</span><span class="n">CONF_T1</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">last_accessed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
 <div class="viewcode-block" id="simulatedQubit.lock"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.lock">[docs]</a>	<span class="k">def</span> <span class="nf">lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span></div>
 <div class="viewcode-block" id="simulatedQubit.remote_lock"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_lock">[docs]</a>	<span class="k">def</span> <span class="nf">remote_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -140,8 +149,6 @@
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Make this a fresh qubit.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-
-
 		<span class="c1"># Create a fresh qubit in the |0&gt; state</span>
 		<span class="n">num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">add_fresh_qubit</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">num</span> <span class="o">=</span> <span class="n">num</span>
@@ -153,6 +160,7 @@
 <span class="sd">		Apply X gate to itself by passing it onto the underlying register.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: applying X to number </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_apply_random_pauli_noise</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">apply_X</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="simulatedQubit.remote_apply_K"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_apply_K">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_K</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -160,6 +168,7 @@
 <span class="sd">		Apply K gate to itself by passing it onto the underlying register. Maps computational to Y eigenbasis.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: applying K to number </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_apply_random_pauli_noise</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">apply_K</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="simulatedQubit.remote_apply_Y"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_apply_Y">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_Y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -167,6 +176,7 @@
 <span class="sd">		Apply Y gate.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: applying Y to number </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_apply_random_pauli_noise</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">apply_Y</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="simulatedQubit.remote_apply_Z"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_apply_Z">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_Z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -174,6 +184,7 @@
 <span class="sd">		Apply Z gate.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: applying Z to number </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_apply_random_pauli_noise</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">apply_Z</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="simulatedQubit.remote_apply_H"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_apply_H">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_H</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -181,6 +192,7 @@
 <span class="sd">		Apply H gate.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: applying H to number </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_apply_random_pauli_noise</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">apply_H</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="simulatedQubit.remote_apply_T"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_apply_T">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_T</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -188,6 +200,7 @@
 <span class="sd">		Apply T gate.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: applying T to number </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_apply_random_pauli_noise</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">apply_T</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="simulatedQubit.remote_apply_rotation"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_apply_rotation">[docs]</a>	<span class="k">def</span> <span class="nf">remote_apply_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
@@ -200,6 +213,7 @@
 		<span class="n">n</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 		<span class="n">a</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: applying rotation to number </span><span class="si">%d</span><span class="s2">. Axis=</span><span class="si">%s</span><span class="s2">,angle=</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">n</span><span class="p">)),</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_apply_random_pauli_noise</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">apply_rotation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">a</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="simulatedQubit.remote_measure_inplace"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_measure_inplace">[docs]</a>	<span class="k">def</span> <span class="nf">remote_measure_inplace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -209,6 +223,7 @@
 
 <span class="sd">		Returns the measurement outcome.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_apply_random_pauli_noise</span><span class="p">()</span>
 		<span class="n">outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">measure_qubit_inplace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
 		<span class="k">return</span> <span class="n">outcome</span></div>
 
@@ -220,6 +235,7 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 
 		<span class="c1"># Measure the qubit</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_apply_random_pauli_noise</span><span class="p">()</span>
 		<span class="n">outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">measure_qubit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
 		<span class="k">return</span> <span class="n">outcome</span></div>
 
@@ -232,6 +248,7 @@
 <span class="sd">		&quot;&quot;&quot;</span>
 
 		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: CNOT from </span><span class="si">%d</span><span class="s2"> to </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">,</span> <span class="n">targetNum</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_apply_random_pauli_noise</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">apply_CNOT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">,</span> <span class="n">targetNum</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="simulatedQubit.remote_cphase_onto"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_cphase_onto">[docs]</a>	<span class="k">def</span> <span class="nf">remote_cphase_onto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targetNum</span><span class="p">):</span>
@@ -241,8 +258,7 @@
 <span class="sd">		Arguments</span>
 <span class="sd">		targetNum	the qubit to use as the target of the CPHASE</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-
-
+		<span class="bp">self</span><span class="o">.</span><span class="n">_apply_random_pauli_noise</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">apply_CPHASE</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">,</span> <span class="n">targetNum</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="simulatedQubit.remote_get_sim_number"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.quantum.simulatedQubit.remote_get_sim_number">[docs]</a>	<span class="k">def</span> <span class="nf">remote_get_sim_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -280,11 +296,28 @@
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Returns out simulation number as well as the details of this simulating node.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simNum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div></div>
+		<span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simNum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
-
-
-
+	<span class="k">def</span> <span class="nf">_apply_random_pauli_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Applies random pauli gate if required</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">noisy</span><span class="p">:</span>
+			<span class="k">return</span>
+		<span class="c1"># Assumes qubit is locked and active</span>
+		<span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_accessed</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">last_accessed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+		<span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">t</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">T1</span><span class="p">))</span> <span class="o">/</span> <span class="mi">4</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+		<span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">p</span><span class="p">:</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: random pauli X applied on </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">apply_X</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="o">*</span><span class="n">p</span><span class="p">:</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: random pauli Y applied on </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">apply_Y</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="o">*</span><span class="n">p</span><span class="p">:</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VIRTUAL NODE </span><span class="si">%s</span><span class="s2">: random pauli Z applied on </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">apply_Z</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

@@ -16,7 +16,7 @@
     <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Distribute a GHZ-state" href="ExamplespythonLibextendGHZ.html" />
+    <link rel="next" title="Estimating QBER" href="ExamplespythonLibQBER.html" />
     <link rel="prev" title="Examples using the python library" href="ExamplespythonLib.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -29,7 +29,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="ExamplespythonLibextendGHZ.html" title="Distribute a GHZ-state"
+          <a href="ExamplespythonLibQBER.html" title="Estimating QBER"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="ExamplespythonLib.html" title="Examples using the python library"
@@ -49,7 +49,6 @@
 <li><a class="reference internal" href="#setting-up">Setting up</a></li>
 <li><a class="reference internal" href="#programming-alice">Programming Alice</a></li>
 <li><a class="reference internal" href="#programming-bob">Programming Bob</a></li>
-<li><a class="reference internal" href="#starting">Starting</a></li>
 </ul>
 </li>
 </ul>
@@ -58,8 +57,8 @@
   <p class="topless"><a href="ExamplespythonLib.html"
                         title="previous chapter">Examples using the python library</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="ExamplespythonLibextendGHZ.html"
-                        title="next chapter">Distribute a GHZ-state</a></p>
+  <p class="topless"><a href="ExamplespythonLibQBER.html"
+                        title="next chapter">Estimating QBER</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -105,58 +104,20 @@ Alice will teleport a state (in this case the <span class="math notranslate nohi
 </div>
 <div class="section" id="setting-up">
 <h2>Setting up<a class="headerlink" href="#setting-up" title="Permalink to this headline">¶</a></h2>
-<p>We will run everything locally (localhost) using the standard virtualNodes.cfg file found in config that define the virtual quantum nodes run in the background to simulate the quantum hardware:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Network configuration file</span>
-<span class="c1">#</span>
-<span class="c1"># For each host its informal name, as well as its location in the network must</span>
-<span class="c1"># be listed.</span>
-<span class="c1">#</span>
-<span class="c1"># [name], [hostname], [port number]</span>
-
-<span class="n">Alice</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8801</span>
-<span class="n">Bob</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8802</span>
-<span class="n">Charlie</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8803</span>
-<span class="n">David</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8804</span>
+<p>We will run everything locally (localhost) using two nodes, Alice and Bob. Start up the backend of the simulation by running:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startAll</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">nodes</span> <span class="s2">&quot;Alice Bob&quot;</span>
 </pre></div>
 </div>
-<p>Similarly we use the cqcNodes.cfg file that define the network of CQC nodes that provides an way to talk to SimulaQron through the CQC interface:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Network configuration file</span>
-<span class="c1">#</span>
-<span class="c1"># For each host its informal name, as well as its location in the network must</span>
-<span class="c1"># be listed.</span>
-<span class="c1">#</span>
-<span class="c1"># [name], [hostname], [port number]</span>
-<span class="c1">#</span>
-
-<span class="n">Alice</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8821</span>
-<span class="n">Bob</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8822</span>
-<span class="n">Charlie</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8823</span>
-<span class="n">David</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8824</span>
+<p>The below example can then be executed when in the folder <cite>examples/cqc/pythonLib/teleport</cite> typing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">doNew</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
-<p>Since in this case Alice and Bob needs to communicate we also need to define an application network and we will use the standard appNodes.cfg file in config that defines this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Network configuration file</span>
-<span class="c1">#</span>
-<span class="c1"># For each host its informal name, as well as its location in the network must</span>
-<span class="c1"># be listed.</span>
-<span class="c1">#</span>
-<span class="c1"># [name], [hostname], [port number]</span>
-<span class="c1">#</span>
-
-<span class="n">Alice</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8831</span>
-<span class="n">Bob</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8832</span>
-<span class="n">Charlie</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8833</span>
-<span class="n">David</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8834</span>
-</pre></div>
-</div>
+<p>which will execute the Python scripts <cite>aliceTest.py</cite> and <cite>bobTest.py</cite> containing the code below.</p>
 </div>
 <div class="section" id="programming-alice">
 <h2>Programming Alice<a class="headerlink" href="#programming-alice" title="Permalink to this headline">¶</a></h2>
 <p>Here we program what Alice should do using the python library:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">SimulaQron.general.hostConfig</span> <span class="k">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.cqcHeader</span> <span class="k">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">SimulaQron.cqc.pythonLib.cqc</span> <span class="k">import</span> <span class="o">*</span>
-
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">SimulaQron.cqc.pythonLib.cqc</span> <span class="k">import</span> <span class="n">CQCConnection</span><span class="p">,</span> <span class="n">qubit</span>
 
 <span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
@@ -164,36 +125,32 @@ Alice will teleport a state (in this case the <span class="math notranslate nohi
 <span class="c1">#</span>
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
 
-<span class="c1"># Initialize the connection</span>
-<span class="n">Alice</span><span class="o">=</span><span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span>
+    <span class="c1"># Initialize the connection</span>
+    <span class="k">with</span> <span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">Alice</span><span class="p">:</span>
 
-<span class="c1"># Make an EPR pair with Bob</span>
-<span class="n">qA</span><span class="o">=</span><span class="n">Alice</span><span class="o">.</span><span class="n">createEPR</span><span class="p">(</span><span class="s2">&quot;Bob&quot;</span><span class="p">)</span>
+        <span class="c1"># Make an EPR pair with Bob</span>
+        <span class="n">qA</span><span class="o">=</span><span class="n">Alice</span><span class="o">.</span><span class="n">createEPR</span><span class="p">(</span><span class="s2">&quot;Bob&quot;</span><span class="p">)</span>
 
-<span class="c1"># Create a qubit to teleport</span>
-<span class="n">q</span><span class="o">=</span><span class="n">qubit</span><span class="p">(</span><span class="n">Alice</span><span class="p">)</span>
+        <span class="c1"># Create a qubit to teleport</span>
+        <span class="n">q</span><span class="o">=</span><span class="n">qubit</span><span class="p">(</span><span class="n">Alice</span><span class="p">)</span>
 
-<span class="c1"># Prepare the qubit to teleport in |+&gt;</span>
-<span class="n">q</span><span class="o">.</span><span class="n">H</span><span class="p">()</span>
+        <span class="c1"># Prepare the qubit to teleport in |+&gt;</span>
+        <span class="n">q</span><span class="o">.</span><span class="n">H</span><span class="p">()</span>
 
-<span class="c1"># Apply the local teleportation operations</span>
-<span class="n">q</span><span class="o">.</span><span class="n">cnot</span><span class="p">(</span><span class="n">qA</span><span class="p">)</span>
-<span class="n">q</span><span class="o">.</span><span class="n">H</span><span class="p">()</span>
+        <span class="c1"># Apply the local teleportation operations</span>
+        <span class="n">q</span><span class="o">.</span><span class="n">cnot</span><span class="p">(</span><span class="n">qA</span><span class="p">)</span>
+        <span class="n">q</span><span class="o">.</span><span class="n">H</span><span class="p">()</span>
 
-<span class="c1"># Measure the qubits</span>
-<span class="n">a</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
-<span class="n">b</span><span class="o">=</span><span class="n">qA</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
-<span class="n">to_print</span><span class="o">=</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2">: Measurement outcomes are: a=</span><span class="si">{}</span><span class="s2">, b=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Alice</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| &quot;</span><span class="o">+</span><span class="n">to_print</span><span class="o">+</span><span class="s2">&quot; |&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+        <span class="c1"># Measure the qubits</span>
+        <span class="n">a</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
+        <span class="n">b</span><span class="o">=</span><span class="n">qA</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
+        <span class="n">to_print</span><span class="o">=</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2">: Measurement outcomes are: a=</span><span class="si">{}</span><span class="s2">, b=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Alice</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| &quot;</span><span class="o">+</span><span class="n">to_print</span><span class="o">+</span><span class="s2">&quot; |&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
 
-<span class="c1"># Send corrections to Bob</span>
-<span class="n">Alice</span><span class="o">.</span><span class="n">sendClassical</span><span class="p">(</span><span class="s2">&quot;Bob&quot;</span><span class="p">,[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">])</span>
-
-<span class="c1"># Stop the connections</span>
-<span class="n">Alice</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
+        <span class="c1"># Send corrections to Bob</span>
+        <span class="n">Alice</span><span class="o">.</span><span class="n">sendClassical</span><span class="p">(</span><span class="s2">&quot;Bob&quot;</span><span class="p">,[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">])</span>
 
 <span class="c1">##################################################################################################</span>
 <span class="n">main</span><span class="p">()</span>
@@ -203,10 +160,7 @@ Alice will teleport a state (in this case the <span class="math notranslate nohi
 <div class="section" id="programming-bob">
 <h2>Programming Bob<a class="headerlink" href="#programming-bob" title="Permalink to this headline">¶</a></h2>
 <p>Here we program what Bob should do using the python library:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">SimulaQron.general.hostConfig</span> <span class="k">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.cqcHeader</span> <span class="k">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">SimulaQron.cqc.pythonLib.cqc</span> <span class="k">import</span> <span class="o">*</span>
-
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">SimulaQron.cqc.pythonLib.cqc</span> <span class="k">import</span> <span class="n">CQCConnection</span><span class="p">,</span> <span class="n">qubit</span>
 
 <span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
@@ -215,46 +169,32 @@ Alice will teleport a state (in this case the <span class="math notranslate nohi
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
 
         <span class="c1"># Initialize the connection</span>
-        <span class="n">Bob</span><span class="o">=</span><span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Bob&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Bob&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">Bob</span><span class="p">:</span>
 
-        <span class="c1"># Make an EPR pair with Alice</span>
-        <span class="n">qB</span><span class="o">=</span><span class="n">Bob</span><span class="o">.</span><span class="n">createEPR</span><span class="p">(</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span>
+            <span class="c1"># Make an EPR pair with Alice</span>
+            <span class="n">qB</span><span class="o">=</span><span class="n">Bob</span><span class="o">.</span><span class="n">createEPR</span><span class="p">(</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Receive info about corrections</span>
-        <span class="n">Bob</span><span class="o">.</span><span class="n">startClassicalServer</span><span class="p">()</span>
-        <span class="n">data</span><span class="o">=</span><span class="n">Bob</span><span class="o">.</span><span class="n">recvClassical</span><span class="p">()</span>
-        <span class="n">message</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="n">a</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">b</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># Receive info about corrections</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">Bob</span><span class="o">.</span><span class="n">recvClassical</span><span class="p">()</span>
+            <span class="n">message</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">a</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">b</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-        <span class="c1"># Apply corrections</span>
-        <span class="k">if</span> <span class="n">b</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
-                <span class="n">qB</span><span class="o">.</span><span class="n">X</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">a</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
-                <span class="n">qB</span><span class="o">.</span><span class="n">Z</span><span class="p">()</span>
+            <span class="c1"># Apply corrections</span>
+            <span class="k">if</span> <span class="n">b</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">qB</span><span class="o">.</span><span class="n">X</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">a</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">qB</span><span class="o">.</span><span class="n">Z</span><span class="p">()</span>
 
-        <span class="c1"># Measure qubit</span>
-        <span class="n">m</span><span class="o">=</span><span class="n">qB</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
-        <span class="n">to_print</span><span class="o">=</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2">: Measurement outcome is: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Bob</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| &quot;</span><span class="o">+</span><span class="n">to_print</span><span class="o">+</span><span class="s2">&quot; |&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Stop the connection</span>
-        <span class="n">Bob</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
+            <span class="c1"># Measure qubit</span>
+            <span class="n">m</span><span class="o">=</span><span class="n">qB</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
+            <span class="n">to_print</span><span class="o">=</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2">: Measurement outcome is: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Bob</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| &quot;</span><span class="o">+</span><span class="n">to_print</span><span class="o">+</span><span class="s2">&quot; |&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
 
 <span class="c1">##################################################################################################</span>
 <span class="n">main</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="starting">
-<h2>Starting<a class="headerlink" href="#starting" title="Permalink to this headline">¶</a></h2>
-<p>Start the virtual nodes and CQC servers as explained in <a class="reference internal" href="GettingStarted.html"><span class="doc">Getting started</span></a>.
-We then start up the programs for the parties themselves. These files contain the code above for the corresponding host:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">aliceTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
-<span class="n">python</span> <span class="n">bobTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
 </pre></div>
 </div>
 </div>
@@ -276,7 +216,7 @@ We then start up the programs for the parties themselves. These files contain th
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="ExamplespythonLibextendGHZ.html" title="Distribute a GHZ-state"
+          <a href="ExamplespythonLibQBER.html" title="Estimating QBER"
              >next</a> |</li>
         <li class="right" >
           <a href="ExamplespythonLib.html" title="Examples using the python library"

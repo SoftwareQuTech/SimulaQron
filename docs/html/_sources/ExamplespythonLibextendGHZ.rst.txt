@@ -24,34 +24,15 @@ They will all measure their corresponing qubits in the standard basis and print 
 Setting up
 -----------
 
-We will run everything locally (localhost) using the standard virtualNodes.cfg file found in config that define the virtual quantum nodes run in the background to simulate the quantum hardware::
+We will run everything locally (localhost) using two nodes, Alice, Bob and Charlie. Start up the backend of the simulation by running::
 
-	# Network configuration file
-	#
-	# For each host its informal name, as well as its location in the network must
-	# be listed.
-	#
-	# [name], [hostname], [port number]
+    sh run/startAll.sh --nodes "Alice Bob Charlie"
 
-	Alice, localhost, 8801
-	Bob, localhost, 8802
-	Charlie, localhost, 8803
-	David, localhost, 8804
+The below example can then be executed when in the folder `examples/cqc/pythonLib/extendGHZ` typing::
 
-Similarly we use the cqcNodes.cfg file that define the network of CQC nodes that provides an way to talk to SimulaQron through the CQC interface::
+    sh doNew.sh
 
-	# Network configuration file
-	# 
-	# For each host its informal name, as well as its location in the network must
-	# be listed.
-	#
-	# [name], [hostname], [port number]
-	#
-
-	Alice, localhost, 8821
-	Bob, localhost, 8822
-	Charlie, localhost, 8823
-	David, localhost, 8824
+which will execute the Python scripts `aliceTest.py`, `bobTest.py` and `charlieTest.py` containing the code below.
 
 -----------------
 Programming Alice
@@ -59,10 +40,7 @@ Programming Alice
 
 Here we program what Alice should do using the python library::
 
-	from SimulaQron.general.hostConfig import *
-	from SimulaQron.cqc.backend.cqcHeader import *
-	from SimulaQron.cqc.pythonLib.cqc import *
-
+	from SimulaQron.cqc.pythonLib.cqc import CQCConnection
 
 	#####################################################################################################
 	#
@@ -71,21 +49,17 @@ Here we program what Alice should do using the python library::
 	def main():
 
 		# Initialize the connection
-		Alice=CQCConnection("Alice")
+		with CQCConnection("Alice") as Alice:
 
-		# Make an EPR pair with Bob
-		qA=Alice.createEPR("Bob")
+            # Make an EPR pair with Bob
+            qA=Alice.createEPR("Bob")
 
-		# Measure qubit
-		m=qA.measure()
-		to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
-		print("|"+"-"*(len(to_print)+2)+"|")
-		print("| "+to_print+" |")
-		print("|"+"-"*(len(to_print)+2)+"|")
-
-		# Stop the connections
-		Alice.close()
-
+            # Measure qubit
+            m=qA.measure()
+            to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
+            print("|"+"-"*(len(to_print)+2)+"|")
+            print("| "+to_print+" |")
+            print("|"+"-"*(len(to_print)+2)+"|")
 
 	##################################################################################################
 	main()
@@ -96,10 +70,7 @@ Programming Bob
 
 Here we program what Bob should do using the python library::
 
-	from SimulaQron.general.hostConfig import *
-	from SimulaQron.cqc.backend.cqcHeader import *
-	from SimulaQron.cqc.pythonLib.cqc import *
-
+	from SimulaQron.cqc.pythonLib.cqc import CQCConnection
 
 	#####################################################################################################
 	#
@@ -108,30 +79,26 @@ Here we program what Bob should do using the python library::
 	def main():
 
 		# Initialize the connection
-		Bob=CQCConnection("Bob")
+		with CQCConnection("Bob") as Bob:
 
-		# Make an EPR pair with Alice
-		qB=Bob.createEPR("Alice")
+            # Make an EPR pair with Alice
+            qB=Bob.createEPR("Alice")
 
-		# Create a fresh qubit
-		qC=qubit(Bob)
+            # Create a fresh qubit
+            qC=qubit(Bob)
 
-		# Entangle the new qubit
-		qB.cnot(qC)
+            # Entangle the new qubit
+            qB.cnot(qC)
 
-		# Send qubit to Charlie
-		Bob.sendQubit(qC,"Charlie")
+            # Send qubit to Charlie
+            Bob.sendQubit(qC,"Charlie")
 
-		# Measure qubit
-		m=qB.measure()
-		to_print="App {}: Measurement outcome is: {}".format(Bob.name,m)
-		print("|"+"-"*(len(to_print)+2)+"|")
-		print("| "+to_print+" |")
-		print("|"+"-"*(len(to_print)+2)+"|")
-
-		# Stop the connection
-		Bob.close()
-
+            # Measure qubit
+            m=qB.measure()
+            to_print="App {}: Measurement outcome is: {}".format(Bob.name,m)
+            print("|"+"-"*(len(to_print)+2)+"|")
+            print("| "+to_print+" |")
+            print("|"+"-"*(len(to_print)+2)+"|")
 
 	##################################################################################################
 	main()
@@ -142,10 +109,7 @@ Programming Charlie
 
 Here we program what Charlie should do using the python library::
 
-	from SimulaQron.general.hostConfig import *
-	from SimulaQron.cqc.backend.cqcHeader import *
-	from SimulaQron.cqc.pythonLib.cqc import *
-
+	from SimulaQron.cqc.pythonLib.cqc import CQCConnection
 
 	#####################################################################################################
 	#
@@ -154,32 +118,18 @@ Here we program what Charlie should do using the python library::
 	def main():
 
 		# Initialize the connection
-		Charlie=CQCConnection("Charlie")
+		with CQCConnection("Charlie") as Charlie:
 
-		# Receive qubit
-		qC=Charlie.recvQubit()
+            # Receive qubit
+            qC=Charlie.recvQubit()
 
-		# Measure qubit
-		m=qC.measure()
-		to_print="App {}: Measurement outcome is: {}".format(Charlie.name,m)
-		print("|"+"-"*(len(to_print)+2)+"|")
-		print("| "+to_print+" |")
-		print("|"+"-"*(len(to_print)+2)+"|")
-
-		# Stop the connection
-		Charlie.close()
-
+            # Measure qubit
+            m=qC.measure()
+            to_print="App {}: Measurement outcome is: {}".format(Charlie.name,m)
+            print("|"+"-"*(len(to_print)+2)+"|")
+            print("| "+to_print+" |")
+            print("|"+"-"*(len(to_print)+2)+"|")
 
 	##################################################################################################
 	main()
 
---------
-Starting
---------
-
-Start the virtual nodes and CQC servers as explained in :doc:`GettingStarted`.
-We then start up the programs for the parties themselves. These files contain the code above for the corresponding host::
-
-	python aliceTest.py &
-	python bobTest.py &
-	python charlieTest.py &

@@ -93,7 +93,7 @@
 <span id="simulaqron-cqc-pythonlib-cqc-module"></span><h2>SimulaQron.cqc.pythonLib.cqc module<a class="headerlink" href="#module-SimulaQron.cqc.pythonLib.cqc" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="SimulaQron.cqc.pythonLib.cqc.CQCConnection">
-<em class="property">class </em><code class="descclassname">SimulaQron.cqc.pythonLib.cqc.</code><code class="descname">CQCConnection</code><span class="sig-paren">(</span><em>name</em>, <em>cqcFile=None</em>, <em>appFile=None</em>, <em>appID=0</em>, <em>pend_messages=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">SimulaQron.cqc.pythonLib.cqc.</code><code class="descname">CQCConnection</code><span class="sig-paren">(</span><em>name</em>, <em>socket_address=None</em>, <em>cqcFile=None</em>, <em>appFile=None</em>, <em>appID=None</em>, <em>pend_messages=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="method">
 <dt id="SimulaQron.cqc.pythonLib.cqc.CQCConnection.allocate_qubits">
@@ -593,6 +593,12 @@ The frequencies from X, Y and Z measurements are returned as a tuple (f_X,f_Y,f_
 <dl class="exception">
 <dt id="SimulaQron.cqc.pythonLib.cqc.CQCTimeoutError">
 <em class="property">exception </em><code class="descclassname">SimulaQron.cqc.pythonLib.cqc.</code><code class="descname">CQCTimeoutError</code><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCTimeoutError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCTimeoutError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimulaQron.cqc.pythonLib.cqc.CQCGeneralError" title="SimulaQron.cqc.pythonLib.cqc.CQCGeneralError"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulaQron.cqc.pythonLib.cqc.CQCGeneralError</span></code></a></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="SimulaQron.cqc.pythonLib.cqc.CQCUnknownError">
+<em class="property">exception </em><code class="descclassname">SimulaQron.cqc.pythonLib.cqc.</code><code class="descname">CQCUnknownError</code><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCUnknownError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCUnknownError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#SimulaQron.cqc.pythonLib.cqc.CQCGeneralError" title="SimulaQron.cqc.pythonLib.cqc.CQCGeneralError"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulaQron.cqc.pythonLib.cqc.CQCGeneralError</span></code></a></p>
 </dd></dl>
 

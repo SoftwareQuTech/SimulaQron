@@ -45,6 +45,13 @@ As a final example let's combine all the arguments specified above and create a 
 
     sh run/startAll.sh -nd "Alice Bob" -nn 15 -tp random_connected_20
 
+The network that is then started might look like this (you can find a similar picture for you network at `config/topology.png`:
+
+.. image:: figs/topology.png
+    :width: 400px
+    :align: center
+    :alt: Programming SimulaQrons Interfaces
+
 To create a custom topology, see the next section.
 
 .. _topologyConf:

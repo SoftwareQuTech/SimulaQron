@@ -203,11 +203,11 @@ We first initialize an object of the class <code class="docutils literal notrans
 Qubits can then be created by initializing a qubit-object, which takes a <code class="docutils literal notranslate"><span class="pre">CQCConnection</span></code> as an input.
 On these qubits operations can be applied and they can also be sent to other nodes in the network by use of the <code class="docutils literal notranslate"><span class="pre">CQCConnection</span></code>.
 The full code in aliceTest.py is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="c1"># Initialize the connection</span>
-    <span class="n">Alice</span><span class="o">=</span><span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Initialize the connection</span>
+<span class="k">with</span> <span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">Alice</span><span class="p">:</span>
 
-<span class="c1"># Create an EPR pair</span>
-<span class="n">q</span> <span class="o">=</span> <span class="n">Alice</span><span class="o">.</span><span class="n">createEPR</span><span class="p">(</span><span class="s2">&quot;Bob&quot;</span><span class="p">)</span>
+    <span class="c1"># Create an EPR pair</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">Alice</span><span class="o">.</span><span class="n">createEPR</span><span class="p">(</span><span class="s2">&quot;Bob&quot;</span><span class="p">)</span>
 
     <span class="c1"># Measure qubit</span>
     <span class="n">m</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
@@ -215,27 +215,21 @@ The full code in aliceTest.py is:</p>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| &quot;</span><span class="o">+</span><span class="n">to_print</span><span class="o">+</span><span class="s2">&quot; |&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Stop the connections</span>
-    <span class="n">Alice</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Similarly the code in bobTest.py read:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Initialize the connection</span>
-<span class="n">Bob</span><span class="o">=</span><span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Bob&quot;</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Bob&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">Bob</span><span class="p">:</span>
 
-<span class="c1"># Receive qubit</span>
-<span class="n">q</span><span class="o">=</span><span class="n">Bob</span><span class="o">.</span><span class="n">recvEPR</span><span class="p">()</span>
+    <span class="c1"># Receive qubit</span>
+    <span class="n">q</span><span class="o">=</span><span class="n">Bob</span><span class="o">.</span><span class="n">recvEPR</span><span class="p">()</span>
 
-<span class="c1"># Measure qubit</span>
-<span class="n">m</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
-<span class="n">to_print</span><span class="o">=</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2">: Measurement outcome is: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Bob</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| &quot;</span><span class="o">+</span><span class="n">to_print</span><span class="o">+</span><span class="s2">&quot; |&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
-
-<span class="c1"># Stop the connection</span>
-<span class="n">Bob</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="c1"># Measure qubit</span>
+    <span class="n">m</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
+    <span class="n">to_print</span><span class="o">=</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2">: Measurement outcome is: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Bob</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| &quot;</span><span class="o">+</span><span class="n">to_print</span><span class="o">+</span><span class="s2">&quot; |&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_print</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>For further examples, see the examples/ folder.</p>
