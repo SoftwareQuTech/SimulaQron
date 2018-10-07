@@ -72,13 +72,14 @@ def createXtraHeader(command, values):
 class CQCConnection:
 	_appIDs = []
 
-	def __init__(self, name, cqcFile=None, appFile=None, appID=None, pend_messages=False):
+	def __init__(self, name, socket_address=None, cqcFile=None, appFile=None, appID=None, pend_messages=False):
 		"""
 		Initialize a connection to the cqc server.
 
 		- **Arguments**
 			:param name:		Name of the host.
-			:param cqcFile:	Path to cqcFile. If None, '$NETSIM/config/cqcNodes.cfg is used.
+			:param socket_address: tuple (str, int) of ip and port number.
+			:param cqcFile:	Path to cqcFile. If None, '$NETSIM/config/cqcNodes.cfg is used, unless socket_address
 			:param appFile:	Path to appFile. If None, '$NETSIM/config/appNodes.cfg is used.
 			:param appID:		Application ID. If set to None, defaults to a nonused ID.
 			:param pend_messages: True if you want to wait with sending messages to the back end.
@@ -119,21 +120,32 @@ class CQCConnection:
 		# Classical connections in the application network
 		self._classicalConn = {}
 
-		# This file defines the network of CQC servers interfacing to virtual quantum nodes
-		if cqcFile is None:
-			self.cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
+		if socket_address is None:
+			# This file defines the network of CQC servers interfacing to virtual quantum nodes
+			if cqcFile is None:
+				self.cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
 
-		# Read configuration files for the cqc network
-		self._cqcNet = networkConfig(self.cqcFile)
+			# Read configuration files for the cqc network
+			self._cqcNet = networkConfig(self.cqcFile)
 
-		# Host data
-		if self.name in self._cqcNet.hostDict:
-			myHost = self._cqcNet.hostDict[self.name]
+			# Host data
+			if self.name in self._cqcNet.hostDict:
+				myHost = self._cqcNet.hostDict[self.name]
+			else:
+				raise ValueError("Host name '{}' is not in the cqc network".format(name))
+
+			# Get IP and port number
+			myIP = socket.inet_ntoa(struct.pack("!L", myHost.ip))
+			port = myHost.port
 		else:
-			raise ValueError("Host name '{}' is not in the cqc network".format(name))
-
-		# Get IP of correct form
-		myIP = socket.inet_ntoa(struct.pack("!L", myHost.ip))
+			try:
+				myIP, port = socket_address
+				if not isinstance(myIP, str):
+					raise TypeError
+				if not isinstance(port, int):
+					raise TypeError
+			except Exception:
+				raise TypeError("When specifying the socket address, this should be a tuple (str,int).")
 
 		self._s = None
 		while True:
@@ -141,7 +153,7 @@ class CQCConnection:
 				logging.debug("App {} : Trying to connect to CQC server".format(self.name))
 
 				self._s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-				self._s.connect((myIP, myHost.port))
+				self._s.connect((myIP, port))
 				break
 			except ConnectionRefusedError:
 				logging.debug("App {} : Could not connect to  CQC server, trying again...".format(self.name))
