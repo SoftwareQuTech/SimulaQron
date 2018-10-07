@@ -20,7 +20,9 @@ Code for Alice
 
 The following code can be found in cqc/cLib and be compiled using make; make send. After compilation, run the code using::
 
-	testSend localhost 8821 localhost 8822 
+	./send localhost 8821 localhost 8822
+
+.. note:: It the compiling fails for you (in particular on macOS). Try using `clang` instead of `gcc`, by changing the entry :code:`CC` in the file `MakeFile`.
 
 Here, both Alice and Bob run on the same host (localhost) but on different ports for testing purposes. To allow the transmission of associated classical control information, the port of Bob's CQC Backend must also be specified.:: 
 
