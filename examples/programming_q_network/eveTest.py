@@ -38,17 +38,13 @@ from SimulaQron.cqc.pythonLib.cqc import *
 def main():
 
 	# Initialize the connection
-	Eve=CQCConnection("Eve")
+	with CQCConnection("Eve") as Eve:
 
-	# Receive qubit from Alice
-	q=Eve.recvQubit()
+		# Receive qubit from Alice
+		q=Eve.recvQubit()
 
-	# Forward the qubit to Bob
-	Eve.sendQubit(q,"Bob")
-
-	# Stop the connection
-	Eve.close()
-
+		# Forward the qubit to Bob
+		Eve.sendQubit(q,"Bob")
 
 ##################################################################################################
 main()

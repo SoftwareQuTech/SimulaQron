@@ -38,35 +38,31 @@ from SimulaQron.cqc.pythonLib.cqc import *
 def main():
 
 	# Initialize the connection
-	S1=CQCConnection("S1")
+	with CQCConnection("S1") as S1:
 
-	# Make EPR-pairs with R1 and T2
-	q2=S1.createEPR("R1")
-	q0=S1.createEPR("T2")
+		# Make EPR-pairs with R1 and T2
+		q2=S1.createEPR("R1")
+		q0=S1.createEPR("T2")
 
-	# Make Bell measurement (step 1)
-	q0.cnot(q2)
-	m=q2.measure()
+		# Make Bell measurement (step 1)
+		q0.cnot(q2)
+		m=q2.measure()
 
-	# Send corrections to R1 (including sender) (step 1)
-	msg="S1".encode('utf-8')+bytes([m])
-	S1.sendClassical("R1",msg)
-	S1.closeClassicalChannel("R1")
+		# Send corrections to R1 (including sender) (step 1)
+		msg="S1".encode('utf-8')+bytes([m])
+		S1.sendClassical("R1",msg)
 
-	# Receive correction from R1 (step 7)
-	m=S1.recvClassical()
-	if m==1:
-		q0.Z()
+		# Receive correction from R1 (step 7)
+		m=S1.recvClassical()
+		if m==1:
+			q0.Z()
 
-	# Measure out
-	m=q0.measure()
-	to_print="0: Measurement outcome: {}".format(m)
-	print("|"+"-"*(len(to_print)+2)+"|")
-	print("| "+to_print+" |")
-	print("|"+"-"*(len(to_print)+2)+"|")
-
-	# Stop the connections
-	S1.close()
+		# Measure out
+		m=q0.measure()
+		to_print="0: Measurement outcome: {}".format(m)
+		print("|"+"-"*(len(to_print)+2)+"|")
+		print("| "+to_print+" |")
+		print("|"+"-"*(len(to_print)+2)+"|")
 
 
 ##################################################################################################
