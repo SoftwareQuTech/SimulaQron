@@ -38,72 +38,63 @@ from SimulaQron.cqc.pythonLib.cqc import *
 def main():
 
 	# Initialize the connection
-	R1=CQCConnection("R1")
+	with CQCConnection("R1") as R1:
 
-	# Make EPR-pairs with S1,S2 and R2
-	qtmp1=R1.recvEPR()
-	qtmp2=R1.recvEPR()
-	q8=R1.createEPR("R2")
+		# Make EPR-pairs with S1,S2 and R2
+		qtmp1=R1.recvEPR()
+		qtmp2=R1.recvEPR()
+		q8=R1.createEPR("R2")
 
-	# Check where qubit are sent from
-	if qtmp1.get_remote_entNode()=="S1":
-		q3=qtmp1
-		q7=qtmp2
-	else:
-		q3=qtmp2
-		q7=qtmp1
+		# Check where qubit are sent from
+		if qtmp1.get_remote_entNode()=="S1":
+			q3=qtmp1
+			q7=qtmp2
+		else:
+			q3=qtmp2
+			q7=qtmp1
 
-	# Receive corrections
-	msg1=R1.recvClassical()
-	R1.closeClassicalServer()
-	msg2=R1.recvClassical()
-	R1.closeClassicalServer()
+		# Receive corrections
+		msg1=R1.recvClassical()
+		msg2=R1.recvClassical()
 
-	# Do corrections
-	if msg1[:2].decode('utf-8')=="S1":
-		if msg1[2]==1:
-			q3.X()
-		if msg2[2]==1:
-			q7.X()
-	else:
-		if msg1[2]==1:
-			q7.X()
-		if msg2[2]==1:
-			q3.X()
+		# Do corrections
+		if msg1[:2].decode('utf-8')=="S1":
+			if msg1[2]==1:
+				q3.X()
+			if msg2[2]==1:
+				q7.X()
+		else:
+			if msg1[2]==1:
+				q7.X()
+			if msg2[2]==1:
+				q3.X()
 
-	# Entangle and measure (step 2)
-	q3.cnot(q8)
-	q7.cnot(q8)
-	m=q8.measure()
+		# Entangle and measure (step 2)
+		q3.cnot(q8)
+		q7.cnot(q8)
+		m=q8.measure()
 
-	# Send corrections to R2 (including sender) (step 2)
-	msg="R1".encode('utf-8')+bytes([m])
-	R1.sendClassical("R2",msg)
-	R1.closeClassicalChannel("R2")
+		# Send corrections to R2 (including sender) (step 2)
+		msg="R1".encode('utf-8')+bytes([m])
+		R1.sendClassical("R2",msg)
 
-	# Get correction from R2 (step 6)
-	msg=R1.recvClassical()
-	R1.closeClassicalServer()
-	if msg[2]==1:
-		q3.Z()
-		q7.Z()
+		# Get correction from R2 (step 6)
+		msg=R1.recvClassical()
+		if msg[2]==1:
+			q3.Z()
+			q7.Z()
 
-	# H and measure qubits (step 7)
-	q3.H()
-	m1=q3.measure()
-	q7.H()
-	m2=q7.measure()
+		# H and measure qubits (step 7)
+		q3.H()
+		m1=q3.measure()
+		q7.H()
+		m2=q7.measure()
 
-	# Send corrections to S1 and S2 (step 7)
-	msg1="R1".encode('utf-8')+bytes([m1])
-	R1.sendClassical("S1",msg1)
-	R1.closeClassicalChannel("S1")
-	msg2="R1".encode('utf-8')+bytes([m2])
-	R1.sendClassical("S2",msg1)
-	R1.closeClassicalChannel("S2")
-
-	# Stop the connections
-	R1.close()
+		# Send corrections to S1 and S2 (step 7)
+		msg1="R1".encode('utf-8')+bytes([m1])
+		R1.sendClassical("S1",msg1)
+		msg2="R1".encode('utf-8')+bytes([m2])
+		R1.sendClassical("S2",msg2)
 
 
 ##################################################################################################

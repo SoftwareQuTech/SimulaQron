@@ -43,18 +43,17 @@ def main():
 	myName="Alice"
 
 	# Initialize the connection
-	cqc=CQCConnection(myName)
+	with CQCConnection(myName) as cqc:
 
-	# Send Hello message
-	cqc.sendSimple(CQC_TP_HELLO)
+		# Send Hello message
+		print("{} says HELLO to CQC server".format(myName))
+		cqc.sendSimple(CQC_TP_HELLO)
 
-	# Get return message
-	message=cqc.readMessage()
-	cqc.print_CQC_msg(message)
-
-	# Stop the connection
-	cqc.close()
-
+		# Get return message
+		message=cqc.readMessage()
+		cqc_header = message[0]
+		if cqc_header.tp == CQC_TP_HELLO:
+			print("CQC server says HELLO back :)")
 
 
 ##################################################################################################

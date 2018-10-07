@@ -38,47 +38,42 @@ from SimulaQron.cqc.pythonLib.cqc import *
 def main():
 
 	# Initialize the connection
-	T1=CQCConnection("T1")
+	with CQCConnection("T1") as T1:
 
-	# Make EPR-pairs with S2 and R2
-	qtmp1=T1.recvEPR()
-	qtmp2=T1.recvEPR()
+		# Make EPR-pairs with S2 and R2
+		qtmp1=T1.recvEPR()
+		qtmp2=T1.recvEPR()
 
-	# Check where qubit are sent from
-	if qtmp1.get_remote_entNode()=="R2":
-		q13=qtmp1
-		q5=qtmp2
-	else:
-		q13=qtmp2
-		q5=qtmp1
+		# Check where qubit are sent from
+		if qtmp1.get_remote_entNode()=="R2":
+			q13=qtmp1
+			q5=qtmp2
+		else:
+			q13=qtmp2
+			q5=qtmp1
 
-	# Receive corrections from R2 (step 3)
-	msg=T1.recvClassical()
-	T1.closeClassicalServer()
-	if msg[2]==1:
-		q13.X()
+		# Receive corrections from R2 (step 3)
+		msg=T1.recvClassical()
+		if msg[2]==1:
+			q13.X()
 
-	# Entangle (step 4)
-	q13.cnot(q5)
+		# Entangle (step 4)
+		q13.cnot(q5)
 
-	# H and measure (step 5)
-	q13.H()
-	m=q13.measure()
+		# H and measure (step 5)
+		q13.H()
+		m=q13.measure()
 
-	# Send corrections to R2 (step 5)
-	msg="T1".encode('utf-8')+bytes([m])
-	T1.sendClassical("R2",msg)
-	T1.closeClassicalChannel("R2")
+		# Send corrections to R2 (step 5)
+		msg="T1".encode('utf-8')+bytes([m])
+		T1.sendClassical("R2",msg)
 
-	# Measure out
-	m=q5.measure()
-	to_print="5: Measurement outcome: {}".format(m)
-	print("|"+"-"*(len(to_print)+2)+"|")
-	print("| "+to_print+" |")
-	print("|"+"-"*(len(to_print)+2)+"|")
-
-	# Stop the connections
-	T1.close()
+		# Measure out
+		m=q5.measure()
+		to_print="5: Measurement outcome: {}".format(m)
+		print("|"+"-"*(len(to_print)+2)+"|")
+		print("| "+to_print+" |")
+		print("|"+"-"*(len(to_print)+2)+"|")
 
 
 ##################################################################################################

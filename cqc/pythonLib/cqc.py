@@ -192,7 +192,10 @@ class CQCConnection:
 		if release_qubits:
 			self.release_all_qubits()
 		self._s.close()
-		self._appIDs.remove(self._appID)
+		try:
+			self._appIDs.remove(self._appID)
+		except ValueError:
+			pass  # Already closed
 
 		self.closeClassicalServer()
 
