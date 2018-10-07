@@ -39,7 +39,7 @@ def main(nr_runs):
 	# Initialize the connection
 	with CQCConnection("Alice") as Alice:
 
-		for i in range(nr_runs):
+		for _ in range(nr_runs):
 
 			# Create an EPR pair
 			q = Alice.createEPR("Bob")
@@ -49,10 +49,10 @@ def main(nr_runs):
 
 			print("Generated EPR pair number {}.".format(sequence_nr))
 
-			if (i % 3) == 0:
+			if (sequence_nr % 3) == 0:
 				# Measure in Z
 				basis = 'Z'
-			elif (i % 3) == 1:
+			elif (sequence_nr % 3) == 1:
 				# Measure in X
 				q.H()
 				basis = 'X'
@@ -76,12 +76,12 @@ def main(nr_runs):
 	for (sequence_nr, mB) in bob_meas_outcomes.items():
 		mA, basis = meas_outcomes[int(sequence_nr)]
 		if basis == 'Y':
-			if mA == mB:
+			if mA == mB:  # In a noiseless situation this shouldn't happen
 				errors.append(True)
 			else:
 				errors.append(False)
 		else:
-			if mA != mB:
+			if mA != mB:  # In a noiseless situation this shouldn't happen
 				errors.append(True)
 			else:
 				errors.append(False)
@@ -98,4 +98,6 @@ if __name__ == '__main__':
 		nr_runs = int(sys.argv[1])
 	except Exception:
 		nr_runs = 500
+	if nr_runs > 1000:
+		raise ValueError("Number of EPR pairs for this example is currently restricted to less than 1000")
 	main(nr_runs)

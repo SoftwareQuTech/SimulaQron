@@ -38,7 +38,7 @@ def main(nr_runs):
 	# Initialize the connection
 	with CQCConnection("Bob") as Bob:
 
-		for i in range(nr_runs):
+		for _ in range(nr_runs):
 
 			# Create an EPR pair
 			q = Bob.recvEPR()
@@ -46,10 +46,10 @@ def main(nr_runs):
 			# Get the identifier of this EPR pair such that Alice can relate the measuement outcomes to hers
 			sequence_nr = q.get_entInfo().id_AB
 
-			if (i % 3) == 0:
+			if (sequence_nr % 3) == 0:
 				# Measure in Z
 				pass
-			elif (i % 3) == 1:
+			elif (sequence_nr % 3) == 1:
 				# Measure in X
 				q.H()
 			else:
@@ -70,4 +70,6 @@ if __name__ == '__main__':
 		nr_runs = int(sys.argv[1])
 	except Exception:
 		nr_runs = 500
+	if nr_runs > 1000:
+		raise ValueError("Number of EPR pairs for this example is currently restricted to less than 1000")
 	main(nr_runs)
