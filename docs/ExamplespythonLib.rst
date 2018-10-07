@@ -8,4 +8,5 @@ The examples below assume that you have already made your way through :doc:`Gett
         :caption: Programming using the python library
 
         ExamplespythonLibTeleport
+        ExamplespythonLibQBER
         ExamplespythonLibextendGHZ
