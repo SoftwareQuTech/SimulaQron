@@ -17,8 +17,8 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-if [ "${QUICK}" == "y" ]; then
-    if [ "${FULL}" == "y" ]; then
+if [ "$QUICK" = y ]; then
+    if [ "$FULL" = y ]; then
         echo "Cannot specify both --quick and --full"
         exit 1
     else
