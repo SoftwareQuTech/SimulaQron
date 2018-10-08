@@ -1,3 +1,7 @@
-ps aux | grep python | grep 'node\.py' | awk {'print $2'} | xargs kill -9
-ps aux | grep python | grep 'node_v2\.py' | awk {'print $2'} | xargs kill -9
+#!/usr/bin/env sh
+NODE_PIDS=$(ps aux | grep python | grep -E "node\.py|node_v2\.py" | awk {'print $2'})
+if [ "$NODE_PIDS" != "" ]
+then
+        kill -9 $NODE_PIDS
+fi
 sh run.sh
