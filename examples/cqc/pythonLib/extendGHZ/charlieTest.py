@@ -39,21 +39,17 @@ from SimulaQron.cqc.pythonLib.cqc import *
 def main():
 
 	# Initialize the connection
-	Charlie=CQCConnection("Charlie")
+	with CQCConnection("Charlie") as Charlie:
 
-	# Receive qubit
-	qC=Charlie.recvQubit()
+		# Receive qubit
+		qC=Charlie.recvQubit()
 
-	# Measure qubit
-	m=qC.measure()
-	to_print="App {}: Measurement outcome is: {}".format(Charlie.name,m)
-	print("|"+"-"*(len(to_print)+2)+"|")
-	print("| "+to_print+" |")
-	print("|"+"-"*(len(to_print)+2)+"|")
-
-	# Stop the connection
-	Charlie.close()
-
+		# Measure qubit
+		m=qC.measure()
+		to_print="App {}: Measurement outcome is: {}".format(Charlie.name,m)
+		print("|"+"-"*(len(to_print)+2)+"|")
+		print("| "+to_print+" |")
+		print("|"+"-"*(len(to_print)+2)+"|")
 
 ##################################################################################################
 main()

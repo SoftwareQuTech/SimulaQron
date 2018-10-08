@@ -159,7 +159,7 @@ def construct_topology_config(topology, nodes, save_fig=True):
 		with open(topology_file, 'w') as top_file:
 			json.dump(adjacency_dct, top_file)
 
-		Settings.set_setting("CONFIG", "topology_file", "/config/topology.json")
+		Settings.set_setting("CONFIG", "topology_file", "config/topology.json")
 	else:
 		Settings.set_setting("CONFIG", "topology_file", "")
 

@@ -84,16 +84,16 @@ class Settings:
 			_config['BACKEND'] = {}
 		backend = _config['BACKEND']
 
-		if "MaxQubits" in backend:
-			cls.CONF_MAXQUBITS = int(backend['MaxQubits'])
+		if "MaxQubits_Per_Node" in backend:
+			cls.CONF_MAXQUBITS = int(backend['MaxQubits_Per_Node'])
 		else:
-			_config['BACKEND']['MaxQubits'] = str(cls.CONF_MAXQUBITS)
+			_config['BACKEND']['MaxQubits_Per_Node'] = str(cls.CONF_MAXQUBITS)
 			config_changed = True
 
-		if "MaxRegisters" in backend:
-			cls.CONF_MAXREGS = int(backend['MaxRegisters'])
+		if "MaxRegisters_Per_Node" in backend:
+			cls.CONF_MAXREGS = int(backend['MaxRegisters_Per_Node'])
 		else:
-			_config['BACKEND']['MaxRegisters'] = str(cls.CONF_MAXREGS)
+			_config['BACKEND']['MaxRegisters_Per_Node'] = str(cls.CONF_MAXREGS)
 			config_changed = True
 
 		if "WaitTime" in backend:
@@ -167,6 +167,7 @@ class Settings:
 			if not os.path.isabs(file):
 				file = os.environ["NETSIM"] + "/" + file
 			cls.CONF_TOPOLOGY_FILE = file
+		print(170, cls.CONF_TOPOLOGY_FILE)
 
 		if "cqcnodes_file" in node_configs and node_configs["cqcnodes_file"] != "":
 			file = node_configs["cqcnodes_file"]

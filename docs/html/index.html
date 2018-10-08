@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>SimulaQron Documentation &#8212; SimulaQron 0.1 beta documentation</title>
+    <title>SimulaQron Documentation &#8212; SimulaQron 1.0 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -30,7 +30,7 @@
         <li class="right" >
           <a href="Overview.html" title="Overview"
              accesskey="N">next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">SimulaQron 0.1 beta documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">SimulaQron 1.0 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -82,7 +82,7 @@ allows the installation of a local simulation program on each computer in the ne
 The local simulation programs on each classical computer connect to each other classically, forming a simulated quantum internet allowing the exchange of simulated qubits between the different
 network nodes, as well as the creation of simulated entanglement.</p>
 <p>SimulaQron is written in <a class="reference external" href="http://www.python.org/">Python</a> and uses the <a class="reference external" href="https://twistedmatrix.com/">Twisted</a> Perspective Broker. To perform the local qubit simulation, SimulaQron uses <a class="reference external" href="http://qutip.org/">QuTip</a> but any other quantum simulator with a python interface can easily be used as a local backend. The main challenge of SimulaQron is to allow the simulation of virtual qubits at different network nodes: since these may be entangled they cannot be simulated on one network node, which is solved by a transparent distributed simulation on top of in principle any local simulation engine.</p>
-<p>We also have a  <a class="reference external" href="https://arxiv.org/abs/1712.08032">paper</a> that describe the design of SimulaQron.</p>
+<p>We also have a  <a class="reference external" href="http://iopscience.iop.org/article/10.1088/2058-9565/aad56e">paper</a> that describe the design of SimulaQron.</p>
 <p>The documentation below assumes familiarity with classical network programming concepts, Python, Twisted, as well as an elementary understanding of quantum information. More information on a competition at <a class="reference external" href="http://www.simulaqron.org/">Our website</a></p>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
@@ -94,8 +94,16 @@ network nodes, as well as the creation of simulated entanglement.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#setup">Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#testing-a-simple-example">Testing a simple example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#settings">Settings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ConfNodes.html">Configuring the simulated network</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ConfNodes.html#starting-the-simulaqron-backend">Starting the SimulaQron backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ConfNodes.html#configuring-the-network-topology">Configuring the network topology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ConfNodes.html#manual-setup">Manual setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ConfNodes.html#connecting-to-a-remote-simulated-network">Connecting to a remote simulated network</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="CQCInterface.html">CQC Interface</a><ul>
@@ -150,7 +158,7 @@ network nodes, as well as the creation of simulated entanglement.</p>
         <li class="right" >
           <a href="Overview.html" title="Overview"
              >next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">SimulaQron 0.1 beta documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">SimulaQron 1.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

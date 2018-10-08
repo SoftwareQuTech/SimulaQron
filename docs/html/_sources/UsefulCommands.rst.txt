@@ -5,7 +5,7 @@ Here we list some useful methods that can be applied to a ``CQCConnection`` obje
 
 ``CQCConnection``
 """""""""""""""""
-The ``CQCConnection`` is initialized with the name of the node (``string``) as an argument.
+The ``CQCConnection`` is initialized with the name of the node (``string``) as an argument, an optional application ID (``int``) (if more Connections are run in the same process), and an optional `pend_messages` (``bool``) flag for when sending commands in sequence.
 
 * ``sendQubit(q,name)`` Sends the qubit q (``qubit``) to the node name (``string``).
 
@@ -19,7 +19,7 @@ The ``CQCConnection`` is initialized with the name of the node (``string``) as a
 * ``recvEPR()`` Receives qubit from an EPR-pair created with another node (that called ``createEPR``). 
 
   Return: ``qubit``.
-* ``sendClassical(name,msg)`` Sends a classical message msg (``int`` in range(0,256) or list of such ``int``s) to the node name (``string``). Opens a socket connection if not already opened. 
+* ``sendClassical(name,msg)`` Sends a classical message msg (``int`` in range(0,256) or list of such ``int`` s) to the node name (``string``). Opens a socket connection if not already opened.
 
   Return: ``None``.
 * ``startClassicalServer()`` Starts a server that can receive classical messages sent by ``sendClassical``. 
@@ -28,6 +28,19 @@ The ``CQCConnection`` is initialized with the name of the node (``string``) as a
 * ``recvClassical()`` Receives a classical message sent by another node by ``sendClassical``. 
 
   Return ``bytes``.
+
+
+``Factory and Sequences``
+---------------------------
+When the `pend_messages` flag is set to True in the CQCConnection, ALL commands (on both ``qubit`` and ``CQCConnection``) that you create are stored in a list, to be send all at once when flushed for a ``CQCConnection``.
+
+* ``set_pending(pend_messages)`` Set the `pend_messages` flag to True/False
+* ``flush(do_sequence=True)`` Send all pending messages to the backend at once. If `do_sequence` == True then it will send `CMDSequenceHeaders` between the commands, if it is False it will add the `ACTION` flag to the commands instead.
+
+  Return ``List``. Returns a list with measurement outcomes (``int`` 's) and ``qubit`` depending if `MEASURE` and/or `NEW` commands were used in the sequence.
+* ``flush_factory(num_iter, do_sequence=True)`` Send all pending messages to the backend at once as a factory, doing the sequence num_iter (``int``) times. If `do_sequence` == True then it will send `CMDSequenceHeaders` between the commands, if it is False it will add the `ACTION` flag to the commands instead.
+
+  Return ``List``. Returns a list with measurement outcomes (``int`` 's) and ``qubit`` depending if `MEASURE` and/or `NEW` commands were used in the sequence.
 
 ``qubit``
 """""""""""""""""

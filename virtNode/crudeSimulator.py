@@ -64,21 +64,15 @@ class simpleEngine(quantumEngine):
 
 	def add_fresh_qubit(self):
 		"""
-		Add a new qubit initialized in the |0> state
+		Add a new qubit initialized in the \|0\> state.
 		"""
 
 		# Prepare a clean qubit state in |0>
 		v = basis(2,0)
 		newQubit = v * v.dag()
 
-
-		try:
-			num = self.add_qubit(newQubit)
-			return num
-		except quantumError:
-			raise quantumError("Out of qubits.")
-			return(-1)
-
+		num = self.add_qubit(newQubit)
+		return num
 
 	def add_qubit(self, newQubit):
 		"""
@@ -86,8 +80,8 @@ class simpleEngine(quantumEngine):
 		"""
 
 		# Check if we are still allowed to add qubits
-		if self.activeQubits == self.maxQubits:
-			raise quantumError("No more qubits available.")
+		if self.activeQubits >= self.maxQubits:
+			raise noQubitError("No more qubits available in register.")
 
 		# Append to the existing state at the end
 		if self.activeQubits > 0:

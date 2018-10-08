@@ -38,25 +38,21 @@ from SimulaQron.cqc.pythonLib.cqc import *
 def main():
 
 	# Initialize the connection
-	Bob=CQCConnection("Bob")
-	Bob.startClassicalServer()
+	with CQCConnection("Bob") as Bob:
 
-	# Receive qubit from Alice (via Eve)
-	q=Bob.recvQubit()
+		# Receive qubit from Alice (via Eve)
+		q=Bob.recvQubit()
 
-	# Retreive key
-	k=q.measure()
+		# Retreive key
+		k=q.measure()
 
-	# Receive classical encoded message from Alice
-	enc=Bob.recvClassical()[0]
+		# Receive classical encoded message from Alice
+		enc=Bob.recvClassical()[0]
 
-	# Calculate message
-	m=(enc+k)%2
+		# Calculate message
+		m=(enc+k)%2
 
-	print("Bob retrived the message m={} from Alice.".format(m))
-
-	# Stop the connection
-	Bob.close()
+		print("Bob retrived the message m={} from Alice.".format(m))
 
 
 ##################################################################################################

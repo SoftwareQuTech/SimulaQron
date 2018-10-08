@@ -1,1 +1,0 @@
-{"Bob": ["Alice", "Charlie"], "Alice": ["Charlie", "Bob"], "Charlie": ["Bob", "Alice"]}

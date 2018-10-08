@@ -25,6 +25,7 @@ if [ "${QUICK}" == "y" ]; then
         echo "Since --quick is specified we skip tests doing tomography (tests of gates)."
         python test_other.py
         python test_sequence.py
+        python test_maxQubits.py
     fi
 else
     python test_single_qubit.py
@@ -33,4 +34,5 @@ else
     python test_factory_gates.py
     python test_factory_other.py
     python test_sequence.py
+    python test_maxQubits.py
 fi
