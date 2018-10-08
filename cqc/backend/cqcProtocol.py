@@ -258,6 +258,7 @@ class CQCProtocol(Protocol):
 			yield self.messageHandler.handle_cqc_message(header, data)
 			messages = self.messageHandler.retrieve_return_messages()
 		except Exception as e:
+			logging.error("CQC {}: Unexpected error when parsing CQC message: {}".format(self.name, e))
 			raise e
 
 		if messages:

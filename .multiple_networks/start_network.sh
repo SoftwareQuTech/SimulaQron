@@ -5,7 +5,7 @@ network_name=$1
 # Move all files to config folder
 
 rm -r "${NETSIM}/config/"*
-mv "${NETSIM}/.multiple_networks/configs/${network_name}/"* "${NETSIM}/config"
+cp "${NETSIM}/.multiple_networks/configs/${network_name}/"* "${NETSIM}/config"
 
 # Kill the current such network
 sh kill_network.sh "${network_name}"

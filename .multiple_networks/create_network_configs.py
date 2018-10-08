@@ -50,7 +50,7 @@ def construct_node_configs(nodes, config_path, start_nr, ip):
 	return start_nr + 3 * nrNodes
 
 
-def construct_settings(config_path, maxqubits=20, maxregs=1000, waittime=0.5, loglevel_back="warning", backendhandler="simulaqron", topology_file="", noisy_qubits=False, T1=1, loglevel_front="warning"):
+def construct_settings(config_path, maxqubits=10, maxregs=1000, waittime=0.5, loglevel_back="debug", backendhandler="simulaqron", topology_file="", noisy_qubits=True, T1=1, loglevel_front="warning"):
 	with open(config_path + "/settings.ini", 'w') as settings:
 		settings.write("[BACKEND]\n")
 		settings.write("maxqubits_per_node = {}\n".format(maxqubits))
