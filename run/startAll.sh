@@ -4,10 +4,16 @@ ps aux | grep python | grep setup | awk {'print $2'} | xargs kill -9
 ps aux | grep python | grep start | awk {'print $2'} | xargs kill -9
 
 # Read in some settings
-nodes_file=$NETSIM/$(sed -nr "/^\[CONFIG\]/ { :l /^nodes_file[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $NETSIM/config/settings.ini)
-if [ -z "$nodes_file" ]
+if [ -f $NETSIM/config/settings.ini ]
 then
-nodes_file="$NETSIM/config/Nodes.cfg"
+    nodes_file=$NETSIM/$(sed -nr "/^\[CONFIG\]/ { :l /^nodes_file[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $NETSIM/config/settings.ini)
+    if [ -z "$nodes_file" ]
+    then
+        nodes_file="$NETSIM/config/Nodes.cfg"
+    fi
+else
+    echo "Settings file not found in config folder, aborting"
+    exit 1
 fi
 # if no arguments were given we take the list of current Nodes
 if [ "$#" -eq 0 ] ;

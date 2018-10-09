@@ -129,8 +129,6 @@ class CQCConnection:
 
 		if socket_address is None:
 			# This file defines the network of CQC servers interfacing to virtual quantum nodes
-			if cqcFile is None:
-				self.cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
 
 			# Read configuration files for the cqc network
 			self._cqcNet = networkConfig(self.cqcFile)
@@ -462,7 +460,6 @@ class CQCConnection:
 			msg = self.readMessage()
 			self.check_error(msg[0])
 			if msg[0].tp != CQC_TP_NEW_OK:
-				print(len(msg))
 				raise CQCUnsuppError("Unexpected message of type {} send back from backend".format(msg[0].tp))
 			qubits.append(self.parse_CQC_msg(msg))
 			self.print_CQC_msg(msg)

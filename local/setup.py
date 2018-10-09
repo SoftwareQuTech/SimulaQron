@@ -91,7 +91,7 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func):
 	for node in classicalNet.hostDict:
 		nb = classicalNet.hostDict[node]
 		if nb.name != myName:
-			logging.debug("LOCAL %s: Making classical connection to %s.",myName,nb.name)
+			logging.debug("LOCAL %s: Making classical connection to %s at port %d.",myName,nb.name, nb.port)
 			nb.factory = pb.PBClientFactory()
 			reactor.connectTCP(nb.hostname, nb.port, nb.factory)
 			dList.append(nb.factory.getRootObject())

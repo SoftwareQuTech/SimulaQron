@@ -260,4 +260,5 @@ class sequenceTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
+	print("Testing sequences")
 	unittest.main()

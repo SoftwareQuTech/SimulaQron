@@ -8,7 +8,6 @@ if [ -z "$nodes_file" ]
 then
 nodes_file="$NETSIM/config/Nodes.cfg"
 fi
-echo ${nodes_file}
 # if no arguments were given we take the list of current Nodes
 if [ "$#" -eq 0 ] ;
 then

@@ -112,8 +112,6 @@ class CQCFactory(Factory):
 			return
 		else:
 			# Get the absolute path to the file
-			print(topology_file)
-			print(os.path.isabs(topology_file))
 			if os.path.isabs(topology_file):
 				abs_path = topology_file
 			else:

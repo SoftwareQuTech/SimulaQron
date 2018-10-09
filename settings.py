@@ -56,13 +56,12 @@ class Settings:
 	_default_appnodes_file = "config/appNodes.cfg"
 	_default_cqcnodes_file = "config/cqcNodes.cfg"
 	_default_nodes_file = "config/Nodes.cfg"
-	_default_topology_config_file = "config/topology.json"
 	_default_virtualnodes_file = "config/virtualNodes.cfg"
 	
 	CONF_APPNODES_FILE = os.environ['NETSIM'] + '/' + _default_appnodes_file
 	CONF_CQCNODES_FILE = os.environ['NETSIM'] + '/' + _default_cqcnodes_file
 	CONF_NODES_FILE = os.environ['NETSIM'] + '/' + _default_nodes_file
-	CONF_TOPOLOGY_FILE = os.environ['NETSIM'] + '/' + _default_topology_config_file
+	CONF_TOPOLOGY_FILE = ""
 	CONF_VIRTUALNODES_FILE = os.environ['NETSIM'] + '/' + _default_virtualnodes_file
 
 	@classmethod
@@ -167,7 +166,6 @@ class Settings:
 			if not os.path.isabs(file):
 				file = os.environ["NETSIM"] + "/" + file
 			cls.CONF_TOPOLOGY_FILE = file
-		print(170, cls.CONF_TOPOLOGY_FILE)
 
 		if "cqcnodes_file" in node_configs and node_configs["cqcnodes_file"] != "":
 			file = node_configs["cqcnodes_file"]

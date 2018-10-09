@@ -1,3 +1,4 @@
+import logging
 import unittest
 from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit, CQCNoQubitError
 from SimulaQron.settings import Settings
@@ -84,4 +85,5 @@ class TestMaxQubit(unittest.TestCase):
 				bob.recvEPR()
 
 if __name__ == '__main__':
+	logging.warning("Testing Max qubit limits. WARNING and ERROR logs in the backend are expected")
 	unittest.main()

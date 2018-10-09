@@ -29,6 +29,7 @@
 
 
 import sys, os
+from SimulaQron.settings import Settings
 
 from twisted.spread import pb
 from twisted.internet import reactor
@@ -133,14 +134,15 @@ def main():
 	myName = "Alice"
 
 	# This file defines the network of virtual quantum nodes
-	virtualFile = os.path.join(os.path.dirname(__file__), '../../../../config/virtualNodes.cfg')
+	virtualFile = os.environ['NETSIM'] + '/tests/auto/resources/default_settings/virtualNodes.cfg'
 
 	# This file defines the nodes acting as servers in the classical communication network
-	classicalFile = os.path.join(os.path.dirname(__file__), 'classicalNet.cfg')
+	classicalFile =  os.environ['NETSIM'] + '/tests/auto/merges/bothLocal/classicalNet.cfg'
 
 	# Read configuration files for the virtual quantum, as well as the classical network
 	virtualNet = networkConfig(virtualFile)
 	classicalNet = networkConfig(classicalFile)
+
 
 	# Check if we should run a local classical server. If so, initialize the code
 	# to handle remote connections on the classical communication network
@@ -155,6 +157,6 @@ def main():
 	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=Settings.CONF_LOGGING_LEVEL_BACKEND)
 main()
 

@@ -11,7 +11,6 @@ from twisted.internet.error import ConnectionRefusedError, CannotListenError
 
 
 def setup_CQC_server(names, hosts, factories):
-	print("HMM")
 	logging.debug("LOCAL: Starting CQC Log server.")
 	for myName in names:
 		cqc_factory = factories[myName]
@@ -21,7 +20,6 @@ def setup_CQC_server(names, hosts, factories):
 			myHost = cqc_factory.host
 			myHost.root = cqc_factory
 			myHost.factory = cqc_factory
-			print(myName, " listening to port", myHost.port)
 			reactor.listenTCP(myHost.port, myHost.factory)
 		except CannotListenError as e:
 			logging.error("LOCAL {}: CQC server address ({}) is already in use.".format(myName, myHost.port))
