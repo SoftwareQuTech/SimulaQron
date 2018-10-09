@@ -19,13 +19,14 @@ def construct_node_configs(nodes, config_path, start_nr, ip):
 
 	# Get path to configuration files
 	conf_files = [config_path + "/virtualNodes.cfg",
-				  config_path + "/cqcNodes.cfg",
-				  config_path + "/appNodes.cfg"]
+				  config_path + "/cqcNodes.cfg"]
+				  # config_path + "/appNodes.cfg"]
 
 	# File for just a simple list of the nodes
 	node_file = config_path + "/Nodes.cfg"
 	# What port numbers to start with
-	start_nrs = [start_nr, start_nr + nrNodes, start_nr + 2 * nrNodes]
+	# start_nrs = [start_nr, start_nr + nrNodes, start_nr + 2 * nrNodes]
+	start_nrs = [start_nr, start_nr + nrNodes]
 
 	# Start of the configuration files
 	conf_top = ["# Network configuration file", "#",
@@ -47,7 +48,7 @@ def construct_node_configs(nodes, config_path, start_nr, ip):
 	network_name = config_path.split('/')[-1]
 	shutil.copy(conf_files[1], "../network_configs/{}.cfg".format(network_name))
 
-	return start_nr + 3 * nrNodes
+	return start_nr + 2 * nrNodes
 
 
 def construct_settings(config_path, maxqubits=10, maxregs=1000, waittime=0.5, loglevel_back="debug", backendhandler="simulaqron", topology_file="", noisy_qubits=True, T1=1, loglevel_front="warning"):
