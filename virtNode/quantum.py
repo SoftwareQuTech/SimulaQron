@@ -98,7 +98,7 @@ class simulatedQubit(pb.Referenceable):
 		num = self.register.add_fresh_qubit()
 		self.num = num
 
-		logging.debug("QUANTUM %s: Adding qubit number %d to register %d",self.node.name, num,self.register.num)
+		logging.info("QUANTUM %s: Adding qubit number %d to register %d",self.node.name, num,self.register.num)
 
 	def remote_apply_X(self):
 		"""
