@@ -28,6 +28,7 @@
 
 from abc import ABC, abstractmethod
 from heapq import heappush, heappop, heapify
+from collections import defaultdict
 
 from SimulaQron.cqc.backend.cqcConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
@@ -420,12 +421,21 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 		self.factory = factory
 
 		# Dictionary that keeps qubit dictorionaries for each application
+		# TODO this is in factory right?
 		self.qubitList = {}
 
 	def handle_hello(self, header, data):
 		"""
 		Hello just requires us to return hello - for testing availability.
 		"""
+		qubits = defaultdict(list)
+		for appID, qID in self.factory.qubitList.keys():
+			qubits[appID].append(qID)
+
+		to_print="Hello! I'm node {} with the following qubits:\n".format(self.name)
+		for appID, qIDs in qubits.items():
+			to_print += "    App ID {}: {}\n".format(appID, qIDs)
+		logging.info(to_print[:-1])
 		msg = self.create_return_message(header.app_id, CQC_TP_HELLO)
 		self.return_messages.append(msg)
 
