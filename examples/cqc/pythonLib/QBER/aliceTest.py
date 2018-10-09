@@ -29,7 +29,7 @@
 
 import sys
 import json
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection, CQCNoQubitError
 
 def main(nr_runs):
 	meas_outcomes = {}
@@ -39,10 +39,16 @@ def main(nr_runs):
 	# Initialize the connection
 	with CQCConnection("Alice") as Alice:
 
-		for _ in range(nr_runs):
+		run = 0
+		while run < nr_runs:
 
-			# Create an EPR pair
-			q = Alice.createEPR("Bob")
+			try:
+				# Create an EPR pair
+				q = Alice.createEPR("Bob")
+			except CQCNoQubitError:
+				continue
+
+			run += 1
 
 			# Get the identifier of this EPR pair such that we can relate our measurement outcomes to Bobs
 			sequence_nr = q.get_entInfo().id_AB
