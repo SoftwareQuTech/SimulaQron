@@ -101,7 +101,7 @@ def main(T1, IP, start_port, nrnodes):
 			if line[-1] == '\n':
 				line = line[:-1]
 			if len(line) > 0:
-				if line[0] != '#':
+				if line[0] != '#' and line[0] != ';':
 					network_names.append(line)
 	print(network_names)
 	for network_name in network_names:
@@ -119,7 +119,7 @@ def parse_args():
 						help='The IP of this computer.')
 	parser.add_argument('--start_port', required=False, type=int, default=8801,
 						help='The port number to start with.')
-	parser.add_argument('--nr_nodes', required=False, type=int, default=20,
+	parser.add_argument('--nr_nodes', required=False, type=int, default=10,
 						help='The number of nodes in the complete networks.')
 	return parser.parse_args()
 
