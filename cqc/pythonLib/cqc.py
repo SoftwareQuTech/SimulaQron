@@ -124,6 +124,8 @@ class CQCConnection:
 			# This file defines the network of CQC servers interfacing to virtual quantum nodes
 			if cqcFile is None:
 				self.cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
+			else:
+				self.cqcFile = cqcFile
 
 			# Read configuration files for the cqc network
 			self._cqcNet = networkConfig(self.cqcFile)
@@ -478,6 +480,7 @@ class CQCConnection:
 
 		if isinstance(qubits, qubit):
 			qubits = [qubits]
+
 		assert isinstance(qubits, list)
 		n = len(qubits)
 
