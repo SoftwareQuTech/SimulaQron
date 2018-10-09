@@ -132,10 +132,8 @@ class CQCConnection:
 
 		if socket_address is None:
 			# This file defines the network of CQC servers interfacing to virtual quantum nodes
-			if cqcFile is None:
+			if self.cqcFile is None:
 				self.cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
-			else:
-				self.cqcFile = cqcFile
 
 			# Read configuration files for the cqc network
 			self._cqcNet = networkConfig(self.cqcFile)
