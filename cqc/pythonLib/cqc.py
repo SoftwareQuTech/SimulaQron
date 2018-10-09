@@ -483,6 +483,7 @@ class CQCConnection:
 
 		if isinstance(qubits, qubit):
 			qubits = [qubits]
+
 		assert isinstance(qubits, list)
 		n = len(qubits)
 
