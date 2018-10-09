@@ -91,6 +91,7 @@ def create_full_config_folder(network_name, start_port, T1, ip, nrnodes):
 			construct_settings(config_path, topology_file=topology_file)
 	else:
 		raise ValueError("Unknown network name {}".format(network_name))
+
 	return start_nr
 
 
@@ -104,8 +105,10 @@ def main(T1, IP, start_port, nrnodes):
 				if line[0] != '#' and line[0] != ';':
 					network_names.append(line)
 	print(network_names)
-	for network_name in network_names:
-		start_port = create_full_config_folder(network_name, start_port, T1, IP, nrnodes)
+	with open("network_names.cfg", 'w') as nn_file:
+		for network_name in network_names:
+			nn_file.write("{}\n".format(network_name))
+			start_port = create_full_config_folder(network_name, start_port, T1, IP, nrnodes)
 
 
 
