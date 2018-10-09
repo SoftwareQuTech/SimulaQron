@@ -93,6 +93,12 @@
 </div>
 <div class="section" id="module-SimulaQron.virtNode.basics">
 <span id="simulaqron-virtnode-basics-module"></span><h2>SimulaQron.virtNode.basics module<a class="headerlink" href="#module-SimulaQron.virtNode.basics" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="SimulaQron.virtNode.basics.noQubitError">
+<em class="property">exception </em><code class="descclassname">SimulaQron.virtNode.basics.</code><code class="descname">noQubitError</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/basics.html#noQubitError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.basics.noQubitError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimulaQron.virtNode.basics.quantumError" title="SimulaQron.virtNode.basics.quantumError"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulaQron.virtNode.basics.quantumError</span></code></a></p>
+</dd></dl>
+
 <dl class="class">
 <dt id="SimulaQron.virtNode.basics.quantumEngine">
 <em class="property">class </em><code class="descclassname">SimulaQron.virtNode.basics.</code><code class="descname">quantumEngine</code><span class="sig-paren">(</span><em>maxQubits=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/basics.html#quantumEngine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.basics.quantumEngine" title="Permalink to this definition">¶</a></dt>
@@ -107,7 +113,7 @@
 <dl class="exception">
 <dt id="SimulaQron.virtNode.basics.quantumError">
 <em class="property">exception </em><code class="descclassname">SimulaQron.virtNode.basics.</code><code class="descname">quantumError</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/basics.html#quantumError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.basics.quantumError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.pb.Error</span></code></p>
 </dd></dl>
 
 <dl class="exception">
@@ -587,7 +593,7 @@ simQubit        simulated qubit reference in the backend we’re adding</p>
 
 <dl class="method">
 <dt id="SimulaQron.virtNode.virtual.virtualNode.remote_add_register">
-<code class="descname">remote_add_register</code><span class="sig-paren">(</span><em>maxQubits=20</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.remote_add_register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.remote_add_register" title="Permalink to this definition">¶</a></dt>
+<code class="descname">remote_add_register</code><span class="sig-paren">(</span><em>maxQubits=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.remote_add_register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.remote_add_register" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a new register to the node..</p>
 <p>Arguments:
 maxQubits       maximum number of qubits to use in the default engine</p>
@@ -727,8 +733,12 @@ num2            number of the second qubit</p>
 
 <dl class="method">
 <dt id="SimulaQron.virtNode.virtual.virtualNode.remote_new_qubit">
-<code class="descname">remote_new_qubit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.remote_new_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.remote_new_qubit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a new qubit in the default local register.</p>
+<code class="descname">remote_new_qubit</code><span class="sig-paren">(</span><em>ignore_max_qubits=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.remote_new_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.remote_new_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new qubit in the default local register.
+:param ignore_max_qubits: bool</p>
+<blockquote>
+<div>Used to ignore the check if max virtual qubits is reached. This is used when creating EPR pairs
+to be able to temporarily create a qubit.</div></blockquote>
 </dd></dl>
 
 <dl class="method">
@@ -797,6 +807,14 @@ newSimNodeName  new node simulating this qubit
 oldSimNodeName  old node simulating the qubit
 oldReg          old register
 newD            dictionary mapping qubit numbers to qubit objects at the new simulating node</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimulaQron.virtNode.virtual.virtualNode.reraise_remote_error">
+<code class="descname">reraise_remote_error</code><span class="sig-paren">(</span><em>remote_err</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.reraise_remote_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.reraise_remote_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a function re-raises the error thrown remotely
+:param remote_err: <code class="xref py py-obj docutils literal notranslate"><span class="pre">twisted.spread.pb.RemoteError</span></code>
+:return: class</p>
 </dd></dl>
 
 </dd></dl>

@@ -112,7 +112,7 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func):
 
 def init_register(resList, myName, virtualNet, classicalNet, lNode, func):
 
-	logging.debug("LOCAL %s: All connections set up.", myName)
+	logging.info("LOCAL %s: All connections set up.", myName)
 
 	# Retrieve the connection to the local virtual node, if successfull
 	j = 0

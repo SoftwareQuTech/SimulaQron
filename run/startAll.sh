@@ -1,7 +1,9 @@
 #!/usr/bin/env sh
-ps aux | grep python | grep Test | awk {'print $2'} | xargs kill -9
-ps aux | grep python | grep setup | awk {'print $2'} | xargs kill -9
-ps aux | grep python | grep start | awk {'print $2'} | xargs kill -9
+ALL_PIDS=$(ps aux | grep python | grep -E "Test|setup|start" | awk {'print $2'})
+if [ "$ALL_PIDS" != "" ]
+then
+        kill -9 $ALL_PIDS
+fi       
 
 # Read in some settings
 if [ -f $NETSIM/config/settings.ini ]

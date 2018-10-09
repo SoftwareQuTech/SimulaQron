@@ -1,7 +1,10 @@
 #!/usr/bin/env sh
-ps aux | grep python | grep Test | awk {'print $2'} | xargs kill -9
-ps aux | grep python | grep setup | awk {'print $2'} | xargs kill -9
-ps aux | grep python | grep start | awk {'print $2'} | xargs kill -9
+ALL_PIDS=$(ps aux | grep python | grep -E "Test|setup|start" | awk {'print $2'})
+if [ "$ALL_PIDS" != "" ]
+then
+        kill -9 $ALL_PIDS
+fi
+
 # Read in some settings
 nodes_file=$NETSIM/$(sed -nr "/^\[CONFIG\]/ { :l /^nodes_file[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $NETSIM/config/settings.ini)
 if [ -z "$nodes_file" ]

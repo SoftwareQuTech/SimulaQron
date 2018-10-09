@@ -51,6 +51,7 @@ Possible message types are listed below. Depending on the message type additiona
 	#define	CQC_ERR_UNSUPP		22	/* Command sequence not supported */
 	#define	CQC_ERR_TIMEOUT		23	/* Timeout */
 	#define CQC_ERR_INUSE		24	/* Qubit already in use */
+	#define CQC_ERR_UNKNOWN		25	/* Unknown qubit ID */
 
 """"""""""""""""""
 CQC Command Header

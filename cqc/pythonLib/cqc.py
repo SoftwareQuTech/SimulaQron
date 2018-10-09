@@ -70,7 +70,7 @@ def createXtraHeader(command, values):
 
 
 class CQCConnection:
-	_appIDs = []
+	_appIDs = {}
 
 	def __init__(self, name, socket_address=None, cqcFile=None, appFile=None, appID=None, pend_messages=False):
 		"""
@@ -93,23 +93,26 @@ class CQCConnection:
 		# Host name
 		self.name = name
 
+		if name not in self._appIDs:
+			self._appIDs[name] = []
+
 		# Which appID
 		if appID is None:
-			if len(self._appIDs) == 0:
+			if len(self._appIDs[name]) == 0:
 				self._appID = 0
 			else:
-				for i in range(min(self._appIDs) + 1, max(self._appIDs)):
-					if i not in self._appIDs:
+				for i in range(min(self._appIDs[name]) + 1, max(self._appIDs[name])):
+					if i not in self._appIDs[name]:
 						self._appID = i
 						break
 				else:
-					self._appID = max(self._appIDs) + 1
-			self._appIDs.append(self._appID)
+					self._appID = max(self._appIDs[name]) + 1
+			self._appIDs[name].append(self._appID)
 		else:
 			if appID in self._appIDs:
 				raise ValueError("appID={} is already in use".format(appID))
 			self._appID = appID
-			self._appIDs.append(self._appID)
+			self._appIDs[name].append(self._appID)
 
 		# Buffer received data
 		self.buf = None
@@ -129,6 +132,10 @@ class CQCConnection:
 
 		if socket_address is None:
 			# This file defines the network of CQC servers interfacing to virtual quantum nodes
+			if cqcFile is None:
+				self.cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
+			else:
+				self.cqcFile = cqcFile
 
 			# Read configuration files for the cqc network
 			self._cqcNet = networkConfig(self.cqcFile)
@@ -146,9 +153,9 @@ class CQCConnection:
 			try:
 				myIP, port = socket_address
 				if not isinstance(myIP, str):
-					raise TypeError
+					raise TypeError()
 				if not isinstance(port, int):
-					raise TypeError
+					raise TypeError()
 			except Exception:
 				raise TypeError("When specifying the socket address, this should be a tuple (str,int).")
 
@@ -210,7 +217,7 @@ class CQCConnection:
 			self.release_all_qubits()
 		self._s.close()
 		try:
-			self._appIDs.remove(self._appID)
+			self._appIDs[self.name].remove(self._appID)
 		except ValueError:
 			pass  # Already closed
 
@@ -720,12 +727,16 @@ class CQCConnection:
 			remote_node = entInfoHdr.node_B
 			remote_port = entInfoHdr.port_B
 			remote_name = None
-			for node in self._cqcNet.hostDict.values():
-				if (node.ip == remote_node) and (node.port == remote_port):
-					remote_name = node.name
-					break
-			if remote_name == None:
-				raise RuntimeError("Remote node ({},{}) is not in config-file.".format(remote_node, remote_port))
+			try:
+				for node in self._cqcNet.hostDict.values():
+					if (node.ip == remote_node) and (node.port == remote_port):
+						remote_name = node.name
+						break
+				if remote_name == None:
+					raise RuntimeError("Remote node ({},{}) is not in config-file.".format(remote_node, remote_port))
+			except AttributeError:
+				remote_name = "({}, {})".format(remote_node, remote_port)
+
 
 			logging.debug(
 				"CQC tells App {}: 'EPR created with node {}, using qubit with ID {}'".format(self.name, remote_name,
@@ -784,7 +795,7 @@ class CQCConnection:
 		if cqc_err == CQC_ERR_UNKNOWN:
 			raise CQCUnknownError("Unknown qubit ID")
 
-	def sendQubit(self, q, name, remote_appID=0, notify=True, block=True):
+	def sendQubit(self, q, name, remote_appID=0, remote_socket=None, notify=True, block=True):
 		"""
 		Sends qubit to another node in the cqc network. If this node is not in the network an error is raised.
 
@@ -793,16 +804,37 @@ class CQCConnection:
 			:q:		 The qubit to send.
 			:Name:		 Name of the node as specified in the cqc network config file.
 			:remote_appID:	 The app ID of the application running on the receiving node.
+			:remote_socket: tuple (str, int) of ip and port number. Needed if no cqcFile was specified
 			:nofify:	 Do we wish to be notified when done.
 			:block:		 Do we want the qubit to be blocked
 		"""
 
-		# Get receiving host
-		hostDict = self._cqcNet.hostDict
-		if name in hostDict:
-			recvHost = hostDict[name]
+		if remote_socket is None:
+			try:
+				# Get receiving host
+				hostDict = self._cqcNet.hostDict
+			except AttributeError:
+				raise ValueError("If a CQCConnections is initialized without specifying a cqcFile you need to also provide a socket address for the remote node here.")
+			if name in hostDict:
+				recvHost = hostDict[name]
+				remote_ip = recvHost.ip
+				remote_port = recvHost.port
+			else:
+				raise ValueError("Host name '{}' is not in the cqc network".format(name))
 		else:
-			raise ValueError("Host name '{}' is not in the cqc network".format(name))
+			try:
+				remote_ip, remote_port = remote_socket
+				if not isinstance(remote_ip, str):
+					raise TypeError()
+				else:
+					# Pack the IP
+					addr = socket.gethostbyname(remote_ip)
+					packedIP = socket.inet_aton(addr)
+					remote_ip = struct.unpack("!L", packedIP)[0]
+				if not isinstance(remote_port, int):
+					raise TypeError()
+			except Exception:
+				raise TypeError("When specifying the remote socket address, this should be a tuple (str,int).")
 
 		if self.pend_messages:
 			# print info
@@ -810,13 +842,13 @@ class CQCConnection:
 				"App {} pends message: 'Send qubit with ID {} to {} and appID {}'".format(self.name, q._qID, name,
 																						  remote_appID))
 			self.pending_messages.append([q, CQC_CMD_SEND, int(notify), int(block), [remote_appID,
-																					 recvHost.ip, recvHost.port]])
+																					 remote_ip, remote_port]])
 		else:
 			# print info
 			logging.debug("App {} tells CQC: 'Send qubit with ID {} to {} and appID {}'".format(self.name, q._qID, name,
 																								remote_appID))
 			self.sendCmdXtra(q._qID, CQC_CMD_SEND, notify=int(notify), block=int(block), remote_appID=remote_appID,
-							 remote_node=recvHost.ip, remote_port=recvHost.port)
+							 remote_node=remote_ip, remote_port=remote_port)
 			if notify:
 				message = self.readMessage()
 				self.print_CQC_msg(message)
@@ -868,7 +900,7 @@ class CQCConnection:
 			q._set_active(True)
 			return q
 
-	def createEPR(self, name, remote_appID=0, notify=True, block=True):
+	def createEPR(self, name, remote_appID=0, remote_socket=None, notify=True, block=True):
 		"""
 		Creates epr with other host in cqc network.
 
@@ -876,16 +908,37 @@ class CQCConnection:
 
 			:name:		 Name of the node as specified in the cqc network config file.
 			:remote_appID:	 The app ID of the application running on the receiving node.
+			:remote_socket: tuple (str, int) of ip and port number. Needed if no cqcFile was specified
 			:nofify:	 Do we wish to be notified when done.
 			:block:		 Do we want the qubit to be blocked
 		"""
 
-		# Get receiving host
-		hostDict = self._cqcNet.hostDict
-		if name in hostDict:
-			recvHost = hostDict[name]
+		if remote_socket is None:
+			try:
+				# Get receiving host
+				hostDict = self._cqcNet.hostDict
+			except AttributeError:
+				raise ValueError("If a CQCConnections is initialized without specifying a cqcFile you need to also provide a socket address for the remote node here.")
+			if name in hostDict:
+				recvHost = hostDict[name]
+				remote_ip = recvHost.ip
+				remote_port = recvHost.port
+			else:
+				raise ValueError("Host name '{}' is not in the cqc network".format(name))
 		else:
-			raise ValueError("Host name '{}' is not in the cqc network".format(name))
+			try:
+				remote_ip, remote_port = remote_socket
+				if not isinstance(remote_ip, str):
+					raise TypeError()
+				else:
+					# Pack the IP
+					addr = socket.gethostbyname(remote_ip)
+					packedIP = socket.inet_aton(addr)
+					remote_ip = struct.unpack("!L", packedIP)[0]
+				if not isinstance(remote_port, int):
+					raise TypeError()
+			except Exception:
+				raise TypeError("When specifying the remote socket address, this should be a tuple (str,int).")
 
 		# initialize the qubit
 		q = qubit(self, createNew=False)
@@ -896,7 +949,7 @@ class CQCConnection:
 																								remote_appID))
 
 			self.pending_messages.append(
-				[q, CQC_CMD_EPR, int(notify), int(block), [remote_appID, recvHost.ip, recvHost.port]])
+				[q, CQC_CMD_EPR, int(notify), int(block), [remote_appID, remote_ip, remote_port]])
 			return q
 		else:
 			# print info
@@ -904,7 +957,7 @@ class CQCConnection:
 				"App {} tells CQC: 'Create EPR-pair with {} and appID {}'".format(self.name, name, remote_appID))
 
 			self.sendCmdXtra(0, CQC_CMD_EPR, notify=int(notify), block=int(block), remote_appID=remote_appID,
-							 remote_node=recvHost.ip, remote_port=recvHost.port)
+							 remote_node=remote_ip, remote_port=remote_port)
 			# Get RECV message
 			message = self.readMessage()
 			notifyHdr = message[1]
@@ -1306,10 +1359,13 @@ class qubit:
 		if self._entInfo:
 			ip = self._entInfo.node_B
 			port = self._entInfo.port_B
-			for node in self._cqc._cqcNet.hostDict.values():
-				if (node.ip == ip) and (node.port == port):
-					self._remote_entNode = node.name
-					break
+			try:
+				for node in self._cqc._cqcNet.hostDict.values():
+					if (node.ip == ip) and (node.port == port):
+						self._remote_entNode = node.name
+						break
+			except AttributeError:
+				self._remote_entNode = None
 
 	def __str__(self):
 		if self._active:
@@ -1334,10 +1390,13 @@ class qubit:
 		if self._entInfo:
 			ip = self._entInfo.node_B
 			port = self._entInfo.port_B
-			for node in self._cqc._cqcNet.hostDict.values():
-				if (node.ip == ip) and (node.port == port):
-					self._remote_entNode = node.name
-					break
+			try:
+				for node in self._cqc._cqcNet.hostDict.values():
+					if (node.ip == ip) and (node.port == port):
+						self._remote_entNode = node.name
+						break
+			except AttributeError:
+				self._remote_entNode = None
 
 	def is_entangled(self):
 		if self._entInfo:

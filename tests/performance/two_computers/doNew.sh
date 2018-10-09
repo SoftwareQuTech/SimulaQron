@@ -1,4 +1,7 @@
-ps aux | grep python | grep start | awk {'print $2'} | xargs kill -9
-ps aux | grep python | grep 'server\.py' | awk {'print $2'} | xargs kill -9
-ps aux | grep python | grep 'server\.py' | awk {'print $2'} | xargs kill -9
+#!/usr/bin/env sh
+PIDS=$(ps aux | grep python | grep -E "start|server\.py" | awk {'print $2'})
+if [ "$PIDS" != "" ]
+then
+        kill -9 $PIDS
+fi
 sh run.sh
