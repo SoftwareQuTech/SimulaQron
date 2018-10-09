@@ -21,7 +21,7 @@ from twisted.spread import pb
 
 
 def init_register(virtRoot, myName, node):
-	logging.debug("LOCAL %s: All connections set up.", myName)
+	logging.info("LOCAL %s: All connections set up.", myName)
 
 	# Set the virtual node
 	node.set_virtual_node(virtRoot)
