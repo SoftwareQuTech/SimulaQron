@@ -144,7 +144,7 @@
 
 <dl class="method">
 <dt id="SimulaQron.cqc.pythonLib.cqc.CQCConnection.createEPR">
-<code class="descname">createEPR</code><span class="sig-paren">(</span><em>name</em>, <em>remote_appID=0</em>, <em>notify=True</em>, <em>block=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection.createEPR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection.createEPR" title="Permalink to this definition">¶</a></dt>
+<code class="descname">createEPR</code><span class="sig-paren">(</span><em>name</em>, <em>remote_appID=0</em>, <em>remote_socket=None</em>, <em>notify=True</em>, <em>block=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection.createEPR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection.createEPR" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates epr with other host in cqc network.</p>
 <ul>
 <li><p class="first"><strong>Arguments</strong></p>
@@ -157,9 +157,11 @@
 </tr>
 <tr class="field-even field"><th class="field-name">remote_appID:</th><td class="field-body">The app ID of the application running on the receiving node.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">nofify:</th><td class="field-body">Do we wish to be notified when done.</td>
+<tr class="field-odd field"><th class="field-name">remote_socket:</th><td class="field-body">tuple (str, int) of ip and port number. Needed if no cqcFile was specified</td>
 </tr>
-<tr class="field-even field"><th class="field-name">block:</th><td class="field-body">Do we want the qubit to be blocked</td>
+<tr class="field-even field"><th class="field-name">nofify:</th><td class="field-body">Do we wish to be notified when done.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">block:</th><td class="field-body">Do we want the qubit to be blocked</td>
 </tr>
 </tbody>
 </table>
@@ -469,7 +471,7 @@ Maxsize is the max size of message.</p>
 
 <dl class="method">
 <dt id="SimulaQron.cqc.pythonLib.cqc.CQCConnection.sendQubit">
-<code class="descname">sendQubit</code><span class="sig-paren">(</span><em>q</em>, <em>name</em>, <em>remote_appID=0</em>, <em>notify=True</em>, <em>block=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection.sendQubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection.sendQubit" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sendQubit</code><span class="sig-paren">(</span><em>q</em>, <em>name</em>, <em>remote_appID=0</em>, <em>remote_socket=None</em>, <em>notify=True</em>, <em>block=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/pythonLib/cqc.html#CQCConnection.sendQubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.pythonLib.cqc.CQCConnection.sendQubit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends qubit to another node in the cqc network. If this node is not in the network an error is raised.</p>
 <ul>
 <li><p class="first"><strong>Arguments</strong></p>
@@ -484,9 +486,11 @@ Maxsize is the max size of message.</p>
 </tr>
 <tr class="field-odd field"><th class="field-name">remote_appID:</th><td class="field-body">The app ID of the application running on the receiving node.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">nofify:</th><td class="field-body">Do we wish to be notified when done.</td>
+<tr class="field-even field"><th class="field-name">remote_socket:</th><td class="field-body">tuple (str, int) of ip and port number. Needed if no cqcFile was specified</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">block:</th><td class="field-body">Do we want the qubit to be blocked</td>
+<tr class="field-odd field"><th class="field-name">nofify:</th><td class="field-body">Do we wish to be notified when done.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">block:</th><td class="field-body">Do we want the qubit to be blocked</td>
 </tr>
 </tbody>
 </table>
