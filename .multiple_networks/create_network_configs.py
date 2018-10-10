@@ -110,6 +110,9 @@ def main(T1, IP, start_port, nrnodes):
 			nn_file.write("{}\n".format(network_name))
 			start_port = create_full_config_folder(network_name, start_port, T1, IP, nrnodes)
 
+	shutil.copy("topology.png", "../network_configs/")
+	shutil.copy("dutch_topology.json", "../network_configs/topology.json")
+
 
 
 
