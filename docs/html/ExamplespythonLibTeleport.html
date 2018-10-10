@@ -172,7 +172,7 @@ Alice will teleport a state (in this case the <span class="math notranslate nohi
         <span class="k">with</span> <span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Bob&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">Bob</span><span class="p">:</span>
 
             <span class="c1"># Make an EPR pair with Alice</span>
-            <span class="n">qB</span><span class="o">=</span><span class="n">Bob</span><span class="o">.</span><span class="n">createEPR</span><span class="p">(</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span>
+            <span class="n">qB</span><span class="o">=</span><span class="n">Bob</span><span class="o">.</span><span class="n">recvEPR</span><span class="p">()</span>
 
             <span class="c1"># Receive info about corrections</span>
             <span class="n">data</span><span class="o">=</span><span class="n">Bob</span><span class="o">.</span><span class="n">recvClassical</span><span class="p">()</span>

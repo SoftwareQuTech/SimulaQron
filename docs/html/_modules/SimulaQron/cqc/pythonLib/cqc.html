@@ -125,7 +125,7 @@
 
 
 <div class="viewcode-block" id="CQCConnection"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection">[docs]</a><span class="k">class</span> <span class="nc">CQCConnection</span><span class="p">:</span>
-	<span class="n">_appIDs</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="n">_appIDs</span> <span class="o">=</span> <span class="p">{}</span>
 
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">socket_address</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cqcFile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">appFile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">appID</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pend_messages</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
@@ -148,23 +148,26 @@
 		<span class="c1"># Host name</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
+		<span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
 		<span class="c1"># Which appID</span>
 		<span class="k">if</span> <span class="n">appID</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">_appID</span> <span class="o">=</span> <span class="mi">0</span>
 			<span class="k">else</span><span class="p">:</span>
-				<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">)):</span>
-					<span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">:</span>
+				<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">[</span><span class="n">name</span><span class="p">])):</span>
+					<span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
 						<span class="bp">self</span><span class="o">.</span><span class="n">_appID</span> <span class="o">=</span> <span class="n">i</span>
 						<span class="k">break</span>
 				<span class="k">else</span><span class="p">:</span>
-					<span class="bp">self</span><span class="o">.</span><span class="n">_appID</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appID</span><span class="p">)</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">_appID</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appID</span><span class="p">)</span>
 		<span class="k">else</span><span class="p">:</span>
 			<span class="k">if</span> <span class="n">appID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">:</span>
 				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;appID=</span><span class="si">{}</span><span class="s2"> is already in use&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">appID</span><span class="p">))</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_appID</span> <span class="o">=</span> <span class="n">appID</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appID</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appID</span><span class="p">)</span>
 
 		<span class="c1"># Buffer received data</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">buf</span> <span class="o">=</span> <span class="kc">None</span>
@@ -179,6 +182,8 @@
 			<span class="c1"># This file defines the network of CQC servers interfacing to virtual quantum nodes</span>
 			<span class="k">if</span> <span class="n">cqcFile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">cqcFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;NETSIM&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/config/cqcNodes.cfg&quot;</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">cqcFile</span> <span class="o">=</span> <span class="n">cqcFile</span>
 
 			<span class="c1"># Read configuration files for the cqc network</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span> <span class="o">=</span> <span class="n">networkConfig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cqcFile</span><span class="p">)</span>
@@ -196,9 +201,9 @@
 			<span class="k">try</span><span class="p">:</span>
 				<span class="n">myIP</span><span class="p">,</span> <span class="n">port</span> <span class="o">=</span> <span class="n">socket_address</span>
 				<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">myIP</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-					<span class="k">raise</span> <span class="ne">TypeError</span>
+					<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
 				<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-					<span class="k">raise</span> <span class="ne">TypeError</span>
+					<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
 			<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
 				<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;When specifying the socket address, this should be a tuple (str,int).&quot;</span><span class="p">)</span>
 
@@ -260,7 +265,7 @@
 			<span class="bp">self</span><span class="o">.</span><span class="n">release_all_qubits</span><span class="p">()</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 		<span class="k">try</span><span class="p">:</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appID</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_appIDs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appID</span><span class="p">)</span>
 		<span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
 			<span class="k">pass</span>  <span class="c1"># Already closed</span>
 
@@ -771,12 +776,16 @@
 			<span class="n">remote_node</span> <span class="o">=</span> <span class="n">entInfoHdr</span><span class="o">.</span><span class="n">node_B</span>
 			<span class="n">remote_port</span> <span class="o">=</span> <span class="n">entInfoHdr</span><span class="o">.</span><span class="n">port_B</span>
 			<span class="n">remote_name</span> <span class="o">=</span> <span class="kc">None</span>
-			<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-				<span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">ip</span> <span class="o">==</span> <span class="n">remote_node</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">port</span> <span class="o">==</span> <span class="n">remote_port</span><span class="p">):</span>
-					<span class="n">remote_name</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
-					<span class="k">break</span>
-			<span class="k">if</span> <span class="n">remote_name</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-				<span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Remote node (</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">) is not in config-file.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">remote_node</span><span class="p">,</span> <span class="n">remote_port</span><span class="p">))</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+					<span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">ip</span> <span class="o">==</span> <span class="n">remote_node</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">port</span> <span class="o">==</span> <span class="n">remote_port</span><span class="p">):</span>
+						<span class="n">remote_name</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
+						<span class="k">break</span>
+				<span class="k">if</span> <span class="n">remote_name</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+					<span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Remote node (</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">) is not in config-file.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">remote_node</span><span class="p">,</span> <span class="n">remote_port</span><span class="p">))</span>
+			<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+				<span class="n">remote_name</span> <span class="o">=</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">remote_node</span><span class="p">,</span> <span class="n">remote_port</span><span class="p">)</span>
+
 
 			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
 				<span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;EPR created with node </span><span class="si">{}</span><span class="s2">, using qubit with ID </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">remote_name</span><span class="p">,</span>
@@ -835,7 +844,7 @@
 		<span class="k">if</span> <span class="n">cqc_err</span> <span class="o">==</span> <span class="n">CQC_ERR_UNKNOWN</span><span class="p">:</span>
 			<span class="k">raise</span> <span class="n">CQCUnknownError</span><span class="p">(</span><span class="s2">&quot;Unknown qubit ID&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CQCConnection.sendQubit"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.sendQubit">[docs]</a>	<span class="k">def</span> <span class="nf">sendQubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">remote_appID</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">notify</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="CQCConnection.sendQubit"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.sendQubit">[docs]</a>	<span class="k">def</span> <span class="nf">sendQubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">remote_appID</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">remote_socket</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">notify</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Sends qubit to another node in the cqc network. If this node is not in the network an error is raised.</span>
 
@@ -844,16 +853,37 @@
 <span class="sd">			:q:		 The qubit to send.</span>
 <span class="sd">			:Name:		 Name of the node as specified in the cqc network config file.</span>
 <span class="sd">			:remote_appID:	 The app ID of the application running on the receiving node.</span>
+<span class="sd">			:remote_socket: tuple (str, int) of ip and port number. Needed if no cqcFile was specified</span>
 <span class="sd">			:nofify:	 Do we wish to be notified when done.</span>
 <span class="sd">			:block:		 Do we want the qubit to be blocked</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
-		<span class="c1"># Get receiving host</span>
-		<span class="n">hostDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span>
-		<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">hostDict</span><span class="p">:</span>
-			<span class="n">recvHost</span> <span class="o">=</span> <span class="n">hostDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+		<span class="k">if</span> <span class="n">remote_socket</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="c1"># Get receiving host</span>
+				<span class="n">hostDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span>
+			<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If a CQCConnections is initialized without specifying a cqcFile you need to also provide a socket address for the remote node here.&quot;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">hostDict</span><span class="p">:</span>
+				<span class="n">recvHost</span> <span class="o">=</span> <span class="n">hostDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+				<span class="n">remote_ip</span> <span class="o">=</span> <span class="n">recvHost</span><span class="o">.</span><span class="n">ip</span>
+				<span class="n">remote_port</span> <span class="o">=</span> <span class="n">recvHost</span><span class="o">.</span><span class="n">port</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Host name &#39;</span><span class="si">{}</span><span class="s2">&#39; is not in the cqc network&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
 		<span class="k">else</span><span class="p">:</span>
-			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Host name &#39;</span><span class="si">{}</span><span class="s2">&#39; is not in the cqc network&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">remote_ip</span><span class="p">,</span> <span class="n">remote_port</span> <span class="o">=</span> <span class="n">remote_socket</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remote_ip</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+					<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="c1"># Pack the IP</span>
+					<span class="n">addr</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostbyname</span><span class="p">(</span><span class="n">remote_ip</span><span class="p">)</span>
+					<span class="n">packedIP</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">inet_aton</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+					<span class="n">remote_ip</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;!L&quot;</span><span class="p">,</span> <span class="n">packedIP</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remote_port</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+					<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
+			<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;When specifying the remote socket address, this should be a tuple (str,int).&quot;</span><span class="p">)</span>
 
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pend_messages</span><span class="p">:</span>
 			<span class="c1"># print info</span>
@@ -861,13 +891,13 @@
 				<span class="s2">&quot;App </span><span class="si">{}</span><span class="s2"> pends message: &#39;Send qubit with ID </span><span class="si">{}</span><span class="s2"> to </span><span class="si">{}</span><span class="s2"> and appID </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">q</span><span class="o">.</span><span class="n">_qID</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
 																						  <span class="n">remote_appID</span><span class="p">))</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">pending_messages</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">q</span><span class="p">,</span> <span class="n">CQC_CMD_SEND</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">notify</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">),</span> <span class="p">[</span><span class="n">remote_appID</span><span class="p">,</span>
-																					 <span class="n">recvHost</span><span class="o">.</span><span class="n">ip</span><span class="p">,</span> <span class="n">recvHost</span><span class="o">.</span><span class="n">port</span><span class="p">]])</span>
+																					 <span class="n">remote_ip</span><span class="p">,</span> <span class="n">remote_port</span><span class="p">]])</span>
 		<span class="k">else</span><span class="p">:</span>
 			<span class="c1"># print info</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2"> tells CQC: &#39;Send qubit with ID </span><span class="si">{}</span><span class="s2"> to </span><span class="si">{}</span><span class="s2"> and appID </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">q</span><span class="o">.</span><span class="n">_qID</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
 																								<span class="n">remote_appID</span><span class="p">))</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">sendCmdXtra</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">_qID</span><span class="p">,</span> <span class="n">CQC_CMD_SEND</span><span class="p">,</span> <span class="n">notify</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">notify</span><span class="p">),</span> <span class="n">block</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">),</span> <span class="n">remote_appID</span><span class="o">=</span><span class="n">remote_appID</span><span class="p">,</span>
-							 <span class="n">remote_node</span><span class="o">=</span><span class="n">recvHost</span><span class="o">.</span><span class="n">ip</span><span class="p">,</span> <span class="n">remote_port</span><span class="o">=</span><span class="n">recvHost</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+							 <span class="n">remote_node</span><span class="o">=</span><span class="n">remote_ip</span><span class="p">,</span> <span class="n">remote_port</span><span class="o">=</span><span class="n">remote_port</span><span class="p">)</span>
 			<span class="k">if</span> <span class="n">notify</span><span class="p">:</span>
 				<span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">print_CQC_msg</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
@@ -919,7 +949,7 @@
 			<span class="n">q</span><span class="o">.</span><span class="n">_set_active</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 			<span class="k">return</span> <span class="n">q</span></div>
 
-<div class="viewcode-block" id="CQCConnection.createEPR"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.createEPR">[docs]</a>	<span class="k">def</span> <span class="nf">createEPR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">remote_appID</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">notify</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="CQCConnection.createEPR"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.createEPR">[docs]</a>	<span class="k">def</span> <span class="nf">createEPR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">remote_appID</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">remote_socket</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">notify</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Creates epr with other host in cqc network.</span>
 
@@ -927,16 +957,37 @@
 
 <span class="sd">			:name:		 Name of the node as specified in the cqc network config file.</span>
 <span class="sd">			:remote_appID:	 The app ID of the application running on the receiving node.</span>
+<span class="sd">			:remote_socket: tuple (str, int) of ip and port number. Needed if no cqcFile was specified</span>
 <span class="sd">			:nofify:	 Do we wish to be notified when done.</span>
 <span class="sd">			:block:		 Do we want the qubit to be blocked</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
-		<span class="c1"># Get receiving host</span>
-		<span class="n">hostDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span>
-		<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">hostDict</span><span class="p">:</span>
-			<span class="n">recvHost</span> <span class="o">=</span> <span class="n">hostDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+		<span class="k">if</span> <span class="n">remote_socket</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="c1"># Get receiving host</span>
+				<span class="n">hostDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span>
+			<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If a CQCConnections is initialized without specifying a cqcFile you need to also provide a socket address for the remote node here.&quot;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">hostDict</span><span class="p">:</span>
+				<span class="n">recvHost</span> <span class="o">=</span> <span class="n">hostDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+				<span class="n">remote_ip</span> <span class="o">=</span> <span class="n">recvHost</span><span class="o">.</span><span class="n">ip</span>
+				<span class="n">remote_port</span> <span class="o">=</span> <span class="n">recvHost</span><span class="o">.</span><span class="n">port</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Host name &#39;</span><span class="si">{}</span><span class="s2">&#39; is not in the cqc network&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
 		<span class="k">else</span><span class="p">:</span>
-			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Host name &#39;</span><span class="si">{}</span><span class="s2">&#39; is not in the cqc network&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">remote_ip</span><span class="p">,</span> <span class="n">remote_port</span> <span class="o">=</span> <span class="n">remote_socket</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remote_ip</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+					<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="c1"># Pack the IP</span>
+					<span class="n">addr</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostbyname</span><span class="p">(</span><span class="n">remote_ip</span><span class="p">)</span>
+					<span class="n">packedIP</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">inet_aton</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+					<span class="n">remote_ip</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;!L&quot;</span><span class="p">,</span> <span class="n">packedIP</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remote_port</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+					<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
+			<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;When specifying the remote socket address, this should be a tuple (str,int).&quot;</span><span class="p">)</span>
 
 		<span class="c1"># initialize the qubit</span>
 		<span class="n">q</span> <span class="o">=</span> <span class="n">qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">createNew</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -947,7 +998,7 @@
 																								<span class="n">remote_appID</span><span class="p">))</span>
 
 			<span class="bp">self</span><span class="o">.</span><span class="n">pending_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-				<span class="p">[</span><span class="n">q</span><span class="p">,</span> <span class="n">CQC_CMD_EPR</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">notify</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">),</span> <span class="p">[</span><span class="n">remote_appID</span><span class="p">,</span> <span class="n">recvHost</span><span class="o">.</span><span class="n">ip</span><span class="p">,</span> <span class="n">recvHost</span><span class="o">.</span><span class="n">port</span><span class="p">]])</span>
+				<span class="p">[</span><span class="n">q</span><span class="p">,</span> <span class="n">CQC_CMD_EPR</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">notify</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">),</span> <span class="p">[</span><span class="n">remote_appID</span><span class="p">,</span> <span class="n">remote_ip</span><span class="p">,</span> <span class="n">remote_port</span><span class="p">]])</span>
 			<span class="k">return</span> <span class="n">q</span>
 		<span class="k">else</span><span class="p">:</span>
 			<span class="c1"># print info</span>
@@ -955,7 +1006,7 @@
 				<span class="s2">&quot;App </span><span class="si">{}</span><span class="s2"> tells CQC: &#39;Create EPR-pair with </span><span class="si">{}</span><span class="s2"> and appID </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">remote_appID</span><span class="p">))</span>
 
 			<span class="bp">self</span><span class="o">.</span><span class="n">sendCmdXtra</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">CQC_CMD_EPR</span><span class="p">,</span> <span class="n">notify</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">notify</span><span class="p">),</span> <span class="n">block</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">),</span> <span class="n">remote_appID</span><span class="o">=</span><span class="n">remote_appID</span><span class="p">,</span>
-							 <span class="n">remote_node</span><span class="o">=</span><span class="n">recvHost</span><span class="o">.</span><span class="n">ip</span><span class="p">,</span> <span class="n">remote_port</span><span class="o">=</span><span class="n">recvHost</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+							 <span class="n">remote_node</span><span class="o">=</span><span class="n">remote_ip</span><span class="p">,</span> <span class="n">remote_port</span><span class="o">=</span><span class="n">remote_port</span><span class="p">)</span>
 			<span class="c1"># Get RECV message</span>
 			<span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
 			<span class="n">notifyHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -1357,10 +1408,13 @@
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="p">:</span>
 			<span class="n">ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="o">.</span><span class="n">node_B</span>
 			<span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="o">.</span><span class="n">port_B</span>
-			<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-				<span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">ip</span> <span class="o">==</span> <span class="n">ip</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">port</span> <span class="o">==</span> <span class="n">port</span><span class="p">):</span>
-					<span class="bp">self</span><span class="o">.</span><span class="n">_remote_entNode</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
-					<span class="k">break</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+					<span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">ip</span> <span class="o">==</span> <span class="n">ip</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">port</span> <span class="o">==</span> <span class="n">port</span><span class="p">):</span>
+						<span class="bp">self</span><span class="o">.</span><span class="n">_remote_entNode</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
+						<span class="k">break</span>
+			<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_remote_entNode</span> <span class="o">=</span> <span class="kc">None</span>
 
 	<span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active</span><span class="p">:</span>
@@ -1385,10 +1439,13 @@
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="p">:</span>
 			<span class="n">ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="o">.</span><span class="n">node_B</span>
 			<span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="o">.</span><span class="n">port_B</span>
-			<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-				<span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">ip</span> <span class="o">==</span> <span class="n">ip</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">port</span> <span class="o">==</span> <span class="n">port</span><span class="p">):</span>
-					<span class="bp">self</span><span class="o">.</span><span class="n">_remote_entNode</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
-					<span class="k">break</span></div>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+					<span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">ip</span> <span class="o">==</span> <span class="n">ip</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">port</span> <span class="o">==</span> <span class="n">port</span><span class="p">):</span>
+						<span class="bp">self</span><span class="o">.</span><span class="n">_remote_entNode</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
+						<span class="k">break</span>
+			<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_remote_entNode</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="qubit.is_entangled"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.qubit.is_entangled">[docs]</a>	<span class="k">def</span> <span class="nf">is_entangled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entInfo</span><span class="p">:</span>

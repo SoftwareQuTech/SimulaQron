@@ -98,7 +98,7 @@ Here we program what Bob should do using the python library::
                 with CQCConnection("Bob") as Bob:
 
                     # Make an EPR pair with Alice
-                    qB=Bob.createEPR("Alice")
+                    qB=Bob.recvEPR()
 
                     # Receive info about corrections
                     data=Bob.recvClassical()
