@@ -184,7 +184,7 @@ class CQCProtocol(Protocol):
 		# Convenience
 		self.name = self.factory.name
 
-		logging.debug("CQC %s: Initialized Protocol", self.name)
+		logging.info("CQC %s: Initialized Protocol", self.name)
 
 	def connectionMade(self):
 		pass
