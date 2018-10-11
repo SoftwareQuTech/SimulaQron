@@ -1,5 +1,4 @@
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
-import sys
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit, CQCUnsuppError
 import os
 import json
 import unittest
@@ -13,7 +12,6 @@ class TestNetworks(unittest.TestCase):
 		for cqc_file in os.listdir(cls.networks_path):
 			if cqc_file.endswith(".cfg"):
 				cls.cqc_files.append(cls.networks_path + cqc_file)
-		print(cls.cqc_files)
 
 	@staticmethod
 	def get_nodes(network_cqc_file):
@@ -50,7 +48,56 @@ class TestNetworks(unittest.TestCase):
 					self.assertEqual(len(cqc.active_qubits), 0)
 
 	def test_topology(self):
-		pass
+		for cqc_file in self.cqc_files:
+			with self.subTest(cqc_file=cqc_file):
+				network_name = cqc_file.split('/')[-1]
+				topology = network_name.split('_')[1]
+				nodes = self.get_nodes(cqc_file)
+				if topology == "complete":
+					for i in range(len(nodes)+1):
+						if i == 0:
+							with CQCConnection(nodes[0], cqcFile=cqc_file) as cqc:
+								q = qubit(cqc)
+								cqc.sendQubit(q, nodes[1])
+						elif i == len(nodes):
+							with CQCConnection(nodes[0], cqcFile=cqc_file) as cqc:
+								cqc.recvQubit()
+						else:
+							with CQCConnection(nodes[i], cqcFile=cqc_file) as cqc:
+								q = cqc.recvQubit()
+								cqc.sendQubit(q, nodes[(i+1)%len(nodes)])
+				elif topology == "topology":
+					edges = self.get_edges()
+					for edge in edges:
+						with self.subTest(edge=edge):
+							with CQCConnection(edge[0], cqcFile=cqc_file) as A:
+								with CQCConnection(edge[1], cqcFile=cqc_file) as B:
+									A.createEPR(B.name)
+									B.recvEPR()
+
+					# Find 5 non-edges
+					n = len(nodes)
+					non_edges = []
+					for _ in range(int(n*(n-1)/2)):
+						for nodeA in nodes:
+							for nodeB in nodes:
+								if (nodeA, nodeB) not in edges and (nodeB, nodeA) not in edges:
+									non_edges.append((nodeA, nodeB))
+									if len(non_edges) > 4:
+										break
+							if len(non_edges) > 4:
+								break
+						if len(non_edges) > 4:
+							break
+					else:
+						raise RuntimeError("No non-edge")
+					for non_edge in non_edges:
+						with self.subTest(non_edge=non_edge):
+							with CQCConnection(non_edge[0], cqcFile=cqc_file) as cqc:
+								with self.assertRaises(CQCUnsuppError):
+									cqc.createEPR(non_edge[1])
+				else:
+					raise RuntimeError()
 
 
 if __name__ == '__main__':
