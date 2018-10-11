@@ -96,6 +96,10 @@ def create_full_config_folder(network_name, start_port, T1, ip, nrnodes):
 
 
 def main(T1, IP, start_port, nrnodes):
+	network_path = "../network_configs/"
+	for file in os.listdir(network_path):
+		os.remove(network_path + file)
+
 	network_names = []
 	with open("networks.cfg",'r') as network_file:
 		for line in network_file.readlines():
