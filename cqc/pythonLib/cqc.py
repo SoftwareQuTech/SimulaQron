@@ -174,7 +174,11 @@ class CQCConnection:
 			self.appFile = os.environ.get('NETSIM') + "/config/appNodes.cfg"
 
 		# Read configuration files for the application network
-		self._appNet = networkConfig(self.appFile)
+		if os.path.exists(self.appFile):
+			self._appNet = networkConfig(self.appFile)
+		else:
+			logging.warning("Since there is no appFile was found the built-in classical commmunication cannot be used.")
+			self._appNet = None
 
 		# List of pending messages waiting to be send to the back-end
 		self.pend_messages = pend_messages
@@ -223,6 +227,8 @@ class CQCConnection:
 		"""
 		Sets up a server for the application communication, if not already set up.
 		"""
+		if self._appNet is None:
+			raise ValueError("Since there is no appFile was found the built-in classical commmunication cannot be used.")
 
 		if not self._classicalServer:
 			logging.debug("App {}: Starting classical server".format(self.name))
@@ -268,6 +274,8 @@ class CQCConnection:
 			:name:		The name of the host in the application network.
 			:timout:	The time to try to connect to the server. When timout is reached an RuntimeError is raised.
 		"""
+		if self._appNet is None:
+			raise ValueError("Since there is no appFile was found the built-in classical commmunication cannot be used.")
 		if name not in self._classicalConn:
 			logging.debug("App {}: Opening classical channel to {}".format(self.name, name))
 			if name in self._appNet.hostDict:
