@@ -38,6 +38,7 @@ class TestNetworks(unittest.TestCase):
 
 	def test_qubit_creation(self):
 		for cqc_file in self.cqc_files:
+			print("Testing creating qubits for network {}".format(cqc_file))
 			with self.subTest(cqc_file=cqc_file):
 				nodes = self.get_nodes(cqc_file)
 				# Test creating a qubit at each node
@@ -49,6 +50,7 @@ class TestNetworks(unittest.TestCase):
 
 	def test_topology(self):
 		for cqc_file in self.cqc_files:
+			print("Testing topology for network {}".format(cqc_file))
 			with self.subTest(cqc_file=cqc_file):
 				network_name = cqc_file.split('/')[-1]
 				topology = network_name.split('_')[1]

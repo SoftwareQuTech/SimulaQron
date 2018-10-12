@@ -101,18 +101,28 @@ def main(T1, IP, start_port, nrnodes):
 		os.remove(network_path + file)
 
 	network_names = []
+	ips = []
 	with open("networks.cfg",'r') as network_file:
 		for line in network_file.readlines():
 			if line[-1] == '\n':
 				line = line[:-1]
 			if len(line) > 0:
 				if line[0] != '#' and line[0] != ';':
-					network_names.append(line)
+					words = line.split(' ')
+					network_name = words[0]
+					network_name.strip()
+					try:
+						ip = words[1]
+						ip.strip()
+					except IndexError:
+						ip = IP
+					network_names.append(network_name)
+					ips.append(ip)
 	print(network_names)
 	with open("network_names.cfg", 'w') as nn_file:
-		for network_name in network_names:
+		for network_name, ip in zip(network_names, ips):
 			nn_file.write("{}\n".format(network_name))
-			start_port = create_full_config_folder(network_name, start_port, T1, IP, nrnodes)
+			start_port = create_full_config_folder(network_name, start_port, T1, ip, nrnodes)
 
 	shutil.copy("topology.png", "../network_configs/")
 	shutil.copy("dutch_topology.json", "../network_configs/topology.json")
@@ -125,7 +135,7 @@ def parse_args():
 	parser = ArgumentParser()
 	parser.add_argument('--T1', required=False, type=str, default=None,
 						help='T1.')
-	parser.add_argument('--IP', required=True, type=str,
+	parser.add_argument('--IP', required=False, type=str,
 						help='The IP of this computer.')
 	parser.add_argument('--start_port', required=False, type=int, default=8801,
 						help='The port number to start with.')
