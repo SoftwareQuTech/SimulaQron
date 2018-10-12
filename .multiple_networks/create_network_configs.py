@@ -109,11 +109,9 @@ def main(T1, IP, start_port, nrnodes):
 			if len(line) > 0:
 				if line[0] != '#' and line[0] != ';':
 					words = line.split(' ')
-					network_name = words[0]
-					network_name.strip()
+					network_name = words[0].strip()
 					try:
-						ip = words[1]
-						ip.strip()
+						ip = words[1].strip()
 					except IndexError:
 						ip = IP
 					network_names.append(network_name)

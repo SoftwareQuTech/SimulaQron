@@ -1,0 +1,2 @@
+python parse_computers.py
+python create_network_configs.py
