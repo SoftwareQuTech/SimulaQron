@@ -29,7 +29,7 @@
 
 import time
 
-from coinflip_consensus import CoinflipConsensus
+from SimulaQron.coinflip_consensus import CoinflipConsensus
 
 #####################################################################################################
 #
