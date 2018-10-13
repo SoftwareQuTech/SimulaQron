@@ -4,21 +4,30 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>SimulaQron.virtNode package &#8212; SimulaQron 1.0 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="SimulaQron.cqc package" href="SimulaQron.cqc.html" />
     <link rel="prev" title="SimulaQron.local package" href="SimulaQron.local.html" /> 
-  </head><body>
+  </head>
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -40,7 +49,7 @@
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
+  <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">SimulaQron.virtNode package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
@@ -68,14 +77,12 @@
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
-    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -96,13 +103,13 @@
 <dl class="exception">
 <dt id="SimulaQron.virtNode.basics.noQubitError">
 <em class="property">exception </em><code class="descclassname">SimulaQron.virtNode.basics.</code><code class="descname">noQubitError</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/basics.html#noQubitError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.basics.noQubitError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#SimulaQron.virtNode.basics.quantumError" title="SimulaQron.virtNode.basics.quantumError"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulaQron.virtNode.basics.quantumError</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#SimulaQron.virtNode.basics.quantumError" title="SimulaQron.virtNode.basics.quantumError"><code class="xref py py-class docutils literal"><span class="pre">SimulaQron.virtNode.basics.quantumError</span></code></a></p>
 </dd></dl>
 
 <dl class="class">
 <dt id="SimulaQron.virtNode.basics.quantumEngine">
 <em class="property">class </em><code class="descclassname">SimulaQron.virtNode.basics.</code><code class="descname">quantumEngine</code><span class="sig-paren">(</span><em>maxQubits=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/basics.html#quantumEngine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.basics.quantumEngine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.flavors.Referenceable</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">twisted.spread.flavors.Referenceable</span></code></p>
 <p>Basic quantum engine. This by itself does nothing.</p>
 <dl class="docutils">
 <dt>Attributes:</dt>
@@ -113,13 +120,13 @@
 <dl class="exception">
 <dt id="SimulaQron.virtNode.basics.quantumError">
 <em class="property">exception </em><code class="descclassname">SimulaQron.virtNode.basics.</code><code class="descname">quantumError</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/basics.html#quantumError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.basics.quantumError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.pb.Error</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">twisted.spread.pb.Error</span></code></p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="SimulaQron.virtNode.basics.virtNetError">
 <em class="property">exception </em><code class="descclassname">SimulaQron.virtNode.basics.</code><code class="descname">virtNetError</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/basics.html#virtNetError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.basics.virtNetError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
 </dd></dl>
 
 </div>
@@ -128,7 +135,7 @@
 <dl class="class">
 <dt id="SimulaQron.virtNode.crudeSimulator.quantumRegister">
 <em class="property">class </em><code class="descclassname">SimulaQron.virtNode.crudeSimulator.</code><code class="descname">quantumRegister</code><span class="sig-paren">(</span><em>node</em>, <em>num</em>, <em>maxQubits=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/crudeSimulator.html#quantumRegister"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.crudeSimulator.quantumRegister" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#SimulaQron.virtNode.crudeSimulator.simpleEngine" title="SimulaQron.virtNode.crudeSimulator.simpleEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulaQron.virtNode.crudeSimulator.simpleEngine</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#SimulaQron.virtNode.crudeSimulator.simpleEngine" title="SimulaQron.virtNode.crudeSimulator.simpleEngine"><code class="xref py py-class docutils literal"><span class="pre">SimulaQron.virtNode.crudeSimulator.simpleEngine</span></code></a></p>
 <p>A simulated quantum register. The qubits who are simulated in this register may be distributed over
 different quantum nodes.</p>
 </dd></dl>
@@ -136,7 +143,7 @@ different quantum nodes.</p>
 <dl class="class">
 <dt id="SimulaQron.virtNode.crudeSimulator.simpleEngine">
 <em class="property">class </em><code class="descclassname">SimulaQron.virtNode.crudeSimulator.</code><code class="descname">simpleEngine</code><span class="sig-paren">(</span><em>maxQubits=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/crudeSimulator.html#simpleEngine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.crudeSimulator.simpleEngine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#SimulaQron.virtNode.basics.quantumEngine" title="SimulaQron.virtNode.basics.quantumEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulaQron.virtNode.basics.quantumEngine</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#SimulaQron.virtNode.basics.quantumEngine" title="SimulaQron.virtNode.basics.quantumEngine"><code class="xref py py-class docutils literal"><span class="pre">SimulaQron.virtNode.basics.quantumEngine</span></code></a></p>
 <p>Basic quantum engine which uses QuTip. Works with density matrices and in principle allows full quantum
 dynamics via QuTip. Subsequently, this is quite slow.</p>
 <dl class="docutils">
@@ -314,7 +321,7 @@ qubitNum        qubit to be measured</p>
 <dl class="class">
 <dt id="SimulaQron.virtNode.quantum.simulatedQubit">
 <em class="property">class </em><code class="descclassname">SimulaQron.virtNode.quantum.</code><code class="descname">simulatedQubit</code><span class="sig-paren">(</span><em>node</em>, <em>register</em>, <em>simNum</em>, <em>num=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/quantum.html#simulatedQubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.quantum.simulatedQubit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.flavors.Referenceable</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">twisted.spread.flavors.Referenceable</span></code></p>
 <p>Simulated qubit object in the specified local simulation engine.</p>
 <ul class="simple">
 <li><dl class="first docutils">
@@ -499,13 +506,13 @@ qubit with the measurement outcome.</p>
 <dl class="class">
 <dt id="SimulaQron.virtNode.virtual.QubitCQC">
 <em class="property">class </em><code class="descclassname">SimulaQron.virtNode.virtual.</code><code class="descname">QubitCQC</code><span class="sig-paren">(</span><em>fromName</em>, <em>toName</em>, <em>from_app_id</em>, <em>to_app_id</em>, <em>new_virt_num</em>, <em>rawEntInfo=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#QubitCQC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.QubitCQC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 </dd></dl>
 
 <dl class="class">
 <dt id="SimulaQron.virtNode.virtual.backEnd">
 <em class="property">class </em><code class="descclassname">SimulaQron.virtNode.virtual.</code><code class="descname">backEnd</code><span class="sig-paren">(</span><em>name</em>, <em>virtualFile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#backEnd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.backEnd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <dl class="method">
 <dt id="SimulaQron.virtNode.virtual.backEnd.start">
 <code class="descname">start</code><span class="sig-paren">(</span><em>maxQubits=20</em>, <em>maxRegisters=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#backEnd.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.backEnd.start" title="Permalink to this definition">¶</a></dt>
@@ -519,7 +526,7 @@ maxQubits       maximum qubits in the default register</p>
 <dl class="class">
 <dt id="SimulaQron.virtNode.virtual.virtualNode">
 <em class="property">class </em><code class="descclassname">SimulaQron.virtNode.virtual.</code><code class="descname">virtualNode</code><span class="sig-paren">(</span><em>ID</em>, <em>config</em>, <em>maxQubits=20</em>, <em>maxRegisters=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.flavors.Root</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">twisted.spread.flavors.Root</span></code></p>
 <dl class="method">
 <dt id="SimulaQron.virtNode.virtual.virtualNode.connectNet">
 <code class="descname">connectNet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.connectNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.connectNet" title="Permalink to this definition">¶</a></dt>
@@ -813,7 +820,7 @@ newD            dictionary mapping qubit numbers to qubit objects at the new sim
 <dt id="SimulaQron.virtNode.virtual.virtualNode.reraise_remote_error">
 <code class="descname">reraise_remote_error</code><span class="sig-paren">(</span><em>remote_err</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualNode.reraise_remote_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualNode.reraise_remote_error" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is a function re-raises the error thrown remotely
-:param remote_err: <code class="xref py py-obj docutils literal notranslate"><span class="pre">twisted.spread.pb.RemoteError</span></code>
+:param remote_err: <code class="xref py py-obj docutils literal"><span class="pre">twisted.spread.pb.RemoteError</span></code>
 :return: class</p>
 </dd></dl>
 
@@ -822,7 +829,7 @@ newD            dictionary mapping qubit numbers to qubit objects at the new sim
 <dl class="class">
 <dt id="SimulaQron.virtNode.virtual.virtualQubit">
 <em class="property">class </em><code class="descclassname">SimulaQron.virtNode.virtual.</code><code class="descname">virtualQubit</code><span class="sig-paren">(</span><em>virtNode</em>, <em>simNode</em>, <em>simQubit</em>, <em>num</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualQubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualQubit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.flavors.Referenceable</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">twisted.spread.flavors.Referenceable</span></code></p>
 <dl class="method">
 <dt id="SimulaQron.virtNode.virtual.virtualQubit.remote_apply_H">
 <code class="descname">remote_apply_H</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/virtNode/virtual.html#virtualQubit.remote_apply_H"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.virtNode.virtual.virtualQubit.remote_apply_H" title="Permalink to this definition">¶</a></dt>
@@ -945,7 +952,7 @@ single Twisted cannot natively transfer complex valued objects.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.4.
     </div>
   </body>
 </html>
