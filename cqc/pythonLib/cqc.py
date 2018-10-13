@@ -1240,6 +1240,10 @@ class ProgressBar:
 	def __init__(self, maxitr):
 		self.maxitr = maxitr
 		self.itr = 0
+		try:
+			self.cols = os.get_terminal_size().columns
+		except (OSError, AttributeError):
+			self.cols = 60
 		print("")
 		self.update()
 
@@ -1248,9 +1252,13 @@ class ProgressBar:
 		self.update()
 
 	def update(self):
-		procent = int(100 * self.itr / self.maxitr)
+		cols = self.cols - 8
+		assert(self.itr <= self.maxitr)
+		ratio = float(self.itr) / self.maxitr
+		procent = int(ratio * 100)
+		progress = '=' * int(cols * ratio)
 		sys.stdout.write('\r')
-		sys.stdout.write("[%-100s] %d%%" % ('=' * procent, procent))
+		sys.stdout.write("[%*s] %d%%" % (-cols, progress, procent))
 		sys.stdout.flush()
 		pass
 
