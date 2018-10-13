@@ -36,7 +36,7 @@ from SimulaQron.coinflip_consensus import CoinflipConsensus
 # main
 #
 def main():
-        arr = ["Alice", "Bob","Charlie","Dennis"]
+        arr = ["Alice", "Bob","Charlie","David"]
         leaderChooser = CoinflipConsensus(arr)
         print(leaderChooser.leader())
         

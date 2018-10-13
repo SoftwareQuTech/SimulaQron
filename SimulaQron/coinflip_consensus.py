@@ -12,7 +12,8 @@ class CoinflipConsensus:
             
             # Bias
             angle = 2 * math.acos(coeff)
-            qcandidate.rot_Y(angle * 256 / (2 * math.pi))
+            step = int(angle * 256 / (2 * math.pi))
+            qcandidate1.rot_Y(step)
 
             # Measure the qubits.
             measured_value = qcandidate1.measure()
