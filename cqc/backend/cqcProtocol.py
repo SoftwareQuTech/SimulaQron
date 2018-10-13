@@ -132,6 +132,7 @@ class CQCFactory(Factory):
 		:return:
 		"""
 		# Check if a topology is defined, otherwise use fully connected
+		self._setup_topology(Settings.CONF_TOPOLOGY_FILE)
 		if self.topology is None:
 			return True
 

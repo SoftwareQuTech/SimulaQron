@@ -40,30 +40,18 @@ from SimulaQron.cqc.pythonLib.cqc import *
 def main():
 
 	# Initialize the connection
-	with CQCConnection("Alice") as Alice:
+	with CQCConnection("Charlie") as Charlie:
 
-		# Create an EPR pair
-		q = Alice.createEPR("Bob")
+		# Receive qubit
+		q=Charlie.recvEPR()
 
 		# Measure qubit
 		m=q.measure()
-		to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
+		to_print="App {}: Measurement outcome is: {}".format(Charlie.name,m)
 		print("|"+"-"*(len(to_print)+2)+"|")
 		print("| "+to_print+" |")
 		print("|"+"-"*(len(to_print)+2)+"|")
 
-		fh = open(os.environ.get('NETSIM') + "/config/topology.json","w")
-		fh.write('{"Alice": ["Bob","Charlie"], "Bob": ["Alice", "Charlie"], "Charlie": ["Bob"]}')
-
-		# Create an EPR pair
-		q = Alice.createEPR("Charlie")
-
-		# Measure qubit
-		m=q.measure()
-		to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
-		print("|"+"-"*(len(to_print)+2)+"|")
-		print("| "+to_print+" |")
-		print("|"+"-"*(len(to_print)+2)+"|")
 
 ##################################################################################################
 main()
