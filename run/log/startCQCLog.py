@@ -5,9 +5,10 @@ import sys
 import re
 from SimulaQron.settings import Settings
 from SimulaQron.general.hostConfig import networkConfig
-from SimulaQron.cqc.backend.cqcProtocol import CQCFactory, reactor
+from SimulaQron.cqc.backend.cqcProtocol import CQCFactory
 from SimulaQron.cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
+from twisted.internet import reactor
 
 
 def setup_CQC_server(names, hosts, factories):
