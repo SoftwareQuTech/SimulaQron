@@ -19,10 +19,10 @@ class CoinflipConsensus:
             else:
                 return candidate2
 
-    def leader(self, queue):
-        winner = queue.pop()  # Returns "top" and removes it.
+    def leader(self):
+        winner = self.queue.pop()  # Returns "top" and removes it.
 
-        for elem in queue:
+        for elem in self.queue:
             winner = self._atomic_flip(winner, elem)
 
         return winner
