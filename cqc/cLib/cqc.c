@@ -9,7 +9,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-#include <string.h>
+#include <strings.h>
 
 #include "cqc.h"
 
@@ -94,7 +94,7 @@ cqc_connect(cqc_lib *cqc, char *hostname, int portno)
 
 	bzero((char *) &serv_addr, sizeof(serv_addr));
    	serv_addr.sin_family = AF_INET;
-   	bcopy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr, server->h_length);
+   	bcopy((char *)server->h_addr_list[0], (char *)&serv_addr.sin_addr.s_addr, server->h_length);
    	serv_addr.sin_port = htons(portno);
 
    	/* Now connect to the server */
