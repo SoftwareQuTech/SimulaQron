@@ -37,7 +37,6 @@ cqc_tomography_dir(cqc_lib *cqc, uint16_t (*func)(cqc_lib *), uint32_t iter, uin
 	int i;
 	int outcome;
 	int count;
-	float iterf;
 	uint8_t cmd;
 	float ratio;
 	uint16_t qubit;

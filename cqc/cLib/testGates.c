@@ -11,29 +11,30 @@
 
 #include <string.h>
 #include<arpa/inet.h>
- 
+
 
 #include "cqc.h"
 
 
-/* 
- * make_plus 
+/*
+ * make_plus
  *
  * Prepares a plus state
  *
  */
 
-uint16_t 
+uint16_t
 make_plus(cqc_lib *cqc)
 {
 	uint16_t qubit;
-	
+
 	/* Create a new qubit in |0> */
 	if (cqc_simple_cmd(cqc, CQC_CMD_NEW, 0 ,0) < 0) {
 		fprintf(stderr,"Qubit creation failed.\n");
 		return(-1);
 	}
-	if((qubit = cqc_wait_until_newok(cqc)) < 0) {
+	qubit = cqc_wait_until_newok(cqc);
+	if(qubit < 0) {
 		fprintf(stderr,"ERROR: Test failed.\n");
 		return(-1);
 	}
@@ -51,8 +52,8 @@ make_plus(cqc_lib *cqc)
 	return(qubit);
 }
 
-/* 
- * make_zero 
+/*
+ * make_zero
  *
  * Prepares a plus state
  *
@@ -62,15 +63,15 @@ make_plus(cqc_lib *cqc)
 uint16_t
 make_zero(cqc_lib *cqc)
 {
-	
 	uint16_t qubit;
 
 	/* Create a new qubit in |0> */
-	if (cqc_simple_cmd(cqc, CQC_CMD_NEW, qubit,0) < 0) {
+	if (cqc_simple_cmd(cqc, CQC_CMD_NEW, 0, 0) < 0) {
 		fprintf(stderr,"Qubit creation failed.\n");
 		return(-1);
 	}
-	if((qubit = cqc_wait_until_newok(cqc)) < 0) {
+	qubit = cqc_wait_until_newok(cqc);
+	if(qubit < 0) {
 		fprintf(stderr,"ERROR: Test failed.\n");
 		return(-1);
 	}
@@ -90,24 +91,25 @@ make_zero(cqc_lib *cqc)
 
 
 
-/* 
- * make_k 
+/*
+ * make_k
  *
  * Prepares a y eigenstate
  *
  */
 
-uint16_t 
+uint16_t
 make_k(cqc_lib *cqc)
 {
 	uint16_t qubit;
-	
+
 	/* Create a new qubit in |0> */
-	if (cqc_simple_cmd(cqc, CQC_CMD_NEW, qubit,0) < 0) {
+	if (cqc_simple_cmd(cqc, CQC_CMD_NEW, 0, 0) < 0) {
 		fprintf(stderr,"Qubit creation failed.\n");
 		return(-1);
 	}
-	if((qubit = cqc_wait_until_newok(cqc)) < 0) {
+	qubit = cqc_wait_until_newok(cqc);
+	if(qubit < 0) {
 		fprintf(stderr,"ERROR: Test failed.\n");
 		return(-1);
 	}
@@ -140,7 +142,7 @@ int main(int argc, char *argv[]) {
       		fprintf(stderr,"usage %s hostname port \n", argv[0]);
       		exit(0);
    	}
-	hostname = argv[1];	
+	hostname = argv[1];
    	portno = atoi(argv[2]);
 
 	/* In this example, we are simply application 10 */

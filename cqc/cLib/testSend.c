@@ -24,7 +24,6 @@ int main(int argc, char *argv[]) {
 	struct in_addr remoteNode;
 	cqc_lib *cqc;
 	int app_id;
-	int outcome;
 	struct hostent *server;
 	uint16_t qubit;
 
