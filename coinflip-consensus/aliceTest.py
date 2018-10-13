@@ -29,6 +29,7 @@
 
 import time
 
+from coinflip_consensus import CoinflipConsensus
 
 #####################################################################################################
 #
