@@ -26,16 +26,21 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import json
+import logging
+import os
 
-from SimulaQron.cqc.backend.cqcMessageHandler import *
+from twisted.internet.defer import DeferredLock, inlineCallbacks
+from twisted.internet.protocol import Factory, Protocol, connectionDone
+
+from SimulaQron.cqc.backend.cqcHeader import (
+	CQC_HDR_LENGTH,
+	CQC_VERSION,
+	CQCHeader
+)
 from SimulaQron.settings import Settings
-from twisted.internet.defer import DeferredLock
-from twisted.internet.protocol import Factory, Protocol
 
-import os, json, logging
-
-
-#####################################################################################################
+###############################################################################
 #
 # CQC Factory
 #
@@ -65,7 +70,8 @@ class CQCFactory(Factory):
 		# Lock governing access to the qubitList
 		self._lock = DeferredLock()
 
-		# Read in topology, if specified. topology=None means fully connected topology
+		# Read in topology, if specified. topology=None means fully connected
+		# topology
 		self.topology = None
 		self._setup_topology(Settings.CONF_TOPOLOGY_FILE)
 
@@ -89,7 +95,8 @@ class CQCFactory(Factory):
 
 	def lookup(self, ip, port):
 		"""
-		Lookup name of remote host used within SimulaQron given ip and portnumber.
+		Lookup name of remote host used within SimulaQron given ip and
+		portnumber.
 		"""
 		for entry in self.cqcNet.hostDict:
 			node = self.cqcNet.hostDict[entry]
@@ -103,9 +110,11 @@ class CQCFactory(Factory):
 		"""
 		Sets up the topology, if specified.
 		:param topology_file: str
-			The relative path to the json-file defining the topology. It will be assumed that the absolute
-			path to the file is $NETSIM / topology_file.
-			If topology is an empty string then a fully connected topology will be used.
+			The relative path to the json-file defining the topology. It will
+			be assumed that the absolute path to the file is
+			${NETSIM}/topology_file.
+			If topology is an empty string then a fully connected topology will
+			be used.
 		:return: None
 		"""
 		if topology_file == "":
@@ -118,15 +127,26 @@ class CQCFactory(Factory):
 					try:
 						self.topology = json.load(top_file)
 					except json.JSONDecodeError:
-						raise RuntimeError("Could not parse the json file: {}".format(abs_path))
+						raise RuntimeError(
+							"Could not parse the json file: {}".format(
+								abs_path
+							)
+						)
 			except FileNotFoundError:
-				raise FileNotFoundError("Could not find the file specifying the topology: {}".format(abs_path))
+				raise FileNotFoundError(
+					"Could not find the file specifying the topology:"
+					" {}".format(abs_path)
+				)
 			except IsADirectoryError:
-				raise FileNotFoundError("Could not find the file specifying the topology: {}".format(abs_path))
+				raise FileNotFoundError(
+					"Could not find the file specifying the topology: "
+					"{}".format(abs_path)
+				)
 
 	def is_adjacent(self, remote_host_name):
 		"""
-		Checks if remote host is adjacent to this node, according to the specified topology.
+		Checks if remote host is adjacent to this node, according to the
+		specified topology.
 		:param remote_host_name: str
 			The name of the remote host
 		:return:
@@ -141,23 +161,27 @@ class CQCFactory(Factory):
 			else:
 				return False
 		else:
-			logging.warning("Node {} is not in the specified topology"
-							"and is therefore assumed to have no neighbors".format(self.name))
+			logging.warning(
+				"Node {} is not in the specified topology and is therefore "
+				"assumed to have no neighbors".format(self.name)
+			)
 			return False
 
 
-#####################################################################################################
+###############################################################################
 #
 # CQC Protocol
 #
-# Execute the CQC Protocol giving access to the SimulaQron backend via the universal interface.
+# Execute the CQC Protocol giving access to the SimulaQron backend via the
+# universal interface.
 #
 
 class CQCProtocol(Protocol):
 	# Dictionary storing the next unique qubit id for each used app_id
 	_next_q_id = {}
 
-	# Dictionary storing the next unique entanglement id for each used (host_app_id,remote_node,remote_app_id)
+	# Dictionary storing the next unique entanglement id for each used
+	# (host_app_id,remote_node,remote_app_id)
 	_next_ent_id = {}
 
 	def __init__(self, factory):
@@ -165,8 +189,9 @@ class CQCProtocol(Protocol):
 		# CQC Factory, including our connection to the SimulaQron backend
 		self.factory = factory
 
-		# Default application ID, typically one connection per application but we will
-		# deliberately NOT check for that since this is the task of higher layers or an OS
+		# Default application ID, typically one connection per application but
+		# we will deliberately NOT check for that since this is the task of
+		# higher layers or an OS
 		self.app_id = 0
 
 		# Define the backend to use. Is a setting in settings.ini
@@ -189,13 +214,13 @@ class CQCProtocol(Protocol):
 	def connectionMade(self):
 		pass
 
-	def connectionLost(self, reason):
+	def connectionLost(self, reason=connectionDone):
 		pass
 
 	def dataReceived(self, data):
 		"""
-		Receive data. We will always wait to receive enough data for the header,
-		and then the entire packet first before commencing processing.
+		Receive data. We will always wait to receive enough data for the
+		header, and then the entire packet first before commencing processing.
 		"""
 		# Read whatever we received into a buffer
 		if self.buf:
@@ -211,27 +236,40 @@ class CQCProtocol(Protocol):
 
 			# Got enough data for the CQC Header so read it in
 			self.gotCQCHeader = True
-			rawHeader = self.buf[0:CQC_HDR_LENGTH]
-			self.currHeader = CQCHeader(rawHeader)
+			raw_header = self.buf[0:CQC_HDR_LENGTH]
+			self.currHeader = CQCHeader(raw_header)
 
 			# Remove the header from the buffer
 			self.buf = self.buf[CQC_HDR_LENGTH:len(self.buf)]
 
-			logging.debug("CQC %s: Read CQC Header: %s", self.name, self.currHeader.printable())
+			logging.debug(
+				"CQC %s: Read CQC Header: %s",
+				self.name,
+				self.currHeader.printable()
+			)
 
 		# Check whether we already received all the data
 		if len(self.buf) < self.currHeader.length:
 			# Still waiting for data
-			logging.debug("CQC %s: Incomplete data. Waiting. Current length %s, required length %s", self.name,
-						  len(self.buf), self.currHeader.length)
+			logging.debug(
+				"CQC %s: Incomplete data. Waiting. Current length %s, "
+				"required length %s",
+				self.name,
+				len(self.buf),
+				self.currHeader.length
+			)
 			return
 
 		# We got the header and all the data for this packet. Start processing.
 		# Update our app ID
 		self.app_id = self.currHeader.app_id
-		# Invoke the relevant message handler, processing the possibly remaining data
+		# Invoke the relevant message handler, processing the possibly
+		# remaining data
 		try:
-			self._parseData(self.currHeader, self.buf[0:self.currHeader.length])
+			self._parseData(
+				self.currHeader,
+				self.buf[0:self.currHeader.length]
+			)
 		except Exception as e:
 			print(e)
 			import traceback
@@ -283,7 +321,8 @@ class CQCProtocol(Protocol):
 	def new_qubit_id(self, app_id):
 
 		"""
-		Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv
+		Returns a new unique qubit id for the specified app_id. Used by cmd_new
+		and cmd_recv
 		"""
 		if app_id in CQCProtocol._next_q_id:
 			q_id = CQCProtocol._next_q_id[app_id]
@@ -291,7 +330,8 @@ class CQCProtocol(Protocol):
 			return q_id
 		else:
 			"""
-			Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv
+			Returns a new unique qubit id for the specified app_id. Used by
+			cmd_new and cmd_recv
 			"""
 			if app_id in CQCProtocol._next_q_id:
 				q_id = CQCProtocol._next_q_id[app_id]
@@ -303,7 +343,8 @@ class CQCProtocol(Protocol):
 
 	def new_ent_id(self, host_app_id, remote_node, remote_app_id):
 		"""
-		Returns a new unique entanglement id for the specified host_app_id, remote_node and remote_app_id. Used by cmd_epr.
+		Returns a new unique entanglement id for the specified host_app_id,
+		remote_node and remote_app_id. Used by cmd_epr.
 		"""
 		pair_id = (host_app_id, remote_node, remote_app_id)
 		if pair_id in CQCProtocol._next_ent_id:
