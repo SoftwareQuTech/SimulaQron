@@ -953,9 +953,6 @@ class CQCConnection:
 			self.pending_messages.append(
 				[q, CQC_CMD_EPR, int(notify), int(block), [remote_appID, remote_ip, remote_port]]
 			)
-
-            if psi:
-                q.X()
 			return q
 		else:
 			# print info
