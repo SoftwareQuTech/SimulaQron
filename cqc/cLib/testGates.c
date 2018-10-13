@@ -12,7 +12,6 @@
 #include <string.h>
 #include<arpa/inet.h>
 
-
 #include "cqc.h"
 
 
@@ -22,7 +21,6 @@
  * Prepares a plus state
  *
  */
-
 uint16_t
 make_plus(cqc_lib *cqc)
 {
@@ -52,14 +50,13 @@ make_plus(cqc_lib *cqc)
 	return(qubit);
 }
 
+
 /*
  * make_zero
  *
  * Prepares a plus state
  *
  */
-
-
 uint16_t
 make_zero(cqc_lib *cqc)
 {
@@ -90,14 +87,12 @@ make_zero(cqc_lib *cqc)
 }
 
 
-
 /*
  * make_k
  *
  * Prepares a y eigenstate
  *
  */
-
 uint16_t
 make_k(cqc_lib *cqc)
 {
@@ -126,7 +121,6 @@ make_k(cqc_lib *cqc)
 
 	return(qubit);
 }
-
 
 
 int main(int argc, char *argv[]) {
@@ -193,6 +187,3 @@ int main(int argc, char *argv[]) {
 
    	return 0;
 }
-
-
-

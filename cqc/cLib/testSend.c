@@ -11,7 +11,6 @@
 
 #include <string.h>
 #include<arpa/inet.h>
- 
 
 #include "cqc.h"
 
@@ -32,7 +31,7 @@ int main(int argc, char *argv[]) {
       		fprintf(stderr,"usage %s hostname port remoteHost remotePort\n", argv[0]);
       		exit(0);
    	}
-	hostname = argv[1];	
+	hostname = argv[1];
    	portno = atoi(argv[2]);
 	remoteHost = argv[3];
 	remotePort = atoi(argv[4]);
