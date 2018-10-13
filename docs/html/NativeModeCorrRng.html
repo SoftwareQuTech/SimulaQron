@@ -4,21 +4,30 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Generate correlated randomness &#8212; SimulaQron 1.0 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Template for programming in native mode" href="NativeModeTemplate.html" />
     <link rel="prev" title="Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)" href="ExamplesDirect.html" /> 
-  </head><body>
+  </head>
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -56,14 +65,12 @@
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
-    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -79,38 +86,38 @@
 <p>Having started the virtual quantum nodes, let us now run a simple test application, which already illustrates some of the aspects in realizing protocols.
 Our objective will be to realize the following protocol which will generate 1 shared random bit between Alice and Bob. Evidently, there would be classical means to achieve this trivial task chosen for illustration.</p>
 <ul class="simple">
-<li>Alice generates 1 EPR pair, that is, two maximally entangled qubits <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span> of the form <span class="math notranslate nohighlight">\(|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)\)</span></li>
-<li>She sends qubit <span class="math notranslate nohighlight">\(B\)</span> to Bob.</li>
-<li>Both Alice and Bob measure their respective qubits to obtain a classical random number <span class="math notranslate nohighlight">\(x \in \{0,1\}\)</span>.</li>
+<li>Alice generates 1 EPR pair, that is, two maximally entangled qubits <span class="math">\(A\)</span> and <span class="math">\(B\)</span> of the form <span class="math">\(|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)\)</span></li>
+<li>She sends qubit <span class="math">\(B\)</span> to Bob.</li>
+<li>Both Alice and Bob measure their respective qubits to obtain a classical random number <span class="math">\(x \in \{0,1\}\)</span>.</li>
 </ul>
 <p>Before seeing how this example works, let us again simply run the code:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">examples</span><span class="o">/</span><span class="n">corrRNG</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">examples</span><span class="o">/</span><span class="n">corrRNG</span>
 <span class="n">sh</span> <span class="n">doNew</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
 <p>Next to a considerable about of debugging information, you should be seeing the following two lines:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ALICE</span><span class="p">:</span> <span class="n">My</span> <span class="n">Random</span> <span class="n">Number</span> <span class="ow">is</span>  <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ALICE</span><span class="p">:</span> <span class="n">My</span> <span class="n">Random</span> <span class="n">Number</span> <span class="ow">is</span>  <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>
 <span class="n">BOB</span><span class="p">:</span> <span class="n">My</span> <span class="n">Random</span> <span class="n">Number</span> <span class="ow">is</span>  <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>
 </pre></div>
 </div>
 <p>Note that the order of these two lines may differ, as it does not matter who measures first. So what is actually going on here ? Let us first look at how we will realize the example by making an additional step (3) explicit:</p>
 <ul class="simple">
-<li>Alice generates 1 EPR pair, that is, two maximally entangled qubits <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span> of the form <span class="math notranslate nohighlight">\(|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)\)</span></li>
-<li>She sends qubit <span class="math notranslate nohighlight">\(B\)</span> to Bob.</li>
+<li>Alice generates 1 EPR pair, that is, two maximally entangled qubits <span class="math">\(A\)</span> and <span class="math">\(B\)</span> of the form <span class="math">\(|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)\)</span></li>
+<li>She sends qubit <span class="math">\(B\)</span> to Bob.</li>
 <li>Bob is informed of the identifier of the qubit and is informed it has arrived.</li>
-<li>Both Alice and Bob measure their respective qubits to obtain a classical random number <span class="math notranslate nohighlight">\(x \in \{0,1\}\)</span>.</li>
+<li>Both Alice and Bob measure their respective qubits to obtain a classical random number <span class="math">\(x \in \{0,1\}\)</span>.</li>
 </ul>
 <p>While the task we want to realize here is completely trivial, the addition of step 3 does however already highlight a range of choices on how to realize step 3 and the need to find good abstractions to allow easy application development.
 One way to realize step 3 would be to hardwire Bobs measurement: if the hardware can identify the correct qubit from Alice, then we could instruct it to measure it immediately without asking for a notification from Alice. It is clear that in a network that is a bit larger than our tiny three node setup, identifying the right setup requires a link between the underlying qubits and classical control information: this is the objective of the classical/quantum combiner, for which we will provide code in version 0.2 of SimulaQron.</p>
 <p>This version simply allows a completely barebones access to the virtual nodes without implementing such convenient abstractions in order to allow you to explore such possibilities. To this end, we will here actually implement the following protocol for mere illustration purposes. We emphasize that this would be inefficient on a real quantum network since it requires Bob to store his qubit until Alice’s control message arrives, which can be a significant delay causing the qubit to decohere in the meantime.</p>
 <ul class="simple">
-<li>Alice generates 1 EPR pair, that is, two maximally entangled qubits <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span> of the form <span class="math notranslate nohighlight">\(|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)\)</span></li>
-<li>She sends qubit <span class="math notranslate nohighlight">\(B\)</span> to Bob.</li>
+<li>Alice generates 1 EPR pair, that is, two maximally entangled qubits <span class="math">\(A\)</span> and <span class="math">\(B\)</span> of the form <span class="math">\(|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)\)</span></li>
+<li>She sends qubit <span class="math">\(B\)</span> to Bob.</li>
 <li>Alice sends Bob the correct identifier of the qubit, and tells him to measure it.</li>
-<li>Both Alice and Bob measure their respective qubits to obtain a classical random number <span class="math notranslate nohighlight">\(x \in \{0,1\}\)</span>.</li>
+<li>Both Alice and Bob measure their respective qubits to obtain a classical random number <span class="math">\(x \in \{0,1\}\)</span>.</li>
 </ul>
 <p>To realize this, we thus need not only the connection to the virtual quantum node servers, but Alice and Bob themselves need to run a client/server to exchange classical control information. Before looking at the code, we node that the setup of these servers is again determined by a configuration file, namely config/classicalNet.cfg. This file defines which nodes act as servers in the classical communication network listening for control information to execute the protocol. You want to copy this to whatever example you are running. It takes the same format as above, where in our example only Bob will act run a server:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configuration file for servers on the classical communication network</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Configuration file for servers on the classical communication network</span>
 <span class="c1">#</span>
 <span class="c1"># For each host its informal name, as well as its location in the network must</span>
 <span class="c1"># be listed.</span>
@@ -122,7 +129,7 @@ One way to realize step 3 would be to hardwire Bobs measurement: if the hardware
 </pre></div>
 </div>
 <p>The first thing that happens if we execute the script doNew.sh is that after some setting up it will call run.sh, executing:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
 
 <span class="n">cd</span> <span class="s2">&quot;$NETSIM/examples/corrRNG&quot;</span>
 <span class="n">python</span> <span class="n">bobTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
@@ -132,7 +139,7 @@ One way to realize step 3 would be to hardwire Bobs measurement: if the hardware
 </pre></div>
 </div>
 <p>Let us now look at the programs for Alice and Bob. Alice will merely run a client on the classical communication network that connects to Bob to be found in aliceTest.py. Using the template (see general Examples section) which establishes the connections to the local virtual nodes, we thus need to provide client code for Alice to implement the protocol above. The function runClientNode will automatically be executed once Alice connected to her local virtual quantum node simulating the underlying hardware, and to Bob’s server:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># runClientNode</span>
 <span class="c1">#</span>
@@ -178,7 +185,7 @@ One way to realize step 3 would be to hardwire Bobs measurement: if the hardware
 </pre></div>
 </div>
 <p>Let us now look at Bob’s server program to be found in bobTest.py. Observe that Alice will call process_qubit above. Not included in the code below are several standard methods that require no change to be used in examples.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># localNode</span>
 <span class="c1">#</span>
@@ -235,7 +242,7 @@ One way to realize step 3 would be to hardwire Bobs measurement: if the hardware
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.4.
     </div>
   </body>
 </html>

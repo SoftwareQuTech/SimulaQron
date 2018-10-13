@@ -249,7 +249,6 @@ For this reason the entanglement ID together with the nodes and the directionali
 ============== ============================  ==========  ===============================================================
 Function       Type                          Length      Comments
 ============== ============================  ==========  ===============================================================
-
 node_A         unsigned int (uint32_t)       4 bytes     IP of this node
 port_A         unsigned int (uint16_t)       2 bytes     Port of this node
 app_id_A       unsigned int (uint16_t)       2 bytes     App ID of this node
