@@ -29,4 +29,4 @@ tests: $(TESTS)
 	$(CC) -o testGates testGates.o $(OBJ) $(CFLAGS)
 
 clean:
-	rm -f $(MAIN) $(OBJ) $(TEST_OBJ) $(SEND) $(RECV) test send recv
+	rm -f $(MAIN) $(OBJ) $(TEST_OBJ) $(SEND) $(RECV) test testGates send recv
