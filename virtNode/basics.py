@@ -28,9 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-from collections import deque
 from twisted.spread import pb
-from twisted.internet import reactor
 
 
 class quantumError(pb.Error):
@@ -66,7 +64,7 @@ class quantumEngine(pb.Referenceable):
         Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.
         """
 
-        self.maxQubits = maxQubits;
+        self.maxQubits = maxQubits
 
         # We start with no active qubits
-        self.activeQubits = 0;
+        self.activeQubits = 0
