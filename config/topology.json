@@ -1,1 +1,1 @@
-{'Alice': ['Bob'], 'Bob': ['Alice', 'Charlie'], 'Charlie': ['Bob'], 'Amjad': [' Bob']}
+{"Alice": ["Bob","Charlie"], "Bob": ["Alice", "Charlie"], "Charlie": ["Bob"]}

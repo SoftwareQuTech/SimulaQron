@@ -225,7 +225,8 @@ class virtualNode(pb.Root):
 				raise e
 
 	def remote_connect_to_node_by_name(self, remote_node_name):
-		if remote_node_name in not self.conn:
+		print("remte_node_name: {}".format(remote_node_name))
+		if remote_node_name not in self.conn:
 			self.connect_to_node(self.config.hostDict[remote_node_name] )
 
 	def connect_to_node(self, node):

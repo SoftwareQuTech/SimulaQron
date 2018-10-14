@@ -1,14 +1,22 @@
 import subprocess
 import os 
 import ast
-import cabler
+from cabler import Command
 import socket
 import json
 
+config = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'config'))
+run = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'run'))
+
+nodesFile = os.environ.get('NETSIM') + "/config/Nodes.cfg"
+topologyFile = os.environ.get('NETSIM') + "/config/topology.json"
+
+startNode = os.environ.get('NETSIM') + "/run/startNode.py"
+startCQC = os.environ.get('NETSIM') + "/run/startCQC.py"
+# startCQC = os.path.join(run, 'startCQC.py')
 
 def get_input():
     port, host, node = None, None, None
-
     node=input("Enter node: ")
 
     while(True):
@@ -30,14 +38,14 @@ def get_input():
     return port, host, node
 
 def add_cabler(port, host, node):
-    cabler = cabler.Command()
+    cabler = Command()
     cabler.add_node(node, host, port)
-
+    
 def read_config_Nodes():
-    fh = open("../config/Nodes.cfg", "r")
+    fh = open(nodesFile, "r")
     nodes=[]
     for n in fh.readlines():
-        nodes.append(n)
+        nodes.append(n.strip())
     print("The nodes are: ", nodes )
     return nodes
 
@@ -47,14 +55,14 @@ def get_input_neigbors(node):
 
 ## read the topology file and update it
 def update_topology(node, neigbors):
-    with open("../config/topology.json", "r") as f:
-            s = f.read()
-            topology = ast.literal_eval(s)
+    with open(topologyFile, "r") as f:
+            # s = f.read()
+            topology = json.load(f)
             topology[node] = [neigbors]
-    print(topology)
+    print("The new topology {}".format(topology))
 
-    with open('../config/topology.json', 'w') as fp:
-        json.dump(topology, fp)
+    with open(topologyFile, 'w') as fp:
+        fp.write(str(topology))
 
 
 if __name__ == "__main__":
@@ -64,5 +72,9 @@ if __name__ == "__main__":
     neigbors = get_input_neigbors(node)
     update_topology(node, neigbors)
 
-    os.system("python startNode.py "+node)
-    os.system("python startCQC.py "+node)
+    print("Where are here 0")
+    print ("python " + startNode + " " +node)
+    os.system("python " + startNode + " " +node + "&")
+    print("Where are here 1")
+    os.system("python "+ startCQC   + " " +node + "&")
+    print("Where are here 2")
