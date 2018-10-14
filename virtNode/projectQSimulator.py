@@ -296,18 +296,7 @@ class projectQEngine(Engine):
         """
         Replaces the qubit at position qubitNum with the one given by state.
         """
-
-        # Remove the qubit currently there by tracing it out
-        self.remove_qubit(qubitNum)
-
-        # Tensor on the new qubit at the end
-        self.add_qubit(state)
-
-        # Put the new qubit in the correct position
-        qList = list(range(self.activeQubits))
-        qList[qubitNum] = self.activeQubits
-        qList[self.activeQubits - 1] = qubitNum
-        self.qubitReg.permute(qList)
+        raise NotImplementedError("Currently you cannot replace a qubit using project Q as backend")
 
     def absorb(self, other):
         """
