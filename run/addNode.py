@@ -10,7 +10,7 @@ node=None
 
 while pass_ok:
 	node = input("Enter node: ")
-	port = input("Enter port: ")
+	port = int(input("Enter port: "))
 	host = input("Enter host: ")
 	pass_ok=False
 
@@ -26,7 +26,7 @@ for n in fh.readlines():
 
 print("The nodes are: ", nodes )
 
-neigbors = input("Enter neighbors of "+node )
+neigbors = input("Enter neigbors of "+ node )
 
 ## read the topology file and update it
 
@@ -34,12 +34,12 @@ neigbors = input("Enter neighbors of "+node )
 with open("../config/topology.json", "r") as f:
         s = f.read()
         topology = ast.literal_eval(s)
-        topology[node] = neighbors
+        topology[node] = [neigbors]
 
+print(topology)
 
-fh = open("../config/Nodes.cfg", "w")
-fh.write("\n")
-fh.write(topology)
+fh = open("../config/topology.json", "w")
+fh.write(str(topology))
 
 exit()
 
