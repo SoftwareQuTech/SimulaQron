@@ -92,7 +92,7 @@ class EntInfoHeader:
 		if not self.is_set:
 			return (0)
 
-		ent_info = pack("=LHHLHHLQQHBB", self.node_A, self.port_A, self.app_id_A, self.node_B, self.port_B,
+		ent_info = pack("!LHHLHHLQQHBB", self.node_A, self.port_A, self.app_id_A, self.node_B, self.port_B,
 						self.app_id_B, self.id_AB, self.timestamp, self.ToG, self.goodness, self.DF, 0)
 		return (ent_info)
 
@@ -100,7 +100,7 @@ class EntInfoHeader:
 		"""
 		Unpack packet data. For definitions see cLib/cqc.h
 		"""
-		ent_info = unpack("=LHHLHHLQQHBB", headerBytes)
+		ent_info = unpack("!LHHLHHLQQHBB", headerBytes)
 
 		self.node_A = ent_info[0]
 		self.port_A = ent_info[1]

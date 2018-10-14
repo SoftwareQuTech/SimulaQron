@@ -127,14 +127,14 @@ class CQCHeader:
 		"""
 		if not self.is_set:
 			return 0
-		cqcH = pack("=BBHL", self.version, self.tp, self.app_id, self.length)
+		cqcH = pack("!BBHL", self.version, self.tp, self.app_id, self.length)
 		return cqcH
 
 	def unpack(self, headerBytes):
 		"""
 			Unpack packet data. For definitions see cLib/cqc.h
 		"""
-		cqcH = unpack("=BBHL", headerBytes)
+		cqcH = unpack("!BBHL", headerBytes)
 		self.version = cqcH[0]
 		self.tp = cqcH[1]
 		self.app_id = cqcH[2]
@@ -203,14 +203,14 @@ class CQCCmdHeader:
 		if self.action:
 			opt = opt | CQC_OPT_ACTION
 
-		cmdH = pack("=HBB", self.qubit_id, self.instr, opt)
+		cmdH = pack("!HBB", self.qubit_id, self.instr, opt)
 		return cmdH
 
 	def unpack(self, headerBytes):
 		"""
 		Unpack packet data. For definitions see cLib/cqc.h
 		"""
-		cmdH = unpack("=HBB", headerBytes)
+		cmdH = unpack("!HBB", headerBytes)
 
 		self.qubit_id = cmdH[0]
 		self.instr = cmdH[1]
@@ -282,7 +282,7 @@ class CQCXtraHeader:
 		if not self.is_set:
 			return 0
 
-		xtraH = pack("=HHLLHBB", self.qubit_id, self.remote_app_id, self.remote_node, self.cmdLength, self.remote_port,
+		xtraH = pack("!HHLLHBB", self.qubit_id, self.remote_app_id, self.remote_node, self.cmdLength, self.remote_port,
 					 self.step, 0)
 		return xtraH
 
@@ -290,7 +290,7 @@ class CQCXtraHeader:
 		"""
 			Unpack packet data. For defnitions see cLib/cqc.h
 		"""
-		xtraH = unpack("=HHLLHBB", headerBytes)
+		xtraH = unpack("!HHLLHBB", headerBytes)
 
 		self.qubit_id = xtraH[0]
 		self.remote_app_id = xtraH[1]
@@ -324,7 +324,7 @@ class CQCSequenceHeader:
 		Seperate classes used clearity and for possible future adaptability. (Increase length for example)
 	"""
 
-	packaging_format = "=B"
+	packaging_format = "!B"
 	HDR_LENGTH = 1
 
 	def __init__(self, headerBytes=None):
@@ -385,7 +385,7 @@ class CQCRotationHeader:
 		Header used to define the rotation angle of a gate
 	"""
 
-	packaging_format = "=B"
+	packaging_format = "!B"
 	HDR_LENGTH = 1
 
 	def __init__(self, headerBytes=None):
@@ -446,7 +446,7 @@ class CQCXtraQubitHeader:
 		Header used to send qubit of a secondary qubit for two qubit gates
 	"""
 
-	packaging_format = "=H"
+	packaging_format = "!H"
 	HDR_LENGTH = 2
 
 	def __init__(self, headerBytes=None):
@@ -509,7 +509,7 @@ class CQCCommunicationHeader:
 		This header has a size of 8
 	"""
 
-	packaging_format = "=HLH"
+	packaging_format = "!HLH"
 	HDR_LENGTH = 8
 
 	def __init__(self, headerBytes=None):
@@ -582,7 +582,7 @@ class CQCFactoryHeader:
 
 	# could maybe include the notify flag in num_iter?
 	# That halfs the amount of possible num_iter from 256 to 128
-	package_format = "=BB"
+	package_format = "!BB"
 	HDR_LENGTH = 2
 
 	def __init__(self, headerBytes=None):
@@ -688,7 +688,7 @@ class CQCNotifyHeader:
 		if not self.is_set:
 			return 0
 
-		xtraH = pack("=HHLQHBB", self.qubit_id, self.remote_app_id, self.remote_node, self.datetime, self.remote_port,
+		xtraH = pack("!HHLQHBB", self.qubit_id, self.remote_app_id, self.remote_node, self.datetime, self.remote_port,
 					 self.outcome, 0)
 		return xtraH
 
@@ -696,7 +696,7 @@ class CQCNotifyHeader:
 		"""
 			Unpack packet data. For defnitions see cLib/cqc.h
 		"""
-		xtraH = unpack("=HHLQHBB", headerBytes)
+		xtraH = unpack("!HHLQHBB", headerBytes)
 
 		self.qubit_id = xtraH[0]
 		self.remote_app_id = xtraH[1]
