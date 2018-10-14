@@ -3,6 +3,9 @@ import math
 
 class CoinflipConsensus:
     def __init__(self, queue):
+        """
+        Inits the algo with the list of candidates' ids.
+        """
         self.queue = queue
 
     def _atomic_flip(self, candidate1, candidate2, coeff):
@@ -35,6 +38,10 @@ class CoinflipConsensus:
                 return candidate2
 
     def leader(self):
+        """
+        Executes the coinflip leader election algo.
+        :return the selected leader id.
+        """
         assert len(self.queue) >= 2
 
         winner = self.queue[0]
