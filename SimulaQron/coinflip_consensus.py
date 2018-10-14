@@ -29,10 +29,10 @@ class CoinflipConsensus:
     def leader(self):
         assert len(self.queue) >= 2
 
-        winner = self.queue.pop()  # Returns "top" and removes it.
+        winner = self.queue[0]
 
-        for i in range(2, len(self.queue)):
+        for i in range(2, len(self.queue) + 1):
             coeff = 1 / math.sqrt(i)
-            winner = self._atomic_flip(winner, self.queue[i], coeff)
+            winner = self._atomic_flip(winner, self.queue[i - 1], coeff)
 
         return winner
