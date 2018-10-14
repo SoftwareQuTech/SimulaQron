@@ -3,9 +3,9 @@
 import argparse
 import os
 import random
-import socket
 import sys
 from contextlib import closing
+from socket import AF_INET, SOCK_STREAM, socket
 
 
 class CommandError(Exception):
@@ -160,9 +160,9 @@ class Command:
         return self.get_random_port()
 
     @staticmethod
-    def check_socket_is_free(port: int) -> bool:
-        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
-            if sock.connect_ex(('127.0.0.1', port)) == 0:
+    def check_socket_is_free(host: str, port: int) -> bool:
+        with closing(socket(AF_INET, SOCK_STREAM)) as sock:
+            if sock.connect_ex((host, port)) == 0:
                 return False  # Open
             return True  # Closed (available)
 
@@ -175,9 +175,10 @@ class Command:
                 continue
 
             for line in config:
-                if port in line[2:]:
+                _, hostname, *ports = line
+                if port in ports:
                     return False
-                if not self.check_socket_is_free(port):
+                if not self.check_socket_is_free(hostname, port):
                     return False
 
         return True
