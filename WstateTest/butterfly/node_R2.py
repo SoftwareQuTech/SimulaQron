@@ -21,24 +21,61 @@
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 # DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
 # DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES
-# LOSS OF USE, DATA, OR PROFITS OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-############################
-# CONFIGURATION FILE FOR CQC
-############################
 
-# Sets how long a node waits for receiving a qubit.
-# Raises a CQC_ERR_TIMEOUT when times is up.
-CQC_CONF_RECV_TIMEOUT = 5000  # (x 100 ms)
-CQC_CONF_RECV_EPR_TIMEOUT = 100  # (x 100 ms)
-CQC_CONF_WAIT_TIME_RECV = 0.1  # (seconds)  sets the time in seconds to wait before each recheck when receiving qubits
+from SimulaQron.cqc.pythonLib.cqc import *
 
-# Sets the time to wait between attempts to setup the connections to the virtual node, cqc node
-CQC_CONF_LINK_WAIT_TIME = 0.5
 
-# Sets the time to wait between attempts to setup the connections to other nodes for classical communication
-CQC_CONF_COM_WAIT_TIME = 0.1
+#####################################################################################################
+#
+# main
+#
+def main():
+
+	# Initialize the connection
+	with CQCConnection("R2") as R2:
+
+		# Make EPR-pairs with T1,T2 and R1
+		q9=R2.recvEPR()
+		q10=R2.createEPR("T2")
+		q12=R2.createEPR("T1")
+
+		# Receive corrections from R1 (step 2)
+		msg=R2.recvClassical()
+		if msg[2]==1:
+			q9.X()
+
+		# Entangle and measure (step 3)
+		q9.cnot(q10)
+		q9.cnot(q12)
+		m1=q10.measure()
+		m2=q12.measure()
+
+		# Send corrections to T1 and T2 (step 3)
+		msg1="R2".encode('utf-8')+bytes([m1])
+		R2.sendClassical("T2",msg1)
+		msg2="R2".encode('utf-8')+bytes([m2])
+		R2.sendClassical("T1",msg2)
+
+		# Receive corrections from T1 and T2 (step 5)
+		m1=R2.recvClassical()[2]
+		m2=R2.recvClassical()[2]
+		if (m1+m2)%2==1:
+			q9.Z()
+
+		# H and measure (step 6)
+		q9.H()
+		m=q9.measure()
+
+		# Send corrections to R1 (step 6)
+		msg="R1".encode('utf-8')+bytes([m])
+		R2.sendClassical("R1",msg)
+
+
+##################################################################################################
+main()

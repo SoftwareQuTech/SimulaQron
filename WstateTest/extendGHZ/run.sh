@@ -2,4 +2,4 @@
 
 python aliceTest.py &
 python bobTest.py &
-#python charlieTest.py &
+python charlieTest.py &

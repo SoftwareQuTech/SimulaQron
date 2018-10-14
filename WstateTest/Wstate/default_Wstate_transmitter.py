@@ -30,30 +30,51 @@
 from SimulaQron.general.hostConfig import *
 from SimulaQron.cqc.backend.cqcHeader import *
 from SimulaQron.cqc.pythonLib.cqc import *
-
-
+from additional_functions import *
 
 #####################################################################################################
 #
 # main
 #
+
+
 def main():
 
+	if len(sys.argv) == 2:
+		nodename =  sys.argv[1]
+	else:
+		print("Provide one argument for the node name")
+
 	# Initialize the connection
-	with CQCConnection("Alice") as Alice:
-
+	with CQCConnection(nodename) as Node:
 		# Create an EPR pair
-		q = Alice.createEPR("Bob")
-		q.X();
-		# Measure qubit
-		m=q.measure()
-		to_print="b App {}: Measurement outcome is: {}".format(Alice.name,m)
-		print("|"+"-"*(len(to_print)+2)+"|")
-		print("| "+to_print+" |")
-		print("|"+"-"*(len(to_print)+2)+"|")
+		Nodenames = Node._cqcNet.hostDict.keys()
+		print(Nodenames, " size = ", len(Nodenames))
+		num_qubit = len(Nodenames);
+		qubits = initialize_Qubit_register(num_qubit, Node)
+		prepare_Nqubit_Wstate(qubits)
 
+		print("Number of qubits as W state = ", len(qubits))
+		index = 0
+		for key in Node._cqcNet.hostDict.keys():
+			if key != Node.name:
+				print("Sending qubit[",index, "] to ",key)
+				Node.sendQubit(qubits[index],key)
+				index = index + 1
 
+		m=qubits[len(qubits)-1].measure()
+		to_print="("+nodename+") App {}: Measurement outcome is: {}".format(Node.name,m)
+		print("|"+"-"*(len(to_print)+2)+"|\n", "| "+to_print+" |", "\n|"+"-"*(len(to_print)+2)+"|")
 
+		if m==1:
+			print("| ("+nodename+") I'm the leader")
+			ordlist = string_to_int(nodename+" is the leader")
+			broadbastClassical(ordlist,Node)
+
+		data=Node.recvClassical()
+		message=list(data)
+		msg = int_to_string(message)
+		print("("+nodename+")",msg)
 
 
 ##################################################################################################

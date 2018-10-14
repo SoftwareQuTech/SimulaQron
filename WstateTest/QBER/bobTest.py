@@ -21,24 +21,55 @@
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 # DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
 # DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES
-# LOSS OF USE, DATA, OR PROFITS OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-############################
-# CONFIGURATION FILE FOR CQC
-############################
+import sys
+import json
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection
 
-# Sets how long a node waits for receiving a qubit.
-# Raises a CQC_ERR_TIMEOUT when times is up.
-CQC_CONF_RECV_TIMEOUT = 5000  # (x 100 ms)
-CQC_CONF_RECV_EPR_TIMEOUT = 100  # (x 100 ms)
-CQC_CONF_WAIT_TIME_RECV = 0.1  # (seconds)  sets the time in seconds to wait before each recheck when receiving qubits
 
-# Sets the time to wait between attempts to setup the connections to the virtual node, cqc node
-CQC_CONF_LINK_WAIT_TIME = 0.5
+def main(nr_runs):
+	meas_outcomes = {}
 
-# Sets the time to wait between attempts to setup the connections to other nodes for classical communication
-CQC_CONF_COM_WAIT_TIME = 0.1
+	# Initialize the connection
+	with CQCConnection("Bob") as Bob:
+
+		for _ in range(nr_runs):
+
+			# Create an EPR pair
+			q = Bob.recvEPR()
+
+			# Get the identifier of this EPR pair such that Alice can relate the measuement outcomes to hers
+			sequence_nr = q.get_entInfo().id_AB
+
+			if (sequence_nr % 3) == 0:
+				# Measure in Z
+				pass
+			elif (sequence_nr % 3) == 1:
+				# Measure in X
+				q.H()
+			else:
+				# Measure in Y
+				q.K()
+
+			m = q.measure()
+			meas_outcomes[sequence_nr] = m
+
+	# Encode the measurement outcomes to bytes, such that we can send them
+	msg = json.dumps(meas_outcomes).encode('utf-8')
+
+	# Send the measurement outcomes to Alice
+	Bob.sendClassical(name="Alice", msg=msg)
+
+if __name__ == '__main__':
+	try:
+		nr_runs = int(sys.argv[1])
+	except Exception:
+		nr_runs = 500
+	if nr_runs > 1000:
+		raise ValueError("Number of EPR pairs for this example is currently restricted to less than 1000")
+	main(nr_runs)

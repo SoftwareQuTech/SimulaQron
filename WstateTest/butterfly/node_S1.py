@@ -21,24 +21,49 @@
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 # DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
 # DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES
-# LOSS OF USE, DATA, OR PROFITS OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-############################
-# CONFIGURATION FILE FOR CQC
-############################
 
-# Sets how long a node waits for receiving a qubit.
-# Raises a CQC_ERR_TIMEOUT when times is up.
-CQC_CONF_RECV_TIMEOUT = 5000  # (x 100 ms)
-CQC_CONF_RECV_EPR_TIMEOUT = 100  # (x 100 ms)
-CQC_CONF_WAIT_TIME_RECV = 0.1  # (seconds)  sets the time in seconds to wait before each recheck when receiving qubits
+from SimulaQron.cqc.pythonLib.cqc import *
 
-# Sets the time to wait between attempts to setup the connections to the virtual node, cqc node
-CQC_CONF_LINK_WAIT_TIME = 0.5
 
-# Sets the time to wait between attempts to setup the connections to other nodes for classical communication
-CQC_CONF_COM_WAIT_TIME = 0.1
+#####################################################################################################
+#
+# main
+#
+def main():
+
+	# Initialize the connection
+	with CQCConnection("S1") as S1:
+
+		# Make EPR-pairs with R1 and T2
+		q2=S1.createEPR("R1")
+		q0=S1.createEPR("T2")
+
+		# Make Bell measurement (step 1)
+		q0.cnot(q2)
+		m=q2.measure()
+
+		# Send corrections to R1 (including sender) (step 1)
+		msg="S1".encode('utf-8')+bytes([m])
+		S1.sendClassical("R1",msg)
+
+		# Receive correction from R1 (step 7)
+		m=S1.recvClassical()
+		if m==1:
+			q0.Z()
+
+		# Measure out
+		m=q0.measure()
+		to_print="0: Measurement outcome: {}".format(m)
+		print("|"+"-"*(len(to_print)+2)+"|")
+		print("| "+to_print+" |")
+		print("|"+"-"*(len(to_print)+2)+"|")
+
+
+##################################################################################################
+main()

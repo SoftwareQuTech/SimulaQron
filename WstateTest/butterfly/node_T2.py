@@ -21,24 +21,60 @@
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 # DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
 # DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES
-# LOSS OF USE, DATA, OR PROFITS OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-############################
-# CONFIGURATION FILE FOR CQC
-############################
 
-# Sets how long a node waits for receiving a qubit.
-# Raises a CQC_ERR_TIMEOUT when times is up.
-CQC_CONF_RECV_TIMEOUT = 5000  # (x 100 ms)
-CQC_CONF_RECV_EPR_TIMEOUT = 100  # (x 100 ms)
-CQC_CONF_WAIT_TIME_RECV = 0.1  # (seconds)  sets the time in seconds to wait before each recheck when receiving qubits
+from SimulaQron.cqc.pythonLib.cqc import *
 
-# Sets the time to wait between attempts to setup the connections to the virtual node, cqc node
-CQC_CONF_LINK_WAIT_TIME = 0.5
 
-# Sets the time to wait between attempts to setup the connections to other nodes for classical communication
-CQC_CONF_COM_WAIT_TIME = 0.1
+#####################################################################################################
+#
+# main
+#
+def main():
+
+	# Initialize the connection
+	with CQCConnection("T2") as T2:
+
+		# Make EPR-pairs with S1 and R2
+		qtmp1=T2.recvEPR()
+		qtmp2=T2.recvEPR()
+
+		# Check where qubit are sent from
+		if qtmp1.get_remote_entNode()=="R2":
+			q11=qtmp1
+			q1=qtmp2
+		else:
+			q11=qtmp2
+			q1=qtmp1
+
+		# Receive corrections from R2 (step 3)
+		msg=T2.recvClassical()
+		if msg[2]==1:
+			q11.X()
+
+		# Entangle (step 4)
+		q11.cnot(q1)
+
+		# H and measure (step 5)
+		q11.H()
+		m=q11.measure()
+
+		# Send corrections to R2 (step 5)
+		msg="T2".encode('utf-8')+bytes([m])
+		T2.sendClassical("R2",msg)
+
+		# Measure out
+		m=q1.measure()
+		to_print="1: Measurement outcome: {}".format(m)
+		print("|"+"-"*(len(to_print)+2)+"|")
+		print("| "+to_print+" |")
+		print("|"+"-"*(len(to_print)+2)+"|")
+
+
+##################################################################################################
+main()

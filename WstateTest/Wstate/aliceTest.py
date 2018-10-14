@@ -21,24 +21,55 @@
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 # DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
 # DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES
-# LOSS OF USE, DATA, OR PROFITS OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-############################
-# CONFIGURATION FILE FOR CQC
-############################
+from SimulaQron.general.hostConfig import *
+from SimulaQron.cqc.backend.cqcHeader import *
+from SimulaQron.cqc.pythonLib.cqc import *
+from additional_functions import *
 
-# Sets how long a node waits for receiving a qubit.
-# Raises a CQC_ERR_TIMEOUT when times is up.
-CQC_CONF_RECV_TIMEOUT = 5000  # (x 100 ms)
-CQC_CONF_RECV_EPR_TIMEOUT = 100  # (x 100 ms)
-CQC_CONF_WAIT_TIME_RECV = 0.1  # (seconds)  sets the time in seconds to wait before each recheck when receiving qubits
+#####################################################################################################
+#
+# main
+#
 
-# Sets the time to wait between attempts to setup the connections to the virtual node, cqc node
-CQC_CONF_LINK_WAIT_TIME = 0.5
+def main():
 
-# Sets the time to wait between attempts to setup the connections to other nodes for classical communication
-CQC_CONF_COM_WAIT_TIME = 0.1
+	# Initialize the connection
+	with CQCConnection("Alice") as Alice:
+		# Create an EPR pair
+		Nodenames = Alice._cqcNet.hostDict.keys()
+		print(Nodenames, " size = ", len(Nodenames))
+		num_qubit = len(Nodenames);
+		qubits = initialize_Qubit_register(num_qubit, Alice)
+		prepare_Nqubit_Wstate(qubits)
+
+		print("Number of qubits as W state = ", len(qubits))
+		index = 0
+		for key in Alice._cqcNet.hostDict.keys():
+			if key != Alice.name:
+				print("Sending qubit[",index, "] to ",key)
+				Alice.sendQubit(qubits[index],key)
+				index = index + 1
+
+		m=qubits[len(qubits)-1].measure()
+		to_print="(Alice) App {}: Measurement outcome is: {}".format(Alice.name,m)
+		print("|"+"-"*(len(to_print)+2)+"|\n", "| "+to_print+" |", "\n|"+"-"*(len(to_print)+2)+"|")
+
+		if m==1:
+			print("| (Alice) I'm the leader")
+			ordlist = string_to_int("Alice is the leader")
+			broadbastClassical(ordlist,Alice)
+
+		data=Alice.recvClassical()
+		message=list(data)
+		msg = int_to_string(message)
+		print("(Alice)",msg)
+
+
+##################################################################################################
+main()
