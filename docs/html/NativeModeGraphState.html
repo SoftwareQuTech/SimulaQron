@@ -4,21 +4,30 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Distributing a graph state &#8212; SimulaQron 1.0 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Programming via the Classical-Quantum Combiner Interface" href="ExamplesNodeOS.html" />
     <link rel="prev" title="Teleporting a Qubit" href="NativeModeTeleport.html" /> 
-  </head><body>
+  </head>
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -41,7 +50,7 @@
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
+  <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Distributing a graph state</a><ul>
 <li><a class="reference internal" href="#an-overview">An overview</a></li>
@@ -71,14 +80,12 @@
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
-    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -102,22 +109,22 @@ The actual order of the operations performed will be different in the actual imp
 For more information on definition of graph states and their transformation under local operations see <a class="reference external" href="https://arxiv.org/abs/quant-ph/0602096">https://arxiv.org/abs/quant-ph/0602096</a>.</p>
 <p>A graph state described by a star graph is a GHZ-state up to Hadamard operations on the qubits which are the leaves of the graph.
 The parties will therefore transform the shared state to make a star graph.
-Alice, Bob, Charlie and David generate a graph state <span class="math notranslate nohighlight">\(|P_4\rangle\)</span>, i.e. a graph state described by a path graph on four vertices, where Alice and David are the ends of the path.
+Alice, Bob, Charlie and David generate a graph state <span class="math">\(|P_4\rangle\)</span>, i.e. a graph state described by a path graph on four vertices, where Alice and David are the ends of the path.
 The edge-set of this graph is</p>
-<div class="math notranslate nohighlight">
+<div class="math">
 \[\{(A,B),(B,C),(C,D)\}\]</div>
-<p>where <span class="math notranslate nohighlight">\(A\)</span>, <span class="math notranslate nohighlight">\(B\)</span>, <span class="math notranslate nohighlight">\(C\)</span> and <span class="math notranslate nohighlight">\(D\)</span> are the vertices corresponding to the parties Alice, Bob, Charlie and David, respectively.
-Local Clifford operations are performed at <span class="math notranslate nohighlight">\(B\)</span>, <span class="math notranslate nohighlight">\(C\)</span> and <span class="math notranslate nohighlight">\(D\)</span> which induces a graph operation called a local complementation at <span class="math notranslate nohighlight">\(C\)</span> and therefore adds the edge <span class="math notranslate nohighlight">\((B,D)\)</span> to the graph.
-The graph is now a star graph with an additional edge <span class="math notranslate nohighlight">\((C,D)\)</span>.
-This edge will be removed by the use of an additional qubit <span class="math notranslate nohighlight">\(E\)</span> generated by David.
-David will entangle his qubit <span class="math notranslate nohighlight">\(D\)</span> with this new qubit and therefore adding the edge <span class="math notranslate nohighlight">\((D,E)\)</span> to the graph.
-Qubit <span class="math notranslate nohighlight">\(E\)</span> is then sent to Charlie which also entangles this with his qubit.
+<p>where <span class="math">\(A\)</span>, <span class="math">\(B\)</span>, <span class="math">\(C\)</span> and <span class="math">\(D\)</span> are the vertices corresponding to the parties Alice, Bob, Charlie and David, respectively.
+Local Clifford operations are performed at <span class="math">\(B\)</span>, <span class="math">\(C\)</span> and <span class="math">\(D\)</span> which induces a graph operation called a local complementation at <span class="math">\(C\)</span> and therefore adds the edge <span class="math">\((B,D)\)</span> to the graph.
+The graph is now a star graph with an additional edge <span class="math">\((C,D)\)</span>.
+This edge will be removed by the use of an additional qubit <span class="math">\(E\)</span> generated by David.
+David will entangle his qubit <span class="math">\(D\)</span> with this new qubit and therefore adding the edge <span class="math">\((D,E)\)</span> to the graph.
+Qubit <span class="math">\(E\)</span> is then sent to Charlie which also entangles this with his qubit.
 The edge-set is then</p>
-<div class="math notranslate nohighlight">
+<div class="math">
 \[\{(A,B),(B,C),(C,D),(B,D),(D,E),(C,E)(\}\]</div>
-<p>Local Cliffords are performed at <span class="math notranslate nohighlight">\(C\)</span>, <span class="math notranslate nohighlight">\(D\)</span> and <span class="math notranslate nohighlight">\(E\)</span> which induces a local complementation at <span class="math notranslate nohighlight">\(E\)</span> and therefore removes the edge <span class="math notranslate nohighlight">\((C,D)\)</span>.
-Finally qubit <span class="math notranslate nohighlight">\(E\)</span> is measured in the standard basis to disconnect is from the rest of the graph state.
-Depending on the measurement outcome, corrections are performed at <span class="math notranslate nohighlight">\(C\)</span> and <span class="math notranslate nohighlight">\(D\)</span>.</p>
+<p>Local Cliffords are performed at <span class="math">\(C\)</span>, <span class="math">\(D\)</span> and <span class="math">\(E\)</span> which induces a local complementation at <span class="math">\(E\)</span> and therefore removes the edge <span class="math">\((C,D)\)</span>.
+Finally qubit <span class="math">\(E\)</span> is measured in the standard basis to disconnect is from the rest of the graph state.
+Depending on the measurement outcome, corrections are performed at <span class="math">\(C\)</span> and <span class="math">\(D\)</span>.</p>
 </div>
 <div class="section" id="the-protocol">
 <h2>The protocol<a class="headerlink" href="#the-protocol" title="Permalink to this headline">¶</a></h2>
@@ -127,52 +134,52 @@ Although the order described here is slightly different the end result is still 
 <li><p class="first">Alice performs the following operations.</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>Alice prepares two qubits in the state <span class="math notranslate nohighlight">\(|+\rangle_A |+\rangle_B\)</span>.</li>
-<li>Alice performs a CPHASE operation between <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span>.</li>
-<li>Alice sends <span class="math notranslate nohighlight">\(B\)</span> to Bob.</li>
-<li>Alice measures qubit <span class="math notranslate nohighlight">\(A\)</span> in the <span class="math notranslate nohighlight">\(X\)</span>-basis.</li>
+<li>Alice prepares two qubits in the state <span class="math">\(|+\rangle_A |+\rangle_B\)</span>.</li>
+<li>Alice performs a CPHASE operation between <span class="math">\(A\)</span> and <span class="math">\(B\)</span>.</li>
+<li>Alice sends <span class="math">\(B\)</span> to Bob.</li>
+<li>Alice measures qubit <span class="math">\(A\)</span> in the <span class="math">\(X\)</span>-basis.</li>
 </ol>
 </div></blockquote>
 </li>
 <li><p class="first">Bob performs the following operations.</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>Bob receives qubit <span class="math notranslate nohighlight">\(B\)</span> from Alice.</li>
-<li>Bob prepares a qubit in the state <span class="math notranslate nohighlight">\(|+\rangle_C\)</span>.</li>
-<li>Bob performs a CPHASE operation between <span class="math notranslate nohighlight">\(B\)</span> and <span class="math notranslate nohighlight">\(C\)</span>.</li>
-<li>Bob performs the operation <span class="math notranslate nohighlight">\(\exp(\frac{\mathrm{i}\pi}{4}Z)\)</span> on <span class="math notranslate nohighlight">\(B\)</span> (one of the operations to induced a local complementation at <span class="math notranslate nohighlight">\(C\)</span>).</li>
-<li>Bob sends <span class="math notranslate nohighlight">\(C\)</span> to Charlie.</li>
-<li>Bob measures qubit <span class="math notranslate nohighlight">\(B\)</span> in the <span class="math notranslate nohighlight">\(Z\)</span>-basis.</li>
+<li>Bob receives qubit <span class="math">\(B\)</span> from Alice.</li>
+<li>Bob prepares a qubit in the state <span class="math">\(|+\rangle_C\)</span>.</li>
+<li>Bob performs a CPHASE operation between <span class="math">\(B\)</span> and <span class="math">\(C\)</span>.</li>
+<li>Bob performs the operation <span class="math">\(\exp(\frac{\mathrm{i}\pi}{4}Z)\)</span> on <span class="math">\(B\)</span> (one of the operations to induced a local complementation at <span class="math">\(C\)</span>).</li>
+<li>Bob sends <span class="math">\(C\)</span> to Charlie.</li>
+<li>Bob measures qubit <span class="math">\(B\)</span> in the <span class="math">\(Z\)</span>-basis.</li>
 </ol>
 </div></blockquote>
 </li>
 <li><p class="first">Charlie performs the following operations</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>Charlie receives qubit <span class="math notranslate nohighlight">\(C\)</span> from Bob</li>
-<li>Charlie prepares a qubit in the state <span class="math notranslate nohighlight">\(|+\rangle_D\)</span></li>
-<li>Charlie performs a CPHASE operation between <span class="math notranslate nohighlight">\(C\)</span> and <span class="math notranslate nohighlight">\(D\)</span>.</li>
-<li>Charlie performs the operations <span class="math notranslate nohighlight">\(\exp(-\frac{\mathrm{i}\pi}{4}X)\)</span> and <span class="math notranslate nohighlight">\(\exp(\frac{\mathrm{i}\pi}{4}Z)\)</span> on <span class="math notranslate nohighlight">\(C\)</span> and <span class="math notranslate nohighlight">\(D\)</span>, respectively (two of the operations to induced a local complementation at <span class="math notranslate nohighlight">\(C\)</span>).</li>
-<li>Charlie sends <span class="math notranslate nohighlight">\(D\)</span> to David.</li>
-<li>Charlie receives qubit <span class="math notranslate nohighlight">\(E\)</span> from David</li>
-<li>Charlie performs a CPHASE operation between <span class="math notranslate nohighlight">\(E\)</span> and <span class="math notranslate nohighlight">\(C\)</span>.</li>
-<li>Charlie performs the operations <span class="math notranslate nohighlight">\(\exp(-\frac{\mathrm{i}\pi}{4}X)\)</span> and <span class="math notranslate nohighlight">\(\exp(\frac{\mathrm{i}\pi}{4}Z)\)</span> on <span class="math notranslate nohighlight">\(E\)</span> and <span class="math notranslate nohighlight">\(C\)</span>, respectively (two of the operations to induced a local complementation at <span class="math notranslate nohighlight">\(E\)</span>).</li>
-<li>Charlie measures qubit <span class="math notranslate nohighlight">\(E\)</span> in the <span class="math notranslate nohighlight">\(Z\)</span>-basis.</li>
-<li>Charlie performs a <span class="math notranslate nohighlight">\(Z\)</span>-operation on <span class="math notranslate nohighlight">\(C\)</span> if the measurement outcome is <span class="math notranslate nohighlight">\(1\)</span> and does nothing if it is <span class="math notranslate nohighlight">\(0\)</span>.</li>
+<li>Charlie receives qubit <span class="math">\(C\)</span> from Bob</li>
+<li>Charlie prepares a qubit in the state <span class="math">\(|+\rangle_D\)</span></li>
+<li>Charlie performs a CPHASE operation between <span class="math">\(C\)</span> and <span class="math">\(D\)</span>.</li>
+<li>Charlie performs the operations <span class="math">\(\exp(-\frac{\mathrm{i}\pi}{4}X)\)</span> and <span class="math">\(\exp(\frac{\mathrm{i}\pi}{4}Z)\)</span> on <span class="math">\(C\)</span> and <span class="math">\(D\)</span>, respectively (two of the operations to induced a local complementation at <span class="math">\(C\)</span>).</li>
+<li>Charlie sends <span class="math">\(D\)</span> to David.</li>
+<li>Charlie receives qubit <span class="math">\(E\)</span> from David</li>
+<li>Charlie performs a CPHASE operation between <span class="math">\(E\)</span> and <span class="math">\(C\)</span>.</li>
+<li>Charlie performs the operations <span class="math">\(\exp(-\frac{\mathrm{i}\pi}{4}X)\)</span> and <span class="math">\(\exp(\frac{\mathrm{i}\pi}{4}Z)\)</span> on <span class="math">\(E\)</span> and <span class="math">\(C\)</span>, respectively (two of the operations to induced a local complementation at <span class="math">\(E\)</span>).</li>
+<li>Charlie measures qubit <span class="math">\(E\)</span> in the <span class="math">\(Z\)</span>-basis.</li>
+<li>Charlie performs a <span class="math">\(Z\)</span>-operation on <span class="math">\(C\)</span> if the measurement outcome is <span class="math">\(1\)</span> and does nothing if it is <span class="math">\(0\)</span>.</li>
 <li>Charlie sends the measurement outcome to David.</li>
-<li>Charlie measures qubit <span class="math notranslate nohighlight">\(C\)</span> in the <span class="math notranslate nohighlight">\(X\)</span>-basis.</li>
+<li>Charlie measures qubit <span class="math">\(C\)</span> in the <span class="math">\(X\)</span>-basis.</li>
 </ol>
 </div></blockquote>
 </li>
 <li><p class="first">David performs the following operations</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>David receives qubit <span class="math notranslate nohighlight">\(D\)</span> from Charlie</li>
-<li>David prepares a qubit in the state <span class="math notranslate nohighlight">\(|+\rangle_E\)</span></li>
-<li>David performs a CPHASE operation between <span class="math notranslate nohighlight">\(D\)</span> and <span class="math notranslate nohighlight">\(E\)</span> and sends <span class="math notranslate nohighlight">\(E\)</span> to Bob.</li>
-<li>David performs the operation <span class="math notranslate nohighlight">\(\exp(\frac{\mathrm{i}\pi}{4}Z)\)</span> on <span class="math notranslate nohighlight">\(D\)</span> (one of the operations to induced a local complementation at <span class="math notranslate nohighlight">\(E\)</span>).</li>
-<li>David receives the measurement outcome from Charlie and performs a <span class="math notranslate nohighlight">\(Z\)</span>-operation on <span class="math notranslate nohighlight">\(D\)</span> if this is <span class="math notranslate nohighlight">\(1\)</span> and nothing if it is <span class="math notranslate nohighlight">\(0\)</span>.</li>
-<li>David measures qubit <span class="math notranslate nohighlight">\(D\)</span> in the <span class="math notranslate nohighlight">\(X\)</span>-basis.</li>
+<li>David receives qubit <span class="math">\(D\)</span> from Charlie</li>
+<li>David prepares a qubit in the state <span class="math">\(|+\rangle_E\)</span></li>
+<li>David performs a CPHASE operation between <span class="math">\(D\)</span> and <span class="math">\(E\)</span> and sends <span class="math">\(E\)</span> to Bob.</li>
+<li>David performs the operation <span class="math">\(\exp(\frac{\mathrm{i}\pi}{4}Z)\)</span> on <span class="math">\(D\)</span> (one of the operations to induced a local complementation at <span class="math">\(E\)</span>).</li>
+<li>David receives the measurement outcome from Charlie and performs a <span class="math">\(Z\)</span>-operation on <span class="math">\(D\)</span> if this is <span class="math">\(1\)</span> and nothing if it is <span class="math">\(0\)</span>.</li>
+<li>David measures qubit <span class="math">\(D\)</span> in the <span class="math">\(X\)</span>-basis.</li>
 </ol>
 </div></blockquote>
 </li>
@@ -181,7 +188,7 @@ Although the order described here is slightly different the end result is still 
 <div class="section" id="setting-up">
 <h2>Setting up<a class="headerlink" href="#setting-up" title="Permalink to this headline">¶</a></h2>
 <p>We will run everything locally (localhost) using the standard virtualNodes.cfg file found in config that define the virtual quantum nodes run in the background to simulate the quantum hardware:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Network configuration file</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Network configuration file</span>
 <span class="c1">#</span>
 <span class="c1"># For each host its informal name, as well as its location in the network must</span>
 <span class="c1"># be listed.</span>
@@ -195,7 +202,7 @@ Although the order described here is slightly different the end result is still 
 </pre></div>
 </div>
 <p>As we can see from the proocol above, Alice is the one that initializes the protocol and the others listen. We will therefore run a client at Alice and servers at Bob, Charlie and David. Since we run everything locally, we may thus use for the configuration file classicalNet.cfg:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Network configuration file</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Network configuration file</span>
 <span class="c1">#</span>
 <span class="c1"># For each host its informal name, as well as its location in the network must</span>
 <span class="c1"># be listed.</span>
@@ -213,7 +220,7 @@ Although the order described here is slightly different the end result is still 
 <div class="section" id="programming-alice">
 <h2>Programming Alice<a class="headerlink" href="#programming-alice" title="Permalink to this headline">¶</a></h2>
 <p>Since Alice acts as a client, we will only need to fill in runClientNode. This gives:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># runClientNode</span>
 <span class="c1">#</span>
@@ -265,7 +272,7 @@ Although the order described here is slightly different the end result is still 
 <div class="section" id="programming-bob">
 <h2>Programming Bob<a class="headerlink" href="#programming-bob" title="Permalink to this headline">¶</a></h2>
 <p>Let us now program the code for Bob. Since he only acts as a server on the classical network, it is enough to edit the localNode portion of the template. Alice calls receive_qubit to convey the identifier of the virtual qubit.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># localNode</span>
 <span class="c1">#</span>
@@ -330,7 +337,7 @@ Although the order described here is slightly different the end result is still 
 <div class="section" id="programming-charlie">
 <h2>Programming Charlie<a class="headerlink" href="#programming-charlie" title="Permalink to this headline">¶</a></h2>
 <p>Let us now program the code for Charlie. Since he only acts as a server on the classical network, it is enough to edit the localNode portion of the template. Both Bob and David calls receive_qubit to convey the identifier of the virtual qubit and depending on the sender Charlie does different things.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># localNode</span>
 <span class="c1">#</span>
@@ -425,7 +432,7 @@ Although the order described here is slightly different the end result is still 
 <div class="section" id="programming-david">
 <h2>Programming David<a class="headerlink" href="#programming-david" title="Permalink to this headline">¶</a></h2>
 <p>Let us now program the code for David. Since he only acts as a server on the classical network, it is enough to edit the localNode portion of the template. Charlie calls receive_qubit to convey the identifier of the virtual qubit.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># localNode</span>
 <span class="c1">#</span>
@@ -495,7 +502,7 @@ Although the order described here is slightly different the end result is still 
 <div class="section" id="starting">
 <h2>Starting<a class="headerlink" href="#starting" title="Permalink to this headline">¶</a></h2>
 <p>We first start the virtual quantum node backend, by executing:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="s2">&quot;$NETSIM&quot;</span><span class="o">/</span><span class="n">run</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="s2">&quot;$NETSIM&quot;</span><span class="o">/</span><span class="n">run</span>
 <span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Alice</span> <span class="o">&amp;</span>
 <span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Bob</span> <span class="o">&amp;</span>
 <span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">David</span> <span class="o">&amp;</span>
@@ -504,7 +511,7 @@ Although the order described here is slightly different the end result is still 
 </div>
 <p>where $NETSIM is the environment variable defining the SimulaQron directory as outlined in <a class="reference internal" href="GettingStarted.html"><span class="doc">Getting started</span></a>.</p>
 <p>We then start up the programs for the parties themselves. These will connect to the virtual quantum nodes, and execute the quantum commands and classical communication outlined above, in the same directory as we placed classicalNet.cfg:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">bobTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">bobTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
 <span class="n">python</span> <span class="n">charlieTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
 <span class="n">python</span> <span class="n">davidTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
 <span class="n">python</span> <span class="n">aliceTest</span><span class="o">.</span><span class="n">py</span>
@@ -541,7 +548,7 @@ Although the order described here is slightly different the end result is still 
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.4.
     </div>
   </body>
 </html>
