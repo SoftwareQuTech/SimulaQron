@@ -24,9 +24,9 @@ send_cqc_header(cqc_lib *cqc, uint8_t type, uint32_t len)
 	cqcHeader cqcH;
 
 	cqcH.version = CQC_VERSION;
-	cqcH.app_id = cqc->app_id;
+	cqcH.app_id = htons(cqc->app_id);
 	cqcH.type = type;
-	cqcH.length = len;
+	cqcH.length = htonl(len);
 
 	/* Send message to the server */
 	return write(cqc->sockfd, &cqcH, CQC_HDR_LENGTH);
@@ -162,7 +162,7 @@ cqc_simple_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id, uint8_t notify)
 
 	/* Prepare message for the specific command */
 	bzero(&cmdH, sizeof(cmdH));
-	cmdH.qubit_id = qubit_id;
+	cmdH.qubit_id = htons(qubit_id);
 	cmdH.instr = command;
 	if(notify == 1) {
 		cmdH.options = CQC_OPT_NOTIFY | CQC_OPT_BLOCK;
@@ -213,7 +213,7 @@ cqc_full_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id, char notify, char
 
 	/* Prepare message for the specific command */
 	bzero(&cmdH, sizeof(cmdH));
-	cmdH.qubit_id = qubit_id;
+	cmdH.qubit_id = htons(qubit_id);
 	cmdH.instr = command;
 
 	cmdH.options = 0;
@@ -235,12 +235,12 @@ cqc_full_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id, char notify, char
 
 	/* Prepare extra header */
 	bzero(&xtra, sizeof(xtra));
-	xtra.xtra_qubit_id = xtra_id;
+	xtra.xtra_qubit_id = htons(xtra_id);
 	xtra.steps = steps;
-	xtra.remote_app_id = r_app_id;
-	xtra.remote_node = r_node;
-	xtra.remote_port = r_port;
-	xtra.cmdLength = cmdLength;
+	xtra.remote_app_id = htons(r_app_id);
+	xtra.remote_node = htonl(r_node);
+	xtra.remote_port = htons(r_port);
+	xtra.cmdLength = htonl(cmdLength);
 	/* Send message to the server */
 	n = write(cqc->sockfd, &xtra, CQC_CMD_XTRA_LENGTH);
 	if (n < 0) {
@@ -330,7 +330,7 @@ cqc_recv(cqc_lib *cqc)
 		return(-1);
 	}
 
-	return(note.qubit_id);
+	return(ntohs(note.qubit_id));
 }
 
 /*
@@ -474,7 +474,7 @@ cqc_wait_until_newok(cqc_lib *cqc)
 		return(-1);
 	}
 
-	return(note.qubit_id);
+	return(ntohs(note.qubit_id));
 }
 
 /*
