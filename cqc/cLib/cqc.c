@@ -14,6 +14,25 @@
 #include "cqc.h"
 
 /*
+ * send_cqc_header
+ *
+ * Prepare and sends CQC header
+ */
+static int
+send_cqc_header(cqc_lib *cqc, uint8_t type, uint32_t len)
+{
+	cqcHeader cqcH;
+
+	cqcH.version = CQC_VERSION;
+	cqcH.app_id = cqc->app_id;
+	cqcH.type = type;
+	cqcH.length = len;
+
+	/* Send message to the server */
+	return write(cqc->sockfd, &cqcH, CQC_HDR_LENGTH);
+}
+
+/*
  * cqc_init
  *
  * Initialize the CQC Backend.
@@ -132,17 +151,10 @@ int
 cqc_simple_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id, uint8_t notify)
 {
 	int n;
-	cqcHeader cqcH;
 	cmdHeader cmdH;
 
-	/* Prepare CQC message indicating a command */
-	cqcH.version = CQC_VERSION;
-	cqcH.app_id = cqc->app_id;
-	cqcH.type = CQC_TP_COMMAND;
-	cqcH.length = CQC_CMD_HDR_LENGTH;
-
-	/* Send message to the server */
-	n = write(cqc->sockfd, &cqcH, CQC_HDR_LENGTH);
+	/* Send CQC message indicating a command */
+	n = send_cqc_header(cqc, CQC_TP_COMMAND, CQC_CMD_HDR_LENGTH);
 	if (n < 0) {
 		perror("ERROR writing to socket");
 		return(-1);
@@ -188,18 +200,12 @@ int
 cqc_full_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id, char notify, char action, char block, uint16_t xtra_id, uint8_t steps, uint16_t r_app_id, uint32_t r_node, uint16_t r_port, uint32_t cmdLength)
 {
 	int n;
-	cqcHeader cqcH;
 	cmdHeader cmdH;
 	xtraCmdHeader xtra;
 
-	/* Prepare CQC message indicating a command */
-	cqcH.version = CQC_VERSION;
-	cqcH.app_id = cqc->app_id;
-	cqcH.type = CQC_TP_COMMAND;
-	cqcH.length = CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH;
-
-	/* Send message to the server */
-	n = write(cqc->sockfd, &cqcH, CQC_HDR_LENGTH);
+	/* Send CQC message indicating a command */
+	n = send_cqc_header(cqc, CQC_TP_COMMAND,
+	                    CQC_CMD_HDR_LENGTH + CQC_CMD_XTRA_LENGTH);
 	if (n < 0) {
 		perror("ERROR writing to socket");
 		return(-1);
@@ -254,16 +260,9 @@ int
 cqc_hello(cqc_lib *cqc)
 {
 	int n;
-	cqcHeader cqcH;
 
-	/* Prepare CQC message indicating a command */
-	cqcH.version = CQC_VERSION;
-	cqcH.app_id = cqc->app_id;
-	cqcH.type = CQC_TP_HELLO;
-	cqcH.length = CQC_CMD_HDR_LENGTH;
-
-	/* Send message to the server */
-	n = write(cqc->sockfd, &cqcH, CQC_HDR_LENGTH);
+	/* Send CQC message indicating a command */
+	n = send_cqc_header(cqc, CQC_TP_HELLO, CQC_CMD_HDR_LENGTH);
 	if (n < 0) {
 		perror("ERROR writing to socket");
 		return(-1);
