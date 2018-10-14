@@ -165,8 +165,8 @@ Settings
 In the file config/settings.ini you can set the following parameters for SimulaQron:
 
 * :code:`[BACKEND]`
-    * :code:`maxqubits` (default 20): This is the maximum virtual qubits a node can store. Note that a node can still have more simulated qubits.
-    * :code:`maxregisters` (default 1000): This is the maximum of qubit registers a virtual node can store.
+    * :code:`maxqubits_per_node` (default 20): This is the maximum virtual qubits a node can store. Note that a node can still have more simulated qubits.
+    * :code:`maxregisters_per_node` (default 1000): This is the maximum of qubit registers a virtual node can store.
     * :code:`waittime` (default 0.5): This is the amount of time that the virtual nodes will wait to try to set up connection between them (when running :code:`sh run/startAll.sh`. If you're setting up SimulaQron between multiple computers, you may wish to increase this.
     * :code:`loglevel` (default `warning`): Determines which logging messages should be printed from the backend. Options are `critical`, `error`, `warning`, `info` and `debug`, with increasing amount of logging. Setting the log-level to `debug` will print a lot of messages.
     * :code:`backendhandler` (default `simulaqron`): This is to set different types of backends for parsing the CQC messages. Current options are `simulaqron` and `log` (simply log the CQC messages). Unless you know what you're doing don't change this!
