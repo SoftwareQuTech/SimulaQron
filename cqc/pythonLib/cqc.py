@@ -51,6 +51,38 @@ def hasXtraHeader(command):
 					   CQC_CMD_CPHASE}
 
 
+def get_remote_from_directory_or_address(cqcNet, name, remote_socket):
+	if remote_socket is None:
+		try:
+			# Get receiving host
+			hostDict = cqcNet.hostDict
+		except AttributeError:
+			raise ValueError("If a CQCConnections is initialized without specifying a cqcFile you need to also provide a socket address for the remote node here.")
+		if name in hostDict:
+			recvHost = hostDict[name]
+			remote_ip = recvHost.ip
+			remote_port = recvHost.port
+		else:
+			raise ValueError("Host name '{}' is not in the cqc network".format(name))
+	else:
+		try:
+			remote_host, remote_port = remote_socket
+			if not isinstance(remote_host, str):
+				raise TypeError()
+			if not isinstance(remote_port, int):
+				raise TypeError()
+		except Exception:
+			raise TypeError("When specifying the remote socket address, this should be a tuple (str,int).")
+
+		# Pack the IP
+		addrs = socket.getaddrinfo(remote_host, remote_port, proto=socket.IPPROTO_TCP, family=socket.AF_INET)
+		addr = addrs[0]
+		remote_ip = cqc_node_id_from_addrinfo(addr)
+		remote_port = addr[4][1]
+	return remote_ip, remote_port
+
+
+
 def createXtraHeader(command, values):
 	if command == CQC_CMD_SEND or command == CQC_CMD_EPR:
 		header = CQCCommunicationHeader()
@@ -140,15 +172,17 @@ class CQCConnection:
 				raise ValueError("Host name '{}' is not in the cqc network".format(name))
 
 			# Get IP and port number
-			myIP = socket.inet_ntoa(struct.pack("!L", myHost.ip))
-			port = myHost.port
+			addr = myHost.addr
 		else:
 			try:
-				myIP, port = socket_address
-				if not isinstance(myIP, str):
+				hostname, port = socket_address
+				if not isinstance(hostname, str):
 					raise TypeError()
 				if not isinstance(port, int):
 					raise TypeError()
+				addrs = socket.getaddrinfo(hostname, port, proto=socket.IPPROTO_TCP, family=socket.AF_INET)
+				addr = addrs[0]
+
 			except Exception:
 				raise TypeError("When specifying the socket address, this should be a tuple (str,int).")
 
@@ -157,8 +191,8 @@ class CQCConnection:
 			try:
 				logging.debug("App {} : Trying to connect to CQC server".format(self.name))
 
-				self._s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-				self._s.connect((myIP, port))
+				self._s = socket.socket(addr[0], addr[1], addr[2])
+				self._s.connect(addr[4])
 				break
 			except ConnectionRefusedError:
 				logging.debug("App {} : Could not connect to  CQC server, trying again...".format(self.name))
@@ -234,11 +268,12 @@ class CQCConnection:
 			logging.debug("App {}: Starting classical server".format(self.name))
 			# Get host data
 			myHost = self._appNet.hostDict[self.name]
+			hostaddr = myHost.addr
 
 			# Setup server
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s = socket.socket(hostaddr[0], hostaddr[1], hostaddr[2])
 			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-			s.bind((myHost.hostname, myHost.port))
+			s.bind(hostaddr[4])
 			s.listen(1)
 			(conn, addr) = s.accept()
 			logging.debug("App {}: Classical server started".format(self.name))
@@ -283,10 +318,11 @@ class CQCConnection:
 			else:
 				raise ValueError("Host name '{}' is not in the cqc network".format(name))
 
+			addr = remoteHost.addr
 			while True:
 				try:
-					s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-					s.connect((remoteHost.hostname, remoteHost.port))
+					s = socket.socket(addr[0], addr[1], addr[2])
+					s.connect(addr[4])
 					logging.debug("App {}: Classical channel to {} opened".format(self.name, name))
 					break
 				except ConnectionRefusedError:
@@ -810,33 +846,7 @@ class CQCConnection:
 			:nofify:	 Do we wish to be notified when done.
 			:block:		 Do we want the qubit to be blocked
 		"""
-
-		if remote_socket is None:
-			try:
-				# Get receiving host
-				hostDict = self._cqcNet.hostDict
-			except AttributeError:
-				raise ValueError("If a CQCConnections is initialized without specifying a cqcFile you need to also provide a socket address for the remote node here.")
-			if name in hostDict:
-				recvHost = hostDict[name]
-				remote_ip = recvHost.ip
-				remote_port = recvHost.port
-			else:
-				raise ValueError("Host name '{}' is not in the cqc network".format(name))
-		else:
-			try:
-				remote_ip, remote_port = remote_socket
-				if not isinstance(remote_ip, str):
-					raise TypeError()
-				else:
-					# Pack the IP
-					addr = socket.gethostbyname(remote_ip)
-					packedIP = socket.inet_aton(addr)
-					remote_ip = struct.unpack("!L", packedIP)[0]
-				if not isinstance(remote_port, int):
-					raise TypeError()
-			except Exception:
-				raise TypeError("When specifying the remote socket address, this should be a tuple (str,int).")
+		remote_ip, remote_port = get_remote_from_directory_or_address(self._cqcNet, name, remote_socket)
 
 		if self.pend_messages:
 			# print info
@@ -915,32 +925,7 @@ class CQCConnection:
 			:block:		 Do we want the qubit to be blocked
 		"""
 
-		if remote_socket is None:
-			try:
-				# Get receiving host
-				hostDict = self._cqcNet.hostDict
-			except AttributeError:
-				raise ValueError("If a CQCConnections is initialized without specifying a cqcFile you need to also provide a socket address for the remote node here.")
-			if name in hostDict:
-				recvHost = hostDict[name]
-				remote_ip = recvHost.ip
-				remote_port = recvHost.port
-			else:
-				raise ValueError("Host name '{}' is not in the cqc network".format(name))
-		else:
-			try:
-				remote_ip, remote_port = remote_socket
-				if not isinstance(remote_ip, str):
-					raise TypeError()
-				else:
-					# Pack the IP
-					addr = socket.gethostbyname(remote_ip)
-					packedIP = socket.inet_aton(addr)
-					remote_ip = struct.unpack("!L", packedIP)[0]
-				if not isinstance(remote_port, int):
-					raise TypeError()
-			except Exception:
-				raise TypeError("When specifying the remote socket address, this should be a tuple (str,int).")
+		remote_ip, remote_port = get_remote_from_directory_or_address(self._cqcNet, name, remote_socket)
 
 		# initialize the qubit
 		q = qubit(self, createNew=False)
