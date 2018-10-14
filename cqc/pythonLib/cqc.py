@@ -902,7 +902,7 @@ class CQCConnection:
 			q._set_active(True)
 			return q
 
-	def createEPR(self, name, psi=False, remote_appID=0, remote_socket=None, notify=True, block=True):
+	def createEPR(self, name, remote_appID=0, remote_socket=None, notify=True, block=True):
 		"""
 		Creates epr with other host in cqc network.
 
@@ -951,8 +951,7 @@ class CQCConnection:
 																								remote_appID))
 
 			self.pending_messages.append(
-				[q, CQC_CMD_EPR, int(notify), int(block), [remote_appID, remote_ip, remote_port]]
-			)
+				[q, CQC_CMD_EPR, int(notify), int(block), [remote_appID, remote_ip, remote_port]])
 			return q
 		else:
 			# print info
