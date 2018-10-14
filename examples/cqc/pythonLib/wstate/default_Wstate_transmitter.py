@@ -51,8 +51,7 @@ def main():
 		Nodenames = Node._cqcNet.hostDict.keys()
 		print(Nodenames, " size = ", len(Nodenames))
 		num_qubit = len(Nodenames);
-		qubits = initialize_Qubit_register(num_qubit, Node)
-		prepare_Nqubit_Wstate(qubits)
+		qubits = create_Nqubit_Wstate(num_qubit, Node)
 
 		print("Number of qubits as W state = ", len(qubits))
 		index = 0
