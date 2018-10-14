@@ -153,6 +153,9 @@ class CQCFactory(Factory):
 		"""
 		# Check if a topology is defined, otherwise use fully connected
 		self._setup_topology(Settings.CONF_TOPOLOGY_FILE)
+		# Check the nodes dict
+		yield self.virtRoot.callRemote("update_hostDict", topology[self.name])
+
 		if self.topology is None:
 			return True
 
