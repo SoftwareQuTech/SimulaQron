@@ -44,8 +44,6 @@ import json
 import random
 from argparse import ArgumentParser
 import networkx as nx
-import matplotlib
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 from SimulaQron.settings import Settings

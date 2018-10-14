@@ -44,10 +44,10 @@ def main():
 
 		# Create an EPR pair
 		q = Alice.createEPR("Bob")
-		q.X();
+
 		# Measure qubit
 		m=q.measure()
-		to_print="b App {}: Measurement outcome is: {}".format(Alice.name,m)
+		to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
 		print("|"+"-"*(len(to_print)+2)+"|")
 		print("| "+to_print+" |")
 		print("|"+"-"*(len(to_print)+2)+"|")
