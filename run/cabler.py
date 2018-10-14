@@ -139,7 +139,7 @@ class Command:
                         port
                     ))
             else:
-                port = self.__get_random_port()
+                port = self.get_random_port()
 
             self.topology[key].append((name, hostname, port))
 
@@ -152,6 +152,19 @@ class Command:
                 if not line[0] == name:
                     tmp.append(line)
             self.topology[key] = tmp
+
+    def get_random_port(self):
+        port = random.randint(8000, 9000)
+        if self.__check_port_available(port):
+            return port
+        return self.get_random_port()
+
+    @staticmethod
+    def check_socket_is_free(port: int) -> bool:
+        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+            if sock.connect_ex(('127.0.0.1', port)) == 0:
+                return False  # Open
+            return True  # Closed (available)
 
     def __check_port_available(self, port):
 
@@ -168,19 +181,6 @@ class Command:
                     return False
 
         return True
-
-    @staticmethod
-    def check_socket_is_free(port: int) -> bool:
-        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
-            if sock.connect_ex(('127.0.0.1', port)) == 0:
-                return False  # Open
-            return True  # Closed (available)
-
-    def __get_random_port(self):
-        port = random.randint(8000, 9000)
-        if self.__check_port_available(port):
-            return port
-        return self.__get_random_port()
 
     def __acquire_current_topology(self):
         self.__read_app_nodes()
