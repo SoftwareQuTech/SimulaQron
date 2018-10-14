@@ -2,19 +2,31 @@ import subprocess
 import os 
 import ast
 import cabler
+import socket
 
-pass_ok=True
 port=None
 host=None
 node=None
 
-while pass_ok:
-	node = input("Enter node: ")
-	port = int(input("Enter port: "))
-	host = input("Enter host: ")
-	pass_ok=False
+node=input("Enter node: ")
 
-#
+while(True):
+    try:
+        port=int(input("Enter port: "))
+        if port >= 1024 and port <= 65535:
+            break
+    except:
+        print("Please provide a valid port number in the range 1024-65535.")
+
+while(True):
+    try:
+        host=input("Enter host: ")
+        socket.gethostbyname(host)
+        break
+    except socket.error:
+        print("Please provide a valid host name.")
+
+
 cabler = cabler.Command()
 cabler.add_node(node, host, port)
 
