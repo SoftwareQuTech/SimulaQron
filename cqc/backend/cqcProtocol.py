@@ -158,6 +158,10 @@ class CQCFactory(Factory):
 
 		if self.name in self.topology:
 			if remote_host_name in self.topology[self.name]:
+				
+				## construct a link, if the nodes are not connected
+				self.virtRoot.callRemote("connect_to_node_by_name", remote_host_name)
+
 				return True
 			else:
 				return False

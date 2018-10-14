@@ -219,6 +219,10 @@ class virtualNode(pb.Root):
 			except Exception as e:
 				raise e
 
+	def remote_connect_to_node_by_name(self, remote_node_name):
+		if remote_node_name in not self.conn:
+			self.connect_to_node(self.config.hostDict[remote_node_name] )
+
 	def connect_to_node(self, node):
 		"""
 		Connects to other node. If node not up yet, waits for CONF_WAIT_TIME seconds.
