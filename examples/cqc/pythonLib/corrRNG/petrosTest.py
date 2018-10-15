@@ -39,31 +39,18 @@ from SimulaQron.cqc.pythonLib.cqc import *
 #
 def main():
 
-	# Initialize the connection
-	with CQCConnection("Alice") as Alice:
+    # Initialize the connection
+    with CQCConnection("Petros") as Petros:
 
-		# Create an EPR pair
-		q = Alice.createEPR("Bob")
+        # Create an EPR pair
+        q = Petros.createEPR("Bob")
 
-		# Measure qubit
-		m=q.measure()
-		to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
-		print("|"+"-"*(len(to_print)+2)+"|")
-		print("| "+to_print+" |")
-		print("|"+"-"*(len(to_print)+2)+"|")
-
-		fh = open(os.environ.get('NETSIM') + "/config/topology.json","w")
-		fh.write('{"Alice": ["Bob","Charlie"], "Bob": ["Alice", "Charlie"], "Charlie": ["Bob"]}')
-
-		# Create an EPR pair
-		q = Alice.createEPR("Charlie")
-
-		# Measure qubit
-		m=q.measure()
-		to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
-		print("|"+"-"*(len(to_print)+2)+"|")
-		print("| "+to_print+" |")
-		print("|"+"-"*(len(to_print)+2)+"|")
+        # Measure qubit
+        m=q.measure()
+        to_print="App {}: Measurement outcome is: {}".format(Petros.name,m)
+        print("|"+"-"*(len(to_print)+2)+"|")
+        print("| "+to_print+" |")
+        print("|"+"-"*(len(to_print)+2)+"|")
 
 ##################################################################################################
 main()

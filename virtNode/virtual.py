@@ -197,6 +197,11 @@ class virtualNode(pb.Root):
 																									  e))
 			raise e
 
+	def remote_update_hostDict(self, node_topology):
+		if len(self.hostDict) != len(node_topology):
+			self.config.read_config(Settings.CONF_TOPOLOGY_FILE)
+
+
 	def remote_check_connections(self):
 		"""
 		Checks if all connections are up. (Just checks if the number of connections equal the number of nodes in config-file)
@@ -218,6 +223,11 @@ class virtualNode(pb.Root):
 				return conn_to_return
 			except Exception as e:
 				raise e
+
+	def remote_connect_to_node_by_name(self, remote_node_name):
+		print("remte_node_name: {}".format(remote_node_name))
+		if remote_node_name not in self.conn:
+			self.connect_to_node(self.config.hostDict[remote_node_name] )
 
 	def connect_to_node(self, node):
 		"""

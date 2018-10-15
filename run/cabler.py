@@ -144,6 +144,7 @@ class Command:
             self.topology[key].append((name, hostname, port))
 
         self.topology['Nodes'].append(name)
+        self.__write_all_the_things()
 
     def remove_node(self, name):
         for key in ('appNodes', 'cqcNodes', 'Nodes', 'virtualNodes'):

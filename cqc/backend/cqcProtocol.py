@@ -98,6 +98,11 @@ class CQCFactory(Factory):
 		Lookup name of remote host used within SimulaQron given ip and
 		portnumber.
 		"""
+		# # Check if a topology is defined, otherwise use fully connected
+		# self._setup_topology(Settings.CONF_TOPOLOGY_FILE)
+		# # Check the nodes dict
+		# yield self.virtRoot.callRemote("update_hostDict", topology[self.name])
+
 		for entry in self.cqcNet.hostDict:
 			node = self.cqcNet.hostDict[entry]
 			if (node.ip == ip) and (node.port == port):
@@ -152,11 +157,19 @@ class CQCFactory(Factory):
 		:return:
 		"""
 		# Check if a topology is defined, otherwise use fully connected
+		self._setup_topology(Settings.CONF_TOPOLOGY_FILE)
+		# Check the nodes dict
+		yield self.virtRoot.callRemote("update_hostDict", topology[self.name])
+
 		if self.topology is None:
 			return True
 
 		if self.name in self.topology:
 			if remote_host_name in self.topology[self.name]:
+				
+				## construct a link, if the nodes are not connected
+				self.virtRoot.callRemote("connect_to_node_by_name", remote_host_name)
+
 				return True
 			else:
 				return False
