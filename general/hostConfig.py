@@ -29,6 +29,19 @@
 
 import sys, socket, struct
 from twisted.spread import pb
+from ipaddress import IPv4Address
+
+def cqc_node_id(fam, ip):
+	if fam == socket.AF_INET:
+		return struct.unpack("!L", IPv4Address(ip).packed)[0]
+	else:
+		raise ValueError("No IPv6 yet :(")
+
+def cqc_node_id_from_addrinfo(addr):
+	fam = addr[0]
+	sockaddr = addr[4]
+	ip = sockaddr[0]
+	return cqc_node_id(fam, ip)
 
 class networkConfig(pb.Referenceable):
 
@@ -81,15 +94,16 @@ class host(pb.Referenceable):
 		self.hostname = hostname
 		self.port = int(port)
 
-		# Lookup IP address - store in network byte order(!)
-		addr = socket.gethostbyname(hostname)
-		packedIP = socket.inet_aton(addr)
-		self.ip = struct.unpack("!L", packedIP)[0]
+		# Lookup IP address
+		addrs = socket.getaddrinfo(hostname, port, proto=socket.IPPROTO_TCP
+                        ,family=socket.AF_INET)
+		addr = addrs[0]
+		self.family = addr[0]
+		self.addr = addr
+
+		self.ip = cqc_node_id_from_addrinfo(addr)
 
 		# Connection identifiers used after connected
 		self.factory = 0
 		self.root = 0
 		self.defer = 0
-
-
-

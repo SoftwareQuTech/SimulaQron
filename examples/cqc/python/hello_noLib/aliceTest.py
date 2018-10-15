@@ -62,17 +62,16 @@ def init(name,cqcFile=None):
 	else:
 		logging.error("The name '%s' is not in the cqc network.",name)
 
-	#Get IP of correct form
-	myIP=socket.inet_ntoa(struct.pack("!L",myHost.ip))
+	addr = myHost.addr
 
 	#Connect to cqc server and run protocol
 	cqc=None
 	try:
-		cqc=socket.socket(socket.AF_INET,socket.SOCK_STREAM,0)
+		cqc=socket.socket(addr[0], addr[1], addr[2])
 	except socket.error:
 		logging.error("Could not connect to cqc server: %s",name)
 	try:
-		cqc.connect((myIP,myHost.port))
+		cqc.connect(addr[4])
 	except socket.error:
 		cqc.close()
 		logging.error("Could not connect to cqc server: %s",name)
