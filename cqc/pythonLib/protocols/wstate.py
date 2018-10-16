@@ -13,7 +13,6 @@ def initialize_Qubit_register(num_qubit,Owner):
 		:param Owner: The owner of the qubit / CQCConnection.
 	"""
 
-	print("\n ------- \n Initializing qubits! \n ------- \n")
 	qubits = []
 	for x in range(0,num_qubit):
 		one_more_qubit = qubit(Owner)
