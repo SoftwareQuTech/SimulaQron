@@ -224,6 +224,12 @@ class simulatedQubit(pb.Referenceable):
 		"""
 		return self.register
 
+	def remote_get_register_RI(self):
+		"""
+		Returns the register where this qubit is simulated.
+		"""
+		return self.register.get_register_RI()
+
 	def remote_get_numbers(self):
 		"""
 		Returns the number of the simulating register.
