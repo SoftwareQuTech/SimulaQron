@@ -1,4 +1,3 @@
 #!/bin/bash
 
-python testEngine.py
-
+python projectQEngine/test_projectQEngine.py

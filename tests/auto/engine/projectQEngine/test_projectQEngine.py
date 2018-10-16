@@ -24,10 +24,11 @@ class TestProjectQEngine(unittest.TestCase):
     def setUp(self):
         self.eng = projectQEngine()
 
-    def tearDown(self):
-        for _ in range(self.eng.activeQubits):
-            self.eng.measure_qubit(0)
-        self.eng.eng.flush()
+    # def tearDown(self):
+    #     print("tearing down: {}".format(self.eng.activeQubits))
+    #     for _ in range(self.eng.activeQubits):
+    #         self.eng.measure_qubit(0)
+    #     self.eng.eng.flush()
 
     @staticmethod
     def abs_inner_product(state, ref):
@@ -42,11 +43,34 @@ class TestProjectQEngine(unittest.TestCase):
         self.assertEqual(len(self.eng.qubitReg), 1)
         self.assertTrue(isinstance(self.eng.qubitReg[num], Qureg))
 
-    def test_add_to_many_qubits(self):
+    def test_add_to_many_fresh_qubits(self):
         for _ in range(10):
             self.eng.add_fresh_qubit()
         with self.assertRaises(noQubitError):
             self.eng.add_fresh_qubit()
+
+    def test_add_qubit(self):
+        new_state = [1, 0]
+        num = self.eng.add_qubit(new_state)
+        self.assertEqual(num, 0)
+        self.assertEqual(self.eng.activeQubits, 1)
+        self.assertEqual(len(self.eng.qubitReg), 1)
+        state = self.eng.get_register_RI()
+        self.assertAlmostEqual(self.abs_inner_product(state, new_state), 1)
+
+    def test_add_qubit_H(self):
+        new_state = [1 / np.sqrt(2), 1 / np.sqrt(2)]
+        num = self.eng.add_qubit(new_state)
+        self.assertEqual(num, 0)
+        self.assertEqual(self.eng.activeQubits, 1)
+        self.assertEqual(len(self.eng.qubitReg), 1)
+        state = self.eng.get_register_RI()
+        self.assertAlmostEqual(self.abs_inner_product(state, new_state), 1)
+
+    def test_add_unphysical_qubit(self):
+        new_state = [1, 1]
+        with self.assertRaises(quantumError):
+            self.eng.add_qubit(new_state)
 
     def test_remove_qubit(self):
         num = self.eng.add_fresh_qubit()
@@ -162,7 +186,128 @@ class TestProjectQEngine(unittest.TestCase):
         self.assertEqual(m, 0)
         self.assertEqual(self.eng.activeQubits, 1)
 
+    def test_absorb_both_empty(self):
+        eng2 = projectQEngine()
+        self.eng.absorb(eng2)
+        self.assertEqual(self.eng.activeQubits, 0)
+        self.assertEqual(len(self.eng.qubitReg), 0)
 
+    def test_absorb_other_empty(self):
+        num = self.eng.add_fresh_qubit()
+        self.eng.apply_H(num)
+        eng2 = projectQEngine()
+        self.eng.absorb(eng2)
+        self.assertEqual(self.eng.activeQubits, 1)
+        self.assertEqual(len(self.eng.qubitReg), 1)
+        state = self.eng.get_register_RI()
+        ref = [1 / np.sqrt(2), 1 / np.sqrt(2)]
+        self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
+
+    def test_absorb_this_empty_H(self):
+        eng2 = projectQEngine()
+        num = eng2.add_fresh_qubit()
+        eng2.apply_H(num)
+        self.eng.absorb(eng2)
+        self.assertEqual(self.eng.activeQubits, 1)
+        self.assertEqual(len(self.eng.qubitReg), 1)
+        state = self.eng.get_register_RI()
+        ref = [1 / np.sqrt(2), 1 / np.sqrt(2)]
+        self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
+
+    def test_absorb_this_empty_CNOT(self):
+        eng2 = projectQEngine()
+        num1 = eng2.add_fresh_qubit()
+        num2 = eng2.add_fresh_qubit()
+        eng2.apply_H(num1)
+        eng2.apply_CNOT(num1, num2)
+        self.eng.absorb(eng2)
+        self.assertEqual(self.eng.activeQubits, 2)
+        self.assertEqual(len(self.eng.qubitReg), 2)
+        state = self.eng.get_register_RI()
+        ref = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
+        self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
+
+    def test_absorb_this_empty_GHZ(self):
+        n = 5
+        eng2 = projectQEngine()
+        qubits = [eng2.add_fresh_qubit() for _ in range(n)]
+        eng2.apply_H(qubits[0])
+        for i in range(1, n):
+            eng2.apply_CNOT(qubits[0], qubits[i])
+        self.eng.absorb(eng2)
+        self.assertEqual(self.eng.activeQubits, n)
+        self.assertEqual(len(self.eng.qubitReg), n)
+        state = self.eng.get_register_RI()
+        ref = [1 / np.sqrt(2)] + [0] * (2**n - 2) + [1 / np.sqrt(2)]
+        self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
+
+    def test_absorb_2GHZ(self):
+        n = 5
+        eng2 = projectQEngine()
+        for eng in [self.eng, eng2]:
+            qubits = [eng.add_fresh_qubit() for _ in range(n)]
+            eng.apply_H(qubits[0])
+            for i in range(1, n):
+                eng.apply_CNOT(qubits[0], qubits[i])
+        self.eng.absorb(eng2)
+        self.assertEqual(self.eng.activeQubits, 2 * n)
+        self.assertEqual(len(self.eng.qubitReg), 2 * n)
+
+    def test_absorb_to_big_this_empty(self):
+        eng2 = projectQEngine(11)
+        for _ in range(11):
+            eng2.add_fresh_qubit()
+        with self.assertRaises(quantumError):
+            self.eng.absorb(eng2)
+
+    def test_absorb_to_big(self):
+        self.eng.add_fresh_qubit()
+        eng2 = projectQEngine()
+        for _ in range(10):
+            eng2.add_fresh_qubit()
+        with self.assertRaises(quantumError):
+            self.eng.absorb(eng2)
+
+    def test_absorb_parts_both_empty(self):
+        eng2 = projectQEngine()
+        self.eng.absorb_parts(*eng2.get_register_RI(), eng2.activeQubits)
+        self.assertEqual(self.eng.activeQubits, 0)
+        self.assertEqual(len(self.eng.qubitReg), 0)
+
+    def test_absorb_parts(self):
+        self.eng.add_fresh_qubit()
+        eng2 = projectQEngine()
+        eng2.add_fresh_qubit()
+        self.eng.absorb_parts(*eng2.get_register_RI(), eng2.activeQubits)
+        self.assertEqual(self.eng.activeQubits, 2)
+        self.assertEqual(len(self.eng.qubitReg), 2)
+        state = self.eng.get_register_RI()
+        ref = [1, 0, 0, 0]
+        self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
+
+    def test_absorb_parts_EPR(self):
+        eng2 = projectQEngine()
+        num1 = eng2.add_fresh_qubit()
+        num2 = eng2.add_fresh_qubit()
+        eng2.apply_H(num1)
+        eng2.apply_CNOT(num1, num2)
+        self.eng.absorb_parts(*eng2.get_register_RI(), eng2.activeQubits)
+        self.assertEqual(self.eng.activeQubits, 2)
+        self.assertEqual(len(self.eng.qubitReg), 2)
+        state = self.eng.get_register_RI()
+        ref = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
+        self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
+
+    def test_absorb_parts_other_empty(self):
+        num = self.eng.add_fresh_qubit()
+        self.eng.apply_H(num)
+        eng2 = projectQEngine()
+        self.eng.absorb_parts(*eng2.get_register_RI(), eng2.activeQubits)
+        self.assertEqual(self.eng.activeQubits, 1)
+        self.assertEqual(len(self.eng.qubitReg), 1)
+        state = self.eng.get_register_RI()
+        ref = [1 / np.sqrt(2), 1 / np.sqrt(2)]
+        self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
 
 if __name__ == '__main__':
