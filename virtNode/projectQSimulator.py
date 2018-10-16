@@ -55,46 +55,56 @@ class projectQEngine(Engine):
         self.maxQubits = maxQubits
 
         # We start with no active qubits
-        self.reset()
-
-    def reset(self):
-        """
-        Resets this register to 0 qubits.
-        """
         self.activeQubits = 0
         self.eng = pQ.MainEngine()
         self.qubitReg = []
+
+    def __del__(self):
+        """
+        Measures out all the current qubits, needed for projectQs garbage collectorself.
+        """
+        # Check first that project Q garbarge collector not already removed qubits
+        self.eng.flush()
+        # print("garbade collector: {}".format(self.eng.backend.cheat()))
+        if not len(self.eng.backend.cheat()[0]) == 0:
+            for _ in range(self.activeQubits):
+                self.measure_qubit(0)
 
     def add_fresh_qubit(self):
         """
         Add a new qubit initialized in the \|0\> state.
         """
-
-        # Prepare a clean qubit state in |0>
-        newQubit = self.eng.allocate_qubit()
-
-        num = self.add_qubit(newQubit)
-        return num
-
-    def add_qubit(self, newQubit):
-        """
-        Add new qubit in the state described by the density matrix newQubit
-        """
-
         # Check if we are still allowed to add qubits
         if self.activeQubits >= self.maxQubits:
             raise noQubitError("No more qubits available in register.")
 
-        # Append to the existing state at the end
-        self.qubitReg.append(newQubit)
+        # Prepare a clean qubit state in |0>
+        qubit = self.eng.allocate_qubit()
 
-        # Index number of that qubit
+        self.qubitReg.append(qubit)
+
         num = self.activeQubits
 
-        # Increment the number of qubits
-        self.activeQubits = self.activeQubits + 1
+        self.activeQubits += 1
 
-        return (num)
+        return num
+
+    def add_qubit(self, newQubit):
+        """
+        Add new qubit in the state described by the vector newQubit ([a, b])
+        """
+
+        norm = np.dot(np.array(newQubit), np.array(newQubit).conj())
+        if not norm <= 1:
+            raise quantumError("State {} is not normalized.".format(newQubit))
+
+        # Create a fresh qubit
+        num = self.add_fresh_qubit()
+
+        # Transform the new qubit into the correct state
+        pQ.ops.StatePreparation(newQubit) | self.qubitReg[num]
+
+        return num
 
     def remove_qubit(self, qubitNum):
         """
@@ -103,10 +113,7 @@ class projectQEngine(Engine):
         if (qubitNum + 1) > self.activeQubits:
             raise quantumError("No such qubit to remove")
 
-        self.qubitReg.pop(qubitNum)
-
-        # Update the number of qubits
-        self.activeQubits = self.activeQubits - 1
+        self.measure_qubit(qubitNum)
 
     # def get_qubits(self, list):
     #     """
@@ -202,6 +209,7 @@ class projectQEngine(Engine):
         n	    A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
         a	    The rotation angle in radians.
         """
+        n = tuple(n)
         if n == (1, 0, 0):
             self.apply_onequbit_gate(pQ.ops.Rx(a), qubitNum)
         elif n == (0, 1, 0):
@@ -288,7 +296,11 @@ class projectQEngine(Engine):
         qubitNum	qubit to be measured
         """
         outcome = self.measure_qubit_inplace(qubitNum)
-        self.remove_qubit(qubitNum)
+
+        self.qubitReg.pop(qubitNum)
+
+        # Update the number of qubits
+        self.activeQubits = self.activeQubits - 1
 
         return outcome
 
@@ -310,9 +322,21 @@ class projectQEngine(Engine):
 
         # Check whether there are in fact qubits to tensor up....
         if self.activeQubits == 0:
-            self.qubitReg = other.qubitReg
-        elif other.activeQubits != 0:
-            self.qubitReg = qp.tensor(self.qubitReg, other.qubitReg)
+            self.eng = other.eng
+            self.qubitReg = list(other.qubitReg)
+        elif other.activeQubits > 0:
+            # Get the current state of the other engine
+            other.eng.flush()
+            other_state = other.eng.backend.cheat()[1]
+
+            # Allocate qubits in this engine for the new qubits from the other engine
+            qreg = self.eng.allocate_qureg(other.activeQubits)
+
+            # Put the new qubits in the correct state
+            pQ.ops.StatePreparation(other_state) | qreg
+
+            # Add the qubits to the list of qubits
+            self.qubitReg += list(qreg)
 
         self.activeQubits = newNum
 
@@ -325,36 +349,26 @@ class projectQEngine(Engine):
         I		imaginary part as a list
         activeQ		active number of qubits
         """
-
-        # Convert the real and imaginary parts given as lists into a qutip object
-        M = I
-        for s in range(len(I)):
-            for t in range(len(I)):
-                M[s][t] = R[s][t] + I[s][t] * 1j
-
-        qt = qp.Qobj(M)
-
         # Check whether there is space
         newNum = self.activeQubits + activeQ
         if newNum > self.maxQubits:
             raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
 
-        # Check whether there are in fact qubits to tensor up....
-        if self.activeQubits == 0:
-            self.qubitReg = qt
-        elif qt.shape[0] != 0:
-            self.qubitReg = qp.tensor(self.qubitReg, qt)
+        if activeQ > 0:
 
-        self.activeQubits = newNum
+            # Convert the real and imaginary parts to a state
+            state = [re + im * 1j for re, im in zip(R, I)]
 
-        # Qutip distinguishes between system dimensionality and matrix dimensionality
-        # so we need to make sure it knows we are talking about multiple qubits
-        k = int(math.log2(self.qubitReg.shape[0]))
-        dimL = []
-        for j in range(k):
-            dimL.append(2)
+            # Allocate qubits in this engine for the new qubits from the other engine
+            qreg = self.eng.allocate_qureg(activeQ)
 
-        self.qubitReg.dims = [dimL, dimL]
+            # Put the new qubits in the correct state
+            pQ.ops.StatePreparation(state) | qreg
+
+            # Add the qubits to the list of qubits
+            self.qubitReg += list(qreg)
+
+            self.activeQubits = newNum
 
 
 class quantumRegister(projectQEngine):
@@ -372,10 +386,7 @@ class quantumRegister(projectQEngine):
         num		number of this register
         maxQubits	maximum number of qubits this register supports
         """
-
-        self.maxQubits = maxQubits
-        self.activeQubits = 0
-        self.qubitReg = 0
+        super().__init__(maxQubits=maxQubits)
 
         # Each register has a number, this may be used be the ``outside`` application
         # using this simulator

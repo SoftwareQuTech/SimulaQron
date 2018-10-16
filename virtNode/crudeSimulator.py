@@ -392,7 +392,7 @@ class simpleEngine(quantumEngine):
         """
 
         f = math.sqrt(2)
-        i = cmath.complex(0, 1)
+        i = complex(0, 1)
         K = qp.Qobj([[1 / f, -i / f], [i / f, -1 / f]], dims=[[2], [2]])
         self.apply_onequbit_gate(K, qubitNum)
 
@@ -417,7 +417,7 @@ class simpleEngine(quantumEngine):
         Applies a Y gate to the qubits with number qubitNum.
         """
 
-        i = cmath.complex(0, 1)
+        i = complex(0, 1)
         Y = qp.Qobj([[0, -i], [i, 0]], dims=[[2], [2]])
         self.apply_onequbit_gate(Y, qubitNum)
 
@@ -425,7 +425,7 @@ class simpleEngine(quantumEngine):
         """
         Applies a T gate to the qubits with number qubitNum.
         """
-        i = cmath.complex(0, 1)
+        i = complex(0, 1)
         Y = qp.Qobj([[1, 0], [0, cmath.exp(i * np.pi / 4)]], dims=[[2], [2]])
         self.apply_onequbit_gate(Y, qubitNum)
 

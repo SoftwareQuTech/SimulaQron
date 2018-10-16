@@ -50,6 +50,7 @@ class Settings:
 	CONF_LOGGING_LEVEL_BACKEND = logging.WARNING
 	CONF_LOGGING_LEVEL_FRONTEND = logging.WARNING
 	CONF_BACKEND_HANDLER = SimulaqronCQCHandler
+	CONF_BACKEND = "projectq"
 	CONF_TOPOLOGY_FILE = ""
 	CONF_NOISY_QUBITS = False
 	CONF_T1 = 1
@@ -115,6 +116,12 @@ class Settings:
 			cls.CONF_BACKEND_HANDLER = CQCLogMessageHandler
 		else:  # default simulqron  (elif backend_handler.lower() == "simulqron")
 			cls.CONF_BACKEND_HANDLER = SimulaqronCQCHandler
+
+		if "Backend" in backend:
+			cls.CONF_BACKEND = backend["backend"]
+		else:
+			backend["backend"] = cls.CONF_BACKEND
+			config_changed = True
 
 		if "Topology_File" in backend:
 			cls.CONF_TOPOLOGY_FILE = backend['Topology_File']
