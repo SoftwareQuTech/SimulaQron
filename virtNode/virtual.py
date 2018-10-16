@@ -1136,13 +1136,23 @@ class virtualNode(pb.Root):
                 q.simNode = newSimNode
                 q.simQubit = newD[givenNum]
 
+    @inlineCallbacks
+    def remote_get_register_RI(self, qubit):
+        """
+        Return the real and imaginary part of the (possibly remote) simulated register which
+        contains this virtual qubit.
+        """
+        if isinstance(qubit, virtualQubit):
+            realM, imagM = yield qubit.remote_get_register_RI()
+        else:
+            realM, imagM = yield qubit.callRemote("get_register_RI")
+        return realM, imagM
+
     def remote_get_register(self, qubit):
         """
         Return the value of of a locally simulated register which contains this virtual qubit.
-
         """
 
-        # XXX Move to virtual qubit?
         (realM, imagM) = qubit.simQubit.register.get_register_RI()
         activeQ = qubit.simQubit.register.activeQubits
         oldRegNum = qubit.simQubit.register.num
@@ -1181,7 +1191,7 @@ class virtualNode(pb.Root):
         for q in reversed(self.simQubits):
             if q.register.num == oldRegNum:
                 self.simQubits.remove(q)
-                gotQ.register.activeQubits -= 1
+                # gotQ.register.activeQubits -= 1
 
         self.remote_delete_register(delRegister)
 
@@ -1925,6 +1935,18 @@ class virtualQubit(pb.Referenceable):
         """
         return self.num
 
+    def remote_get_virtNode(self):
+        """
+        Returns the virtNode of this virtual qubit
+        """
+        return self.virtNode.name
+
+    def remote_get_simNode(self):
+        """
+        Returns the simNode of this virtual qubit
+        """
+        return self.simNode.name
+
     @inlineCallbacks
     def remote_get_qubit(self):
         """
@@ -1949,6 +1971,14 @@ class virtualQubit(pb.Referenceable):
                 raise err
 
         return (R, I)
+
+    @inlineCallbacks
+    def remote_get_register_RI(self):
+        if self.simNode == self.virtNode:
+            realM, imagM = self.simQubit.register.get_register_RI()
+        else:
+            realM, imagM = yield self.simQubit.callRemote("get_register_RI")
+        return realM, imagM
 
 
 ############################################
