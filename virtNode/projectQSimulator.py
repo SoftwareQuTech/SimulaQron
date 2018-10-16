@@ -27,13 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import qutip as qp
-import math
-import cmath
 import projectq as pQ
-
-import numpy as np
-import logging
 
 from SimulaQron.virtNode.basics import quantumError, noQubitError
 from SimulaQron.virtNode.crudeSimulator import Engine
@@ -172,6 +166,8 @@ class projectQEngine(Engine):
         """
         self.apply_onequbit_gate(pQ.ops.H, qubitNum)
         self.apply_onequbit_gate(pQ.ops.S, qubitNum)
+        self.apply_onequbit_gate(pQ.ops.H, qubitNum)
+        self.apply_onequbit_gate(pQ.ops.Z, qubitNum)
 
     def apply_X(self, qubitNum):
         """
