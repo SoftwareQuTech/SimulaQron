@@ -9,9 +9,9 @@ fn test_send() {
     // Initialise the host name, port number, remote host address,
     // remote host port number and application id
     let hostname = String::from("localhost");
-    let portno: u16 = 8821;
+    let portno: u16 = 8803;
     let remote_host: u32 = u32::from(Ipv4Addr::new(127, 0, 0, 1));
-    let remote_port: u16 = 8822;
+    let remote_port: u16 = 8804;
     let app_id: u16 = 10;
 
     // In this example, we will not check for errors.
@@ -19,7 +19,8 @@ fn test_send() {
     let mut cqc = Cqc::new(app_id, &hostname, portno).unwrap();
 
     // Execute a simple CQC command to create a new qubit
-    cqc.simple_cmd(hdr::Cmd::New as u8, 0, false).unwrap();
+    let request = cqc.builder.cmd_new(0, hdr::CmdOpt::empty());
+    cqc.encode_and_send(&request).unwrap();
 
     // Get the qubit id
     let qubit = cqc.wait_until_newok().unwrap();
@@ -32,7 +33,7 @@ fn test_send() {
 fn test_recv() {
     // Initialise the host name, port number and application id
     let hostname = String::from("localhost");
-    let portno: u16 = 8822;
+    let portno: u16 = 8804;
     let app_id: u16 = 10;
 
     // In this example, we will not check for errors.

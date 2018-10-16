@@ -58,7 +58,7 @@ RUN ln -s /usr/bin/pip3 /usr/bin/pip
 RUN pip install cython numpy scipy matplotlib
 
 # SimulaQron dependencies
-RUN pip install twisted service_identity qutip
+RUN pip install twisted service_identity qutip networkx
 
 # Add the working directory
 ARG WORKSPACE=/workspace

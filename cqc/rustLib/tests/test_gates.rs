@@ -17,23 +17,6 @@ use rust_lib::Cqc;
 // Returns:
 // ratio   average (in [-1,1] interval).
 fn cqc_tomography_dir(cqc: &mut Cqc, func: &Fn(&mut Cqc) -> u16, n_iter: u32, dir: u8) -> f64 {
-    // Translate the direction into a rotation command
-    // 0 => Indetity
-    // 1 => Hadamard Gate
-    // 2 => K-Gate
-    let cmd: u8;
-    match dir {
-        0 => cmd = hdr::Cmd::I as u8,
-        1 => cmd = hdr::Cmd::H as u8,
-        2 => cmd = hdr::Cmd::K as u8,
-        _ => panic!(
-            "Direction can be 0 (Identity), 1 (Hadamard) or 2 (K-Gate).\
-             You have {}.\n \
-             No gate is applied to the qubit in this instance.",
-            dir
-        ),
-    }
-
     // Measure in the given direction n_iter times to gather statistics
     let mut count: i32 = 0;
     for _ in 0..n_iter {
@@ -42,7 +25,18 @@ fn cqc_tomography_dir(cqc: &mut Cqc, func: &Fn(&mut Cqc) -> u16, n_iter: u32, di
 
         // Apply the rotation
         if dir > 0 {
-            cqc.simple_cmd(cmd, qubit, true).unwrap();
+            let options = *hdr::CmdOpt::empty().set_notify().set_block();
+            let request = match dir {
+                1 => cqc.builder.cmd_h(qubit, options),
+                2 => cqc.builder.cmd_k(qubit, options),
+                _ => panic!(
+                    "Direction can be 1 (Hadamard) or 2 (K-Gate).\
+                     You have {}.\n \
+                     No gate is applied to the qubit in this instance.",
+                    dir
+                ),
+            };
+            cqc.encode_and_send(&request).unwrap();
             cqc.wait_until_done(1).unwrap();
         }
 
@@ -120,11 +114,16 @@ fn cqc_test_qubit(
 // Prepares a plus state
 fn make_plus(cqc: &mut Cqc) -> u16 {
     // Create a new qubit in |0>
-    cqc.simple_cmd(hdr::Cmd::New as u8, 0, false).unwrap();
+    let request = cqc.builder.cmd_new(0, hdr::CmdOpt::empty());
+    cqc.encode_and_send(&request).unwrap();
     let qubit: u16 = cqc.wait_until_newok().unwrap();
 
     // Turn it into |+>
-    cqc.simple_cmd(hdr::Cmd::H as u8, qubit, true).unwrap();
+    let request = cqc.builder.cmd_h(
+        qubit,
+        *hdr::CmdOpt::empty().set_notify().set_block(),
+    );
+    cqc.encode_and_send(&request).unwrap();
     cqc.wait_until_done(1).unwrap();
 
     qubit
@@ -133,12 +132,9 @@ fn make_plus(cqc: &mut Cqc) -> u16 {
 // Prepares a zero state
 fn make_zero(cqc: &mut Cqc) -> u16 {
     // Create a new qubit in |0>
-    cqc.simple_cmd(hdr::Cmd::New as u8, 0, false).unwrap();
+    let request = cqc.builder.cmd_new(0, hdr::CmdOpt::empty());
+    cqc.encode_and_send(&request).unwrap();
     let qubit: u16 = cqc.wait_until_newok().unwrap();
-
-    // Keep it as |0>
-    cqc.simple_cmd(hdr::Cmd::I as u8, qubit, true).unwrap();
-    cqc.wait_until_done(1).unwrap();
 
     qubit
 }
@@ -146,11 +142,16 @@ fn make_zero(cqc: &mut Cqc) -> u16 {
 // Prepares a y_0 eigenstate
 fn make_k(cqc: &mut Cqc) -> u16 {
     // Create a new qubit in |0>
-    cqc.simple_cmd(hdr::Cmd::New as u8, 0, false).unwrap();
+    let request = cqc.builder.cmd_new(0, hdr::CmdOpt::empty());
+    cqc.encode_and_send(&request).unwrap();
     let qubit: u16 = cqc.wait_until_newok().unwrap();
 
     // Turn it into |+>
-    cqc.simple_cmd(hdr::Cmd::K as u8, qubit, true).unwrap();
+    let request = cqc.builder.cmd_k(
+        qubit,
+        *hdr::CmdOpt::empty().set_notify().set_block(),
+    );
+    cqc.encode_and_send(&request).unwrap();
     cqc.wait_until_done(1).unwrap();
 
     qubit
@@ -160,7 +161,7 @@ fn make_k(cqc: &mut Cqc) -> u16 {
 fn test_gates() {
     // Initialise the host name, port number and application id
     let hostname = String::from("localhost");
-    let portno: u16 = 8821;
+    let portno: u16 = 8803;
     let app_id: u16 = 10;
 
     // In this example, we will not check for errors.
