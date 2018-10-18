@@ -28,6 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import projectq as pQ
+import numpy as np
 
 from SimulaQron.virtNode.basics import quantumError, noQubitError
 from SimulaQron.virtNode.crudeSimulator import Engine
