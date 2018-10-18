@@ -147,7 +147,7 @@ class localNode(pb.Root):
             # Output state
             (realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits", [self.qA, self.qB])
             rho = assemble_qubit(realRho, imagRho)
-            expectedRho = qp.Qobj([[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]])
+            expectedRho = qp.Qobj([[1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
             correct = (rho == expectedRho)
         elif Settings.CONF_BACKEND == "projectq":
             (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", self.qA)
