@@ -80,7 +80,7 @@ else  # if arguments were given, create the new nodes and start them
             shift
             shift
             ;;
-            --T1)
+            --t1)
             T1="$2"
             shift
             shift
