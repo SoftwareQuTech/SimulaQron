@@ -32,6 +32,8 @@ done
 
 BACKEND=${BACKEND:-"projectq"} #If not set, use projectq backend
 
+rm "${NETSIM}/config/settings.ini"
+
 echo "Starting SimulaQron sever"
 sh "${NETSIM}/run/startAll.sh" -nd "Alice Bob Charlie David Eve" --backend "$BACKEND" &
 sleep 1s
