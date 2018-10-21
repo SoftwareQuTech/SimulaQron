@@ -26,7 +26,7 @@ Setting up
 
 We will run everything locally (localhost) using two nodes, Alice, Bob and Charlie. Start up the backend of the simulation by running::
 
-    sh run/startAll.sh --nodes "Alice Bob Charlie"
+    ./cli/main.py network start-all --nodes Alice,Bob,Charlie
 
 The below example can then be executed when in the folder `examples/cqc/pythonLib/extendGHZ` typing::
 

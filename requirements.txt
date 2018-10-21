@@ -10,3 +10,4 @@ projectq>=0.4.1
 bitstring>=3.1.5
 black>=18.9b0
 flake8>=3.6.0
+click>=7.0
