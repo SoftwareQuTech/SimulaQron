@@ -33,7 +33,7 @@ Setting up
 
 We will run everything locally (localhost) using two nodes, Alice and Bob. Start up the backend of the simulation by running (to make this example more interesting you should before turn on the noise on the qubits as described above)::
 
-    sh run/startAll.sh --nodes "Alice Bob"
+    ./cli/main.py network start-all --nodes Alice,Bob
 
 The below example can then be executed when in the folder `examples/cqc/pythonLib/teleport` typing::
 

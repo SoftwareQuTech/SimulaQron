@@ -64,11 +64,11 @@ Starting the SimulaQron backend
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 By default SimulaQron uses the five nodes Alice, Bob, Charlie, David and Eve on your local computers. In this example there will be two processes for each node listening to incoming messages on a certain port number. These make up the simulation backend and the CQC server. To start the processes and thus the backend of SimulaQron simply type::
 
-    sh run/startAll.sh
+    ./cli/main.py network start-all
 
-.. warning:: Running :code:`sh run/startAll.sh` will be default start up servers on localhost (i.e., your own computer), using port numbers 8801-8811, to form the simulated quantum internet hardware. SimulaQron does not provide any access control to its simulated hardware, so you are responsible to securing access should this be relevant for you. You can also run the different simulated nodes on different computers. We do not take any responsibility for problems caused by SimulaQron.
+.. warning:: Running :code:`./cli/main.py network start-all` will be default start up servers on localhost (i.e., your own computer), using port numbers 8801-8811, to form the simulated quantum internet hardware. SimulaQron does not provide any access control to its simulated hardware, so you are responsible to securing access should this be relevant for you. You can also run the different simulated nodes on different computers. We do not take any responsibility for problems caused by SimulaQron.
 
-For more information on what :code:`sh run/startAll.sh` does, how to change the nodes and the ports of the network, the topology etc, see :doc:`ConfNodes`.
+For more information on what :code:`./cli/main.py network start-all` does, how to change the nodes and the ports of the network, the topology etc, see :doc:`ConfNodes`.
 
 ^^^^^^^^^^^^^^^^^^^
 Running a protocol
@@ -154,7 +154,7 @@ In the file config/settings.ini you can set the following parameters for SimulaQ
 * :code:`[BACKEND]`
     * :code:`maxqubits_per_node` (default 20): This is the maximum virtual qubits a node can store. Note that a node can still have more simulated qubits.
     * :code:`maxregisters_per_node` (default 1000): This is the maximum of qubit registers a virtual node can store.
-    * :code:`waittime` (default 0.5): This is the amount of time that the virtual nodes will wait to try to set up connection between them (when running :code:`sh run/startAll.sh`. If you're setting up SimulaQron between multiple computers, you may wish to increase this.
+    * :code:`waittime` (default 0.5): This is the amount of time that the virtual nodes will wait to try to set up connection between them (when running :code:`./cli/main.py network start-all`). If you're setting up SimulaQron between multiple computers, you may wish to increase this.
     * :code:`loglevel` (default `warning`): Determines which logging messages should be printed from the backend. Options are `critical`, `error`, `warning`, `info` and `debug`, with increasing amount of logging. Setting the log-level to `debug` will print a lot of messages.
     * :code:`backendhandler` (default `simulaqron`): This is to set different types of backends for parsing the CQC messages. Current options are `simulaqron` and `log` (simply log the CQC messages). Unless you know what you're doing don't change this!
     * :code:`backend` (default `projectq`): Current choices are: `qutip` (mixed states), `projectq` (pure states) and `stabilizer` (stabilizer states and only Clifford operations).

@@ -5,31 +5,35 @@ Configuring the simulated network
 Starting the SimulaQron backend
 -------------------------------
 
-The backend of SimulaQron, i.e. the virtual nodes and the corresponding CQC servers can be started by running the file run/startAll.sh. If no arguments are given, a network is setup using the files in the folder config. By default this network consist of the five nodes Alice, Bob, Charlie, David and Eve, in a fully connected topology. One can easily also setup networks using different nodes and topologies by providing arguments to run/startAll.sh as described in this section. To setup a specific topology see the next section :ref:`topologyConf`. How to manually setup a network by editing the config files, see the section :ref:`manualSetup` below. This is useful if you don't want run/startAll.sh to choose the port numbers used for the servers. Finally, to know how to connect to an already running simulated network using CQC, see section :ref:`remoteNetwork`.
+The backend of a SimulaQron network is a set of running virtual nodes and their corresponding CQC servers. To start the backend of a SimulaQron network run the command ``./cli/main.py network start-all``.
+
+With no arguments, a network is setup using the files in the ``$NETSIM/config`` directory. If no files exist in this directory, the ``./cli/main.py network start-all`` command will generate config files for five nodes (Alice, Bobm Charlie, David, and Eve) in a fully connected topology (every node is connected to every other node).
+
+.. warning:: ``./cli/main.py network start-all`` can fail if any of the ports specified in the config files are already in use by a running SimulaQron network or another program.
+
+To setup a specific topology see section :ref:`topologyConf`. For setting up the config files manually, see section :ref:`manualSetup` below. Finally for instructions on how to connect to an already runnning simulated network using CQC, see section :ref:`remoteNetwork`.
 
 If you want to start a network with for example the three nodes Alex, Bart, Curt, simply type::
 
-    sh run/startAll.sh --nodes "Alex Bart Curt"
-
-.. warning:: This will kill python processes containing the keywords `Test`, `start` or `setup`, edit files in the directory config and start servers at `localhost` using port numbers from 8801 to 8800 + 2 * (# nodes).
+    ./cli/main.py network start-all --nodes Alex,Bart,Curt
 
 If you simply want a network with 10 nodes, type::
 
-    sh run/startAll.sh --nrnodes 10
+    ./cli/main.py network start-all --nrnodes 10
 
 This will start up a network where the nodes are called Node0, Node1, ..., Node9.
 
 The --nodes and --nrnodes can be combined. Let's say you want a network with 10 nodes and that three of the nodes are called Alice, Bob and Charlie, type::
 
-    sh run/startAll.sh --nodes "Alice Bob Charlie" --nrnodes 10
+    ./cli/main.py network start-all --nodes Alice,Bob,Charlie --nrnodes 10
 
 Which will start up a network with the nodes Alice, Bob, Charlie, Node0, Node1, ..., Node6. If --nrnodes is less than the entries in --nodes, then --nrnodes is ignored. The two keywords can also be specified shorter as -nd and -nn respectively. So the above can also be done as::
 
-    sh run/startAll.sh -nd "Alice Bob Charlie" -nn 10
+    ./cli/main.py network start-all -nd Alice,Bob,Charlie -nn 10
 
 You can also specify a topology of the network. For example if you want 10 nodes in a ring topology, type::
 
-    sh run/startAll.sh --nrnodes 10 --topology ring
+    ./cli/main.py network start-all --nrnodes 10 --topology ring
 
 In this network Node :math:`i` can create EPR pairs and send qubits to Node :math:`i-1 \pmod{10}` and Node :math:`i+1 \pmod{10}`. However, if a CQC message is sent to for example Node2 to produce entanglement with Node5, a error message (CQC_ERR_UNSUPP) will be returned. The options for the automatically generated topologies are currently:
 
@@ -43,7 +47,7 @@ Along with setting up the network with the specified topology a .png figure is a
 
 As a final example let's combine all the arguments specified above and create a network using 15 nodes, where two of then are called Alice and Bob and the topology of the network is randomly generated as a connected graph with 20 edges::
 
-    sh run/startAll.sh -nd "Alice Bob" -nn 15 -tp random_connected_20
+    ./cli/main.py network start-all -nd Alice,Bob -nn 15 -tp random_connected_20
 
 The network that is then started might look like this (you can find a similar picture for you network at `config/topology.png`:
 
@@ -60,7 +64,7 @@ To create a custom topology, see the next section.
 Configuring the network topology
 --------------------------------
 
-As seen in the previous section a pre-defined network topology can be used by passing an argument when running run/startAll.sh. The topology is then specified to SimulaQron as a .json-file stored at config/topology.json. The content of this .json file is a dictionary where the keys are the names of the nodes and the values a list of the neighbors. For example, a file specifying a topology where Alice is adjacent to Bob, Bob is adjacent to Alice and Charlie and Charlie is adjacent to Bob would be::
+As seen in the previous section a pre-defined network topology can be used by passing an argument when running `./cli/main.py network start-all`. The topology is then specified to SimulaQron as a .json-file stored at config/topology.json. The content of this .json file is a dictionary where the keys are the names of the nodes and the values a list of the neighbors. For example, a file specifying a topology where Alice is adjacent to Bob, Bob is adjacent to Alice and Charlie and Charlie is adjacent to Bob would be::
 
     {
      "Alice": ["Bob"],
@@ -72,7 +76,7 @@ As seen in the previous section a pre-defined network topology can be used by pa
 
 You can create your own .json file specifying the network topology you want to use. When doing so, make sure that the names of the nonodes you use are consistent with the nodes used by SimulaQron. To have SimulaQron use your specified topology, set the entry :code:`topology_file` in the file config/settings to be the relative path to the .json file, as seen from the root of the repository.
 
-.. note:: When using the keyword argument --topology (or -tp) for run/startAll.sh, the file config/topology.json is overwritten. It is therefore recommended to create your own topology-file with another name or in a different directory, to not accidentally overwrite your file.
+.. note:: When using the keyword argument --topology (or -tp) for ``./cli/main.py network start-all``, the file config/topology.json is overwritten. It is therefore recommended to create your own topology-file with another name or in a different directory, to not accidentally overwrite your file.
 
 .. _manualSetup:
 
@@ -80,11 +84,11 @@ You can create your own .json file specifying the network topology you want to u
 Manual setup
 ------------
 
-In this section we describe what the file run/startAll.sh does and how one can manually start up the SimulaQron and editing the nodes and port numbers used. This is useful if you don't want run/startAll.sh to automatically set the port numbers for you. Depending on what arguments are given to run/startAll.sh, the following is done:
+In this section we describe what the file ``./cli/main.py network start-all`` does and how one can manually start up the SimulaQron and editing the nodes and port numbers used. This is useful if you don't want ``./cli/main.py network start-all`` to automatically set the port numbers for you. Depending on what arguments are given to ``./cli/main.py network start-all``, the following is done:
 
-* If no arguments to run/startAll.sh are given then SimulaQron will start using the configuration specified by the files in the directory config. If there the file config/Nodes.cfg doesn't exist then it will be created and the files config/{virtualNodes.cfg, cqcNodes.cfg, appNodes.cfg} will be overwritten using the nodes Alice, Bob, Charlie, David and Eve.
+* If no arguments to ``./cli/main.py network start-all`` are given then SimulaQron will start using the configuration specified by the files in the directory config. If there the file config/Nodes.cfg doesn't exist then it will be created and the files config/{virtualNodes.cfg, cqcNodes.cfg, appNodes.cfg} will be overwritten using the nodes Alice, Bob, Charlie, David and Eve.
 
-* If the arguments --nodes (-nd) or --nrnodes (-nn) are used for run/startAll.sh then the files config/{Nodes.cfg, virtualNodes.cfg, cqcNodes.cfg, appNodes.cfg} are overwritten using the specified nodes. Port numbers will be used froThe files run/startVNodes.sh and run/startCQCNodes.sh are then called. What these scripts in turn do is specified below.m 8801.
+* If the arguments --nodes (-nd) or --nrnodes (-nn) are used for ``./cli/main.py network start-all`` then the files config/{Nodes.cfg, virtualNodes.cfg, cqcNodes.cfg, appNodes.cfg} are overwritten using the specified nodes. Port numbers will be used froThe files run/startVNodes.sh and run/startCQCNodes.sh are then called. What these scripts in turn do is specified below.m 8801.
 
 * If the argument --topology (-tp) is used then the files config/topology.json and config/topology.png will be overwritten which the specified topology and the entry :code:`topology_file` in config/settings.ini will be set to point to this file.
 
