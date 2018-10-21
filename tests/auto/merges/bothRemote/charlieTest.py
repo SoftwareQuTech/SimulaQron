@@ -40,6 +40,7 @@ from twisted.internet.defer import inlineCallbacks
 from SimulaQron.general.hostConfig import networkConfig
 from SimulaQron.local.setup import setup_local, assemble_qubit
 from SimulaQron.settings import Settings
+from SimulaQron.toolbox.stabilizerStates import StabilizerState
 
 
 #####################################################################################################
@@ -154,6 +155,13 @@ class localNode(pb.Root):
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
+        elif Settings.CONF_BACKEND == "stabilizer":
+            (array, _, _, _, _) = yield self.virtRoot.callRemote("get_register", self.qA)
+            state = StabilizerState(array)
+            expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
+            correct = (state == expectedState)
+        else:
+            ValueError("Unknown backend {}".format(Settings.CONF_BACKEND))
 
         if correct:
             print("Testing register merge, both remote, different nodes............ok")

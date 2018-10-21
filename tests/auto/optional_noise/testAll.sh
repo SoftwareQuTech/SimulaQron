@@ -19,6 +19,10 @@ while [ "$#" -gt 0 ]; do
         BACKEND="projectq"
         shift
         ;;
+        --stabilizer)
+        BACKEND="stabilizer"
+        shift
+        ;;
         *)
         echo "Unknown argument ${key}"
         exit 1

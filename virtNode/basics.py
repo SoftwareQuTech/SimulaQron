@@ -65,6 +65,3 @@ class quantumEngine(pb.Referenceable):
         """
 
         self.maxQubits = maxQubits
-
-        # We start with no active qubits
-        self.activeQubits = 0

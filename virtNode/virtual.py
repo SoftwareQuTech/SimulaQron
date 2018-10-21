@@ -39,7 +39,7 @@ from twisted.spread.pb import RemoteError
 from SimulaQron.virtNode.basics import quantumError, noQubitError, virtNetError
 from SimulaQron.virtNode.quantum import simulatedQubit
 from SimulaQron.general.hostConfig import networkConfig
-from SimulaQron.virtNode import crudeSimulator, projectQSimulator
+from SimulaQron.virtNode import crudeSimulator, projectQSimulator, stabilizerSimulator
 from SimulaQron.settings import Settings
 
 import logging
@@ -433,6 +433,8 @@ class virtualNode(pb.Root):
                 newReg = crudeSimulator.quantumRegister(self.myID, regNum, maxQubits)
             elif Settings.CONF_BACKEND == "projectq":
                 newReg = projectQSimulator.quantumRegister(self.myID, regNum, maxQubits)
+            elif Settings.CONF_BACKEND == "stabilizer":
+                newReg = stabilizerSimulator.quantumRegister(self.myID, regNum, maxQubits)
             else:
                 raise quantumError("Unknown backend {}".format(Settings.CONF_BACKEND))
 

@@ -19,6 +19,10 @@ while [ "$#" -gt 0 ]; do
         BACKEND="projectq"
         shift
         ;;
+        --stabilizer)
+        BACKEND="stabilizer"
+        shift
+        ;;
         *)
         echo "Unknown argument ${key}"
         exit 1
@@ -36,4 +40,6 @@ if [ "$BACKEND" = "projectq" ]; then
     python test_projectQEngine.py
 elif [ "$BACKEND" = "qutip" ]; then
     python test_qutipEngine.py
+elif [ "$BACKEND" = "stabilizer" ]; then
+    python test_stabilizerEngine.py
 fi

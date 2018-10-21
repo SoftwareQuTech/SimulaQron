@@ -18,6 +18,9 @@ tests_qutip:
 tests_projectq:
 	@sh $(RUN_TESTS) --quick --projectq
 
+tests_stabilizer:
+	@sh $(RUN_TESTS) --quick --stabilizer
+
 full_tests:
 	@sh $(RUN_TESTS) --full --projectq
 
@@ -27,9 +30,12 @@ full_tests_qutip:
 full_tests_projectq:
 	@sh $(RUN_TESTS) --full --projectq
 
-tests_allBackends: tests_qutip tests_projectq
+full_tests_stabilizer:
+	@sh $(RUN_TESTS) --full --stabilizer
 
-full_tests_allBackends: full_tests_qutip full_tests_projectq
+tests_allBackends: tests_qutip tests_projectq tests_stabilizer
+
+full_tests_allBackends: full_tests_qutip full_tests_projectq full_tests_stabilizer
 
 verify: clean python-deps tests
 

@@ -269,18 +269,12 @@ class simpleEngine(quantumEngine):
         """
         Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.
         """
-
-        self.maxQubits = maxQubits
+        super().__init__(maxQubits=maxQubits)
 
         # We start with no active qubits
-        self.reset()
-
-    def reset(self):
-        """
-        Resets this register to 0 qubits.
-        """
         self.activeQubits = 0
         self.qubitReg = qp.Qobj()
+
 
     def add_fresh_qubit(self):
         """
@@ -686,9 +680,7 @@ class quantumRegister(simpleEngine):
         maxQubits	maximum number of qubits this register supports
         """
 
-        self.maxQubits = maxQubits
-        self.activeQubits = 0
-        self.qubitReg = 0
+        super().__init__(maxQubits=maxQubits)
 
         # Each register has a number, this may be used be the ``outside`` application
         # using this simulator
