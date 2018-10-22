@@ -258,7 +258,12 @@ class stabilizerEngine(Engine):
         if newNum > self.maxQubits:
             raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
 
-        self.qubitReg = self.qubitReg.tensor_product(StabilizerState(R))
+        try:
+            self.qubitReg = self.qubitReg.tensor_product(StabilizerState(R))
+        except Exception as err:
+            print(err)
+            print("R: {}".format(R))
+            print("I: {}".format(I))
 
 
 

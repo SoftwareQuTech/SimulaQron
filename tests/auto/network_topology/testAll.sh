@@ -31,14 +31,14 @@ done
 
 BACKEND=${BACKEND:-"projectq"} #If not set, use projectq backend
 
-echo "Starting SimulaQron sever (restricted topology)"
+echo "Starting SimulaQron server (restricted topology and using $BACKEND as backend)"
 sh "${NETSIM}/run/startAll.sh" -nd "Alice Bob Charlie" -tp "path" --backend "$BACKEND" &
 sleep 1s
-echo "Started SimulaQron sever (restricted topology)"
+echo "Started SimulaQron server (restricted topology)"
 python "${NETSIM}/tests/auto/network_topology/test_restricted_topology.py"
 
-echo "Starting SimulaQron sever (default settings)"
+echo "Starting SimulaQron server (default settings and using $BACKEND as backend))"
 sh "${NETSIM}/run/startAll.sh" -nd "Alice Bob Charlie David Eve" --backend "$BACKEND" &
 sleep 1s
-echo "Started SimulaQron sever (default settings)"
+echo "Started SimulaQron server (default settings)"
 python "${NETSIM}/tests/auto/network_topology/test_default_topology.py"

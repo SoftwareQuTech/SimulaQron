@@ -59,9 +59,8 @@ class projectQEngine(Engine):
         """
         Measures out all the current qubits, needed for projectQs garbage collectorself.
         """
-        # Check first that project Q garbarge collector not already removed qubits
+        # Check first that project Q garbage collector not already removed qubits
         self.eng.flush()
-        # print("garbade collector: {}".format(self.eng.backend.cheat()))
         if not len(self.eng.backend.cheat()[0]) == 0:
             for _ in range(self.activeQubits):
                 self.measure_qubit(0)
@@ -154,7 +153,7 @@ class projectQEngine(Engine):
         Re = tuple(n.real for n in state)
         Im = tuple(n.imag for n in state)
 
-        return (Re, Im)
+        return Re, Im
 
     def apply_H(self, qubitNum):
         """

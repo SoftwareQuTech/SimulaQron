@@ -76,25 +76,31 @@ class StabilizerState:
             self._nr_rows = data._nr_rows
             self._nr_cols = data._nr_cols
         else:
-            try:
-                self._group = np.array(data, dtype=bool)
-            except Exception as err:
-                print(data)
-                print(type(data))
-                raise ValueError("Could not create an array of the 'data' due to the following error: {}".format(err))
-
-            if len(self._group.shape) != 2:
-                raise ValueError("'data' needs to be an array of rank 2")
+            if len(data) == 0:
+                self._group = np.empty(shape=(0, 0), dtype=bool)
+                self._nr_rows = 0
+                self._nr_cols = 0
+                return
             else:
-                self._nr_rows, self._nr_cols = self._group.shape
+                try:
+                    self._group = np.array(data, dtype=bool)
+                except Exception as err:
+                    print(data)
+                    print(type(data))
+                    raise ValueError("Could not create an array of the 'data' due to the following error: {}".format(err))
 
-                if 2 * self._nr_rows == self._nr_cols:
-                    if self._nr_rows != 0:
-                        self._group = np.append(self._group, [[False, False]] * self._nr_rows, 1)
-                elif (2 * self._nr_rows + 2) == self._nr_cols:
-                    pass
+                if len(self._group.shape) != 2:
+                    raise ValueError("'data' needs to be an array of rank 2")
                 else:
-                    raise ValueError("'data' needs to be an array of dimension n x 2n or n x (2n +2)")
+                    self._nr_rows, self._nr_cols = self._group.shape
+
+                    if 2 * self._nr_rows == self._nr_cols:
+                        if self._nr_rows != 0:
+                            self._group = np.append(self._group, [[False, False]] * self._nr_rows, 1)
+                    elif (2 * self._nr_rows + 2) == self._nr_cols:
+                        pass
+                    else:
+                        raise ValueError("'data' needs to be an array of dimension n x 2n or n x (2n +2)")
 
     @property
     def num_qubits(self):
@@ -464,9 +470,9 @@ class StabilizerState:
 
                 # Swap back the X and Z columns of this qubit
                 X_part_before_pos = tmp_matrix[:, 2:(position + 2)]
-                X_part_after_pos = tmp_matrix[:, (position + 2):n]
+                X_part_after_pos = tmp_matrix[:, (position + 2):(n + 1)]
                 X_part = np.concatenate((X_part_before_pos, tmp_matrix[:, [0]], X_part_after_pos), 1)
-                Z_part_before_pos = tmp_matrix[:, n:(position + n + 1)]
+                Z_part_before_pos = tmp_matrix[:, (n + 1):(position + n + 1)]
                 Z_part_after_pos = tmp_matrix[:, (position + n + 1):]
                 Z_part = np.concatenate((Z_part_before_pos, tmp_matrix[:, [1]], Z_part_after_pos), 1)
                 self._group = np.concatenate((X_part, Z_part), 1)

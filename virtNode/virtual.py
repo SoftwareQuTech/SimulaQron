@@ -1361,7 +1361,7 @@ class virtualQubit(pb.Referenceable):
                             waiting = False
                             outcome = True
                     except Exception as e:
-                        logging.error("VIRTUAL NODE %s: Cannot apply %s - %s", e, name)
+                        logging.error("VIRTUAL NODE {}: Cannot apply {} - {}".format(self.virtNode.name, e, name))
                         waiting = False
                     finally:
                         self.simQubit.unlock()
@@ -1403,7 +1403,8 @@ class virtualQubit(pb.Referenceable):
         Apply X gate to itself by passing it onto the underlying register.
         """
         try:
-            yield self._single_gate("apply_X")
+            success = yield self._single_gate("apply_X")
+            return success
         except Exception as err:
             raise err
 
@@ -1413,7 +1414,8 @@ class virtualQubit(pb.Referenceable):
         Apply Y gate.
         """
         try:
-            yield self._single_gate("apply_Y")
+            success = yield self._single_gate("apply_Y")
+            return success
         except Exception as err:
             raise err
 
@@ -1423,7 +1425,8 @@ class virtualQubit(pb.Referenceable):
         Apply Z gate.
         """
         try:
-            yield self._single_gate("apply_Z")
+            success = yield self._single_gate("apply_Z")
+            return success
         except Exception as err:
             raise err
 
@@ -1433,7 +1436,8 @@ class virtualQubit(pb.Referenceable):
         Apply H gate.
         """
         try:
-            yield self._single_gate("apply_H")
+            success = yield self._single_gate("apply_H")
+            return success
         except Exception as err:
             raise err
 
@@ -1443,7 +1447,8 @@ class virtualQubit(pb.Referenceable):
         Apply K gate - taking computational basis to Y eigenbasis.
         """
         try:
-            yield self._single_gate("apply_K")
+            success = yield self._single_gate("apply_K")
+            return success
         except Exception as err:
             raise err
 
@@ -1453,7 +1458,8 @@ class virtualQubit(pb.Referenceable):
         Apply T gate.
         """
         try:
-            yield self._single_gate("apply_T")
+            success = yield self._single_gate("apply_T")
+            return success
         except Exception as err:
             raise err
 
@@ -1466,7 +1472,8 @@ class virtualQubit(pb.Referenceable):
         a	The rotation angle in radians.
         """
         try:
-            yield self._single_gate("apply_rotation", n, a)
+            success = yield self._single_gate("apply_rotation", n, a)
+            return success
         except Exception as err:
             raise err
 
@@ -1673,7 +1680,8 @@ class virtualQubit(pb.Referenceable):
         """
 
         try:
-            yield self._two_qubit_gate(target, "cnot_onto")
+            success = yield self._two_qubit_gate(target, "cnot_onto")
+            return success
         except Exception as err:
             raise err
 
@@ -1687,7 +1695,8 @@ class virtualQubit(pb.Referenceable):
         """
 
         try:
-            yield self._two_qubit_gate(target, "cphase_onto")
+            success = yield self._two_qubit_gate(target, "cphase_onto")
+            return success
         except Exception as err:
             raise err
 
@@ -1909,6 +1918,8 @@ class virtualQubit(pb.Referenceable):
             yield self._unlock_inreg(self)
             yield self._unlock_inreg(target)
             yield self._unlock_nodes(q1simNode, q1virtNode, q2simNode, q2virtNode)
+
+        return True
 
     @inlineCallbacks
     def remote_get_number(self):

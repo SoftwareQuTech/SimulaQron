@@ -31,7 +31,7 @@ done
 
 BACKEND=${BACKEND:-"projectq"} #If not set, use projectq backend
 
-echo "Starting SimulaQron server"
+echo "Starting tests (using $BACKEND as backend)"
 sh "$NETSIM"/run/startAll.sh -nd "Alice Bob Charlie" --backend "$BACKEND" &
 sleep 1s
 echo "Started SimulaQron server"
