@@ -110,38 +110,6 @@ class projectQEngine(Engine):
 
         self.measure_qubit(qubitNum)
 
-    # def get_qubits(self, list):
-    #     """
-    #     Returns the qubits with numbers in list.
-    #     """
-    #
-    #     # Qutip distinguishes between system dimensionality and matrix dimensionality
-    #     # so we need to make sure it knows we are talking about multiple qubits
-    #     k = int(math.log2(self.qubitReg.shape[0]))
-    #     dimL = []
-    #     for j in range(k):
-    #         dimL.append(2)
-    #
-    #     self.qubitReg.dims = [dimL, dimL]
-    #
-    #     logging.debug("Dimensions %s", self.qubitReg.dims)
-    #     return self.qubitReg.ptrace(list)
-    #
-    # def get_qubits_RI(self, qList):
-    #     """
-    #     Retrieves the qubits in the list and returns the result as a list divided into
-    #     a real and imaginary part. Twisted only likes to send real values lists,
-    #     not complex ones.
-    #
-    #     Arguments
-    #     qList		list of qubits to retrieve, e.g. [1, 4]
-    #     """
-    #     rho = self.get_qubits(qList)
-    #     Re = rho.full().real.tolist()
-    #     Im = rho.full().imag.tolist()
-    #
-    #     return (Re, Im)
-
     def get_register_RI(self):
         """
         Retrieves the entire register in real and imaginary parts and returns the result as a

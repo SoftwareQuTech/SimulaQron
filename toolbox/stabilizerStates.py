@@ -240,27 +240,6 @@ class StabilizerState:
         else:
             return np.array(self._group, dtype=bool)
 
-    # def apply_Pauli(self, Pauli, position):
-    #     """
-    #     Applies a Pauli operator (X, Y or Z) to the qubit a the specified position
-    #     of the stabilizer state and updates the generators.
-    #     :param Pauli: The Pauli operator to apply
-    #     :type Pauli: str
-    #     :param position: The position of the qubit.
-    #     :type position: int
-    #     :return: None
-    #     """
-    #     if Pauli not in ["X", "Y", "Z"]:
-    #         raise ValueError("'Pauli' must be either X, Y or Z (as a str)")
-    #     n = self.num_qubits
-    #     if not (position >= 0 and position < n):
-    #         raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
-    #     for row in self._group:
-    #         if self.bool2Pauli[row[position], row[position + n]] in ["I", Pauli]:
-    #             pass
-    #         else:
-    #             row[-1] = not row[-1]
-
     def apply_X(self, position):
         """
         Applies the Pauli X operator to qubit 'position' of the stabilizer state and updates the generators.

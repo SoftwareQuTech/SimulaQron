@@ -66,20 +66,6 @@ class Engine(quantumEngine, metaclass=abc.ABCMeta):
         """
         pass
 
-    # @abc.abstractmethod
-    # def get_qubits_RI(self, qList):
-    #     """
-    #     Retrieves the qubits in the list and returns the result as a list divided into
-    #     a real and imaginary part. Twisted only likes to send real values lists,
-    #     not complex ones.
-    #
-    #     Arguments
-    #     qList		list of qubits to retrieve, e.g. [1, 4]
-    #     :return: The real and imaginary parts of a qubit state
-    #     :rtype: tuple
-    #     """
-    #     pass
-
     @abc.abstractmethod
     def get_register_RI(self):
         """
@@ -166,15 +152,6 @@ class Engine(quantumEngine, metaclass=abc.ABCMeta):
         :rtype: None
         """
         pass
-
-    # @abc.abstractmethod
-    # def get_qubits(self, list):
-    #     """
-    #     Returns the qubits with numbers in list.
-    #     :return: Reduced state on the qubits in the list
-    #     :rtype: :obj:`qutip.Qobj`
-    #     """
-    #     pass
 
     @abc.abstractmethod
     def apply_onequbit_gate(self, gateU, qubitNum):
@@ -335,16 +312,6 @@ class simpleEngine(quantumEngine):
 
         # Update the number of qubits
         self.activeQubits = self.activeQubits - 1
-
-    # def get_qubits(self, qList):
-    #     """
-    #     Retrieves a the qubits in the list. This traces out the rest of the qubits.
-    #
-    #     Arguments
-    #     qList		list of qubits to retrieve, e.g. [1, 4]
-    #     """
-    #
-    #     return self.qubitReg.ptrace(qList)
 
     def get_qubits_RI(self, qList):
         """
