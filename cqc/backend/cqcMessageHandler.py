@@ -128,7 +128,7 @@ class CQCMessageHandler(ABC):
 		return error_class
 
 	@inlineCallbacks
-	def handle_cqc_message(self, header, message):
+	def handle_cqc_message(self, header, message, transport=None):
 		"""
 		This calls the correct method to handle the cqcmessage, based on the type specified in the header
 		"""
