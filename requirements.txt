@@ -4,3 +4,4 @@ twisted>=18.7.0
 matplotlib>=2.2.0,<3.0.0
 qutip>=4.3.1
 networkx>=2.2
+projectq>=0.4.1
