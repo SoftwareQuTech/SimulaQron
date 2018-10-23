@@ -71,17 +71,3 @@ fi
 # Reset to default settins
 rm "${NETSIM}/config/settings.ini"
 python "${NETSIM}/settings.py"
-
-if [ "$FULL" = "y" ]; then
-    if [ "$BACKEND" = "qutip" ]; then
-        sh testAll.sh --full --qutip
-    else
-        sh testAll.sh --full --projectq
-    fi
-else
-    if [ "$BACKEND" = "qutip" ]; then
-        sh testAll.sh --quick --qutip
-    else
-        sh testAll.sh --quick --projectq
-    fi
-fi

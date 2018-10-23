@@ -6,7 +6,7 @@ from SimulaQron.virtNode.basics import noQubitError, quantumError
 from SimulaQron.toolbox.stabilizerStates import StabilizerState
 
 
-class TestProjectQEngine_init(unittest.TestCase):
+class TestStabilizerEngine_init(unittest.TestCase):
     def test_init(self):
         eng = stabilizerEngine()
         self.assertEqual(eng.maxQubits, 10)
@@ -19,7 +19,7 @@ class TestProjectQEngine_init(unittest.TestCase):
         self.assertEqual(len(eng.qubitReg), 0)
 
 
-class TestProjectQEngine(unittest.TestCase):
+class TestStabilizerEngine(unittest.TestCase):
     def setUp(self):
         self.eng = stabilizerEngine()
 
@@ -53,10 +53,6 @@ class TestProjectQEngine(unittest.TestCase):
         state, _ = self.eng.get_register_RI()
         self.assertEqual(StabilizerState(state), StabilizerState(new_state))
 
-    def test_add_unphysical_qubit(self):
-        # TODO
-        pass
-
     def test_remove_qubit(self):
         num = self.eng.add_fresh_qubit()
         self.eng.remove_qubit(num)
@@ -87,21 +83,21 @@ class TestProjectQEngine(unittest.TestCase):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_X(num)
         state, _ = self.eng.get_register_RI()
-        self.assertTrue(StabilizerState(state) == StabilizerState([[0, 1, 0, 1]]))
+        self.assertTrue(StabilizerState(state) == StabilizerState([[0, 1, 1]]))
 
     def test_Y(self):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_H(num)
         self.eng.apply_Y(num)
         state, _ = self.eng.get_register_RI()
-        self.assertTrue(StabilizerState(state) == StabilizerState([[1, 0, 0, 1]]))
+        self.assertTrue(StabilizerState(state) == StabilizerState([[1, 0, 1]]))
 
     def test_Z(self):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_H(num)
         self.eng.apply_Z(num)
         state, _ = self.eng.get_register_RI()
-        self.assertTrue(StabilizerState(state) == StabilizerState([[1, 0, 0, 1]]))
+        self.assertTrue(StabilizerState(state) == StabilizerState([[1, 0, 1]]))
 
     def test_Rx(self):
         num = self.eng.add_fresh_qubit()

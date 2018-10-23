@@ -16,6 +16,7 @@ class TestContext(unittest.TestCase):
 		with self.assertRaises(CQCNoQubitError):
 			cqc = CQCConnection("Alice")
 			qubit(cqc)
+		cqc.close()
 
 	def test_with_context(self):
 		for _ in range(Settings.CONF_MAXQUBITS):
