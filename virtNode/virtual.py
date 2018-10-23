@@ -1696,7 +1696,7 @@ class virtualQubit(pb.Referenceable):
 
         try:
             success = yield self._two_qubit_gate(target, "cphase_onto")
-            return success
+            return successp
         except Exception as err:
             raise err
 

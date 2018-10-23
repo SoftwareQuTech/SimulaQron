@@ -48,4 +48,3 @@ if [ "$FULL" = "y" ]; then
 else
     sh run.sh --quick
 fi
-
