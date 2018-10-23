@@ -18,15 +18,15 @@ class TestStabilizerStates(unittest.TestCase):
         state = StabilizerState([[0, 1]])
         self.assertAlmostEqual(state.num_qubits, 1)
 
-        state = StabilizerState([[0, 1, 0, 0]])
+        state = StabilizerState([[0, 1, 0]])
         self.assertAlmostEqual(state.num_qubits, 1)
 
         state = StabilizerState([[1, 1, 0, 0],
                                  [0, 0, 1, 1]])
         self.assertAlmostEqual(state.num_qubits, 2)
 
-        state = StabilizerState([[1, 1, 0, 0, 0, 0],
-                                 [0, 0, 1, 1, 0, 1]])
+        state = StabilizerState([[1, 1, 0, 0, 0],
+                                 [0, 0, 1, 1, 1]])
         self.assertAlmostEqual(state.num_qubits, 2)
 
         self.assertTrue(state == StabilizerState(state))
@@ -64,7 +64,7 @@ class TestStabilizerStates(unittest.TestCase):
 
     def test_list_of_str_init(self):
         phip = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
-        phim = StabilizerState([[1, 1, 0, 0, 0, 0], [0, 0, 1, 1, 0, 1]])
+        phim = StabilizerState([[1, 1, 0, 0, 0], [0, 0, 1, 1, 1]])
 
         data = ["XX", "ZZ"]
         s1 = StabilizerState(data)
@@ -114,9 +114,9 @@ class TestStabilizerStates(unittest.TestCase):
     def test_eq(self):
         state1 = StabilizerState([[0, 1]])
         state2 = StabilizerState([[0, 1]])
-        state3 = StabilizerState([[0, 1, 0, 0]])
-        state4 = StabilizerState([[0, 1, 0, 1]])
-        state5 = StabilizerState([[1, 1, 0, 0]])
+        state3 = StabilizerState([[0, 1, 0]])
+        state4 = StabilizerState([[0, 1, 1]])
+        state5 = StabilizerState([[1, 1, 0]])
         state6 = StabilizerState([[1, 1, 0, 0],
                                   [0, 0, 1, 1]])
 
@@ -128,15 +128,15 @@ class TestStabilizerStates(unittest.TestCase):
         self.assertFalse(state5 == state6)
 
     def test_repr(self):
-        s1 = StabilizerState([[0, 0, 1, 0, 0, 0],
-                              [0, 0, 0, 1, 0, 1]])
+        s1 = StabilizerState([[0, 0, 1, 0, 0],
+                              [0, 0, 0, 1, 1]])
         s2 = StabilizerState(eval(repr(s1)))
 
         self.assertTrue(s1 == s2)
 
     def test_to_array(self):
-        s1 = StabilizerState([[0, 0, 1, 0, 0, 0],
-                              [0, 0, 0, 1, 0, 1]])
+        s1 = StabilizerState([[0, 0, 1, 0, 0],
+                              [0, 0, 0, 1, 1]])
         s2 = StabilizerState(s1.to_array())
 
         self.assertTrue(s1 == s2)
@@ -152,17 +152,17 @@ class TestStabilizerStates(unittest.TestCase):
         self.assertTrue(s3 == s4)
 
         s1 = StabilizerState([[0, 1]])  # The state |0>
-        s2 = StabilizerState([[0, 1, 0, 1]])  # The state |1>
+        s2 = StabilizerState([[0, 1, 1]])  # The state |1>
 
         s3 = s1 * s2  # This is then the state |01>
-        s4 = StabilizerState([[0, 0, 1, 0, 0, 0],
-                              [0, 0, 0, 1, 0, 1]])
+        s4 = StabilizerState([[0, 0, 1, 0, 0],
+                              [0, 0, 0, 1, 1]])
         self.assertEqual(s3.num_qubits, 2)
         self.assertTrue(s3 == s4)
 
     def test_apply_Pauli(self):
         s1 = StabilizerState([[0, 1]])
-        s2 = StabilizerState([[0, 1, 0, 1]])
+        s2 = StabilizerState([[0, 1, 1]])
 
         s1.apply_Z(0)
         self.assertFalse(s1 == s2)
@@ -172,8 +172,8 @@ class TestStabilizerStates(unittest.TestCase):
 
         s3 = StabilizerState([[1, 1, 0, 0],
                               [0, 0, 1, 1]])
-        s4 = StabilizerState([[1, 1, 0, 0, 0, 0],
-                              [0, 0, 1, 1, 0, 1]])
+        s4 = StabilizerState([[1, 1, 0, 0, 0],
+                              [0, 0, 1, 1, 1]])
         s3.apply_X(0)
         self.assertTrue(s3 == s4)
 
@@ -182,7 +182,7 @@ class TestStabilizerStates(unittest.TestCase):
         s2 = StabilizerState([[1, 0]])
         s3 = StabilizerState([[0, 1]])
         s4 = StabilizerState([[1, 1]])
-        s5 = StabilizerState([[1, 1, 0, 1]])
+        s5 = StabilizerState([[1, 1, 1]])
 
         s1.apply_H(0)
         self.assertTrue(s1 == s2)
@@ -196,7 +196,7 @@ class TestStabilizerStates(unittest.TestCase):
     def test_apply_K(self):
         z0 = StabilizerState([[0, 1]])
         x0 = StabilizerState([[1, 0]])
-        x1 = StabilizerState([[1, 0, 0, 1]])
+        x1 = StabilizerState([[1, 0, 1]])
         y0 = StabilizerState([[1, 1]])
         s1 = StabilizerState(z0)
         s2 = StabilizerState(x0)
@@ -213,7 +213,7 @@ class TestStabilizerStates(unittest.TestCase):
     def test_apply_S(self):
         z0 = StabilizerState([[0, 1]])
         x0 = StabilizerState([[1, 0]])
-        x1 = StabilizerState([[1, 0, 0, 1]])
+        x1 = StabilizerState([[1, 0, 1]])
         y0 = StabilizerState([[1, 1]])
         s1 = StabilizerState(z0)
         s2 = StabilizerState(x0)
@@ -230,8 +230,8 @@ class TestStabilizerStates(unittest.TestCase):
     def test_standard_form(self):
         s1 = StabilizerState([[1, 0, 0, 0], [0, 1, 0, 0]])
         s2 = StabilizerState([[1, 0, 0, 0], [1, 1, 0, 0]])
-        s3 = StabilizerState([[1, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0]])
-        s4 = StabilizerState([[1, 0, 0, 0, 0, 1], [0, 1, 0, 0, 0, 1]])
+        s3 = StabilizerState([[1, 0, 0, 0, 1], [1, 1, 0, 0, 0]])
+        s4 = StabilizerState([[1, 0, 0, 0, 1], [0, 1, 0, 0, 1]])
 
         self.assertTrue(s1 == s2)
         self.assertFalse(s1 == s3)
@@ -241,7 +241,7 @@ class TestStabilizerStates(unittest.TestCase):
 
         # Classical CNOT
         z0z0 = StabilizerState([[0, 0, 1, 0], [0, 0, 0, 1]])
-        z1z1 = StabilizerState([[0, 0, 1, 0, 0, 1], [0, 0, 0, 1, 0, 1]])
+        z1z1 = StabilizerState([[0, 0, 1, 0, 1], [0, 0, 0, 1, 1]])
         z0z0.apply_X(0)
         z0z0.apply_CNOT(0, 1)
         self.assertTrue(z0z0 == z1z1)
@@ -268,7 +268,7 @@ class TestStabilizerStates(unittest.TestCase):
 
         # Classical CNOT
         z0x0 = StabilizerState([[0, 0, 1, 0], [0, 1, 0, 0]])
-        z1x1 = StabilizerState([[0, 0, 1, 0, 0, 1], [0, 1, 0, 0, 0, 1]])
+        z1x1 = StabilizerState([[0, 0, 1, 0, 1], [0, 1, 0, 0, 1]])
         z0x0.apply_X(0)
         z0x0.apply_CZ(0, 1)
         z0x0.put_in_standard_form()
@@ -300,12 +300,12 @@ class TestStabilizerStates(unittest.TestCase):
             self.assertEqual(m, 0)
 
         for _ in range(20):
-            z1 = StabilizerState([[0, 1, 0, 1]])
+            z1 = StabilizerState([[0, 1, 1]])
             m = z1.measure(0)
             self.assertEqual(m, 1)
 
         z0z0 = StabilizerState([[0, 0, 1, 0], [0, 0, 0, 1]])
-        z1z1 = StabilizerState([[0, 0, 1, 0, 0, 1], [0, 0, 0, 1, 0, 1]])
+        z1z1 = StabilizerState([[0, 0, 1, 0, 1], [0, 0, 0, 1, 1]])
         for _ in range(20):
             epr = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
             m0 = epr.measure(0, inplace=True)
@@ -334,6 +334,4 @@ class TestStabilizerStates(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    # unittest.main()
-    t = TestStabilizerStates()
-    t.test_symplectic_check()
+    unittest.main()

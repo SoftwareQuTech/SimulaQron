@@ -15,20 +15,16 @@ from functools import partial
 
 
 class StabilizerState:
-    bool2phase = {(False, False): "+1",
-                  (False, True): "-1",
-                  (True, False): "+i",
-                  (True, True): "-i"}
+    bool2phase = {False: "+1",
+                  True: "-1"}
 
     bool2Pauli = {(False, False): "I",
                   (True, False): "X",
                   (True, True): "Y",
                   (False, True): "Z"}
 
-    phase2bool = {"+1": (False, False),
-                  "-1": (False, True),
-                  "+i": (True, False),
-                  "-i": (True, True)}
+    phase2bool = {"+1": False,
+                  "-1": True}
 
     Pauli2bool = {"I": (False, False),
                   "X": (True, False),
@@ -50,12 +46,10 @@ class StabilizerState:
                 A binary array representing the generators of the stabilizer group.
                 If the array is n-by-2n a stabilizer state on n qubits will be represented.
                 The n first columns are the X-stabilizers and the n last the Z-stabilizer.
-                If the array is n-by-(2n+2), the two last columns are seen as the phase for each generator
+                If the array is n-by-(2n+1), the two last columns are seen as the phase for each generator
                 as follows:
-                    00 -> 1
-                    01 -> -1
-                    10 -> i
-                    11 -> -i
+                    0 -> 1
+                    1 -> -1
 
             An array of rank 1 containing 'str':
                 Then each string is assumed to be a generator as for example "XXZIY"
@@ -87,15 +81,15 @@ class StabilizerState:
             StabilizerState([[0, 1]])
 
         A qubit in the state |1> can be created as:
-            StabilizerState([[0, 1, 0, 1]])
+            StabilizerState([[0, 1, 1]])
 
         The entangled state (|00> + |11>)/sqrt(2) can be created as:
             StabilizerState([[1, 1, 0, 0],
                               0, 0, 1, 1]])
 
         The entangled state (|01> + |10>)/sqrt(2) can be created as:
-            StabilizerState([[1, 1, 0, 0, 0, 0],
-                              0, 0, 1, 1, 0, 1]])
+            StabilizerState([[1, 1, 0, 0, 0],
+                              0, 0, 1, 1, 1]])
         :param check_symplectic: bool
             Whether to check if all stabilizers commute or not.
         """
@@ -106,10 +100,10 @@ class StabilizerState:
         elif isinstance(data, int):
             X_part = np.zeros(shape=(data, data), dtype=bool)
             Z_part = np.identity(data, dtype=bool)
-            phases = np.zeros(shape=(data, 2), dtype=bool)
+            phases = np.zeros(shape=(data, 1), dtype=bool)
             self._group = np.concatenate((X_part, Z_part, phases), 1)
             self._nr_rows = data
-            self._nr_cols = 2 * data + 2
+            self._nr_cols = 2 * data + 1
         elif isinstance(data, StabilizerState):
             self._group = np.array(data._group, dtype=bool)
             self._nr_rows = data._nr_rows
@@ -119,10 +113,10 @@ class StabilizerState:
             adj_matrix = nx.adjacency_matrix(data)
             X_part = np.identity(n, dtype=bool)
             Z_part = np.array(adj_matrix.todense(), dtype=bool)
-            phases = [[False, False]] * n
+            phases = [[False]] * n
             self._group = np.concatenate((X_part, Z_part, phases), 1)
             self._nr_rows = n
-            self._nr_cols = 2 * n + 2
+            self._nr_cols = 2 * n + 1
         else:
             if len(data) == 0:
                 self._group = np.empty(shape=(0, 0), dtype=bool)
@@ -140,7 +134,7 @@ class StabilizerState:
                     elif all(map(lambda gen_str: len(gen_str) == (n + 2), data)):
                         X_part = list(map(lambda gen_str: list(map(lambda P_str: P_str in ("X", "Y"), gen_str[2:])), data))
                         Z_part = list(map(lambda gen_str: list(map(lambda P_str: P_str in ("Y", "Z"), gen_str[2:])), data))
-                        phases = list(map(lambda gen_str: list(self.phase2bool[gen_str[:2]]), data))
+                        phases = list(map(lambda gen_str: [self.phase2bool[gen_str[:2]]], data))
                         data = np.concatenate((X_part, Z_part, phases), 1)
                     else:
                         raise ValueError("If data is a length-'n' list or stings, then each string needs be of length 'n' or 'n+2'")
@@ -158,18 +152,18 @@ class StabilizerState:
 
                     if 2 * self._nr_rows == self._nr_cols:
                         if self._nr_rows != 0:
-                            self._group = np.append(self._group, [[False, False]] * self._nr_rows, 1)
-                    elif (2 * self._nr_rows + 2) == self._nr_cols:
+                            self._group = np.append(self._group, [[False]] * self._nr_rows, 1)
+                    elif (2 * self._nr_rows + 1) == self._nr_cols:
                         pass
                     else:
-                        raise ValueError("'data' needs to be an array of dimension n x 2n or n x (2n +2)")
+                        raise ValueError("'data' needs to be an array of dimension n x 2n or n x (2n +1)")
                 if check_symplectic:
                     # Check that all stabilizers commute, i.e. the matrix should be symplectic
                     n = self._nr_rows
                     zeros = np.zeros(shape=(n, n), dtype=int)
                     identity = np.identity(n, dtype=int)
                     P = np.block([[zeros, identity], [identity, zeros]])
-                    M = np.array(self._group[:, :-2], dtype=int)
+                    M = np.array(self._group[:, :-1], dtype=int)
 
                     commute = M@P@M.transpose()
                     if (commute % 2).any():
@@ -200,7 +194,7 @@ class StabilizerState:
     def __str__(self):
         to_return = "Stabilizer state on {} with the following stabilizer generators:\n".format(self.num_qubits)
         for row in self._group:
-            to_return += "    {} ".format(self.bool2phase[(row[-2], row[-1])])
+            to_return += "    {} ".format(self.bool2phase[row[-1]])
             n = self.num_qubits
             for i in range(n):
                 to_return += self.bool2Pauli[(row[i], row[i + n])]
@@ -287,14 +281,14 @@ class StabilizerState:
             return self
         else:
             this_X_stab = self._group[:, :self.num_qubits]
-            this_Z_stab = self._group[:, self.num_qubits:-2]
+            this_Z_stab = self._group[:, self.num_qubits:-1]
             other_X_stab = other._group[:, :other.num_qubits]
-            other_Z_stab = other._group[:, other.num_qubits:-2]
+            other_Z_stab = other._group[:, other.num_qubits:-1]
 
             new_X_stab = block_diag(this_X_stab, other_X_stab)
             new_Z_stab = block_diag(this_Z_stab, other_Z_stab)
 
-            phases = np.append(self._group[:, -2:], other._group[:, -2:], 0)
+            phases = np.append(self._group[:, -1:], other._group[:, -1:], 0)
             new_group = np.concatenate((new_X_stab, new_Z_stab, phases), 1)
             return StabilizerState(new_group)
 
@@ -491,7 +485,7 @@ class StabilizerState:
         if not (position >= 0 and position < n):
             raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
         # Create a new matrix where the X and Z columns of the corresponding qubit are the first.
-        columns = np.arange(2*n + 2)
+        columns = np.arange(2*n + 1)
         columns_without_position = np.logical_and(columns != position, columns != (position + n))
         tmp_matrix = np.concatenate((self._group[:, [position, position + n]], self._group[:, columns_without_position]), 1)
 
