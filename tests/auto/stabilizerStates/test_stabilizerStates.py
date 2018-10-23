@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+import networkx as nx
 
 from SimulaQron.toolbox.stabilizerStates import StabilizerState
 
@@ -29,6 +30,62 @@ class TestStabilizerStates(unittest.TestCase):
         self.assertAlmostEqual(state.num_qubits, 2)
 
         self.assertTrue(state == StabilizerState(state))
+
+    def test_symplectic_check(self):
+        StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
+
+        with self.assertRaises(ValueError):
+            StabilizerState([[1, 0, 0, 0], [0, 0, 1, 0]])
+
+        with self.assertRaises(ValueError):
+            StabilizerState([[1, 1, 0, 0], [0, 0, 1, 0]])
+
+        with self.assertRaises(ValueError):
+            StabilizerState([[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1], [0, 0, 0, 1, 0, 0]])
+
+    def test_networkx_init(self):
+        n = 5
+        G = nx.complete_graph(n)
+        graph_state = StabilizerState(G)
+        self.assertEqual(graph_state.num_qubits, n)
+
+        # Create a star graph state and check that this is SQC equiv to the GHZ state
+        G = nx.star_graph(n - 1)
+        graph_state = StabilizerState(G)
+        for i in range(1, n):
+            graph_state.apply_H(i)
+
+        GHZ_state = StabilizerState(n)
+        GHZ_state.apply_H(0)
+        for i in range(1, n):
+            GHZ_state.apply_CNOT(0, i)
+
+        self.assertTrue(graph_state == GHZ_state)
+
+    def test_list_of_str_init(self):
+        phip = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
+        phim = StabilizerState([[1, 1, 0, 0, 0, 0], [0, 0, 1, 1, 0, 1]])
+
+        data = ["XX", "ZZ"]
+        s1 = StabilizerState(data)
+        self.assertTrue(s1 == phip)
+
+        data = ["+1XX", "+1ZZ"]
+        s1 = StabilizerState(data)
+        self.assertTrue(s1 == phip)
+
+        data = ["+1XX", "-1ZZ"]
+        s1 = StabilizerState(data)
+        self.assertTrue(s1 == phim)
+
+        # Test faulty input
+        data = ["XX", "-1ZZ"]
+        with self.assertRaises(ValueError):
+            StabilizerState(data)
+
+        data = ["XX", "ZZZ"]
+        with self.assertRaises(ValueError):
+            StabilizerState(data)
 
     def test_init_of_class(self):
         state = StabilizerState([[1, 1, 0, 0],
@@ -277,4 +334,6 @@ class TestStabilizerStates(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    # unittest.main()
+    t = TestStabilizerStates()
+    t.test_symplectic_check()

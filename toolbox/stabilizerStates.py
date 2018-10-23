@@ -8,8 +8,10 @@
 ##########################################################################################
 
 import numpy as np
+import networkx as nx
 from scipy.linalg import block_diag
 from random import randint
+from functools import partial
 
 
 class StabilizerState:
@@ -23,27 +25,62 @@ class StabilizerState:
                   (True, True): "Y",
                   (False, True): "Z"}
 
-    def __init__(self, data=None):
+    phase2bool = {"+1": (False, False),
+                  "-1": (False, True),
+                  "+i": (True, False),
+                  "-i": (True, True)}
+
+    Pauli2bool = {"I": (False, False),
+                  "X": (True, False),
+                  "Y": (True, True),
+                  "Z": (False, True)}
+
+    def __init__(self, data=None, check_symplectic=True):
         """
         This class represent a stabilizer state and allows to be manipulated using
         Clifford operations and Pauli-measurements.
-        :param data: A binary array representing the generators of the stabilizer group.
-            If the array is n-by-2n a stabilizer state on n qubits will be represented.
-            The n first columns are the X-stabilizers and the n last the Z-stabilizer.
-            If the array is n-by-(2n+2), the two last columns are seen as the phase for each generator
-            as follows:
-                00 -> 1
-                01 -> -1
-                10 -> i
-                11 -> -i
 
-            If 'data=None' (default) then this is seen as a stabilizer state on no qubits, i.e. a complex number.
-            To add a qubit to such a state one can do:
-                s = StabilizerState()
-                s.add_qubit()  # This is now in the state |0>
+        If check_symplectic=True then a check will be made that all stabilizers commute, by checking
+        That the matrix is symplectic. Otherwise no check is made.
 
-            If 'data' is an 'int' then a stabilizer state on this many qubits are created, all in the state |0> as:
-                StabilizerState(5)  # This is the then the state |00000>
+        :param data:
+            Can be one of the following:
+
+            A binary array of rank 2:
+                A binary array representing the generators of the stabilizer group.
+                If the array is n-by-2n a stabilizer state on n qubits will be represented.
+                The n first columns are the X-stabilizers and the n last the Z-stabilizer.
+                If the array is n-by-(2n+2), the two last columns are seen as the phase for each generator
+                as follows:
+                    00 -> 1
+                    01 -> -1
+                    10 -> i
+                    11 -> -i
+
+            An array of rank 1 containing 'str':
+                Then each string is assumed to be a generator as for example "XXZIY"
+                Note that each string in the array should have the same length.
+                If the number of strings is 'n' then a stabilizer state on 'n' qubits is created.
+                If the strings have length 'n' then it is assumed that the phase is '+1'.
+                An explicit phase can be added to the start of the string as for example: "-1XXXY".
+                Creating a Bell-pair:
+                    StabilizerState(["XX", "ZZ"])  # The state (|00> + |11>) / sqrt(2)
+
+            'None' (default):
+                Then this is seen as a stabilizer state on no qubits, i.e. a complex number.
+                To add a qubit to such a state one can do:
+                    s = StabilizerState()
+                    s.add_qubit()  # This is now in the state |0>
+
+            'int':
+                Then a stabilizer state on this many qubits are created, all in the state |0> as:
+                    StabilizerState(5)  # This is the then the state |00000>
+
+            'networkx.Graph':
+                Then the graph state corresponding to this graph will be created.
+                This assumes that the nodes are numbered from 0 to n - 1, where n is the number of nodes.
+                For example:
+                    StabilizerState(networkx.complete_graph(5))  # Single qubit Clifford equiv. to a GHZ state
 
         Examples:
         A qubit in the state |0> can be created as:
@@ -59,6 +96,8 @@ class StabilizerState:
         The entangled state (|01> + |10>)/sqrt(2) can be created as:
             StabilizerState([[1, 1, 0, 0, 0, 0],
                               0, 0, 1, 1, 0, 1]])
+        :param check_symplectic: bool
+            Whether to check if all stabilizers commute or not.
         """
         if data is None:
             self._group = np.empty(shape=(0, 0), dtype=bool)
@@ -75,6 +114,15 @@ class StabilizerState:
             self._group = np.array(data._group, dtype=bool)
             self._nr_rows = data._nr_rows
             self._nr_cols = data._nr_cols
+        elif isinstance(data, nx.Graph):
+            n = data.number_of_nodes()
+            adj_matrix = nx.adjacency_matrix(data)
+            X_part = np.identity(n, dtype=bool)
+            Z_part = np.array(adj_matrix.todense(), dtype=bool)
+            phases = [[False, False]] * n
+            self._group = np.concatenate((X_part, Z_part, phases), 1)
+            self._nr_rows = n
+            self._nr_cols = 2 * n + 2
         else:
             if len(data) == 0:
                 self._group = np.empty(shape=(0, 0), dtype=bool)
@@ -82,6 +130,20 @@ class StabilizerState:
                 self._nr_cols = 0
                 return
             else:
+                if isinstance(data[0], str):
+                    # We should pre-process this entry since it contains strings and not booleans
+                    n = len(data)
+                    if all(map(lambda gen_str: len(gen_str) == n, data)):
+                        X_part = list(map(lambda gen_str: list(map(lambda P_str: P_str in ("X", "Y"), gen_str)), data))
+                        Z_part = list(map(lambda gen_str: list(map(lambda P_str: P_str in ("Y", "Z"), gen_str)), data))
+                        data = np.concatenate((X_part, Z_part), 1)
+                    elif all(map(lambda gen_str: len(gen_str) == (n + 2), data)):
+                        X_part = list(map(lambda gen_str: list(map(lambda P_str: P_str in ("X", "Y"), gen_str[2:])), data))
+                        Z_part = list(map(lambda gen_str: list(map(lambda P_str: P_str in ("Y", "Z"), gen_str[2:])), data))
+                        phases = list(map(lambda gen_str: list(self.phase2bool[gen_str[:2]]), data))
+                        data = np.concatenate((X_part, Z_part, phases), 1)
+                    else:
+                        raise ValueError("If data is a length-'n' list or stings, then each string needs be of length 'n' or 'n+2'")
                 try:
                     self._group = np.array(data, dtype=bool)
                 except Exception as err:
@@ -101,6 +163,17 @@ class StabilizerState:
                         pass
                     else:
                         raise ValueError("'data' needs to be an array of dimension n x 2n or n x (2n +2)")
+                if check_symplectic:
+                    # Check that all stabilizers commute, i.e. the matrix should be symplectic
+                    n = self._nr_rows
+                    zeros = np.zeros(shape=(n, n), dtype=int)
+                    identity = np.identity(n, dtype=int)
+                    P = np.block([[zeros, identity], [identity, zeros]])
+                    M = np.array(self._group[:, :-2], dtype=int)
+
+                    commute = M@P@M.transpose()
+                    if (commute % 2).any():
+                        raise ValueError("All stabilizer of the group constructed from the input does not commute.")
 
     @property
     def num_qubits(self):
