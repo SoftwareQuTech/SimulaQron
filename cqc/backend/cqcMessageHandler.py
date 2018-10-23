@@ -128,7 +128,7 @@ class CQCMessageHandler(ABC):
         return error_class
 
     @inlineCallbacks
-    def handle_cqc_message(self, header, message):
+    def handle_cqc_message(self, header, message, transport=None):
         """
         This calls the correct method to handle the cqcmessage, based on the type specified in the header
         """
@@ -143,6 +143,9 @@ class CQCMessageHandler(ABC):
             except UnknownQubitError as e:
                 logging.error("CQC {}: Couldn't find qubit with given ID".format(self.name))
                 self.return_messages.append(self.create_return_message(header.app_id, CQC_ERR_UNKNOWN))
+            except NotImplementedError as e:
+                logging.error("CQC {}: Command not implemented yet".format(self.name))
+                self.return_messages.append(self.create_return_message(header.app_id, CQC_ERR_UNSUPP))
             except Exception as err:
                 logging.error(
                     "CQC {}: Got the following unexpected error when handling CQC message: {}".format(self.name, err))
@@ -245,10 +248,16 @@ class CQCMessageHandler(ABC):
                 return False, 0
             try:
                 succ = yield self.commandHandlers[cmd.instr](cqc_header, cmd, xtra)
+            except NotImplementedError as e:
+                logging.error("CQC {}: Command not implemented yet".format(self.name))
+                self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP))
+                return False, 0
             except Exception as err:
                 logging.error("CQC {}: Got the following unexpected error when process command {}: {}".format(self.name,
                                                                                                               cmd.instr,
                                                                                                               err))
+                msg = self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
+                self.return_messages.append(msg)
                 return False, 0
             if succ is False:  # only if it explicitly is false, if succ is None then we assume it went fine
                 return False, 0
@@ -268,6 +277,8 @@ class CQCMessageHandler(ABC):
                 except Exception as err:
                     logging.error(
                         "CQC {}: Got the following unexpected error when process commands: {}".format(self.name, err))
+                    msg = self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL)
+                    self.return_messages.append(msg)
                     return False, 0
 
                 should_notify = (should_notify or retNotify)
