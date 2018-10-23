@@ -19,6 +19,10 @@ while [ "$#" -gt 0 ]; do
         BACKEND="projectq"
         shift
         ;;
+        --stabilizer)
+        BACKEND="stabilizer"
+        shift
+        ;;
         *)
         echo "Unknown argument ${key}"
         exit 1
@@ -37,8 +41,8 @@ if [ "$QUICK" = y ]; then
     fi
 fi
 
-echo "Starting SimulaQron sever (noisy setting)"
-sh "${NETSIM}/run/startAll.sh" -nd "Alice" --noisy_qubits "True" --t1 "0.0001"
+echo "Starting SimulaQron server (noisy setting and using $BACKEND as backend))"
+sh "${NETSIM}/run/startAll.sh" -nd "Alice" --noisy_qubits "True" --t1 "0.0001" --backend "$BACKEND"
 sleep 1s
-echo "Started SimulaQron sever (noise setting)"
+echo "Started SimulaQron server (noise setting)"
 python "${NETSIM}/tests/auto/optional_noise/test_optional_noise.py"

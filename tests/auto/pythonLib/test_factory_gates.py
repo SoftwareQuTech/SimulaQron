@@ -36,7 +36,8 @@ import unittest
 
 import numpy as np
 import qutip
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit, CQCUnsuppError
+from SimulaQron.settings import Settings
 
 
 def calc_exp_values_single(q):
@@ -458,30 +459,46 @@ class FactoryGateTest(unittest.TestCase):
             # Test T factory quarter
             sys.stdout.write("Testing T factory (quarter):")
             exp_values = calc_exp_values_single(prep_T_qutip(1))
-            ans = cqc.test_preparation(prep_T_CQC_FACTORY_QUARTER, exp_values, iterations=self.iterations)
-            sys.stdout.write('\r')
-            self.assertTrue(ans)
+            if Settings.CONF_BACKEND == "stabilizer":
+                with self.assertRaises(CQCUnsuppError):
+                    cqc.test_preparation(prep_T_CQC_FACTORY_QUARTER, exp_values, iterations=self.iterations, progress=False)
+            else:
+                ans = cqc.test_preparation(prep_T_CQC_FACTORY_QUARTER, exp_values, iterations=self.iterations)
+                sys.stdout.write('\r')
+                self.assertTrue(ans)
 
             # Test T factory half
             sys.stdout.write("Testing T factory (half):")
             exp_values = calc_exp_values_single(prep_T_qutip(2))
-            ans = cqc.test_preparation(prep_T_CQC_FACTORY_HALF, exp_values, iterations=self.iterations)
-            sys.stdout.write('\r')
-            self.assertTrue(ans)
+            if Settings.CONF_BACKEND == "stabilizer":
+                with self.assertRaises(CQCUnsuppError):
+                    cqc.test_preparation(prep_T_CQC_FACTORY_HALF, exp_values, iterations=self.iterations, progress=False)
+            else:
+                ans = cqc.test_preparation(prep_T_CQC_FACTORY_HALF, exp_values, iterations=self.iterations)
+                sys.stdout.write('\r')
+                self.assertTrue(ans)
 
             # Test T factory half
             sys.stdout.write("Testing T factory (three quarters):")
             exp_values = calc_exp_values_single(prep_T_qutip(3))
-            ans = cqc.test_preparation(prep_T_CQC_FACTORY_THREE_QUARTER, exp_values, iterations=self.iterations)
-            sys.stdout.write('\r')
-            self.assertTrue(ans)
+            if Settings.CONF_BACKEND == "stabilizer":
+                with self.assertRaises(CQCUnsuppError):
+                    cqc.test_preparation(prep_T_CQC_FACTORY_THREE_QUARTER, exp_values, iterations=self.iterations, progress=False)
+            else:
+                ans = cqc.test_preparation(prep_T_CQC_FACTORY_THREE_QUARTER, exp_values, iterations=self.iterations)
+                sys.stdout.write('\r')
+                self.assertTrue(ans)
 
             # Test T factory half
             sys.stdout.write("Testing T factory (full):")
             exp_values = calc_exp_values_single(prep_I_qutip())
-            ans = cqc.test_preparation(prep_T_CQC_FACTORY_FULL, exp_values, iterations=self.iterations)
-            sys.stdout.write('\r')
-            self.assertTrue(ans)
+            if Settings.CONF_BACKEND == "stabilizer":
+                with self.assertRaises(CQCUnsuppError):
+                    cqc.test_preparation(prep_T_CQC_FACTORY_FULL, exp_values, iterations=self.iterations, progress=False)
+            else:
+                ans = cqc.test_preparation(prep_T_CQC_FACTORY_FULL, exp_values, iterations=self.iterations)
+                sys.stdout.write('\r')
+                self.assertTrue(ans)
 
     def testHFactory(self):
         with CQCConnection("Alice", appID=1) as cqc:
@@ -523,9 +540,13 @@ class FactoryGateTest(unittest.TestCase):
             # To the amount of times this rotation is done
             sys.stdout.write("Testing CNOT rotation of 4 times 1/32:")
             exp_values = calc_exp_values_single(prep_ROT_X_qutip())
-            ans = cqc.test_preparation(prep_ROT_X, exp_values, iterations=self.iterations)
-            sys.stdout.write('\r')
-            self.assertTrue(ans)
+            if Settings.CONF_BACKEND == "stabilizer":
+                with self.assertRaises(CQCUnsuppError):
+                    cqc.test_preparation(prep_ROT_X, exp_values, iterations=self.iterations, progress=False)
+            else:
+                ans = cqc.test_preparation(prep_ROT_X, exp_values, iterations=self.iterations)
+                sys.stdout.write('\r')
+                self.assertTrue(ans)
 
     def testCNOTFactory(self):
         with CQCConnection("Alice", appID=1) as cqc:

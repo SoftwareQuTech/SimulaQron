@@ -27,16 +27,16 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import projectq as pQ
 import numpy as np
 
 from SimulaQron.virtNode.basics import quantumError, noQubitError
 from SimulaQron.virtNode.crudeSimulator import Engine
+from SimulaQron.toolbox.stabilizerStates import StabilizerState
 
 
-class projectQEngine(Engine):
+class stabilizerEngine(Engine):
     """
-    Basic quantum engine which uses ProjectQ.
+    Basic quantum engine which uses stabilizer formalism. Thus only Clifford operations can be performed
 
     Attributes:
         maxQubits:	maximum number of qubits this engine will support.
@@ -49,21 +49,11 @@ class projectQEngine(Engine):
 
         super().__init__(maxQubits=maxQubits)
 
-        # We start with no active qubits
-        self.activeQubits = 0
+        self.qubitReg = StabilizerState()
 
-        self.eng = pQ.MainEngine()
-        self.qubitReg = []
-
-    def __del__(self):
-        """
-        Measures out all the current qubits, needed for projectQs garbage collectorself.
-        """
-        # Check first that project Q garbage collector not already removed qubits
-        self.eng.flush()
-        if not len(self.eng.backend.cheat()[0]) == 0:
-            for _ in range(self.activeQubits):
-                self.measure_qubit(0)
+    @property
+    def activeQubits(self):
+        return self.qubitReg.num_qubits
 
     def add_fresh_qubit(self):
         """
@@ -73,31 +63,31 @@ class projectQEngine(Engine):
         if self.activeQubits >= self.maxQubits:
             raise noQubitError("No more qubits available in register.")
 
-        # Prepare a clean qubit state in |0>
-        qubit = self.eng.allocate_qubit()
-
-        self.qubitReg.append(qubit)
-
         num = self.activeQubits
 
-        self.activeQubits += 1
+        # Prepare a clean qubit state in |0>
+        self.qubitReg.add_qubit()
+
 
         return num
 
     def add_qubit(self, newQubit):
         """
-        Add new qubit in the state described by the vector newQubit ([a, b])
+        Add new qubit in the state described by the array containing the generators of the stabilizer group.
+        This should be in the form required by the StabilizerState class.
         """
 
-        norm = np.dot(np.array(newQubit), np.array(newQubit).conj())
-        if not norm <= 1:
-            raise quantumError("State {} is not normalized.".format(newQubit))
+        try:
+            qubit = StabilizerState(newQubit)
+        except Exception:
+            raise ValueError("'newQubits' was not in the correct form to be given as an argument to StabilizerState")
 
-        # Create a fresh qubit
-        num = self.add_fresh_qubit()
+        # Create the qubit
+        qubit = StabilizerState(newQubit)
 
-        # Transform the new qubit into the correct state
-        pQ.ops.StatePreparation(newQubit) | self.qubitReg[num]
+        num = self.activeQubits
+
+        self.qubitReg = self.qubitReg.tensor_product(qubit)
 
         return num
 
@@ -112,14 +102,13 @@ class projectQEngine(Engine):
 
     def get_register_RI(self):
         """
-        Retrieves the entire register in real and imaginary parts and returns the result as a
-        list. Twisted only likes to send real valued lists, not complex ones.
+        Retrieves the entire register in real and imaginary part. Twisted only likes to send real valued lists, not complex ones.
+        Since this is in stabilizer formalism the real part will be the boolean matrix describing the generators
+        and the imaginary part will be None
         """
-        self.eng.flush()
-        state = self.eng.backend.cheat()[1]
 
-        Re = tuple(n.real for n in state)
-        Im = tuple(n.imag for n in state)
+        Re = self.qubitReg.to_array().tolist()
+        Im = None
 
         return Re, Im
 
@@ -127,43 +116,40 @@ class projectQEngine(Engine):
         """
         Applies a Hadamard gate to the qubits with number qubitNum.
         """
-        self.apply_onequbit_gate(pQ.ops.H, qubitNum)
+        self.qubitReg.apply_H(qubitNum)
 
     def apply_K(self, qubitNum):
         """
         Applies a K gate to the qubits with number qubitNum. Maps computational basis to Y eigenbasis.
         """
-        self.apply_onequbit_gate(pQ.ops.H, qubitNum)
-        self.apply_onequbit_gate(pQ.ops.S, qubitNum)
-        self.apply_onequbit_gate(pQ.ops.H, qubitNum)
-        self.apply_onequbit_gate(pQ.ops.Z, qubitNum)
+        self.qubitReg.apply_K(qubitNum)
 
     def apply_X(self, qubitNum):
         """
         Applies a X gate to the qubits with number qubitNum.
         """
 
-        self.apply_onequbit_gate(pQ.ops.X, qubitNum)
+        self.qubitReg.apply_X(qubitNum)
 
     def apply_Z(self, qubitNum):
         """
         Applies a Z gate to the qubits with number qubitNum.
         """
 
-        self.apply_onequbit_gate(pQ.ops.Z, qubitNum)
+        self.qubitReg.apply_Z(qubitNum)
 
     def apply_Y(self, qubitNum):
         """
         Applies a Y gate to the qubits with number qubitNum.
         """
 
-        self.apply_onequbit_gate(pQ.ops.Y, qubitNum)
+        self.qubitReg.apply_Y(qubitNum)
 
     def apply_T(self, qubitNum):
         """
         Applies a T gate to the qubits with number qubitNum.
         """
-        self.apply_onequbit_gate(pQ.ops.T, qubitNum)
+        raise AttributeError("Cannot apply T gate in stabilizer formalism")
 
     def apply_rotation(self, qubitNum, n, a):
         """
@@ -174,28 +160,20 @@ class projectQEngine(Engine):
         n	    A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
         a	    The rotation angle in radians.
         """
-        n = tuple(n)
-        if n == (1, 0, 0):
-            self.apply_onequbit_gate(pQ.ops.Rx(a), qubitNum)
-        elif n == (0, 1, 0):
-            self.apply_onequbit_gate(pQ.ops.Ry(a), qubitNum)
-        elif n == (0, 0, 1):
-            self.apply_onequbit_gate(pQ.ops.Rz(a), qubitNum)
-        else:
-            raise NotImplementedError("Can only do rotations around X, Y, or Z axis right now")
+        raise AttributeError("Cannot apply arbitrary rotation gate in stabilizer formalism")
 
     def apply_CNOT(self, qubitNum1, qubitNum2):
         """
         Applies the CNOT to the qubit with the numbers qubitNum1 and qubitNum2.
         """
-        self.apply_twoqubit_gate(pQ.ops.CNOT, qubitNum1, qubitNum2)
+        self.qubitReg.apply_CNOT(qubitNum1, qubitNum2)
 
     def apply_CPHASE(self, qubitNum1, qubitNum2):
         """
         Applies the CPHASE to the qubit with the numbers qubitNum1 and qubitNum2.
         """
 
-        self.apply_twoqubit_gate(pQ.ops.CZ, qubitNum1, qubitNum2)
+        self.qubitReg.apply_CZ(qubitNum1, qubitNum2)
 
     def apply_onequbit_gate(self, gate, qubitNum):
         """
@@ -206,10 +184,7 @@ class projectQEngine(Engine):
         qubitNum 	the number of the qubit this gate is applied to
         """
 
-        if (qubitNum + 1) > self.activeQubits:
-            raise quantumError("No such qubit to apply a single qubit gate to")
-
-        gate | self.qubitReg[qubitNum]
+        raise AttributeError("Cannot apply arbitrary one qubit gate in stabilizer formalism")
 
     def apply_twoqubit_gate(self, gate, qubit1, qubit2):
         """
@@ -220,16 +195,7 @@ class projectQEngine(Engine):
         qubit1 		the first qubit
         qubit2		the second qubit
         """
-        if (qubit1 + 1) > self.activeQubits:
-            raise quantumError("No such qubit to act as a control qubit")
-
-        if (qubit2 + 1) > self.activeQubits:
-            raise quantumError("No such qubit to act as a target qubit")
-
-        if qubit1 == qubit2:
-            raise quantumError("Control and target are equal")
-
-        gate | (self.qubitReg[qubit1], self.qubitReg[qubit2])
+        raise AttributeError("Cannot apply arbitrary two qubit gate in stabilizer formalism")
 
     def measure_qubit_inplace(self, qubitNum):
         """
@@ -244,11 +210,7 @@ class projectQEngine(Engine):
         if (qubitNum + 1) > self.activeQubits:
             raise quantumError("No such qubit to be measured.")
 
-        pQ.ops.Measure | self.qubitReg[qubitNum]
-
-        self.eng.flush()
-
-        outcome = int(self.qubitReg[qubitNum])
+        outcome = self.qubitReg.measure(qubitNum, inplace=True)
 
         # return measurement outcome
         return outcome
@@ -260,12 +222,7 @@ class projectQEngine(Engine):
         Arguments:
         qubitNum	qubit to be measured
         """
-        outcome = self.measure_qubit_inplace(qubitNum)
-
-        self.qubitReg.pop(qubitNum)
-
-        # Update the number of qubits
-        self.activeQubits = self.activeQubits - 1
+        outcome = self.qubitReg.measure(qubitNum, inplace=False)
 
         return outcome
 
@@ -273,7 +230,7 @@ class projectQEngine(Engine):
         """
         Replaces the qubit at position qubitNum with the one given by state.
         """
-        raise NotImplementedError("Currently you cannot replace a qubit using project Q as backend")
+        raise NotImplementedError("Currently you cannot replace a qubit using stabilizer formalism")
 
     def absorb(self, other):
         """
@@ -285,33 +242,15 @@ class projectQEngine(Engine):
         if newNum > self.maxQubits:
             raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
 
-        # Check whether there are in fact qubits to tensor up....
-        if self.activeQubits == 0:
-            self.eng = other.eng
-            self.qubitReg = list(other.qubitReg)
-        elif other.activeQubits > 0:
-            # Get the current state of the other engine
-            other.eng.flush()
-            other_state = other.eng.backend.cheat()[1]
-
-            # Allocate qubits in this engine for the new qubits from the other engine
-            qreg = self.eng.allocate_qureg(other.activeQubits)
-
-            # Put the new qubits in the correct state
-            pQ.ops.StatePreparation(other_state) | qreg
-
-            # Add the qubits to the list of qubits
-            self.qubitReg += list(qreg)
-
-        self.activeQubits = newNum
+        self.qubitReg = self.qubitReg.tensor_product(other.qubitReg)
 
     def absorb_parts(self, R, I, activeQ):
         """
         Absorb the qubits, given in pieces
 
         Arguments:
-        R		real part of the qubit state as a list
-        I		imaginary part as a list
+        R		The array describing the stabilizer state (from StabilizerState.to_array)
+        I		Unused
         activeQ		active number of qubits
         """
         # Check whether there is space
@@ -319,24 +258,16 @@ class projectQEngine(Engine):
         if newNum > self.maxQubits:
             raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
 
-        if activeQ > 0:
-
-            # Convert the real and imaginary parts to a state
-            state = [re + im * 1j for re, im in zip(R, I)]
-
-            # Allocate qubits in this engine for the new qubits from the other engine
-            qreg = self.eng.allocate_qureg(activeQ)
-
-            # Put the new qubits in the correct state
-            pQ.ops.StatePreparation(state) | qreg
-
-            # Add the qubits to the list of qubits
-            self.qubitReg += list(qreg)
-
-            self.activeQubits = newNum
+        try:
+            self.qubitReg = self.qubitReg.tensor_product(StabilizerState(R))
+        except Exception as err:
+            print(err)
+            print("R: {}".format(R))
+            print("I: {}".format(I))
 
 
-class quantumRegister(projectQEngine):
+
+class quantumRegister(stabilizerEngine):
     """
     A simulated quantum register. The qubits who are simulated in this register may be distributed over
     different quantum nodes.
