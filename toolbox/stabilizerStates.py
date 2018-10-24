@@ -46,7 +46,7 @@ class StabilizerState:
                 A binary array representing the generators of the stabilizer group.
                 If the array is n-by-2n a stabilizer state on n qubits will be represented.
                 The n first columns are the X-stabilizers and the n last the Z-stabilizer.
-                If the array is n-by-(2n+1), the last column are seen as the phase for each generator
+                If the array is n-by-(2n+1), the last column is seen as the phase for each generator
                 as follows:
                     0 -> 1
                     1 -> -1
