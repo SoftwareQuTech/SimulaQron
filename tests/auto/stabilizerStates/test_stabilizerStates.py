@@ -332,6 +332,30 @@ class TestStabilizerStates(unittest.TestCase):
             outcomes = [GHZ.measure(0) for _ in range(n)]
             self.assertNotIn(False, [outcomes[0] == outcomes[i] for i in range(1, n)])
 
+    def test_going_to_graph(self):
+        one_Bell_pair = StabilizerState(["-1XX", "+1ZZ"])
+        G = nx.Graph()
+        G.add_edge(0,1)
+        one_Bell_pair_graph = one_Bell_pair.find_SQC_equiv_graph_state()
+        self.assertTrue(G,one_Bell_pair_graph)
+
+        two_EPR_pairs = StabilizerState([[1,0,0,1,0,0,0,0],[0,1,1,0,0,0,0,0],
+                                        [0,0,0,0,1,0,0,1],[0,0,0,0,0,1,1,0]])
+        G.remove_edge(0,1)
+        G.add_edges_from([(0,3),(1,2)])
+        two_EPR_pairs_graph = two_EPR_pairs.find_SQC_equiv_graph_state()
+        self.assertTrue(G,two_EPR_pairs_graph)
+
+        n = 5
+        GHZ = StabilizerState(n)
+        GHZ.apply_H(0)
+        for i in range(1, n):
+            GHZ.apply_CNOT(0, i)
+        GHZ_graph = GHZ.find_SQC_equiv_graph_state()
+        self.assertTrue(GHZ_graph,nx.star_graph(n-1))
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

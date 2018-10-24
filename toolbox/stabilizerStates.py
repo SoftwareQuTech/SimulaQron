@@ -46,7 +46,7 @@ class StabilizerState:
                 A binary array representing the generators of the stabilizer group.
                 If the array is n-by-2n a stabilizer state on n qubits will be represented.
                 The n first columns are the X-stabilizers and the n last the Z-stabilizer.
-                If the array is n-by-(2n+1), the two last columns are seen as the phase for each generator
+                If the array is n-by-(2n+1), the last column are seen as the phase for each generator
                 as follows:
                     0 -> 1
                     1 -> -1
@@ -205,7 +205,7 @@ class StabilizerState:
         return self.num_qubits
 
     @staticmethod
-    def boolean_gaussian_elimination(matrix):
+    def boolean_gaussian_elimination(matrix,return_pivot_columns=False):
         """
         Given a boolean matrix returns the matrix in row reduced echelon form
         where entries are seen as elements of GF(2), i.e. intergers modulus 2.
@@ -226,6 +226,7 @@ class StabilizerState:
 
         h = 0
         k = 0
+        pivot_columns = []
         while (h < m) and (k < n):
             non_zero_ind = new_matrix[:, k].nonzero()[0]
             non_zero_ind_under_h = non_zero_ind[non_zero_ind >= h]
@@ -237,11 +238,15 @@ class StabilizerState:
                 if i_max != h:
                     new_matrix[[h, i_max]] = new_matrix[[i_max, h]]
                 # Add pivot row to the rest
+                pivot_columns.append(k)
                 non_zero_except_i_max = non_zero_ind[non_zero_ind != i_max]
                 new_matrix[non_zero_except_i_max, :] = np.logical_xor(new_matrix[non_zero_except_i_max, :], new_matrix[h, :])
                 h += 1
                 k += 1
-        return new_matrix
+        if return_pivot_columns:
+            return new_matrix,pivot_columns
+        else:
+            return new_matrix
 
     def add_qubit(self):
         """
@@ -292,7 +297,7 @@ class StabilizerState:
             new_group = np.concatenate((new_X_stab, new_Z_stab, phases), 1)
             return StabilizerState(new_group)
 
-    def to_array(self, standard_form=False):
+    def to_array(self, standard_form=False,return_pivot_columns=False):
         """
         Returns the numpy array representing the stabilizer group of this state.
         See doc-string for __init__ how the elements of this numpy array are treated.
@@ -302,8 +307,12 @@ class StabilizerState:
         :return: The generators of this stabilizer group as a numpy array
         :rtype: :obj:`numpy.array`
         """
+
         if standard_form:
-            return self.boolean_gaussian_elimination(self._group)
+            if return_pivot_columns:
+                return self.boolean_gaussian_elimination(self._group,True)
+            else:
+                return self.boolean_gaussian_elimination(self._group)
         else:
             return np.array(self._group, dtype=bool)
 
@@ -540,3 +549,66 @@ class StabilizerState:
                 pass
 
         return outcome
+
+    def find_SQC_equiv_graph_state(self):
+        """
+        Finds a graph state single qubit Clifford equivalent to self. Method is described
+        in quant-ph/0308151.
+
+        For example:
+            EPR_pair = [[1,1,0,0],[0,0,1,1]]
+            S = StabilizerState(EPR_pair)
+            G = find_SQC_equiv_graph_state(S)
+
+        :param self: The StabilizerState for which we want to find the corresponding graph state
+        :type self: :obj:`StabilizerState`
+        :return: A networkx graph SQC equivalent to S
+        :rtype: :obj:`networkx.classes.graph.Graph`
+        """
+        S_ech_form,pivs = self.to_array(standard_form=True,return_pivot_columns=True)
+        print(S_ech_form.shape)
+        n = len(pivs)
+        pivsX = [i for i in pivs if i<n]
+        k = len(pivsX)
+
+        #Next step is to relabel the qubits such that the pivot columns in X
+        #are the first k columns in X-part and the Z-part.
+        A = pivsX+[i for i in range(n) if i not in pivsX]
+        A.extend([sum(x) for x in zip(A, n*[n])]+[2*n])
+        Sp = StabilizerState(S_ech_form[:,A])
+
+        #Then apply Hadamards on the last n-k qubits such that X has full rank
+        for j in range(k,n):
+            Sp.apply_H(j)
+        Sp_mat = Sp.to_array().astype(int)[:,:2*n]
+        phase_list = Sp.to_array()[:,-1]
+
+        #Then multiply by inv(X) such that inv(X)X = I
+        Spp_mat = np.matmul(np.linalg.inv(Sp_mat[:,:n]),Sp_mat)
+
+        #Test if this was succesfull
+        if not np.array_equal(Spp_mat[:,:n],np.identity(n)):
+            raise ValueError("The X-part should be identity,but something went wrong")
+
+        #then swap back (first the columns, then the rows to keep identity on the X-part)
+        Spp_mat = Spp_mat[:,A[:2*n]]
+        Spp_mat = Spp_mat[A[:n],:]
+        Spp = StabilizerState(np.c_[Spp_mat,phase_list])
+
+        #Spp is now a graph state with possible self loops. To remove these,
+        #do an S on every qubit with a self loop
+        for j in range(n):
+            if Spp_mat[j,j+n]:
+                Spp.apply_S(j)
+
+        #Now we remove -1 phases which might still be there
+        for j in range(n):
+            if Spp.to_array()[:,-1][j]:
+                Spp.apply_Z(j)
+
+
+        #Spp is now in the form of (I,Gamma) where Gamma is the adj mat of the Graph
+        #SQC equivalent to the stabilizer state.
+        adj_mat = Spp.to_array()[:,n:2*n]
+        G = nx.from_numpy_matrix(adj_mat)
+        return G
