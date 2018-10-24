@@ -594,7 +594,7 @@ class StabilizerState:
         #then swap back (first the columns, then the rows to keep identity on the X-part)
         Spp_mat = Spp_mat[:,A[:2*n]]
         Spp_mat = Spp_mat[A[:n],:]
-        Spp = StabilizerState(np.c_[Spp_mat,phase_list])
+        Spp = StabilizerState(np.c_[Spp_mat,[phase_list[i] for i in A[:n]]])
 
         #Spp is now a graph state with possible self loops. To remove these,
         #do an S on every qubit with a self loop
