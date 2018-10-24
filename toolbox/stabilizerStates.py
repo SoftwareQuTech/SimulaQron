@@ -550,7 +550,7 @@ class StabilizerState:
 
         return outcome
 
-    def find_SQC_equiv_graph_state(self):
+    def find_SQC_equiv_graph_state(self,return_operations = False):
         """
         Finds a graph state single qubit Clifford equivalent to self. Method is described
         in quant-ph/0308151.
@@ -566,10 +566,10 @@ class StabilizerState:
         :rtype: :obj:`networkx.classes.graph.Graph`
         """
         S_ech_form,pivs = self.to_array(standard_form=True,return_pivot_columns=True)
-        print(S_ech_form.shape)
         n = len(pivs)
         pivsX = [i for i in pivs if i<n]
         k = len(pivsX)
+        operations = []
 
         #Next step is to relabel the qubits such that the pivot columns in X
         #are the first k columns in X-part and the Z-part.
@@ -580,6 +580,7 @@ class StabilizerState:
         #Then apply Hadamards on the last n-k qubits such that X has full rank
         for j in range(k,n):
             Sp.apply_H(j)
+            operations.append(('H',A[j]))
         Sp_mat = Sp.to_array().astype(int)[:,:2*n]
         phase_list = Sp.to_array()[:,-1]
 
@@ -600,15 +601,20 @@ class StabilizerState:
         for j in range(n):
             if Spp_mat[j,j+n]:
                 Spp.apply_S(j)
+                operations.append(('S',j))
 
         #Now we remove -1 phases which might still be there
         for j in range(n):
             if Spp.to_array()[:,-1][j]:
                 Spp.apply_Z(j)
-
+                operations.append(('Z',j))
 
         #Spp is now in the form of (I,Gamma) where Gamma is the adj mat of the Graph
         #SQC equivalent to the stabilizer state.
         adj_mat = Spp.to_array()[:,n:2*n]
         G = nx.from_numpy_matrix(adj_mat)
-        return G
+
+        if return_operations:
+            return G,operations
+        else:
+            return G

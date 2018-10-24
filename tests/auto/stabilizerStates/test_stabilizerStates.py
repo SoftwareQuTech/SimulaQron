@@ -351,8 +351,9 @@ class TestStabilizerStates(unittest.TestCase):
         GHZ.apply_H(0)
         for i in range(1, n):
             GHZ.apply_CNOT(0, i)
-        GHZ_graph = GHZ.find_SQC_equiv_graph_state()
+        GHZ_graph,operations = GHZ.find_SQC_equiv_graph_state(return_operations=True)
         self.assertTrue(GHZ_graph,nx.star_graph(n-1))
+        self.assertTrue(operations == [('H', i) for i in range(1,n)])
 
 
 
