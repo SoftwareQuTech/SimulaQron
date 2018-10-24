@@ -56,10 +56,10 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
     Code to execture for the local client node. Called if all connections are established.
 
     Arguments
-    qReg		quantum register (twisted object supporting remote method calls)
-    virtRoot	virtual quantum ndoe (twisted object supporting remote method calls)
-    myName		name of this node (string)
-    classicalNet	servers in the classical communication network (dictionary of hosts)
+    qReg        quantum register (twisted object supporting remote method calls)
+    virtRoot    virtual quantum ndoe (twisted object supporting remote method calls)
+    myName        name of this node (string)
+    classicalNet    servers in the classical communication network (dictionary of hosts)
     """
 
     logging.debug("LOCAL %s: Runing client side program.", myName)
@@ -72,8 +72,8 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 # This will be run if the local node acts as a server on the classical communication network,
 # accepting remote method calls from the other nodes.
 
-class localNode(pb.Root):
 
+class localNode(pb.Root):
     def __init__(self, node, classicalNet):
 
         self.node = node
@@ -101,10 +101,14 @@ class localNode(pb.Root):
         Recover the qubit from Alice. We should now have a tripartite GHZ state
 
         Arguments
-        virtualNum	number of the virtual qubit corresponding to the EPR pair received
+        virtualNum    number of the virtual qubit corresponding to the EPR pair received
         """
 
-        logging.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
+        logging.debug(
+            "LOCAL %s: Getting reference to qubit number %d.",
+            self.node.name,
+            virtualNum,
+        )
 
         self.qA = yield self.virtRoot.callRemote("get_virtual_ref", virtualNum)
         self.gotAlice = True
@@ -118,10 +122,14 @@ class localNode(pb.Root):
         Recover the qubit from Bob. We should now have a tripartite GHZ state
 
         Arguments
-        virtualNum	number of the virtual qubit corresponding to the EPR pair received
+        virtualNum    number of the virtual qubit corresponding to the EPR pair received
         """
 
-        logging.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
+        logging.debug(
+            "LOCAL %s: Getting reference to qubit number %d.",
+            self.node.name,
+            virtualNum,
+        )
 
         self.qB = yield self.virtRoot.callRemote("get_virtual_ref", virtualNum)
         self.gotBob = True
@@ -135,7 +143,7 @@ class localNode(pb.Root):
         Recover the qubit from Bob. We should now have a tripartite GHZ state
 
         Arguments
-        virtualNum	number of the virtual qubit corresponding to the EPR pair received
+        virtualNum    number of the virtual qubit corresponding to the EPR pair received
         """
 
         logging.debug("LOCAL %s: Got both qubits from Alice and Bob.", self.node.name)
@@ -146,12 +154,18 @@ class localNode(pb.Root):
 
         if Settings.CONF_BACKEND == "qutip":
             # Output state
-            (realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits", [self.qA, self.qB])
+            (realRho, imagRho) = yield self.virtRoot.callRemote(
+                "get_multiple_qubits", [self.qA, self.qB]
+            )
             rho = assemble_qubit(realRho, imagRho)
-            expectedRho = qp.Qobj([[1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
-            correct = (rho == expectedRho)
+            expectedRho = qp.Qobj(
+                [[1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+            )
+            correct = rho == expectedRho
         elif Settings.CONF_BACKEND == "projectq":
-            (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", self.qA)
+            (realvec, imagvec) = yield self.virtRoot.callRemote(
+                "get_register_RI", self.qA
+            )
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1, 0, 0, 0]
             correct = np.all(np.isclose(state, expectedState))
@@ -159,14 +173,18 @@ class localNode(pb.Root):
             (array, _) = yield self.virtRoot.callRemote("get_register_RI", self.qA)
             state = StabilizerState(array)
             expectedState = StabilizerState([[0, 0, 1, 0], [0, 0, 0, 1]])
-            correct = (state == expectedState)
+            correct = state == expectedState
         else:
             ValueError("Unknown backend {}".format(Settings.CONF_BACKEND))
 
         if correct:
-            print("Testing register merge, both remote, same node, same register............ok")
+            print(
+                "Testing register merge, both remote, same node, same register............ok"
+            )
         else:
-            print("Testing register merge, both remote, same node, same register............fail")
+            print(
+                "Testing register merge, both remote, same node, same register............fail"
+            )
 
         reactor.stop()
 
@@ -180,10 +198,12 @@ def main():
     myName = "Charlie"
 
     # This file defines the network of virtual quantum nodes
-    virtualFile = os.path.join(os.path.dirname(__file__), '../../../../config/virtualNodes.cfg')
+    virtualFile = os.path.join(
+        os.path.dirname(__file__), "../../../../config/virtualNodes.cfg"
+    )
 
     # This file defines the nodes acting as servers in the classical communication network
-    classicalFile = os.path.join(os.path.dirname(__file__), 'classicalNet.cfg')
+    classicalFile = os.path.join(os.path.dirname(__file__), "classicalNet.cfg")
 
     # Read configuration files for the virtual quantum, as well as the classical network
     virtualNet = networkConfig(virtualFile)
@@ -203,5 +223,5 @@ def main():
 
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
+logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=logging.ERROR)
 main()

@@ -39,144 +39,141 @@ from SimulaQron.general.hostConfig import *
 
 from itertools import repeat
 
+
 def main():
 
-	# Read config file
-	config = networkConfig("../../../config/virtualNodes.cfg")
+    # Read config file
+    config = networkConfig("../../../config/virtualNodes.cfg")
 
-	# We are Alice
-	myName = "Alice"
+    # We are Alice
+    myName = "Alice"
 
-	# Connect to the local virtual Node
-	node = config.hostDict[myName]
-	factory = pb.PBClientFactory()
-	reactor.connectTCP(node.hostname, node.port, factory)
-	def1 = factory.getRootObject()
-	def1.addCallback(got_root)
-	def1.addErrback(err_obj1)
-	reactor.run()
+    # Connect to the local virtual Node
+    node = config.hostDict[myName]
+    factory = pb.PBClientFactory()
+    reactor.connectTCP(node.hostname, node.port, factory)
+    def1 = factory.getRootObject()
+    def1.addCallback(got_root)
+    def1.addErrback(err_obj1)
+    reactor.run()
+
 
 def err_obj1(reason):
-    	print("error getting first object", reason)
-    	reactor.stop()
+    print("error getting first object", reason)
+    reactor.stop()
+
 
 @inlineCallbacks
 def got_root(obj):
 
-	print("Got root object", obj)
+    print("Got root object", obj)
 
-	###
-	# Do some operations in the default register
-	reg1 = yield obj.callRemote("new_register")
-	q = yield obj.callRemote("new_qubit_inreg",reg1)
+    ###
+    # Do some operations in the default register
+    reg1 = yield obj.callRemote("new_register")
+    q = yield obj.callRemote("new_qubit_inreg", reg1)
 
-	defer = yield q.callRemote("test")
-	defer = yield q.callRemote("apply_X")
-	defer = yield q.callRemote("apply_Z")
-	defer = yield q.callRemote("apply_Y")
-	defer = yield q.callRemote("apply_H")
-	outcome = yield q.callRemote("measure")
-	print("Got outcome:",outcome)
+    defer = yield q.callRemote("test")
+    defer = yield q.callRemote("apply_X")
+    defer = yield q.callRemote("apply_Z")
+    defer = yield q.callRemote("apply_Y")
+    defer = yield q.callRemote("apply_H")
+    outcome = yield q.callRemote("measure")
+    print("Got outcome:", outcome)
 
-	# Generate EPR pair between two qubits
-	q1 = yield obj.callRemote("new_qubit")
-	defer = yield q1.callRemote("apply_T")
+    # Generate EPR pair between two qubits
+    q1 = yield obj.callRemote("new_qubit")
+    defer = yield q1.callRemote("apply_T")
 
-	q2 = yield obj.callRemote("new_qubit")
-	defer = yield q1.callRemote("cnot_onto",q2)
+    q2 = yield obj.callRemote("new_qubit")
+    defer = yield q1.callRemote("cnot_onto", q2)
 
-	(R,I) = yield obj.callRemote("get_multiple_qubits",[q1,q2])
-	M = I
+    (R, I) = yield obj.callRemote("get_multiple_qubits", [q1, q2])
+    M = I
 
-	for s in range(len(I)):
-		for t in range(len(I)):
-			M[s][t] = R[s][t] + I[s][t] * 1j
+    for s in range(len(I)):
+        for t in range(len(I)):
+            M[s][t] = R[s][t] + I[s][t] * 1j
 
+            # M = []
+    qt = Qobj(M)
+    print("Matrix: ", qt)
 
-	# M = []
-	qt = Qobj(M)
-	print("Matrix: ", qt)
+    outcome = yield q2.callRemote("measure")
+    print("Got outcome from EPR:", outcome)
 
-	outcome = yield q2.callRemote("measure")
-	print("Got outcome from EPR:",outcome)
+    ###
+    # Make a new register
+    reg1 = yield obj.callRemote("new_register")
+    reg2 = yield obj.callRemote("new_register")
 
-	###
-	# Make a new register
-	reg1 = yield obj.callRemote("new_register")
-	reg2 = yield obj.callRemote("new_register")
+    q1 = yield obj.callRemote("new_qubit_inreg", reg1)
+    q2 = yield obj.callRemote("new_qubit_inreg", reg2)
 
-	q1 = yield obj.callRemote("new_qubit_inreg",reg1)
-	q2 = yield obj.callRemote("new_qubit_inreg",reg2)
+    (R, I) = yield obj.callRemote("get_multiple_qubits", [q1])
+    # (R,I, activeQ, oldRegNum, oldQubitNum) = yield obj.callRemote("get_register",q1)
+    M = I
 
-	(R,I) = yield obj.callRemote("get_multiple_qubits",[q1])
-	# (R,I, activeQ, oldRegNum, oldQubitNum) = yield obj.callRemote("get_register",q1)
-	M = I
+    for s in range(len(I)):
+        for t in range(len(I)):
+            M[s][t] = R[s][t] + I[s][t] * 1j
 
-	for s in range(len(I)):
-		for t in range(len(I)):
-			M[s][t] = R[s][t] + I[s][t] * 1j
+            # M = []
+    qt = Qobj(M)
+    print("Q1 Matrix: ", qt)
+    (R, I) = yield obj.callRemote("get_multiple_qubits", [q2])
+    M = I
 
+    for s in range(len(I)):
+        for t in range(len(I)):
+            M[s][t] = R[s][t] + I[s][t] * 1j
 
-	# M = []
-	qt = Qobj(M)
-	print("Q1 Matrix: ", qt)
-	(R,I) = yield obj.callRemote("get_multiple_qubits",[q2])
-	M = I
+            # M = []
+    qt = Qobj(M)
+    print("Q2 Matrix: ", qt)
 
-	for s in range(len(I)):
-		for t in range(len(I)):
-			M[s][t] = R[s][t] + I[s][t] * 1j
+    print("Applying CNOT")
 
+    defer = yield q1.callRemote("apply_H")
+    defer = yield q1.callRemote("cnot_onto", q2)
 
-	# M = []
-	qt = Qobj(M)
-	print("Q2 Matrix: ", qt)
+    (R, I) = yield obj.callRemote("get_multiple_qubits", [q1, q2])
+    M = I
 
-	print("Applying CNOT")
+    for s in range(len(I)):
+        for t in range(len(I)):
+            M[s][t] = R[s][t] + I[s][t] * 1j
 
-	defer = yield q1.callRemote("apply_H")
-	defer = yield q1.callRemote("cnot_onto",q2)
+            # M = []
+    qt = Qobj(M)
+    print("Matrix: ", qt)
 
-	(R,I) = yield obj.callRemote("get_multiple_qubits",[q1,q2])
-	M = I
+    outcome = yield q2.callRemote("measure")
+    print("Got outcome from cross register EPR:", outcome)
 
-	for s in range(len(I)):
-		for t in range(len(I)):
-			M[s][t] = R[s][t] + I[s][t] * 1j
+    ###
+    #
+    num = yield q1.callRemote("get_number")
+    print("Got number:", num)
 
+    (R, I, activeQ, oldRegNum, oldQubitNum) = yield obj.callRemote("get_register", q1)
+    M = I
 
-	# M = []
-	qt = Qobj(M)
-	print("Matrix: ", qt)
+    for s in range(len(I)):
+        for t in range(len(I)):
+            M[s][t] = R[s][t] + I[s][t] * 1j
 
-	outcome = yield q2.callRemote("measure")
-	print("Got outcome from cross register EPR:",outcome)
+            # M = []
+    qt = Qobj(M)
+    print("Matrix: ", qt)
 
-	###
-	#
-	num = yield q1.callRemote("get_number")
-	print("Got number:", num)
+    ####
+    # Send qubits
+    defer = yield obj.callRemote("send_qubit", q1, "Bob")
 
-	(R,I, activeQ, oldRegNum, oldQubitNum) = yield obj.callRemote("get_register",q1)
-	M = I
+    defer = yield q1.callRemote("apply_H")
 
-	for s in range(len(I)):
-		for t in range(len(I)):
-			M[s][t] = R[s][t] + I[s][t] * 1j
-
-
-	# M = []
-	qt = Qobj(M)
-	print("Matrix: ", qt)
-
-	####
-	# Send qubits
-	defer = yield obj.callRemote("send_qubit", q1, "Bob")
-
-	defer = yield q1.callRemote("apply_H")
-
-
-	reactor.stop()
+    reactor.stop()
 
 
 main()

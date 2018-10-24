@@ -33,43 +33,46 @@ from SimulaQron.cqc.pythonLib.cqc import CQCConnection
 
 
 def main(nr_runs):
-	meas_outcomes = {}
+    meas_outcomes = {}
 
-	# Initialize the connection
-	with CQCConnection("Bob") as Bob:
+    # Initialize the connection
+    with CQCConnection("Bob") as Bob:
 
-		for _ in range(nr_runs):
+        for _ in range(nr_runs):
 
-			# Create an EPR pair
-			q = Bob.recvEPR()
+            # Create an EPR pair
+            q = Bob.recvEPR()
 
-			# Get the identifier of this EPR pair such that Alice can relate the measuement outcomes to hers
-			sequence_nr = q.get_entInfo().id_AB
+            # Get the identifier of this EPR pair such that Alice can relate the measuement outcomes to hers
+            sequence_nr = q.get_entInfo().id_AB
 
-			if (sequence_nr % 3) == 0:
-				# Measure in Z
-				pass
-			elif (sequence_nr % 3) == 1:
-				# Measure in X
-				q.H()
-			else:
-				# Measure in Y
-				q.K()
+            if (sequence_nr % 3) == 0:
+                # Measure in Z
+                pass
+            elif (sequence_nr % 3) == 1:
+                # Measure in X
+                q.H()
+            else:
+                # Measure in Y
+                q.K()
 
-			m = q.measure()
-			meas_outcomes[sequence_nr] = m
+            m = q.measure()
+            meas_outcomes[sequence_nr] = m
 
-	# Encode the measurement outcomes to bytes, such that we can send them
-	msg = json.dumps(meas_outcomes).encode('utf-8')
+            # Encode the measurement outcomes to bytes, such that we can send them
+    msg = json.dumps(meas_outcomes).encode("utf-8")
 
-	# Send the measurement outcomes to Alice
-	Bob.sendClassical(name="Alice", msg=msg)
+    # Send the measurement outcomes to Alice
+    Bob.sendClassical(name="Alice", msg=msg)
 
-if __name__ == '__main__':
-	try:
-		nr_runs = int(sys.argv[1])
-	except Exception:
-		nr_runs = 500
-	if nr_runs > 1000:
-		raise ValueError("Number of EPR pairs for this example is currently restricted to less than 1000")
-	main(nr_runs)
+
+if __name__ == "__main__":
+    try:
+        nr_runs = int(sys.argv[1])
+    except Exception:
+        nr_runs = 500
+    if nr_runs > 1000:
+        raise ValueError(
+            "Number of EPR pairs for this example is currently restricted to less than 1000"
+        )
+    main(nr_runs)

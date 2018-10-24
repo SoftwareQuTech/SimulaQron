@@ -39,7 +39,7 @@ class stabilizerEngine(Engine):
     Basic quantum engine which uses stabilizer formalism. Thus only Clifford operations can be performed
 
     Attributes:
-        maxQubits:	maximum number of qubits this engine will support.
+        maxQubits:    maximum number of qubits this engine will support.
     """
 
     def __init__(self, maxQubits=10):
@@ -68,7 +68,6 @@ class stabilizerEngine(Engine):
         # Prepare a clean qubit state in |0>
         self.qubitReg.add_qubit()
 
-
         return num
 
     def add_qubit(self, newQubit):
@@ -80,7 +79,9 @@ class stabilizerEngine(Engine):
         try:
             qubit = StabilizerState(newQubit)
         except Exception:
-            raise ValueError("'newQubits' was not in the correct form to be given as an argument to StabilizerState")
+            raise ValueError(
+                "'newQubits' was not in the correct form to be given as an argument to StabilizerState"
+            )
 
         # Create the qubit
         qubit = StabilizerState(newQubit)
@@ -157,10 +158,12 @@ class stabilizerEngine(Engine):
         is raised.
         Arguments:
                 qubitNum    Qubit number
-        n	    A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
-        a	    The rotation angle in radians.
+        n        A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+        a        The rotation angle in radians.
         """
-        raise AttributeError("Cannot apply arbitrary rotation gate in stabilizer formalism")
+        raise AttributeError(
+            "Cannot apply arbitrary rotation gate in stabilizer formalism"
+        )
 
     def apply_CNOT(self, qubitNum1, qubitNum2):
         """
@@ -181,10 +184,12 @@ class stabilizerEngine(Engine):
 
         Arguments:
         gate       The project Q gate to be applied
-        qubitNum 	the number of the qubit this gate is applied to
+        qubitNum     the number of the qubit this gate is applied to
         """
 
-        raise AttributeError("Cannot apply arbitrary one qubit gate in stabilizer formalism")
+        raise AttributeError(
+            "Cannot apply arbitrary one qubit gate in stabilizer formalism"
+        )
 
     def apply_twoqubit_gate(self, gate, qubit1, qubit2):
         """
@@ -192,10 +197,12 @@ class stabilizerEngine(Engine):
 
         Arguments:
         gate       The project Q gate to be applied
-        qubit1 		the first qubit
-        qubit2		the second qubit
+        qubit1         the first qubit
+        qubit2        the second qubit
         """
-        raise AttributeError("Cannot apply arbitrary two qubit gate in stabilizer formalism")
+        raise AttributeError(
+            "Cannot apply arbitrary two qubit gate in stabilizer formalism"
+        )
 
     def measure_qubit_inplace(self, qubitNum):
         """
@@ -203,7 +210,7 @@ class stabilizerEngine(Engine):
         is in the post-measurment state corresponding to the obtained outcome.
 
         Arguments:
-        qubitNum	qubit to be measured
+        qubitNum    qubit to be measured
         """
 
         # Check we have such a qubit...
@@ -220,7 +227,7 @@ class stabilizerEngine(Engine):
         Measures the desired qubit in the standard basis. This returns the classical outcome and deletes the qubit.
 
         Arguments:
-        qubitNum	qubit to be measured
+        qubitNum    qubit to be measured
         """
         outcome = self.qubitReg.measure(qubitNum, inplace=False)
 
@@ -230,7 +237,9 @@ class stabilizerEngine(Engine):
         """
         Replaces the qubit at position qubitNum with the one given by state.
         """
-        raise NotImplementedError("Currently you cannot replace a qubit using stabilizer formalism")
+        raise NotImplementedError(
+            "Currently you cannot replace a qubit using stabilizer formalism"
+        )
 
     def absorb(self, other):
         """
@@ -249,9 +258,9 @@ class stabilizerEngine(Engine):
         Absorb the qubits, given in pieces
 
         Arguments:
-        R		The array describing the stabilizer state (from StabilizerState.to_array)
-        I		Unused
-        activeQ		active number of qubits
+        R        The array describing the stabilizer state (from StabilizerState.to_array)
+        I        Unused
+        activeQ        active number of qubits
         """
         # Check whether there is space
         newNum = self.activeQubits + activeQ
@@ -266,7 +275,6 @@ class stabilizerEngine(Engine):
             print("I: {}".format(I))
 
 
-
 class quantumRegister(stabilizerEngine):
     """
     A simulated quantum register. The qubits who are simulated in this register may be distributed over
@@ -278,9 +286,9 @@ class quantumRegister(stabilizerEngine):
         Initialize the quantum register at the given node.
 
         Arguments
-        node		node this register is started from
-        num		number of this register
-        maxQubits	maximum number of qubits this register supports
+        node        node this register is started from
+        num        number of this register
+        maxQubits    maximum number of qubits this register supports
         """
         super().__init__(maxQubits=maxQubits)
 

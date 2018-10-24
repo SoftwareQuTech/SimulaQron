@@ -33,13 +33,16 @@ import sys
 import os
 import logging
 
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=Settings.CONF_LOGGING_LEVEL_BACKEND)
+logging.basicConfig(
+    format="%(asctime)s:%(levelname)s:%(message)s",
+    level=Settings.CONF_LOGGING_LEVEL_BACKEND,
+)
 
 
 # args.hostName instead of sys.argv[1] ?
 logging.debug("Starting VIRTUAL NODE %s", sys.argv[1])
 
-virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
+virtualFile = os.environ.get("NETSIM") + "/config/virtualNodes.cfg"
 be = backEnd(sys.argv[1], virtualFile)
 
 node = be.start(maxQubits=Settings.CONF_MAXQUBITS, maxRegisters=Settings.CONF_MAXREGS)

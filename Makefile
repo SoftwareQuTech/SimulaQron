@@ -6,6 +6,9 @@ RUN_TESTS     = tests/runTests.sh
 clean:
 	@find . -name '*.pyc' -delete
 
+format:
+	black .
+
 python-deps:
 	@$(PIP) install -r requirements.txt
 
@@ -39,4 +42,4 @@ full_tests_allBackends: full_tests_qutip full_tests_projectq full_tests_stabiliz
 
 verify: clean python-deps tests
 
-.PHONY: clean python-deps tests full_tests verify
+.PHONY: clean format python-deps tests full_tests verify

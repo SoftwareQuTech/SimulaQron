@@ -39,7 +39,7 @@ class projectQEngine(Engine):
     Basic quantum engine which uses ProjectQ.
 
     Attributes:
-        maxQubits:	maximum number of qubits this engine will support.
+        maxQubits:    maximum number of qubits this engine will support.
     """
 
     def __init__(self, maxQubits=10):
@@ -171,8 +171,8 @@ class projectQEngine(Engine):
         is raised.
         Arguments:
                 qubitNum    Qubit number
-        n	    A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
-        a	    The rotation angle in radians.
+        n        A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+        a        The rotation angle in radians.
         """
         n = tuple(n)
         if n == (1, 0, 0):
@@ -182,7 +182,9 @@ class projectQEngine(Engine):
         elif n == (0, 0, 1):
             self.apply_onequbit_gate(pQ.ops.Rz(a), qubitNum)
         else:
-            raise NotImplementedError("Can only do rotations around X, Y, or Z axis right now")
+            raise NotImplementedError(
+                "Can only do rotations around X, Y, or Z axis right now"
+            )
 
     def apply_CNOT(self, qubitNum1, qubitNum2):
         """
@@ -203,7 +205,7 @@ class projectQEngine(Engine):
 
         Arguments:
         gate       The project Q gate to be applied
-        qubitNum 	the number of the qubit this gate is applied to
+        qubitNum     the number of the qubit this gate is applied to
         """
 
         if (qubitNum + 1) > self.activeQubits:
@@ -217,8 +219,8 @@ class projectQEngine(Engine):
 
         Arguments:
         gate       The project Q gate to be applied
-        qubit1 		the first qubit
-        qubit2		the second qubit
+        qubit1         the first qubit
+        qubit2        the second qubit
         """
         if (qubit1 + 1) > self.activeQubits:
             raise quantumError("No such qubit to act as a control qubit")
@@ -237,7 +239,7 @@ class projectQEngine(Engine):
         is in the post-measurment state corresponding to the obtained outcome.
 
         Arguments:
-        qubitNum	qubit to be measured
+        qubitNum    qubit to be measured
         """
 
         # Check we have such a qubit...
@@ -258,7 +260,7 @@ class projectQEngine(Engine):
         Measures the desired qubit in the standard basis. This returns the classical outcome and deletes the qubit.
 
         Arguments:
-        qubitNum	qubit to be measured
+        qubitNum    qubit to be measured
         """
         outcome = self.measure_qubit_inplace(qubitNum)
 
@@ -273,7 +275,9 @@ class projectQEngine(Engine):
         """
         Replaces the qubit at position qubitNum with the one given by state.
         """
-        raise NotImplementedError("Currently you cannot replace a qubit using project Q as backend")
+        raise NotImplementedError(
+            "Currently you cannot replace a qubit using project Q as backend"
+        )
 
     def absorb(self, other):
         """
@@ -310,9 +314,9 @@ class projectQEngine(Engine):
         Absorb the qubits, given in pieces
 
         Arguments:
-        R		real part of the qubit state as a list
-        I		imaginary part as a list
-        activeQ		active number of qubits
+        R        real part of the qubit state as a list
+        I        imaginary part as a list
+        activeQ        active number of qubits
         """
         # Check whether there is space
         newNum = self.activeQubits + activeQ
@@ -347,9 +351,9 @@ class quantumRegister(projectQEngine):
         Initialize the quantum register at the given node.
 
         Arguments
-        node		node this register is started from
-        num		number of this register
-        maxQubits	maximum number of qubits this register supports
+        node        node this register is started from
+        num        number of this register
+        maxQubits    maximum number of qubits this register supports
         """
         super().__init__(maxQubits=maxQubits)
 

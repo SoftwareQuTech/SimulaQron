@@ -90,13 +90,17 @@ class TestProjectQEngine(unittest.TestCase):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_H(num)
         state = self.eng.get_register_RI()
-        self.assertAlmostEqual(self.abs_inner_product(state, [1 / np.sqrt(2), 1 / np.sqrt(2)]), 1)
+        self.assertAlmostEqual(
+            self.abs_inner_product(state, [1 / np.sqrt(2), 1 / np.sqrt(2)]), 1
+        )
 
     def test_K(self):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_K(num)
         state = self.eng.get_register_RI()
-        self.assertAlmostEqual(self.abs_inner_product(state, [1 / np.sqrt(2), 1j / np.sqrt(2)]), 1)
+        self.assertAlmostEqual(
+            self.abs_inner_product(state, [1 / np.sqrt(2), 1j / np.sqrt(2)]), 1
+        )
 
     def test_X(self):
         num = self.eng.add_fresh_qubit()
@@ -122,14 +126,14 @@ class TestProjectQEngine(unittest.TestCase):
 
     def test_Rx(self):
         num = self.eng.add_fresh_qubit()
-        self.eng.apply_rotation(num, (1, 0, 0), np.pi/2)
+        self.eng.apply_rotation(num, (1, 0, 0), np.pi / 2)
         state = self.eng.get_register_RI()
         ref = [1 / np.sqrt(2), -1j / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
     def test_Ry(self):
         num = self.eng.add_fresh_qubit()
-        self.eng.apply_rotation(num, (0, 1, 0), np.pi/2)
+        self.eng.apply_rotation(num, (0, 1, 0), np.pi / 2)
         state = self.eng.get_register_RI()
         ref = [1 / np.sqrt(2), 1 / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
@@ -137,7 +141,7 @@ class TestProjectQEngine(unittest.TestCase):
     def test_Rz(self):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_H(num)
-        self.eng.apply_rotation(num, (0, 0, 1), np.pi/2)
+        self.eng.apply_rotation(num, (0, 0, 1), np.pi / 2)
         state = self.eng.get_register_RI()
         ref = [1 / np.sqrt(2), 1j / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
@@ -146,7 +150,7 @@ class TestProjectQEngine(unittest.TestCase):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_H(num)
         with self.assertRaises(NotImplementedError):
-            self.eng.apply_rotation(num, (1, 0, 1), np.pi/2)
+            self.eng.apply_rotation(num, (1, 0, 1), np.pi / 2)
 
     def test_cnot(self):
         num1 = self.eng.add_fresh_qubit()
@@ -238,7 +242,7 @@ class TestProjectQEngine(unittest.TestCase):
         self.assertEqual(self.eng.activeQubits, n)
         self.assertEqual(len(self.eng.qubitReg), n)
         state = self.eng.get_register_RI()
-        ref = [1 / np.sqrt(2)] + [0] * (2**n - 2) + [1 / np.sqrt(2)]
+        ref = [1 / np.sqrt(2)] + [0] * (2 ** n - 2) + [1 / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
     def test_absorb_2GHZ(self):
@@ -310,5 +314,5 @@ class TestProjectQEngine(unittest.TestCase):
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

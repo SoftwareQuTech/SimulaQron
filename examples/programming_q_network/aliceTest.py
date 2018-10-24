@@ -32,37 +32,35 @@ from SimulaQron.cqc.pythonLib.cqc import *
 import random
 
 
-
 #####################################################################################################
 #
 # main
 #
 def main():
 
-	# Initialize the connection
-	with CQCConnection("Alice") as Alice:
+    # Initialize the connection
+    with CQCConnection("Alice") as Alice:
 
-		#Generate a key
-		k=random.randint(0,1)
+        # Generate a key
+        k = random.randint(0, 1)
 
-		# Create a qubit
-		q=qubit(Alice)
+        # Create a qubit
+        q = qubit(Alice)
 
-		# Encode the key in the qubit
-		if k==1:
-			q.X()
+        # Encode the key in the qubit
+        if k == 1:
+            q.X()
 
-		#Send qubit to Bob (via Eve)
-		Alice.sendQubit(q,"Eve")
+            # Send qubit to Bob (via Eve)
+        Alice.sendQubit(q, "Eve")
 
-		# Encode and send a classical message m to Bob
-		m=0
-		enc=(m+k)%2
-		Alice.sendClassical("Bob",enc)
+        # Encode and send a classical message m to Bob
+        m = 0
+        enc = (m + k) % 2
+        Alice.sendClassical("Bob", enc)
 
-		print("Alice send the message m={} to Bob".format(m))
+        print("Alice send the message m={} to Bob".format(m))
 
 
 ##################################################################################################
 main()
-

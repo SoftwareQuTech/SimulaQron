@@ -40,40 +40,46 @@ from additional_functions import *
 
 def main():
 
-	if len(sys.argv) == 2:
-		nodename =  sys.argv[1]
-	else:
-		print("Provide one argument for the node name")
+    if len(sys.argv) == 2:
+        nodename = sys.argv[1]
+    else:
+        print("Provide one argument for the node name")
 
-	# Initialize the connection
-	with CQCConnection(nodename) as Node:
-		# Create an EPR pair
-		Nodenames = Node._cqcNet.hostDict.keys()
-		print(Nodenames, " size = ", len(Nodenames))
-		num_qubit = len(Nodenames);
-		qubits = create_Nqubit_Wstate(num_qubit, Node)
+        # Initialize the connection
+    with CQCConnection(nodename) as Node:
+        # Create an EPR pair
+        Nodenames = Node._cqcNet.hostDict.keys()
+        print(Nodenames, " size = ", len(Nodenames))
+        num_qubit = len(Nodenames)
+        qubits = create_Nqubit_Wstate(num_qubit, Node)
 
-		print("Number of qubits as W state = ", len(qubits))
-		index = 0
-		for key in Node._cqcNet.hostDict.keys():
-			if key != Node.name:
-				print("Sending qubit[",index, "] to ",key)
-				Node.sendQubit(qubits[index],key)
-				index = index + 1
+        print("Number of qubits as W state = ", len(qubits))
+        index = 0
+        for key in Node._cqcNet.hostDict.keys():
+            if key != Node.name:
+                print("Sending qubit[", index, "] to ", key)
+                Node.sendQubit(qubits[index], key)
+                index = index + 1
 
-		m=qubits[len(qubits)-1].measure()
-		to_print="("+nodename+") App {}: Measurement outcome is: {}".format(Node.name,m)
-		print("|"+"-"*(len(to_print)+2)+"|\n", "| "+to_print+" |", "\n|"+"-"*(len(to_print)+2)+"|")
+        m = qubits[len(qubits) - 1].measure()
+        to_print = (
+            "(" + nodename + ") App {}: Measurement outcome is: {}".format(Node.name, m)
+        )
+        print(
+            "|" + "-" * (len(to_print) + 2) + "|\n",
+            "| " + to_print + " |",
+            "\n|" + "-" * (len(to_print) + 2) + "|",
+        )
 
-		if m==1:
-			print("| ("+nodename+") I'm the leader")
-			ordlist = string_to_int(nodename+" is the leader")
-			broadbastClassical(ordlist,Node)
+        if m == 1:
+            print("| (" + nodename + ") I'm the leader")
+            ordlist = string_to_int(nodename + " is the leader")
+            broadbastClassical(ordlist, Node)
 
-		data=Node.recvClassical()
-		message=list(data)
-		msg = int_to_string(message)
-		print("("+nodename+")",msg)
+        data = Node.recvClassical()
+        message = list(data)
+        msg = int_to_string(message)
+        print("(" + nodename + ")", msg)
 
 
 ##################################################################################################

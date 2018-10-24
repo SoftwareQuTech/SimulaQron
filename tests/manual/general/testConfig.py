@@ -35,4 +35,3 @@ newNet = networkConfig("network.cfg")
 newNet.print_details("Alice")
 newNet.print_details("Bob")
 newNet.print_details("Charlie")
-

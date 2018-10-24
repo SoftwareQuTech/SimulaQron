@@ -53,10 +53,10 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
     Code to execute for the local client node. Called if all connections are established.
 
     Arguments
-    qReg		quantum register (twisted object supporting remote method calls)
-    virtRoot	virtual quantum ndoe (twisted object supporting remote method calls)
-    myName		name of this node (string)
-    classicalNet	servers in the classical communication network (dictionary of hosts)
+    qReg        quantum register (twisted object supporting remote method calls)
+    virtRoot    virtual quantum ndoe (twisted object supporting remote method calls)
+    myName        name of this node (string)
+    classicalNet    servers in the classical communication network (dictionary of hosts)
     """
 
     logging.debug("LOCAL %s: Runing client side program.", myName)
@@ -81,8 +81,8 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 # This will be run if the local node acts as a server on the classical communication network,
 # accepting remote method calls from the other nodes.
 
-class localNode(pb.Root):
 
+class localNode(pb.Root):
     def __init__(self, node, classicalNet):
         self.node = node
         self.classicalNet = classicalNet
@@ -109,10 +109,12 @@ def main():
     myName = "Alice"
 
     # This file defines the network of virtual quantum nodes
-    virtualFile = os.path.join(os.path.dirname(__file__), '../../../../config/virtualNodes.cfg')
+    virtualFile = os.path.join(
+        os.path.dirname(__file__), "../../../../config/virtualNodes.cfg"
+    )
 
     # This file defines the nodes acting as servers in the classical communication network
-    classicalFile = os.path.join(os.path.dirname(__file__), 'classicalNet.cfg')
+    classicalFile = os.path.join(os.path.dirname(__file__), "classicalNet.cfg")
 
     # Read configuration files for the virtual quantum, as well as the classical network
     virtualNet = networkConfig(virtualFile)
@@ -132,5 +134,5 @@ def main():
 
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
+logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=logging.ERROR)
 main()

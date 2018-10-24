@@ -32,73 +32,78 @@ from SimulaQron.virtNode.crudeSimulator import simpleEngine
 
 from qutip import *
 
+
 def testSimpleEngine():
-	print("RUNNING TESTS: Simple Engine\n")
-	tracingTest()
-	gateTest()
-	measureTest()
+    print("RUNNING TESTS: Simple Engine\n")
+    tracingTest()
+    gateTest()
+    measureTest()
 
 
 def tracingTest():
-	print("Testing the partial trace...")
-	se = simpleEngine(10)
-	se2  = simpleEngine(10)
+    print("Testing the partial trace...")
+    se = simpleEngine(10)
+    se2 = simpleEngine(10)
 
-	se.add_fresh_qubit()
-	se.add_fresh_qubit()
-	se.add_fresh_qubit()
+    se.add_fresh_qubit()
+    se.add_fresh_qubit()
+    se.add_fresh_qubit()
 
-	se2.add_fresh_qubit()
-	se2.add_fresh_qubit()
-	se2.add_fresh_qubit()
+    se2.add_fresh_qubit()
+    se2.add_fresh_qubit()
+    se2.add_fresh_qubit()
 
-	se.apply_X(0)
-	se.apply_X(2)
-	se2.apply_X(0)
-	se2.apply_X(1)
+    se.apply_X(0)
+    se.apply_X(2)
+    se2.apply_X(0)
+    se2.apply_X(1)
 
-	se.remove_qubit(1)
-	se2.remove_qubit(2)
+    se.remove_qubit(1)
+    se2.remove_qubit(2)
 
-	if se.qubitReg != se2.qubitReg:
-		print("ERROR: Partial trace failed\n")
+    if se.qubitReg != se2.qubitReg:
+        print("ERROR: Partial trace failed\n")
 
-	print("ok\n");
+    print("ok\n")
 
 
 def gateTest():
-	print("Testing the gates...")
-	se = simpleEngine(10)
-	se.add_fresh_qubit()
-	savedQubit = se.qubitReg
+    print("Testing the gates...")
+    se = simpleEngine(10)
+    se.add_fresh_qubit()
+    savedQubit = se.qubitReg
 
-	se.apply_H(0)
-	se.apply_Z(0)
-	se.apply_H(0)
-	se.apply_X(0)
+    se.apply_H(0)
+    se.apply_Z(0)
+    se.apply_H(0)
+    se.apply_X(0)
 
-	if savedQubit != se.qubitReg:
-		print("ERROR: Gate test failed\n")
+    if savedQubit != se.qubitReg:
+        print("ERROR: Gate test failed\n")
 
-	print("ok\n")
+    print("ok\n")
+
 
 def measureTest():
-	print("Testing a measurement...")
-	se = simpleEngine()
+    print("Testing a measurement...")
+    se = simpleEngine()
 
-	se.add_fresh_qubit()
-	outcome = se.measure_qubit(0)
-	if outcome != 0:
-		print("ERROR: Measurement test failed\n")
+    se.add_fresh_qubit()
+    outcome = se.measure_qubit(0)
+    if outcome != 0:
+        print("ERROR: Measurement test failed\n")
 
-	se.add_fresh_qubit()
-	se.apply_X(0);
-	outcome = se.measure_qubit(0)
-	if outcome != 1:
-		print("ERROR: Measurement test failed\n")
+    se.add_fresh_qubit()
+    se.apply_X(0)
+    outcome = se.measure_qubit(0)
+    if outcome != 1:
+        print("ERROR: Measurement test failed\n")
 
-	print("ok\n")
+    print("ok\n")
+
 
 def main():
-	testSimpleEngine()
+    testSimpleEngine()
+
+
 main()

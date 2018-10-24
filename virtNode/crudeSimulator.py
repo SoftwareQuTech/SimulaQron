@@ -131,8 +131,8 @@ class Engine(quantumEngine, metaclass=abc.ABCMeta):
         is raised.
         Arguments:
                 qubitNum    Qubit number
-        n	    A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
-        a	    The rotation angle in radians.
+        n        A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+        a        The rotation angle in radians.
         :rtype: None
         """
         pass
@@ -159,8 +159,8 @@ class Engine(quantumEngine, metaclass=abc.ABCMeta):
         Applies a unitary gate to the specified qubit.
 
         Arguments:
-        gateU   	unitary to apply as Qobj
-        qubitNum 	the number of the qubit this gate is applied to
+        gateU       unitary to apply as Qobj
+        qubitNum     the number of the qubit this gate is applied to
         :rtype: None
         """
         pass
@@ -171,9 +171,9 @@ class Engine(quantumEngine, metaclass=abc.ABCMeta):
         Applies a unitary gate to the two specified qubits.
 
         Arguments:
-        gateU		unitary to apply as Qobj
-        qubit1 		the first qubit
-        qubit2		the second qubit
+        gateU        unitary to apply as Qobj
+        qubit1         the first qubit
+        qubit2        the second qubit
         :rtype: None
         """
         pass
@@ -185,7 +185,7 @@ class Engine(quantumEngine, metaclass=abc.ABCMeta):
         is in the post-measurment state corresponding to the obtained outcome.
 
         Arguments:
-        qubitNum	qubit to be measured
+        qubitNum    qubit to be measured
         :return: The meaurement outcome
         :rtype: int
         """
@@ -197,7 +197,7 @@ class Engine(quantumEngine, metaclass=abc.ABCMeta):
         Measures the desired qubit in the standard basis. This returns the classical outcome and deletes the qubit.
 
         Arguments:
-        qubitNum	qubit to be measured
+        qubitNum    qubit to be measured
         :return: The meaurement outcome
         :rtype: int
         """
@@ -225,9 +225,9 @@ class Engine(quantumEngine, metaclass=abc.ABCMeta):
         Absorb the qubits, given in pieces
 
         Arguments:
-        R		real part of the qubit state as a list
-        I		imaginary part as a list
-        activeQ		active number of qubits
+        R        real part of the qubit state as a list
+        I        imaginary part as a list
+        activeQ        active number of qubits
         :rtype: None
         """
         pass
@@ -239,7 +239,7 @@ class simpleEngine(quantumEngine):
     dynamics via QuTip. Subsequently, this is quite slow.
 
     Attributes:
-        maxQubits:	maximum number of qubits this engine will support.
+        maxQubits:    maximum number of qubits this engine will support.
     """
 
     def __init__(self, maxQubits=10):
@@ -251,7 +251,6 @@ class simpleEngine(quantumEngine):
         # We start with no active qubits
         self.activeQubits = 0
         self.qubitReg = qp.Qobj()
-
 
     def add_fresh_qubit(self):
         """
@@ -286,7 +285,7 @@ class simpleEngine(quantumEngine):
         # Increment the number of qubits
         self.activeQubits = self.activeQubits + 1
 
-        return (num)
+        return num
 
     def remove_qubit(self, qubitNum):
         """
@@ -320,7 +319,7 @@ class simpleEngine(quantumEngine):
         not complex ones.
 
         Arguments
-        qList		list of qubits to retrieve, e.g. [1, 4]
+        qList        list of qubits to retrieve, e.g. [1, 4]
         """
         rho = self.get_qubits(qList)
         Re = rho.full().real.tolist()
@@ -396,13 +395,18 @@ class simpleEngine(quantumEngine):
         is raised.
         Arguments:
                 qubitNum    Qubit number
-        n	    A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
-        a	    The rotation angle in radians.
+        n        A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+        a        The rotation angle in radians.
         """
         nNorm = np.linalg.norm(n)
         if nNorm == 0:
             raise ValueError("Rotation vector n can't be 0")
-        R = (-1j * a / (2 * nNorm) * (n[0] * qp.sigmax() + n[1] * qp.sigmay() + n[2] * qp.sigmaz())).expm()
+        R = (
+            -1j
+            * a
+            / (2 * nNorm)
+            * (n[0] * qp.sigmax() + n[1] * qp.sigmay() + n[2] * qp.sigmaz())
+        ).expm()
         self.apply_onequbit_gate(R, qubitNum)
 
     def apply_CNOT(self, qubitNum1, qubitNum2):
@@ -411,11 +415,10 @@ class simpleEngine(quantumEngine):
         """
 
         # Construct the CNOT matrix
-        cnot = qp.Qobj([[1, 0, 0, 0],
-                       [0, 1, 0, 0],
-                       [0, 0, 0, 1],
-                       [0, 0, 1, 0]],
-                       dims=[[2, 2], [2, 2]])
+        cnot = qp.Qobj(
+            [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]],
+            dims=[[2, 2], [2, 2]],
+        )
 
         # Apply it to the desired qubits
         self.apply_twoqubit_gate(cnot, qubitNum1, qubitNum2)
@@ -426,11 +429,10 @@ class simpleEngine(quantumEngine):
         """
 
         # Construct the CPHASE matrix
-        cphase = qp.Qobj([[1, 0, 0, 0],
-                         [0, 1, 0, 0],
-                         [0, 0, 1, 0],
-                         [0, 0, 0, -1]],
-                         dims=[[2, 2], [2, 2]])
+        cphase = qp.Qobj(
+            [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, -1]],
+            dims=[[2, 2], [2, 2]],
+        )
 
         # Apply it to the desired qubits
         self.apply_twoqubit_gate(cphase, qubitNum1, qubitNum2)
@@ -457,8 +459,8 @@ class simpleEngine(quantumEngine):
         Applies a unitary gate to the specified qubit.
 
         Arguments:
-        gateU   	unitary to apply as Qobj
-        qubitNum 	the number of the qubit this gate is applied to
+        gateU       unitary to apply as Qobj
+        qubitNum     the number of the qubit this gate is applied to
         """
 
         # Compute the overall unitary, identity everywhere with gateU at position qubitNum
@@ -482,9 +484,9 @@ class simpleEngine(quantumEngine):
         Applies a unitary gate to the two specified qubits.
 
         Arguments:
-        gateU		unitary to apply as Qobj
-        qubit1 		the first qubit
-        qubit2		the second qubit
+        gateU        unitary to apply as Qobj
+        qubit1         the first qubit
+        qubit2        the second qubit
         """
 
         # Construct the overall unitary
@@ -509,7 +511,7 @@ class simpleEngine(quantumEngine):
         is in the post-measurment state corresponding to the obtained outcome.
 
         Arguments:
-        qubitNum	qubit to be measured
+        qubitNum    qubit to be measured
         """
 
         # Check we have such a qubit...
@@ -548,7 +550,7 @@ class simpleEngine(quantumEngine):
         Measures the desired qubit in the standard basis. This returns the classical outcome and deletes the qubit.
 
         Arguments:
-        qubitNum	qubit to be measured
+        qubitNum    qubit to be measured
         """
         outcome = self.measure_qubit_inplace(qubitNum)
         self.remove_qubit(qubitNum)
@@ -595,9 +597,9 @@ class simpleEngine(quantumEngine):
         Absorb the qubits, given in pieces
 
         Arguments:
-        R		real part of the qubit state as a list
-        I		imaginary part as a list
-        activeQ		active number of qubits
+        R        real part of the qubit state as a list
+        I        imaginary part as a list
+        activeQ        active number of qubits
         """
 
         # Convert the real and imaginary parts given as lists into a qutip object
@@ -642,9 +644,9 @@ class quantumRegister(simpleEngine):
         Initialize the quantum register at the given node.
 
         Arguments
-        node		node this register is started from
-        num		number of this register
-        maxQubits	maximum number of qubits this register supports
+        node        node this register is started from
+        num        number of this register
+        maxQubits    maximum number of qubits this register supports
         """
 
         super().__init__(maxQubits=maxQubits)

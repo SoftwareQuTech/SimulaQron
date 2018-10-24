@@ -102,17 +102,17 @@ class TestStabilizerEngine(unittest.TestCase):
     def test_Rx(self):
         num = self.eng.add_fresh_qubit()
         with self.assertRaises(AttributeError):
-            self.eng.apply_rotation(num, (1, 0, 0), np.pi/2)
+            self.eng.apply_rotation(num, (1, 0, 0), np.pi / 2)
 
     def test_Ry(self):
         num = self.eng.add_fresh_qubit()
         with self.assertRaises(AttributeError):
-            self.eng.apply_rotation(num, (0, 1, 0), np.pi/2)
+            self.eng.apply_rotation(num, (0, 1, 0), np.pi / 2)
 
     def test_Rz(self):
         num = self.eng.add_fresh_qubit()
         with self.assertRaises(AttributeError):
-            self.eng.apply_rotation(num, (0, 0, 1), np.pi/2)
+            self.eng.apply_rotation(num, (0, 0, 1), np.pi / 2)
 
     def test_cnot(self):
         num1 = self.eng.add_fresh_qubit()
@@ -120,7 +120,9 @@ class TestStabilizerEngine(unittest.TestCase):
         self.eng.apply_H(num1)
         self.eng.apply_CNOT(num1, num2)
         state, _ = self.eng.get_register_RI()
-        self.assertTrue(StabilizerState(state) == StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]]))
+        self.assertTrue(
+            StabilizerState(state) == StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
+        )
 
     def test_cz(self):
         num1 = self.eng.add_fresh_qubit()
@@ -129,7 +131,9 @@ class TestStabilizerEngine(unittest.TestCase):
         self.eng.apply_H(num2)
         self.eng.apply_CPHASE(num1, num2)
         state, _ = self.eng.get_register_RI()
-        self.assertTrue(StabilizerState(state) == StabilizerState([[1, 0, 0, 1], [0, 1, 1, 0]]))
+        self.assertTrue(
+            StabilizerState(state) == StabilizerState([[1, 0, 0, 1], [0, 1, 1, 0]])
+        )
 
     def test_measure0(self):
         num = self.eng.add_fresh_qubit()
@@ -186,7 +190,9 @@ class TestStabilizerEngine(unittest.TestCase):
         self.assertEqual(self.eng.activeQubits, 2)
         self.assertEqual(len(self.eng.qubitReg), 2)
         state, _ = self.eng.get_register_RI()
-        self.assertTrue(StabilizerState(state) == StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]]))
+        self.assertTrue(
+            StabilizerState(state) == StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
+        )
 
     def test_absorb_this_empty_GHZ(self):
         n = 5
@@ -199,10 +205,10 @@ class TestStabilizerEngine(unittest.TestCase):
         self.assertEqual(self.eng.activeQubits, n)
         self.assertEqual(len(self.eng.qubitReg), n)
         state, _ = self.eng.get_register_RI()
-        ref = [1 / np.sqrt(2)] + [0] * (2**n - 2) + [1 / np.sqrt(2)]
-        ref = [[1]*n + [0]*n]
+        ref = [1 / np.sqrt(2)] + [0] * (2 ** n - 2) + [1 / np.sqrt(2)]
+        ref = [[1] * n + [0] * n]
         for i in range(n - 1):
-            ref += [[0]*n + [0]*i + [1]*2 + [0]*(n - i - 2)]
+            ref += [[0] * n + [0] * i + [1] * 2 + [0] * (n - i - 2)]
         self.assertTrue(StabilizerState(state) == StabilizerState(ref))
 
     def test_absorb_2GHZ(self):
@@ -246,7 +252,9 @@ class TestStabilizerEngine(unittest.TestCase):
         self.assertEqual(self.eng.activeQubits, 2)
         self.assertEqual(len(self.eng.qubitReg), 2)
         state, _ = self.eng.get_register_RI()
-        self.assertTrue(StabilizerState(state) == StabilizerState([[0, 0, 1, 0], [0, 0, 0, 1]]))
+        self.assertTrue(
+            StabilizerState(state) == StabilizerState([[0, 0, 1, 0], [0, 0, 0, 1]])
+        )
 
     def test_absorb_parts_EPR(self):
         eng2 = stabilizerEngine()
@@ -258,7 +266,9 @@ class TestStabilizerEngine(unittest.TestCase):
         self.assertEqual(self.eng.activeQubits, 2)
         self.assertEqual(len(self.eng.qubitReg), 2)
         state, _ = self.eng.get_register_RI()
-        self.assertTrue(StabilizerState(state) == StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]]))
+        self.assertTrue(
+            StabilizerState(state) == StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
+        )
 
     def test_absorb_parts_other_empty(self):
         num = self.eng.add_fresh_qubit()
@@ -271,5 +281,5 @@ class TestStabilizerEngine(unittest.TestCase):
         self.assertTrue(StabilizerState(state) == StabilizerState([[1, 0]]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

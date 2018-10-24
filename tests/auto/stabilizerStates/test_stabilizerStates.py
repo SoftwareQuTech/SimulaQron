@@ -21,12 +21,10 @@ class TestStabilizerStates(unittest.TestCase):
         state = StabilizerState([[0, 1, 0]])
         self.assertAlmostEqual(state.num_qubits, 1)
 
-        state = StabilizerState([[1, 1, 0, 0],
-                                 [0, 0, 1, 1]])
+        state = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
         self.assertAlmostEqual(state.num_qubits, 2)
 
-        state = StabilizerState([[1, 1, 0, 0, 0],
-                                 [0, 0, 1, 1, 1]])
+        state = StabilizerState([[1, 1, 0, 0, 0], [0, 0, 1, 1, 1]])
         self.assertAlmostEqual(state.num_qubits, 2)
 
         self.assertTrue(state == StabilizerState(state))
@@ -41,7 +39,9 @@ class TestStabilizerStates(unittest.TestCase):
             StabilizerState([[1, 1, 0, 0], [0, 0, 1, 0]])
 
         with self.assertRaises(ValueError):
-            StabilizerState([[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1], [0, 0, 0, 1, 0, 0]])
+            StabilizerState(
+                [[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1], [0, 0, 0, 1, 0, 0]]
+            )
 
     def test_networkx_init(self):
         n = 5
@@ -88,8 +88,7 @@ class TestStabilizerStates(unittest.TestCase):
             StabilizerState(data)
 
     def test_init_of_class(self):
-        state = StabilizerState([[1, 1, 0, 0],
-                                 [0, 0, 1, 1]])
+        state = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
 
         self.assertTrue(state == StabilizerState(state))
 
@@ -117,8 +116,7 @@ class TestStabilizerStates(unittest.TestCase):
         state3 = StabilizerState([[0, 1, 0]])
         state4 = StabilizerState([[0, 1, 1]])
         state5 = StabilizerState([[1, 1, 0]])
-        state6 = StabilizerState([[1, 1, 0, 0],
-                                  [0, 0, 1, 1]])
+        state6 = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
 
         self.assertTrue(state1 == state1)
         self.assertTrue(state1 == state2)
@@ -128,15 +126,13 @@ class TestStabilizerStates(unittest.TestCase):
         self.assertFalse(state5 == state6)
 
     def test_repr(self):
-        s1 = StabilizerState([[0, 0, 1, 0, 0],
-                              [0, 0, 0, 1, 1]])
+        s1 = StabilizerState([[0, 0, 1, 0, 0], [0, 0, 0, 1, 1]])
         s2 = StabilizerState(eval(repr(s1)))
 
         self.assertTrue(s1 == s2)
 
     def test_to_array(self):
-        s1 = StabilizerState([[0, 0, 1, 0, 0],
-                              [0, 0, 0, 1, 1]])
+        s1 = StabilizerState([[0, 0, 1, 0, 0], [0, 0, 0, 1, 1]])
         s2 = StabilizerState(s1.to_array())
 
         self.assertTrue(s1 == s2)
@@ -146,8 +142,7 @@ class TestStabilizerStates(unittest.TestCase):
         s2 = StabilizerState([[0, 1]])  # The state |0>
 
         s3 = s1 * s2  # This is then the state |00>
-        s4 = StabilizerState([[0, 0, 1, 0],
-                              [0, 0, 0, 1]])
+        s4 = StabilizerState([[0, 0, 1, 0], [0, 0, 0, 1]])
         self.assertEqual(s3.num_qubits, 2)
         self.assertTrue(s3 == s4)
 
@@ -155,8 +150,7 @@ class TestStabilizerStates(unittest.TestCase):
         s2 = StabilizerState([[0, 1, 1]])  # The state |1>
 
         s3 = s1 * s2  # This is then the state |01>
-        s4 = StabilizerState([[0, 0, 1, 0, 0],
-                              [0, 0, 0, 1, 1]])
+        s4 = StabilizerState([[0, 0, 1, 0, 0], [0, 0, 0, 1, 1]])
         self.assertEqual(s3.num_qubits, 2)
         self.assertTrue(s3 == s4)
 
@@ -170,10 +164,8 @@ class TestStabilizerStates(unittest.TestCase):
         s1.apply_X(0)
         self.assertTrue(s1 == s2)
 
-        s3 = StabilizerState([[1, 1, 0, 0],
-                              [0, 0, 1, 1]])
-        s4 = StabilizerState([[1, 1, 0, 0, 0],
-                              [0, 0, 1, 1, 1]])
+        s3 = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
+        s4 = StabilizerState([[1, 1, 0, 0, 0], [0, 0, 1, 1, 1]])
         s3.apply_X(0)
         self.assertTrue(s3 == s4)
 
@@ -333,5 +325,5 @@ class TestStabilizerStates(unittest.TestCase):
             self.assertNotIn(False, [outcomes[0] == outcomes[i] for i in range(1, n)])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

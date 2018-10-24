@@ -56,7 +56,7 @@ class quantumEngine(pb.Referenceable):
     Basic quantum engine. This by itself does nothing.
 
     Attributes:
-        maxQubits:	maximum number of qubits this engine will support.
+        maxQubits:    maximum number of qubits this engine will support.
     """
 
     def __init__(self, maxQubits=10):

@@ -41,111 +41,110 @@ from timeit import default_timer as timer
 #
 def main():
 
-	input_data=sys.argv[1:]
+    input_data = sys.argv[1:]
 
-	# Set node numbers
-	node_nr=int(input_data[0])
-	tot_nr=int(input_data[1])
-	next_node_nr=(node_nr+1)%tot_nr
+    # Set node numbers
+    node_nr = int(input_data[0])
+    tot_nr = int(input_data[1])
+    next_node_nr = (node_nr + 1) % tot_nr
 
-	# Initialize the connection
-	node=CQCConnection('n'+str(node_nr))
+    # Initialize the connection
+    node = CQCConnection("n" + str(node_nr))
 
-	if node_nr==0: # this is the first node so create qubit
+    if node_nr == 0:  # this is the first node so create qubit
 
-		# start timer
-		t1=timer()
+        # start timer
+        t1 = timer()
 
-		# Create a qubit to teleport
-		q=qubit(node)
+        # Create a qubit to teleport
+        q = qubit(node)
 
-		# Prepare the qubit to teleport in |+>
-		q.H()
+        # Prepare the qubit to teleport in |+>
+        q.H()
 
-		#------
-		# Qubit is created, send it to next node
-		#------
+        # ------
+        # Qubit is created, send it to next node
+        # ------
 
-	else: # we are node in chain so receive qubit
+    else:  # we are node in chain so receive qubit
 
-		# Make an EPR pair with previous node
-		q=node.recvEPR()
+        # Make an EPR pair with previous node
+        q = node.recvEPR()
 
-		# Receive info about corrections
-		data=node.recvClassical()
-		message=list(data)
-		a=message[0]
-		b=message[1]
+        # Receive info about corrections
+        data = node.recvClassical()
+        message = list(data)
+        a = message[0]
+        b = message[1]
 
-		# Apply corrections
-		if b==1:
-			q.X()
-		if a==1:
-			q.Z()
+        # Apply corrections
+        if b == 1:
+            q.X()
+        if a == 1:
+            q.Z()
 
-		#------
-		# Qubit is receive, send it to next node
-		#------
+            # ------
+            # Qubit is receive, send it to next node
+            # ------
 
-	# Make an EPR pair with next node
-	qEPR=node.createEPR('n'+str(next_node_nr))
+            # Make an EPR pair with next node
+    qEPR = node.createEPR("n" + str(next_node_nr))
 
-	# Apply the local teleportation operations
-	q.cnot(qEPR)
-	q.H()
+    # Apply the local teleportation operations
+    q.cnot(qEPR)
+    q.H()
 
-	# Measure the qubits
-	a=q.measure()
-	b=qEPR.measure()
-	to_print="App {}: Measurement outcomes are: a={}, b={}".format(node.name,a,b)
-	print("|"+"-"*(len(to_print)+2)+"|")
-	print("| "+to_print+" |")
-	print("|"+"-"*(len(to_print)+2)+"|")
+    # Measure the qubits
+    a = q.measure()
+    b = qEPR.measure()
+    to_print = "App {}: Measurement outcomes are: a={}, b={}".format(node.name, a, b)
+    print("|" + "-" * (len(to_print) + 2) + "|")
+    print("| " + to_print + " |")
+    print("|" + "-" * (len(to_print) + 2) + "|")
 
-	# Send corrections to next node
-	node.sendClassical('n'+str(next_node_nr),[a,b])
-	# node.closeClassicalChannel('n'+str(next_node_nr))
+    # Send corrections to next node
+    node.sendClassical("n" + str(next_node_nr), [a, b])
+    # node.closeClassicalChannel('n'+str(next_node_nr))
 
-	if node_nr==0: # this is first node, so receive again after qubit traversed chain
+    if node_nr == 0:  # this is first node, so receive again after qubit traversed chain
 
-		# Make an EPR pair with last node
-		q=node.recvEPR()
+        # Make an EPR pair with last node
+        q = node.recvEPR()
 
-		# Receive info about corrections
-		data=node.recvClassical()
-		message=list(data)
-		a=message[0]
-		b=message[1]
+        # Receive info about corrections
+        data = node.recvClassical()
+        message = list(data)
+        a = message[0]
+        b = message[1]
 
-		# Apply corrections
-		if b==1:
-			q.X()
-		if a==1:
-			q.Z()
+        # Apply corrections
+        if b == 1:
+            q.X()
+        if a == 1:
+            q.Z()
 
-		#------
-		# Qubit is receive, so measure it
-		#------
+            # ------
+            # Qubit is receive, so measure it
+            # ------
 
-		# measure the qubit, print the outcome and record the time it took
-		m=q.measure()
-		t2=timer()
-		to_print="App {}: Measurement outcome is: m={}".format(node.name,m)
-		print("|"+"-"*(len(to_print)+2)+"|")
-		print("| "+to_print+" |")
-		print("|"+"-"*(len(to_print)+2)+"|")
-		to_print="App {}: Time elapsed: t={}".format(node.name,t2-t1)
-		print("|"+"-"*(len(to_print)+2)+"|")
-		print("| "+to_print+" |")
-		print("|"+"-"*(len(to_print)+2)+"|")
+            # measure the qubit, print the outcome and record the time it took
+        m = q.measure()
+        t2 = timer()
+        to_print = "App {}: Measurement outcome is: m={}".format(node.name, m)
+        print("|" + "-" * (len(to_print) + 2) + "|")
+        print("| " + to_print + " |")
+        print("|" + "-" * (len(to_print) + 2) + "|")
+        to_print = "App {}: Time elapsed: t={}".format(node.name, t2 - t1)
+        print("|" + "-" * (len(to_print) + 2) + "|")
+        print("| " + to_print + " |")
+        print("|" + "-" * (len(to_print) + 2) + "|")
 
-		with open('times.txt','a') as f:
-			f.write("{}, {}\n".format(tot_nr,t2-t1))
+        with open("times.txt", "a") as f:
+            f.write("{}, {}\n".format(tot_nr, t2 - t1))
 
-	# Stop the connection
-	node.close()
+            # Stop the connection
+    node.close()
 
 
 ##################################################################################################
 main()
-

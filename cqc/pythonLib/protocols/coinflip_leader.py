@@ -1,6 +1,7 @@
 from SimulaQron.cqc.pythonLib.cqc import *
 import math
 
+
 class CoinflipConsensus:
     def __init__(self, queue):
         """
@@ -20,7 +21,7 @@ class CoinflipConsensus:
         with CQCConnection(candidate1) as Alice:
             qA = qubit(Alice)
             qB = qubit(Alice)
-            
+
             # Bias
             angle = 2 * math.acos(coeff)
             step = int(angle * 256 / (2 * math.pi))
@@ -29,8 +30,8 @@ class CoinflipConsensus:
             qB.X()
 
             # Send qubit qB to Bob.
-            Alice.sendQubit(qB,candidate2)
-            
+            Alice.sendQubit(qB, candidate2)
+
             # Measure the qubits.
             measured_value = qA.measure()
 
@@ -52,11 +53,11 @@ class CoinflipConsensus:
         assert len(self.queue) >= 2
 
         winner = self.queue[0]
-        
+
         for i in range(2, len(self.queue) + 1):
             # This is calculated to bias the every next coinflip to
             # equalize candidates' chances to win.
-            coeff = math.sqrt(1/i)
+            coeff = math.sqrt(1 / i)
             winner = self._atomic_flip(winner, self.queue[i - 1], coeff)
 
         return winner

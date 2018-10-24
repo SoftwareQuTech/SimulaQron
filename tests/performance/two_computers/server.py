@@ -40,63 +40,64 @@ import sys
 #
 def main():
 
-	input_data=sys.argv[1:]
+    input_data = sys.argv[1:]
 
-	# Set node numbers
-	min_tel=int(input_data[0])
-	max_tel=int(input_data[1])
-	number=int(input_data[2])
+    # Set node numbers
+    min_tel = int(input_data[0])
+    max_tel = int(input_data[1])
+    number = int(input_data[2])
 
-	# Initialize the connection
-	Bob=CQCConnection("Bob")
+    # Initialize the connection
+    Bob = CQCConnection("Bob")
 
-	for n in range(min_tel,max_tel+1):
+    for n in range(min_tel, max_tel + 1):
 
-		for _ in range(number):
+        for _ in range(number):
 
-			# Start teleporting back and fourth
+            # Start teleporting back and fourth
 
-			for _ in range(n):
+            for _ in range(n):
 
-				# Make an EPR pair with other node
-				q=Bob.recvEPR()
+                # Make an EPR pair with other node
+                q = Bob.recvEPR()
 
-				# Receive info about corrections
-				data=Bob.recvClassical(timout=3600)
-				Bob.closeClassicalServer()
-				message=list(data)
-				a=message[0]
-				b=message[1]
+                # Receive info about corrections
+                data = Bob.recvClassical(timout=3600)
+                Bob.closeClassicalServer()
+                message = list(data)
+                a = message[0]
+                b = message[1]
 
-				# Apply corrections
-				if b==1:
-					q.X()
-				if a==1:
-					q.Z()
+                # Apply corrections
+                if b == 1:
+                    q.X()
+                if a == 1:
+                    q.Z()
 
-				# Make an EPR pair with next node
-				qEPR=Bob.recvEPR()
+                    # Make an EPR pair with next node
+                qEPR = Bob.recvEPR()
 
-				# Apply the local teleportation operations
-				q.cnot(qEPR)
-				q.H()
+                # Apply the local teleportation operations
+                q.cnot(qEPR)
+                q.H()
 
-				# Measure the qubits
-				a=q.measure()
-				b=qEPR.measure()
-				to_print="App {}: Measurement outcomes are: a={}, b={}".format(Bob.name,a,b)
-				print("|"+"-"*(len(to_print)+2)+"|")
-				print("| "+to_print+" |")
-				print("|"+"-"*(len(to_print)+2)+"|")
+                # Measure the qubits
+                a = q.measure()
+                b = qEPR.measure()
+                to_print = "App {}: Measurement outcomes are: a={}, b={}".format(
+                    Bob.name, a, b
+                )
+                print("|" + "-" * (len(to_print) + 2) + "|")
+                print("| " + to_print + " |")
+                print("|" + "-" * (len(to_print) + 2) + "|")
 
-				# Send corrections to other node
-				Bob.sendClassical("Alice",[a,b])
-				Bob.closeClassicalChannel("Alice")
+                # Send corrections to other node
+                Bob.sendClassical("Alice", [a, b])
+                Bob.closeClassicalChannel("Alice")
 
-	# Stop the connection
-	Bob.close()
+                # Stop the connection
+    Bob.close()
 
 
 ##################################################################################################
 main()
-
