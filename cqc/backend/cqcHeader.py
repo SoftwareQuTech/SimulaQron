@@ -40,6 +40,7 @@ CQC_HDR_LENGTH = 8  # Length of the CQC Header
 CQC_CMD_HDR_LENGTH = 4  # Length of a command header
 CQC_CMD_XTRA_LENGTH = 16  # Length of extra command information
 CQC_NOTIFY_LENGTH = 20  # Length of a notification send from the CQC upwards
+CQC_EPR_REQ_LENGTH = 16  # Length of EPR request header
 
 # Constants defining the messages types
 CQC_TP_HELLO = 0  # Alive check
@@ -733,7 +734,8 @@ class CQCEPRRequestHeader:
                      'uint:8=num_pairs, ' \
                      'uint:4=priority', \
                      'uint:1=store, ' \
-                     'uint:1=measure_directly'
+                     'uint:1=measure_directly, ' \
+                     'uint:2=0'
     HDR_LENGTH = 16
 
     def __init__(self, headerBytes=None):
@@ -838,3 +840,5 @@ class CQCEPRRequestHeader:
             to_print += "Priority: {}".format(self.priority)
             to_print += "Store: {}".format(self.store)
             to_print += "Measure Directly: {}".format(self.measure_directly)
+
+            return to_print

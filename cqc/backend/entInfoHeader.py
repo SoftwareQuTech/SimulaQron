@@ -29,15 +29,19 @@
 
 import logging
 
-from struct import *
+import struct
+import bitstring
 
 # Lengths of the headers in bytes
 ENT_INFO_LENGTH = 40  # Length of a entanglement information header
 
+ENT_INFO_TP_CREATE_KEEP = 1  # Type of message when entanglement is kept
+ENT_INFO_TP_MEAS_DIRECT = 2  # Type of message when entanglement is measured directly (for classical correlations)
+
 
 class EntInfoHeader:
 	"""
-		Header for a entanglement information packet.
+		Header for a entanglement information packet. Fo
 	"""
 
 	def __init__(self, headerBytes=None):
@@ -67,6 +71,7 @@ class EntInfoHeader:
 		"""
 		Set using given values.
 		"""
+		self.type = type
 		self.node_A = node_A
 		self.port_A = port_A
 		self.app_id_A = app_id_A
@@ -79,6 +84,148 @@ class EntInfoHeader:
 
 		self.timestamp = timestamp
 		self.ToG = ToG
+		self.goodness = goodness
+		self.DF = DF
+
+		self.is_set = True
+
+	def pack(self):
+		"""
+		Pack data into packet format. For defnitions see cLib/cgc.h
+		"""
+
+		if not self.is_set:
+			return (0)
+
+		ent_info = struct.pack("!LHHLHHLQQHBB", self.node_A, self.port_A, self.app_id_A, self.node_B, self.port_B,
+						self.app_id_B, self.id_AB, self.timestamp, self.ToG, self.goodness, self.DF, 0)
+		return (ent_info)
+
+	def unpack(self, headerBytes):
+		"""
+		Unpack packet data. For definitions see cLib/cqc.h
+		"""
+		ent_info = struct.unpack("!LHHLHHLQQHBB", headerBytes)
+
+		self.node_A = ent_info[0]
+		self.port_A = ent_info[1]
+		self.app_id_A = ent_info[2]
+
+		self.node_B = ent_info[3]
+		self.port_B = ent_info[4]
+		self.app_id_B = ent_info[5]
+
+		self.id_AB = ent_info[6]
+
+		self.timestamp = ent_info[7]
+		self.ToG = ent_info[8]
+		self.goodness = ent_info[9]
+		self.DF = ent_info[10]
+
+		self.is_set = True
+
+	def printable(self):
+		"""
+		Produce a printable string for information purposes.
+		"""
+		if not self.is_set:
+			return (" ")
+
+		toPrint = "A: ({}, {}, {})".format(self.node_A, self.port_A, self.app_id_A) + " "
+		toPrint += "B: ({}, {}, {})".format(self.node_B, self.port_B, self.app_id_B) + " "
+		toPrint = toPrint + "Entanglement ID: " + str(self.id_AB) + " "
+		toPrint = toPrint + "Timestamp: " + str(self.timestamp) + " "
+		toPrint = toPrint + "Time of Goodness: " + str(self.ToG) + " "
+		toPrint = toPrint + "Goodness: " + str(self.goodness) + " "
+		toPrint = toPrint + "Directionality Flag: " + str(self.DF)
+		return (toPrint)
+
+	def switch_nodes(self):
+		"""
+		Switches the ip and port of the nodes and flips the directionality flag.
+		Used to give correct message to both nodes.
+		"""
+
+		# Get current info
+		node_A = self.node_A
+		port_A = self.port_A
+		app_id_A = self.app_id_A
+		node_B = self.node_B
+		port_B = self.port_B
+		app_id_B = self.app_id_B
+		DF = self.DF
+
+		# Update
+		self.node_A = node_B
+		self.port_A = port_B
+		self.app_id_A = app_id_B
+		self.node_B = node_A
+		self.port_B = port_A
+		self.app_id_B = app_id_A
+		if DF == 0:
+			self.DF = 0
+		elif DF == 1:
+			self.DF = 2
+		elif DF == 2:
+			self.DF = 1
+		else:
+			logging.warning("Unknown directionality flag")
+			self.DF = DF
+
+
+class EntInfoCreateKeepHeader:
+	"""
+		Header for a entanglement information packet, where entanglement is kept after generation
+	"""
+
+	type = ENT_INFO_TP_CREATE_KEEP
+	package_format = 'uint:4=type, ' \
+					 'uint:16=mhp_seq, ' \
+					 'uint:1=DF, ' \
+					 'uint:12=0, ' \
+					 'uint:32=ip_A, ' \
+					 'uint:32=ip_B, ' \
+					 'uint:16=port_A, ' \
+					 'uint:16=port_B, ' \
+					 'float:32=t_create, ' \
+					 'float:32=t_goodness, ' \
+
+
+	def __init__(self, headerBytes=None):
+		"""
+		Initialize using values received from a packet, if available.
+		"""
+
+		if headerBytes == None:
+			self.ip_A = 0
+			self.port_A = 0
+
+			self.ip_B = 0
+			self.port_B = 0
+
+			self.mhp_seq = 0
+
+			self.t_create = 0
+			self.t_goodness = 0
+			self.goodness = 0
+			self.DF = 0
+		else:
+			self.unpack(headerBytes)
+
+	def setVals(self, ip_A, port_A, ip_B, port_B, mhp_seq, t_create, t_goodness, goodness, DF):
+		"""
+		Set using given values.
+		"""
+		self.ip_A = ip_A
+		self.port_A = port_A
+
+		self.ip_B = ip_B
+		self.port_B = port_B
+
+		self.mhp_seq = mhp_seq
+
+		self.t_create = t_create
+		self.t_goodness = t_goodness
 		self.goodness = goodness
 		self.DF = DF
 
