@@ -205,6 +205,25 @@ class StabilizerState:
         return self.num_qubits
 
     @staticmethod
+    def Pauli_phase_tracking(old_pauli,applied_pauli):
+        if old_pauli==[True,False] and applied_pauli == [True,True]:
+            added_phase =3
+        elif old_pauli==[True,True] and applied_pauli == [False,True]:
+            added_phase =3
+        elif old_pauli==[False,True] and applied_pauli == [True,False]:
+            added_phase =3
+        elif old_pauli==[True,True] and applied_pauli == [True,False]:
+            added_phase =1
+        elif old_pauli==[False,True] and applied_pauli == [True,True]:
+            added_phase =1
+        elif old_pauli==[True,False] and applied_pauli == [False,True]:
+            added_phase =1
+        else:
+            added_phase =0
+        return added_phase
+
+
+    @staticmethod
     def boolean_gaussian_elimination(matrix,return_pivot_columns=False):
         """
         Given a boolean matrix returns the matrix in row reduced echelon form
@@ -240,13 +259,35 @@ class StabilizerState:
                 # Add pivot row to the rest
                 pivot_columns.append(k)
                 non_zero_except_i_max = non_zero_ind[non_zero_ind != i_max]
-                new_matrix[non_zero_except_i_max, :] = np.logical_xor(new_matrix[non_zero_except_i_max, :], new_matrix[h, :])
+
+                for i_loop in non_zero_except_i_max:
+                    extra_phase = 0 #we count i's here, so 2 -> (-i)^2=-1, 4->1, 6-> -1
+                    for j in range(m):
+                        extra_phase+= StabilizerState.Pauli_phase_tracking([new_matrix[i_loop, j],new_matrix[i_loop, j+m]],
+                                                        [new_matrix[h, j],new_matrix[h, j+m]])
+                    new_matrix[i_loop, :] = np.logical_xor(new_matrix[i_loop, :], new_matrix[h, :])
+                    if ((extra_phase/2)%2):
+                        new_matrix[i_loop,-1]=np.logical_not(new_matrix[i_loop,-1])
                 h += 1
                 k += 1
         if return_pivot_columns:
             return new_matrix,pivot_columns
         else:
             return new_matrix
+
+    def check_symplectic(self):
+        n = self._nr_rows
+        zeros = np.zeros(shape=(n, n), dtype=int)
+        identity = np.identity(n, dtype=int)
+        P = np.block([[zeros, identity], [identity, zeros]])
+        M = np.array(self._group[:, :-1], dtype=int)
+
+        commute = M@P@M.transpose()
+        if (commute % 2).any():
+            #All stabilizer of the group constructed from the input does not commute
+            return False
+        else:
+            return True
 
     def add_qubit(self):
         """
@@ -414,6 +455,14 @@ class StabilizerState:
         x_rows = np.logical_and(self._group[:, position], np.logical_not(self._group[:, position + n]))
         self._group[x_rows, -1] = np.logical_not(self._group[x_rows, -1])
 
+    def apply_sqrt_minIX(self,position):
+        self.apply_K(position)
+        self.apply_Z(position)
+
+    def apply_sqrt_IZ(self,position):
+        self.apply_Z(position)
+        self.apply_S(position)
+
     def apply_CNOT(self, control, target):
         """
         Applies CNOT using qubit 'control' as control and 'target' as target.
@@ -493,14 +542,12 @@ class StabilizerState:
         n = self.num_qubits
         if not (position >= 0 and position < n):
             raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
+        # Perform Gaussian elimination such that there is maximally one X or Y at the qubit position
+        self.put_in_standard_form()
         # Create a new matrix where the X and Z columns of the corresponding qubit are the first.
         columns = np.arange(2*n + 1)
         columns_without_position = np.logical_and(columns != position, columns != (position + n))
         tmp_matrix = np.concatenate((self._group[:, [position, position + n]], self._group[:, columns_without_position]), 1)
-
-        # Perform Gaussian elimination such that there is maximally one X or Y at the qubit position
-        tmp_matrix = self.boolean_gaussian_elimination(tmp_matrix)
-
         # Check if there is an X or a Y at the qubit position
         if tmp_matrix[0, 0]:
             # The first row (generator) of this matrix is then the only one that doesn't commute with the observabel Z
@@ -549,6 +596,24 @@ class StabilizerState:
                 pass
 
         return outcome
+
+    def do_random_SQC(self,j=None):
+        i = randint(0,6)
+        if j==None:
+            j = randint(0,self.num_qubits-1)
+
+        if i==0:
+            self.apply_X(j)
+        elif i==1:
+            self.apply_Y(j)
+        elif i==2:
+            self.apply_Z(j)
+        elif i==3:
+            self.apply_H(j)
+        elif i==4:
+            self.apply_K(j)
+        elif i==5:
+            self.apply_S(j)
 
     def find_SQC_equiv_graph_state(self,return_operations = False):
         """

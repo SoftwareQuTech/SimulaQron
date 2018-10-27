@@ -160,6 +160,27 @@ class TestStabilizerStates(unittest.TestCase):
         self.assertEqual(s3.num_qubits, 2)
         self.assertTrue(s3 == s4)
 
+    def test_Pauli_phase_tracking(self):
+        S = StabilizerState()
+        self.assertFalse(S.Pauli_phase_tracking([False,False],[False,False]))
+        self.assertFalse(S.Pauli_phase_tracking([True,True],[True,True]))
+        self.assertFalse(S.Pauli_phase_tracking([True,False],[True,False]))
+        self.assertFalse(S.Pauli_phase_tracking([False,True],[False,True]))
+
+        self.assertTrue(S.Pauli_phase_tracking([True,True],[True,False]))
+        self.assertTrue(S.Pauli_phase_tracking([False,True],[True,True]))
+        self.assertTrue(S.Pauli_phase_tracking([True,False],[False,True]))
+
+        self.assertEqual(S.Pauli_phase_tracking([True,False],[True,True]),
+                        S.Pauli_phase_tracking([True,True],[False,True]))
+        self.assertEqual(S.Pauli_phase_tracking([False,True],[True,False]),
+                        S.Pauli_phase_tracking([True,True],[False,True]))
+
+    def test_gaussian_elimination(self):
+        S = StabilizerState(["XZZ","YIX","IXX"])
+        S.put_in_standard_form()
+        self.assertTrue(np.array_equal(S.to_array(),StabilizerState(["+1XZZ","-1ZYZ","-1ZZY"]).to_array()))
+
     def test_apply_Pauli(self):
         s1 = StabilizerState([[0, 1]])
         s2 = StabilizerState([[0, 1, 1]])
