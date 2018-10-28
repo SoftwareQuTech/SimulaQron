@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import networkx as nx
 
-from SimulaQron.toolbox.stabilizerStates import StabilizerState
+from toolbox.stabilizerStates import StabilizerState
 
 
 class TestStabilizerStates(unittest.TestCase):
