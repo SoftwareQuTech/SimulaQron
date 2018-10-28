@@ -544,10 +544,18 @@ class StabilizerState:
             raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
         # Perform Gaussian elimination such that there is maximally one X or Y at the qubit position
         self.put_in_standard_form()
+        tmp_matrix = self._group
         # Create a new matrix where the X and Z columns of the corresponding qubit are the first.
-        columns = np.arange(2*n + 1)
-        columns_without_position = np.logical_and(columns != position, columns != (position + n))
-        tmp_matrix = np.concatenate((self._group[:, [position, position + n]], self._group[:, columns_without_position]), 1)
+        perm = [position]+[i for i in range(n) if i!=position]
+        perm.extend([i+n for i in perm])
+        perm.append(2*n)
+        tmp_matrix = tmp_matrix[:,perm]
+        if tmp_matrix[tmp_matrix[:,0]].any():
+            rows_without_position = np.logical_not(tmp_matrix[:,0])
+            tmp_matrix = np.concatenate((tmp_matrix[tmp_matrix[:,0],: ],tmp_matrix[rows_without_position,: ]), 0)
+        else:
+            rows_without_position = np.logical_not(tmp_matrix[:,n])
+
         # Check if there is an X or a Y at the qubit position
         if tmp_matrix[0, 0]:
             # The first row (generator) of this matrix is then the only one that doesn't commute with the observabel Z
@@ -555,30 +563,25 @@ class StabilizerState:
 
             # If outcome is 1 we need to flip phases for the other generators that has an Z at this qubit
             if outcome == 1:
-                z_rows = tmp_matrix[:, 1]
+                z_rows = tmp_matrix[:, n]
                 tmp_matrix[z_rows, -1] = np.logical_not(tmp_matrix[z_rows, -1])
             if not inplace:
                 # Simply remove first generator and columns for X and Z of this qubit
-                self._group = tmp_matrix[1:, 2:]
-                self._nr_rows -= 1
+                X_part = tmp_matrix[1:n, 1:n]
+                Z_part_and_phase = tmp_matrix[1:n, n+1:]
+                self._group = np.concatenate((X_part, Z_part_and_phase), 1)
+                self._nr_rows = n-1
             else:
                 # Set first generator to be the observable
                 tmp_matrix[0, :] = False
-                tmp_matrix[0, 1] = True
+                tmp_matrix[0, n] = True
                 if outcome == 1:
                     tmp_matrix[0, -1] = not tmp_matrix[0, -1]
                 # Set the rest of the first column to be identity
-                tmp_matrix[1:, 1] = False
 
+                tmp_matrix[1:, n] = False
                 # Swap back the X and Z columns of this qubit
-                X_part_before_pos = tmp_matrix[:, 2:(position + 2)]
-                X_part_after_pos = tmp_matrix[:, (position + 2):(n + 1)]
-                X_part = np.concatenate((X_part_before_pos, tmp_matrix[:, [0]], X_part_after_pos), 1)
-                Z_part_before_pos = tmp_matrix[:, (n + 1):(position + n + 1)]
-                Z_part_after_pos = tmp_matrix[:, (position + n + 1):]
-                Z_part = np.concatenate((Z_part_before_pos, tmp_matrix[:, [1]], Z_part_after_pos), 1)
-                self._group = np.concatenate((X_part, Z_part), 1)
-
+                self._group = tmp_matrix[:,np.argsort(perm)]
         else:
             # Thus means that all stabilizer elements commute with the observable
             # and therefore that the qubit is already in |0> or |1>
@@ -589,12 +592,16 @@ class StabilizerState:
                 # Qubit is in |1>
                 outcome = 1
             if not inplace:
-                self._group = tmp_matrix[1:, 2:]
-                self._nr_rows -= 1
+                tmp_matrix = tmp_matrix[:,np.argsort(perm)]
+                columns = np.arange(2*n + 1)
+                columns_without_position = np.logical_and(columns != position, columns != (position + n))
+                tmp_matrix = tmp_matrix[np.logical_not(tmp_matrix[:,n+position]),:]
+                self._group = tmp_matrix[:,columns_without_position]
+                self._nr_rows = n-1
             else:
                 # We don't need to do anything here since the state has not changed
+                self._group = tmp_matrix[:,np.argsort(perm)]
                 pass
-
         return outcome
 
     def do_random_SQC(self,j=None):
@@ -673,7 +680,6 @@ class StabilizerState:
             if Spp.to_array()[:,-1][j]:
                 Spp.apply_Z(j)
                 operations.append(('Z',j))
-
         #Spp is now in the form of (I,Gamma) where Gamma is the adj mat of the Graph
         #SQC equivalent to the stabilizer state.
         adj_mat = Spp.to_array()[:,n:2*n]
