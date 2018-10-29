@@ -450,7 +450,6 @@ class StabilizerState:
         # Perform effective CNOT from X column to Z column
         xy_rows = self._group[:, position]
         self._group[xy_rows, position + n] = np.logical_not(self._group[xy_rows, position + n])
-
         # Update the phases
         x_rows = np.logical_and(self._group[:, position], np.logical_not(self._group[:, position + n]))
         self._group[x_rows, -1] = np.logical_not(self._group[x_rows, -1])
@@ -512,6 +511,12 @@ class StabilizerState:
         if control == target:
             raise ValueError("Control and target qubits cannot be the same")
 
+        # Update the phases
+        x_and_y_rows = np.logical_and(self._group[:, control],self._group[:, target])
+        z_rows = np.logical_xor(self._group[:, control+n],self._group[:, target+n])
+        rows_to_flip = np.logical_and(x_and_y_rows,z_rows)
+        self._group[rows_to_flip, -1] = np.logical_not(self._group[rows_to_flip, -1])
+
         # Perform effective CNOT from the control X column to target Z column
         xy_control_rows = self._group[:, control]
         self._group[xy_control_rows, target + n] = np.logical_not(self._group[xy_control_rows, target + n])
@@ -519,13 +524,6 @@ class StabilizerState:
         # Perform effective CNOT from the target X column to control Z column
         xy_target_rows = self._group[:, target]
         self._group[xy_target_rows, control + n] = np.logical_not(self._group[xy_target_rows, control + n])
-
-        # Update the phases
-
-        xy_control_rows = self._group[:, control]
-        x_target_rows = np.logical_and(self._group[:, target], np.logical_not(self._group[:, target + n]))
-        rows_to_flip = np.logical_and(xy_control_rows, x_target_rows)
-        self._group[rows_to_flip, -1] = np.logical_not(self._group[rows_to_flip, -1])
 
     def measure(self, position, inplace=False):
         """
@@ -542,25 +540,20 @@ class StabilizerState:
         n = self.num_qubits
         if not (position >= 0 and position < n):
             raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
-        # Perform Gaussian elimination such that there is maximally one X or Y at the qubit position
-        self.put_in_standard_form()
+
         tmp_matrix = self._group
         # Create a new matrix where the X and Z columns of the corresponding qubit are the first.
         perm = [position]+[i for i in range(n) if i!=position]
         perm.extend([i+n for i in perm])
         perm.append(2*n)
         tmp_matrix = tmp_matrix[:,perm]
-        if tmp_matrix[tmp_matrix[:,0]].any():
-            rows_without_position = np.logical_not(tmp_matrix[:,0])
-            tmp_matrix = np.concatenate((tmp_matrix[tmp_matrix[:,0],: ],tmp_matrix[rows_without_position,: ]), 0)
-        else:
-            rows_without_position = np.logical_not(tmp_matrix[:,n])
+        # Perform Gaussian elimination such that there is maximally one X or Y at the qubit position
+        tmp_matrix = self.boolean_gaussian_elimination(tmp_matrix)
 
         # Check if there is an X or a Y at the qubit position
         if tmp_matrix[0, 0]:
             # The first row (generator) of this matrix is then the only one that doesn't commute with the observabel Z
             outcome = randint(0, 1)
-
             # If outcome is 1 we need to flip phases for the other generators that has an Z at this qubit
             if outcome == 1:
                 z_rows = tmp_matrix[:, n]
@@ -578,7 +571,6 @@ class StabilizerState:
                 if outcome == 1:
                     tmp_matrix[0, -1] = not tmp_matrix[0, -1]
                 # Set the rest of the first column to be identity
-
                 tmp_matrix[1:, n] = False
                 # Swap back the X and Z columns of this qubit
                 self._group = tmp_matrix[:,np.argsort(perm)]
