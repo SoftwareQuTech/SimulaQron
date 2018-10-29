@@ -10,7 +10,7 @@
 import numpy as np
 import networkx as nx
 from scipy.linalg import block_diag
-from random import randint
+from random import randint,sample,choice
 from functools import partial
 
 
@@ -596,23 +596,72 @@ class StabilizerState:
                 pass
         return outcome
 
-    def do_random_SQC(self,j=None):
-        i = randint(0,6)
-        if j==None:
-            j = randint(0,self.num_qubits-1)
+    def random_Clifford_operations(self,position=None,seq_oper=None,inplace=True,hermitian=False,multi_qubits=None,return_seq=False):
+        if position is None:
+            position = list(range(self.num_qubits))
+        elif isinstance(position, int):
+            position = [position]
+        elif isinstance(position, list):
+            pass
 
-        if i==0:
-            self.apply_X(j)
-        elif i==1:
-            self.apply_Y(j)
-        elif i==2:
-            self.apply_Z(j)
-        elif i==3:
-            self.apply_H(j)
-        elif i==4:
-            self.apply_K(j)
-        elif i==5:
-            self.apply_S(j)
+        if multi_qubits is None:
+            if len(position)==1:
+                multi_qubits = False
+            else:
+                multi_qubits = True
+
+        if seq_oper is None:
+            seq_oper=[]
+            oper_list = ['X','Y','Z','S','H','K']
+            oper_list_2 = ['CZ','CNOT']
+            for _ in range(len(position)*3):
+                if choice([0,0,0,0,1]) and multi_qubits:
+                    seq_oper.append((choice(oper_list_2),tuple(sample(position,2))))
+                    pass
+                else:
+                    seq_oper.append((choice(oper_list),choice(position)))
+
+        if inplace:
+            if hermitian: seq_oper = seq_oper[::-1]
+            for oper,qubits in seq_oper:
+                if oper == 'CZ':
+                    self.apply_CZ(qubits[0],qubits[1])
+                elif oper == 'CNOT':
+                    self.apply_CNOT(qubits[0],qubits[1])
+                elif oper == 'X':
+                    self.apply_X(qubits)
+                elif oper == 'Y':
+                    self.apply_Y(qubits)
+                elif oper == 'Z':
+                    self.apply_Z(qubits)
+                elif oper == 'S':
+                    if not hermitian:
+                        self.apply_S(qubits)
+                    else:
+                        self.apply_S(qubits)
+                        self.apply_Z(qubits)
+                elif oper == 'H':
+                    self.apply_H(qubits)
+                elif oper == 'K':
+                    self.apply_K(qubits)
+                elif oper == 'LC_N':
+                    if not hermitian:
+                        self.apply_sqrt_IZ(qubits)
+                    else:
+                        self.apply_S(qubits)
+                elif oper == 'LC':
+                    if not hermitian:
+                        self.apply_sqrt_minIX(qubits)
+                    else:
+                        self.apply_Z(qubits)
+                        self.apply_K(qubits)
+                else:
+                    pass
+            if hermitian: seq_oper = seq_oper[::-1]
+            if return_seq:
+                return seq_oper
+        else:
+            return seq_oper
 
     def find_SQC_equiv_graph_state(self,return_operations = False):
         """
