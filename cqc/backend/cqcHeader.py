@@ -753,6 +753,8 @@ class CQCEPRRequestHeader:
             self.priority = 0
             self.store = True
             self.measure_directly = False
+
+            self.is_set = False
         else:
             self.unpack(headerBytes)
 
@@ -787,11 +789,16 @@ class CQCEPRRequestHeader:
         self.store = store
         self.measure_directly = measure_directly
 
+        self.is_set = True
+
     def pack(self):
         """
         Pack the data in packet form.
         :return: str
         """
+        if not self.is_set:
+            return 0
+
         to_pack = {"remote_ip": self.remote_ip,
                    "remote_port": self.remote_port,
                    "min_fidelity": self.min_fidelity,
@@ -814,13 +821,14 @@ class CQCEPRRequestHeader:
         request_Bitstring = bitstring.BitString(headerBytes)
         request_fields = request_Bitstring.unpack(self.package_format)
         self.remote_ip = request_fields[0]
-        self.remote_port = request_fields[1]
-        self.min_fidelity = request_fields[4]
-        self.max_time = request_fields[5]
-        self.num_pairs = request_fields[7]
-        self.priority = request_fields[8]
-        self.store = bool(request_fields[9])
-        self.measure_directly = bool(request_fields[10])
+        self.min_fidelity = request_fields[1]
+        self.max_time = request_fields[2]
+        self.remote_port = request_fields[3]
+        self.num_pairs = request_fields[4]
+        self.priority = request_fields[5]
+        self.store = request_fields[6]
+        self.measure_directly = request_fields[7]
+
         self.is_set = True
 
     def printable(self):
