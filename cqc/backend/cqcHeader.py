@@ -40,6 +40,7 @@ CQC_HDR_LENGTH = 8  # Length of the CQC Header
 CQC_CMD_HDR_LENGTH = 4  # Length of a command header
 CQC_CMD_XTRA_LENGTH = 16  # Length of extra command information
 CQC_NOTIFY_LENGTH = 20  # Length of a notification send from the CQC upwards
+CQC_EPR_REQ_LENGTH = 16  # Length of EPR request header
 
 # Constants defining the messages types
 CQC_TP_HELLO = 0  # Alive check
@@ -733,7 +734,8 @@ class CQCEPRRequestHeader:
                      'uint:8=num_pairs, ' \
                      'uint:4=priority', \
                      'uint:1=store, ' \
-                     'uint:1=measure_directly'
+                     'uint:1=measure_directly, ' \
+                     'uint:2=0'
     HDR_LENGTH = 16
 
     def __init__(self, headerBytes=None):
@@ -751,6 +753,8 @@ class CQCEPRRequestHeader:
             self.priority = 0
             self.store = True
             self.measure_directly = False
+
+            self.is_set = False
         else:
             self.unpack(headerBytes)
 
@@ -785,11 +789,16 @@ class CQCEPRRequestHeader:
         self.store = store
         self.measure_directly = measure_directly
 
+        self.is_set = True
+
     def pack(self):
         """
         Pack the data in packet form.
         :return: str
         """
+        if not self.is_set:
+            return 0
+
         to_pack = {"remote_ip": self.remote_ip,
                    "remote_port": self.remote_port,
                    "min_fidelity": self.min_fidelity,
@@ -812,13 +821,14 @@ class CQCEPRRequestHeader:
         request_Bitstring = bitstring.BitString(headerBytes)
         request_fields = request_Bitstring.unpack(self.package_format)
         self.remote_ip = request_fields[0]
-        self.remote_port = request_fields[1]
-        self.min_fidelity = request_fields[4]
-        self.max_time = request_fields[5]
-        self.num_pairs = request_fields[7]
-        self.priority = request_fields[8]
-        self.store = bool(request_fields[9])
-        self.measure_directly = bool(request_fields[10])
+        self.min_fidelity = request_fields[1]
+        self.max_time = request_fields[2]
+        self.remote_port = request_fields[3]
+        self.num_pairs = request_fields[4]
+        self.priority = request_fields[5]
+        self.store = request_fields[6]
+        self.measure_directly = request_fields[7]
+
         self.is_set = True
 
     def printable(self):
@@ -838,3 +848,5 @@ class CQCEPRRequestHeader:
             to_print += "Priority: {}".format(self.priority)
             to_print += "Store: {}".format(self.store)
             to_print += "Measure Directly: {}".format(self.measure_directly)
+
+            return to_print
