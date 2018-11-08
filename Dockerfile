@@ -44,26 +44,32 @@ FROM ubuntu:18.04
 LABEL author="Wojciech Kozlowski <wk@wojciechkozlowski.eu>"
 
 # Update docker image
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get upgrade -y
 
 # Install Rust and cargo
 RUN apt-get install -y rustc cargo
 
 # Install Python 3
-RUN apt-get install -y python3 python3-pip
+RUN apt-get install -y python3 python3-pip python3-tk
 RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN ln -s /usr/bin/pip3 /usr/bin/pip
 
-# qutip dependencies
-RUN pip install cython numpy scipy matplotlib
-
-# SimulaQron dependencies
-RUN pip install twisted service_identity qutip networkx
+# Set a UTF-8 locale - this is needed for some python packages to play nice
+RUN apt-get -y install language-pack-en
+ENV LANG="en_US.UTF-8"
 
 # Add the working directory
 ARG WORKSPACE=/workspace
 ADD . $WORKSPACE/SimulaQron
 WORKDIR $WORKSPACE/SimulaQron
+
+# SimulaQron dependencies
+# projectq fails to install without pybind11 pre-installed
+# qutip is also badly behaved so installed separately
+RUN pip install pybind11
+RUN cat ./requirements.txt | sed /qutip/d | xargs pip install
+RUN pip install qutip
 
 # Fetch rustLib dependencies
 RUN cd cqc/rustLib && cargo update

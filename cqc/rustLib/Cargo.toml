@@ -5,5 +5,5 @@ authors = ["Wojciech Kozlowski <wk@wojciechkozlowski.eu>",
            "Marco Lam <cylammarco@gmail.com"]
 
 [dependencies]
-cqc = "0.3"
+cqc = "0.3.2"
 bincode = "1.0"
