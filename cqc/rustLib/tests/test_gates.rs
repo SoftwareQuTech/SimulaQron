@@ -64,7 +64,7 @@ fn cqc_tomography_dir(cqc: &mut Cqc, func: &Fn(&mut Cqc) -> u16, n_iter: u32, di
 // cqc	    a CQC object
 // func    function to invoke to prepare qubit
 // n_iter  number of times to iterate the test in tomography
-// epsilon desired precision
+// conf    confidence region (acceptable error is +/- conf/sqrt(n_iter))
 // exp_x   expected value for <X>
 // exp_y   expted value for <Y>
 // exp_z   expected value for <Z>
@@ -72,7 +72,7 @@ fn cqc_test_qubit(
     cqc: &mut Cqc,
     func: &Fn(&mut Cqc) -> u16,
     n_iter: u32,
-    epsilon: f64,
+    conf: u32,
     exp_x: f64,
     exp_y: f64,
     exp_z: f64,
@@ -87,6 +87,9 @@ fn cqc_test_qubit(
     let diff_x = (tomo_x - exp_x).abs();
     let diff_y = (tomo_y - exp_y).abs();
     let diff_z = (tomo_z - exp_z).abs();
+
+    // Define the acceptable tolerance to be conf/
+    let epsilon: f64 = (conf as f64) / (n_iter as f64).sqrt();
 
     assert!(
         diff_x <= epsilon,
@@ -163,20 +166,22 @@ fn test_gates() {
     let hostname = String::from("localhost");
     let portno: u16 = 8803;
     let app_id: u16 = 10;
+    let n_iter = 100;
+    let conf = 2;
 
     // In this example, we will not check for errors.
     // Initialise a CQC service.
     let mut cqc = Cqc::new(app_id, &hostname, portno).unwrap();
 
     // Test whether we can make the zero state
-    println!("Testing |0> preparation......................");
-    cqc_test_qubit(&mut cqc, &make_zero, 500, 0.1, 0., 0., 1.);
+    println!("Testing z-basis preparation: |0>");
+    cqc_test_qubit(&mut cqc, &make_zero, n_iter, conf, 0., 0., 1.);
 
     // Test whether we can make the plus state
-    println!("Testing |+> preparation......................");
-    cqc_test_qubit(&mut cqc, &make_plus, 500, 0.1, 1., 0., 0.);
+    println!("Testing x-basis preparation: |0>+|1>");
+    cqc_test_qubit(&mut cqc, &make_plus, n_iter, conf, 1., 0., 0.);
 
     // Test whether we can make the y_0 eigenstate
-    println!("Testing |1> preparation......................");
-    cqc_test_qubit(&mut cqc, &make_k, 500, 0.1, 0., 1., 0.);
+    println!("Testing y-basis preparation: |0>+i|1>");
+    cqc_test_qubit(&mut cqc, &make_k, n_iter, conf, 0., 1., 0.);
 }
