@@ -88,7 +88,7 @@ fn cqc_test_qubit(
     let diff_y = (tomo_y - exp_y).abs();
     let diff_z = (tomo_z - exp_z).abs();
 
-    // Define the acceptable tolerance to be conf/
+    // Define the acceptable tolerance to be conf/sqrt(n_iter)
     let epsilon: f64 = (conf as f64) / (n_iter as f64).sqrt();
 
     assert!(
