@@ -10,7 +10,7 @@
 import numpy as np
 import networkx as nx
 from scipy.linalg import block_diag
-from random import randint,sample,choice
+from random import randint, sample, choice
 from functools import partial
 
 
@@ -132,18 +132,22 @@ class StabilizerState:
                         Z_part = list(map(lambda gen_str: list(map(lambda P_str: P_str in ("Y", "Z"), gen_str)), data))
                         data = np.concatenate((X_part, Z_part), 1)
                     elif all(map(lambda gen_str: len(gen_str) == (n + 2), data)):
-                        X_part = list(map(lambda gen_str: list(map(lambda P_str: P_str in ("X", "Y"), gen_str[2:])), data))
-                        Z_part = list(map(lambda gen_str: list(map(lambda P_str: P_str in ("Y", "Z"), gen_str[2:])), data))
+                        X_part = list(
+                            map(lambda gen_str: list(map(lambda P_str: P_str in ("X", "Y"), gen_str[2:])), data))
+                        Z_part = list(
+                            map(lambda gen_str: list(map(lambda P_str: P_str in ("Y", "Z"), gen_str[2:])), data))
                         phases = list(map(lambda gen_str: [self.phase2bool[gen_str[:2]]], data))
                         data = np.concatenate((X_part, Z_part, phases), 1)
                     else:
-                        raise ValueError("If data is a length-'n' list or stings, then each string needs be of length 'n' or 'n+2'")
+                        raise ValueError(
+                            "If data is a length-'n' list or stings, then each string needs be of length 'n' or 'n+2'")
                 try:
                     self._group = np.array(data, dtype=bool)
                 except Exception as err:
                     print(data)
                     print(type(data))
-                    raise ValueError("Could not create an array of the 'data' due to the following error: {}".format(err))
+                    raise ValueError(
+                        "Could not create an array of the 'data' due to the following error: {}".format(err))
 
                 if len(self._group.shape) != 2:
                     raise ValueError("'data' needs to be an array of rank 2")
@@ -165,7 +169,7 @@ class StabilizerState:
                     P = np.block([[zeros, identity], [identity, zeros]])
                     M = np.array(self._group[:, :-1], dtype=int)
 
-                    commute = M@P@M.transpose()
+                    commute = M @ P @ M.transpose()
                     if (commute % 2).any():
                         raise ValueError("All stabilizer of the group constructed from the input does not commute.")
 
@@ -205,26 +209,25 @@ class StabilizerState:
         return self.num_qubits
 
     @staticmethod
-    def Pauli_phase_tracking(old_pauli,applied_pauli):
-        if old_pauli==[True,False] and applied_pauli == [True,True]:
-            added_phase =3
-        elif old_pauli==[True,True] and applied_pauli == [False,True]:
-            added_phase =3
-        elif old_pauli==[False,True] and applied_pauli == [True,False]:
-            added_phase =3
-        elif old_pauli==[True,True] and applied_pauli == [True,False]:
-            added_phase =1
-        elif old_pauli==[False,True] and applied_pauli == [True,True]:
-            added_phase =1
-        elif old_pauli==[True,False] and applied_pauli == [False,True]:
-            added_phase =1
+    def Pauli_phase_tracking(old_pauli, applied_pauli):
+        if old_pauli == [True, False] and applied_pauli == [True, True]:
+            added_phase = 3
+        elif old_pauli == [True, True] and applied_pauli == [False, True]:
+            added_phase = 3
+        elif old_pauli == [False, True] and applied_pauli == [True, False]:
+            added_phase = 3
+        elif old_pauli == [True, True] and applied_pauli == [True, False]:
+            added_phase = 1
+        elif old_pauli == [False, True] and applied_pauli == [True, True]:
+            added_phase = 1
+        elif old_pauli == [True, False] and applied_pauli == [False, True]:
+            added_phase = 1
         else:
-            added_phase =0
+            added_phase = 0
         return added_phase
 
-
     @staticmethod
-    def boolean_gaussian_elimination(matrix,return_pivot_columns=False):
+    def boolean_gaussian_elimination(matrix, return_pivot_columns=False):
         """
         Given a boolean matrix returns the matrix in row reduced echelon form
         where entries are seen as elements of GF(2), i.e. intergers modulus 2.
@@ -261,17 +264,18 @@ class StabilizerState:
                 non_zero_except_i_max = non_zero_ind[non_zero_ind != i_max]
 
                 for i_loop in non_zero_except_i_max:
-                    extra_phase = 0 #we count i's here, so 2 -> (-i)^2=-1, 4->1, 6-> -1
+                    extra_phase = 0  # we count i's here, so 2 -> (-i)^2=-1, 4->1, 6-> -1
                     for j in range(m):
-                        extra_phase+= StabilizerState.Pauli_phase_tracking([new_matrix[i_loop, j],new_matrix[i_loop, j+m]],
-                                                        [new_matrix[h, j],new_matrix[h, j+m]])
+                        extra_phase += StabilizerState.Pauli_phase_tracking(
+                            [new_matrix[i_loop, j], new_matrix[i_loop, j + m]],
+                            [new_matrix[h, j], new_matrix[h, j + m]])
                     new_matrix[i_loop, :] = np.logical_xor(new_matrix[i_loop, :], new_matrix[h, :])
-                    if ((extra_phase/2)%2):
-                        new_matrix[i_loop,-1]=np.logical_not(new_matrix[i_loop,-1])
+                    if ((extra_phase / 2) % 2):
+                        new_matrix[i_loop, -1] = np.logical_not(new_matrix[i_loop, -1])
                 h += 1
                 k += 1
         if return_pivot_columns:
-            return new_matrix,pivot_columns
+            return new_matrix, pivot_columns
         else:
             return new_matrix
 
@@ -282,9 +286,9 @@ class StabilizerState:
         P = np.block([[zeros, identity], [identity, zeros]])
         M = np.array(self._group[:, :-1], dtype=int)
 
-        commute = M@P@M.transpose()
+        commute = M @ P @ M.transpose()
         if (commute % 2).any():
-            #All stabilizer of the group constructed from the input does not commute
+            # All stabilizer of the group constructed from the input does not commute
             return False
         else:
             return True
@@ -338,7 +342,7 @@ class StabilizerState:
             new_group = np.concatenate((new_X_stab, new_Z_stab, phases), 1)
             return StabilizerState(new_group)
 
-    def to_array(self, standard_form=False,return_pivot_columns=False):
+    def to_array(self, standard_form=False, return_pivot_columns=False):
         """
         Returns the numpy array representing the stabilizer group of this state.
         See doc-string for __init__ how the elements of this numpy array are treated.
@@ -351,7 +355,7 @@ class StabilizerState:
 
         if standard_form:
             if return_pivot_columns:
-                return self.boolean_gaussian_elimination(self._group,True)
+                return self.boolean_gaussian_elimination(self._group, True)
             else:
                 return self.boolean_gaussian_elimination(self._group)
         else:
@@ -454,11 +458,11 @@ class StabilizerState:
         x_rows = np.logical_and(self._group[:, position], np.logical_not(self._group[:, position + n]))
         self._group[x_rows, -1] = np.logical_not(self._group[x_rows, -1])
 
-    def apply_sqrt_minIX(self,position):
+    def apply_sqrt_minIX(self, position):
         self.apply_K(position)
         self.apply_Z(position)
 
-    def apply_sqrt_IZ(self,position):
+    def apply_sqrt_IZ(self, position):
         self.apply_Z(position)
         self.apply_S(position)
 
@@ -490,8 +494,10 @@ class StabilizerState:
         # Update the phases
         xy_control_yz_target_rows = np.logical_and(self._group[:, control], self._group[:, target + n])
         yz_control_xy_target_rows = np.logical_and(self._group[:, control + n], self._group[:, target])
-        not_yz_control_not_xy_target_rows = np.logical_and(np.logical_not(self._group[:, control + n]), np.logical_not(self._group[:, target]))
-        rows_to_flip = np.logical_and(xy_control_yz_target_rows, np.logical_or(yz_control_xy_target_rows, not_yz_control_not_xy_target_rows))
+        not_yz_control_not_xy_target_rows = np.logical_and(np.logical_not(self._group[:, control + n]),
+                                                           np.logical_not(self._group[:, target]))
+        rows_to_flip = np.logical_and(xy_control_yz_target_rows,
+                                      np.logical_or(yz_control_xy_target_rows, not_yz_control_not_xy_target_rows))
         self._group[rows_to_flip, -1] = np.logical_not(self._group[rows_to_flip, -1])
 
     def apply_CZ(self, control, target):
@@ -512,9 +518,9 @@ class StabilizerState:
             raise ValueError("Control and target qubits cannot be the same")
 
         # Update the phases
-        x_and_y_rows = np.logical_and(self._group[:, control],self._group[:, target])
-        z_rows = np.logical_xor(self._group[:, control+n],self._group[:, target+n])
-        rows_to_flip = np.logical_and(x_and_y_rows,z_rows)
+        x_and_y_rows = np.logical_and(self._group[:, control], self._group[:, target])
+        z_rows = np.logical_xor(self._group[:, control + n], self._group[:, target + n])
+        rows_to_flip = np.logical_and(x_and_y_rows, z_rows)
         self._group[rows_to_flip, -1] = np.logical_not(self._group[rows_to_flip, -1])
 
         # Perform effective CNOT from the control X column to target Z column
@@ -543,10 +549,10 @@ class StabilizerState:
 
         tmp_matrix = self._group
         # Create a new matrix where the X and Z columns of the corresponding qubit are the first.
-        perm = [position]+[i for i in range(n) if i!=position]
-        perm.extend([i+n for i in perm])
-        perm.append(2*n)
-        tmp_matrix = tmp_matrix[:,perm]
+        perm = [position] + [i for i in range(n) if i != position]
+        perm.extend([i + n for i in perm])
+        perm.append(2 * n)
+        tmp_matrix = tmp_matrix[:, perm]
         # Perform Gaussian elimination such that there is maximally one X or Y at the qubit position
         tmp_matrix = self.boolean_gaussian_elimination(tmp_matrix)
 
@@ -561,9 +567,9 @@ class StabilizerState:
             if not inplace:
                 # Simply remove first generator and columns for X and Z of this qubit
                 X_part = tmp_matrix[1:n, 1:n]
-                Z_part_and_phase = tmp_matrix[1:n, n+1:]
+                Z_part_and_phase = tmp_matrix[1:n, n + 1:]
                 self._group = np.concatenate((X_part, Z_part_and_phase), 1)
-                self._nr_rows = n-1
+                self._nr_rows = n - 1
             else:
                 # Set first generator to be the observable
                 tmp_matrix[0, :] = False
@@ -573,7 +579,7 @@ class StabilizerState:
                 # Set the rest of the first column to be identity
                 tmp_matrix[1:, n] = False
                 # Swap back the X and Z columns of this qubit
-                self._group = tmp_matrix[:,np.argsort(perm)]
+                self._group = tmp_matrix[:, np.argsort(perm)]
         else:
             # Thus means that all stabilizer elements commute with the observable
             # and therefore that the qubit is already in |0> or |1>
@@ -584,86 +590,19 @@ class StabilizerState:
                 # Qubit is in |1>
                 outcome = 1
             if not inplace:
-                tmp_matrix = tmp_matrix[:,np.argsort(perm)]
-                columns = np.arange(2*n + 1)
+                tmp_matrix = tmp_matrix[:, np.argsort(perm)]
+                columns = np.arange(2 * n + 1)
                 columns_without_position = np.logical_and(columns != position, columns != (position + n))
-                tmp_matrix = tmp_matrix[np.logical_not(tmp_matrix[:,n+position]),:]
-                self._group = tmp_matrix[:,columns_without_position]
-                self._nr_rows = n-1
+                tmp_matrix = tmp_matrix[np.logical_not(tmp_matrix[:, n + position]), :]
+                self._group = tmp_matrix[:, columns_without_position]
+                self._nr_rows = n - 1
             else:
                 # We don't need to do anything here since the state has not changed
-                self._group = tmp_matrix[:,np.argsort(perm)]
+                self._group = tmp_matrix[:, np.argsort(perm)]
                 pass
         return outcome
 
-    def random_Clifford_operations(self,position=None,seq_oper=None,inplace=True,hermitian=False,multi_qubits=None,return_seq=False):
-        if position is None:
-            position = list(range(self.num_qubits))
-        elif isinstance(position, int):
-            position = [position]
-        elif isinstance(position, list):
-            pass
-
-        if multi_qubits is None:
-            if len(position)==1:
-                multi_qubits = False
-            else:
-                multi_qubits = True
-
-        if seq_oper is None:
-            seq_oper=[]
-            oper_list = ['X','Y','Z','S','H','K']
-            oper_list_2 = ['CZ','CNOT']
-            for _ in range(len(position)*3):
-                if choice([0,0,0,0,1]) and multi_qubits:
-                    seq_oper.append((choice(oper_list_2),tuple(sample(position,2))))
-                    pass
-                else:
-                    seq_oper.append((choice(oper_list),choice(position)))
-
-        if inplace:
-            if hermitian: seq_oper = seq_oper[::-1]
-            for oper,qubits in seq_oper:
-                if oper == 'CZ':
-                    self.apply_CZ(qubits[0],qubits[1])
-                elif oper == 'CNOT':
-                    self.apply_CNOT(qubits[0],qubits[1])
-                elif oper == 'X':
-                    self.apply_X(qubits)
-                elif oper == 'Y':
-                    self.apply_Y(qubits)
-                elif oper == 'Z':
-                    self.apply_Z(qubits)
-                elif oper == 'S':
-                    if not hermitian:
-                        self.apply_S(qubits)
-                    else:
-                        self.apply_S(qubits)
-                        self.apply_Z(qubits)
-                elif oper == 'H':
-                    self.apply_H(qubits)
-                elif oper == 'K':
-                    self.apply_K(qubits)
-                elif oper == 'LC_N':
-                    if not hermitian:
-                        self.apply_sqrt_IZ(qubits)
-                    else:
-                        self.apply_S(qubits)
-                elif oper == 'LC':
-                    if not hermitian:
-                        self.apply_sqrt_minIX(qubits)
-                    else:
-                        self.apply_Z(qubits)
-                        self.apply_K(qubits)
-                else:
-                    pass
-            if hermitian: seq_oper = seq_oper[::-1]
-            if return_seq:
-                return seq_oper
-        else:
-            return seq_oper
-
-    def find_SQC_equiv_graph_state(self,return_operations = False):
+    def find_SQC_equiv_graph_state(self, return_operations=False):
         """
         Finds a graph state single qubit Clifford equivalent to self. Method is described
         in quant-ph/0308151.
@@ -678,55 +617,55 @@ class StabilizerState:
         :return: A networkx graph SQC equivalent to S
         :rtype: :obj:`networkx.classes.graph.Graph`
         """
-        S_ech_form,pivs = self.to_array(standard_form=True,return_pivot_columns=True)
+        S_ech_form, pivs = self.to_array(standard_form=True, return_pivot_columns=True)
         n = len(pivs)
-        pivsX = [i for i in pivs if i<n]
+        pivsX = [i for i in pivs if i < n]
         k = len(pivsX)
         operations = []
 
-        #Next step is to relabel the qubits such that the pivot columns in X
-        #are the first k columns in X-part and the Z-part.
-        A = pivsX+[i for i in range(n) if i not in pivsX]
-        A.extend([sum(x) for x in zip(A, n*[n])]+[2*n])
-        Sp = StabilizerState(S_ech_form[:,A])
+        # Next step is to relabel the qubits such that the pivot columns in X
+        # are the first k columns in X-part and the Z-part.
+        A = pivsX + [i for i in range(n) if i not in pivsX]
+        A.extend([sum(x) for x in zip(A, n * [n])] + [2 * n])
+        Sp = StabilizerState(S_ech_form[:, A])
 
-        #Then apply Hadamards on the last n-k qubits such that X has full rank
-        for j in range(k,n):
+        # Then apply Hadamards on the last n-k qubits such that X has full rank
+        for j in range(k, n):
             Sp.apply_H(j)
-            operations.append(('H',A[j]))
-        Sp_mat = Sp.to_array().astype(int)[:,:2*n]
-        phase_list = Sp.to_array()[:,-1]
+            operations.append(('H', A[j]))
+        Sp_mat = Sp.to_array().astype(int)[:, :2 * n]
+        phase_list = Sp.to_array()[:, -1]
 
-        #Then multiply by inv(X) such that inv(X)X = I
-        Spp_mat = np.matmul(np.linalg.inv(Sp_mat[:,:n]),Sp_mat)
+        # Then multiply by inv(X) such that inv(X)X = I
+        Spp_mat = np.matmul(np.linalg.inv(Sp_mat[:, :n]), Sp_mat)
 
-        #Test if this was succesfull
-        if not np.array_equal(Spp_mat[:,:n],np.identity(n)):
+        # Test if this was succesfull
+        if not np.array_equal(Spp_mat[:, :n], np.identity(n)):
             raise ValueError("The X-part should be identity,but something went wrong")
 
-        #then swap back (first the columns, then the rows to keep identity on the X-part)
-        Spp_mat = Spp_mat[:,A[:2*n]]
-        Spp_mat = Spp_mat[A[:n],:]
-        Spp = StabilizerState(np.c_[Spp_mat,[phase_list[i] for i in A[:n]]])
+        # then swap back (first the columns, then the rows to keep identity on the X-part)
+        Spp_mat = Spp_mat[:, A[:2 * n]]
+        Spp_mat = Spp_mat[A[:n], :]
+        Spp = StabilizerState(np.c_[Spp_mat, [phase_list[i] for i in A[:n]]])
 
-        #Spp is now a graph state with possible self loops. To remove these,
-        #do an S on every qubit with a self loop
+        # Spp is now a graph state with possible self loops. To remove these,
+        # do an S on every qubit with a self loop
         for j in range(n):
-            if Spp_mat[j,j+n]:
+            if Spp_mat[j, j + n]:
                 Spp.apply_S(j)
-                operations.append(('S',j))
+                operations.append(('S', j))
 
-        #Now we remove -1 phases which might still be there
+        # Now we remove -1 phases which might still be there
         for j in range(n):
-            if Spp.to_array()[:,-1][j]:
+            if Spp.to_array()[:, -1][j]:
                 Spp.apply_Z(j)
-                operations.append(('Z',j))
-        #Spp is now in the form of (I,Gamma) where Gamma is the adj mat of the Graph
-        #SQC equivalent to the stabilizer state.
-        adj_mat = Spp.to_array()[:,n:2*n]
+                operations.append(('Z', j))
+        # Spp is now in the form of (I,Gamma) where Gamma is the adj mat of the Graph
+        # SQC equivalent to the stabilizer state.
+        adj_mat = Spp.to_array()[:, n:2 * n]
         G = nx.from_numpy_matrix(adj_mat)
 
         if return_operations:
-            return G,operations
+            return G, operations
         else:
             return G
