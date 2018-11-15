@@ -160,6 +160,27 @@ class TestStabilizerStates(unittest.TestCase):
         self.assertEqual(s3.num_qubits, 2)
         self.assertTrue(s3 == s4)
 
+    def test_Pauli_phase_tracking(self):
+        S = StabilizerState()
+        self.assertFalse(S.Pauli_phase_tracking([False, False], [False, False]))
+        self.assertFalse(S.Pauli_phase_tracking([True, True], [True, True]))
+        self.assertFalse(S.Pauli_phase_tracking([True, False], [True, False]))
+        self.assertFalse(S.Pauli_phase_tracking([False, True], [False, True]))
+
+        self.assertTrue(S.Pauli_phase_tracking([True, True], [True, False]))
+        self.assertTrue(S.Pauli_phase_tracking([False, True], [True, True]))
+        self.assertTrue(S.Pauli_phase_tracking([True, False], [False, True]))
+
+        self.assertEqual(S.Pauli_phase_tracking([True, False], [True, True]),
+                         S.Pauli_phase_tracking([True, True], [False, True]))
+        self.assertEqual(S.Pauli_phase_tracking([False, True], [True, False]),
+                         S.Pauli_phase_tracking([True, True], [False, True]))
+
+    def test_gaussian_elimination(self):
+        S = StabilizerState(["XZZ", "YIX", "IXX"])
+        S.put_in_standard_form()
+        self.assertTrue(np.array_equal(S.to_array(), StabilizerState(["+1XZZ", "-1ZYZ", "-1ZZY"]).to_array()))
+
     def test_apply_Pauli(self):
         s1 = StabilizerState([[0, 1]])
         s2 = StabilizerState([[0, 1, 1]])
@@ -331,6 +352,29 @@ class TestStabilizerStates(unittest.TestCase):
                 GHZ.apply_CNOT(0, i)
             outcomes = [GHZ.measure(0) for _ in range(n)]
             self.assertNotIn(False, [outcomes[0] == outcomes[i] for i in range(1, n)])
+
+    def test_going_to_graph(self):
+        one_Bell_pair = StabilizerState(["-1XX", "+1ZZ"])
+        G = nx.Graph()
+        G.add_edge(0, 1)
+        one_Bell_pair_graph = one_Bell_pair.find_SQC_equiv_graph_state()
+        self.assertTrue(G, one_Bell_pair_graph)
+
+        two_EPR_pairs = StabilizerState([[1, 0, 0, 1, 0, 0, 0, 0], [0, 1, 1, 0, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 1, 0, 0, 1], [0, 0, 0, 0, 0, 1, 1, 0]])
+        G.remove_edge(0, 1)
+        G.add_edges_from([(0, 3), (1, 2)])
+        two_EPR_pairs_graph = two_EPR_pairs.find_SQC_equiv_graph_state()
+        self.assertTrue(G, two_EPR_pairs_graph)
+
+        n = 5
+        GHZ = StabilizerState(n)
+        GHZ.apply_H(0)
+        for i in range(1, n):
+            GHZ.apply_CNOT(0, i)
+        GHZ_graph, operations = GHZ.find_SQC_equiv_graph_state(return_operations=True)
+        self.assertTrue(GHZ_graph, nx.star_graph(n - 1))
+        self.assertTrue(operations == [('H', i) for i in range(1, n)])
 
 
 if __name__ == '__main__':
