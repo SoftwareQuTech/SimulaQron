@@ -761,6 +761,7 @@ class CQCEPRRequestHeader:
     def setVals(self, remote_ip, remote_port, num_pairs, min_fidelity, max_time, priority, store, measure_directly):
         """
         Stores required parameters of Entanglement Generation Protocol Request
+
         :param remote_ip: int
             IP of the other node we are attempting to generate entanglement with
         :param remote_port: int

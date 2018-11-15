@@ -16,7 +16,10 @@ allows the installation of a local simulation program on each computer in the ne
 The local simulation programs on each classical computer connect to each other classically, forming a simulated quantum internet allowing the exchange of simulated qubits between the different
 network nodes, as well as the creation of simulated entanglement.
 
-SimulaQron is written in `Python <http://www.python.org/>`_ and uses the `Twisted <https://twistedmatrix.com/>`_ Perspective Broker. To perform the local qubit simulation, SimulaQron uses `QuTip <http://qutip.org/>`_ but any other quantum simulator with a python interface can easily be used as a local backend. The main challenge of SimulaQron is to allow the simulation of virtual qubits at different network nodes: since these may be entangled they cannot be simulated on one network node, which is solved by a transparent distributed simulation on top of in principle any local simulation engine.
+SimulaQron is written in `Python <http://www.python.org/>`_ and uses the `Twisted <https://twistedmatrix.com/>`_ Perspective Broker.
+To perform the local qubit simulation, three different backends have so far been implemented: Using `QuTip <http://qutip.org/>`_ and mixed state, using `Project Q <https://projectq.ch/>`_ and pure states and finally using stabilizer formalism.
+However, any other quantum simulator with a python interface can easily be used as a local backend.
+The main challenge of SimulaQron is to allow the simulation of virtual qubits at different network nodes: since these may be entangled they cannot be simulated on one network node, which is solved by a transparent distributed simulation on top of in principle any local simulation engine.
 
 We also have a  `paper <http://iopscience.iop.org/article/10.1088/2058-9565/aad56e>`_ that describe the design of SimulaQron.
 

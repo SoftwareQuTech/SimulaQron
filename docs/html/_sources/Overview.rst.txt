@@ -59,7 +59,16 @@ deal with this backend simulation.
 
 Nevertheless, as a guide to the backend, it consists of three essential components:
 
-* quantumEngine - the one used here is implemented as simpleEngine in crudeSimulator.py which uses `QuTip <http://qutip.org/>`_ as a backend. This corresponds to one quantum register full of qubits across which gates can be performed. Should you wish to use a different backend, you may wish to add a different engine.
+* quantumEngine - There are currenlty three different quantumEngines implemented: Using `QuTip <http://qutip.org/>`_ and mixed state, using `Project Q <https://projectq.ch/>`_ and pure states and finally using stabilizer formalism.
+    This corresponds to one quantum register full of qubits across which gates can be performed. Should you wish to use a different backend, you may wish to add a different engine.
+    The three current backends give different runtimes due to how quantum states are stored and manipulated.
+    In the stabilizer formalism, only Clifford operations can be performed and the simulation is in fact efficient in the number of qubits.
+    See figure XXX for a comparison of runtimes to create a GHZ-state on a number of qubits using the three different backends.
+
+.. image:: figs/runtime_qutip_vs_projectq_vs_stabilizer.png
+    :width: 700px
+    :align: center
+    :alt: Runtime of creating a GHZ-state using the three different backends currently implemented in SimulaQron.
 
 * simulatedQubit - for each qubit simulated in that register, there is a simQubit object. This is local to each node. It exports remote method calls. These methods are only called by the virtual node network itself: when a virtual node discovers the qubit is actually simulated remotely, it passes on this call by calling the relevant method on the remote qubit object.
 

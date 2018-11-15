@@ -147,6 +147,7 @@ class CQCFactory(Factory):
 		"""
 		Checks if remote host is adjacent to this node, according to the
 		specified topology.
+
 		:param remote_host_name: str
 			The name of the remote host
 		:return:

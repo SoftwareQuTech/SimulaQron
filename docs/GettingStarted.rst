@@ -5,7 +5,7 @@ Getting started
 Setup
 -----
 
-SimulaQron requires `Python 3 <https://python.org/>`_ , `Twisted <http://twistedmatrix.com/trac/>`_ and `QuTip <http://qutip.org/>`_ along with the packages *scipy*, *cython*, *matplotlib* and *networkx*.
+SimulaQron requires `Python 3 <https://python.org/>`_  and `Twisted <http://twistedmatrix.com/trac/>`_  along with the packages *scipy*, *Cython*, *service_identity*, *qutip*, *matplotlib*, *networkx*, *projectq* and *bitstring*.
 
 .. note:: It is assumed that if you type :code:`python` in a terminal Python 3.x starts. If typing :code:`python` starts Python 2.x for you and you do not know how to fix this, see below:
 
@@ -22,6 +22,7 @@ To install conda, follow the link below that corresponds to your operating syste
 * `Windows <https://conda.io/docs/user-guide/install/windows.html>`_
 
 and go through the instructions to install conda. When you download the installer, make sure to choose the 3.x version.
+Alternatively you can use the dockerfile in the root of the repository.
 
 ^^^^^^^^^^^^
 Installation
@@ -47,18 +48,21 @@ Verifying the installation
 To run SimulaQron you need to following Python packages:
 
 * scipy
-* cython
+* Cython
 * service_identity
 * twisted
 * qutip
 * matplotlib
-* networkx
+* networkx$
+* projectq
+* bitstring
 
 To verify that that SimulaQron is working on your computer, type::
 
     make verify
 
 in a terminal at the root of the repository. This command will clear any .pyc files in this directory, check that the needed python packages are installed (and if not install these using pip) and run the automated tests. By default a shorter version of the tests are run. If you wish to run the full tests type :code:`make full_tests`. Not however that the full tests can take quite some time since they perform quantum tomography to tests operations on the qubits.
+By default the *projectq* engine will be used. If you wish to run the tests with the *qutip* backend instead, type :code:`make tests_qutip` or :code:`make full_tests_qutip`. If you want to run all tests with all three backends, type :code:`make full_tests_allBackends`. Note that running the full tests with all backends takes a lot of time.
 
 If :code:`make` does not work for you, you can also run the test by typing :code:`sh tests/runTests.sh --quick` (not including tomography tests) or :code:`sh tests/runTests.sh --full` (full tests).
 
@@ -170,6 +174,7 @@ In the file config/settings.ini you can set the following parameters for SimulaQ
     * :code:`waittime` (default 0.5): This is the amount of time that the virtual nodes will wait to try to set up connection between them (when running :code:`sh run/startAll.sh`. If you're setting up SimulaQron between multiple computers, you may wish to increase this.
     * :code:`loglevel` (default `warning`): Determines which logging messages should be printed from the backend. Options are `critical`, `error`, `warning`, `info` and `debug`, with increasing amount of logging. Setting the log-level to `debug` will print a lot of messages.
     * :code:`backendhandler` (default `simulaqron`): This is to set different types of backends for parsing the CQC messages. Current options are `simulaqron` and `log` (simply log the CQC messages). Unless you know what you're doing don't change this!
+    * :code:`backend` (default `projectq`): Current choices are: `qutip` (mixed states), `projectq` (pure states) and `stabilizer` (stabilizer states and only Clifford operations).
     * :code:`topology_file` (default `<empty_string>`): Set this to the relative path (seen from root of the repo) of a .json file describing the topology of the network to be used. For more details on how to configure a network with a specific topology, see :doc:`ConfNodes`.
     * :code:`noisy_qubits` (default `False`): Setting this to `True` will add probabilistic Pauli noise to the simulated qubits, with a rate specified with the :code:`T1` parameter below.
     * :code:`T1` (default 1): If :code:`noisy_qubits` above is `True` then for each qubit one of the Pauli operators :math:`X=\begin{pmatrix}0 & 1 \\ 1 & 0\end{pmatrix}`, :math:`Y=\begin{pmatrix}0 & -i \\ i & 0\end{pmatrix}` or :math:`Z=\begin{pmatrix}1 & 0 \\ 0 & -1\end{pmatrix}` will be applied with probability :math:`1-exp(-t/T1)`, where :math:`t` is the time the qubit spent at a node. NOTE, this is not an accurate model of noise in a quantum network but simply an option to be able run and explore protocols in a noisy setting. A major drawback with this noise model is that the amount of noise during a protocol depends on how fast your computer is, since the only time in SimulaQron is the runtime of your computer.

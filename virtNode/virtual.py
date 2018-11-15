@@ -465,6 +465,7 @@ class virtualNode(pb.Root):
     def remote_new_qubit(self, ignore_max_qubits=False):
         """
         Create a new qubit in the default local register.
+
         :param ignore_max_qubits: bool
             Used to ignore the check if max virtual qubits is reached. This is used when creating EPR pairs
             to be able to temporarily create a qubit.

@@ -4,30 +4,21 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Classical Communication &#8212; SimulaQron 1.0 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Useful commands" href="UsefulCommands.html" />
     <link rel="prev" title="Using the Python library" href="PythonLib.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -64,12 +55,14 @@
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -89,24 +82,24 @@ CQC is an interface between the classical control information in the network and
 The communication between the nodes needed to simulate the quantum hardware is handled by the SimulaQron servers, denoted SimulaQron internal communication in the figure.
 Note that such communication is needed since entanglement cannot be simulated locally.
 SimulaQron comes with a Python library that handles all the communication between the application and the CQC server.
-In this library, the object <code class="code docutils literal"><span class="pre">CQCConnection</span></code> takes care of this communication.
-Any operation applied to the qubits in this Python library is translated to a message sent to the CQC server, by the <code class="code docutils literal"><span class="pre">CQCConnection</span></code>.</p>
+In this library, the object <code class="code docutils literal notranslate"><span class="pre">CQCConnection</span></code> takes care of this communication.
+Any operation applied to the qubits in this Python library is translated to a message sent to the CQC server, by the <code class="code docutils literal notranslate"><span class="pre">CQCConnection</span></code>.</p>
 <p>On top of the quantum network there will be classical communication between the applications, denoted Application communication in the figure.
 This communication include for example the case where Alice can sends Bob an encoded classical message or a measurement outcome.
 Such communication would also be present in a real implementation of a quantum network.
 There is a built-in feature in the Python library that realize this functionality, which have been developed for ease of use for someone not familiar with a client/server setup.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">To have classical communication between the applications, one is not forced to use the built-in functionality realized by the <code class="docutils literal"><span class="pre">CQCConnection</span></code>. You can just as well setup your own client/server communication using the method of your preference. More information and a template for setting up a client/server interaction can be found in <a class="reference internal" href="NativeModeTemplate.html"><span class="doc">Template for programming in native mode</span></a>:.</p>
+<p class="last">To have classical communication between the applications, one is not forced to use the built-in functionality realized by the <code class="docutils literal notranslate"><span class="pre">CQCConnection</span></code>. You can just as well setup your own client/server communication using the method of your preference. More information and a template for setting up a client/server interaction can be found in <a class="reference internal" href="NativeModeTemplate.html"><span class="doc">Template for programming in native mode</span></a>:.</p>
 </div>
-<p>The built-in classical communication of the Python library is handled by the object <code class="code docutils literal"><span class="pre">CQCConnection</span></code>.
-Let assume that Alice wants to send a classical message to Bob and that Alice and Bob are instances of <code class="code docutils literal"><span class="pre">CQCConnection</span></code> at the respective nodes.
-This can be done by simply executing <code class="code docutils literal"><span class="pre">Alice.sendClassical(&quot;Bob&quot;,</span> <span class="pre">msg)</span></code>, where <code class="code docutils literal"><span class="pre">msg</span></code> is the message to be sent from Alice to Bob.
-The method <code class="code docutils literal"><span class="pre">sendClassical</span></code> tries to open a socket connection to Bob and to sent the message.
+<p>The built-in classical communication of the Python library is handled by the object <code class="code docutils literal notranslate"><span class="pre">CQCConnection</span></code>.
+Let assume that Alice wants to send a classical message to Bob and that Alice and Bob are instances of <code class="code docutils literal notranslate"><span class="pre">CQCConnection</span></code> at the respective nodes.
+This can be done by simply executing <code class="code docutils literal notranslate"><span class="pre">Alice.sendClassical(&quot;Bob&quot;,</span> <span class="pre">msg)</span></code>, where <code class="code docutils literal notranslate"><span class="pre">msg</span></code> is the message to be sent from Alice to Bob.
+The method <code class="code docutils literal notranslate"><span class="pre">sendClassical</span></code> tries to open a socket connection to Bob and to sent the message.
 Note that if this method is never called, a socket connection is never opened.
 The socket connection between Alice and Bob are closed after the message is sent.
 This classical communication is thus not built for efficiency but for easy of use for someone not familiar with client/server setup.</p>
-<p>The socket addresses used by the built-in classical communication are taken from the file specified by the path in the argument <code class="code docutils literal"><span class="pre">appFile</span></code> when instantiating the <code class="code docutils literal"><span class="pre">CQCConnection</span></code>. If this argument is not specified, the file config/appNodes.cfg is used by default.</p>
+<p>The socket addresses used by the built-in classical communication are taken from the file specified by the path in the argument <code class="code docutils literal notranslate"><span class="pre">appFile</span></code> when instantiating the <code class="code docutils literal notranslate"><span class="pre">CQCConnection</span></code>. If this argument is not specified, the file config/appNodes.cfg is used by default.</p>
 <a class="reference internal image-reference" href="_images/servers.png"><img alt="Programming SimulaQrons Interfaces" class="align-center" src="_images/servers.png" style="width: 600px;" /></a>
 </div>
 
@@ -137,7 +130,7 @@ This classical communication is thus not built for efficiency but for easy of us
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
     </div>
   </body>
 </html>
