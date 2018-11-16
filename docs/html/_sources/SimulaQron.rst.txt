@@ -11,6 +11,7 @@ Subpackages
     SimulaQron.virtNode
     SimulaQron.cqc
     CLib
+    RustLib
 
 SimulaQron.conf module
 ----------------------

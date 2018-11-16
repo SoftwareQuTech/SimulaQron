@@ -27,15 +27,19 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from SimulaQron.virtNode.virtual import *
+from SimulaQron.virtNode.virtual import backEnd
+from SimulaQron.settings import Settings
+import sys
+import os
+import logging
 
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=Settings.CONF_LOGGING_LEVEL_BACKEND)
+logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=Settings.CONF_LOGGING_LEVEL_BACKEND)
 
 
 # args.hostName instead of sys.argv[1] ?
 logging.debug("Starting VIRTUAL NODE %s", sys.argv[1])
 
-virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
-be = backEnd(sys.argv[1], virtualFile)
+virtualFile = os.environ.get("NETSIM") + "/config/virtualNodes.cfg"
+be = backEnd(sys.argv[1].strip(), virtualFile)
 
 node = be.start(maxQubits=Settings.CONF_MAXQUBITS, maxRegisters=Settings.CONF_MAXREGS)

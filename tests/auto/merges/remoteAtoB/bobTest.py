@@ -29,19 +29,19 @@
 
 
 import os
+import logging
+
+import qutip as qp
+import numpy as np
 
 from twisted.spread import pb
-from twisted.internet import reactor
-from twisted.internet.defer import inlineCallbacks, returnValue, DeferredList, Deferred
+from twisted.internet.defer import inlineCallbacks
 
-from qutip import *
+from SimulaQron.general.hostConfig import networkConfig
+from SimulaQron.local.setup import setup_local, assemble_qubit
+from SimulaQron.settings import Settings
+from SimulaQron.toolbox.stabilizerStates import StabilizerState
 
-from SimulaQron.virtNode.basics import *
-from SimulaQron.virtNode.quantum import *
-from SimulaQron.virtNode.crudeSimulator import *
-from SimulaQron.general.hostConfig import *
-
-from SimulaQron.local.setup import *
 
 #####################################################################################################
 #
@@ -52,17 +52,17 @@ from SimulaQron.local.setup import *
 # communication server is running (if applicable).
 #
 def runClientNode(qReg, virtRoot, myName, classicalNet):
-	"""
-	Code to execture for the local client node. Called if all connections are established.
+    """
+    Code to execture for the local client node. Called if all connections are established.
 
-	Arguments
-	qReg		quantum register (twisted object supporting remote method calls)
-	virtRoot	virtual quantum ndoe (twisted object supporting remote method calls)
-	myName		name of this node (string)
-	classicalNet	servers in the classical communication network (dictionary of hosts)
-	"""
+    Arguments
+    qReg		quantum register (twisted object supporting remote method calls)
+    virtRoot	virtual quantum ndoe (twisted object supporting remote method calls)
+    myName		name of this node (string)
+    classicalNet	servers in the classical communication network (dictionary of hosts)
+    """
 
-	logging.debug("LOCAL %s: Runing client side program.",myName)
+    logging.debug("LOCAL %s: Runing client side program.", myName)
 
 
 #####################################################################################################
@@ -72,103 +72,105 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 # This will be run if the local node acts as a server on the classical communication network,
 # accepting remote method calls from the other nodes.
 
+
 class localNode(pb.Root):
+    def __init__(self, node, classicalNet):
 
-	def __init__(self, node, classicalNet):
+        self.node = node
+        self.classicalNet = classicalNet
 
-		self.node = node
-		self.classicalNet = classicalNet
+        self.virtQubit = None
+        self.virtRoot = None
+        self.qReg = None
 
-		self.virtQubit = None
-		self.virtRoot = None
-		self.qReg = None
+    def set_virtual_node(self, virtRoot):
+        self.virtRoot = virtRoot
 
-	def set_virtual_node(self, virtRoot):
-		self.virtRoot = virtRoot
+    def set_virtual_reg(self, qReg):
+        self.qReg = qReg
 
-	def set_virtual_reg(self, qReg):
-		self.qReg = qReg
+    def remote_test(self):
+        return "Tested!"
 
-	def remote_test(self):
-		return "Tested!"
+    # This can be called by Alice to tell Bob where to get the qubit and what corrections to apply
+    @inlineCallbacks
+    def remote_receive_qubit(self, virtualNum):
+        """
+        Recover the qubit from teleportation.
 
-	# This can be called by Alice to tell Bob where to get the qubit and what corrections to apply
-	@inlineCallbacks
-	def remote_receive_qubit(self, virtualNum):
-		"""
-		Recover the qubit from teleportation.
+        Arguments
+        a,b		received measurement outcomes from Alice
+        virtualNum	number of the virtual qubit corresponding to the EPR pair received
+        """
 
-		Arguments
-		a,b		received measurement outcomes from Alice
-		virtualNum	number of the virtual qubit corresponding to the EPR pair received
-		"""
+        logging.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
 
-		logging.debug("LOCAL %s: Getting reference to qubit number %d.",self.node.name, virtualNum)
+        # Get a reference to our side of the EPR pair
+        qA = yield self.virtRoot.callRemote("get_virtual_ref", virtualNum)
 
-		# Get a reference to our side of the EPR pair
-		qA = yield self.virtRoot.callRemote("get_virtual_ref",virtualNum)
+        # Create a fresh qubit
+        q = yield self.virtRoot.callRemote("new_qubit_inreg", self.qReg)
 
-		# Create a fresh qubit
-		q = yield self.virtRoot.callRemote("new_qubit_inreg",self.qReg)
+        # Create the GHZ state by entangling the fresh qubit
+        yield qA.callRemote("apply_H")
+        yield qA.callRemote("cnot_onto", q)
 
-		# Create the GHZ state by entangling the fresh qubit
-		yield qA.callRemote("apply_H")
-		yield qA.callRemote("cnot_onto",q)
+        if Settings.CONF_BACKEND == "qutip":
+            # Output state
+            (realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits", [qA, q])
+            rho = assemble_qubit(realRho, imagRho)
+            expectedRho = qp.Qobj([[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]])
+            correct = rho == expectedRho
+        elif Settings.CONF_BACKEND == "projectq":
+            (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", qA)
+            state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
+            expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
+            correct = np.all(np.isclose(state, expectedState))
+        elif Settings.CONF_BACKEND == "stabilizer":
+            (array, _) = yield self.virtRoot.callRemote("get_register_RI", qA)
+            state = StabilizerState(array)
+            expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
+            correct = state == expectedState
+        else:
+            ValueError("Unknown backend {}".format(Settings.CONF_BACKEND))
 
-		# Print the received qubits
-		(realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits",[qA, q])
-		rho = self.assemble_qubit(realRho,imagRho)
-		expectedRho = Qobj([[0.5,0,0,0.5],[0,0,0,0],[0,0,0,0],[0.5,0,0,0.5]])
+        if correct:
+            print("Testing register merge: A to B............ok")
+        else:
+            print("Testing register merge: A to B............fail")
 
-		if rho == expectedRho:
-			print("Testing register merge: A to B............ok")
-		else:
-			print("Testing register merge: A to B............fail")
-
-	def assemble_qubit(self, realM, imagM):
-		"""
-		Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
-		We need this since Twisted PB does not support sending complex valued object natively.
-		"""
-		M = realM
-		for s in range(len(M)):
-			for t in range(len(M)):
-				M[s][t] = realM[s][t] + 1j * imagM[s][t]
-
-		return Qobj(M)
 
 #####################################################################################################
 #
 # main
 #
 def main():
+    # In this example, we are Bob.
+    myName = "Bob"
 
-	# In this example, we are Bob.
-	myName = "Bob"
+    # This file defines the network of virtual quantum nodes
+    virtualFile = os.path.join(os.path.dirname(__file__), "../../../../config/virtualNodes.cfg")
 
-	# This file defines the network of virtual quantum nodes
-	virtualFile = os.path.join(os.path.dirname(__file__), '../../../../config/virtualNodes.cfg')
+    # This file defines the nodes acting as servers in the classical communication network
+    classicalFile = os.path.join(os.path.dirname(__file__), "classicalNet.cfg")
 
-	# This file defines the nodes acting as servers in the classical communication network
-	classicalFile = os.path.join(os.path.dirname(__file__), 'classicalNet.cfg')
+    # Read configuration files for the virtual quantum, as well as the classical network
+    virtualNet = networkConfig(virtualFile)
+    classicalNet = networkConfig(classicalFile)
 
-	# Read configuration files for the virtual quantum, as well as the classical network
-	virtualNet = networkConfig(virtualFile)
-	classicalNet = networkConfig(classicalFile)
+    # Check if we should run a local classical server. If so, initialize the code
+    # to handle remote connections on the classical communication network
+    if myName in classicalNet.hostDict:
+        lNode = localNode(classicalNet.hostDict[myName], classicalNet)
+    else:
+        lNode = None
 
-	# Check if we should run a local classical server. If so, initialize the code
-	# to handle remote connections on the classical communication network
-	if myName in classicalNet.hostDict:
-		lNode = localNode(classicalNet.hostDict[myName], classicalNet)
-	else:
-		lNode = None
+    # Set up the local classical server if applicable, and connect to the virtual
+    # node and other classical servers. Once all connections are set up, this will
+    # execute the function runClientNode
+    setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
-	# Set up the local classical server if applicable, and connect to the virtual
-	# node and other classical servers. Once all connections are set up, this will
-	# execute the function runClientNode
-	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
+logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=logging.ERROR)
 main()
-

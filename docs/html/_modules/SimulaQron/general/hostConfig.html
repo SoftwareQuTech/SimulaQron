@@ -84,6 +84,19 @@
 
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">struct</span>
 <span class="kn">from</span> <span class="nn">twisted.spread</span> <span class="k">import</span> <span class="n">pb</span>
+<span class="kn">from</span> <span class="nn">ipaddress</span> <span class="k">import</span> <span class="n">IPv4Address</span>
+
+<div class="viewcode-block" id="cqc_node_id"><a class="viewcode-back" href="../../../SimulaQron.general.html#SimulaQron.general.hostConfig.cqc_node_id">[docs]</a><span class="k">def</span> <span class="nf">cqc_node_id</span><span class="p">(</span><span class="n">fam</span><span class="p">,</span> <span class="n">ip</span><span class="p">):</span>
+	<span class="k">if</span> <span class="n">fam</span> <span class="o">==</span> <span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;!L&quot;</span><span class="p">,</span> <span class="n">IPv4Address</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span><span class="o">.</span><span class="n">packed</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No IPv6 yet :(&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="cqc_node_id_from_addrinfo"><a class="viewcode-back" href="../../../SimulaQron.general.html#SimulaQron.general.hostConfig.cqc_node_id_from_addrinfo">[docs]</a><span class="k">def</span> <span class="nf">cqc_node_id_from_addrinfo</span><span class="p">(</span><span class="n">addr</span><span class="p">):</span>
+	<span class="n">fam</span> <span class="o">=</span> <span class="n">addr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">sockaddr</span> <span class="o">=</span> <span class="n">addr</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+	<span class="n">ip</span> <span class="o">=</span> <span class="n">sockaddr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="k">return</span> <span class="n">cqc_node_id</span><span class="p">(</span><span class="n">fam</span><span class="p">,</span> <span class="n">ip</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="networkConfig"><a class="viewcode-back" href="../../../SimulaQron.general.html#SimulaQron.general.hostConfig.networkConfig">[docs]</a><span class="k">class</span> <span class="nc">networkConfig</span><span class="p">(</span><span class="n">pb</span><span class="o">.</span><span class="n">Referenceable</span><span class="p">):</span>
 
@@ -136,18 +149,19 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">hostname</span> <span class="o">=</span> <span class="n">hostname</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
 
-		<span class="c1"># Lookup IP address - store in network byte order(!)</span>
-		<span class="n">addr</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostbyname</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span>
-		<span class="n">packedIP</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">inet_aton</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">ip</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;!L&quot;</span><span class="p">,</span> <span class="n">packedIP</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="c1"># Lookup IP address</span>
+		<span class="n">addrs</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">getaddrinfo</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">IPPROTO_TCP</span>
+                        <span class="p">,</span><span class="n">family</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">)</span>
+		<span class="n">addr</span> <span class="o">=</span> <span class="n">addrs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">family</span> <span class="o">=</span> <span class="n">addr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">addr</span> <span class="o">=</span> <span class="n">addr</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">ip</span> <span class="o">=</span> <span class="n">cqc_node_id_from_addrinfo</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
 
 		<span class="c1"># Connection identifiers used after connected</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="mi">0</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="mi">0</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">defer</span> <span class="o">=</span> <span class="mi">0</span></div>
-
-
-
 </pre></div>
 
           </div>

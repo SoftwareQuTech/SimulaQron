@@ -81,16 +81,21 @@
 <span class="c1"># (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS</span>
 <span class="c1"># SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
 
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
-<span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.cqcMessageHandler</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">twisted.internet.defer</span> <span class="k">import</span> <span class="n">DeferredLock</span><span class="p">,</span> <span class="n">inlineCallbacks</span>
+<span class="kn">from</span> <span class="nn">twisted.internet.protocol</span> <span class="k">import</span> <span class="n">Factory</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">connectionDone</span>
+
+<span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.cqcHeader</span> <span class="k">import</span> <span class="p">(</span>
+	<span class="n">CQC_HDR_LENGTH</span><span class="p">,</span>
+	<span class="n">CQC_VERSION</span><span class="p">,</span>
+	<span class="n">CQCHeader</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">SimulaQron.settings</span> <span class="k">import</span> <span class="n">Settings</span>
-<span class="kn">from</span> <span class="nn">twisted.internet.defer</span> <span class="k">import</span> <span class="n">DeferredLock</span>
-<span class="kn">from</span> <span class="nn">twisted.internet.protocol</span> <span class="k">import</span> <span class="n">Factory</span><span class="p">,</span> <span class="n">Protocol</span>
 
-<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">json</span><span class="o">,</span> <span class="nn">logging</span>
-
-
-<span class="c1">#####################################################################################################</span>
+<span class="c1">###############################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># CQC Factory</span>
 <span class="c1">#</span>
@@ -120,7 +125,8 @@
 		<span class="c1"># Lock governing access to the qubitList</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">DeferredLock</span><span class="p">()</span>
 
-		<span class="c1"># Read in topology, if specified. topology=None means fully connected topology</span>
+		<span class="c1"># Read in topology, if specified. topology=None means fully connected</span>
+		<span class="c1"># topology</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">topology</span> <span class="o">=</span> <span class="kc">None</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_setup_topology</span><span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">CONF_TOPOLOGY_FILE</span><span class="p">)</span>
 
@@ -144,7 +150,8 @@
 
 <div class="viewcode-block" id="CQCFactory.lookup"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCFactory.lookup">[docs]</a>	<span class="k">def</span> <span class="nf">lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Lookup name of remote host used within SimulaQron given ip and portnumber.</span>
+<span class="sd">		Lookup name of remote host used within SimulaQron given ip and</span>
+<span class="sd">		portnumber.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cqcNet</span><span class="o">.</span><span class="n">hostDict</span><span class="p">:</span>
 			<span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cqcNet</span><span class="o">.</span><span class="n">hostDict</span><span class="p">[</span><span class="n">entry</span><span class="p">]</span>
@@ -158,9 +165,11 @@
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Sets up the topology, if specified.</span>
 <span class="sd">		:param topology_file: str</span>
-<span class="sd">			The relative path to the json-file defining the topology. It will be assumed that the absolute</span>
-<span class="sd">			path to the file is $NETSIM / topology_file.</span>
-<span class="sd">			If topology is an empty string then a fully connected topology will be used.</span>
+<span class="sd">			The relative path to the json-file defining the topology. It will</span>
+<span class="sd">			be assumed that the absolute path to the file is</span>
+<span class="sd">			${NETSIM}/topology_file.</span>
+<span class="sd">			If topology is an empty string then a fully connected topology will</span>
+<span class="sd">			be used.</span>
 <span class="sd">		:return: None</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="n">topology_file</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
@@ -173,15 +182,27 @@
 					<span class="k">try</span><span class="p">:</span>
 						<span class="bp">self</span><span class="o">.</span><span class="n">topology</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">top_file</span><span class="p">)</span>
 					<span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
-						<span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Could not parse the json file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">abs_path</span><span class="p">))</span>
+						<span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+							<span class="s2">&quot;Could not parse the json file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+								<span class="n">abs_path</span>
+							<span class="p">)</span>
+						<span class="p">)</span>
 			<span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-				<span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">&quot;Could not find the file specifying the topology: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">abs_path</span><span class="p">))</span>
+				<span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+					<span class="s2">&quot;Could not find the file specifying the topology:&quot;</span>
+					<span class="s2">&quot; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">abs_path</span><span class="p">)</span>
+				<span class="p">)</span>
 			<span class="k">except</span> <span class="ne">IsADirectoryError</span><span class="p">:</span>
-				<span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">&quot;Could not find the file specifying the topology: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">abs_path</span><span class="p">))</span>
+				<span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+					<span class="s2">&quot;Could not find the file specifying the topology: &quot;</span>
+					<span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">abs_path</span><span class="p">)</span>
+				<span class="p">)</span>
 
 <div class="viewcode-block" id="CQCFactory.is_adjacent"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCFactory.is_adjacent">[docs]</a>	<span class="k">def</span> <span class="nf">is_adjacent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">remote_host_name</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Checks if remote host is adjacent to this node, according to the specified topology.</span>
+<span class="sd">		Checks if remote host is adjacent to this node, according to the</span>
+<span class="sd">		specified topology.</span>
+
 <span class="sd">		:param remote_host_name: str</span>
 <span class="sd">			The name of the remote host</span>
 <span class="sd">		:return:</span>
@@ -196,23 +217,27 @@
 			<span class="k">else</span><span class="p">:</span>
 				<span class="k">return</span> <span class="kc">False</span>
 		<span class="k">else</span><span class="p">:</span>
-			<span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Node </span><span class="si">{}</span><span class="s2"> is not in the specified topology&quot;</span>
-							<span class="s2">&quot;and is therefore assumed to have no neighbors&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+				<span class="s2">&quot;Node </span><span class="si">{}</span><span class="s2"> is not in the specified topology and is therefore &quot;</span>
+				<span class="s2">&quot;assumed to have no neighbors&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+			<span class="p">)</span>
 			<span class="k">return</span> <span class="kc">False</span></div></div>
 
 
-<span class="c1">#####################################################################################################</span>
+<span class="c1">###############################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># CQC Protocol</span>
 <span class="c1">#</span>
-<span class="c1"># Execute the CQC Protocol giving access to the SimulaQron backend via the universal interface.</span>
+<span class="c1"># Execute the CQC Protocol giving access to the SimulaQron backend via the</span>
+<span class="c1"># universal interface.</span>
 <span class="c1">#</span>
 
 <div class="viewcode-block" id="CQCProtocol"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol">[docs]</a><span class="k">class</span> <span class="nc">CQCProtocol</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 	<span class="c1"># Dictionary storing the next unique qubit id for each used app_id</span>
 	<span class="n">_next_q_id</span> <span class="o">=</span> <span class="p">{}</span>
 
-	<span class="c1"># Dictionary storing the next unique entanglement id for each used (host_app_id,remote_node,remote_app_id)</span>
+	<span class="c1"># Dictionary storing the next unique entanglement id for each used</span>
+	<span class="c1"># (host_app_id,remote_node,remote_app_id)</span>
 	<span class="n">_next_ent_id</span> <span class="o">=</span> <span class="p">{}</span>
 
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory</span><span class="p">):</span>
@@ -220,8 +245,9 @@
 		<span class="c1"># CQC Factory, including our connection to the SimulaQron backend</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="n">factory</span>
 
-		<span class="c1"># Default application ID, typically one connection per application but we will</span>
-		<span class="c1"># deliberately NOT check for that since this is the task of higher layers or an OS</span>
+		<span class="c1"># Default application ID, typically one connection per application but</span>
+		<span class="c1"># we will deliberately NOT check for that since this is the task of</span>
+		<span class="c1"># higher layers or an OS</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">app_id</span> <span class="o">=</span> <span class="mi">0</span>
 
 		<span class="c1"># Define the backend to use. Is a setting in settings.ini</span>
@@ -239,18 +265,18 @@
 		<span class="c1"># Convenience</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span>
 
-		<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Initialized Protocol&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+		<span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Initialized Protocol&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CQCProtocol.connectionMade"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.connectionMade">[docs]</a>	<span class="k">def</span> <span class="nf">connectionMade</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="k">pass</span></div>
 
-<div class="viewcode-block" id="CQCProtocol.connectionLost"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.connectionLost">[docs]</a>	<span class="k">def</span> <span class="nf">connectionLost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reason</span><span class="p">):</span>
+<div class="viewcode-block" id="CQCProtocol.connectionLost"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.connectionLost">[docs]</a>	<span class="k">def</span> <span class="nf">connectionLost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="n">connectionDone</span><span class="p">):</span>
 		<span class="k">pass</span></div>
 
 <div class="viewcode-block" id="CQCProtocol.dataReceived"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.dataReceived">[docs]</a>	<span class="k">def</span> <span class="nf">dataReceived</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Receive data. We will always wait to receive enough data for the header,</span>
-<span class="sd">		and then the entire packet first before commencing processing.</span>
+<span class="sd">		Receive data. We will always wait to receive enough data for the</span>
+<span class="sd">		header, and then the entire packet first before commencing processing.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="c1"># Read whatever we received into a buffer</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">:</span>
@@ -266,27 +292,40 @@
 
 			<span class="c1"># Got enough data for the CQC Header so read it in</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">gotCQCHeader</span> <span class="o">=</span> <span class="kc">True</span>
-			<span class="n">rawHeader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">CQC_HDR_LENGTH</span><span class="p">]</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">currHeader</span> <span class="o">=</span> <span class="n">CQCHeader</span><span class="p">(</span><span class="n">rawHeader</span><span class="p">)</span>
+			<span class="n">raw_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">CQC_HDR_LENGTH</span><span class="p">]</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">currHeader</span> <span class="o">=</span> <span class="n">CQCHeader</span><span class="p">(</span><span class="n">raw_header</span><span class="p">)</span>
 
 			<span class="c1"># Remove the header from the buffer</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[</span><span class="n">CQC_HDR_LENGTH</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">)]</span>
 
-			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Read CQC Header: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currHeader</span><span class="o">.</span><span class="n">printable</span><span class="p">())</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+				<span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Read CQC Header: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">currHeader</span><span class="o">.</span><span class="n">printable</span><span class="p">()</span>
+			<span class="p">)</span>
 
 		<span class="c1"># Check whether we already received all the data</span>
 		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">currHeader</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
 			<span class="c1"># Still waiting for data</span>
-			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Incomplete data. Waiting. Current length </span><span class="si">%s</span><span class="s2">, required length </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-						  <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">currHeader</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+				<span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Incomplete data. Waiting. Current length </span><span class="si">%s</span><span class="s2">, &quot;</span>
+				<span class="s2">&quot;required length </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+				<span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">),</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">currHeader</span><span class="o">.</span><span class="n">length</span>
+			<span class="p">)</span>
 			<span class="k">return</span>
 
 		<span class="c1"># We got the header and all the data for this packet. Start processing.</span>
 		<span class="c1"># Update our app ID</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">app_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currHeader</span><span class="o">.</span><span class="n">app_id</span>
-		<span class="c1"># Invoke the relevant message handler, processing the possibly remaining data</span>
+		<span class="c1"># Invoke the relevant message handler, processing the possibly</span>
+		<span class="c1"># remaining data</span>
 		<span class="k">try</span><span class="p">:</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">_parseData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currHeader</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">currHeader</span><span class="o">.</span><span class="n">length</span><span class="p">])</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_parseData</span><span class="p">(</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">currHeader</span><span class="p">,</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">currHeader</span><span class="o">.</span><span class="n">length</span><span class="p">]</span>
+			<span class="p">)</span>
 		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
 			<span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 			<span class="kn">import</span> <span class="nn">traceback</span>
@@ -338,7 +377,8 @@
 <div class="viewcode-block" id="CQCProtocol.new_qubit_id"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.new_qubit_id">[docs]</a>	<span class="k">def</span> <span class="nf">new_qubit_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_id</span><span class="p">):</span>
 
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv</span>
+<span class="sd">		Returns a new unique qubit id for the specified app_id. Used by cmd_new</span>
+<span class="sd">		and cmd_recv</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="n">app_id</span> <span class="ow">in</span> <span class="n">CQCProtocol</span><span class="o">.</span><span class="n">_next_q_id</span><span class="p">:</span>
 			<span class="n">q_id</span> <span class="o">=</span> <span class="n">CQCProtocol</span><span class="o">.</span><span class="n">_next_q_id</span><span class="p">[</span><span class="n">app_id</span><span class="p">]</span>
@@ -346,7 +386,8 @@
 			<span class="k">return</span> <span class="n">q_id</span>
 		<span class="k">else</span><span class="p">:</span>
 			<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">			Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv</span>
+<span class="sd">			Returns a new unique qubit id for the specified app_id. Used by</span>
+<span class="sd">			cmd_new and cmd_recv</span>
 <span class="sd">			&quot;&quot;&quot;</span>
 			<span class="k">if</span> <span class="n">app_id</span> <span class="ow">in</span> <span class="n">CQCProtocol</span><span class="o">.</span><span class="n">_next_q_id</span><span class="p">:</span>
 				<span class="n">q_id</span> <span class="o">=</span> <span class="n">CQCProtocol</span><span class="o">.</span><span class="n">_next_q_id</span><span class="p">[</span><span class="n">app_id</span><span class="p">]</span>
@@ -358,7 +399,8 @@
 
 <div class="viewcode-block" id="CQCProtocol.new_ent_id"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.new_ent_id">[docs]</a>	<span class="k">def</span> <span class="nf">new_ent_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host_app_id</span><span class="p">,</span> <span class="n">remote_node</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Returns a new unique entanglement id for the specified host_app_id, remote_node and remote_app_id. Used by cmd_epr.</span>
+<span class="sd">		Returns a new unique entanglement id for the specified host_app_id,</span>
+<span class="sd">		remote_node and remote_app_id. Used by cmd_epr.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">pair_id</span> <span class="o">=</span> <span class="p">(</span><span class="n">host_app_id</span><span class="p">,</span> <span class="n">remote_node</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">pair_id</span> <span class="ow">in</span> <span class="n">CQCProtocol</span><span class="o">.</span><span class="n">_next_ent_id</span><span class="p">:</span>

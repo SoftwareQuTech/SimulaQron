@@ -106,6 +106,38 @@
 					   <span class="n">CQC_CMD_CPHASE</span><span class="p">}</span></div>
 
 
+<div class="viewcode-block" id="get_remote_from_directory_or_address"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.get_remote_from_directory_or_address">[docs]</a><span class="k">def</span> <span class="nf">get_remote_from_directory_or_address</span><span class="p">(</span><span class="n">cqcNet</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">remote_socket</span><span class="p">):</span>
+	<span class="k">if</span> <span class="n">remote_socket</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="c1"># Get receiving host</span>
+			<span class="n">hostDict</span> <span class="o">=</span> <span class="n">cqcNet</span><span class="o">.</span><span class="n">hostDict</span>
+		<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If a CQCConnections is initialized without specifying a cqcFile you need to also provide a socket address for the remote node here.&quot;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">hostDict</span><span class="p">:</span>
+			<span class="n">recvHost</span> <span class="o">=</span> <span class="n">hostDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+			<span class="n">remote_ip</span> <span class="o">=</span> <span class="n">recvHost</span><span class="o">.</span><span class="n">ip</span>
+			<span class="n">remote_port</span> <span class="o">=</span> <span class="n">recvHost</span><span class="o">.</span><span class="n">port</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Host name &#39;</span><span class="si">{}</span><span class="s2">&#39; is not in the cqc network&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">remote_host</span><span class="p">,</span> <span class="n">remote_port</span> <span class="o">=</span> <span class="n">remote_socket</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remote_host</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+				<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remote_port</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+				<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;When specifying the remote socket address, this should be a tuple (str,int).&quot;</span><span class="p">)</span>
+
+		<span class="c1"># Pack the IP</span>
+		<span class="n">addrs</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">getaddrinfo</span><span class="p">(</span><span class="n">remote_host</span><span class="p">,</span> <span class="n">remote_port</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">IPPROTO_TCP</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">)</span>
+		<span class="n">addr</span> <span class="o">=</span> <span class="n">addrs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">remote_ip</span> <span class="o">=</span> <span class="n">cqc_node_id_from_addrinfo</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+		<span class="n">remote_port</span> <span class="o">=</span> <span class="n">addr</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+	<span class="k">return</span> <span class="n">remote_ip</span><span class="p">,</span> <span class="n">remote_port</span></div>
+
+
+
 <div class="viewcode-block" id="createXtraHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.createXtraHeader">[docs]</a><span class="k">def</span> <span class="nf">createXtraHeader</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
 	<span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="n">CQC_CMD_SEND</span> <span class="ow">or</span> <span class="n">command</span> <span class="o">==</span> <span class="n">CQC_CMD_EPR</span><span class="p">:</span>
 		<span class="n">header</span> <span class="o">=</span> <span class="n">CQCCommunicationHeader</span><span class="p">()</span>
@@ -195,15 +227,17 @@
 				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Host name &#39;</span><span class="si">{}</span><span class="s2">&#39; is not in the cqc network&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
 
 			<span class="c1"># Get IP and port number</span>
-			<span class="n">myIP</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">inet_ntoa</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;!L&quot;</span><span class="p">,</span> <span class="n">myHost</span><span class="o">.</span><span class="n">ip</span><span class="p">))</span>
-			<span class="n">port</span> <span class="o">=</span> <span class="n">myHost</span><span class="o">.</span><span class="n">port</span>
+			<span class="n">addr</span> <span class="o">=</span> <span class="n">myHost</span><span class="o">.</span><span class="n">addr</span>
 		<span class="k">else</span><span class="p">:</span>
 			<span class="k">try</span><span class="p">:</span>
-				<span class="n">myIP</span><span class="p">,</span> <span class="n">port</span> <span class="o">=</span> <span class="n">socket_address</span>
-				<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">myIP</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+				<span class="n">hostname</span><span class="p">,</span> <span class="n">port</span> <span class="o">=</span> <span class="n">socket_address</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
 					<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
 				<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
 					<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
+				<span class="n">addrs</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">getaddrinfo</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">IPPROTO_TCP</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">)</span>
+				<span class="n">addr</span> <span class="o">=</span> <span class="n">addrs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
 			<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
 				<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;When specifying the socket address, this should be a tuple (str,int).&quot;</span><span class="p">)</span>
 
@@ -212,8 +246,8 @@
 			<span class="k">try</span><span class="p">:</span>
 				<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2"> : Trying to connect to CQC server&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
-				<span class="bp">self</span><span class="o">.</span><span class="n">_s</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">myIP</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_s</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">addr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">addr</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">addr</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">addr</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
 				<span class="k">break</span>
 			<span class="k">except</span> <span class="ne">ConnectionRefusedError</span><span class="p">:</span>
 				<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2"> : Could not connect to  CQC server, trying again...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
@@ -229,7 +263,11 @@
 			<span class="bp">self</span><span class="o">.</span><span class="n">appFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;NETSIM&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/config/appNodes.cfg&quot;</span>
 
 		<span class="c1"># Read configuration files for the application network</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span> <span class="o">=</span> <span class="n">networkConfig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">appFile</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">appFile</span><span class="p">):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span> <span class="o">=</span> <span class="n">networkConfig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">appFile</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Since there is no appFile was found the built-in classical commmunication cannot be used.&quot;</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span> <span class="o">=</span> <span class="kc">None</span>
 
 		<span class="c1"># List of pending messages waiting to be send to the back-end</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">pend_messages</span> <span class="o">=</span> <span class="n">pend_messages</span>
@@ -278,16 +316,19 @@
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Sets up a server for the application communication, if not already set up.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Since there is no appFile was found the built-in classical commmunication cannot be used.&quot;</span><span class="p">)</span>
 
 		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classicalServer</span><span class="p">:</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2">: Starting classical server&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 			<span class="c1"># Get host data</span>
 			<span class="n">myHost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span><span class="o">.</span><span class="n">hostDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+			<span class="n">hostaddr</span> <span class="o">=</span> <span class="n">myHost</span><span class="o">.</span><span class="n">addr</span>
 
 			<span class="c1"># Setup server</span>
-			<span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+			<span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">hostaddr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">hostaddr</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">hostaddr</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 			<span class="n">s</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SO_REUSEADDR</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-			<span class="n">s</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="n">myHost</span><span class="o">.</span><span class="n">hostname</span><span class="p">,</span> <span class="n">myHost</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+			<span class="n">s</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">hostaddr</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
 			<span class="n">s</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 			<span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">addr</span><span class="p">)</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2">: Classical server started&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
@@ -323,6 +364,8 @@
 <span class="sd">			:name:		The name of the host in the application network.</span>
 <span class="sd">			:timout:	The time to try to connect to the server. When timout is reached an RuntimeError is raised.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Since there is no appFile was found the built-in classical commmunication cannot be used.&quot;</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classicalConn</span><span class="p">:</span>
 			<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2">: Opening classical channel to </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
 			<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span><span class="o">.</span><span class="n">hostDict</span><span class="p">:</span>
@@ -330,10 +373,11 @@
 			<span class="k">else</span><span class="p">:</span>
 				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Host name &#39;</span><span class="si">{}</span><span class="s2">&#39; is not in the cqc network&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
 
+			<span class="n">addr</span> <span class="o">=</span> <span class="n">remoteHost</span><span class="o">.</span><span class="n">addr</span>
 			<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
 				<span class="k">try</span><span class="p">:</span>
-					<span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
-					<span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">remoteHost</span><span class="o">.</span><span class="n">hostname</span><span class="p">,</span> <span class="n">remoteHost</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+					<span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">addr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">addr</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">addr</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+					<span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">addr</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
 					<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2">: Classical channel to </span><span class="si">{}</span><span class="s2"> opened&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
 					<span class="k">break</span>
 				<span class="k">except</span> <span class="ne">ConnectionRefusedError</span><span class="p">:</span>
@@ -857,33 +901,7 @@
 <span class="sd">			:nofify:	 Do we wish to be notified when done.</span>
 <span class="sd">			:block:		 Do we want the qubit to be blocked</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-
-		<span class="k">if</span> <span class="n">remote_socket</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-			<span class="k">try</span><span class="p">:</span>
-				<span class="c1"># Get receiving host</span>
-				<span class="n">hostDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span>
-			<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If a CQCConnections is initialized without specifying a cqcFile you need to also provide a socket address for the remote node here.&quot;</span><span class="p">)</span>
-			<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">hostDict</span><span class="p">:</span>
-				<span class="n">recvHost</span> <span class="o">=</span> <span class="n">hostDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-				<span class="n">remote_ip</span> <span class="o">=</span> <span class="n">recvHost</span><span class="o">.</span><span class="n">ip</span>
-				<span class="n">remote_port</span> <span class="o">=</span> <span class="n">recvHost</span><span class="o">.</span><span class="n">port</span>
-			<span class="k">else</span><span class="p">:</span>
-				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Host name &#39;</span><span class="si">{}</span><span class="s2">&#39; is not in the cqc network&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="k">try</span><span class="p">:</span>
-				<span class="n">remote_ip</span><span class="p">,</span> <span class="n">remote_port</span> <span class="o">=</span> <span class="n">remote_socket</span>
-				<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remote_ip</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-					<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
-				<span class="k">else</span><span class="p">:</span>
-					<span class="c1"># Pack the IP</span>
-					<span class="n">addr</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostbyname</span><span class="p">(</span><span class="n">remote_ip</span><span class="p">)</span>
-					<span class="n">packedIP</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">inet_aton</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
-					<span class="n">remote_ip</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;!L&quot;</span><span class="p">,</span> <span class="n">packedIP</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-				<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remote_port</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-					<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
-			<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-				<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;When specifying the remote socket address, this should be a tuple (str,int).&quot;</span><span class="p">)</span>
+		<span class="n">remote_ip</span><span class="p">,</span> <span class="n">remote_port</span> <span class="o">=</span> <span class="n">get_remote_from_directory_or_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">remote_socket</span><span class="p">)</span>
 
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pend_messages</span><span class="p">:</span>
 			<span class="c1"># print info</span>
@@ -962,32 +980,7 @@
 <span class="sd">			:block:		 Do we want the qubit to be blocked</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
-		<span class="k">if</span> <span class="n">remote_socket</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-			<span class="k">try</span><span class="p">:</span>
-				<span class="c1"># Get receiving host</span>
-				<span class="n">hostDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span>
-			<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If a CQCConnections is initialized without specifying a cqcFile you need to also provide a socket address for the remote node here.&quot;</span><span class="p">)</span>
-			<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">hostDict</span><span class="p">:</span>
-				<span class="n">recvHost</span> <span class="o">=</span> <span class="n">hostDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-				<span class="n">remote_ip</span> <span class="o">=</span> <span class="n">recvHost</span><span class="o">.</span><span class="n">ip</span>
-				<span class="n">remote_port</span> <span class="o">=</span> <span class="n">recvHost</span><span class="o">.</span><span class="n">port</span>
-			<span class="k">else</span><span class="p">:</span>
-				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Host name &#39;</span><span class="si">{}</span><span class="s2">&#39; is not in the cqc network&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="k">try</span><span class="p">:</span>
-				<span class="n">remote_ip</span><span class="p">,</span> <span class="n">remote_port</span> <span class="o">=</span> <span class="n">remote_socket</span>
-				<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remote_ip</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-					<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
-				<span class="k">else</span><span class="p">:</span>
-					<span class="c1"># Pack the IP</span>
-					<span class="n">addr</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostbyname</span><span class="p">(</span><span class="n">remote_ip</span><span class="p">)</span>
-					<span class="n">packedIP</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">inet_aton</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
-					<span class="n">remote_ip</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;!L&quot;</span><span class="p">,</span> <span class="n">packedIP</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-				<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remote_port</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-					<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">()</span>
-			<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-				<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;When specifying the remote socket address, this should be a tuple (str,int).&quot;</span><span class="p">)</span>
+		<span class="n">remote_ip</span><span class="p">,</span> <span class="n">remote_port</span> <span class="o">=</span> <span class="n">get_remote_from_directory_or_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">remote_socket</span><span class="p">)</span>
 
 		<span class="c1"># initialize the qubit</span>
 		<span class="n">q</span> <span class="o">=</span> <span class="n">qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">createNew</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -1287,6 +1280,10 @@
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxitr</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">maxitr</span> <span class="o">=</span> <span class="n">maxitr</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">itr</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">cols</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">get_terminal_size</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span>
+		<span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">cols</span> <span class="o">=</span> <span class="mi">60</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
@@ -1295,9 +1292,13 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ProgressBar.update"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.ProgressBar.update">[docs]</a>	<span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-		<span class="n">procent</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">itr</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxitr</span><span class="p">)</span>
+		<span class="n">cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span> <span class="o">-</span> <span class="mi">8</span>
+		<span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">itr</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxitr</span><span class="p">)</span>
+		<span class="n">ratio</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">itr</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxitr</span>
+		<span class="n">procent</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ratio</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+		<span class="n">progress</span> <span class="o">=</span> <span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">cols</span> <span class="o">*</span> <span class="n">ratio</span><span class="p">)</span>
 		<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">)</span>
-		<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;[</span><span class="si">%-100s</span><span class="s2">] </span><span class="si">%d%%</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="n">procent</span><span class="p">,</span> <span class="n">procent</span><span class="p">))</span>
+		<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;[</span><span class="si">%*s</span><span class="s2">] </span><span class="si">%d%%</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="o">-</span><span class="n">cols</span><span class="p">,</span> <span class="n">progress</span><span class="p">,</span> <span class="n">procent</span><span class="p">))</span>
 		<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 		<span class="k">pass</span></div>
 

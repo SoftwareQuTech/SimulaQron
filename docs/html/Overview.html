@@ -137,7 +137,17 @@ by the backend provided here. For programming network applications using SimulaQ
 deal with this backend simulation.</p>
 <p>Nevertheless, as a guide to the backend, it consists of three essential components:</p>
 <ul class="simple">
-<li>quantumEngine - the one used here is implemented as simpleEngine in crudeSimulator.py which uses <a class="reference external" href="http://qutip.org/">QuTip</a> as a backend. This corresponds to one quantum register full of qubits across which gates can be performed. Should you wish to use a different backend, you may wish to add a different engine.</li>
+<li><dl class="first docutils">
+<dt>quantumEngine - There are currenlty three different quantumEngines implemented: Using <a class="reference external" href="http://qutip.org/">QuTip</a> and mixed state, using <a class="reference external" href="https://projectq.ch/">Project Q</a> and pure states and finally using stabilizer formalism.</dt>
+<dd>This corresponds to one quantum register full of qubits across which gates can be performed. Should you wish to use a different backend, you may wish to add a different engine.
+The three current backends give different runtimes due to how quantum states are stored and manipulated.
+In the stabilizer formalism, only Clifford operations can be performed and the simulation is in fact efficient in the number of qubits.
+See figure XXX for a comparison of runtimes to create a GHZ-state on a number of qubits using the three different backends.</dd>
+</dl>
+</li>
+</ul>
+<a class="reference internal image-reference" href="_images/runtime_qutip_vs_projectq_vs_stabilizer.png"><img alt="Runtime of creating a GHZ-state using the three different backends currently implemented in SimulaQron." class="align-center" src="_images/runtime_qutip_vs_projectq_vs_stabilizer.png" style="width: 700px;" /></a>
+<ul class="simple">
 <li>simulatedQubit - for each qubit simulated in that register, there is a simQubit object. This is local to each node. It exports remote method calls. These methods are only called by the virtual node network itself: when a virtual node discovers the qubit is actually simulated remotely, it passes on this call by calling the relevant method on the remote qubit object.</li>
 <li>virtualQubit - this is the object representing a virtually local qubit. This carries information about the remote simulating qubit. These virtualQubit objects can in turn be accessed by the clients who can access these virtual qubits as if they were real local physical qubits without having to know where they are actually simulated. That is, the client obtains a pointer to the relevant virtual qubit object on which it can perform operations directly.</li>
 <li>virtualNode - this is the local virtual node which accepts requests to get a virtual qubit object, send qubits to other nodes, read out the state of qubits, perform gates etc.</li>

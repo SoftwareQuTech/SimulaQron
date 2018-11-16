@@ -27,10 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from SimulaQron.general.hostConfig import *
-from SimulaQron.cqc.backend.cqcHeader import *
-from SimulaQron.cqc.pythonLib.cqc import *
-
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection
 
 
 #####################################################################################################
@@ -39,20 +36,19 @@ from SimulaQron.cqc.pythonLib.cqc import *
 #
 def main():
 
-	# Initialize the connection
-	with CQCConnection("Bob") as Bob:
+    # Initialize the connection
+    with CQCConnection("Bob") as Bob:
 
-		# Receive qubit
-		q=Bob.recvEPR()
+        # Receive qubit
+        q = Bob.recvEPR()
 
-		# Measure qubit
-		m=q.measure()
-		to_print="App {}: Measurement outcome is: {}".format(Bob.name,m)
-		print("|"+"-"*(len(to_print)+2)+"|")
-		print("| "+to_print+" |")
-		print("|"+"-"*(len(to_print)+2)+"|")
+        # Measure qubit
+        m = q.measure()
+        to_print = "App {}: Measurement outcome is: {}".format(Bob.name, m)
+        print("|" + "-" * (len(to_print) + 2) + "|")
+        print("| " + to_print + " |")
+        print("|" + "-" * (len(to_print) + 2) + "|")
 
 
 ##################################################################################################
 main()
-

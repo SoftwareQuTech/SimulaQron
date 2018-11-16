@@ -27,8 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from SimulaQron.cqc.pythonLib.cqc import *
-
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection
 
 
 #####################################################################################################
@@ -37,15 +36,15 @@ from SimulaQron.cqc.pythonLib.cqc import *
 #
 def main():
 
-	# Initialize the connection
-	with CQCConnection("Eve") as Eve:
+    # Initialize the connection
+    with CQCConnection("Eve") as Eve:
 
-		# Receive qubit from Alice
-		q=Eve.recvQubit()
+        # Receive qubit from Alice
+        q = Eve.recvQubit()
 
-		# Forward the qubit to Bob
-		Eve.sendQubit(q,"Bob")
+        # Forward the qubit to Bob
+        Eve.sendQubit(q, "Bob")
+
 
 ##################################################################################################
 main()
-

@@ -28,9 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-from SimulaQron.general.hostConfig import *
-from SimulaQron.cqc.backend.cqcHeader import *
-from SimulaQron.cqc.pythonLib.cqc import *
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection
 
 
 #####################################################################################################
@@ -39,20 +37,19 @@ from SimulaQron.cqc.pythonLib.cqc import *
 #
 def main():
 
-	# Initialize the connection
-	with CQCConnection("Alice") as Alice:
+    # Initialize the connection
+    with CQCConnection("Alice") as Alice:
 
-		# Make an EPR pair with Bob
-		qA=Alice.createEPR("Bob")
+        # Make an EPR pair with Bob
+        qA = Alice.createEPR("Bob")
 
-		# Measure qubit
-		m=qA.measure()
-		to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
-		print("|"+"-"*(len(to_print)+2)+"|")
-		print("| "+to_print+" |")
-		print("|"+"-"*(len(to_print)+2)+"|")
+        # Measure qubit
+        m = qA.measure()
+        to_print = "App {}: Measurement outcome is: {}".format(Alice.name, m)
+        print("|" + "-" * (len(to_print) + 2) + "|")
+        print("| " + to_print + " |")
+        print("|" + "-" * (len(to_print) + 2) + "|")
 
 
 ##################################################################################################
 main()
-

@@ -393,7 +393,7 @@ The following commands require an xtra header when issued to the CQC Backend: CQ
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td>qubit_id</td>
-<td>unsigned int (uint8_t)</td>
+<td>unsigned int (uint16_t)</td>
 <td>2 bytes</td>
 <td>Qubit_id of the target qubit</td>
 </tr>
@@ -456,7 +456,7 @@ The following commands require an xtra header when issued to the CQC Backend: CQ
 <tbody valign="top">
 <tr class="row-even"><td>num_iter</td>
 <td>unsigned int (uint8_t)</td>
-<td>1 bytes</td>
+<td>1 byte</td>
 <td>Number of iterations to do the sequence</td>
 </tr>
 <tr class="row-odd"><td>options</td>
@@ -554,7 +554,7 @@ For this reason the entanglement ID together with the nodes and the directionali
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td>node_A</td>
-<td>unsigned int (uint16_t)</td>
+<td>unsigned int (uint32_t)</td>
 <td>4 bytes</td>
 <td>IP of this node</td>
 </tr>
@@ -564,12 +564,12 @@ For this reason the entanglement ID together with the nodes and the directionali
 <td>Port of this node</td>
 </tr>
 <tr class="row-even"><td>app_id_A</td>
-<td>unsigned int (uint32_t)</td>
+<td>unsigned int (uint16_t)</td>
 <td>2 bytes</td>
 <td>App ID of this node</td>
 </tr>
 <tr class="row-odd"><td>node_B</td>
-<td>unsigned int (uint64_t)</td>
+<td>unsigned int (uint32_t)</td>
 <td>4 bytes</td>
 <td>IP of other node</td>
 </tr>
@@ -579,28 +579,28 @@ For this reason the entanglement ID together with the nodes and the directionali
 <td>Port of other node</td>
 </tr>
 <tr class="row-odd"><td>app_id_B</td>
-<td>unsigned int (uint8_t)</td>
+<td>unsigned int (uint16_t)</td>
 <td>2 byte</td>
 <td>App ID of other node</td>
 </tr>
 <tr class="row-even"><td>id_AB</td>
-<td>unsigned int (uint8_t)</td>
+<td>unsigned int (uint32_t)</td>
 <td>4 byte</td>
 <td>Entanglement ID</td>
 </tr>
 <tr class="row-odd"><td>timestamp</td>
-<td>unsigned int (uint8_t)</td>
+<td>unsigned int (uint64_t)</td>
 <td>8 byte</td>
 <td>Time of creation</td>
 </tr>
 <tr class="row-even"><td>ToG</td>
-<td>unsigned int (uint8_t)</td>
+<td>unsigned int (uint64_t)</td>
 <td>8 byte</td>
 <td>Time of goodness</td>
 </tr>
 <tr class="row-odd"><td>goodness</td>
-<td>unsigned int (uint8_t)</td>
-<td>4 byte</td>
+<td>unsigned int (uint16_t)</td>
+<td>2 byte</td>
 <td>Goodness (estimate of the fidelity of state)</td>
 </tr>
 <tr class="row-even"><td>DF</td>

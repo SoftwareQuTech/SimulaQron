@@ -149,7 +149,7 @@ This header has a size of 8</p>
 
 <dl class="attribute">
 <dt id="SimulaQron.cqc.backend.cqcHeader.CQCCommunicationHeader.packaging_format">
-<code class="descname">packaging_format</code><em class="property"> = '=HLH'</em><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCCommunicationHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<code class="descname">packaging_format</code><em class="property"> = '!HLH'</em><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCCommunicationHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -177,6 +177,77 @@ This header has a size of 8</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader">
+<em class="property">class </em><code class="descclassname">SimulaQron.cqc.backend.cqcHeader.</code><code class="descname">CQCEPRRequestHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcHeader.html#CQCEPRRequestHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 16</em><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.pack">
+<code class="descname">pack</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcHeader.html#CQCEPRRequestHeader.pack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.pack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pack the data in packet form.
+:return: str</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.package_format">
+<code class="descname">package_format</code><em class="property"> = ('uint:32=remote_ip, float:32=min_fidelity, float:32=max_time, uint:16=remote_port, uint:8=num_pairs, uint:4=priority', 'uint:1=store, uint:1=measure_directly, uint:2=0')</em><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.package_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.printable">
+<code class="descname">printable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcHeader.html#CQCEPRRequestHeader.printable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.printable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produce printable string for information purposes
+:return: str</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.setVals">
+<code class="descname">setVals</code><span class="sig-paren">(</span><em>remote_ip</em>, <em>remote_port</em>, <em>num_pairs</em>, <em>min_fidelity</em>, <em>max_time</em>, <em>priority</em>, <em>store</em>, <em>measure_directly</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcHeader.html#CQCEPRRequestHeader.setVals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.setVals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores required parameters of Entanglement Generation Protocol Request</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>remote_ip</strong> – int
+IP of the other node we are attempting to generate entanglement with</li>
+<li><strong>remote_port</strong> – int
+Port number of other node.</li>
+<li><strong>num_pairs</strong> – int
+The number of entangled pairs we are trying to generate</li>
+<li><strong>min_fidelity</strong> – float
+The minimum acceptable fidelity for the pairs we are generating</li>
+<li><strong>max_time</strong> – float
+The maximum amount of time we are permitted to take when generating the pairs</li>
+<li><strong>priority</strong> – obj
+Priority on the request</li>
+<li><strong>store</strong> – bool
+Specifies whether entangled qubits should be stored within a storage qubit or left within the communication
+qubit</li>
+<li><strong>measure_directly</strong> – bool
+Specifies whether to measure the communication qubit directly after the photon is emitted</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.unpack">
+<code class="descname">unpack</code><span class="sig-paren">(</span><em>headerBytes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcHeader.html#CQCEPRRequestHeader.unpack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.unpack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpack data.
+:param headerBytes: str
+:return:</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="SimulaQron.cqc.backend.cqcHeader.CQCFactoryHeader">
 <em class="property">class </em><code class="descclassname">SimulaQron.cqc.backend.cqcHeader.</code><code class="descname">CQCFactoryHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcHeader.html#CQCFactoryHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCFactoryHeader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -194,7 +265,7 @@ This header has a size of 8</p>
 
 <dl class="attribute">
 <dt id="SimulaQron.cqc.backend.cqcHeader.CQCFactoryHeader.package_format">
-<code class="descname">package_format</code><em class="property"> = '=BB'</em><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCFactoryHeader.package_format" title="Permalink to this definition">¶</a></dt>
+<code class="descname">package_format</code><em class="property"> = '!BB'</em><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCFactoryHeader.package_format" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -301,7 +372,7 @@ This header has a size of 8</p>
 
 <dl class="attribute">
 <dt id="SimulaQron.cqc.backend.cqcHeader.CQCRotationHeader.packaging_format">
-<code class="descname">packaging_format</code><em class="property"> = '=B'</em><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCRotationHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<code class="descname">packaging_format</code><em class="property"> = '!B'</em><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCRotationHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -347,7 +418,7 @@ Seperate classes used clearity and for possible future adaptability. (Increase l
 
 <dl class="attribute">
 <dt id="SimulaQron.cqc.backend.cqcHeader.CQCSequenceHeader.packaging_format">
-<code class="descname">packaging_format</code><em class="property"> = '=B'</em><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCSequenceHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<code class="descname">packaging_format</code><em class="property"> = '!B'</em><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCSequenceHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -427,7 +498,7 @@ Seperate classes used clearity and for possible future adaptability. (Increase l
 
 <dl class="attribute">
 <dt id="SimulaQron.cqc.backend.cqcHeader.CQCXtraQubitHeader.packaging_format">
-<code class="descname">packaging_format</code><em class="property"> = '=H'</em><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCXtraQubitHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<code class="descname">packaging_format</code><em class="property"> = '!H'</em><a class="headerlink" href="#SimulaQron.cqc.backend.cqcHeader.CQCXtraQubitHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -468,15 +539,16 @@ Seperate classes used clearity and for possible future adaptability. (Increase l
 <dl class="method">
 <dt id="SimulaQron.cqc.backend.cqcProtocol.CQCFactory.is_adjacent">
 <code class="descname">is_adjacent</code><span class="sig-paren">(</span><em>remote_host_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCFactory.is_adjacent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCFactory.is_adjacent" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks if remote host is adjacent to this node, according to the specified topology.
-:param remote_host_name: str</p>
-<blockquote>
-<div>The name of the remote host</div></blockquote>
+<dd><p>Checks if remote host is adjacent to this node, according to the
+specified topology.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>remote_host_name</strong> – str
+The name of the remote host</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
@@ -485,7 +557,8 @@ Seperate classes used clearity and for possible future adaptability. (Increase l
 <dl class="method">
 <dt id="SimulaQron.cqc.backend.cqcProtocol.CQCFactory.lookup">
 <code class="descname">lookup</code><span class="sig-paren">(</span><em>ip</em>, <em>port</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCFactory.lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCFactory.lookup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lookup name of remote host used within SimulaQron given ip and portnumber.</p>
+<dd><p>Lookup name of remote host used within SimulaQron given ip and
+portnumber.</p>
 </dd></dl>
 
 <dl class="method">
@@ -502,7 +575,7 @@ Seperate classes used clearity and for possible future adaptability. (Increase l
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.internet.protocol.Protocol</span></code></p>
 <dl class="method">
 <dt id="SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.connectionLost">
-<code class="descname">connectionLost</code><span class="sig-paren">(</span><em>reason</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCProtocol.connectionLost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.connectionLost" title="Permalink to this definition">¶</a></dt>
+<code class="descname">connectionLost</code><span class="sig-paren">(</span><em>reason=&lt;twisted.python.failure.Failure twisted.internet.error.ConnectionDone: Connection was closed cleanly.&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCProtocol.connectionLost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.connectionLost" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called when the connection is shut down.</p>
 <p>Clear any circular references here, and any external references
 to this Protocol.  The connection has been closed.</p>
@@ -524,20 +597,22 @@ send any greeting or initial message, do it here.</p>
 <dl class="method">
 <dt id="SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.dataReceived">
 <code class="descname">dataReceived</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCProtocol.dataReceived"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.dataReceived" title="Permalink to this definition">¶</a></dt>
-<dd><p>Receive data. We will always wait to receive enough data for the header,
-and then the entire packet first before commencing processing.</p>
+<dd><p>Receive data. We will always wait to receive enough data for the
+header, and then the entire packet first before commencing processing.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.new_ent_id">
 <code class="descname">new_ent_id</code><span class="sig-paren">(</span><em>host_app_id</em>, <em>remote_node</em>, <em>remote_app_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCProtocol.new_ent_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.new_ent_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a new unique entanglement id for the specified host_app_id, remote_node and remote_app_id. Used by cmd_epr.</p>
+<dd><p>Returns a new unique entanglement id for the specified host_app_id,
+remote_node and remote_app_id. Used by cmd_epr.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.new_qubit_id">
 <code class="descname">new_qubit_id</code><span class="sig-paren">(</span><em>app_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimulaQron/cqc/backend/cqcProtocol.html#CQCProtocol.new_qubit_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimulaQron.cqc.backend.cqcProtocol.CQCProtocol.new_qubit_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a new unique qubit id for the specified app_id. Used by cmd_new and cmd_recv</p>
+<dd><p>Returns a new unique qubit id for the specified app_id. Used by cmd_new
+and cmd_recv</p>
 </dd></dl>
 
 </dd></dl>

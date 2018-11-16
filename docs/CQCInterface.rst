@@ -179,7 +179,7 @@ Additional header used to send the qubit_id of a secondary qubit for two qubit g
 ============== ============================  ==========  ===============================================================
 Function       Type                          Length      Comments
 ============== ============================  ==========  ===============================================================
-qubit_id       unsigned int (uint8_t)        2 bytes     Qubit_id of the target qubit
+qubit_id       unsigned int (uint16_t)       2 bytes     Qubit_id of the target qubit
 ============== ============================  ==========  ===============================================================
 
 """"""""""""""""""""""""
@@ -203,7 +203,7 @@ Additional header used to send factory information. Factory commands are used to
 ============== ============================  ==========  ===============================================================
 Function       Type                          Length      Comments
 ============== ============================  ==========  ===============================================================
-num_iter       unsigned int (uint8_t)        1 bytes     Number of iterations to do the sequence
+num_iter       unsigned int (uint8_t)        1 byte      Number of iterations to do the sequence
 options	       unsigned int (uint8_t)        1 byte      Options when executing the factory
 ============== ============================  ==========  ===============================================================
 
@@ -249,16 +249,16 @@ For this reason the entanglement ID together with the nodes and the directionali
 ============== ============================  ==========  ===============================================================
 Function       Type                          Length      Comments
 ============== ============================  ==========  ===============================================================
-node_A         unsigned int (uint16_t)       4 bytes     IP of this node
+node_A         unsigned int (uint32_t)       4 bytes     IP of this node
 port_A         unsigned int (uint16_t)       2 bytes     Port of this node
-app_id_A       unsigned int (uint32_t)       2 bytes     App ID of this node
-node_B         unsigned int (uint64_t)       4 bytes     IP of other node
+app_id_A       unsigned int (uint16_t)       2 bytes     App ID of this node
+node_B         unsigned int (uint32_t)       4 bytes     IP of other node
 port_B         unsigned int (uint16_t)       2 bytes     Port of other node
-app_id_B       unsigned int (uint8_t)        2 byte      App ID of other node
-id_AB          unsigned int (uint8_t)        4 byte      Entanglement ID
-timestamp      unsigned int (uint8_t)        8 byte      Time of creation
-ToG            unsigned int (uint8_t)        8 byte      Time of goodness
-goodness       unsigned int (uint8_t)        4 byte      Goodness (estimate of the fidelity of state)
+app_id_B       unsigned int (uint16_t)       2 byte      App ID of other node
+id_AB          unsigned int (uint32_t)       4 byte      Entanglement ID
+timestamp      unsigned int (uint64_t)       8 byte      Time of creation
+ToG            unsigned int (uint64_t)       8 byte      Time of goodness
+goodness       unsigned int (uint16_t)       2 byte      Goodness (estimate of the fidelity of state)
 DF             unsigned int (uint8_t)        1 byte      Directionality flag (0=Mid-source, 1=node_A, 2=node_B)
 unused         unsigned int (uint8_t)        1 byte      4 byte align
 ============== ============================  ==========  ===============================================================

@@ -27,56 +27,54 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import socket
-import sys
+import logging
 import os
-import struct
+import socket
 
-from SimulaQron.general.hostConfig import *
-from SimulaQron.cqc.backend.cqcHeader import *
-from SimulaQron.cqc.pythonLib.cqc import *
+from SimulaQron.general.hostConfig import networkConfig
+from SimulaQron.cqc.backend.cqcHeader import CQCHeader, CQC_TP_HELLO, CQC_VERSION
 
 
 #####################################################################################################
 #
 # init
 #
-def init(name,cqcFile=None):
-	"""
-	Initialize a connection to the cqc server with the name given as input.
-	A path to a configure file for the cqc network can be given,
-	if it's not given the config file '$NETSIM/config/cqcNodes.cfg' will be used.
-	Returns a socket object.
-	"""
+def init(name, cqcFile=None):
+    """
+    Initialize a connection to the cqc server with the name given as input.
+    A path to a configure file for the cqc network can be given,
+    if it's not given the config file '$NETSIM/config/cqcNodes.cfg' will be used.
+    Returns a socket object.
+    """
 
-	# This file defines the network of CQC servers interfacing to virtual quantum nodes
-	if cqcFile==None:
-		cqcFile = os.environ.get('NETSIM') + "/config/cqcNodes.cfg"
+    # This file defines the network of CQC servers interfacing to virtual quantum nodes
+    if cqcFile is None:
+        cqcFile = os.environ.get("NETSIM") + "/config/cqcNodes.cfg"
 
-	# Read configuration files for the cqc network
-	cqcNet = networkConfig(cqcFile)
+        # Read configuration files for the cqc network
+    cqcNet = networkConfig(cqcFile)
 
-	# Host data
-	if name in cqcNet.hostDict:
-		myHost = cqcNet.hostDict[name]
-	else:
-		logging.error("The name '%s' is not in the cqc network.",name)
+    # Host data
+    if name in cqcNet.hostDict:
+        myHost = cqcNet.hostDict[name]
+    else:
+        logging.error("The name '%s' is not in the cqc network.", name)
+        raise LookupError("The name '%s' is not in the cqc network.".format(name))
 
-	#Get IP of correct form
-	myIP=socket.inet_ntoa(struct.pack("!L",myHost.ip))
+    addr = myHost.addr
 
-	#Connect to cqc server and run protocol
-	cqc=None
-	try:
-		cqc=socket.socket(socket.AF_INET,socket.SOCK_STREAM,0)
-	except socket.error:
-		logging.error("Could not connect to cqc server: %s",name)
-	try:
-		cqc.connect((myIP,myHost.port))
-	except socket.error:
-		cqc.close()
-		logging.error("Could not connect to cqc server: %s",name)
-	return cqc
+    # Connect to cqc server and run protocol
+    cqc = None
+    try:
+        cqc = socket.socket(addr[0], addr[1], addr[2])
+    except socket.error:
+        logging.error("Could not connect to cqc server: %s", name)
+    try:
+        cqc.connect(addr[4])
+    except socket.error:
+        cqc.close()
+        logging.error("Could not connect to cqc server: %s", name)
+    return cqc
 
 
 #####################################################################################################
@@ -85,30 +83,29 @@ def init(name,cqcFile=None):
 #
 def main():
 
-	# In this example, we are Alice.
-	myName="Alice"
+    # In this example, we are Alice.
+    myName = "Alice"
 
-	# Initialize the connection
-	cqc=init(myName)
+    # Initialize the connection
+    cqc = init(myName)
 
-	#Send Hello message
-	hdr=CQCHeader()
-	hdr.setVals(CQC_VERSION,CQC_TP_HELLO,0,0)
-	msg=hdr.pack()
-	cqc.send(msg)
+    # Send Hello message
+    hdr = CQCHeader()
+    hdr.setVals(CQC_VERSION, CQC_TP_HELLO, 0, 0)
+    msg = hdr.pack()
+    cqc.send(msg)
 
-	#Receive return message
-	data=cqc.recv(192)
-	hdr=CQCHeader(data)
-	if hdr.tp==CQC_TP_HELLO:
-		print("CQC tells App {}: 'HELLO'".format(myName))
-	else:
-		print("Did not receive a hello message, but rather: {}".format(hdr.printable()))
+    # Receive return message
+    data = cqc.recv(192)
+    hdr = CQCHeader(data)
+    if hdr.tp == CQC_TP_HELLO:
+        print("CQC tells App {}: 'HELLO'".format(myName))
+    else:
+        print("Did not receive a hello message, but rather: {}".format(hdr.printable()))
 
-	#Close the connection
-	cqc.close()
+        # Close the connection
+    cqc.close()
 
 
 ##################################################################################################
 main()
-
