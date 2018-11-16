@@ -28,11 +28,10 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-from hostConfig import *
+from SimulaQron.general.hostConfig import networkConfig
 
 newNet = networkConfig("network.cfg")
 
 newNet.print_details("Alice")
 newNet.print_details("Bob")
 newNet.print_details("Charlie")
-

@@ -39,36 +39,34 @@ from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
 
 
 class OthersTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        print("Testing others (measure inplace and get time)")
 
-	@classmethod
-	def setUpClass(cls):
-		print("Testing others (measure inplace and get time)")
+    def testMeasureInplace(self):
+        with CQCConnection("Alice", appID=1) as cqc:
+            q = qubit(cqc)
+            q.H()
+            m1 = q.measure(inplace=True)
+            for _ in range(10):
+                m2 = q.measure(inplace=True)
+                self.assertEqual(m1, m2)
+            q.measure()
 
-	def testMeasureInplace(self):
-		with CQCConnection("Alice", appID=1) as cqc:
-			q = qubit(cqc)
-			q.H()
-			m1 = q.measure(inplace=True)
-			failed = False
-			for _ in range(10):
-				m2 = q.measure(inplace=True)
-				self.assertEqual(m1, m2)
-			q.measure()
+    def testGetTime(self):
+        with CQCConnection("Alice", appID=1) as cqc:
+            # Test Get time
+            q1 = qubit(cqc)
+            time.sleep(3)
+            q2 = qubit(cqc)
+            t1 = q1.getTime()
+            t2 = q2.getTime()
+            self.assertEqual(t2 - t1, 3)
+            q1.measure()
+            q2.measure()
 
-	def testGetTime(self):
-		with CQCConnection("Alice", appID=1) as cqc:
-			# Test Get time
-			q1 = qubit(cqc)
-			time.sleep(3)
-			q2 = qubit(cqc)
-			t1 = q1.getTime()
-			t2 = q2.getTime()
-			self.assertEqual(t2-t1, 3)
-			q1.measure()
-			q2.measure()
 
 ##################################################################################################
 
-if __name__ == '__main__':
-	unittest.main()
-
+if __name__ == "__main__":
+    unittest.main()

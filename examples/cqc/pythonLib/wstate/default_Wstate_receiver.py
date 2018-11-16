@@ -28,10 +28,9 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
-from SimulaQron.general.hostConfig import *
-from SimulaQron.cqc.backend.cqcHeader import *
-from SimulaQron.cqc.pythonLib.cqc import *
-from additional_functions import string_to_int, int_to_string, broadbastClassical
+
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection
+from additional_functions import string_to_int, int_to_string, broadcastClassical
 
 
 #####################################################################################################
@@ -39,30 +38,30 @@ from additional_functions import string_to_int, int_to_string, broadbastClassica
 # main
 #
 def main():
-	if len(sys.argv) == 2:
-		nodename =  sys.argv[1]
-	else:
-		print("Provide one argument for the node name")
+    if len(sys.argv) == 2:
+        nodename = sys.argv[1]
+    else:
+        print("Provide one argument for the node name")
 
+        # Initialize the connection
+    with CQCConnection(nodename) as Node:
+        # Receive qubit
+        q = Node.recvQubit()
+        # Measure qubit
+        m = q.measure()
+        to_print = "(" + nodename + ") App {}: Measurement outcome is: {}".format(Node.name, m)
+        print("|" + "-" * (len(to_print) + 2) + "|\n", "| " + to_print + " |", "\n|" + "-" * (len(to_print) + 2) + "|")
 
-	# Initialize the connection
-	with CQCConnection(nodename) as Node:
-		# Receive qubit
-		q=Node.recvQubit()
-		# Measure qubit
-		m=q.measure()
-		to_print="("+nodename+") App {}: Measurement outcome is: {}".format(Node.name,m)
-		print("|"+"-"*(len(to_print)+2)+"|\n", "| "+to_print+" |", "\n|"+"-"*(len(to_print)+2)+"|")
+        if m == 1:
+            print("| (", nodename, ") I'm the leader")
+            ordlist = string_to_int(nodename + " is the leader")
+            broadcastClassical(ordlist, Node)
 
-		if m==1:
-			print("| (",nodename,") I'm the leader")
-			ordlist = string_to_int(nodename+" is the leader")
-			broadbastClassical(ordlist, Node)
+        data = Node.recvClassical()
+        message = list(data)
+        msg = int_to_string(message)
+        print("(", nodename, ")", msg)
 
-		data=Node.recvClassical()
-		message=list(data)
-		msg = int_to_string(message)
-		print("(",nodename,")",msg)
 
 ##################################################################################################
 main()

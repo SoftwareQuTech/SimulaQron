@@ -28,19 +28,15 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-import sys, os
-sys.path.insert(0, os.environ.get('NETSIM'))
+import logging
+import os
 
+import numpy as np
+
+from SimulaQron.local.setup import setup_local
+from SimulaQron.general.hostConfig import networkConfig
+from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
-from twisted.internet import reactor
-from twisted.internet.defer import inlineCallbacks, returnValue, DeferredList, Deferred
-
-from SimulaQron.virtNode.basics import *
-from SimulaQron.virtNode.quantum import *
-from SimulaQron.general.hostConfig import *
-from SimulaQron.virtNode.crudeSimulator import *
-
-from SimulaQron.local.setup import *
 
 
 #####################################################################################################
@@ -51,20 +47,19 @@ from SimulaQron.local.setup import *
 # quantum backend, as well as the nodes in the classical communication network), and the local classical
 # communication server is running (if applicable).
 #
-#@inlineCallbacks
+# @inlineCallbacks
 def runClientNode(qReg, virtRoot, myName, classicalNet):
-	"""
-	Code to execute for the local client node. Called if all connections are established.
+    """
+    Code to execute for the local client node. Called if all connections are established.
 
-	Arguments
-	qReg		quantum register (twisted object supporting remote method calls)
-	virtRoot	virtual quantum ndoe (twisted object supporting remote method calls)
-	myName		name of this node (string)
-	classicalNet	servers in the classical communication network (dictionary of hosts)
-	"""
+    Arguments
+    qReg        quantum register (twisted object supporting remote method calls)
+    virtRoot    virtual quantum ndoe (twisted object supporting remote method calls)
+    myName        name of this node (string)
+    classicalNet    servers in the classical communication network (dictionary of hosts)
+    """
 
-	logging.debug("LOCAL %s: Runing client side program.",myName)
-
+    logging.debug("LOCAL %s: Runing client side program.", myName)
 
 
 #####################################################################################################
@@ -74,58 +69,59 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 # This will be run if the local node acts as a server on the classical communication network,
 # accepting remote method calls from the other nodes.
 
+
 class localNode(pb.Root):
+    def __init__(self, node, classicalNet):
 
-	def __init__(self, node, classicalNet):
+        self.node = node
+        self.classicalNet = classicalNet
 
-		self.node = node
-		self.classicalNet = classicalNet
+        self.virtRoot = None
+        self.qReg = None
 
-		self.virtRoot = None
-		self.qReg = None
+    def set_virtual_node(self, virtRoot):
+        self.virtRoot = virtRoot
 
-	def set_virtual_node(self, virtRoot):
-		self.virtRoot = virtRoot
+    def set_virtual_reg(self, qReg):
+        self.qReg = qReg
 
-	def set_virtual_reg(self, qReg):
-		self.qReg = qReg
+    def remote_test(self):
+        return "Tested!"
 
-	def remote_test(self):
-		return "Tested!"
+        # This can be called by Alice (or other clients on the classical network) to inform Bob
+        # of an event.
 
-	# This can be called by Alice (or other clients on the classical network) to inform Bob
-	# of an event.
-	@inlineCallbacks
-	def remote_receive_qubit(self, virtualNum):
+    @inlineCallbacks
+    def remote_receive_qubit(self, virtualNum):
 
-		logging.debug("LOCAL %s: Getting reference to qubit number %d.",self.node.name, virtualNum)
+        logging.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
 
-		# Get ref of qubit
-		qB=yield self.virtRoot.callRemote("get_virtual_ref",virtualNum)
+        # Get ref of qubit
+        qB = yield self.virtRoot.callRemote("get_virtual_ref", virtualNum)
 
-		#Create new qubit
-		qC=yield self.virtRoot.callRemote("new_qubit_inreg",self.qReg)
+        # Create new qubit
+        qC = yield self.virtRoot.callRemote("new_qubit_inreg", self.qReg)
 
-		#Expand graph state
-		yield qC.callRemote("apply_H")
-		yield qB.callRemote("cphase_onto",qC)
+        # Expand graph state
+        yield qC.callRemote("apply_H")
+        yield qB.callRemote("cphase_onto", qC)
 
-		#Perform part of tau at C
-		yield qB.callRemote("apply_rotation",[0,0,1],-np.pi/2)
+        # Perform part of tau at C
+        yield qB.callRemote("apply_rotation", [0, 0, 1], -np.pi / 2)
 
+        # send qubit C to Charlie
+        # instruct virtual node to transfer qubit
+        remoteNum = yield self.virtRoot.callRemote("send_qubit", qC, "Charlie")
+        logging.debug("LOCAL %s: Remote qubit is %d.", "Bob", remoteNum)
 
-		#send qubit C to Charlie
-		#instruct virtual node to transfer qubit
-		remoteNum = yield self.virtRoot.callRemote("send_qubit",qC,"Charlie")
-		logging.debug("LOCAL %s: Remote qubit is %d.","Bob",remoteNum)
+        # Tell number of virtual qubit to Charlie and receive measurement outcome parity
+        charlie = self.classicalNet.hostDict["Charlie"]
+        yield charlie.root.callRemote("receive_qubit", remoteNum, "Bob")
 
-		#Tell number of virtual qubit to Charlie and receive measurement outcome parity
-		charlie=self.classicalNet.hostDict["Charlie"]
-		yield charlie.root.callRemote("receive_qubit",remoteNum,"Bob")
+        # Measure qubit (Z-basis)
+        outcome = yield qB.callRemote("measure")
+        print("Bob outcome was:", outcome)
 
-		#Measure qubit (Z-basis)
-		outcome=yield qB.callRemote("measure")
-		print("Bob outcome was:", outcome)
 
 #####################################################################################################
 #
@@ -134,35 +130,35 @@ class localNode(pb.Root):
 # This can stay the same for any example you run
 #
 
+
 def main():
 
-	# In this example, we are YOURNAME
-	myName = "Bob"
+    # In this example, we are YOURNAME
+    myName = "Bob"
 
+    # This file defines the network of virtual quantum nodes
+    virtualFile = os.environ.get("NETSIM") + "/config/virtualNodes.cfg"
 
-	# This file defines the network of virtual quantum nodes
-	virtualFile = os.environ.get('NETSIM') + "/config/virtualNodes.cfg"
+    # This file defines the nodes acting as servers in the classical communication network
+    classicalFile = os.path.join(os.path.dirname(__file__), "classicalNet.cfg")
 
-	# This file defines the nodes acting as servers in the classical communication network
-	classicalFile = os.path.join(os.path.dirname(__file__), 'classicalNet.cfg')
+    # Read configuration files for the virtual quantum, as well as the classical network
+    virtualNet = networkConfig(virtualFile)
+    classicalNet = networkConfig(classicalFile)
 
-	# Read configuration files for the virtual quantum, as well as the classical network
-	virtualNet = networkConfig(virtualFile)
-	classicalNet = networkConfig(classicalFile)
+    # Check if we should run a local classical server. If so, initialize the code
+    # to handle remote connections on the classical communication network
+    if myName in classicalNet.hostDict:
+        lNode = localNode(classicalNet.hostDict[myName], classicalNet)
+    else:
+        lNode = None
 
-	# Check if we should run a local classical server. If so, initialize the code
-	# to handle remote connections on the classical communication network
-	if myName in classicalNet.hostDict:
-		lNode = localNode(classicalNet.hostDict[myName], classicalNet)
-	else:
-		lNode = None
+        # Set up the local classical server if applicable, and connect to the virtual
+        # node and other classical servers. Once all connections are set up, this will
+        # execute the function runClientNode
+    setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
-	# Set up the local classical server if applicable, and connect to the virtual
-	# node and other classical servers. Once all connections are set up, this will
-	# execute the function runClientNode
-	setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=logging.DEBUG)
 main()
-

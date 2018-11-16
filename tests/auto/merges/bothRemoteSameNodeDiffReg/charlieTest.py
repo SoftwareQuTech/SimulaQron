@@ -72,8 +72,8 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 # This will be run if the local node acts as a server on the classical communication network,
 # accepting remote method calls from the other nodes.
 
-class localNode(pb.Root):
 
+class localNode(pb.Root):
     def __init__(self, node, classicalNet):
 
         self.node = node
@@ -149,7 +149,7 @@ class localNode(pb.Root):
             (realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits", [self.qA, self.qB])
             rho = assemble_qubit(realRho, imagRho)
             expectedRho = qp.Qobj([[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]])
-            correct = (rho == expectedRho)
+            correct = rho == expectedRho
         elif Settings.CONF_BACKEND == "projectq":
             (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", self.qA)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
@@ -159,7 +159,7 @@ class localNode(pb.Root):
             (array, _) = yield self.virtRoot.callRemote("get_register_RI", self.qA)
             state = StabilizerState(array)
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
-            correct = (state == expectedState)
+            correct = state == expectedState
         else:
             ValueError("Unknown backend {}".format(Settings.CONF_BACKEND))
 
@@ -180,10 +180,10 @@ def main():
     myName = "Charlie"
 
     # This file defines the network of virtual quantum nodes
-    virtualFile = os.path.join(os.path.dirname(__file__), '../../../../config/virtualNodes.cfg')
+    virtualFile = os.path.join(os.path.dirname(__file__), "../../../../config/virtualNodes.cfg")
 
     # This file defines the nodes acting as servers in the classical communication network
-    classicalFile = os.path.join(os.path.dirname(__file__), 'classicalNet.cfg')
+    classicalFile = os.path.join(os.path.dirname(__file__), "classicalNet.cfg")
 
     # Read configuration files for the virtual quantum, as well as the classical network
     virtualNet = networkConfig(virtualFile)
@@ -203,5 +203,5 @@ def main():
 
 
 ##################################################################################################
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.ERROR)
+logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=logging.ERROR)
 main()

@@ -194,7 +194,6 @@ def prep_I_qutip():
 
 #####################################################################################################
 class SingleQubitGateTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.iterations = 100
@@ -206,7 +205,7 @@ class SingleQubitGateTest(unittest.TestCase):
             sys.stdout.write("Testing I gate:")
             exp_values = calc_exp_values(prep_I_qutip())
             ans = cqc.test_preparation(prep_I_CQC, exp_values, iterations=self.iterations)
-            sys.stdout.write('\r')
+            sys.stdout.write("\r")
             self.assertTrue(ans)
 
     def testXGate(self):
@@ -215,7 +214,7 @@ class SingleQubitGateTest(unittest.TestCase):
             sys.stdout.write("Testing X gate:")
             exp_values = calc_exp_values(prep_X_qutip())
             ans = cqc.test_preparation(prep_X_CQC, exp_values, iterations=self.iterations)
-            sys.stdout.write('\r')
+            sys.stdout.write("\r")
             self.assertTrue(ans)
 
     def testYGate(self):
@@ -224,7 +223,7 @@ class SingleQubitGateTest(unittest.TestCase):
             sys.stdout.write("Testing Y gate:")
             exp_values = calc_exp_values(prep_Y_qutip())
             ans = cqc.test_preparation(prep_Y_CQC, exp_values, iterations=self.iterations)
-            sys.stdout.write('\r')
+            sys.stdout.write("\r")
             self.assertTrue(ans)
 
     def testZGate(self):
@@ -233,7 +232,7 @@ class SingleQubitGateTest(unittest.TestCase):
             sys.stdout.write("Testing Z gate:")
             exp_values = calc_exp_values(prep_Z_qutip())
             ans = cqc.test_preparation(prep_Z_CQC, exp_values, iterations=self.iterations)
-            sys.stdout.write('\r')
+            sys.stdout.write("\r")
             self.assertTrue(ans)
 
     def testHGate(self):
@@ -242,7 +241,7 @@ class SingleQubitGateTest(unittest.TestCase):
             sys.stdout.write("Testing H gate:")
             exp_values = calc_exp_values(prep_H_qutip())
             ans = cqc.test_preparation(prep_H_CQC, exp_values, iterations=self.iterations)
-            sys.stdout.write('\r')
+            sys.stdout.write("\r")
             self.assertTrue(ans)
 
     def testTGate(self):
@@ -255,7 +254,7 @@ class SingleQubitGateTest(unittest.TestCase):
                     cqc.test_preparation(prep_T_CQC, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = cqc.test_preparation(prep_T_CQC, exp_values, iterations=self.iterations)
-                sys.stdout.write('\r')
+                sys.stdout.write("\r")
                 self.assertTrue(ans)
 
     def testKGate(self):
@@ -264,7 +263,7 @@ class SingleQubitGateTest(unittest.TestCase):
             sys.stdout.write("Testing K gate:")
             exp_values = calc_exp_values(prep_K_qutip())
             ans = cqc.test_preparation(prep_K_CQC, exp_values, iterations=self.iterations)
-            sys.stdout.write('\r')
+            sys.stdout.write("\r")
             self.assertTrue(ans)
 
     def testXpi8Rot(self):
@@ -277,7 +276,7 @@ class SingleQubitGateTest(unittest.TestCase):
                     cqc.test_preparation(prep_rotx1_CQC, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = cqc.test_preparation(prep_rotx1_CQC, exp_values, iterations=self.iterations)
-                sys.stdout.write('\r')
+                sys.stdout.write("\r")
                 self.assertTrue(ans)
 
     def testX5pi8Rot(self):
@@ -290,7 +289,7 @@ class SingleQubitGateTest(unittest.TestCase):
                     cqc.test_preparation(prep_rotx2_CQC, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = cqc.test_preparation(prep_rotx2_CQC, exp_values, iterations=self.iterations)
-                sys.stdout.write('\r')
+                sys.stdout.write("\r")
                 self.assertTrue(ans)
 
     def testYpi8Rot(self):
@@ -303,7 +302,7 @@ class SingleQubitGateTest(unittest.TestCase):
                     cqc.test_preparation(prep_roty1_CQC, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = cqc.test_preparation(prep_roty1_CQC, exp_values, iterations=self.iterations)
-                sys.stdout.write('\r')
+                sys.stdout.write("\r")
                 self.assertTrue(ans)
 
     def testY5pi8Rot(self):
@@ -316,7 +315,7 @@ class SingleQubitGateTest(unittest.TestCase):
                     cqc.test_preparation(prep_roty2_CQC, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = cqc.test_preparation(prep_roty2_CQC, exp_values, iterations=self.iterations)
-                sys.stdout.write('\r')
+                sys.stdout.write("\r")
                 self.assertTrue(ans)
 
     def testZpi8Rot(self):
@@ -329,7 +328,7 @@ class SingleQubitGateTest(unittest.TestCase):
                     cqc.test_preparation(prep_rotz1_CQC, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = cqc.test_preparation(prep_rotz1_CQC, exp_values, iterations=self.iterations)
-                sys.stdout.write('\r')
+                sys.stdout.write("\r")
                 self.assertTrue(ans)
 
     def testZ5pi8Rot(self):
@@ -342,7 +341,7 @@ class SingleQubitGateTest(unittest.TestCase):
                     cqc.test_preparation(prep_rotz2_CQC, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = cqc.test_preparation(prep_rotz2_CQC, exp_values, iterations=self.iterations)
-                sys.stdout.write('\r')
+                sys.stdout.write("\r")
                 self.assertTrue(ans)
 
     def testReset(self):
@@ -351,11 +350,11 @@ class SingleQubitGateTest(unittest.TestCase):
             sys.stdout.write("Testing RESET:")
             exp_values = calc_exp_values(prep_I_qutip())
             ans = cqc.test_preparation(prep_reset_CQC, exp_values, iterations=self.iterations)
-            sys.stdout.write('\r')
+            sys.stdout.write("\r")
             self.assertTrue(ans)
 
 
 ##################################################################################################
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

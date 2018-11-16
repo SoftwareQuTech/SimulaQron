@@ -27,83 +27,84 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import sys, socket, struct
+import socket
+import struct
 from twisted.spread import pb
 from ipaddress import IPv4Address
 
+
 def cqc_node_id(fam, ip):
-	if fam == socket.AF_INET:
-		return struct.unpack("!L", IPv4Address(ip).packed)[0]
-	else:
-		raise ValueError("No IPv6 yet :(")
+    if fam == socket.AF_INET:
+        return struct.unpack("!L", IPv4Address(ip).packed)[0]
+    else:
+        raise ValueError("No IPv6 yet :(")
+
 
 def cqc_node_id_from_addrinfo(addr):
-	fam = addr[0]
-	sockaddr = addr[4]
-	ip = sockaddr[0]
-	return cqc_node_id(fam, ip)
+    fam = addr[0]
+    sockaddr = addr[4]
+    ip = sockaddr[0]
+    return cqc_node_id(fam, ip)
+
 
 class networkConfig(pb.Referenceable):
+    def __init__(self, filename):
+        """
+        Initialize by reading in the configuration file.
+        """
+        # Dictionary where we will keep host details, indexed by node name (e.g. Alice)
+        self.hostDict = {}
 
-	def __init__(self, filename):
-		"""
-		Initialize by reading in the configuration file.
-		"""
-		# Dictionary where we will keep host details, indexed by node name (e.g. Alice)
-		self.hostDict = {}
+        # Read config file
+        self.read_config(filename)
 
-		# Read config file
-		self.read_config(filename)
+    def read_config(self, filename):
+        """
+        Reads the configuration file in which each line has the form: node name, hostname, port number.
+        For example:
+        Alice, localhost, 8888
+        """
+        with open(filename) as confFile:
+            for line in confFile:
+                if not line.startswith("#"):
+                    words = line.split(",")
 
-	def read_config(self, filename):
-		"""
-		Reads the configuration file in which each line has the form: node name, hostname, port number.
-		For example:
-		Alice, localhost, 8888
-		"""
-		with open(filename) as confFile:
-			for line in confFile:
-				if not line.startswith("#"):
-					words = line.split(',')
+                    # We will simply ignore lines which are not of the right form
+                    if len(words) == 3:
+                        newHost = host(words[0].strip(), words[1].strip(), words[2].strip())
+                        self.hostDict[words[0]] = newHost
 
-					# We will simply ignore lines which are not of the right form
-					if len(words) == 3:
-						newHost = host(words[0].strip(), words[1].strip(), words[2].strip())
-						self.hostDict[words[0]] = newHost
-
-	def print_details(self, name):
-		"""
-		Prints the details of the specified node with name.
-		"""
-		host = self.hostDict[name]
-		print("Host details of ", name, ": ", host.hostname, ":", host.port)
+    def print_details(self, name):
+        """
+        Prints the details of the specified node with name.
+        """
+        host = self.hostDict[name]
+        print("Host details of ", name, ": ", host.hostname, ":", host.port)
 
 
 class host(pb.Referenceable):
+    def __init__(self, name, hostname, port):
+        """
+        Initialize the details of the host. For now, we just keep the following:
 
-	def __init__(self, name, hostname, port):
-		"""
-		Initialize the details of the host. For now, we just keep the following:
+        name        informal name of the host (e.g. Alice)
+        hostname    name of the node on the network (e.g. localhost or yournode.qutech.nl)
+        port        port number on hostname
+        """
 
-		name		informal name of the host (e.g. Alice)
-		hostname	name of the node on the network (e.g. localhost or yournode.qutech.nl)
-		port		port number on hostname
-		"""
+        self.name = name
+        self.hostname = hostname
+        self.port = int(port)
 
-		self.name = name
-		self.hostname = hostname
-		self.port = int(port)
+        # Lookup IP address
+        addrs = socket.getaddrinfo(hostname, port, proto=socket.IPPROTO_TCP, family=socket.AF_INET)
+        addr = addrs[0]
+        self.family = addr[0]
+        self.addr = addr
 
-		# Lookup IP address
-		addrs = socket.getaddrinfo(hostname, port, proto=socket.IPPROTO_TCP
-                        ,family=socket.AF_INET)
-		addr = addrs[0]
-		self.family = addr[0]
-		self.addr = addr
+        self.ip = cqc_node_id_from_addrinfo(addr)
 
-		self.ip = cqc_node_id_from_addrinfo(addr)
-
-		# Connection identifiers used after connected
-		self.factory = 0
-		self.root = 0
-		self.defer = 0
+        # Connection identifiers used after connected
+        self.factory = 0
+        self.root = 0
+        self.defer = 0

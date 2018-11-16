@@ -28,54 +28,41 @@ class Command:
 
     def __init__(self):
 
-        config = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), '..', 'config'))
+        config = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "config"))
 
-        self.app_nodes = os.path.join(config, 'appNodes.cfg')
-        self.cqc_nodes = os.path.join(config, 'cqcNodes.cfg')
-        self.nodes = os.path.join(config, 'Nodes.cfg')
-        self.vnodes = os.path.join(config, 'virtualNodes.cfg')
+        self.app_nodes = os.path.join(config, "appNodes.cfg")
+        self.cqc_nodes = os.path.join(config, "cqcNodes.cfg")
+        self.nodes = os.path.join(config, "Nodes.cfg")
+        self.vnodes = os.path.join(config, "virtualNodes.cfg")
 
-        self.topology = {
-            "appNodes": [],
-            "cqcNodes": [],
-            "Nodes": [],
-            "virtualNodes": [],
-        }
+        self.topology = {"appNodes": [], "cqcNodes": [], "Nodes": [], "virtualNodes": []}
         self.__acquire_current_topology()
 
-        self.parser = argparse.ArgumentParser(
-            description='Re-cable the network')
+        self.parser = argparse.ArgumentParser(description="Re-cable the network")
 
-        subparsers = self.parser.add_subparsers(dest='subcommand')
+        subparsers = self.parser.add_subparsers(dest="subcommand")
 
-        parser_add = subparsers.add_parser('add', help='Add a node')
-        parser_add.add_argument('name', type=str, help='The common name')
-        parser_add.add_argument('hostname', type=str, help='The hostname')
+        parser_add = subparsers.add_parser("add", help="Add a node")
+        parser_add.add_argument("name", type=str, help="The common name")
+        parser_add.add_argument("hostname", type=str, help="The hostname")
         parser_add.add_argument(
-            '--app-port',
+            "--app-port",
             type=int,
-            help="An available port number for the application node.  If one"
-                 "isn't specified, it will be generated)"
+            help="An available port number for the application node.  If one" "isn't specified, it will be generated)",
         )
         parser_add.add_argument(
-            '--cqc-port',
+            "--cqc-port",
             type=int,
-            help="An available port number for the CQC Node.  If one isn't"
-                 "specified, it will be generated)"
+            help="An available port number for the CQC Node.  If one isn't" "specified, it will be generated)",
         )
         parser_add.add_argument(
-            '--vnode-port',
+            "--vnode-port",
             type=int,
-            help="An available port number for the virtual node.  If one isn't"
-                 "specified, it will be generated)"
+            help="An available port number for the virtual node.  If one isn't" "specified, it will be generated)",
         )
 
-        parser_remove = subparsers.add_parser('remove', help='Remove help')
-        parser_remove.add_argument(
-            'name',
-            choices=[_[0] for _ in self.topology['appNodes']]
-        )
+        parser_remove = subparsers.add_parser("remove", help="Remove help")
+        parser_remove.add_argument("name", choices=[_[0] for _ in self.topology["appNodes"]])
 
         self.args = self.parser.parse_args()
 
@@ -86,27 +73,19 @@ class Command:
             sys.exit(0)
 
         try:
-            if self.args.subcommand == 'add':
+            if self.args.subcommand == "add":
 
                 self.add_node(
-                    self.args.name,
-                    self.args.hostname,
-                    self.args.app_port,
-                    self.args.cqc_port,
-                    self.args.vnode_port,
+                    self.args.name, self.args.hostname, self.args.app_port, self.args.cqc_port, self.args.vnode_port
                 )
 
-            elif self.args.subcommand == 'remove':
+            elif self.args.subcommand == "remove":
 
                 self.remove_node(self.args.name)
 
             else:
 
-                raise CommandError(
-                    "Undefined subcommand.  "
-                    "This shouldn't be possible.  "
-                    "Stop it."
-                )
+                raise CommandError("Undefined subcommand.  " "This shouldn't be possible.  " "Stop it.")
 
         except CommandError as e:
             sys.stderr.write("{}\n".format(e))
@@ -116,37 +95,24 @@ class Command:
 
         sys.exit(0)
 
-    def add_node(
-            self, 
-            name: str, 
-            hostname: str, 
-            app_port: int = None, 
-            cqc_port: int = None, 
-            vnode_port: int = None
-    ):
+    def add_node(self, name: str, hostname: str, app_port: int = None, cqc_port: int = None, vnode_port: int = None):
 
-        ports = (
-            ('appNodes', app_port),
-            ('cqcNodes', cqc_port),
-            ('virtualNodes', vnode_port)
-        )
+        ports = (("appNodes", app_port), ("cqcNodes", cqc_port), ("virtualNodes", vnode_port))
 
         for key, port in ports:
 
             if port:
                 if not self.__check_port_available(port):
-                    raise CommandError('Port {} is already in use.'.format(
-                        port
-                    ))
+                    raise CommandError("Port {} is already in use.".format(port))
             else:
                 port = self.get_random_port()
 
             self.topology[key].append((name, hostname, port))
 
-        self.topology['Nodes'].append(name)
+        self.topology["Nodes"].append(name)
 
     def remove_node(self, name):
-        for key in ('appNodes', 'cqcNodes', 'Nodes', 'virtualNodes'):
+        for key in ("appNodes", "cqcNodes", "Nodes", "virtualNodes"):
             tmp = []
             for line in self.topology[key]:
                 if not line[0] == name:
@@ -171,7 +137,7 @@ class Command:
         for key, config in self.topology.items():
 
             # No ports defined in this one
-            if key == 'Nodes':
+            if key == "Nodes":
                 continue
 
             for line in config:
@@ -202,67 +168,65 @@ class Command:
     # aware of.
 
     def __read_app_nodes(self):
-        with open(self.app_nodes, 'r') as r:
+        with open(self.app_nodes, "r") as r:
             for line in r:
-                if line.startswith('#'):
+                if line.startswith("#"):
                     continue
                 if not line.strip():
                     continue
-                name, hostname, port = [_.strip() for _ in line.split(',')]
-                self.topology['appNodes'].append((name, hostname, int(port)))
+                name, hostname, port = [_.strip() for _ in line.split(",")]
+                self.topology["appNodes"].append((name, hostname, int(port)))
 
     def __read_cqc_nodes(self):
-        with open(self.cqc_nodes, 'r') as r:
+        with open(self.cqc_nodes, "r") as r:
             for line in r:
-                if line.startswith('#'):
+                if line.startswith("#"):
                     continue
                 if not line.strip():
                     continue
-                name, hostname, port = [_.strip() for _ in line.split(',')]
-                self.topology['cqcNodes'].append((name, hostname, int(port)))
+                name, hostname, port = [_.strip() for _ in line.split(",")]
+                self.topology["cqcNodes"].append((name, hostname, int(port)))
 
     def __read_nodes(self):
-        with open(self.nodes, 'r') as r:
+        with open(self.nodes, "r") as r:
             for line in r:
                 line = line.strip()
-                if line.startswith('#'):
+                if line.startswith("#"):
                     continue
                 if not line:
                     continue
-                self.topology['Nodes'].append(line)
+                self.topology["Nodes"].append(line)
 
     def __read_virtual_nodes(self):
-        with open(self.vnodes, 'r') as r:
+        with open(self.vnodes, "r") as r:
             for line in r:
-                if line.startswith('#'):
+                if line.startswith("#"):
                     continue
                 if not line.strip():
                     continue
-                name, hostname, port = [_.strip() for _ in line.split(',')]
-                self.topology['virtualNodes'].append(
-                    (name, hostname, int(port))
-                )
+                name, hostname, port = [_.strip() for _ in line.split(",")]
+                self.topology["virtualNodes"].append((name, hostname, int(port)))
 
     def __write_app_nodes(self):
-        with open(self.app_nodes, 'w') as f:
-            for line in self.topology['appNodes']:
-                f.write('{}, {}, {}\n'.format(*line))
+        with open(self.app_nodes, "w") as f:
+            for line in self.topology["appNodes"]:
+                f.write("{}, {}, {}\n".format(*line))
 
     def __write_cqc_nodes(self):
-        with open(self.cqc_nodes, 'w') as f:
-            for line in self.topology['cqcNodes']:
-                f.write('{}, {}, {}\n'.format(*line))
+        with open(self.cqc_nodes, "w") as f:
+            for line in self.topology["cqcNodes"]:
+                f.write("{}, {}, {}\n".format(*line))
 
     def __write_nodes(self):
-        with open(self.nodes, 'w') as f:
-            for line in self.topology['Nodes']:
+        with open(self.nodes, "w") as f:
+            for line in self.topology["Nodes"]:
                 f.write(line + "\n")
 
     def __write_virtual_nodes(self):
-        with open(self.vnodes, 'w') as f:
-            for line in self.topology['virtualNodes']:
-                f.write('{}, {}, {}\n'.format(*line))
+        with open(self.vnodes, "w") as f:
+            for line in self.topology["virtualNodes"]:
+                f.write("{}, {}, {}\n".format(*line))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Command().main()

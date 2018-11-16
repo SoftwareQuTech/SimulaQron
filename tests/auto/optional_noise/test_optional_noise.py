@@ -7,94 +7,96 @@
 ####################################################################################
 
 import unittest
-from SimulaQron.cqc.pythonLib.cqc import *
+import sys
+
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
 
 
 def prep_z0(cqc):
-	q = qubit(cqc)
-	return q
+    q = qubit(cqc)
+    return q
 
 
 def prep_z1(cqc):
-	q = qubit(cqc)
-	q.X()
-	return q
+    q = qubit(cqc)
+    q.X()
+    return q
 
 
 def prep_x0(cqc):
-	q = qubit(cqc)
-	q.H()
-	return q
+    q = qubit(cqc)
+    q.H()
+    return q
 
 
 def prep_x1(cqc):
-	q = qubit(cqc)
-	q.X()
-	q.H()
-	return q
+    q = qubit(cqc)
+    q.X()
+    q.H()
+    return q
 
 
 def prep_y0(cqc):
-	q = qubit(cqc)
-	q.K()
-	return q
+    q = qubit(cqc)
+    q.K()
+    return q
 
 
 def prep_y1(cqc):
-	q = qubit(cqc)
-	q.X()
-	q.K()
-	return q
+    q = qubit(cqc)
+    q.X()
+    q.K()
+    return q
 
 
 class TestOptionalNoise(unittest.TestCase):
-	@classmethod
-	def setUpClass(cls):
-		cls.exp_values = (1/2, 1/2, 1/2)
-		cls.iterations = 100
+    @classmethod
+    def setUpClass(cls):
+        cls.exp_values = (1 / 2, 1 / 2, 1 / 2)
+        cls.iterations = 100
 
-	def test_z0(self):
-		with CQCConnection("Alice") as cqc:
-			sys.stdout.write("Testing noise on state |0>")
-			ans = cqc.test_preparation(prep_z0, exp_values=self.exp_values, iterations=self.iterations)
-			sys.stdout.write('\r')
-			self.assertTrue(ans)
+    def test_z0(self):
+        with CQCConnection("Alice") as cqc:
+            sys.stdout.write("Testing noise on state |0>")
+            ans = cqc.test_preparation(prep_z0, exp_values=self.exp_values, iterations=self.iterations)
+            sys.stdout.write("\r")
+            self.assertTrue(ans)
 
-	def test_z1(self):
-		with CQCConnection("Alice") as cqc:
-			sys.stdout.write("Testing noise on state |1>")
-			ans = cqc.test_preparation(prep_z1, exp_values=self.exp_values, iterations=self.iterations)
-			sys.stdout.write('\r')
-			self.assertTrue(ans)
+    def test_z1(self):
+        with CQCConnection("Alice") as cqc:
+            sys.stdout.write("Testing noise on state |1>")
+            ans = cqc.test_preparation(prep_z1, exp_values=self.exp_values, iterations=self.iterations)
+            sys.stdout.write("\r")
+            self.assertTrue(ans)
 
-	def test_x0(self):
-		with CQCConnection("Alice") as cqc:
-			sys.stdout.write("Testing noise on state (|0>+|1>)/sqrt(2)")
-			ans = cqc.test_preparation(prep_x0, exp_values=self.exp_values, iterations=self.iterations)
-			sys.stdout.write('\r')
-			self.assertTrue(ans)
+    def test_x0(self):
+        with CQCConnection("Alice") as cqc:
+            sys.stdout.write("Testing noise on state (|0>+|1>)/sqrt(2)")
+            ans = cqc.test_preparation(prep_x0, exp_values=self.exp_values, iterations=self.iterations)
+            sys.stdout.write("\r")
+            self.assertTrue(ans)
 
-	def test_x1(self):
-		with CQCConnection("Alice") as cqc:
-			sys.stdout.write("Testing noise on state (|0>-|1>)/sqrt(2)")
-			ans = cqc.test_preparation(prep_x1, exp_values=self.exp_values, iterations=self.iterations)
-			sys.stdout.write('\r')
-			self.assertTrue(ans)
+    def test_x1(self):
+        with CQCConnection("Alice") as cqc:
+            sys.stdout.write("Testing noise on state (|0>-|1>)/sqrt(2)")
+            ans = cqc.test_preparation(prep_x1, exp_values=self.exp_values, iterations=self.iterations)
+            sys.stdout.write("\r")
+            self.assertTrue(ans)
 
-	def test_y0(self):
-		with CQCConnection("Alice") as cqc:
-			sys.stdout.write("Testing noise on state (|0>+i|1>)/sqrt(2)")
-			ans = cqc.test_preparation(prep_y0, exp_values=self.exp_values, iterations=self.iterations)
-			sys.stdout.write('\r')
-			self.assertTrue(ans)
+    def test_y0(self):
+        with CQCConnection("Alice") as cqc:
+            sys.stdout.write("Testing noise on state (|0>+i|1>)/sqrt(2)")
+            ans = cqc.test_preparation(prep_y0, exp_values=self.exp_values, iterations=self.iterations)
+            sys.stdout.write("\r")
+            self.assertTrue(ans)
 
-	def test_y1(self):
-		with CQCConnection("Alice") as cqc:
-			sys.stdout.write("Testing noise on state (|0>-i|1>)/sqrt(2)")
-			ans = cqc.test_preparation(prep_y1, exp_values=self.exp_values, iterations=self.iterations)
-			sys.stdout.write('\r')
-			self.assertTrue(ans)
+    def test_y1(self):
+        with CQCConnection("Alice") as cqc:
+            sys.stdout.write("Testing noise on state (|0>-i|1>)/sqrt(2)")
+            ans = cqc.test_preparation(prep_y1, exp_values=self.exp_values, iterations=self.iterations)
+            sys.stdout.write("\r")
+            self.assertTrue(ans)
 
 
 if __name__ == "__main__":
-	unittest.main()
+    unittest.main()
