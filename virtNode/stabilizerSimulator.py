@@ -27,8 +27,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import numpy as np
-
 from SimulaQron.virtNode.basics import quantumError, noQubitError
 from SimulaQron.virtNode.crudeSimulator import Engine
 from SimulaQron.toolbox.stabilizerStates import StabilizerState
@@ -68,7 +66,6 @@ class stabilizerEngine(Engine):
         # Prepare a clean qubit state in |0>
         self.qubitReg.add_qubit()
 
-
         return num
 
     def add_qubit(self, newQubit):
@@ -102,7 +99,8 @@ class stabilizerEngine(Engine):
 
     def get_register_RI(self):
         """
-        Retrieves the entire register in real and imaginary part. Twisted only likes to send real valued lists, not complex ones.
+        Retrieves the entire register in real and imaginary part. Twisted only likes to send real valued lists,
+        not complex ones.
         Since this is in stabilizer formalism the real part will be the boolean matrix describing the generators
         and the imaginary part will be None
         """
@@ -264,7 +262,6 @@ class stabilizerEngine(Engine):
             print(err)
             print("R: {}".format(R))
             print("I: {}".format(I))
-
 
 
 class quantumRegister(stabilizerEngine):

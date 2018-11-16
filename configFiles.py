@@ -62,12 +62,14 @@ def construct_node_configs(nodes):
         return
 
     # Get path from environment variable
-    netsim_path = os.environ['NETSIM'] + '/'
+    netsim_path = os.environ["NETSIM"] + "/"
 
     # Get path to configuration files
-    conf_files = [netsim_path + "config/virtualNodes.cfg",
-                  netsim_path + "config/cqcNodes.cfg",
-                  netsim_path + "config/appNodes.cfg"]
+    conf_files = [
+        netsim_path + "config/virtualNodes.cfg",
+        netsim_path + "config/cqcNodes.cfg",
+        netsim_path + "config/appNodes.cfg",
+    ]
 
     # File for just a simple list of the nodes
     node_file = netsim_path + "config/Nodes.cfg"
@@ -75,19 +77,25 @@ def construct_node_configs(nodes):
     start_nr = [8801, 8801 + nrNodes, 8801 + 2 * nrNodes]
 
     # Start of the configuration files
-    conf_top = ["# Network configuration file", "#",
-                "# For each host its informal name, as well as its location in the network must", "# be listed.", "#",
-                "# [name], [hostname], [port number]", "#"]
+    conf_top = [
+        "# Network configuration file",
+        "#",
+        "# For each host its informal name, as well as its location in the network must",
+        "# be listed.",
+        "#",
+        "# [name], [hostname], [port number]",
+        "#",
+    ]
 
     # Write to the configuration files
     for i in range(len(conf_files)):
-        with open(conf_files[i], 'w') as f:
+        with open(conf_files[i], "w") as f:
             for line in conf_top:
                 f.write(line + "\n")
             for j in range(nrNodes):
                 f.write("{}, localhost, {}\n".format(nodes[j], start_nr[i] + j))
 
-    with open(node_file, 'w') as f:
+    with open(node_file, "w") as f:
         for j in range(nrNodes):
             f.write("{}\n".format(nodes[j]))
 
@@ -107,7 +115,7 @@ def construct_topology_config(topology, nodes, save_fig=True):
         if topology == "complete":
             adjacency_dct = {}
             for i, node in enumerate(nodes):
-                adjacency_dct[node] = nodes[:i] + nodes[i + 1:]
+                adjacency_dct[node] = nodes[:i] + nodes[i + 1 :]
 
         elif topology == "ring":
             adjacency_dct = {}
@@ -126,20 +134,22 @@ def construct_topology_config(topology, nodes, save_fig=True):
                 else:
                     adjacency_dct[node] = [nodes[(i - 1) % nn], nodes[(i + 1) % nn]]
 
-        elif topology == 'random_tree':
+        elif topology == "random_tree":
             adjacency_dct = get_random_tree(nodes)
 
-        elif topology[:16] == 'random_connected':
+        elif topology[:16] == "random_connected":
             try:
                 nr_edges = int(topology[17:])
             except ValueError:
                 raise ValueError(
                     "When specifying a random connected graph use the format 'random_connected_{nr_edges}',"
-                    "where 'nr_edges' is the number of edges of the graph.")
+                    "where 'nr_edges' is the number of edges of the graph."
+                )
             except IndexError:
                 raise ValueError(
                     "When specifying a random connected graph use the format 'random_connected_{nr_edges}',"
-                    "where 'nr_edges' is the number of edges of the graph.")
+                    "where 'nr_edges' is the number of edges of the graph."
+                )
             adjacency_dct = get_random_connected(nodes, nr_edges)
 
         else:
@@ -151,7 +161,7 @@ def construct_topology_config(topology, nodes, save_fig=True):
             plt.savefig(os.environ["NETSIM"] + "/config/topology.png")
 
         topology_file = os.environ["NETSIM"] + "/config/topology.json"
-        with open(topology_file, 'w') as top_file:
+        with open(topology_file, "w") as top_file:
             json.dump(adjacency_dct, top_file)
 
         Settings.set_setting("BACKEND", "topology_file", "config/topology.json")
@@ -224,27 +234,32 @@ def set_settings(settings):
 def parse_input():
     # Get inputs from terminal
     parser = ArgumentParser()
-    parser.add_argument('--nrnodes', required=False, type=str, default=None,
-                        help='Number of nodes to use in the network.')
-    parser.add_argument('--topology', required=False, type=str, default=None,
-                        help='Which topology to use, if None it will be fully connected.')
-    parser.add_argument('--nodes', required=False, type=str, default=None,
-                        help='Node names to be used in the network')
-    parser.add_argument('--maxqubits_per_node', required=False, type=str, default="")
-    parser.add_argument('--maxregisters_per_node', required=False, type=str, default="")
-    parser.add_argument('--waittime', required=False, type=str, default="")
-    parser.add_argument('--backend_loglevel', required=False, type=str, default="")
-    parser.add_argument('--backendhandler', required=False, type=str, default="")
-    parser.add_argument('--backend', required=False, type=str, default="")
-    parser.add_argument('--topology_file', required=False, type=str, default="")
-    parser.add_argument('--noisy_qubits', required=False, type=str, default="")
-    parser.add_argument('--t1', required=False, type=str, default="")
-    parser.add_argument('--frontend_loglevel', required=False, type=str, default="")
+    parser.add_argument(
+        "--nrnodes", required=False, type=str, default=None, help="Number of nodes to use in the network."
+    )
+    parser.add_argument(
+        "--topology",
+        required=False,
+        type=str,
+        default=None,
+        help="Which topology to use, if None it will be fully connected.",
+    )
+    parser.add_argument("--nodes", required=False, type=str, default=None, help="Node names to be used in the network")
+    parser.add_argument("--maxqubits_per_node", required=False, type=str, default="")
+    parser.add_argument("--maxregisters_per_node", required=False, type=str, default="")
+    parser.add_argument("--waittime", required=False, type=str, default="")
+    parser.add_argument("--backend_loglevel", required=False, type=str, default="")
+    parser.add_argument("--backendhandler", required=False, type=str, default="")
+    parser.add_argument("--backend", required=False, type=str, default="")
+    parser.add_argument("--topology_file", required=False, type=str, default="")
+    parser.add_argument("--noisy_qubits", required=False, type=str, default="")
+    parser.add_argument("--t1", required=False, type=str, default="")
+    parser.add_argument("--frontend_loglevel", required=False, type=str, default="")
     args = parser.parse_args()
 
     # Get the pre set node names
     if args.nodes:
-        nodes = args.nodes.split(' ')
+        nodes = args.nodes.split(" ")
     else:
         nodes = []
 
@@ -291,7 +306,7 @@ def parse_input():
     return nodes, topology, settings
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     nodes, topology, settings = parse_input()
     construct_node_configs(nodes=nodes)
     construct_topology_config(topology=topology, nodes=nodes)

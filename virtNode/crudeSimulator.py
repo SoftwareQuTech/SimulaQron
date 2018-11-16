@@ -255,7 +255,6 @@ class simpleEngine(quantumEngine):
         self.activeQubits = 0
         self.qubitReg = qp.Qobj()
 
-
     def add_fresh_qubit(self):
         """
         Add a new qubit initialized in the \|0\> state.
@@ -289,7 +288,7 @@ class simpleEngine(quantumEngine):
         # Increment the number of qubits
         self.activeQubits = self.activeQubits + 1
 
-        return (num)
+        return num
 
     def remove_qubit(self, qubitNum):
         """
@@ -418,11 +417,7 @@ class simpleEngine(quantumEngine):
         """
 
         # Construct the CNOT matrix
-        cnot = qp.Qobj([[1, 0, 0, 0],
-                       [0, 1, 0, 0],
-                       [0, 0, 0, 1],
-                       [0, 0, 1, 0]],
-                       dims=[[2, 2], [2, 2]])
+        cnot = qp.Qobj([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]], dims=[[2, 2], [2, 2]])
 
         # Apply it to the desired qubits
         self.apply_twoqubit_gate(cnot, qubitNum1, qubitNum2)
@@ -433,11 +428,7 @@ class simpleEngine(quantumEngine):
         """
 
         # Construct the CPHASE matrix
-        cphase = qp.Qobj([[1, 0, 0, 0],
-                         [0, 1, 0, 0],
-                         [0, 0, 1, 0],
-                         [0, 0, 0, -1]],
-                         dims=[[2, 2], [2, 2]])
+        cphase = qp.Qobj([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, -1]], dims=[[2, 2], [2, 2]])
 
         # Apply it to the desired qubits
         self.apply_twoqubit_gate(cphase, qubitNum1, qubitNum2)

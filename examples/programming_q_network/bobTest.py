@@ -27,8 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from SimulaQron.cqc.pythonLib.cqc import *
-
+from SimulaQron.cqc.pythonLib.cqc import CQCConnection
 
 
 #####################################################################################################
@@ -37,24 +36,23 @@ from SimulaQron.cqc.pythonLib.cqc import *
 #
 def main():
 
-	# Initialize the connection
-	with CQCConnection("Bob") as Bob:
+    # Initialize the connection
+    with CQCConnection("Bob") as Bob:
 
-		# Receive qubit from Alice (via Eve)
-		q=Bob.recvQubit()
+        # Receive qubit from Alice (via Eve)
+        q = Bob.recvQubit()
 
-		# Retreive key
-		k=q.measure()
+        # Retreive key
+        k = q.measure()
 
-		# Receive classical encoded message from Alice
-		enc=Bob.recvClassical()[0]
+        # Receive classical encoded message from Alice
+        enc = Bob.recvClassical()[0]
 
-		# Calculate message
-		m=(enc+k)%2
+        # Calculate message
+        m = (enc + k) % 2
 
-		print("Bob retrived the message m={} from Alice.".format(m))
+        print("Bob retrived the message m={} from Alice.".format(m))
 
 
 ##################################################################################################
 main()
-

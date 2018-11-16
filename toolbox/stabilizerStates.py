@@ -10,26 +10,17 @@
 import numpy as np
 import networkx as nx
 from scipy.linalg import block_diag
-from random import randint, sample, choice
-from functools import partial
+from random import randint
 
 
 class StabilizerState:
-    bool2phase = {False: "+1",
-                  True: "-1"}
+    bool2phase = {False: "+1", True: "-1"}
 
-    bool2Pauli = {(False, False): "I",
-                  (True, False): "X",
-                  (True, True): "Y",
-                  (False, True): "Z"}
+    bool2Pauli = {(False, False): "I", (True, False): "X", (True, True): "Y", (False, True): "Z"}
 
-    phase2bool = {"+1": False,
-                  "-1": True}
+    phase2bool = {"+1": False, "-1": True}
 
-    Pauli2bool = {"I": (False, False),
-                  "X": (True, False),
-                  "Y": (True, True),
-                  "Z": (False, True)}
+    Pauli2bool = {"I": (False, False), "X": (True, False), "Y": (True, True), "Z": (False, True)}
 
     def __init__(self, data=None, check_symplectic=True):
         """
@@ -133,21 +124,25 @@ class StabilizerState:
                         data = np.concatenate((X_part, Z_part), 1)
                     elif all(map(lambda gen_str: len(gen_str) == (n + 2), data)):
                         X_part = list(
-                            map(lambda gen_str: list(map(lambda P_str: P_str in ("X", "Y"), gen_str[2:])), data))
+                            map(lambda gen_str: list(map(lambda P_str: P_str in ("X", "Y"), gen_str[2:])), data)
+                        )
                         Z_part = list(
-                            map(lambda gen_str: list(map(lambda P_str: P_str in ("Y", "Z"), gen_str[2:])), data))
+                            map(lambda gen_str: list(map(lambda P_str: P_str in ("Y", "Z"), gen_str[2:])), data)
+                        )
                         phases = list(map(lambda gen_str: [self.phase2bool[gen_str[:2]]], data))
                         data = np.concatenate((X_part, Z_part, phases), 1)
                     else:
                         raise ValueError(
-                            "If data is a length-'n' list or stings, then each string needs be of length 'n' or 'n+2'")
+                            "If data is a length-'n' list or stings, then each string needs be of length 'n' or 'n+2'"
+                        )
                 try:
                     self._group = np.array(data, dtype=bool)
                 except Exception as err:
                     print(data)
                     print(type(data))
                     raise ValueError(
-                        "Could not create an array of the 'data' due to the following error: {}".format(err))
+                        "Could not create an array of the 'data' due to the following error: {}".format(err)
+                    )
 
                 if len(self._group.shape) != 2:
                     raise ValueError("'data' needs to be an array of rank 2")
@@ -193,7 +188,7 @@ class StabilizerState:
         return self.tensor_product(other)
 
     def __repr__(self):
-        return 'StabilizerState(np.' + self._group.__repr__() + ')'
+        return "StabilizerState(np." + self._group.__repr__() + ")"
 
     def __str__(self):
         to_return = "Stabilizer state on {} with the following stabilizer generators:\n".format(self.num_qubits)
@@ -267,10 +262,10 @@ class StabilizerState:
                     extra_phase = 0  # we count i's here, so 2 -> (-i)^2=-1, 4->1, 6-> -1
                     for j in range(m):
                         extra_phase += StabilizerState.Pauli_phase_tracking(
-                            [new_matrix[i_loop, j], new_matrix[i_loop, j + m]],
-                            [new_matrix[h, j], new_matrix[h, j + m]])
+                            [new_matrix[i_loop, j], new_matrix[i_loop, j + m]], [new_matrix[h, j], new_matrix[h, j + m]]
+                        )
                     new_matrix[i_loop, :] = np.logical_xor(new_matrix[i_loop, :], new_matrix[h, :])
-                    if ((extra_phase / 2) % 2):
+                    if (extra_phase / 2) % 2:
                         new_matrix[i_loop, -1] = np.logical_not(new_matrix[i_loop, -1])
                 h += 1
                 k += 1
@@ -330,10 +325,10 @@ class StabilizerState:
         elif other.num_qubits == 0:
             return self
         else:
-            this_X_stab = self._group[:, :self.num_qubits]
-            this_Z_stab = self._group[:, self.num_qubits:-1]
-            other_X_stab = other._group[:, :other.num_qubits]
-            other_Z_stab = other._group[:, other.num_qubits:-1]
+            this_X_stab = self._group[:, : self.num_qubits]
+            this_Z_stab = self._group[:, self.num_qubits : -1]
+            other_X_stab = other._group[:, : other.num_qubits]
+            other_Z_stab = other._group[:, other.num_qubits : -1]
 
             new_X_stab = block_diag(this_X_stab, other_X_stab)
             new_Z_stab = block_diag(this_Z_stab, other_Z_stab)
@@ -494,10 +489,12 @@ class StabilizerState:
         # Update the phases
         xy_control_yz_target_rows = np.logical_and(self._group[:, control], self._group[:, target + n])
         yz_control_xy_target_rows = np.logical_and(self._group[:, control + n], self._group[:, target])
-        not_yz_control_not_xy_target_rows = np.logical_and(np.logical_not(self._group[:, control + n]),
-                                                           np.logical_not(self._group[:, target]))
-        rows_to_flip = np.logical_and(xy_control_yz_target_rows,
-                                      np.logical_or(yz_control_xy_target_rows, not_yz_control_not_xy_target_rows))
+        not_yz_control_not_xy_target_rows = np.logical_and(
+            np.logical_not(self._group[:, control + n]), np.logical_not(self._group[:, target])
+        )
+        rows_to_flip = np.logical_and(
+            xy_control_yz_target_rows, np.logical_or(yz_control_xy_target_rows, not_yz_control_not_xy_target_rows)
+        )
         self._group[rows_to_flip, -1] = np.logical_not(self._group[rows_to_flip, -1])
 
     def apply_CZ(self, control, target):
@@ -534,7 +531,7 @@ class StabilizerState:
     def measure(self, position, inplace=False):
         """
         Measures qubit 'position' of the stabilizer state in the standard basis.
-        If 'inplace=False' the qubit is removed from the state, i.e. the number of qubits in the state is reduced by one.
+        If 'inplace=False' the qubit is removed from the state, i.e. the number of qubits in the state is reduced by one
         If 'inplace=True' the qubit is not removed and the number of qubits remain the same.
         :param position: The position of the qubit.
         :type position: int
@@ -567,7 +564,7 @@ class StabilizerState:
             if not inplace:
                 # Simply remove first generator and columns for X and Z of this qubit
                 X_part = tmp_matrix[1:n, 1:n]
-                Z_part_and_phase = tmp_matrix[1:n, n + 1:]
+                Z_part_and_phase = tmp_matrix[1:n, n + 1 :]
                 self._group = np.concatenate((X_part, Z_part_and_phase), 1)
                 self._nr_rows = n - 1
             else:
@@ -632,8 +629,8 @@ class StabilizerState:
         # Then apply Hadamards on the last n-k qubits such that X has full rank
         for j in range(k, n):
             Sp.apply_H(j)
-            operations.append(('H', A[j]))
-        Sp_mat = Sp.to_array().astype(int)[:, :2 * n]
+            operations.append(("H", A[j]))
+        Sp_mat = Sp.to_array().astype(int)[:, : 2 * n]
         phase_list = Sp.to_array()[:, -1]
 
         # Then multiply by inv(X) such that inv(X)X = I
@@ -644,7 +641,7 @@ class StabilizerState:
             raise ValueError("The X-part should be identity,but something went wrong")
 
         # then swap back (first the columns, then the rows to keep identity on the X-part)
-        Spp_mat = Spp_mat[:, A[:2 * n]]
+        Spp_mat = Spp_mat[:, A[: 2 * n]]
         Spp_mat = Spp_mat[A[:n], :]
         Spp = StabilizerState(np.c_[Spp_mat, [phase_list[i] for i in A[:n]]])
 
@@ -653,16 +650,16 @@ class StabilizerState:
         for j in range(n):
             if Spp_mat[j, j + n]:
                 Spp.apply_S(j)
-                operations.append(('S', j))
+                operations.append(("S", j))
 
         # Now we remove -1 phases which might still be there
         for j in range(n):
             if Spp.to_array()[:, -1][j]:
                 Spp.apply_Z(j)
-                operations.append(('Z', j))
+                operations.append(("Z", j))
         # Spp is now in the form of (I,Gamma) where Gamma is the adj mat of the Graph
         # SQC equivalent to the stabilizer state.
-        adj_mat = Spp.to_array()[:, n:2 * n]
+        adj_mat = Spp.to_array()[:, n : 2 * n]
         G = nx.from_numpy_matrix(adj_mat)
 
         if return_operations:

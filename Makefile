@@ -1,10 +1,23 @@
 PYTHON        = python
 PIP           = pip
 RUN_TESTS     = tests/runTests.sh
-
+CQC_DIR		  = cqc
+EXAMPLES_DIR  = examples
+GENERAL_DIR   = general
+LOCAL_DIR     = local
+RUN_DIR       = run
+TESTS_DIR     = tests
+TOOLBOX_DIR   = toolbox
+VIRTNODE_DIR  = virtNode
 
 clean:
 	@find . -name '*.pyc' -delete
+
+format:
+	black -l 120 .
+
+lint:
+	@${PYTHON} -m flake8 ${CQC_DIR} ${EXAMPLES_DIR} ${GENERAL_DIR} ${LOCAL_DIR} ${RUN_DIR} ${TESTS_DIR} ${TOOLBOX_DIR} ${VIRTNODE_DIR}
 
 python-deps:
 	@$(PIP) install -r requirements.txt
@@ -37,6 +50,6 @@ tests_allBackends: tests_qutip tests_projectq tests_stabilizer
 
 full_tests_allBackends: full_tests_qutip full_tests_projectq full_tests_stabilizer
 
-verify: clean python-deps tests
+verify: clean lint python-deps tests
 
-.PHONY: clean python-deps tests full_tests verify
+.PHONY: clean format lint python-deps tests full_tests verify

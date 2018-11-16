@@ -161,6 +161,7 @@ class CQCCmdHeader:
     """
         Header for a command instruction packet.
     """
+
     HDR_LENGTH = CQC_CMD_HDR_LENGTH
 
     def __init__(self, headerBytes=None):
@@ -254,7 +255,7 @@ class CQCXtraHeader:
         Initialize using values received from a packet.
         """
         warnings.warn("Xtra Header is deprecated, it is split into different headers", DeprecationWarning)
-        if headerBytes == None:
+        if headerBytes is None:
             self.is_set = False
             self.qubit_id = 0
             self.step = 0
@@ -284,9 +285,16 @@ class CQCXtraHeader:
         if not self.is_set:
             return 0
 
-        xtraH = struct.pack("!HHLLHBB", self.qubit_id, self.remote_app_id, self.remote_node, self.cmdLength,
-                            self.remote_port,
-                            self.step, 0)
+        xtraH = struct.pack(
+            "!HHLLHBB",
+            self.qubit_id,
+            self.remote_app_id,
+            self.remote_node,
+            self.cmdLength,
+            self.remote_port,
+            self.step,
+            0,
+        )
         return xtraH
 
     def unpack(self, headerBytes):
@@ -661,7 +669,7 @@ class CQCNotifyHeader:
         """
             Initialize from packet data.
         """
-        if headerBytes == None:
+        if headerBytes is None:
             self.is_set = False
             self.qubit_id = 0
             self.outcome = 0
@@ -691,9 +699,16 @@ class CQCNotifyHeader:
         if not self.is_set:
             return 0
 
-        xtraH = struct.pack("!HHLQHBB", self.qubit_id, self.remote_app_id, self.remote_node, self.datetime,
-                            self.remote_port,
-                            self.outcome, 0)
+        xtraH = struct.pack(
+            "!HHLQHBB",
+            self.qubit_id,
+            self.remote_app_id,
+            self.remote_node,
+            self.datetime,
+            self.remote_port,
+            self.outcome,
+            0,
+        )
         return xtraH
 
     def unpack(self, headerBytes):
@@ -727,15 +742,15 @@ class CQCNotifyHeader:
 
 
 class CQCEPRRequestHeader:
-    package_format = 'uint:32=remote_ip, ' \
-                     'float:32=min_fidelity, ' \
-                     'float:32=max_time, ' \
-                     'uint:16=remote_port, ' \
-                     'uint:8=num_pairs, ' \
-                     'uint:4=priority', \
-                     'uint:1=store, ' \
-                     'uint:1=measure_directly, ' \
-                     'uint:2=0'
+    package_format = (
+        "uint:32=remote_ip, "
+        "float:32=min_fidelity, "
+        "float:32=max_time, "
+        "uint:16=remote_port, "
+        "uint:8=num_pairs, "
+        "uint:4=priority",
+        "uint:1=store, " "uint:1=measure_directly, " "uint:2=0",
+    )
     HDR_LENGTH = 16
 
     def __init__(self, headerBytes=None):
@@ -800,14 +815,16 @@ class CQCEPRRequestHeader:
         if not self.is_set:
             return 0
 
-        to_pack = {"remote_ip": self.remote_ip,
-                   "remote_port": self.remote_port,
-                   "min_fidelity": self.min_fidelity,
-                   "max_time": self.max_time,
-                   "num_pairs": self.num_pairs,
-                   "priority": self.priority,
-                   "store": self.store,
-                   "measure_directly": self.measure_directly}
+        to_pack = {
+            "remote_ip": self.remote_ip,
+            "remote_port": self.remote_port,
+            "min_fidelity": self.min_fidelity,
+            "max_time": self.max_time,
+            "num_pairs": self.num_pairs,
+            "priority": self.priority,
+            "store": self.store,
+            "measure_directly": self.measure_directly,
+        }
         request_Bitstring = bitstring.pack(self.package_format, **to_pack)
         requestH = request_Bitstring.tobytes()
 
