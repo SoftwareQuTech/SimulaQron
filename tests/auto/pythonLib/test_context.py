@@ -5,20 +5,21 @@ from SimulaQron.settings import Settings
 
 class TestContext(unittest.TestCase):
     def setUp(self):
-        self.qubits = []
+        self.cqcs = []
 
     def tearDown(self):
-        for q in self.qubits:
-            q.measure()
+        for cqc in self.cqcs:
+            cqc.close()
 
     def test_without_context(self):
         for _ in range(Settings.CONF_MAXQUBITS):
             cqc = CQCConnection("Alice")
-            self.qubits.append(qubit(cqc))
+            self.cqcs.append(cqc)
+            qubit(cqc)
         with self.assertRaises(CQCNoQubitError):
             cqc = CQCConnection("Alice")
+            self.cqcs.append(cqc)
             qubit(cqc)
-        cqc.close()
 
     def test_with_context(self):
         for _ in range(Settings.CONF_MAXQUBITS):
