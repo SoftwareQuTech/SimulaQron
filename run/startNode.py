@@ -32,6 +32,7 @@ from SimulaQron.settings import Settings
 import sys
 import os
 import logging
+import signal
 
 logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=Settings.CONF_LOGGING_LEVEL_BACKEND)
 
