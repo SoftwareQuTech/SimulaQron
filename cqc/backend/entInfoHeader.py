@@ -32,17 +32,23 @@ import logging
 import struct
 import bitstring
 
+from SimulaQron.cqc.backend.cqcHeader import Header
+
 # Lengths of the headers in bytes
-ENT_INFO_LENGTH = 40  # Length of a entanglement information header
+ENT_INFO_LENGTH = 40                 # Length of a entanglement information header
+ENT_INFO_CREATE_KEEP_LENGTH = 28     # Length of a entanglement information header (for create and keep)
+ENT_INFO_MEAS_DIRECT_LENGTH = 24     # Length of a entanglement information header (for measure directly)
 
 ENT_INFO_TP_CREATE_KEEP = 1  # Type of message when entanglement is kept
 ENT_INFO_TP_MEAS_DIRECT = 2  # Type of message when entanglement is measured directly (for classical correlations)
 
 
-class EntInfoHeader:
+class EntInfoHeader(Header):
     """
     Header for a entanglement information packet. Fo
     """
+
+    HDR_LENGTH = ENT_INFO_LENGTH
 
     def __init__(self, headerBytes=None):
         """
@@ -186,7 +192,7 @@ class EntInfoHeader:
             self.DF = DF
 
 
-class EntInfoCreateKeepHeader:
+class EntInfoCreateKeepHeader(Header):
     """
         Header for a entanglement information packet, where entanglement is kept after generation
     """
@@ -206,6 +212,8 @@ class EntInfoCreateKeepHeader:
         "float:32=goodness, "
         "uint:32=create_id"
     )
+
+    HDR_LENGTH = ENT_INFO_CREATE_KEEP_LENGTH
 
     def __init__(self, headerBytes=None):
         """
@@ -346,7 +354,7 @@ class EntInfoCreateKeepHeader:
             self.DF = DF
 
 
-class EntInfoMeasDirectHeader:
+class EntInfoMeasDirectHeader(Header):
     """
         Header for a entanglement information packet, where communication qubit is measured directly after emission.
     """
@@ -367,6 +375,8 @@ class EntInfoMeasDirectHeader:
         "float:32=goodness, "
         "uint:32=create_id"
     )
+
+    HDR_LENGTH = ENT_INFO_MEAS_DIRECT_LENGTH
 
     def __init__(self, headerBytes=None):
         """
