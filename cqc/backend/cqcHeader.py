@@ -531,7 +531,7 @@ class CQCCommunicationHeader:
     packaging_format_v1 = "!HLH"
     HDR_LENGTH = CQC_COM_HDR_LENGTH
 
-    def __init__(self, headerBytes=None):
+    def __init__(self, headerBytes=None, cqc_version=CQC_VERSION):
         """
         Initialize from packet data
         :param headerBytes:  packet data
@@ -543,7 +543,7 @@ class CQCCommunicationHeader:
             self.remote_node = 0
 
         else:
-            self.unpack(headerBytes)
+            self.unpack(headerBytes, cqc_version=cqc_version)
 
     def setVals(self, remote_app_id, remote_node, remote_port):
         """
