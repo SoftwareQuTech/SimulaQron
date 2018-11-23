@@ -836,7 +836,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
             hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0)
         else:
             hdr = CQCMeasOutHeader()
-            hdr.setVals(meas_out=outcome)
+            hdr.setVals(outcome=outcome)
         msg = hdr.pack()
         self.return_messages.append(msg)
         # self.protocol.transport.write(msg)
