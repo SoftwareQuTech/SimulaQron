@@ -64,6 +64,7 @@ from SimulaQron.cqc.backend.cqcHeader import (
     CQC_CMD_RELEASE,
     CQCCommunicationHeader,
     CQCXtraQubitHeader,
+    CQC_XTRA_QUBIT_HDR_LENGTH,
     CQCRotationHeader,
     CQCXtraHeader,
     CQC_CMD_XTRA_LENGTH,
@@ -80,6 +81,10 @@ from SimulaQron.cqc.backend.cqcHeader import (
     CQC_NOTIFY_LENGTH,
     CQC_ERR_NOQUBIT,
     CQCNotifyHeader,
+    CQCMeasOutHeader,
+    CQC_MEAS_OUT_HDR_LENGTH,
+    CQCTimeinfoHeader,
+    CQC_TIMEINFO_HDR_LENGTH,
     CQC_TP_MEASOUT,
     CQC_ERR_TIMEOUT,
     CQC_ERR_INUSE,
@@ -537,13 +542,21 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
         # Craft reply
         # First send an appropriate CQC Header
-        cqc_msg = self.create_return_message(header.app_id, CQC_TP_INF_TIME, length=CQC_NOTIFY_LENGTH)
+        if header.version < 2:
+            length = CQC_NOTIFY_LENGTH
+        else:
+            length = CQC_TIMEINFO_HDR_LENGTH
+        cqc_msg = self.create_return_message(header.app_id, CQC_TP_INF_TIME, length=length)
         self.return_messages.append(cqc_msg)
 
         # Then we send a notify header with the timing details
-        notify = CQCNotifyHeader()
-        notify.setVals(cmd_hdr.qubit_id, 0, 0, 0, 0, q.timestamp)
-        msg = notify.pack()
+        if header.version < 2:
+            hdr = CQCNotifyHeader()
+            hdr.setVals(cmd_hdr.qubit_id, 0, 0, 0, 0, q.timestamp)
+        else:
+            hdr = CQCTimeinfoHeader()
+            hdr.setVals(q.timestamp)
+        msg = hdr.pack()
         self.return_messages.append(msg)
 
     def cmd_i(self, cqc_header, cmd, xtra):
@@ -785,12 +798,20 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
         logging.debug("CQC %s: Measured outcome %d", self.name, outcome)
         # Send the outcome back as MEASOUT
-        cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_MEASOUT, length=CQC_NOTIFY_LENGTH)
+        if cqc_header.version < 2:
+            length = CQC_NOTIFY_LENGTH
+        else:
+            length = CQC_MEAS_OUT_HDR_LENGTH
+        cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_MEASOUT, length=length)
         self.return_messages.append(cqc_msg)
 
         # Send notify header with outcome
-        hdr = CQCNotifyHeader()
-        hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0)
+        if cqc_header.version < 2:
+            hdr = CQCNotifyHeader()
+            hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0)
+        else:
+            hdr = CQCMeasOutHeader()
+            hdr.setVals(meas_out=outcome)
         msg = hdr.pack()
         self.return_messages.append(msg)
         # self.protocol.transport.write(msg)
@@ -1002,14 +1023,20 @@ class SimulaqronCQCHandler(CQCMessageHandler):
             self.factory._lock.release()
 
         # Send message we received a qubit back
-        # logging.debug("GOO")
-        recv_msg = self.create_return_message(cqc_header.app_id, CQC_TP_RECV, length=CQC_NOTIFY_LENGTH)
+        if cqc_header.version < 2:
+            length = CQC_NOTIFY_LENGTH
+        else:
+            length = CQC_XTRA_QUBIT_HDR_LENGTH
+        recv_msg = self.create_return_message(cqc_header.app_id, CQC_TP_RECV, length=length)
         self.return_messages.append(recv_msg)
 
         # Send notify header with qubit ID
-        # logging.debug("GOO")
-        hdr = CQCNotifyHeader()
-        hdr.setVals(q_id, 0, 0, 0, 0, 0)
+        if cqc_header.version < 2:
+            hdr = CQCNotifyHeader()
+            hdr.setVals(q_id, 0, 0, 0, 0, 0)
+        else:
+            hdr = CQCXtraQubitHeader()
+            hdr.setVals(qubit_id=q_id)
         msg = hdr.pack()
         # self.protocol.transport.write(msg)
         logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
@@ -1245,25 +1272,31 @@ class SimulaqronCQCHandler(CQCMessageHandler):
             return False
 
         # Send message we created EPR pair
+        if cqc_header.version < 2:
+            length = CQC_NOTIFY_LENGTH + ENT_INFO_LENGTH
+        else:
+            length = CQC_XTRA_QUBIT_HDR_LENGTH + ENT_INFO_LENGTH
         msg_ok = self.create_return_message(
-            cqc_header.app_id, CQC_TP_EPR_OK, length=CQC_NOTIFY_LENGTH + ENT_INFO_LENGTH
+            cqc_header.app_id, CQC_TP_EPR_OK, length=length
         )
 
         self.return_messages.append(msg_ok)
 
         # Send notify header with qubit ID
-        hdr = CQCNotifyHeader()
-        hdr.setVals(q_id1, 0, 0, 0, 0, 0)
-        msg_notify = hdr.pack()
-        self.return_messages.append(msg_notify)
+        if cqc_header.version < 2:
+            hdr = CQCNotifyHeader()
+            hdr.setVals(q_id1, 0, 0, 0, 0, 0)
+        else:
+            hdr = CQCXtraQubitHeader()
+            hdr.setVals(qubit_id=q_id1)
+        msg = hdr.pack()
+        self.return_messages.append(msg)
 
-        # self.protocol.transport.write(msg)
         logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
 
         # Send entanglement info
         msg_ent_info = ent_info.pack()
         self.return_messages.append(msg_ent_info)
-        # self.protocol.transport.write(msg)
         logging.debug("CQC %s: Entanglement information %s", self.name, ent_info.printable())
 
         logging.debug("CQC %s: EPR Pair ID %d qubit id %d", self.name, cqc_header.app_id, cmd.qubit_id)
@@ -1393,23 +1426,30 @@ class SimulaqronCQCHandler(CQCMessageHandler):
             self.factory._lock.release()
 
         # Send message we received a qubit back
+        if cqc_header.version < 2:
+            length = CQC_NOTIFY_LENGTH + ENT_INFO_LENGTH
+        else:
+            length = CQC_XTRA_QUBIT_HDR_LENGTH + ENT_INFO_LENGTH
         cqc_msg = self.create_return_message(
-            cqc_header.app_id, CQC_TP_EPR_OK, length=CQC_NOTIFY_LENGTH + ENT_INFO_LENGTH
+            cqc_header.app_id, CQC_TP_EPR_OK, length=length
         )
         self.return_messages.append(cqc_msg)
 
         # Send notify header with qubit ID
-        hdr = CQCNotifyHeader()
-        hdr.setVals(q_id, 0, 0, 0, 0, 0)
-        notify_msg = hdr.pack()
-        self.return_messages.append(notify_msg)
-        # self.protocol.transport.write(msg)
-        logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
+        if cqc_header.version < 2:
+            hdr = CQCNotifyHeader()
+            hdr.setVals(q_id, 0, 0, 0, 0, 0)
+            logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
+        else:
+            hdr = CQCXtraQubitHeader()
+            hdr.setVals(qubit_id=q_id)
+            logging.debug("CQC %s: %s", self.name, hdr.printable())
+        msg = hdr.pack()
+        self.return_messages.append(msg)
 
         # Send entanglement info
         ent_info_msg = ent_info.pack()
         self.return_messages.append(ent_info_msg)
-        # self.protocol.transport.write(msg)
         logging.debug("CQC %s: Entanglement information %s", self.name, ent_info.printable())
 
         logging.debug("CQC %s: EPR Pair ID %d qubit id %d", self.name, cqc_header.app_id, cmd.qubit_id)
@@ -1453,6 +1493,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
                     )
                     self.return_messages.append(self.create_return_message(cqc_header.app_id, CQC_ERR_GENERAL))
             except Exception as err:
+                succ = False
                 logging.error(
                     "CQC {}: Got the following unexpected error when trying to create new qubit: {}".format(
                         self.name, err
@@ -1468,17 +1509,23 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
                 if not return_q_id:
                     # Send message we created a qubit back
-                    # logging.debug("GOO")
-                    cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_NEW_OK, length=CQC_NOTIFY_LENGTH)
-                    # self.protocol.transport.write(cqc_msg)
+                    if cqc_header.version < 2:
+                        length = CQC_NOTIFY_LENGTH
+                    else:
+                        length = CQC_XTRA_QUBIT_HDR_LENGTH
+                    cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_NEW_OK, length=length)
                     self.return_messages.append(cqc_msg)
 
                     # Send notify header with qubit ID
-                    hdr = CQCNotifyHeader()
-                    hdr.setVals(q_id, 0, 0, 0, 0, 0)
+                    if cqc_header.version < 2:
+                        hdr = CQCNotifyHeader()
+                        hdr.setVals(q_id, 0, 0, 0, 0, 0)
+                        logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
+                    else:
+                        hdr = CQCXtraQubitHeader()
+                        hdr.setVals(qubit_id=q_id)
+                        logging.debug("CQC %s: %s", self.name, hdr.printable())
                     msg = hdr.pack()
-                    # self.protocol.transport.write(msg)
-                    logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
                     self.return_messages.append(msg)
         finally:
             self.factory._lock.release()
