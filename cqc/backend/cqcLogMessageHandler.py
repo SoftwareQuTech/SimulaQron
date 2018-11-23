@@ -29,6 +29,7 @@
 """
 This class interfaces cqcMessageHandler, and is for testing purposes only
 """
+
 import logging
 
 from SimulaQron.cqc.backend.cqcMessageHandler import CQCMessageHandler
@@ -97,7 +98,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
         if len(data) >= cmd_l:
             subdata["cmd_header"] = cls.parse_cmd(CQCCmdHeader(data[:cmd_l]))
         if len(data) >= cmd_l + xtra_l:
-            subdata["xtra_header"] = cls.parse_xtra(CQCXtraHeader(data[cmd_l : cmd_l + xtra_l]))
+            subdata["xtra_header"] = cls.parse_xtra(CQCXtraHeader(data[cmd_l: cmd_l + xtra_l]))
         cls.logData.append(subdata)
         with open(cls.file, "w") as outfile:
             json.dump(cls.logData, outfile)
@@ -268,7 +269,8 @@ class CQCLogMessageHandler(CQCMessageHandler):
             length = CQC_NOTIFY_LENGTH
         else:
             length = CQC_MEAS_OUT_HDR_LENGTH
-        cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_MEASOUT, length=length, cqc_version=cqc_header.version)
+        cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_MEASOUT, length=length,
+                                             cqc_version=cqc_header.version)
 
         outcome = 2
         if cqc_header.version < 2:
@@ -288,7 +290,8 @@ class CQCLogMessageHandler(CQCMessageHandler):
             length = CQC_NOTIFY_LENGTH
         else:
             length = CQC_MEAS_OUT_HDR_LENGTH
-        cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_MEASOUT, length=length, cqc_version=cqc_header.version)
+        cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_MEASOUT, length=length,
+                                             cqc_version=cqc_header.version)
 
         outcome = 2
         if cqc_header.version < 2:
@@ -316,7 +319,8 @@ class CQCLogMessageHandler(CQCMessageHandler):
             length = CQC_NOTIFY_LENGTH
         else:
             length = CQC_XTRA_QUBIT_HDR_LENGTH
-        recv_msg = self.create_return_message(cqc_header.app_id, CQC_TP_RECV, length=length, cqc_version=cqc_header.version)
+        recv_msg = self.create_return_message(cqc_header.app_id, CQC_TP_RECV, length=length,
+                                              cqc_version=cqc_header.version)
 
         if cqc_header.version < 2:
             hdr = CQCNotifyHeader()
@@ -386,7 +390,6 @@ class CQCLogMessageHandler(CQCMessageHandler):
         msg = hdr.pack()
         self.return_messages.append(msg)
 
-
         # Send entanglement info
         ent_id = 1
         ent_info = EntInfoHeader()
@@ -417,7 +420,8 @@ class CQCLogMessageHandler(CQCMessageHandler):
             length = CQC_NOTIFY_LENGTH
         else:
             length = CQC_XTRA_QUBIT_HDR_LENGTH
-        cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_RECV, length=length, cqc_version=cqc_header.version)
+        cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_RECV, length=length,
+                                             cqc_version=cqc_header.version)
 
         if cqc_header.version < 2:
             hdr = CQCNotifyHeader()
@@ -440,7 +444,8 @@ class CQCLogMessageHandler(CQCMessageHandler):
                 length = CQC_NOTIFY_LENGTH
             else:
                 length = CQC_XTRA_QUBIT_HDR_LENGTH
-            cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_NEW_OK, length=length, cqc_version=cqc_header.version)
+            cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_NEW_OK, length=length,
+                                                 cqc_version=cqc_header.version)
             self.return_messages.append(cqc_msg)
 
             if cqc_header.version < 2:

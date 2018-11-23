@@ -34,7 +34,6 @@ import time
 import logging
 import socket
 import warnings
-import struct
 
 from SimulaQron.cqc.backend.cqcConfig import CQC_CONF_LINK_WAIT_TIME, CQC_CONF_COM_WAIT_TIME
 from SimulaQron.cqc.backend.cqcHeader import (
@@ -80,13 +79,9 @@ from SimulaQron.cqc.backend.cqcHeader import (
     CQCFactoryHeader,
     CQC_CMD_HDR_LENGTH,
     CQC_TP_INF_TIME,
-    CQC_NOTIFY_LENGTH,
     CQC_ERR_NOQUBIT,
-    CQCNotifyHeader,
     CQCMeasOutHeader,
-    CQC_MEAS_OUT_HDR_LENGTH,
     CQCTimeinfoHeader,
-    CQC_TIMEINFO_HDR_LENGTH,
     CQC_TP_MEASOUT,
     CQC_ERR_TIMEOUT,
     CQC_TP_RECV,
@@ -94,7 +89,7 @@ from SimulaQron.cqc.backend.cqcHeader import (
     CQC_TP_NEW_OK,
     CQC_TP_EXPIRE,
 )
-from SimulaQron.cqc.backend.entInfoHeader import EntInfoHeader, ENT_INFO_LENGTH
+from SimulaQron.cqc.backend.entInfoHeader import EntInfoHeader
 from SimulaQron.general.hostConfig import cqc_node_id_from_addrinfo, networkConfig
 from SimulaQron.settings import Settings
 
