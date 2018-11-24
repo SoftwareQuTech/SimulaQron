@@ -947,7 +947,7 @@ class CQCEPRRequestHeader(Header):
         "uint:16=remote_port, "
         "uint:8=num_pairs, "
         "uint:4=priority",
-        "uint:1=store, " "uint:1=measure_directly, " "uint:2=0",
+        "uint:1=store, " "uint:1=atomic, " "uint:1=measure_directly, " "uint:2=0",
     )
 
     HDR_LENGTH = CQC_EPR_REQ_LENGTH
@@ -966,13 +966,15 @@ class CQCEPRRequestHeader(Header):
             self.max_time = 0.0
             self.priority = 0
             self.store = True
+            self.atomic = False
             self.measure_directly = False
 
             self.is_set = False
         else:
             self.unpack(headerBytes)
 
-    def setVals(self, remote_ip, remote_port, num_pairs, min_fidelity, max_time, priority, store, measure_directly):
+    def setVals(self, remote_ip, remote_port, num_pairs, min_fidelity, max_time, priority, store, atomic,
+                measure_directly):
         """
         Stores required parameters of Entanglement Generation Protocol Request
 
@@ -1002,6 +1004,7 @@ class CQCEPRRequestHeader(Header):
         self.max_time = max_time
         self.priority = priority
         self.store = store
+        self.atomic = atomic
         self.measure_directly = measure_directly
 
         self.is_set = True
@@ -1022,6 +1025,7 @@ class CQCEPRRequestHeader(Header):
             "num_pairs": self.num_pairs,
             "priority": self.priority,
             "store": self.store,
+            "atomic": self.atomic,
             "measure_directly": self.measure_directly,
         }
         request_Bitstring = bitstring.pack(self.package_format, **to_pack)
@@ -1044,7 +1048,8 @@ class CQCEPRRequestHeader(Header):
         self.num_pairs = request_fields[4]
         self.priority = request_fields[5]
         self.store = request_fields[6]
-        self.measure_directly = request_fields[7]
+        self.atomic = request_fields[7]
+        self.measure_directly = request_fields[8]
 
         self.is_set = True
 
@@ -1064,6 +1069,7 @@ class CQCEPRRequestHeader(Header):
             to_print += "Num Pairs: {}".format(self.num_pairs)
             to_print += "Priority: {}".format(self.priority)
             to_print += "Store: {}".format(self.store)
+            to_print += "Atomic: {}".format(self.atomic)
             to_print += "Measure Directly: {}".format(self.measure_directly)
 
             return to_print
