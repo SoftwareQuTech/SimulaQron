@@ -29,6 +29,7 @@
 """
 This class interfaces cqcMessageHandler, and is for testing purposes only
 """
+
 import logging
 
 from SimulaQron.cqc.backend.cqcMessageHandler import CQCMessageHandler
@@ -37,11 +38,16 @@ from SimulaQron.cqc.backend.cqcHeader import (
     CQCXtraHeader,
     CQC_CMD_HDR_LENGTH,
     CQC_CMD_XTRA_LENGTH,
+    CQC_TIMEINFO_HDR_LENGTH,
+    CQC_MEAS_OUT_HDR_LENGTH,
+    CQC_XTRA_QUBIT_HDR_LENGTH,
     CQCFactoryHeader,
     CQCCommunicationHeader,
     CQCXtraQubitHeader,
     CQCRotationHeader,
     CQCNotifyHeader,
+    CQCTimeinfoHeader,
+    CQCMeasOutHeader,
     CQC_TP_NEW_OK,
     CQC_NOTIFY_LENGTH,
     CQC_TP_INF_TIME,
@@ -92,7 +98,7 @@ class CQCLogMessageHandler(CQCMessageHandler):
         if len(data) >= cmd_l:
             subdata["cmd_header"] = cls.parse_cmd(CQCCmdHeader(data[:cmd_l]))
         if len(data) >= cmd_l + xtra_l:
-            subdata["xtra_header"] = cls.parse_xtra(CQCXtraHeader(data[cmd_l : cmd_l + xtra_l]))
+            subdata["xtra_header"] = cls.parse_xtra(CQCXtraHeader(data[cmd_l: cmd_l + xtra_l]))
         cls.logData.append(subdata)
         with open(cls.file, "w") as outfile:
             json.dump(cls.logData, outfile)
@@ -199,15 +205,23 @@ class CQCLogMessageHandler(CQCMessageHandler):
         cmd_hdr = CQCCmdHeader(raw_cmd_header)
         # Craft reply
         # First send an appropriate CQC Header
-        cqc_msg = self.create_return_message(header.app_id, CQC_TP_INF_TIME, length=CQC_NOTIFY_LENGTH)
+        if header.version < 2:
+            length = CQC_NOTIFY_LENGTH
+        else:
+            length = CQC_TIMEINFO_HDR_LENGTH
+        cqc_msg = self.create_return_message(header.app_id, CQC_TP_INF_TIME, length=length, cqc_version=header.version)
         self.return_messages.append(cqc_msg)
         # Then we send a notify header with the timing details
         # We do not have a qubit, so no timestamp either.
         # So let's send back some random date
         datetime = 758505600
-        notify = CQCNotifyHeader()
-        notify.setVals(cmd_hdr.qubit_id, 0, 0, 0, 0, datetime)
-        msg = notify.pack()
+        if header.version < 2:
+            hdr = CQCNotifyHeader()
+            hdr.setVals(cmd_hdr.qubit_id, 0, 0, 0, 0, datetime)
+        else:
+            hdr = CQCTimeinfoHeader()
+            hdr.setVals(datetime)
+        msg = hdr.pack()
         self.return_messages.append(msg)
 
         return
@@ -251,11 +265,20 @@ class CQCLogMessageHandler(CQCMessageHandler):
     def cmd_measure(self, cqc_header, cmd, xtra, inplace=False):
         self.parse_data(cqc_header, cmd, xtra, "Measure", self.factory.name)
         # We'll always have 2 as outcome
-        cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_MEASOUT, length=CQC_NOTIFY_LENGTH)
+        if cqc_header.version < 2:
+            length = CQC_NOTIFY_LENGTH
+        else:
+            length = CQC_MEAS_OUT_HDR_LENGTH
+        cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_MEASOUT, length=length,
+                                             cqc_version=cqc_header.version)
 
         outcome = 2
-        hdr = CQCNotifyHeader()
-        hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0)
+        if cqc_header.version < 2:
+            hdr = CQCNotifyHeader()
+            hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0)
+        else:
+            hdr = CQCMeasOutHeader()
+            hdr.setVals(outcome=outcome)
         msg = hdr.pack()
         self.return_messages.append(cqc_msg)
         self.return_messages.append(msg)
@@ -263,11 +286,20 @@ class CQCLogMessageHandler(CQCMessageHandler):
     def cmd_measure_inplace(self, cqc_header, cmd, xtra):
         self.parse_data(cqc_header, cmd, xtra, "Measure in place", self.factory.name)
         # We'll always have 2 as outcome
-        cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_MEASOUT, length=CQC_NOTIFY_LENGTH)
+        if cqc_header.version < 2:
+            length = CQC_NOTIFY_LENGTH
+        else:
+            length = CQC_MEAS_OUT_HDR_LENGTH
+        cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_MEASOUT, length=length,
+                                             cqc_version=cqc_header.version)
 
         outcome = 2
-        hdr = CQCNotifyHeader()
-        hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0)
+        if cqc_header.version < 2:
+            hdr = CQCNotifyHeader()
+            hdr.setVals(cmd.qubit_id, outcome, 0, 0, 0, 0)
+        else:
+            hdr = CQCMeasOutHeader()
+            hdr.setVals(outcome=outcome)
         msg = hdr.pack()
         self.return_messages.append(cqc_msg)
         self.return_messages.append(msg)
@@ -283,9 +315,19 @@ class CQCLogMessageHandler(CQCMessageHandler):
         q_id = CQCLogMessageHandler.cur_qubit_id
         CQCLogMessageHandler.cur_qubit_id += 1
 
-        recv_msg = self.create_return_message(cqc_header.app_id, CQC_TP_RECV, length=CQC_NOTIFY_LENGTH)
-        hdr = CQCNotifyHeader()
-        hdr.setVals(q_id, 0, 0, 0, 0, 0)
+        if cqc_header.version < 2:
+            length = CQC_NOTIFY_LENGTH
+        else:
+            length = CQC_XTRA_QUBIT_HDR_LENGTH
+        recv_msg = self.create_return_message(cqc_header.app_id, CQC_TP_RECV, length=length,
+                                              cqc_version=cqc_header.version)
+
+        if cqc_header.version < 2:
+            hdr = CQCNotifyHeader()
+            hdr.setVals(q_id, 0, 0, 0, 0, 0)
+        else:
+            hdr = CQCXtraQubitHeader()
+            hdr.setVals(qubit_id=q_id)
         msg = hdr.pack()
         self.return_messages.append(recv_msg)
         self.return_messages.append(msg)
@@ -328,17 +370,25 @@ class CQCLogMessageHandler(CQCMessageHandler):
 
         self.cmd_cnot(cqc_header, cmd1, xtra_cnot)
 
+        if cqc_header.version < 2:
+            length = CQC_NOTIFY_LENGTH + ENT_INFO_LENGTH
+        else:
+            length = CQC_XTRA_QUBIT_HDR_LENGTH + ENT_INFO_LENGTH
         msg_ok = self.create_return_message(
-            cqc_header.app_id, CQC_TP_EPR_OK, length=CQC_NOTIFY_LENGTH + ENT_INFO_LENGTH
+            cqc_header.app_id, CQC_TP_EPR_OK, length=length
         )
         self.return_messages.append(msg_ok)
 
-        hdr = CQCNotifyHeader()
-        hdr.setVals(q_id1, 0, 0, 0, 0, 0)
-        msg_notify = hdr.pack()
-        self.return_messages.append(msg_notify)
-
-        logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
+        if cqc_header.version < 2:
+            hdr = CQCNotifyHeader()
+            hdr.setVals(q_id1, 0, 0, 0, 0, 0)
+            logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
+        else:
+            hdr = CQCXtraQubitHeader()
+            hdr.setVals(qubit_id=q_id1)
+            logging.debug("CQC %s: %s", self.name, hdr.printable())
+        msg = hdr.pack()
+        self.return_messages.append(msg)
 
         # Send entanglement info
         ent_id = 1
@@ -366,9 +416,19 @@ class CQCLogMessageHandler(CQCMessageHandler):
 
         # We're not sending the entanglement info atm, because we do not have any
 
-        cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_RECV, length=CQC_NOTIFY_LENGTH)
-        hdr = CQCNotifyHeader()
-        hdr.setVals(q_id, 0, 0, 0, 0, 0)
+        if cqc_header.version < 2:
+            length = CQC_NOTIFY_LENGTH
+        else:
+            length = CQC_XTRA_QUBIT_HDR_LENGTH
+        cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_RECV, length=length,
+                                             cqc_version=cqc_header.version)
+
+        if cqc_header.version < 2:
+            hdr = CQCNotifyHeader()
+            hdr.setVals(q_id, 0, 0, 0, 0, 0)
+        else:
+            hdr = CQCXtraQubitHeader()
+            hdr.setVals(qubit_id=q_id)
         msg = hdr.pack()
         self.return_messages.append(cqc_msg)
         self.return_messages.append(msg)
@@ -380,11 +440,20 @@ class CQCLogMessageHandler(CQCMessageHandler):
         CQCLogMessageHandler.cur_qubit_id += 1
         if not return_q_id:
             # Send message we created a qubit back
-            # logging.debug("GOO")
-            cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_NEW_OK, length=CQC_NOTIFY_LENGTH)
+            if cqc_header.version < 2:
+                length = CQC_NOTIFY_LENGTH
+            else:
+                length = CQC_XTRA_QUBIT_HDR_LENGTH
+            cqc_msg = self.create_return_message(cqc_header.app_id, CQC_TP_NEW_OK, length=length,
+                                                 cqc_version=cqc_header.version)
             self.return_messages.append(cqc_msg)
-            hdr = CQCNotifyHeader()
-            hdr.setVals(q_id, 0, 0, 0, 0, 0)
+
+            if cqc_header.version < 2:
+                hdr = CQCNotifyHeader()
+                hdr.setVals(q_id, 0, 0, 0, 0, 0)
+            else:
+                hdr = CQCXtraQubitHeader()
+                hdr.setVals(qubit_id=q_id)
             msg = hdr.pack()
             self.return_messages.append(msg)
         if return_q_id:

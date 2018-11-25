@@ -31,16 +31,24 @@ import warnings
 
 import struct
 import bitstring
+import abc
 
 # Constant defining CQC version
-CQC_VERSION = 1
+CQC_VERSION = 2
 
 # Lengths of the headers in bytes
-CQC_HDR_LENGTH = 8  # Length of the CQC Header
-CQC_CMD_HDR_LENGTH = 4  # Length of a command header
-CQC_CMD_XTRA_LENGTH = 16  # Length of extra command information
-CQC_NOTIFY_LENGTH = 20  # Length of a notification send from the CQC upwards
-CQC_EPR_REQ_LENGTH = 16  # Length of EPR request header
+CQC_HDR_LENGTH = 8              # Length of the CQC Header
+CQC_CMD_HDR_LENGTH = 4          # Length of a command header
+CQC_CMD_XTRA_LENGTH = 16        # Length of extra command information
+CQC_SEQ_HDR_LENGTH = 1          # Length of the command sequence header
+CQC_ROT_HDR_LENGTH = 1          # Length of the rotation header
+CQC_XTRA_QUBIT_HDR_LENGTH = 2   # Length of the extra qubit header
+CQC_COM_HDR_LENGTH = 8          # Length of the communication header
+CQC_FACTORY_HDR_LENGTH = 2      # Length of the factory header
+CQC_NOTIFY_LENGTH = 20          # Length of a notification send from the CQC upwards
+CQC_MEAS_OUT_HDR_LENGTH = 1     # Length of the measurement outcome header
+CQC_TIMEINFO_HDR_LENGTH = 8     # Length of the time info header
+CQC_EPR_REQ_LENGTH = 16         # Length of EPR request header
 
 # Constants defining the messages types
 CQC_TP_HELLO = 0  # Alive check
@@ -95,10 +103,62 @@ CQC_OPT_ACTION = 0x02  # On if there are actions to execute when done
 CQC_OPT_BLOCK = 0x04  # Block until command is done
 
 
-class CQCHeader:
+class Header(metaclass=abc.ABCMeta):
+    """
+    Abstact class for headers.
+    Should be subclassed
+    """
+
+    HDR_LENGTH = 0
+
+    @abc.abstractmethod
+    def __init__(self, headerBytes=None, **kwargs):
+        """
+            Initialize using values received from a packet.
+        """
+        if headerBytes is None:
+            self.is_set = False
+        else:
+            self.unpack(headerBytes)
+
+    @abc.abstractmethod
+    def unpack(self, headerBytes):
+        """
+            Unpack packet data.
+        """
+        self.is_set = True
+
+    @abc.abstractmethod
+    def pack(self):
+        """
+            Pack data into packet format.
+
+        :return: bytes
+        """
+        if not self.is_set:
+            return 0
+        return bytes(0)
+
+    @abc.abstractmethod
+    def printable(self):
+        """
+            Produce a printable string for information purposes.
+        """
+        if not self.is_set:
+            return " "
+
+        toPrint = "Abstract header"
+
+        return toPrint
+
+
+class CQCHeader(Header):
+
     """
         Definition of the general CQC header.
     """
+
+    HDR_LENGTH = CQC_HDR_LENGTH
 
     def __init__(self, headerBytes=None):
         """
@@ -157,7 +217,7 @@ class CQCHeader:
         return toPrint
 
 
-class CQCCmdHeader:
+class CQCCmdHeader(Header):
     """
         Header for a command instruction packet.
     """
@@ -242,12 +302,12 @@ class CQCCmdHeader:
         return toPrint
 
 
-class CQCXtraHeader:
+class CQCXtraHeader(Header):
     """
     Optional addtional cmd header information. Only relevant for certain commands.
     """
 
-    HDR_LENGTH = 16
+    HDR_LENGTH = CQC_CMD_XTRA_LENGTH
 
     # Deprecated, split into multiple headers
     def __init__(self, headerBytes=None):
@@ -328,7 +388,7 @@ class CQCXtraHeader:
         return toPrint
 
 
-class CQCSequenceHeader:
+class CQCSequenceHeader(Header):
     """
         Header used to indicate size of a sequence.
         Currently exactly the same as CQCRotationHeaer.
@@ -336,7 +396,7 @@ class CQCSequenceHeader:
     """
 
     packaging_format = "!B"
-    HDR_LENGTH = 1
+    HDR_LENGTH = CQC_SEQ_HDR_LENGTH
 
     def __init__(self, headerBytes=None):
         """
@@ -366,16 +426,16 @@ class CQCSequenceHeader:
         if not self.is_set:
             return 0
 
-        q_header = struct.pack(self.packaging_format, self.cmd_length)
-        return q_header
+        header = struct.pack(self.packaging_format, self.cmd_length)
+        return header
 
     def unpack(self, headerBytes):
         """
         Unpack packet data. For defnitions see cLib/cqc.h
         :param headerBytes: The unpacked headers.
         """
-        seq_header = struct.unpack(self.packaging_format, headerBytes)
-        self.cmd_length = seq_header[0]
+        header = struct.unpack(self.packaging_format, headerBytes)
+        self.cmd_length = header[0]
         self.is_set = True
 
     def printable(self):
@@ -391,13 +451,13 @@ class CQCSequenceHeader:
         return toPrint
 
 
-class CQCRotationHeader:
+class CQCRotationHeader(Header):
     """
         Header used to define the rotation angle of a gate
     """
 
     packaging_format = "!B"
-    HDR_LENGTH = 1
+    HDR_LENGTH = CQC_ROT_HDR_LENGTH
 
     def __init__(self, headerBytes=None):
         """
@@ -427,16 +487,16 @@ class CQCRotationHeader:
         if not self.is_set:
             return 0
 
-        q_header = struct.pack(self.packaging_format, self.step)
-        return q_header
+        header = struct.pack(self.packaging_format, self.step)
+        return header
 
     def unpack(self, headerBytes):
         """
         Unpack packet data. For defnitions see cLib/cqc.h
         :param headerBytes: The unpacked headers.
         """
-        rot_header = struct.unpack(self.packaging_format, headerBytes)
-        self.step = rot_header[0]
+        header = struct.unpack(self.packaging_format, headerBytes)
+        self.step = header[0]
         self.is_set = True
 
     def printable(self):
@@ -452,13 +512,13 @@ class CQCRotationHeader:
         return toPrint
 
 
-class CQCXtraQubitHeader:
+class CQCXtraQubitHeader(Header):
     """
         Header used to send qubit of a secondary qubit for two qubit gates
     """
 
     packaging_format = "!H"
-    HDR_LENGTH = 2
+    HDR_LENGTH = CQC_XTRA_QUBIT_HDR_LENGTH
 
     def __init__(self, headerBytes=None):
         """
@@ -488,16 +548,16 @@ class CQCXtraQubitHeader:
         if not self.is_set:
             return 0
 
-        q_header = struct.pack(self.packaging_format, self.qubit_id)
-        return q_header
+        header = struct.pack(self.packaging_format, self.qubit_id)
+        return header
 
     def unpack(self, headerBytes):
         """
-        Unpack packet data. For defnitions see cLib/cqc.h
+        Unpack packet data. For definitions see cLib/cqc.h
         :param headerBytes: The unpacked headers.
         """
-        com_header = struct.unpack(self.packaging_format, headerBytes)
-        self.qubit_id = com_header[0]
+        header = struct.unpack(self.packaging_format, headerBytes)
+        self.qubit_id = header[0]
         self.is_set = True
 
     def printable(self):
@@ -513,17 +573,18 @@ class CQCXtraQubitHeader:
         return toPrint
 
 
-class CQCCommunicationHeader:
+class CQCCommunicationHeader(Header):
     """
         Header used to send information to which node to send information to.
         Used for example in Send and EPR commands
         This header has a size of 8
     """
 
-    packaging_format = "!HLH"
-    HDR_LENGTH = 8
+    packaging_format = "!HHL"
+    packaging_format_v1 = "!HLH"
+    HDR_LENGTH = CQC_COM_HDR_LENGTH
 
-    def __init__(self, headerBytes=None):
+    def __init__(self, headerBytes=None, cqc_version=CQC_VERSION):
         """
         Initialize from packet data
         :param headerBytes:  packet data
@@ -531,11 +592,11 @@ class CQCCommunicationHeader:
         if headerBytes is None:
             self.is_set = False
             self.remote_app_id = 0
-            self.remote_node = 0
             self.remote_port = 0
+            self.remote_node = 0
 
         else:
-            self.unpack(headerBytes)
+            self.unpack(headerBytes, cqc_version=cqc_version)
 
     def setVals(self, remote_app_id, remote_node, remote_port):
         """
@@ -546,29 +607,40 @@ class CQCCommunicationHeader:
         """
         self.is_set = True
         self.remote_app_id = remote_app_id
-        self.remote_node = remote_node
         self.remote_port = remote_port
+        self.remote_node = remote_node
 
-    def pack(self):
+    def pack(self, cqc_version=CQC_VERSION):
         """
         Pack data into packet form. For definitions see cLib/cqc.h
+        :param cqc_version: The CQC version to be used
         :returns the packed header
         """
         if not self.is_set:
             return 0
 
-        com_header = struct.pack(self.packaging_format, self.remote_app_id, self.remote_node, self.remote_port)
-        return com_header
+        if cqc_version < 2:
+            header = struct.pack(self.packaging_format_v1, self.remote_app_id, self.remote_node, self.remote_port)
+        else:
+            header = struct.pack(self.packaging_format, self.remote_app_id, self.remote_port, self.remote_node)
+        return header
 
-    def unpack(self, headerBytes):
+    def unpack(self, headerBytes, cqc_version=CQC_VERSION):
         """
         Unpack packet data. For defnitions see cLib/cqc.h
         :param headerBytes: The unpacked headers.
+        :param cqc_version: The CQC version to be used
         """
-        com_header = struct.unpack(self.packaging_format, headerBytes)
-        self.remote_app_id = com_header[0]
-        self.remote_node = com_header[1]
-        self.remote_port = com_header[2]
+        if cqc_version < 2:
+            header = struct.unpack(self.packaging_format_v1, headerBytes)
+            self.remote_app_id = header[0]
+            self.remote_node = header[1]
+            self.remote_port = header[2]
+        else:
+            header = struct.unpack(self.packaging_format, headerBytes)
+            self.remote_app_id = header[0]
+            self.remote_port = header[1]
+            self.remote_node = header[2]
         self.is_set = True
 
     def printable(self):
@@ -586,7 +658,7 @@ class CQCCommunicationHeader:
         return toPrint
 
 
-class CQCFactoryHeader:
+class CQCFactoryHeader(Header):
     """
     Header used to send factory information
     """
@@ -594,7 +666,7 @@ class CQCFactoryHeader:
     # could maybe include the notify flag in num_iter?
     # That halfs the amount of possible num_iter from 256 to 128
     package_format = "!BB"
-    HDR_LENGTH = 2
+    HDR_LENGTH = CQC_FACTORY_HDR_LENGTH
 
     def __init__(self, headerBytes=None):
         """
@@ -660,15 +732,19 @@ class CQCFactoryHeader:
         return toPrint
 
 
-class CQCNotifyHeader:
+class CQCNotifyHeader(Header):
     """
         Header used to specify notification details.
     """
+
+    HDR_LENGTH = CQC_NOTIFY_LENGTH
 
     def __init__(self, headerBytes=None):
         """
             Initialize from packet data.
         """
+        warnings.warn("Notify Header is deprecated, it is split into CQCXtraQubitHeader, CQCMeasOutHeader, "
+                      "CQCTimeInfoHeader", DeprecationWarning)
         if headerBytes is None:
             self.is_set = False
             self.qubit_id = 0
@@ -741,17 +817,144 @@ class CQCNotifyHeader:
         return toPrint
 
 
-class CQCEPRRequestHeader:
+class CQCMeasOutHeader(Header):
+    """
+    Header used to send a measurement outcome.
+    """
+
+    packaging_format = "!B"
+    HDR_LENGTH = CQC_MEAS_OUT_HDR_LENGTH
+
+    def __init__(self, headerBytes=None):
+        """
+        Initialize from packet data
+        :param headerBytes:  packet data
+        """
+        if headerBytes is None:
+            self.is_set = False
+            self.outcome = 0
+
+        else:
+            self.unpack(headerBytes)
+
+    def setVals(self, outcome):
+        """
+        Set header using given values
+        :param meas_out: The measurement outcome
+        """
+        self.is_set = True
+        self.outcome = outcome
+
+    def pack(self):
+        """
+        Pack data into packet form. For definitions see cLib/cqc.h
+        :returns the packed header
+        """
+        if not self.is_set:
+            return 0
+
+        header = struct.pack(self.packaging_format, self.outcome)
+        return header
+
+    def unpack(self, headerBytes):
+        """
+        Unpack packet data. For definitions see cLib/cqc.h
+        :param headerBytes: The unpacked headers.
+        """
+        header = struct.unpack(self.packaging_format, headerBytes)
+        self.outcome = header[0]
+        self.is_set = True
+
+    def printable(self):
+        """
+            Produce a printable string for information purposes.
+        """
+        if not self.is_set:
+            return " "
+
+        toPrint = "Measurement Outcome header. "
+        toPrint += "measurement outcome: " + str(self.outcome) + " "
+
+        return toPrint
+
+
+class CQCTimeinfoHeader(Header):
+    """
+    Header used to send timing information
+    """
+
+    packaging_format = "!Q"
+    HDR_LENGTH = CQC_TIMEINFO_HDR_LENGTH
+
+    def __init__(self, headerBytes=None):
+        """
+        Initialize from packet data
+        :param headerBytes:  packet data
+        """
+        if headerBytes is None:
+            self.is_set = False
+            self.datetime = 0
+
+        else:
+            self.unpack(headerBytes)
+
+    def setVals(self, datetime):
+        """
+        Set header using given values
+        :param datetime: The timestamp
+        """
+        self.is_set = True
+        self.datetime = datetime
+
+    def pack(self):
+        """
+        Pack data into packet form. For definitions see cLib/cqc.h
+        :returns the packed header
+        """
+        if not self.is_set:
+            return 0
+
+        header = struct.pack(self.packaging_format, self.datetime)
+        return header
+
+    def unpack(self, headerBytes):
+        """
+        Unpack packet data. For definitions see cLib/cqc.h
+        :param headerBytes: The unpacked headers.
+        """
+        header = struct.unpack(self.packaging_format, headerBytes)
+        self.datetime = header[0]
+        self.is_set = True
+
+    def printable(self):
+        """
+            Produce a printable string for information purposes.
+        """
+        if not self.is_set:
+            return " "
+
+        toPrint = "Time Info header. "
+        toPrint += "timestamp: " + str(self.datetime) + " "
+
+        return toPrint
+
+
+class CQCEPRRequestHeader(Header):
+
     package_format = (
         "uint:32=remote_ip, "
         "float:32=min_fidelity, "
         "float:32=max_time, "
         "uint:16=remote_port, "
         "uint:8=num_pairs, "
-        "uint:4=priority",
-        "uint:1=store, " "uint:1=measure_directly, " "uint:2=0",
+        "uint:4=priority, "
+        "uint:1=store, "
+        "uint:1=atomic, "
+        "uint:1=measure_directly, "
+        "uint:1=0"
     )
-    HDR_LENGTH = 16
+
+    HDR_LENGTH = CQC_EPR_REQ_LENGTH
 
     def __init__(self, headerBytes=None):
         """
@@ -767,13 +970,15 @@ class CQCEPRRequestHeader:
             self.max_time = 0.0
             self.priority = 0
             self.store = True
+            self.atomic = False
             self.measure_directly = False
 
             self.is_set = False
         else:
             self.unpack(headerBytes)
 
-    def setVals(self, remote_ip, remote_port, num_pairs, min_fidelity, max_time, priority, store, measure_directly):
+    def setVals(self, remote_ip, remote_port, num_pairs, min_fidelity, max_time, priority, store, atomic,
+                measure_directly):
         """
         Stores required parameters of Entanglement Generation Protocol Request
 
@@ -803,6 +1008,7 @@ class CQCEPRRequestHeader:
         self.max_time = max_time
         self.priority = priority
         self.store = store
+        self.atomic = atomic
         self.measure_directly = measure_directly
 
         self.is_set = True
@@ -823,6 +1029,7 @@ class CQCEPRRequestHeader:
             "num_pairs": self.num_pairs,
             "priority": self.priority,
             "store": self.store,
+            "atomic": self.atomic,
             "measure_directly": self.measure_directly,
         }
         request_Bitstring = bitstring.pack(self.package_format, **to_pack)
@@ -845,7 +1052,8 @@ class CQCEPRRequestHeader:
         self.num_pairs = request_fields[4]
         self.priority = request_fields[5]
         self.store = request_fields[6]
-        self.measure_directly = request_fields[7]
+        self.atomic = request_fields[7]
+        self.measure_directly = request_fields[8]
 
         self.is_set = True
 
@@ -865,6 +1073,7 @@ class CQCEPRRequestHeader:
             to_print += "Num Pairs: {}".format(self.num_pairs)
             to_print += "Priority: {}".format(self.priority)
             to_print += "Store: {}".format(self.store)
+            to_print += "Atomic: {}".format(self.atomic)
             to_print += "Measure Directly: {}".format(self.measure_directly)
 
             return to_print
