@@ -901,6 +901,7 @@ class CQCConnection:
         """
         parses the cqc message and returns the relevant value of that measure
         (qubit, measurement outcome)
+
         :param message: str
             the cqc message to be parsed
         :param q: :obj:`SimulaQron.cqc.pythonLib.cqc.qubit`

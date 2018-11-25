@@ -132,6 +132,7 @@ class Header(metaclass=abc.ABCMeta):
     def pack(self):
         """
             Pack data into packet format.
+
         :return: bytes
         """
         if not self.is_set:
