@@ -946,8 +946,11 @@ class CQCEPRRequestHeader(Header):
         "float:32=max_time, "
         "uint:16=remote_port, "
         "uint:8=num_pairs, "
-        "uint:4=priority",
-        "uint:1=store, " "uint:1=atomic, " "uint:1=measure_directly, " "uint:2=0",
+        "uint:4=priority, "
+        "uint:1=store, "
+        "uint:1=atomic, "
+        "uint:1=measure_directly, "
+        "uint:1=0"
     )
 
     HDR_LENGTH = CQC_EPR_REQ_LENGTH
