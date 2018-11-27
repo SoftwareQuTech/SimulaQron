@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>SimulaQron.virtNode.crudeSimulator &#8212; SimulaQron 1.0 documentation</title>
+    <title>SimulaQron.virtNode.crudeSimulator &#8212; SimulaQron 1.2 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -26,7 +26,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 1.2 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -310,7 +310,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qubitReg</span> <span class="o">=</span> <span class="n">qp</span><span class="o">.</span><span class="n">Qobj</span><span class="p">()</span>
 
-
 <div class="viewcode-block" id="simpleEngine.add_fresh_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.crudeSimulator.simpleEngine.add_fresh_qubit">[docs]</a>    <span class="k">def</span> <span class="nf">add_fresh_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a new qubit initialized in the \|0\&gt; state.</span>
@@ -344,7 +343,7 @@
         <span class="c1"># Increment the number of qubits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span> <span class="o">+</span> <span class="mi">1</span>
 
-        <span class="k">return</span> <span class="p">(</span><span class="n">num</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">num</span></div>
 
 <div class="viewcode-block" id="simpleEngine.remove_qubit"><a class="viewcode-back" href="../../../SimulaQron.virtNode.html#SimulaQron.virtNode.crudeSimulator.simpleEngine.remove_qubit">[docs]</a>    <span class="k">def</span> <span class="nf">remove_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -473,11 +472,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Construct the CNOT matrix</span>
-        <span class="n">cnot</span> <span class="o">=</span> <span class="n">qp</span><span class="o">.</span><span class="n">Qobj</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-                       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
-                       <span class="n">dims</span><span class="o">=</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]])</span>
+        <span class="n">cnot</span> <span class="o">=</span> <span class="n">qp</span><span class="o">.</span><span class="n">Qobj</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">dims</span><span class="o">=</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]])</span>
 
         <span class="c1"># Apply it to the desired qubits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">apply_twoqubit_gate</span><span class="p">(</span><span class="n">cnot</span><span class="p">,</span> <span class="n">qubitNum1</span><span class="p">,</span> <span class="n">qubitNum2</span><span class="p">)</span></div>
@@ -488,11 +483,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Construct the CPHASE matrix</span>
-        <span class="n">cphase</span> <span class="o">=</span> <span class="n">qp</span><span class="o">.</span><span class="n">Qobj</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                         <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                         <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                         <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]],</span>
-                         <span class="n">dims</span><span class="o">=</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]])</span>
+        <span class="n">cphase</span> <span class="o">=</span> <span class="n">qp</span><span class="o">.</span><span class="n">Qobj</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">dims</span><span class="o">=</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]])</span>
 
         <span class="c1"># Apply it to the desired qubits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">apply_twoqubit_gate</span><span class="p">(</span><span class="n">cphase</span><span class="p">,</span> <span class="n">qubitNum1</span><span class="p">,</span> <span class="n">qubitNum2</span><span class="p">)</span></div>
@@ -733,7 +724,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 1.2 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

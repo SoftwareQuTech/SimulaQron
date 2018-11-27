@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>SimulaQron.cqc.backend.cqcHeader &#8212; SimulaQron 1.0 documentation</title>
+    <title>SimulaQron.cqc.backend.cqcHeader &#8212; SimulaQron 1.2 documentation</title>
     <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
@@ -26,7 +26,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">SimulaQron 1.2 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -216,6 +216,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Header for a command instruction packet.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">CQC_CMD_HDR_LENGTH</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -309,7 +310,7 @@
 <span class="sd">        Initialize using values received from a packet.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Xtra Header is deprecated, it is split into different headers&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">headerBytes</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">headerBytes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>
@@ -339,9 +340,16 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">0</span>
 
-        <span class="n">xtraH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;!HHLLHBB&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmdLength</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">xtraH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span>
+            <span class="s2">&quot;!HHLLHBB&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cmdLength</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">xtraH</span></div>
 
 <div class="viewcode-block" id="CQCXtraHeader.unpack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCXtraHeader.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
@@ -716,7 +724,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Initialize from packet data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">headerBytes</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">headerBytes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">outcome</span> <span class="o">=</span> <span class="mi">0</span>
@@ -746,9 +754,16 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">0</span>
 
-        <span class="n">xtraH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;!HHLQHBB&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">outcome</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">xtraH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span>
+            <span class="s2">&quot;!HHLQHBB&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outcome</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">xtraH</span></div>
 
 <div class="viewcode-block" id="CQCNotifyHeader.unpack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCNotifyHeader.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
@@ -782,15 +797,15 @@
 
 
 <div class="viewcode-block" id="CQCEPRRequestHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCEPRRequestHeader</span><span class="p">:</span>
-    <span class="n">package_format</span> <span class="o">=</span> <span class="s1">&#39;uint:32=remote_ip, &#39;</span> \
-                     <span class="s1">&#39;float:32=min_fidelity, &#39;</span> \
-                     <span class="s1">&#39;float:32=max_time, &#39;</span> \
-                     <span class="s1">&#39;uint:16=remote_port, &#39;</span> \
-                     <span class="s1">&#39;uint:8=num_pairs, &#39;</span> \
-                     <span class="s1">&#39;uint:4=priority&#39;</span><span class="p">,</span> \
-                     <span class="s1">&#39;uint:1=store, &#39;</span> \
-                     <span class="s1">&#39;uint:1=measure_directly, &#39;</span> \
-                     <span class="s1">&#39;uint:2=0&#39;</span>
+    <span class="n">package_format</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;uint:32=remote_ip, &quot;</span>
+        <span class="s2">&quot;float:32=min_fidelity, &quot;</span>
+        <span class="s2">&quot;float:32=max_time, &quot;</span>
+        <span class="s2">&quot;uint:16=remote_port, &quot;</span>
+        <span class="s2">&quot;uint:8=num_pairs, &quot;</span>
+        <span class="s2">&quot;uint:4=priority&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uint:1=store, &quot;</span> <span class="s2">&quot;uint:1=measure_directly, &quot;</span> <span class="s2">&quot;uint:2=0&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="mi">16</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -855,14 +870,16 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">0</span>
 
-        <span class="n">to_pack</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;remote_ip&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_ip</span><span class="p">,</span>
-                   <span class="s2">&quot;remote_port&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">,</span>
-                   <span class="s2">&quot;min_fidelity&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_fidelity</span><span class="p">,</span>
-                   <span class="s2">&quot;max_time&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span><span class="p">,</span>
-                   <span class="s2">&quot;num_pairs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_pairs</span><span class="p">,</span>
-                   <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span>
-                   <span class="s2">&quot;store&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="p">,</span>
-                   <span class="s2">&quot;measure_directly&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_directly</span><span class="p">}</span>
+        <span class="n">to_pack</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;remote_ip&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_ip</span><span class="p">,</span>
+            <span class="s2">&quot;remote_port&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">,</span>
+            <span class="s2">&quot;min_fidelity&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_fidelity</span><span class="p">,</span>
+            <span class="s2">&quot;max_time&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span><span class="p">,</span>
+            <span class="s2">&quot;num_pairs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_pairs</span><span class="p">,</span>
+            <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span>
+            <span class="s2">&quot;store&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="p">,</span>
+            <span class="s2">&quot;measure_directly&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_directly</span><span class="p">,</span>
+        <span class="p">}</span>
         <span class="n">request_Bitstring</span> <span class="o">=</span> <span class="n">bitstring</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">package_format</span><span class="p">,</span> <span class="o">**</span><span class="n">to_pack</span><span class="p">)</span>
         <span class="n">requestH</span> <span class="o">=</span> <span class="n">request_Bitstring</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
 
@@ -922,7 +939,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">SimulaQron 1.2 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
