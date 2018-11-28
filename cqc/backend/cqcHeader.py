@@ -37,18 +37,18 @@ import abc
 CQC_VERSION = 2
 
 # Lengths of the headers in bytes
-CQC_HDR_LENGTH = 8              # Length of the CQC Header
-CQC_CMD_HDR_LENGTH = 4          # Length of a command header
-CQC_CMD_XTRA_LENGTH = 16        # Length of extra command information
-CQC_SEQ_HDR_LENGTH = 1          # Length of the command sequence header
-CQC_ROT_HDR_LENGTH = 1          # Length of the rotation header
-CQC_XTRA_QUBIT_HDR_LENGTH = 2   # Length of the extra qubit header
-CQC_COM_HDR_LENGTH = 8          # Length of the communication header
-CQC_FACTORY_HDR_LENGTH = 2      # Length of the factory header
-CQC_NOTIFY_LENGTH = 20          # Length of a notification send from the CQC upwards
-CQC_MEAS_OUT_HDR_LENGTH = 1     # Length of the measurement outcome header
-CQC_TIMEINFO_HDR_LENGTH = 8     # Length of the time info header
-CQC_EPR_REQ_LENGTH = 16         # Length of EPR request header
+CQC_HDR_LENGTH = 8  # Length of the CQC Header
+CQC_CMD_HDR_LENGTH = 4  # Length of a command header
+CQC_CMD_XTRA_LENGTH = 16  # Length of extra command information
+CQC_SEQ_HDR_LENGTH = 1  # Length of the command sequence header
+CQC_ROT_HDR_LENGTH = 1  # Length of the rotation header
+CQC_XTRA_QUBIT_HDR_LENGTH = 2  # Length of the extra qubit header
+CQC_COM_HDR_LENGTH = 8  # Length of the communication header
+CQC_FACTORY_HDR_LENGTH = 2  # Length of the factory header
+CQC_NOTIFY_LENGTH = 20  # Length of a notification send from the CQC upwards
+CQC_MEAS_OUT_HDR_LENGTH = 1  # Length of the measurement outcome header
+CQC_TIMEINFO_HDR_LENGTH = 8  # Length of the time info header
+CQC_EPR_REQ_LENGTH = 16  # Length of EPR request header
 
 # Constants defining the messages types
 CQC_TP_HELLO = 0  # Alive check
@@ -222,9 +222,7 @@ class Header(metaclass=abc.ABCMeta):
         pass
 
 
-
 class CQCHeader(Header):
-
     """
         Definition of the general CQC header.
     """
@@ -811,8 +809,6 @@ class CQCTimeinfoHeader(Header):
 
 
 class CQCEPRRequestHeader(Header):
-
-
     HDR_LENGTH = CQC_EPR_REQ_LENGTH
     package_format = (
         "uint:32=remote_ip, "
@@ -828,7 +824,7 @@ class CQCEPRRequestHeader(Header):
     )
 
     def _setVals(self, remote_ip=0, remote_port=0, num_pairs=0, min_fidelity=0.0, max_time=0.0, priority=0, store=True,
-                atomic=False, measure_directly=False):
+                 atomic=False, measure_directly=False):
         """
         Stores required parameters of Entanglement Generation Protocol Request
 

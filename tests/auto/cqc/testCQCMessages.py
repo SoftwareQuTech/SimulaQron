@@ -29,7 +29,6 @@
 
 import json
 import unittest
-import struct
 import os
 
 from SimulaQron.cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler

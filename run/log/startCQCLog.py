@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 
-import re
 from SimulaQron.settings import Settings
 from SimulaQron.general.hostConfig import networkConfig
 from SimulaQron.cqc.backend.cqcProtocol import CQCFactory

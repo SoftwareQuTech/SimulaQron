@@ -35,9 +35,9 @@ import bitstring
 from SimulaQron.cqc.backend.cqcHeader import Header
 
 # Lengths of the headers in bytes
-ENT_INFO_LENGTH = 40                 # Length of a entanglement information header
-ENT_INFO_CREATE_KEEP_LENGTH = 28     # Length of a entanglement information header (for create and keep)
-ENT_INFO_MEAS_DIRECT_LENGTH = 24     # Length of a entanglement information header (for measure directly)
+ENT_INFO_LENGTH = 40  # Length of a entanglement information header
+ENT_INFO_CREATE_KEEP_LENGTH = 28  # Length of a entanglement information header (for create and keep)
+ENT_INFO_MEAS_DIRECT_LENGTH = 24  # Length of a entanglement information header (for measure directly)
 
 ENT_INFO_TP_CREATE_KEEP = 1  # Type of message when entanglement is kept
 ENT_INFO_TP_MEAS_DIRECT = 2  # Type of message when entanglement is measured directly (for classical correlations)
@@ -51,7 +51,8 @@ class EntInfoHeader(Header):
     HDR_LENGTH = ENT_INFO_LENGTH
     packaging_format = "!LHHLHHLQQHBB"
 
-    def _setVals(self, node_A=0, port_A=0, app_id_A=0, node_B=0, port_B=0, app_id_B=0, id_AB=0, timestamp=0, ToG=0, goodness=0, DF=0):
+    def _setVals(self, node_A=0, port_A=0, app_id_A=0, node_B=0, port_B=0, app_id_B=0, id_AB=0, timestamp=0, ToG=0,
+                 goodness=0, DF=0):
         """
         Set using given values.
         """
@@ -184,7 +185,8 @@ class EntInfoCreateKeepHeader(Header):
 
     HDR_LENGTH = ENT_INFO_CREATE_KEEP_LENGTH
 
-    def _setVals(self, ip_A=0, port_A=0, ip_B=0, port_B=0, mhp_seq=0, t_create=0.0, t_goodness=0.0, goodness=0.0, DF=0, create_id=0):
+    def _setVals(self, ip_A=0, port_A=0, ip_B=0, port_B=0, mhp_seq=0, t_create=0.0, t_goodness=0.0, goodness=0.0, DF=0,
+                 create_id=0):
         """
         Set using given values.
         """
@@ -313,7 +315,8 @@ class EntInfoMeasDirectHeader(Header):
 
     HDR_LENGTH = ENT_INFO_MEAS_DIRECT_LENGTH
 
-    def _setVals(self, ip_A=0, port_A=0, ip_B=0, port_B=0, mhp_seq=0, meas_out=0, basis=0, t_create=0.0, goodness=0.0, DF=0, create_id=0):
+    def _setVals(self, ip_A=0, port_A=0, ip_B=0, port_B=0, mhp_seq=0, meas_out=0, basis=0, t_create=0.0, goodness=0.0,
+                 DF=0, create_id=0):
         """
         Set using given values.
         """
