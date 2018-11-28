@@ -856,7 +856,7 @@ class CQCEPRRequestHeader(Header):
         self.atomic = atomic
         self.measure_directly = measure_directly
 
-    def pack(self):
+    def _pack(self):
         """
         Pack the data in packet form.
         :return: str
@@ -877,7 +877,7 @@ class CQCEPRRequestHeader(Header):
 
         return requestH
 
-    def unpack(self, headerBytes):
+    def _unpack(self, headerBytes):
         """
         Unpack data.
         :param headerBytes: str
@@ -895,7 +895,7 @@ class CQCEPRRequestHeader(Header):
         self.atomic = request_fields[7]
         self.measure_directly = request_fields[8]
 
-    def printable(self):
+    def _printable(self):
         """
         Produce printable string for information purposes
         :return: str
