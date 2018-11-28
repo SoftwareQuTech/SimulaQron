@@ -49,31 +49,9 @@ class EntInfoHeader(Header):
     """
 
     HDR_LENGTH = ENT_INFO_LENGTH
+    packaging_format = "!LHHLHHLQQHBB"
 
-    def __init__(self, headerBytes=None):
-        """
-        Initialize using values received from a packet, if available.
-        """
-
-        if headerBytes is None:
-            self.node_A = 0
-            self.port_A = 0
-            self.app_id_A = 0
-
-            self.node_B = 0
-            self.port_B = 0
-            self.app_id_B = 0
-
-            self.id_AB = 0
-
-            self.timestamp = 0
-            self.ToG = 0
-            self.goodness = 0
-            self.DF = 0
-        else:
-            self.unpack(headerBytes)
-
-    def setVals(self, node_A, port_A, app_id_A, node_B, port_B, app_id_B, id_AB, timestamp, ToG, goodness, DF):
+    def _setVals(self, node_A=0, port_A=0, app_id_A=0, node_B=0, port_B=0, app_id_B=0, id_AB=0, timestamp=0, ToG=0, goodness=0, DF=0):
         """
         Set using given values.
         """
@@ -95,16 +73,12 @@ class EntInfoHeader(Header):
 
         self.is_set = True
 
-    def pack(self):
+    def _pack(self):
         """
         Pack data into packet format. For defnitions see cLib/cgc.h
         """
-
-        if not self.is_set:
-            return 0
-
         ent_info = struct.pack(
-            "!LHHLHHLQQHBB",
+            self.packaging_format,
             self.node_A,
             self.port_A,
             self.app_id_A,
@@ -120,11 +94,11 @@ class EntInfoHeader(Header):
         )
         return ent_info
 
-    def unpack(self, headerBytes):
+    def _unpack(self, headerBytes):
         """
         Unpack packet data. For definitions see cLib/cqc.h
         """
-        ent_info = struct.unpack("!LHHLHHLQQHBB", headerBytes)
+        ent_info = struct.unpack(self.packaging_format, headerBytes)
 
         self.node_A = ent_info[0]
         self.port_A = ent_info[1]
@@ -141,15 +115,10 @@ class EntInfoHeader(Header):
         self.goodness = ent_info[9]
         self.DF = ent_info[10]
 
-        self.is_set = True
-
-    def printable(self):
+    def _printable(self):
         """
         Produce a printable string for information purposes.
         """
-        if not self.is_set:
-            return " "
-
         toPrint = "A: ({}, {}, {})".format(self.node_A, self.port_A, self.app_id_A) + " "
         toPrint += "B: ({}, {}, {})".format(self.node_B, self.port_B, self.app_id_B) + " "
         toPrint += "Entanglement ID: " + str(self.id_AB) + " "
@@ -215,31 +184,7 @@ class EntInfoCreateKeepHeader(Header):
 
     HDR_LENGTH = ENT_INFO_CREATE_KEEP_LENGTH
 
-    def __init__(self, headerBytes=None):
-        """
-        Initialize using values received from a packet, if available.
-        """
-
-        if headerBytes is None:
-            self.ip_A = 0
-            self.port_A = 0
-
-            self.ip_B = 0
-            self.port_B = 0
-
-            self.mhp_seq = 0
-
-            self.t_create = 0
-            self.t_goodness = 0
-            self.goodness = 0
-            self.DF = 0
-            self.create_id = 0
-
-            self.is_set = False
-        else:
-            self.unpack(headerBytes)
-
-    def setVals(self, ip_A, port_A, ip_B, port_B, mhp_seq, t_create, t_goodness, goodness, DF, create_id):
+    def _setVals(self, ip_A=0, port_A=0, ip_B=0, port_B=0, mhp_seq=0, t_create=0.0, t_goodness=0.0, goodness=0.0, DF=0, create_id=0):
         """
         Set using given values.
         """
@@ -257,15 +202,10 @@ class EntInfoCreateKeepHeader(Header):
         self.DF = DF
         self.create_id = create_id
 
-        self.is_set = True
-
-    def pack(self):
+    def _pack(self):
         """
         Pack data into packet format. For defnitions see cLib/cgc.h
         """
-
-        if not self.is_set:
-            return 0
 
         to_pack = {
             "type": self.type,
@@ -284,7 +224,7 @@ class EntInfoCreateKeepHeader(Header):
         ent_info = ent_info_Bitstring.tobytes()
         return ent_info
 
-    def unpack(self, headerBytes):
+    def _unpack(self, headerBytes):
         """
         Unpack packet data. For definitions see cLib/cqc.h
         """
@@ -306,15 +246,10 @@ class EntInfoCreateKeepHeader(Header):
         self.goodness = ent_info[10]
         self.create_id = ent_info[11]
 
-        self.is_set = True
-
-    def printable(self):
+    def _printable(self):
         """
         Produce a printable string for information purposes.
         """
-        if not self.is_set:
-            return " "
-
         toPrint = "Create and Keep OK with createID={}".format(self.create_id) + " "
         toPrint += "A: ({}, {})".format(self.ip_A, self.port_A) + " "
         toPrint += "B: ({}, {})".format(self.ip_B, self.port_B) + " "
@@ -378,33 +313,7 @@ class EntInfoMeasDirectHeader(Header):
 
     HDR_LENGTH = ENT_INFO_MEAS_DIRECT_LENGTH
 
-    def __init__(self, headerBytes=None):
-        """
-        Initialize using values received from a packet, if available.
-        """
-
-        if headerBytes is None:
-            self.ip_A = 0
-            self.port_A = 0
-
-            self.ip_B = 0
-            self.port_B = 0
-
-            self.mhp_seq = 0
-
-            self.meas_out = 0
-            self.basis = 0
-
-            self.t_create = 0
-            self.goodness = 0
-            self.DF = 0
-            self.create_id = 0
-
-            self.is_set = False
-        else:
-            self.unpack(headerBytes)
-
-    def setVals(self, ip_A, port_A, ip_B, port_B, mhp_seq, meas_out, basis, t_create, goodness, DF, create_id):
+    def _setVals(self, ip_A=0, port_A=0, ip_B=0, port_B=0, mhp_seq=0, meas_out=0, basis=0, t_create=0.0, goodness=0.0, DF=0, create_id=0):
         """
         Set using given values.
         """
@@ -424,16 +333,10 @@ class EntInfoMeasDirectHeader(Header):
         self.DF = DF
         self.create_id = create_id
 
-        self.is_set = True
-
-    def pack(self):
+    def _pack(self):
         """
         Pack data into packet format. For defnitions see cLib/cgc.h
         """
-
-        if not self.is_set:
-            return 0
-
         to_pack = {
             "type": self.type,
             "ip_A": self.ip_A,
@@ -452,7 +355,7 @@ class EntInfoMeasDirectHeader(Header):
         ent_info = ent_info_Bitstring.tobytes()
         return ent_info
 
-    def unpack(self, headerBytes):
+    def _unpack(self, headerBytes):
         """
         Unpack packet data. For definitions see cLib/cqc.h
         """
@@ -475,15 +378,10 @@ class EntInfoMeasDirectHeader(Header):
         self.goodness = ent_info[11]
         self.create_id = ent_info[12]
 
-        self.is_set = True
-
-    def printable(self):
+    def _printable(self):
         """
         Produce a printable string for information purposes.
         """
-        if not self.is_set:
-            return " "
-
         toPrint = "Measure Direclty OK with createID={}".format(self.create_id) + " "
         toPrint += "A: ({}, {})".format(self.ip_A, self.port_A) + " "
         toPrint += "B: ({}, {})".format(self.ip_B, self.port_B) + " "
