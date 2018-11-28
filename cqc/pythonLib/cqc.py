@@ -911,7 +911,7 @@ class CQCConnection:
         :return: the result of the message (either a qubit, or a measurement outcome. Otherwise None
         """
         hdr = message[0]
-        notifyHdr = message[1]
+        otherHdr = message[1]
         entInfoHdr = message[2]
 
         if hdr.tp in {CQC_TP_RECV, CQC_TP_NEW_OK, CQC_TP_EPR_OK}:
@@ -920,14 +920,14 @@ class CQCConnection:
                 q = qubit(self, createNew=False)
             if q is None:
                 q = qubit(self, createNew=False)
-            q._qID = notifyHdr.qubit_id
+            q._qID = otherHdr.qubit_id
             q.set_entInfo(entInfoHdr)
             q._set_active(True)
             return q
-        if hdr.tp in {CQC_TP_MEASOUT, CQC_TP_GET_TIME}:
-            return notifyHdr.outcome
+        if hdr.tp == CQC_TP_MEASOUT:
+            return otherHdr.outcome
         if hdr.tp == CQC_TP_INF_TIME:
-            return notifyHdr.datetime
+            return otherHdr.datetime
 
     def check_error(self, hdr):
         """

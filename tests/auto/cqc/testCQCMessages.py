@@ -29,7 +29,6 @@
 
 import json
 import unittest
-import struct
 import os
 
 from SimulaQron.cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
@@ -266,31 +265,31 @@ class CQCMessageTest(unittest.TestCase):
     def testRotXFail(self):
         with CQCConnection("Alice", appID=1) as alice:
             q1 = qubit(alice)
-            with self.assertRaises(struct.error):
+            with self.assertRaises(ValueError):
                 q1.rot_X(256)
 
     def testRotXFailNone(self):
         with CQCConnection("Alice", appID=1) as alice:
             q1 = qubit(alice)
-            with self.assertRaises(struct.error):
+            with self.assertRaises(ValueError):
                 q1.rot_X(None)
 
     def testRotXFailNaN(self):
         with CQCConnection("Alice", appID=1) as alice:
             q1 = qubit(alice)
-            with self.assertRaises(struct.error):
+            with self.assertRaises(ValueError):
                 q1.rot_X("four")
 
     def testRotXFailNegative(self):
         with CQCConnection("Alice", appID=1) as alice:
             q1 = qubit(alice)
-            with self.assertRaises(struct.error):
+            with self.assertRaises(ValueError):
                 q1.rot_X(-1)
 
     def testRotXFailFloat(self):
         with CQCConnection("Alice", appID=1) as alice:
             q1 = qubit(alice)
-            with self.assertRaises(struct.error):
+            with self.assertRaises(ValueError):
                 q1.rot_X(1.1)
 
     def testCNot(self):
