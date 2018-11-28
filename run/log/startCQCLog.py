@@ -61,11 +61,5 @@ logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=Settin
 
 
 names = sys.argv[1:]
-if not names:
-    nodeFile = os.environ.get("NETSIM") + "/config/Nodes.cfg"
-    with open(nodeFile) as file:
-        for line in file:
-            if line:
-                names.append(re.sub("[^0-9a-zA-Z_\-]+", "", line))
 
 main(names)

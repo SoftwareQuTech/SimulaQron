@@ -11,7 +11,11 @@ then
     # check if the file with current nodes exist. Otherwise use Alice - Eve
     if [ -f "$NETSIM/config/Nodes.cfg" ]
     then
-        python "$NETSIM/run/log/startCQCLog.py"
+        names=""
+        while IFS='' read -r name; do
+            names="$names $name"
+        done < "$NETSIM/config/Nodes.cfg"
+        python "$NETSIM/run/log/startCQCLog.py" $names &
     else
         python "$NETSIM/configFiles.py" --nd "Alice Bob Charlie David Eve"
 
