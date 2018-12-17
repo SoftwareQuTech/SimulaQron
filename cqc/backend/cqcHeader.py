@@ -168,7 +168,8 @@ class Header(metaclass=abc.ABCMeta):
         try:
             self._unpack(headerBytes)
         except Exception as err:
-            raise ValueError("Could not unpack headerBytes={} to a {}, since {}".format(headerBytes, self.__class__.__name__, err))
+            raise ValueError("Could not unpack headerBytes={} to a {}, since {}"
+                             .format(headerBytes, self.__class__.__name__, err))
         self.is_set = True
 
     @abc.abstractmethod
