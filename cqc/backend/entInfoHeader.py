@@ -302,7 +302,7 @@ class EntInfoMeasDirectHeader(Header):
         "uint:16=mhp_seq, "
         "uint:1=DF, "
         "uint:1=meas_out, "
-        "uint:1=basis, "
+        "uint:2=basis, "
         "uint:9=0, "
         "uint:32=ip_A, "
         "uint:32=ip_B, "
