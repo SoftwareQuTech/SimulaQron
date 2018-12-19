@@ -89,10 +89,10 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">socket</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">struct</span>
 
 <span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.cqcConfig</span> <span class="k">import</span> <span class="n">CQC_CONF_LINK_WAIT_TIME</span><span class="p">,</span> <span class="n">CQC_CONF_COM_WAIT_TIME</span>
 <span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.cqcHeader</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">Header</span><span class="p">,</span>
     <span class="n">CQCCmdHeader</span><span class="p">,</span>
     <span class="n">CQC_CMD_SEND</span><span class="p">,</span>
     <span class="n">CQC_CMD_EPR</span><span class="p">,</span>
@@ -134,9 +134,9 @@
     <span class="n">CQCFactoryHeader</span><span class="p">,</span>
     <span class="n">CQC_CMD_HDR_LENGTH</span><span class="p">,</span>
     <span class="n">CQC_TP_INF_TIME</span><span class="p">,</span>
-    <span class="n">CQC_NOTIFY_LENGTH</span><span class="p">,</span>
     <span class="n">CQC_ERR_NOQUBIT</span><span class="p">,</span>
-    <span class="n">CQCNotifyHeader</span><span class="p">,</span>
+    <span class="n">CQCMeasOutHeader</span><span class="p">,</span>
+    <span class="n">CQCTimeinfoHeader</span><span class="p">,</span>
     <span class="n">CQC_TP_MEASOUT</span><span class="p">,</span>
     <span class="n">CQC_ERR_TIMEOUT</span><span class="p">,</span>
     <span class="n">CQC_TP_RECV</span><span class="p">,</span>
@@ -144,7 +144,7 @@
     <span class="n">CQC_TP_NEW_OK</span><span class="p">,</span>
     <span class="n">CQC_TP_EXPIRE</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.entInfoHeader</span> <span class="k">import</span> <span class="n">EntInfoHeader</span><span class="p">,</span> <span class="n">ENT_INFO_LENGTH</span>
+<span class="kn">from</span> <span class="nn">SimulaQron.cqc.backend.entInfoHeader</span> <span class="k">import</span> <span class="n">EntInfoHeader</span>
 <span class="kn">from</span> <span class="nn">SimulaQron.general.hostConfig</span> <span class="k">import</span> <span class="n">cqc_node_id_from_addrinfo</span><span class="p">,</span> <span class="n">networkConfig</span>
 <span class="kn">from</span> <span class="nn">SimulaQron.settings</span> <span class="k">import</span> <span class="n">Settings</span>
 
@@ -874,49 +874,58 @@
                 <span class="k">continue</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">break</span>
-                <span class="c1"># We got all the data, read notify (and ent_info) if there is any</span>
+                <span class="c1"># We got all the data, read other headers if there is any</span>
         <span class="k">if</span> <span class="n">currHeader</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">currHeader</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
-        <span class="k">elif</span> <span class="n">currHeader</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="n">CQC_NOTIFY_LENGTH</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">rawNotifyHeader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[:</span><span class="n">CQC_NOTIFY_LENGTH</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[</span><span class="n">CQC_NOTIFY_LENGTH</span> <span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">)]</span>
-                <span class="n">notifyHeader</span> <span class="o">=</span> <span class="n">CQCNotifyHeader</span><span class="p">(</span><span class="n">rawNotifyHeader</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">currHeader</span><span class="p">,</span> <span class="n">notifyHeader</span><span class="p">,</span> <span class="kc">None</span>
-            <span class="k">except</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">currHeader</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="n">CQC_NOTIFY_LENGTH</span> <span class="o">+</span> <span class="n">ENT_INFO_LENGTH</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">rawNotifyHeader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[:</span><span class="n">CQC_NOTIFY_LENGTH</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[</span><span class="n">CQC_NOTIFY_LENGTH</span> <span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">)]</span>
-                <span class="n">notifyHeader</span> <span class="o">=</span> <span class="n">CQCNotifyHeader</span><span class="p">(</span><span class="n">rawNotifyHeader</span><span class="p">)</span>
-
-                <span class="n">rawEntInfoHeader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[:</span><span class="n">ENT_INFO_LENGTH</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[</span><span class="n">ENT_INFO_LENGTH</span> <span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">)]</span>
-                <span class="n">entInfoHeader</span> <span class="o">=</span> <span class="n">EntInfoHeader</span><span class="p">(</span><span class="n">rawEntInfoHeader</span><span class="p">)</span>
-
-                <span class="k">return</span> <span class="n">currHeader</span><span class="p">,</span> <span class="n">notifyHeader</span><span class="p">,</span> <span class="n">entInfoHeader</span>
-            <span class="k">except</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Warning: Received message of unknown length, return None&quot;</span><span class="p">)</span></div>
+            <span class="k">if</span> <span class="n">currHeader</span><span class="o">.</span><span class="n">tp</span> <span class="o">==</span> <span class="n">CQC_TP_INF_TIME</span><span class="p">:</span>
+                <span class="n">timeinfo_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_header</span><span class="p">(</span><span class="n">CQCTimeinfoHeader</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">currHeader</span><span class="p">,</span> <span class="n">timeinfo_header</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="k">elif</span> <span class="n">currHeader</span><span class="o">.</span><span class="n">tp</span> <span class="o">==</span> <span class="n">CQC_TP_MEASOUT</span><span class="p">:</span>
+                <span class="n">measout_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_header</span><span class="p">(</span><span class="n">CQCMeasOutHeader</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">currHeader</span><span class="p">,</span> <span class="n">measout_header</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="k">elif</span> <span class="n">currHeader</span><span class="o">.</span><span class="n">tp</span> <span class="ow">in</span> <span class="p">[</span><span class="n">CQC_TP_RECV</span><span class="p">,</span> <span class="n">CQC_TP_NEW_OK</span><span class="p">,</span> <span class="n">CQC_TP_EXPIRE</span><span class="p">]:</span>
+                <span class="n">xtra_qubit_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_header</span><span class="p">(</span><span class="n">CQCXtraQubitHeader</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">currHeader</span><span class="p">,</span> <span class="n">xtra_qubit_header</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="k">elif</span> <span class="n">currHeader</span><span class="o">.</span><span class="n">tp</span> <span class="o">==</span> <span class="n">CQC_TP_EPR_OK</span><span class="p">:</span>
+                <span class="n">xtra_qubit_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_header</span><span class="p">(</span><span class="n">CQCXtraQubitHeader</span><span class="p">)</span>
+                <span class="n">ent_info_hdr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_header</span><span class="p">(</span><span class="n">EntInfoHeader</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">currHeader</span><span class="p">,</span> <span class="n">xtra_qubit_header</span><span class="p">,</span> <span class="n">ent_info_hdr</span></div>
+
+    <span class="k">def</span> <span class="nf">_extract_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header_class</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts the given header class from the first part of the current buffer.</span>
+<span class="sd">        :param header_class: Subclassed from `SimulaQron.cqc.backend.cqcHeader.Header`</span>
+<span class="sd">        :return: An instance of the class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">header_class</span><span class="p">,</span> <span class="n">Header</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;header_class </span><span class="si">{}</span><span class="s2"> is not a subclass of Header&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">header_class</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rawHeader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[:</span><span class="n">header_class</span><span class="o">.</span><span class="n">HDR_LENGTH</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Got a header message of unexpected size&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[</span><span class="n">header_class</span><span class="o">.</span><span class="n">HDR_LENGTH</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">)]</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">header_class</span><span class="p">(</span><span class="n">rawHeader</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">header</span>
 
 <div class="viewcode-block" id="CQCConnection.print_CQC_msg"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.print_CQC_msg">[docs]</a>    <span class="k">def</span> <span class="nf">print_CQC_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prints messsage returned by the readMessage method of CQCConnection.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">hdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">notifyHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">otherHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">entInfoHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span> <span class="o">==</span> <span class="n">CQC_TP_HELLO</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;HELLO&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
         <span class="k">elif</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span> <span class="o">==</span> <span class="n">CQC_TP_EXPIRE</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;Qubit with ID </span><span class="si">{}</span><span class="s2"> has expired&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;Qubit with ID </span><span class="si">{}</span><span class="s2"> has expired&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">otherHdr</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">))</span>
         <span class="k">elif</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span> <span class="o">==</span> <span class="n">CQC_TP_DONE</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;Done with command&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
         <span class="k">elif</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span> <span class="o">==</span> <span class="n">CQC_TP_RECV</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;Received qubit with ID </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;Received qubit with ID </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">otherHdr</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">))</span>
         <span class="k">elif</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span> <span class="o">==</span> <span class="n">CQC_TP_EPR_OK</span><span class="p">:</span>
 
             <span class="c1"># Lookup host name</span>
@@ -935,13 +944,13 @@
 
             <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
                 <span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;EPR created with node </span><span class="si">{}</span><span class="s2">, using qubit with ID </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">remote_name</span><span class="p">,</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">remote_name</span><span class="p">,</span> <span class="n">otherHdr</span><span class="o">.</span><span class="n">qubit_id</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span> <span class="o">==</span> <span class="n">CQC_TP_MEASOUT</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;Measurement outcome is </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">outcome</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;Measurement outcome is </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">otherHdr</span><span class="o">.</span><span class="n">outcome</span><span class="p">))</span>
         <span class="k">elif</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span> <span class="o">==</span> <span class="n">CQC_TP_INF_TIME</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;Timestamp is </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">datetime</span><span class="p">))</span></div>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC tells App </span><span class="si">{}</span><span class="s2">: &#39;Timestamp is </span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">otherHdr</span><span class="o">.</span><span class="n">datetime</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="CQCConnection.parse_CQC_msg"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.parse_CQC_msg">[docs]</a>    <span class="k">def</span> <span class="nf">parse_CQC_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_factory</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -957,7 +966,7 @@
 <span class="sd">        :return: the result of the message (either a qubit, or a measurement outcome. Otherwise None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">hdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">notifyHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">otherHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">entInfoHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span> <span class="ow">in</span> <span class="p">{</span><span class="n">CQC_TP_RECV</span><span class="p">,</span> <span class="n">CQC_TP_NEW_OK</span><span class="p">,</span> <span class="n">CQC_TP_EPR_OK</span><span class="p">}:</span>
@@ -966,14 +975,14 @@
                 <span class="n">q</span> <span class="o">=</span> <span class="n">qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">createNew</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">q</span> <span class="o">=</span> <span class="n">qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">createNew</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">q</span><span class="o">.</span><span class="n">_qID</span> <span class="o">=</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span>
+            <span class="n">q</span><span class="o">.</span><span class="n">_qID</span> <span class="o">=</span> <span class="n">otherHdr</span><span class="o">.</span><span class="n">qubit_id</span>
             <span class="n">q</span><span class="o">.</span><span class="n">set_entInfo</span><span class="p">(</span><span class="n">entInfoHdr</span><span class="p">)</span>
             <span class="n">q</span><span class="o">.</span><span class="n">_set_active</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">q</span>
-        <span class="k">if</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span> <span class="ow">in</span> <span class="p">{</span><span class="n">CQC_TP_MEASOUT</span><span class="p">,</span> <span class="n">CQC_TP_GET_TIME</span><span class="p">}:</span>
-            <span class="k">return</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">outcome</span>
+        <span class="k">if</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span> <span class="o">==</span> <span class="n">CQC_TP_MEASOUT</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">otherHdr</span><span class="o">.</span><span class="n">outcome</span>
         <span class="k">if</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tp</span> <span class="o">==</span> <span class="n">CQC_TP_INF_TIME</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">datetime</span></div>
+            <span class="k">return</span> <span class="n">otherHdr</span><span class="o">.</span><span class="n">datetime</span></div>
 
 <div class="viewcode-block" id="CQCConnection.check_error"><a class="viewcode-back" href="../../../../SimulaQron.cqc.pythonLib.html#SimulaQron.cqc.pythonLib.cqc.CQCConnection.check_error">[docs]</a>    <span class="k">def</span> <span class="nf">check_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hdr</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1072,8 +1081,8 @@
 
             <span class="c1"># Get RECV message</span>
             <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
-            <span class="n">notifyHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">q_id</span> <span class="o">=</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span>
+            <span class="n">otherHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">q_id</span> <span class="o">=</span> <span class="n">otherHdr</span><span class="o">.</span><span class="n">qubit_id</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">print_CQC_msg</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
@@ -1133,9 +1142,9 @@
             <span class="p">)</span>
             <span class="c1"># Get RECV message</span>
             <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
-            <span class="n">notifyHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">otherHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">entInfoHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-            <span class="n">q_id</span> <span class="o">=</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span>
+            <span class="n">q_id</span> <span class="o">=</span> <span class="n">otherHdr</span><span class="o">.</span><span class="n">qubit_id</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">print_CQC_msg</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
@@ -1173,9 +1182,9 @@
 
             <span class="c1"># Get RECV message</span>
             <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
-            <span class="n">notifyHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">otherHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">entInfoHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-            <span class="n">q_id</span> <span class="o">=</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span>
+            <span class="n">q_id</span> <span class="o">=</span> <span class="n">otherHdr</span><span class="o">.</span><span class="n">qubit_id</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">print_CQC_msg</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
@@ -1527,8 +1536,8 @@
                 <span class="c1"># Get qubit id</span>
                 <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">notifyHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_qID</span> <span class="o">=</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">qubit_id</span>
+                    <span class="n">otherHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_qID</span> <span class="o">=</span> <span class="n">otherHdr</span><span class="o">.</span><span class="n">qubit_id</span>
                 <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">CQCGeneralError</span><span class="p">(</span><span class="s2">&quot;Didn&#39;t receive the qubit id&quot;</span><span class="p">)</span>
                     <span class="c1"># Activate qubit</span>
@@ -1904,8 +1913,8 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">inplace</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_set_active</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">notifyHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="k">return</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">outcome</span>
+                <span class="n">otherHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">otherHdr</span><span class="o">.</span><span class="n">outcome</span>
             <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">None</span></div>
 
@@ -1965,8 +1974,8 @@
         <span class="c1"># Return time-stamp</span>
         <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqc</span><span class="o">.</span><span class="n">readMessage</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">notifyHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">notifyHdr</span><span class="o">.</span><span class="n">datetime</span>
+            <span class="n">otherHdr</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">otherHdr</span><span class="o">.</span><span class="n">datetime</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span></div></div>
 </pre></div>

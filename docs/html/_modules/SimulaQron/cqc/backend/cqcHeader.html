@@ -86,15 +86,23 @@
 
 <span class="kn">import</span> <span class="nn">struct</span>
 <span class="kn">import</span> <span class="nn">bitstring</span>
+<span class="kn">import</span> <span class="nn">abc</span>
 
 <span class="c1"># Constant defining CQC version</span>
-<span class="n">CQC_VERSION</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">CQC_VERSION</span> <span class="o">=</span> <span class="mi">2</span>
 
 <span class="c1"># Lengths of the headers in bytes</span>
 <span class="n">CQC_HDR_LENGTH</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># Length of the CQC Header</span>
 <span class="n">CQC_CMD_HDR_LENGTH</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># Length of a command header</span>
 <span class="n">CQC_CMD_XTRA_LENGTH</span> <span class="o">=</span> <span class="mi">16</span>  <span class="c1"># Length of extra command information</span>
+<span class="n">CQC_SEQ_HDR_LENGTH</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Length of the command sequence header</span>
+<span class="n">CQC_ROT_HDR_LENGTH</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Length of the rotation header</span>
+<span class="n">CQC_XTRA_QUBIT_HDR_LENGTH</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Length of the extra qubit header</span>
+<span class="n">CQC_COM_HDR_LENGTH</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># Length of the communication header</span>
+<span class="n">CQC_FACTORY_HDR_LENGTH</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Length of the factory header</span>
 <span class="n">CQC_NOTIFY_LENGTH</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># Length of a notification send from the CQC upwards</span>
+<span class="n">CQC_MEAS_OUT_HDR_LENGTH</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Length of the measurement outcome header</span>
+<span class="n">CQC_TIMEINFO_HDR_LENGTH</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># Length of the time info header</span>
 <span class="n">CQC_EPR_REQ_LENGTH</span> <span class="o">=</span> <span class="mi">16</span>  <span class="c1"># Length of EPR request header</span>
 
 <span class="c1"># Constants defining the messages types</span>
@@ -150,25 +158,138 @@
 <span class="n">CQC_OPT_BLOCK</span> <span class="o">=</span> <span class="mh">0x04</span>  <span class="c1"># Block until command is done</span>
 
 
-<div class="viewcode-block" id="CQCHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCHeader</span><span class="p">:</span>
+<div class="viewcode-block" id="Header"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.Header">[docs]</a><span class="k">class</span> <span class="nc">Header</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Definition of the general CQC header.</span>
+<span class="sd">    Abstact class for headers.</span>
+<span class="sd">    Should be subclassed</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">packaging_format</span> <span class="o">=</span> <span class="s2">&quot;!&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Initialize using values received from a packet.</span>
+<span class="sd">            Don&#39;t override this but rather _setVals</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">headerBytes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setVals</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tp</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">app_id</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CQCHeader.setVals"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCHeader.setVals">[docs]</a>    <span class="k">def</span> <span class="nf">setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">app_id</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+<div class="viewcode-block" id="Header.setVals"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.Header.setVals">[docs]</a>    <span class="k">def</span> <span class="nf">setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Set using given values.</span>
+<span class="sd">            Don&#39;t override this but rather _setVals</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setVals</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_vals</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_check_vals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Method to be called after settings values, checks if values can be packed and sets is_set to True.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="c1"># Set default values again</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid arguments. Could not packed since: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Set using given values.</span>
+<span class="sd">            Should be overridden</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="Header.unpack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.Header.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Unpack packet data.</span>
+<span class="sd">            Don&#39;t override this but rather _unpack</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_unpack</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not unpack headerBytes=</span><span class="si">{}</span><span class="s2"> to a </span><span class="si">{}</span><span class="s2">, since </span><span class="si">{}</span><span class="s2">&quot;</span>
+                             <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Unpack packet data.</span>
+<span class="sd">            Should be overridden</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="Header.pack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.Header.pack">[docs]</a>    <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Pack data into packet format.</span>
+<span class="sd">            Don&#39;t override this but rather _pack</span>
+
+<span class="sd">        :return: bytes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Cannot pack a header which is not set&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pack</span><span class="p">()</span></div>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Pack data into packet format.</span>
+<span class="sd">            Should be overridden</span>
+
+<span class="sd">        :return: bytes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="Header.printable"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.Header.printable">[docs]</a>    <span class="k">def</span> <span class="nf">printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Produce a printable string for information purposes.</span>
+<span class="sd">            Don&#39;t override this but rather _printable</span>
+
+<span class="sd">        :return: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Cannot print a header which is not set&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_printable</span><span class="p">()</span></div>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Produce a printable string for information purposes.</span>
+<span class="sd">            Should be overridden</span>
+
+<span class="sd">        :return: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="CQCHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Definition of the general CQC header.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">CQC_HDR_LENGTH</span>
+    <span class="n">packaging_format</span> <span class="o">=</span> <span class="s2">&quot;!BBHL&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tp</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">app_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Set using given values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -176,65 +297,45 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">tp</span> <span class="o">=</span> <span class="n">tp</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app_id</span> <span class="o">=</span> <span class="n">app_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">length</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span>
 
-<div class="viewcode-block" id="CQCHeader.pack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCHeader.pack">[docs]</a>    <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Pack data into packet format. For defnitions see cLib/cgc.h</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">0</span>
-        <span class="n">cqcH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;!BBHL&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">cqcH</span></div>
+        <span class="n">cqcH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cqcH</span>
 
-<div class="viewcode-block" id="CQCHeader.unpack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCHeader.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Unpack packet data. For definitions see cLib/cqc.h</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">cqcH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;!BBHL&quot;</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
+        <span class="n">cqcH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">cqcH</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tp</span> <span class="o">=</span> <span class="n">cqcH</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app_id</span> <span class="o">=</span> <span class="n">cqcH</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">cqcH</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="CQCHeader.printable"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCHeader.printable">[docs]</a>    <span class="k">def</span> <span class="nf">printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Produce a printable string for information purposes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot; &quot;</span>
-
         <span class="n">toPrint</span> <span class="o">=</span> <span class="s2">&quot;CQC Header. Version: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">=</span> <span class="n">toPrint</span> <span class="o">+</span> <span class="s2">&quot;Type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tp</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">=</span> <span class="n">toPrint</span> <span class="o">+</span> <span class="s2">&quot;App ID: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Length: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">toPrint</span></div></div>
+        <span class="k">return</span> <span class="n">toPrint</span></div>
 
 
-<div class="viewcode-block" id="CQCCmdHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCCmdHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCCmdHeader</span><span class="p">:</span>
+<div class="viewcode-block" id="CQCCmdHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCCmdHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCCmdHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Header for a command instruction packet.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">CQC_CMD_HDR_LENGTH</span>
+    <span class="n">packaging_format</span> <span class="o">=</span> <span class="s2">&quot;!HBB&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize using values received from a packet, if available.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">block</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="k">if</span> <span class="n">headerBytes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">instr</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
-
-<div class="viewcode-block" id="CQCCmdHeader.setVals"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCCmdHeader.setVals">[docs]</a>    <span class="k">def</span> <span class="nf">setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit_id</span><span class="p">,</span> <span class="n">instr</span><span class="p">,</span> <span class="n">notify</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">instr</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">notify</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set using given values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -243,15 +344,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify</span> <span class="o">=</span> <span class="n">notify</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">block</span> <span class="o">=</span> <span class="n">block</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">action</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="CQCCmdHeader.pack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCCmdHeader.pack">[docs]</a>    <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pack data into packet format. For defnitions see cLib/cgc.h</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">0</span>
 
         <span class="n">opt</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">notify</span><span class="p">:</span>
@@ -261,48 +358,50 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">action</span><span class="p">:</span>
             <span class="n">opt</span> <span class="o">=</span> <span class="n">opt</span> <span class="o">|</span> <span class="n">CQC_OPT_ACTION</span>
 
-        <span class="n">cmdH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;!HBB&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instr</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">cmdH</span></div>
+        <span class="n">cmdH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instr</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cmdH</span>
 
-<div class="viewcode-block" id="CQCCmdHeader.unpack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCCmdHeader.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Unpack packet data. For definitions see cLib/cqc.h</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">cmdH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;!HBB&quot;</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
+        <span class="n">cmdH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="n">cmdH</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">instr</span> <span class="o">=</span> <span class="n">cmdH</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">cmdH</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">CQC_OPT_NOTIFY</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">notify</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">notify</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">cmdH</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">CQC_OPT_BLOCK</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">block</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">block</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">cmdH</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">CQC_OPT_ACTION</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
-
-<div class="viewcode-block" id="CQCCmdHeader.printable"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCCmdHeader.printable">[docs]</a>    <span class="k">def</span> <span class="nf">printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Produce a printable string for information purposes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot; &quot;</span>
-
         <span class="n">toPrint</span> <span class="o">=</span> <span class="s2">&quot;Command Header. Qubit ID: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">=</span> <span class="n">toPrint</span> <span class="o">+</span> <span class="s2">&quot;Instruction: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instr</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">=</span> <span class="n">toPrint</span> <span class="o">+</span> <span class="s2">&quot;Notify: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">notify</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">=</span> <span class="n">toPrint</span> <span class="o">+</span> <span class="s2">&quot;Block: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">=</span> <span class="n">toPrint</span> <span class="o">+</span> <span class="s2">&quot;Action: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">toPrint</span></div></div>
+        <span class="k">return</span> <span class="n">toPrint</span></div>
 
 
-<div class="viewcode-block" id="CQCXtraHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCXtraHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCXtraHeader</span><span class="p">:</span>
+<div class="viewcode-block" id="CQCXtraHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCXtraHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCXtraHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Optional addtional cmd header information. Only relevant for certain commands.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">CQC_CMD_XTRA_LENGTH</span>
+    <span class="n">packaging_format</span> <span class="o">=</span> <span class="s2">&quot;!HHLLHBB&quot;</span>
 
     <span class="c1"># Deprecated, split into multiple headers</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -310,18 +409,9 @@
 <span class="sd">        Initialize using values received from a packet.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Xtra Header is deprecated, it is split into different headers&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">headerBytes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cmdLength</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CQCXtraHeader.setVals"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCXtraHeader.setVals">[docs]</a>    <span class="k">def</span> <span class="nf">setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xtra_qubit_id</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="p">,</span> <span class="n">remote_node</span><span class="p">,</span> <span class="n">remote_port</span><span class="p">,</span> <span class="n">cmdLength</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xtra_qubit_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">remote_node</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">remote_port</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cmdLength</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Set using given values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -331,17 +421,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span> <span class="o">=</span> <span class="n">remote_node</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span> <span class="o">=</span> <span class="n">remote_port</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cmdLength</span> <span class="o">=</span> <span class="n">cmdLength</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="CQCXtraHeader.pack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCXtraHeader.pack">[docs]</a>    <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Pack data into packet form. For definitions see cLib/cqc.h</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">0</span>
-
         <span class="n">xtraH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span>
-            <span class="s2">&quot;!HHLLHBB&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span><span class="p">,</span>
@@ -350,13 +436,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">,</span>
             <span class="mi">0</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">xtraH</span></div>
+        <span class="k">return</span> <span class="n">xtraH</span>
 
-<div class="viewcode-block" id="CQCXtraHeader.unpack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCXtraHeader.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Unpack packet data. For defnitions see cLib/cqc.h</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">xtraH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;!HHLLHBB&quot;</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
+        <span class="n">xtraH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="n">xtraH</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span> <span class="o">=</span> <span class="n">xtraH</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -364,14 +450,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cmdLength</span> <span class="o">=</span> <span class="n">xtraH</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span> <span class="o">=</span> <span class="n">xtraH</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">xtraH</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="CQCXtraHeader.printable"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCXtraHeader.printable">[docs]</a>    <span class="k">def</span> <span class="nf">printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Produce a printable string for information purposes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot; &quot;</span>
 
         <span class="n">toPrint</span> <span class="o">=</span> <span class="s2">&quot;Xtra Qubit: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">=</span> <span class="n">toPrint</span> <span class="o">+</span> <span class="s2">&quot;Angle Step: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
@@ -380,10 +463,10 @@
         <span class="n">toPrint</span> <span class="o">=</span> <span class="n">toPrint</span> <span class="o">+</span> <span class="s2">&quot;Remote Port: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">=</span> <span class="n">toPrint</span> <span class="o">+</span> <span class="s2">&quot;Command Length: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cmdLength</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">toPrint</span></div></div>
+        <span class="k">return</span> <span class="n">toPrint</span></div>
 
 
-<div class="viewcode-block" id="CQCSequenceHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCSequenceHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCSequenceHeader</span><span class="p">:</span>
+<div class="viewcode-block" id="CQCSequenceHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCSequenceHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCSequenceHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Header used to indicate size of a sequence.</span>
 <span class="sd">        Currently exactly the same as CQCRotationHeaer.</span>
@@ -391,257 +474,195 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">packaging_format</span> <span class="o">=</span> <span class="s2">&quot;!B&quot;</span>
-    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">CQC_SEQ_HDR_LENGTH</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize from packet data</span>
-<span class="sd">        :param headerBytes:  packet data</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">headerBytes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cmd_length</span> <span class="o">=</span> <span class="mi">0</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
-
-<div class="viewcode-block" id="CQCSequenceHeader.setVals"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCSequenceHeader.setVals">[docs]</a>    <span class="k">def</span> <span class="nf">setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd_length</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd_length</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set header using given values</span>
 <span class="sd">        :param cmd_length: The step size of the rotation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cmd_length</span> <span class="o">=</span> <span class="n">cmd_length</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cmd_length</span> <span class="o">=</span> <span class="n">cmd_length</span>
 
-<div class="viewcode-block" id="CQCSequenceHeader.pack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCSequenceHeader.pack">[docs]</a>    <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pack data into packet form. For definitions see cLib/cqc.h</span>
 <span class="sd">        :returns the packed header</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">0</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_length</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">header</span>
 
-        <span class="n">q_header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_length</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">q_header</span></div>
-
-<div class="viewcode-block" id="CQCSequenceHeader.unpack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCSequenceHeader.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Unpack packet data. For defnitions see cLib/cqc.h</span>
 <span class="sd">        :param headerBytes: The unpacked headers.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">seq_header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cmd_length</span> <span class="o">=</span> <span class="n">seq_header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cmd_length</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-<div class="viewcode-block" id="CQCSequenceHeader.printable"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCSequenceHeader.printable">[docs]</a>    <span class="k">def</span> <span class="nf">printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Produce a printable string for information purposes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot; &quot;</span>
-
         <span class="n">toPrint</span> <span class="o">=</span> <span class="s2">&quot;Sequence header. &quot;</span>
         <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Command length: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cmd_length</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
 
-        <span class="k">return</span> <span class="n">toPrint</span></div></div>
+        <span class="k">return</span> <span class="n">toPrint</span></div>
 
 
-<div class="viewcode-block" id="CQCRotationHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCRotationHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCRotationHeader</span><span class="p">:</span>
+<div class="viewcode-block" id="CQCRotationHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCRotationHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCRotationHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Header used to define the rotation angle of a gate</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">packaging_format</span> <span class="o">=</span> <span class="s2">&quot;!B&quot;</span>
-    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">CQC_ROT_HDR_LENGTH</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize from packet data</span>
-<span class="sd">        :param headerBytes:  packet data</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">headerBytes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
-
-<div class="viewcode-block" id="CQCRotationHeader.setVals"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCRotationHeader.setVals">[docs]</a>    <span class="k">def</span> <span class="nf">setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set header using given values</span>
 <span class="sd">        :param step: The step size of the rotation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step</span>
 
-<div class="viewcode-block" id="CQCRotationHeader.pack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCRotationHeader.pack">[docs]</a>    <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pack data into packet form. For definitions see cLib/cqc.h</span>
 <span class="sd">        :returns the packed header</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">0</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">header</span>
 
-        <span class="n">q_header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">q_header</span></div>
-
-<div class="viewcode-block" id="CQCRotationHeader.unpack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCRotationHeader.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Unpack packet data. For defnitions see cLib/cqc.h</span>
 <span class="sd">        :param headerBytes: The unpacked headers.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">rot_header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">rot_header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-<div class="viewcode-block" id="CQCRotationHeader.printable"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCRotationHeader.printable">[docs]</a>    <span class="k">def</span> <span class="nf">printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Produce a printable string for information purposes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot; &quot;</span>
-
         <span class="n">toPrint</span> <span class="o">=</span> <span class="s2">&quot;Rotation header. &quot;</span>
         <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;step size: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
 
-        <span class="k">return</span> <span class="n">toPrint</span></div></div>
+        <span class="k">return</span> <span class="n">toPrint</span></div>
 
 
-<div class="viewcode-block" id="CQCXtraQubitHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCXtraQubitHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCXtraQubitHeader</span><span class="p">:</span>
+<div class="viewcode-block" id="CQCXtraQubitHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCXtraQubitHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCXtraQubitHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Header used to send qubit of a secondary qubit for two qubit gates</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">packaging_format</span> <span class="o">=</span> <span class="s2">&quot;!H&quot;</span>
-    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">CQC_XTRA_QUBIT_HDR_LENGTH</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize from packet data</span>
-<span class="sd">        :param headerBytes:  packet data</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">headerBytes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="mi">0</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
-
-<div class="viewcode-block" id="CQCXtraQubitHeader.setVals"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCXtraQubitHeader.setVals">[docs]</a>    <span class="k">def</span> <span class="nf">setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit_id</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit_id</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set header using given values</span>
 <span class="sd">        :param qubit_id: The id of the secondary qubit</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="n">qubit_id</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="n">qubit_id</span>
 
-<div class="viewcode-block" id="CQCXtraQubitHeader.pack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCXtraQubitHeader.pack">[docs]</a>    <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pack data into packet form. For definitions see cLib/cqc.h</span>
 <span class="sd">        :returns the packed header</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">0</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">header</span>
 
-        <span class="n">q_header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">q_header</span></div>
-
-<div class="viewcode-block" id="CQCXtraQubitHeader.unpack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCXtraQubitHeader.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Unpack packet data. For defnitions see cLib/cqc.h</span>
+<span class="sd">        Unpack packet data. For definitions see cLib/cqc.h</span>
 <span class="sd">        :param headerBytes: The unpacked headers.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">com_header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="n">com_header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-<div class="viewcode-block" id="CQCXtraQubitHeader.printable"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCXtraQubitHeader.printable">[docs]</a>    <span class="k">def</span> <span class="nf">printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Produce a printable string for information purposes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot; &quot;</span>
-
         <span class="n">toPrint</span> <span class="o">=</span> <span class="s2">&quot;Extra Qubit header. &quot;</span>
         <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;qubit id: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
 
-        <span class="k">return</span> <span class="n">toPrint</span></div></div>
+        <span class="k">return</span> <span class="n">toPrint</span></div>
 
 
-<div class="viewcode-block" id="CQCCommunicationHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCCommunicationHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCCommunicationHeader</span><span class="p">:</span>
+<div class="viewcode-block" id="CQCCommunicationHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCCommunicationHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCCommunicationHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Header used to send information to which node to send information to.</span>
 <span class="sd">        Used for example in Send and EPR commands</span>
 <span class="sd">        This header has a size of 8</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">packaging_format</span> <span class="o">=</span> <span class="s2">&quot;!HLH&quot;</span>
-    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">packaging_format</span> <span class="o">=</span> <span class="s2">&quot;!HHL&quot;</span>
+    <span class="n">packaging_format_v1</span> <span class="o">=</span> <span class="s2">&quot;!HLH&quot;</span>
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">CQC_COM_HDR_LENGTH</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cqc_version</span><span class="o">=</span><span class="n">CQC_VERSION</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize from packet data</span>
 <span class="sd">        :param headerBytes:  packet data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">headerBytes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cqc_version</span> <span class="o">=</span> <span class="n">cqc_version</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
 
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
-
-<div class="viewcode-block" id="CQCCommunicationHeader.setVals"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCCommunicationHeader.setVals">[docs]</a>    <span class="k">def</span> <span class="nf">setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="p">,</span> <span class="n">remote_node</span><span class="p">,</span> <span class="n">remote_port</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">remote_node</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">remote_port</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set header using given values</span>
 <span class="sd">        :param remote_app_id: Application ID of remote host</span>
 <span class="sd">        :param remote_node: IP of remote host in cqc network</span>
 <span class="sd">        :param remote_port: port of remote hode in cqc network</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span> <span class="o">=</span> <span class="n">remote_app_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span> <span class="o">=</span> <span class="n">remote_port</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span> <span class="o">=</span> <span class="n">remote_node</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span> <span class="o">=</span> <span class="n">remote_port</span></div>
 
-<div class="viewcode-block" id="CQCCommunicationHeader.pack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCCommunicationHeader.pack">[docs]</a>    <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pack data into packet form. For definitions see cLib/cqc.h</span>
+<span class="sd">        :param cqc_version: The CQC version to be used</span>
 <span class="sd">        :returns the packed header</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqc_version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format_v1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">header</span>
 
-        <span class="n">com_header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">com_header</span></div>
-
-<div class="viewcode-block" id="CQCCommunicationHeader.unpack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCCommunicationHeader.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Unpack packet data. For defnitions see cLib/cqc.h</span>
 <span class="sd">        :param headerBytes: The unpacked headers.</span>
+<span class="sd">        :param cqc_version: The CQC version to be used</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">com_header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span> <span class="o">=</span> <span class="n">com_header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span> <span class="o">=</span> <span class="n">com_header</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span> <span class="o">=</span> <span class="n">com_header</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqc_version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format_v1</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
-<div class="viewcode-block" id="CQCCommunicationHeader.printable"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCCommunicationHeader.printable">[docs]</a>    <span class="k">def</span> <span class="nf">printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Produce a printable string for information purposes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot; &quot;</span>
-
         <span class="n">toPrint</span> <span class="o">=</span> <span class="s2">&quot;Communication header. &quot;</span>
         <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Remote App ID: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Remote Node: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Remote Port: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
 
-        <span class="k">return</span> <span class="n">toPrint</span></div></div>
+        <span class="k">return</span> <span class="n">toPrint</span></div>
 
 
-<div class="viewcode-block" id="CQCFactoryHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCFactoryHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCFactoryHeader</span><span class="p">:</span>
+<div class="viewcode-block" id="CQCFactoryHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCFactoryHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCFactoryHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Header used to send factory information</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -649,21 +670,9 @@
     <span class="c1"># could maybe include the notify flag in num_iter?</span>
     <span class="c1"># That halfs the amount of possible num_iter from 256 to 128</span>
     <span class="n">package_format</span> <span class="o">=</span> <span class="s2">&quot;!BB&quot;</span>
-    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">CQC_FACTORY_HDR_LENGTH</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Initialize from packet data.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">headerBytes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">num_iter</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">notify</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">block</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
-
-<div class="viewcode-block" id="CQCFactoryHeader.setVals"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCFactoryHeader.setVals">[docs]</a>    <span class="k">def</span> <span class="nf">setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_iter</span><span class="p">,</span> <span class="n">notify</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">notify</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set using give values</span>
 <span class="sd">        :param num_iter: The amount of iterations to this factory</span>
@@ -673,15 +682,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">num_iter</span> <span class="o">=</span> <span class="n">num_iter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify</span> <span class="o">=</span> <span class="n">notify</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">block</span> <span class="o">=</span> <span class="n">block</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="CQCFactoryHeader.pack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCFactoryHeader.pack">[docs]</a>    <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pack data into packet form. For definitions see cLib/cqc.h</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">0</span>
-
         <span class="n">opt</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">notify</span><span class="p">:</span>
             <span class="n">opt</span> <span class="o">=</span> <span class="n">opt</span> <span class="o">|</span> <span class="n">CQC_OPT_NOTIFY</span>
@@ -689,9 +694,9 @@
             <span class="n">opt</span> <span class="o">=</span> <span class="n">opt</span> <span class="o">|</span> <span class="n">CQC_OPT_BLOCK</span>
 
         <span class="n">factH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">package_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_iter</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">factH</span></div>
+        <span class="k">return</span> <span class="n">factH</span>
 
-<div class="viewcode-block" id="CQCFactoryHeader.unpack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCFactoryHeader.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Unpack packet data. For defnitions see cLib/cqc.h</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -701,41 +706,33 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">block</span> <span class="o">=</span> <span class="n">fact_hdr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">CQC_OPT_BLOCK</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">num_iter</span> <span class="o">=</span> <span class="n">fact_hdr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="CQCFactoryHeader.printable"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCFactoryHeader.printable">[docs]</a>    <span class="k">def</span> <span class="nf">printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Produce a printable string for information purposes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot; &quot;</span>
-
         <span class="n">toPrint</span> <span class="o">=</span> <span class="s2">&quot;Factory Header. &quot;</span>
         <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Number of iterations: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_iter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
-        <span class="k">return</span> <span class="n">toPrint</span></div></div>
+        <span class="k">return</span> <span class="n">toPrint</span></div>
 
 
-<div class="viewcode-block" id="CQCNotifyHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCNotifyHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCNotifyHeader</span><span class="p">:</span>
+<div class="viewcode-block" id="CQCNotifyHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCNotifyHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCNotifyHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Header used to specify notification details.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">CQC_NOTIFY_LENGTH</span>
+    <span class="n">packaging_format</span> <span class="o">=</span> <span class="s2">&quot;!HHLQHBB&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Initialize from packet data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">headerBytes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">outcome</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Notify Header is deprecated, it is split into CQCXtraQubitHeader, CQCMeasOutHeader, &quot;</span>
+                      <span class="s2">&quot;CQCTimeInfoHeader&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CQCNotifyHeader.setVals"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCNotifyHeader.setVals">[docs]</a>    <span class="k">def</span> <span class="nf">setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit_id</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="p">,</span> <span class="n">remote_node</span><span class="p">,</span> <span class="n">remote_port</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">outcome</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">remote_app_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">remote_node</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">remote_port</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">datetime</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set using given values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -745,17 +742,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span> <span class="o">=</span> <span class="n">remote_node</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span> <span class="o">=</span> <span class="n">remote_port</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="n">datetime</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="CQCNotifyHeader.pack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCNotifyHeader.pack">[docs]</a>    <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pack data into packet form. For definitions see cLib/cqc.h</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">0</span>
-
         <span class="n">xtraH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span>
-            <span class="s2">&quot;!HHLQHBB&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span><span class="p">,</span>
@@ -764,13 +757,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">outcome</span><span class="p">,</span>
             <span class="mi">0</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">xtraH</span></div>
+        <span class="k">return</span> <span class="n">xtraH</span>
 
-<div class="viewcode-block" id="CQCNotifyHeader.unpack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCNotifyHeader.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Unpack packet data. For defnitions see cLib/cqc.h</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">xtraH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;!HHLQHBB&quot;</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
+        <span class="n">xtraH</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="n">xtraH</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span> <span class="o">=</span> <span class="n">xtraH</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -778,57 +771,119 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="n">xtraH</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span> <span class="o">=</span> <span class="n">xtraH</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outcome</span> <span class="o">=</span> <span class="n">xtraH</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="CQCNotifyHeader.printable"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCNotifyHeader.printable">[docs]</a>    <span class="k">def</span> <span class="nf">printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Produce a printable string for information purposes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot; &quot;</span>
-
         <span class="n">toPrint</span> <span class="o">=</span> <span class="s2">&quot;Qubit ID: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">=</span> <span class="n">toPrint</span> <span class="o">+</span> <span class="s2">&quot;Outcome: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outcome</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">=</span> <span class="n">toPrint</span> <span class="o">+</span> <span class="s2">&quot;Remote App ID: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remote_app_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">=</span> <span class="n">toPrint</span> <span class="o">+</span> <span class="s2">&quot;Remote Node: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remote_node</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">=</span> <span class="n">toPrint</span> <span class="o">+</span> <span class="s2">&quot;Remote Port: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
         <span class="n">toPrint</span> <span class="o">=</span> <span class="n">toPrint</span> <span class="o">+</span> <span class="s2">&quot;Datetime: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">toPrint</span></div></div>
+        <span class="k">return</span> <span class="n">toPrint</span></div>
 
 
-<div class="viewcode-block" id="CQCEPRRequestHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCEPRRequestHeader</span><span class="p">:</span>
+<div class="viewcode-block" id="CQCMeasOutHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCMeasOutHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCMeasOutHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Header used to send a measurement outcome.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">packaging_format</span> <span class="o">=</span> <span class="s2">&quot;!B&quot;</span>
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">CQC_MEAS_OUT_HDR_LENGTH</span>
+
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcome</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set header using given values</span>
+<span class="sd">        :param meas_out: The measurement outcome</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outcome</span> <span class="o">=</span> <span class="n">outcome</span>
+
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pack data into packet form. For definitions see cLib/cqc.h</span>
+<span class="sd">        :returns the packed header</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outcome</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">header</span>
+
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unpack packet data. For definitions see cLib/cqc.h</span>
+<span class="sd">        :param headerBytes: The unpacked headers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outcome</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Produce a printable string for information purposes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">toPrint</span> <span class="o">=</span> <span class="s2">&quot;Measurement Outcome header. &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;measurement outcome: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outcome</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+
+        <span class="k">return</span> <span class="n">toPrint</span></div>
+
+
+<div class="viewcode-block" id="CQCTimeinfoHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCTimeinfoHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCTimeinfoHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Header used to send timing information</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">packaging_format</span> <span class="o">=</span> <span class="s2">&quot;!Q&quot;</span>
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">CQC_TIMEINFO_HDR_LENGTH</span>
+
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datetime</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set header using given values</span>
+<span class="sd">        :param datetime: The timestamp</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="n">datetime</span>
+
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pack data into packet form. For definitions see cLib/cqc.h</span>
+<span class="sd">        :returns the packed header</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">header</span>
+
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unpack packet data. For definitions see cLib/cqc.h</span>
+<span class="sd">        :param headerBytes: The unpacked headers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Produce a printable string for information purposes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">toPrint</span> <span class="o">=</span> <span class="s2">&quot;Time Info header. &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;timestamp: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+
+        <span class="k">return</span> <span class="n">toPrint</span></div>
+
+
+<div class="viewcode-block" id="CQCEPRRequestHeader"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader">[docs]</a><span class="k">class</span> <span class="nc">CQCEPRRequestHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">CQC_EPR_REQ_LENGTH</span>
     <span class="n">package_format</span> <span class="o">=</span> <span class="p">(</span>
         <span class="s2">&quot;uint:32=remote_ip, &quot;</span>
         <span class="s2">&quot;float:32=min_fidelity, &quot;</span>
         <span class="s2">&quot;float:32=max_time, &quot;</span>
         <span class="s2">&quot;uint:16=remote_port, &quot;</span>
         <span class="s2">&quot;uint:8=num_pairs, &quot;</span>
-        <span class="s2">&quot;uint:4=priority&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;uint:1=store, &quot;</span> <span class="s2">&quot;uint:1=measure_directly, &quot;</span> <span class="s2">&quot;uint:2=0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uint:4=priority, &quot;</span>
+        <span class="s2">&quot;uint:1=store, &quot;</span>
+        <span class="s2">&quot;uint:1=atomic, &quot;</span>
+        <span class="s2">&quot;uint:1=measure_directly, &quot;</span>
+        <span class="s2">&quot;uint:1=0&quot;</span>
     <span class="p">)</span>
-    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="mi">16</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize using values received from a packet.</span>
-<span class="sd">        :param headerBytes: bytes</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">headerBytes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">remote_ip</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">num_pairs</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">min_fidelity</span> <span class="o">=</span> <span class="mf">0.0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="o">=</span> <span class="mf">0.0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">store</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">measure_directly</span> <span class="o">=</span> <span class="kc">False</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
-
-<div class="viewcode-block" id="CQCEPRRequestHeader.setVals"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.setVals">[docs]</a>    <span class="k">def</span> <span class="nf">setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">remote_ip</span><span class="p">,</span> <span class="n">remote_port</span><span class="p">,</span> <span class="n">num_pairs</span><span class="p">,</span> <span class="n">min_fidelity</span><span class="p">,</span> <span class="n">max_time</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">store</span><span class="p">,</span> <span class="n">measure_directly</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">remote_ip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">remote_port</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_pairs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">min_fidelity</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_time</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">atomic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">measure_directly</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Stores required parameters of Entanglement Generation Protocol Request</span>
 
@@ -850,7 +905,6 @@
 <span class="sd">        :param measure_directly: bool</span>
 <span class="sd">            Specifies whether to measure the communication qubit directly after the photon is emitted</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">remote_ip</span> <span class="o">=</span> <span class="n">remote_ip</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span> <span class="o">=</span> <span class="n">remote_port</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_pairs</span> <span class="o">=</span> <span class="n">num_pairs</span>
@@ -858,18 +912,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="o">=</span> <span class="n">max_time</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">priority</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">store</span> <span class="o">=</span> <span class="n">store</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomic</span> <span class="o">=</span> <span class="n">atomic</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">measure_directly</span> <span class="o">=</span> <span class="n">measure_directly</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
-
-<div class="viewcode-block" id="CQCEPRRequestHeader.pack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.pack">[docs]</a>    <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pack the data in packet form.</span>
 <span class="sd">        :return: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">0</span>
-
         <span class="n">to_pack</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;remote_ip&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_ip</span><span class="p">,</span>
             <span class="s2">&quot;remote_port&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">,</span>
@@ -878,14 +928,15 @@
             <span class="s2">&quot;num_pairs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_pairs</span><span class="p">,</span>
             <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span>
             <span class="s2">&quot;store&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="p">,</span>
+            <span class="s2">&quot;atomic&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomic</span><span class="p">,</span>
             <span class="s2">&quot;measure_directly&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_directly</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="n">request_Bitstring</span> <span class="o">=</span> <span class="n">bitstring</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">package_format</span><span class="p">,</span> <span class="o">**</span><span class="n">to_pack</span><span class="p">)</span>
         <span class="n">requestH</span> <span class="o">=</span> <span class="n">request_Bitstring</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">requestH</span></div>
+        <span class="k">return</span> <span class="n">requestH</span>
 
-<div class="viewcode-block" id="CQCEPRRequestHeader.unpack"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Unpack data.</span>
 <span class="sd">        :param headerBytes: str</span>
@@ -900,29 +951,26 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">num_pairs</span> <span class="o">=</span> <span class="n">request_fields</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">request_fields</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">store</span> <span class="o">=</span> <span class="n">request_fields</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">measure_directly</span> <span class="o">=</span> <span class="n">request_fields</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomic</span> <span class="o">=</span> <span class="n">request_fields</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measure_directly</span> <span class="o">=</span> <span class="n">request_fields</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span></div>
-
-<div class="viewcode-block" id="CQCEPRRequestHeader.printable"><a class="viewcode-back" href="../../../../SimulaQron.cqc.backend.html#SimulaQron.cqc.backend.cqcHeader.CQCEPRRequestHeader.printable">[docs]</a>    <span class="k">def</span> <span class="nf">printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Produce printable string for information purposes</span>
 <span class="sd">        :return: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot; &quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">to_print</span> <span class="o">=</span> <span class="s2">&quot;EPR Request Header.&quot;</span>
-            <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Remote IP: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remote_ip</span><span class="p">)</span>
-            <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Remote port: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">)</span>
-            <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Min Fidelity: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_fidelity</span><span class="p">)</span>
-            <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Max Time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_time</span><span class="p">)</span>
-            <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Num Pairs: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_pairs</span><span class="p">)</span>
-            <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Priority: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="p">)</span>
-            <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Store: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="p">)</span>
-            <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Measure Directly: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measure_directly</span><span class="p">)</span>
+        <span class="n">to_print</span> <span class="o">=</span> <span class="s2">&quot;EPR Request Header.&quot;</span>
+        <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Remote IP: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remote_ip</span><span class="p">)</span>
+        <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Remote port: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remote_port</span><span class="p">)</span>
+        <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Min Fidelity: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_fidelity</span><span class="p">)</span>
+        <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Max Time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_time</span><span class="p">)</span>
+        <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Num Pairs: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_pairs</span><span class="p">)</span>
+        <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Priority: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="p">)</span>
+        <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Store: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="p">)</span>
+        <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Atomic: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomic</span><span class="p">)</span>
+        <span class="n">to_print</span> <span class="o">+=</span> <span class="s2">&quot;Measure Directly: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measure_directly</span><span class="p">)</span>
 
-            <span class="k">return</span> <span class="n">to_print</span></div></div>
+        <span class="k">return</span> <span class="n">to_print</span></div>
 </pre></div>
 
           </div>

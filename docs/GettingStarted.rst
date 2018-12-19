@@ -53,7 +53,7 @@ To run SimulaQron you need to following Python packages:
 * twisted
 * qutip
 * matplotlib
-* networkx$
+* networkx
 * projectq
 * bitstring
 

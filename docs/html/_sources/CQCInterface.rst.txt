@@ -11,7 +11,7 @@ Here we specifiy the CQC message interface. For programming SimulaQron via the C
 Upon establishing a connection to the CQC Backend, the following packet format can be used to issue commands to the simulated quantum network. Each interaction to and from the interface starts with a CQC Header, followed by additional headers as appropriate to the message type. 
 
 When accessing the interface directly, you must keep track of qubit IDs for each application ID yourself. It is a deliberate choice that the CQC Backend does not itself keep track of qubit or application IDs, leaving such management to you (and indeed higher levels of abstraction if you wish).
-When a qubit is created with the command `CQC_CMD_NEW` a CQC message will be returned of the type `CQC_TP_NEW_OK` followed by a notification header containing the qubit ID.
+When a qubit is created with the command `CQC_CMD_NEW` a CQC message will be returned of the type `CQC_TP_NEW_OK` followed by a CQCXtraQubitHeader containing the qubit ID.
 Note that if the option notify, see below, is set to true a message of type `CQC_TP_DONE` will also be returned, after the notification header, saying that the command is finished.
 
 ^^^^^^^^^^^^^^^^^
@@ -22,14 +22,14 @@ CQC Header format
 CQC Header
 """"""""""
 
-=========== ============================  =========  ===============================================================
+=========== ============================  =========  ===================================================================
 Function    Type                          Length     Comment
-=========== ============================  =========  ===============================================================
-version     unsigned integer (uint8_t)    1 byte      Current version is 1
+=========== ============================  =========  ===================================================================
+version     unsigned integer (uint8_t)    1 byte      Current version is 2
 type        unsigned integer (uint8_t)    1 byte      Message type (see below)
 app_id      unsigned integer (uint16_t)   2 bytes     Application ID, return messages will be tagged appropriately 
-length      unsigned integer (uint32_t)   4 bytes     Total length of the CQC instruction packet
-=========== ============================  =========  ===============================================================
+length      unsigned integer (uint32_t)   4 bytes     Total length of the CQC instruction packet (excluding this header)
+=========== ============================  =========  ===================================================================
 
 Possible message types are listed below. Depending on the message type additional headers may be required as specified below.::
 
@@ -61,10 +61,10 @@ If the message type is `CQC_TP_COMMAND`, `CQC_TP_FACTORY` or `CQC_TP_GET_TIME`, 
 
 If `CQC_OPT_NOTIFY` set to true, each of these commmands return a CQC message of type `CQC_TP_DONE`. Some commands also return additional messages before the optional done-message, as described below:
 
-* `CQC_CMD_NEW`: Returns `CQC_TP_NEW_OK` followed by a notify header containing the qubit ID.
-* `CQC_CMD_MEASURE(_INPLACE)`: Returns `CQC_TP_MEASOUT` followed by a notify header containing the measurement outcome.
-* `CQC_CMD_RECV`: Returns `CQC_TP_RECV` followed by a notify header containing the qubit ID.
-* `CQC_CMD_EPR(_RECV)`: Returns `CQC_TP_EPR_OK` followed by an entanglement information header.
+* `CQC_CMD_NEW`: Returns `CQC_TP_NEW_OK` followed by a `CQCXtraQubitHeader` containing the qubit ID.
+* `CQC_CMD_MEASURE(_INPLACE)`: Returns `CQC_TP_MEASOUT` followed by a `CQCMeasOutHeader` containing the measurement outcome.
+* `CQC_CMD_RECV`: Returns `CQC_TP_RECV` followed by a `CQCXtraQubitHeader` containing the qubit ID.
+* `CQC_CMD_EPR(_RECV)`: Returns `CQC_TP_EPR_OK` followed by `CQCXtraQubitHeader` and an entanglement information header.
 
 Example sequences of headers:
 
@@ -174,7 +174,7 @@ step            unsigned int (uint8_t)        1 bytes    Angle step of rotation 
 """"""""""""""""""""""
 CQC Extra Qubit Header
 """"""""""""""""""""""
-Additional header used to send the qubit_id of a secondary qubit for two qubit gates
+Additional header used to send a qubit_id
 
 ============== ============================  ==========  ===============================================================
 Function       Type                          Length      Comments
@@ -191,8 +191,8 @@ Additional header used to send to which node to send information to. Used in sen
 Function       Type                          Length      Comments
 ============== ============================  ==========  ===============================================================
 remote_app_id  unsigned int (uint16_t)       2 bytes     Remote Application ID
-remote_node    unsigned int (uint32_t)       4 bytes     IP of the remote node (IPv4)
 remote_port    unsigned int (uint16_t)       2 bytes     Port of the remode node for sending classical control info
+remote_node    unsigned int (uint32_t)       4 bytes     IP of the remote node (IPv4)
 ============== ============================  ==========  ===============================================================
 
 """"""""""""""""""""""""
@@ -216,7 +216,8 @@ The value of options can be any of the following::
 CQC Notify Header
 """""""""""""""""
 
-In some cases, the CQC Backend will return notifications to the client that require additional information. For example, where a qubit was received from, the lifetime of a qubit, the measurement outcome etc. 
+**The CQCNotifyHeader is deprecated and will be removed in the future. It is split up in `CQCXtraQubitHeader`, `CQCMeasOutHeader`and `CQCTimeinfoHeader` now.**
+In some cases, the CQC Backend will return notifications to the client that require additional information. For example, where a qubit was received from, the lifetime of a qubit, the measurement outcome etc.
 
 ============== ============================  ==========  ===============================================================
 Function       Type                          Length      Comments
@@ -230,6 +231,27 @@ outcome        unsigned int (uint8_t)        1 byte      Measurement outcome
 unused         unsigned int (uint8_t)        1 byte      4 byte align
 ============== ============================  ==========  ===============================================================
 
+""""""""""""""""""""""
+CQC Meas Out Header
+""""""""""""""""""""""
+Additional header used to send the outcome of a measurement.
+
+============== ============================  ==========  ===============================================================
+Function       Type                          Length      Comments
+============== ============================  ==========  ===============================================================
+meas_out       unsigned int (uint8_t)        1 byte      Measurement outcome
+============== ============================  ==========  ===============================================================
+
+""""""""""""""""""""""
+CQC Timeinfo Header
+""""""""""""""""""""""
+Additional header used to send time information (return of `CQC_TP_GET_TIME`).
+
+============== ============================  ==========  ===============================================================
+Function       Type                          Length      Comments
+============== ============================  ==========  ===============================================================
+datetime       unsigned int (uint64_t)       8 bytes     Time of creation
+============== ============================  ==========  ===============================================================
 
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
