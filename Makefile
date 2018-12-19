@@ -20,7 +20,7 @@ lint:
 	@${PYTHON} -m flake8 ${CQC_DIR} ${EXAMPLES_DIR} ${GENERAL_DIR} ${LOCAL_DIR} ${RUN_DIR} ${TESTS_DIR} ${TOOLBOX_DIR} ${VIRTNODE_DIR}
 
 python-deps:
-	@$(PIP) install -r requirements.txt
+	@cat requirements.txt | xargs -n 1 -L 1 $(PIP) install
 
 tests:
 	@sh $(RUN_TESTS) --quick --projectq

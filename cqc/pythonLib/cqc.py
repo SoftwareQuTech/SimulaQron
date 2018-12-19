@@ -34,10 +34,10 @@ import time
 import logging
 import socket
 import warnings
-import struct
 
 from SimulaQron.cqc.backend.cqcConfig import CQC_CONF_LINK_WAIT_TIME, CQC_CONF_COM_WAIT_TIME
 from SimulaQron.cqc.backend.cqcHeader import (
+    Header,
     CQCCmdHeader,
     CQC_CMD_SEND,
     CQC_CMD_EPR,
@@ -79,9 +79,9 @@ from SimulaQron.cqc.backend.cqcHeader import (
     CQCFactoryHeader,
     CQC_CMD_HDR_LENGTH,
     CQC_TP_INF_TIME,
-    CQC_NOTIFY_LENGTH,
     CQC_ERR_NOQUBIT,
-    CQCNotifyHeader,
+    CQCMeasOutHeader,
+    CQCTimeinfoHeader,
     CQC_TP_MEASOUT,
     CQC_ERR_TIMEOUT,
     CQC_TP_RECV,
@@ -89,7 +89,7 @@ from SimulaQron.cqc.backend.cqcHeader import (
     CQC_TP_NEW_OK,
     CQC_TP_EXPIRE,
 )
-from SimulaQron.cqc.backend.entInfoHeader import EntInfoHeader, ENT_INFO_LENGTH
+from SimulaQron.cqc.backend.entInfoHeader import EntInfoHeader
 from SimulaQron.general.hostConfig import cqc_node_id_from_addrinfo, networkConfig
 from SimulaQron.settings import Settings
 
@@ -819,49 +819,58 @@ class CQCConnection:
                 continue
             else:
                 break
-                # We got all the data, read notify (and ent_info) if there is any
+                # We got all the data, read other headers if there is any
         if currHeader.length == 0:
             return currHeader, None, None
-        elif currHeader.length == CQC_NOTIFY_LENGTH:
-            try:
-                rawNotifyHeader = self.buf[:CQC_NOTIFY_LENGTH]
-                self.buf = self.buf[CQC_NOTIFY_LENGTH : len(self.buf)]
-                notifyHeader = CQCNotifyHeader(rawNotifyHeader)
-                return currHeader, notifyHeader, None
-            except struct.error as err:
-                print(err)
-        elif currHeader.length == CQC_NOTIFY_LENGTH + ENT_INFO_LENGTH:
-            try:
-                rawNotifyHeader = self.buf[:CQC_NOTIFY_LENGTH]
-                self.buf = self.buf[CQC_NOTIFY_LENGTH : len(self.buf)]
-                notifyHeader = CQCNotifyHeader(rawNotifyHeader)
-
-                rawEntInfoHeader = self.buf[:ENT_INFO_LENGTH]
-                self.buf = self.buf[ENT_INFO_LENGTH : len(self.buf)]
-                entInfoHeader = EntInfoHeader(rawEntInfoHeader)
-
-                return currHeader, notifyHeader, entInfoHeader
-            except struct.error as err:
-                print(err)
         else:
-            logging.warning("Warning: Received message of unknown length, return None")
+            if currHeader.tp == CQC_TP_INF_TIME:
+                timeinfo_header = self._extract_header(CQCTimeinfoHeader)
+                return currHeader, timeinfo_header, None
+            elif currHeader.tp == CQC_TP_MEASOUT:
+                measout_header = self._extract_header(CQCMeasOutHeader)
+                return currHeader, measout_header, None
+            elif currHeader.tp in [CQC_TP_RECV, CQC_TP_NEW_OK, CQC_TP_EXPIRE]:
+                xtra_qubit_header = self._extract_header(CQCXtraQubitHeader)
+                return currHeader, xtra_qubit_header, None
+            elif currHeader.tp == CQC_TP_EPR_OK:
+                xtra_qubit_header = self._extract_header(CQCXtraQubitHeader)
+                ent_info_hdr = self._extract_header(EntInfoHeader)
+                return currHeader, xtra_qubit_header, ent_info_hdr
+
+    def _extract_header(self, header_class):
+        """
+        Extracts the given header class from the first part of the current buffer.
+        :param header_class: Subclassed from `SimulaQron.cqc.backend.cqcHeader.Header`
+        :return: An instance of the class
+        """
+        if not issubclass(header_class, Header):
+            raise ValueError("header_class {} is not a subclass of Header".format(header_class))
+
+        try:
+            rawHeader = self.buf[:header_class.HDR_LENGTH]
+        except IndexError:
+            raise ValueError("Got a header message of unexpected size")
+        self.buf = self.buf[header_class.HDR_LENGTH: len(self.buf)]
+        header = header_class(rawHeader)
+
+        return header
 
     def print_CQC_msg(self, message):
         """
         Prints messsage returned by the readMessage method of CQCConnection.
         """
         hdr = message[0]
-        notifyHdr = message[1]
+        otherHdr = message[1]
         entInfoHdr = message[2]
 
         if hdr.tp == CQC_TP_HELLO:
             logging.debug("CQC tells App {}: 'HELLO'".format(self.name))
         elif hdr.tp == CQC_TP_EXPIRE:
-            logging.debug("CQC tells App {}: 'Qubit with ID {} has expired'".format(self.name, notifyHdr.qubit_id))
+            logging.debug("CQC tells App {}: 'Qubit with ID {} has expired'".format(self.name, otherHdr.qubit_id))
         elif hdr.tp == CQC_TP_DONE:
             logging.debug("CQC tells App {}: 'Done with command'".format(self.name))
         elif hdr.tp == CQC_TP_RECV:
-            logging.debug("CQC tells App {}: 'Received qubit with ID {}'".format(self.name, notifyHdr.qubit_id))
+            logging.debug("CQC tells App {}: 'Received qubit with ID {}'".format(self.name, otherHdr.qubit_id))
         elif hdr.tp == CQC_TP_EPR_OK:
 
             # Lookup host name
@@ -880,13 +889,13 @@ class CQCConnection:
 
             logging.debug(
                 "CQC tells App {}: 'EPR created with node {}, using qubit with ID {}'".format(
-                    self.name, remote_name, notifyHdr.qubit_id
+                    self.name, remote_name, otherHdr.qubit_id
                 )
             )
         elif hdr.tp == CQC_TP_MEASOUT:
-            logging.debug("CQC tells App {}: 'Measurement outcome is {}'".format(self.name, notifyHdr.outcome))
+            logging.debug("CQC tells App {}: 'Measurement outcome is {}'".format(self.name, otherHdr.outcome))
         elif hdr.tp == CQC_TP_INF_TIME:
-            logging.debug("CQC tells App {}: 'Timestamp is {}'".format(self.name, notifyHdr.datetime))
+            logging.debug("CQC tells App {}: 'Timestamp is {}'".format(self.name, otherHdr.datetime))
 
     def parse_CQC_msg(self, message, q=None, is_factory=False):
         """
@@ -902,7 +911,7 @@ class CQCConnection:
         :return: the result of the message (either a qubit, or a measurement outcome. Otherwise None
         """
         hdr = message[0]
-        notifyHdr = message[1]
+        otherHdr = message[1]
         entInfoHdr = message[2]
 
         if hdr.tp in {CQC_TP_RECV, CQC_TP_NEW_OK, CQC_TP_EPR_OK}:
@@ -911,14 +920,14 @@ class CQCConnection:
                 q = qubit(self, createNew=False)
             if q is None:
                 q = qubit(self, createNew=False)
-            q._qID = notifyHdr.qubit_id
+            q._qID = otherHdr.qubit_id
             q.set_entInfo(entInfoHdr)
             q._set_active(True)
             return q
-        if hdr.tp in {CQC_TP_MEASOUT, CQC_TP_GET_TIME}:
-            return notifyHdr.outcome
+        if hdr.tp == CQC_TP_MEASOUT:
+            return otherHdr.outcome
         if hdr.tp == CQC_TP_INF_TIME:
-            return notifyHdr.datetime
+            return otherHdr.datetime
 
     def check_error(self, hdr):
         """
@@ -1017,8 +1026,8 @@ class CQCConnection:
 
             # Get RECV message
             message = self.readMessage()
-            notifyHdr = message[1]
-            q_id = notifyHdr.qubit_id
+            otherHdr = message[1]
+            q_id = otherHdr.qubit_id
 
             self.print_CQC_msg(message)
 
@@ -1078,9 +1087,9 @@ class CQCConnection:
             )
             # Get RECV message
             message = self.readMessage()
-            notifyHdr = message[1]
+            otherHdr = message[1]
             entInfoHdr = message[2]
-            q_id = notifyHdr.qubit_id
+            q_id = otherHdr.qubit_id
 
             self.print_CQC_msg(message)
 
@@ -1118,9 +1127,9 @@ class CQCConnection:
 
             # Get RECV message
             message = self.readMessage()
-            notifyHdr = message[1]
+            otherHdr = message[1]
             entInfoHdr = message[2]
-            q_id = notifyHdr.qubit_id
+            q_id = otherHdr.qubit_id
 
             self.print_CQC_msg(message)
 
@@ -1472,8 +1481,8 @@ class qubit:
                 # Get qubit id
                 message = self._cqc.readMessage()
                 try:
-                    notifyHdr = message[1]
-                    self._qID = notifyHdr.qubit_id
+                    otherHdr = message[1]
+                    self._qID = otherHdr.qubit_id
                 except AttributeError:
                     raise CQCGeneralError("Didn't receive the qubit id")
                     # Activate qubit
@@ -1849,8 +1858,8 @@ class qubit:
             if not inplace:
                 self._set_active(False)
             try:
-                notifyHdr = message[1]
-                return notifyHdr.outcome
+                otherHdr = message[1]
+                return otherHdr.outcome
             except AttributeError:
                 return None
 
@@ -1910,7 +1919,7 @@ class qubit:
         # Return time-stamp
         message = self._cqc.readMessage()
         try:
-            notifyHdr = message[1]
-            return notifyHdr.datetime
+            otherHdr = message[1]
+            return otherHdr.datetime
         except AttributeError:
             return None
