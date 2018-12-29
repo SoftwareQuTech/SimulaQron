@@ -41,9 +41,9 @@ you use bash (e.g., standard on OSX or the GIT Bash install on Windows 10), othe
 
 where yourPath is the directory containing SimulaQron. You can add this to your ~/.bashrc or ~/.bash_profile file.
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Verifying the installation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Verifying the installation and dependencies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To run SimulaQron you need to following Python packages:
 
@@ -56,6 +56,10 @@ To run SimulaQron you need to following Python packages:
 * networkx
 * projectq
 * bitstring
+
+To install the dependencies, type::
+
+    make python-deps
 
 To verify that that SimulaQron is working on your computer, type::
 
