@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Copyright (c) 2017, Stephanie Wehner and Axel Dahlberg
 # All rights reserved.
@@ -27,24 +28,38 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from simulaqron.virtNode.virtual import backEnd
-from simulaqron.settings import Settings
 import sys
 import os
 import logging
 import signal
+from twisted.internet import reactor
 
-logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=Settings.CONF_LOGGING_LEVEL_BACKEND)
+from simulaqron.virtNode.virtual import backEnd
+from simulaqron.settings import Settings
 
 
-# args.hostName instead of sys.argv[1] ?
-logging.debug("Starting VIRTUAL NODE %s", sys.argv[1])
+def sigterm_handler(_signo, _stack_frame):
+    reactor.stop()
+    sys.exit(0)
 
-# Get path to SimulaQron folder
-path_to_this_folder = os.path.dirname(os.path.abspath(__file__))
-simulaqron_path = os.path.split(path_to_this_folder)[0]
 
-virtualFile = os.path.join(simulaqron_path, "config/virtualNodes.cfg")
-be = backEnd(sys.argv[1].strip(), virtualFile)
+def main(name):
+    signal.signal(signal.SIGTERM, sigterm_handler)
+    signal.signal(signal.SIGINT, sigterm_handler)
 
-node = be.start(maxQubits=Settings.CONF_MAXQUBITS, maxRegisters=Settings.CONF_MAXREGS)
+    # Get path to SimulaQron folder
+    path_to_this_folder = os.path.dirname(os.path.abspath(__file__))
+    simulaqron_path = os.path.split(path_to_this_folder)[0]
+
+    logging.basicConfig(
+        format="%(asctime)s:%(levelname)s:%(message)s",
+        level=Settings.CONF_LOGGING_LEVEL_BACKEND,
+    )
+    logging.debug("Starting VIRTUAL NODE %s", name)
+    virtualFile = os.path.join(simulaqron_path, "config", "virtualNodes.cfg")
+    be = backEnd(name, virtualFile)
+    be.start(maxQubits=Settings.CONF_MAXQUBITS, maxRegisters=Settings.CONF_MAXREGS)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1])
