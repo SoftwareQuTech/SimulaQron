@@ -3,6 +3,7 @@ import logging
 import multiprocessing as mp
 import os
 import time
+import sys
 
 from pathlib import Path
 
@@ -30,21 +31,21 @@ _common_options = [
         type=click.Path(exists=True, file_okay=False, dir_okay=True),
     ),
     click.option(
-        "-nn",
+        "-N",
         "--nrnodes",
         help="Number of nodes to start \n(WARNING: overwites existing config files)",
         type=click.INT,
         default=None,
     ),
     click.option(
-        "-nd",
+        "-n",
         "--nodes",
         help="Comma separated list of nodes to start \n(WARNING: overwites existing config files)",
         type=click.STRING,
         default=None,
     ),
     click.option(
-        "-tp",
+        "-t",
         "--topology",
         help="Topology of network \n(WARNING: overwites existing config files)",
         type=click.STRING,
