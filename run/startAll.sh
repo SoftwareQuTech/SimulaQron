@@ -1,4 +1,4 @@
-!/usr/bin/env sh
+#!/usr/bin/env sh
 ALL_PIDS=$(ps aux | grep python | grep -E "Test|setup|start" | awk {'print $2'})
 if [ "$ALL_PIDS" != "" ]
 then
