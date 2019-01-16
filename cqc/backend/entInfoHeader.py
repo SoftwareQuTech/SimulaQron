@@ -36,8 +36,8 @@ from SimulaQron.cqc.backend.cqcHeader import Header
 
 # Lengths of the headers in bytes
 ENT_INFO_LENGTH = 40  # Length of a entanglement information header
-ENT_INFO_CREATE_KEEP_LENGTH = 28  # Length of a entanglement information header (for create and keep)
-ENT_INFO_MEAS_DIRECT_LENGTH = 24  # Length of a entanglement information header (for measure directly)
+ENT_INFO_CREATE_KEEP_LENGTH = 32  # Length of a entanglement information header (for create and keep)
+ENT_INFO_MEAS_DIRECT_LENGTH = 28  # Length of a entanglement information header (for measure directly)
 
 ENT_INFO_TP_CREATE_KEEP = 1  # Type of message when entanglement is kept
 ENT_INFO_TP_MEAS_DIRECT = 2  # Type of message when entanglement is measured directly (for classical correlations)
@@ -303,7 +303,7 @@ class EntInfoMeasDirectHeader(Header):
         "uint:1=DF, "
         "uint:1=meas_out, "
         "uint:2=basis, "
-        "uint:9=0, "
+        "uint:8=0, "
         "uint:32=ip_A, "
         "uint:32=ip_B, "
         "uint:16=port_A, "
