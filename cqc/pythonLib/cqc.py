@@ -438,11 +438,11 @@ class CQCConnection:
         if name not in self._classicalConn:
             self.openClassicalChannel(name)
         try:
-            to_send = [int(msg)]
-        except TypeError:
-            to_send = msg
+            to_send = bytes([int(msg)])
+        except (TypeError, ValueError):
+            to_send = bytes(msg)
         logging.debug("App {}: Sending classical message {} to {}".format(self.name, to_send, name))
-        self._classicalConn[name].send(bytes(to_send))
+        self._classicalConn[name].send(to_send)
         logging.debug("App {}: Classical message {} to {} sent".format(self.name, to_send, name))
         if close_after:
             self.closeClassicalChannel(name)
