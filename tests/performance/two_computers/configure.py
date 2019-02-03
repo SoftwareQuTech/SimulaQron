@@ -36,20 +36,20 @@ with open(netsim_path + "config/appNodes.cfg", "w") as f:
 with open("run.sh", "w") as f:
     f.write("#!/bin/sh\n\n")
     if client:
-        f.write("python " + netsim_path + "run/startNode.py Alice &\n")
-        f.write("python " + netsim_path + "run/startCQC.py Alice &\n")
-        # f.write("python "+netsim_path+"run/startNode.py Bob &\n")
-        # f.write("python "+netsim_path+"run/startCQC.py Bob &\n")
+        f.write("python3 " + netsim_path + "run/startNode.py Alice &\n")
+        f.write("python3 " + netsim_path + "run/startCQC.py Alice &\n")
+        # f.write("python3 "+netsim_path+"run/startNode.py Bob &\n")
+        # f.write("python3 "+netsim_path+"run/startCQC.py Bob &\n")
 
         f.write("\nsleep 10s\n\n")
 
-        # f.write("python server.py {} {} {}&\n".format(min_tel,max_tel,number))
+        # f.write("python3 server.py {} {} {}&\n".format(min_tel,max_tel,number))
 
-        f.write("python client.py {} {} {}\n".format(min_tel, max_tel, number))
+        f.write("python3 client.py {} {} {}\n".format(min_tel, max_tel, number))
     else:
-        f.write("python " + netsim_path + "run/startNode.py Bob\n")
-        f.write("python " + netsim_path + "run/startCQC.py Bob\n")
+        f.write("python3 " + netsim_path + "run/startNode.py Bob\n")
+        f.write("python3 " + netsim_path + "run/startCQC.py Bob\n")
 
         f.write("\nsleep 10s\n\n")
 
-        f.write("python server.py {} {} {}\n".format(min_tel, max_tel, number))
+        f.write("python3 server.py {} {} {}\n".format(min_tel, max_tel, number))

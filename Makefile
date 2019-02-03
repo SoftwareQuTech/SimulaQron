@@ -1,5 +1,5 @@
-PYTHON        = python
-PIP           = pip
+PYTHON        = python3
+PIP           = pip3
 RUN_TESTS     = tests/runTests.sh
 CQC_DIR		  = cqc
 EXAMPLES_DIR  = examples
@@ -20,7 +20,7 @@ lint:
 	@${PYTHON} -m flake8 ${CQC_DIR} ${EXAMPLES_DIR} ${GENERAL_DIR} ${LOCAL_DIR} ${RUN_DIR} ${TESTS_DIR} ${TOOLBOX_DIR} ${VIRTNODE_DIR}
 
 python-deps:
-	@cat requirements.txt | xargs -n 1 -L 1 $(PIP) install
+	@cat requirements.txt | xargs -n 1 -L 1 $(PIP) install --user
 
 tests:
 	@sh $(RUN_TESTS) --quick --projectq
@@ -50,6 +50,6 @@ tests_allBackends: tests_qutip tests_projectq tests_stabilizer
 
 full_tests_allBackends: full_tests_qutip full_tests_projectq full_tests_stabilizer
 
-verify: clean lint python-deps tests
+verify: clean python-deps lint tests
 
 .PHONY: clean format lint python-deps tests full_tests verify

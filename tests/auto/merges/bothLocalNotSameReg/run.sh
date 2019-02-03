@@ -1,6 +1,6 @@
 #/bin/sh
 
-python aliceTest.py
+python3 aliceTest.py
 
 
 

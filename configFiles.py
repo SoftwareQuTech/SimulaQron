@@ -30,12 +30,12 @@
 # INFO:
 # This file can be used to configure the nodes used in the simulation of SimulaQron.
 # To setup a network with the nodes Alice, Bob and Charlie, simply type:
-# 	'python configFiles.py --nodes "Alice Bob Charlie"'
+# 	'python3 configFiles.py --nodes "Alice Bob Charlie"'
 # If you simply want a network with 10 nodes you can type:
-# 'python configFiles.py --nrnodes 10
+# 'python3 configFiles.py --nrnodes 10
 # Node names will then be 'Node0' until 'Node9'.
 # If you want a specific topology you can also add:
-# 'python configFiles.py --nrnodes 10 --topology "ring".
+# 'python3 configFiles.py --nrnodes 10 --topology "ring".
 # This will make changes to the files 'config/{virtual,cqc,app}Nodes.cfg' and 'config/topology.json'.
 # Port numbers will start at 8801 and depend on the number of nodes used.
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 
-python charlieTest.py &
-python aliceTest.py
+python3 charlieTest.py &
+python3 aliceTest.py
 
 
 
