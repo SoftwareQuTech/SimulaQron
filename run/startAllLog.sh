@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-ALL_PIDS=$(ps aux | grep python | grep -E "Test|setup|start" | awk {'print $2'})
+ALL_PIDS=$(ps aux | grep python3 | grep -E "Test|setup|start" | awk {'print $2'})
 if [ "$ALL_PIDS" != "" ]
 then
         kill -9 $ALL_PIDS
@@ -15,9 +15,9 @@ then
         while IFS='' read -r name; do
             names="$names $name"
         done < "$NETSIM/config/Nodes.cfg"
-        python "$NETSIM/run/log/startCQCLog.py" $names &
+        python3 "$NETSIM/run/log/startCQCLog.py" $names &
     else
-        python "$NETSIM/configFiles.py" --nd "Alice Bob Charlie David Eve"
+        python3 "$NETSIM/configFiles.py" --nd "Alice Bob Charlie David Eve"
 
         # We call this script again, without arguments, to use the newly created config-files
         sh "$NETSIM/run/startAllLog.sh"
@@ -47,7 +47,7 @@ else  # if arguments were given, create the new nodes and start them
         esac
     done
 
-    python "$NETSIM/configFiles.py" --nrnodes "${NRNODES}" --topology "${TOPOLOGY}" --nodes "${NODES}"
+    python3 "$NETSIM/configFiles.py" --nrnodes "${NRNODES}" --topology "${TOPOLOGY}" --nodes "${NODES}"
 
     # We call this script again, without arguments, to use the newly created config-files
     sh "$NETSIM/run/startAllLog.sh"

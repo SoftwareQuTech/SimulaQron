@@ -35,10 +35,10 @@ echo "Starting SimulaQron server (restricted topology and using $BACKEND as back
 sh "${NETSIM}/run/startAll.sh" -nd "Alice Bob Charlie" -tp "path" --backend "$BACKEND" &
 sleep 1s
 echo "Started SimulaQron server (restricted topology)"
-python "${NETSIM}/tests/auto/network_topology/test_restricted_topology.py"
+python3 "${NETSIM}/tests/auto/network_topology/test_restricted_topology.py"
 
 echo "Starting SimulaQron server (default settings and using $BACKEND as backend))"
 sh "${NETSIM}/run/startAll.sh" -nd "Alice Bob Charlie David Eve" --backend "$BACKEND" &
 sleep 1s
 echo "Started SimulaQron server (default settings)"
-python "${NETSIM}/tests/auto/network_topology/test_default_topology.py"
+python3 "${NETSIM}/tests/auto/network_topology/test_default_topology.py"

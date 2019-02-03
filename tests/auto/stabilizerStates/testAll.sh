@@ -1,5 +1,5 @@
 #!/bin/bash
 
 echo "Testing stabilizer toolbox"
-python "$NETSIM"/tests/auto/stabilizerStates/test_stabilizerStates.py
+python3 "$NETSIM"/tests/auto/stabilizerStates/test_stabilizerStates.py
 

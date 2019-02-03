@@ -23,18 +23,18 @@ if [ "$QUICK" = y ]; then
         exit 1
     else
         echo "Since --quick is specified we skip tests doing tomography (tests of gates)."
-        python test_context.py
-        python test_other.py
-        python test_sequence.py
-        python test_maxQubits.py
+        python3 test_context.py
+        python3 test_other.py
+        python3 test_sequence.py
+        python3 test_maxQubits.py
     fi
 else
-    python test_context.py
-    python test_single_qubit.py
-    python test_two_qubit.py
-    python test_other.py
-    python test_factory_gates.py
-    python test_factory_other.py
-    python test_sequence.py
-    python test_maxQubits.py
+    python3 test_context.py
+    python3 test_single_qubit.py
+    python3 test_two_qubit.py
+    python3 test_other.py
+    python3 test_factory_gates.py
+    python3 test_factory_other.py
+    python3 test_sequence.py
+    python3 test_maxQubits.py
 fi

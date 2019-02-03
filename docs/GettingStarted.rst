@@ -7,23 +7,6 @@ Setup
 
 SimulaQron requires `Python 3 <https://python.org/>`_  and `Twisted <http://twistedmatrix.com/trac/>`_  along with the packages *scipy*, *Cython*, *service_identity*, *qutip*, *matplotlib*, *networkx*, *projectq* and *bitstring*.
 
-.. note:: It is assumed that if you type :code:`python` in a terminal Python 3.x starts. If typing :code:`python` starts Python 2.x for you and you do not know how to fix this, see below:
-
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Setting up a virtual environment
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-A virtual environment can be setup using `virtualenv <https://virtualenv.pypa.io/en/stable/>`_ or `conda <https://conda.io/docs/>`_. For someone new to Python, using conda is the easy option and we give a brief description here. Further details can be found at `<https://conda.io/docs/user-guide/getting-started.html#managing-environments>`_.
-
-To install conda, follow the link below that corresponds to your operating system:
-
-* `Linux <https://conda.io/docs/user-guide/install/linux.html>`_
-* `OSX <https://conda.io/docs/user-guide/install/macos.html>`_
-* `Windows <https://conda.io/docs/user-guide/install/windows.html>`_
-
-and go through the instructions to install conda. When you download the installer, make sure to choose the 3.x version.
-Alternatively you can use the dockerfile in the root of the repository.
-
 ^^^^^^^^^^^^
 Installation
 ^^^^^^^^^^^^

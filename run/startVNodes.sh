@@ -6,5 +6,5 @@ cd "$NETSIM"/run
 
 for name in "$@"
 do
-    python startNode.py "$name" &
+    python3 startNode.py "$name" &
 done

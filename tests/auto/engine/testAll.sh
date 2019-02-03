@@ -37,9 +37,9 @@ sleep 1s
 echo "Started SimulaQron server"
 
 if [ "$BACKEND" = "projectq" ]; then
-    python test_projectQEngine.py
+    python3 test_projectQEngine.py
 elif [ "$BACKEND" = "qutip" ]; then
-    python test_qutipEngine.py
+    python3 test_qutipEngine.py
 elif [ "$BACKEND" = "stabilizer" ]; then
-    python test_stabilizerEngine.py
+    python3 test_stabilizerEngine.py
 fi

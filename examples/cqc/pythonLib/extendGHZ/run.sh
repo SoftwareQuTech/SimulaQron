@@ -1,5 +1,5 @@
 #!/bin/sh
 
-python aliceTest.py &
-python bobTest.py &
-python charlieTest.py &
+python3 aliceTest.py &
+python3 bobTest.py &
+python3 charlieTest.py &

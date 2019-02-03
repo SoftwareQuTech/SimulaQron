@@ -45,4 +45,4 @@ echo "Starting SimulaQron server (noisy setting and using $BACKEND as backend))"
 sh "${NETSIM}/run/startAll.sh" -nd "Alice" --noisy_qubits "True" --t1 "0.0001" --backend "$BACKEND"
 sleep 1s
 echo "Started SimulaQron server (noise setting)"
-python "${NETSIM}/tests/auto/optional_noise/test_optional_noise.py"
+python3 "${NETSIM}/tests/auto/optional_noise/test_optional_noise.py"
