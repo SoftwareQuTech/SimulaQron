@@ -27,7 +27,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import projectq as pQ
+try:
+    import projectq as pQ
+except ModuleNotFoundError:
+    raise RuntimeError("If you want to use the projectq backend you need to install the python package 'projectq'")
 import numpy as np
 
 from SimulaQron.virtNode.basics import quantumError, noQubitError

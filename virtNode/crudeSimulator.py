@@ -27,7 +27,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import qutip as qp
+try:
+    import qutip as qp
+except ModuleNotFoundError:
+    raise RuntimeError("If you want to use the qutip backend you need to install the python package 'qutip'")
 import math
 import cmath
 

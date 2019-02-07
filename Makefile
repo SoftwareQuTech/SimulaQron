@@ -20,10 +20,10 @@ lint:
 	@${PYTHON} -m flake8 ${CQC_DIR} ${EXAMPLES_DIR} ${GENERAL_DIR} ${LOCAL_DIR} ${RUN_DIR} ${TESTS_DIR} ${TOOLBOX_DIR} ${VIRTNODE_DIR}
 
 python-deps:
-	@cat requirements.txt | xargs -n 1 -L 1 $(PIP) install --user
+	@cat requirements.txt | xargs -n 1 -L 1 $(PIP) install
 
 tests:
-	@sh $(RUN_TESTS) --quick --projectq
+	@sh $(RUN_TESTS) --quick --stabilizer
 
 tests_qutip:
 	@sh $(RUN_TESTS) --quick --qutip
@@ -35,7 +35,7 @@ tests_stabilizer:
 	@sh $(RUN_TESTS) --quick --stabilizer
 
 full_tests:
-	@sh $(RUN_TESTS) --full --projectq
+	@sh $(RUN_TESTS) --full --stabilizer
 
 full_tests_qutip:
 	@sh $(RUN_TESTS) --full --qutip

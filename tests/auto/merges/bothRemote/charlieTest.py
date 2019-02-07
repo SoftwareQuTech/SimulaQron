@@ -30,7 +30,6 @@
 import os
 import logging
 
-import qutip as qp
 import numpy as np
 
 from twisted.spread import pb
@@ -41,6 +40,12 @@ from SimulaQron.general.hostConfig import networkConfig
 from SimulaQron.local.setup import setup_local, assemble_qubit
 from SimulaQron.settings import Settings
 from SimulaQron.toolbox.stabilizerStates import StabilizerState
+
+if Settings.CONF_BACKEND == "qutip":
+    try:
+        import qutip as qp
+    except ModuleNotFoundError:
+        raise RuntimeError("If you want to use the qutip backend you need to install the python package 'qutip'")
 
 
 #####################################################################################################

@@ -27,6 +27,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import logging
+import random
+
 from collections import deque
 
 from twisted.spread import pb
@@ -39,11 +42,16 @@ from twisted.spread.pb import RemoteError
 from SimulaQron.virtNode.basics import quantumError, noQubitError, virtNetError
 from SimulaQron.virtNode.quantum import simulatedQubit
 from SimulaQron.general.hostConfig import networkConfig
-from SimulaQron.virtNode import crudeSimulator, projectQSimulator, stabilizerSimulator
 from SimulaQron.settings import Settings
 
-import logging
-import random
+if Settings.CONF_BACKEND == "qutip":
+    from SimulaQron.virtNode import crudeSimulator
+elif Settings.CONF_BACKEND == "projectq":
+    from SimulaQron.virtNode import projectQSimulator
+elif Settings.CONF_BACKEND == "stabilizer":
+    from SimulaQron.virtNode import stabilizerSimulator
+else:
+    raise quantumError("Unknown backend {}".format(Settings.CONF_BACKEND))
 
 
 ######
