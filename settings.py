@@ -40,7 +40,10 @@ from SimulaQron.cqc.backend.cqcMessageHandler import SimulaqronCQCHandler
 
 
 class Settings:
-    _settings_file = os.environ["NETSIM"] + "/config/settings.ini"
+    # Get path to SimulaQron folder
+    simulaqron_path = os.path.dirname(os.path.abspath(__file__))
+
+    _settings_file = os.path.join(simulaqron_path, "config/settings.ini")
     _config = ConfigParser()
 
     # default settings for if file is not ready yet

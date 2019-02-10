@@ -5,6 +5,11 @@ then
         kill -9 $ALL_PIDS
 fi
 
+# Get the path to the SimulaQron folder
+this_file_path=$(realpath "$0")
+this_folder_path=$(dirname "${this_file_path}")
+simulaqron_path=${this_folder_path%/tests}
+
 while [ "$#" -gt 0 ]; do
     key="$1"
     case $key in
@@ -37,7 +42,7 @@ done
 BACKEND=${BACKEND:-"projectq"} #If not set, use projectq backend
 
 echo "Starting tests (using $BACKEND as backend)"
-cd "$NETSIM"/tests/auto
+cd "$simulaqron_path"/tests/auto
 
 if [ "$FULL" = "y" ]; then
     if [ "$BACKEND" = "qutip" ]; then
@@ -69,5 +74,5 @@ then
 fi
 
 # Reset to default settins
-rm "${NETSIM}/config/settings.ini"
-python3 "${NETSIM}/settings.py"
+rm "${simulaqron_path}/config/settings.ini"
+python3 "${simulaqron_path}/settings.py"

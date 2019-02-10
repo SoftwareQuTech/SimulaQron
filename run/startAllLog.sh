@@ -5,22 +5,27 @@ then
         kill -9 $ALL_PIDS
 fi
 
+# Get the path to the SimulaQron folder
+this_file_path=$(realpath "$0")
+this_folder_path=$(dirname "${this_file_path}")
+simulaqron_path=${this_folder_path%/run}
+
 # if no arguments were given we take the list of current Nodes
 if [ "$#" -eq 0 ] ;
 then
     # check if the file with current nodes exist. Otherwise use Alice - Eve
-    if [ -f "$NETSIM/config/Nodes.cfg" ]
+    if [ -f "$simulaqron_path/config/Nodes.cfg" ]
     then
         names=""
         while IFS='' read -r name; do
             names="$names $name"
-        done < "$NETSIM/config/Nodes.cfg"
-        python3 "$NETSIM/run/log/startCQCLog.py" $names &
+        done < "$simulaqron_path/config/Nodes.cfg"
+        python3 "$simulaqron_path/run/log/startCQCLog.py" $names &
     else
-        python3 "$NETSIM/configFiles.py" --nd "Alice Bob Charlie David Eve"
+        python3 "$simulaqron_path/configFiles.py" --nd "Alice Bob Charlie David Eve"
 
         # We call this script again, without arguments, to use the newly created config-files
-        sh "$NETSIM/run/startAllLog.sh"
+        sh "$simulaqron_path/run/startAllLog.sh"
     fi
 else  # if arguments were given, create the new nodes and start them
     while [ "$#" -gt 0 ]; do
@@ -47,8 +52,8 @@ else  # if arguments were given, create the new nodes and start them
         esac
     done
 
-    python3 "$NETSIM/configFiles.py" --nrnodes "${NRNODES}" --topology "${TOPOLOGY}" --nodes "${NODES}"
+    python3 "$simulaqron_path/configFiles.py" --nrnodes "${NRNODES}" --topology "${TOPOLOGY}" --nodes "${NODES}"
 
     # We call this script again, without arguments, to use the newly created config-files
-    sh "$NETSIM/run/startAllLog.sh"
+    sh "$simulaqron_path/run/startAllLog.sh"
 fi
