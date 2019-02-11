@@ -1,7 +1,7 @@
 import sys
 import os
 
-from SimulaQron.toolbox import get_simulaqron_path
+from simulaqron.toolbox import get_simulaqron_path
 
 # Get path to SimulaQron folder
 simulaqron_path = get_simulaqron_path.main()

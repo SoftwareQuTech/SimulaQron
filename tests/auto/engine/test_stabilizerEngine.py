@@ -1,9 +1,9 @@
 import unittest
 import numpy as np
 
-from SimulaQron.virtNode.stabilizerSimulator import stabilizerEngine
-from SimulaQron.virtNode.basics import noQubitError, quantumError
-from SimulaQron.toolbox.stabilizerStates import StabilizerState
+from simulaqron.virtNode.stabilizerSimulator import stabilizerEngine
+from simulaqron.virtNode.basics import noQubitError, quantumError
+from simulaqron.toolbox.stabilizerStates import StabilizerState
 
 
 class TestStabilizerEngine_init(unittest.TestCase):

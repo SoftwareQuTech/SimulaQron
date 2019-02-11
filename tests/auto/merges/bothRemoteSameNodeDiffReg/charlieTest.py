@@ -36,10 +36,10 @@ from twisted.spread import pb
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
 
-from SimulaQron.general.hostConfig import networkConfig
-from SimulaQron.local.setup import setup_local, assemble_qubit
-from SimulaQron.settings import Settings
-from SimulaQron.toolbox.stabilizerStates import StabilizerState
+from simulaqron.general.hostConfig import networkConfig
+from simulaqron.local.setup import setup_local, assemble_qubit
+from simulaqron.settings import Settings
+from simulaqron.toolbox.stabilizerStates import StabilizerState
 
 
 #####################################################################################################

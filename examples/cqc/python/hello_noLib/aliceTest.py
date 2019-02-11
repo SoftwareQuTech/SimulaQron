@@ -31,9 +31,9 @@ import logging
 import os
 import socket
 
-from SimulaQron.general.hostConfig import networkConfig
-from SimulaQron.cqc.backend.cqcHeader import CQCHeader, CQC_TP_HELLO, CQC_VERSION
-from SimulaQron.toolbox import get_simulaqron_path
+from simulaqron.general.hostConfig import networkConfig
+from cqc.backend.cqcHeader import CQCHeader, CQC_TP_HELLO, CQC_VERSION
+from simulaqron.toolbox import get_simulaqron_path
 
 
 #####################################################################################################

@@ -32,11 +32,11 @@ import logging
 import os
 import numpy as np
 
-from SimulaQron.local.setup import setup_local, assemble_qubit
-from SimulaQron.general.hostConfig import networkConfig
-from SimulaQron.toolbox import get_simulaqron_path
-from SimulaQron.settings import Settings
-from SimulaQron.toolbox.stabilizerStates import StabilizerState
+from simulaqron.local.setup import setup_local, assemble_qubit
+from simulaqron.general.hostConfig import networkConfig
+from simulaqron.toolbox import get_simulaqron_path
+from simulaqron.settings import Settings
+from simulaqron.toolbox.stabilizerStates import StabilizerState
 from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
 

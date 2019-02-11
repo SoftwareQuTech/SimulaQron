@@ -29,8 +29,8 @@
 
 import sys
 
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection
-from SimulaQron.cqc.pythonLib.protocols.wstate import create_Nqubit_Wstate
+from cqc.pythonLib import CQCConnection
+from cqc.pythonLib_protocols.wstate import create_Nqubit_Wstate
 from additional_functions import string_to_int, broadcastClassical, int_to_string
 
 #####################################################################################################

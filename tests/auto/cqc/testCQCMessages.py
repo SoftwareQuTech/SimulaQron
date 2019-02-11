@@ -31,9 +31,9 @@ import json
 import unittest
 import os
 
-from SimulaQron.cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit, CQCUnsuppError, QubitNotActiveError
-from SimulaQron.cqc.backend.cqcHeader import (
+from cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
+from cqc.pythonLib import CQCConnection, qubit, CQCUnsuppError, QubitNotActiveError
+from cqc.backend.cqcHeader import (
     CQCCmdHeader,
     CQC_CMD_SEND,
     CQC_CMD_EPR,

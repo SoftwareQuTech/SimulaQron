@@ -27,8 +27,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from SimulaQron.virtNode.virtual import backEnd
-from SimulaQron.settings import Settings
+from simulaqron.virtNode.virtual import backEnd
+from simulaqron.settings import Settings
 import sys
 import os
 import logging

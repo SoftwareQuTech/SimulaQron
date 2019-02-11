@@ -35,8 +35,8 @@ import logging
 import socket
 import warnings
 
-from SimulaQron.cqc.backend.cqcConfig import CQC_CONF_LINK_WAIT_TIME, CQC_CONF_COM_WAIT_TIME
-from SimulaQron.cqc.backend.cqcHeader import (
+from cqc.backend.cqcConfig import CQC_CONF_LINK_WAIT_TIME, CQC_CONF_COM_WAIT_TIME
+from cqc.backend.cqcHeader import (
     Header,
     CQCCmdHeader,
     CQC_CMD_SEND,
@@ -89,10 +89,10 @@ from SimulaQron.cqc.backend.cqcHeader import (
     CQC_TP_NEW_OK,
     CQC_TP_EXPIRE,
 )
-from SimulaQron.cqc.backend.entInfoHeader import EntInfoHeader
-from SimulaQron.general.hostConfig import cqc_node_id_from_addrinfo, networkConfig
-from SimulaQron.settings import Settings
-from SimulaQron.toolbox import get_simulaqron_path
+from cqc.backend.entInfoHeader import EntInfoHeader
+from simulaqron.general.hostConfig import cqc_node_id_from_addrinfo, networkConfig
+from simulaqron.settings import Settings
+from simulaqron.toolbox import get_simulaqron_path
 
 logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=Settings.CONF_LOGGING_LEVEL_FRONTEND)
 

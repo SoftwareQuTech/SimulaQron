@@ -30,9 +30,9 @@
 import logging
 import os
 
-from SimulaQron.local.setup import setup_local
-from SimulaQron.general.hostConfig import networkConfig
-from SimulaQron.toolbox import get_simulaqron_path
+from simulaqron.local.setup import setup_local
+from simulaqron.general.hostConfig import networkConfig
+from simulaqron.toolbox import get_simulaqron_path
 from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
 

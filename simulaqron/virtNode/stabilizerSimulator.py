@@ -27,8 +27,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from SimulaQron.virtNode.basics import quantumEngine, quantumError, noQubitError
-from SimulaQron.toolbox.stabilizerStates import StabilizerState
+from simulaqron.virtNode.basics import quantumEngine, quantumError, noQubitError
+from simulaqron.toolbox.stabilizerStates import StabilizerState
 
 
 class stabilizerEngine(quantumEngine):

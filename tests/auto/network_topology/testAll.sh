@@ -3,7 +3,7 @@
 # Get the path to the SimulaQron folder
 this_file_path=$0
 this_folder_path=$(dirname "${this_file_path}")
-simulaqron_path=$(${this_folder_path}/../../../toolbox/get_simulaqron_path.py)
+simulaqron_path=$(${this_folder_path}/../../../simulaqron/toolbox/get_simulaqron_path.py)
 
 while [ "$#" -gt 0 ]; do
     key="$1"

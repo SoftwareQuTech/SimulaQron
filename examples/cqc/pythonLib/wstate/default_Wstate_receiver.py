@@ -29,7 +29,7 @@
 
 import sys
 
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection
+from cqc.pythonLib import CQCConnection
 from additional_functions import string_to_int, int_to_string, broadcastClassical
 
 

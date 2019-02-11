@@ -30,7 +30,7 @@ import random
 import time
 
 import numpy as np
-from SimulaQron import settings
+from simulaqron import settings
 from twisted.spread import pb
 from twisted.internet.defer import DeferredLock
 

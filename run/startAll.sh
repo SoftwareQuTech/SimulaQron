@@ -8,7 +8,7 @@ fi
 # Get the path to the SimulaQron folder
 this_file_path=$0
 this_folder_path=$(dirname "${this_file_path}")
-simulaqron_path=$(${this_folder_path}/../toolbox/get_simulaqron_path.py)
+simulaqron_path=$(${this_folder_path}/../simulaqron/toolbox/get_simulaqron_path.py)
 
 # if no arguments were given we take the list of current Nodes
 if [ "$#" -eq 0 ] ;
@@ -21,7 +21,7 @@ then
             python3 "$simulaqron_path/run/startCQC.py" "$name" &
         done < "$simulaqron_path/config/Nodes.cfg"
     else
-        python3 "$simulaqron_path/configFiles.py" --nd "Alice Bob Charlie David Eve"
+        python3 "$simulaqron_path/simulaqron/configFiles.py" --nd "Alice Bob Charlie David Eve"
 
         # We call this script again, without arguments, to use the newly created config-files
         sh "$simulaqron_path/run/startAll.sh"
@@ -101,7 +101,7 @@ else  # if arguments were given, create the new nodes and start them
         esac
     done
 
-    python3 "$simulaqron_path/configFiles.py" --nrnodes "${NRNODES}" --topology "${TOPOLOGY}" --nodes "${NODES}" \
+    python3 "$simulaqron_path/simulaqron/configFiles.py" --nrnodes "${NRNODES}" --topology "${TOPOLOGY}" --nodes "${NODES}" \
                                     --maxqubits_per_node "${MAXQUBITSPERNODE}" --maxregisters_per_node "${MAXREGISTERSPERNODE}" \
                                     --waittime "${WAITTIME}" --backend_loglevel "${BACKENDLOGLEVEL}" \
                                     --backendhandler "${BACKENDHANDLER}" --backend "${BACKEND}" \

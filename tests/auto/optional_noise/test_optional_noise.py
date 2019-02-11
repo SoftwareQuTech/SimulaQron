@@ -9,7 +9,7 @@
 import unittest
 import sys
 
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
+from cqc.pythonLib import CQCConnection, qubit
 
 
 def prep_z0(cqc):

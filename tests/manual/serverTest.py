@@ -32,7 +32,7 @@ from twisted.internet import reactor
 from twisted.spread import pb
 from twisted.internet.defer import inlineCallbacks
 
-from SimulaQron.general.hostConfig import networkConfig
+from simulaqron.general.hostConfig import networkConfig
 
 from qutip import Qobj
 

@@ -35,8 +35,8 @@ from twisted.spread import pb
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
 
-from SimulaQron.general.hostConfig import networkConfig
-from SimulaQron.local.setup import setup_local
+from simulaqron.general.hostConfig import networkConfig
+from simulaqron.local.setup import setup_local
 
 
 #####################################################################################################

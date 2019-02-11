@@ -39,17 +39,17 @@ from twisted.internet.task import deferLater
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
 from twisted.spread.pb import RemoteError
 
-from SimulaQron.virtNode.basics import quantumError, noQubitError, virtNetError
-from SimulaQron.virtNode.quantum import simulatedQubit
-from SimulaQron.general.hostConfig import networkConfig
-from SimulaQron.settings import Settings
+from simulaqron.virtNode.basics import quantumError, noQubitError, virtNetError
+from simulaqron.virtNode.quantum import simulatedQubit
+from simulaqron.general.hostConfig import networkConfig
+from simulaqron.settings import Settings
 
 if Settings.CONF_BACKEND == "qutip":
-    from SimulaQron.virtNode.qutipSimulator import qutipEngine
+    from simulaqron.virtNode.qutipSimulator import qutipEngine
 elif Settings.CONF_BACKEND == "projectq":
-    from SimulaQron.virtNode.projectQSimulator import projectQEngine
+    from simulaqron.virtNode.projectQSimulator import projectQEngine
 elif Settings.CONF_BACKEND == "stabilizer":
-    from SimulaQron.virtNode.stabilizerSimulator import stabilizerEngine
+    from simulaqron.virtNode.stabilizerSimulator import stabilizerEngine
 else:
     raise quantumError("Unknown backend {}".format(Settings.CONF_BACKEND))
 

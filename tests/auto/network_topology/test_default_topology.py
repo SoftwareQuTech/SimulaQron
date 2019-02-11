@@ -1,5 +1,5 @@
 import unittest
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit, CQCUnsuppError
+from cqc.pythonLib import CQCConnection, qubit, CQCUnsuppError
 
 
 class TestDefaultTopology(unittest.TestCase):

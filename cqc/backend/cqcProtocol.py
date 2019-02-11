@@ -33,9 +33,9 @@ import os
 from twisted.internet.defer import DeferredLock, inlineCallbacks
 from twisted.internet.protocol import Factory, Protocol, connectionDone
 
-from SimulaQron.cqc.backend.cqcHeader import CQC_HDR_LENGTH, CQC_VERSION, CQCHeader
-from SimulaQron.settings import Settings
-from SimulaQron.toolbox import get_simulaqron_path
+from cqc.backend.cqcHeader import CQC_HDR_LENGTH, CQC_VERSION, CQCHeader
+from simulaqron.settings import Settings
+from simulaqron.toolbox import get_simulaqron_path
 
 
 ###############################################################################

@@ -33,7 +33,7 @@ except ModuleNotFoundError:
     raise RuntimeError("If you want to use the projectq backend you need to install the python package 'projectq'")
 import numpy as np
 
-from SimulaQron.virtNode.basics import quantumEngine, quantumError, noQubitError
+from simulaqron.virtNode.basics import quantumEngine, quantumError, noQubitError
 
 
 class projectQEngine(quantumEngine):

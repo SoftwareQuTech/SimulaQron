@@ -8,7 +8,7 @@ fi
 # Get the path to the SimulaQron folder
 this_file_path=$0
 this_folder_path=$(dirname "${this_file_path}")
-simulaqron_path=$(${this_folder_path}/../toolbox/get_simulaqron_path.py)
+simulaqron_path=$(${this_folder_path}/../simulaqron/toolbox/get_simulaqron_path.py)
 
  while [ "$#" -gt 0 ]; do
      key="$1"
@@ -46,14 +46,14 @@ simulaqron_path=$(${this_folder_path}/../toolbox/get_simulaqron_path.py)
 
  if [ "$FULL" = "y" ]; then
      if [ "$BACKEND" = "qutip" ]; then
-         has_qutip=$(${simulaqron_path}/toolbox/has_module.py qutip)
+         has_qutip=$(${simulaqron_path}/simulqron/toolbox/has_module.py qutip)
          if [ "$has_qutip" = "Y" ]; then
              sh testAll.sh --full --qutip
          else
              echo "Cannot run tests for qutip backend if qutip is not installed as a module"
          fi
      elif [ "$BACKEND" = "projectq" ]; then
-         has_projectq=$(${simulaqron_path}/toolbox/has_module.py projectq)
+         has_projectq=$(${simulaqron_path}/simulqron/toolbox/has_module.py projectq)
          if [ "$has_projectq" = "Y" ]; then
              sh testAll.sh --full --projectq
          else
@@ -66,14 +66,14 @@ simulaqron_path=$(${this_folder_path}/../toolbox/get_simulaqron_path.py)
      fi
  else
      if [ "$BACKEND" = "qutip" ]; then
-         has_qutip=$(${simulaqron_path}/toolbox/has_module.py qutip)
+         has_qutip=$(${simulaqron_path}/simulaqron/toolbox/has_module.py qutip)
          if [ "$has_qutip" = "Y" ]; then
              sh testAll.sh --quick --qutip
          else
              echo "Cannot run tests for qutip backend if qutip is not installed as a module"
          fi
      elif [ "$BACKEND" = "projectq" ]; then
-         has_projectq=$(${simulaqron_path}/toolbox/has_module.py projectq)
+         has_projectq=$(${simulaqron_path}/simulaqron/toolbox/has_module.py projectq)
          if [ "$has_projectq" = "Y" ]; then
              sh testAll.sh --quick --projectq
          else
@@ -95,4 +95,4 @@ simulaqron_path=$(${this_folder_path}/../toolbox/get_simulaqron_path.py)
 
 # Reset to default settins
 rm "${simulaqron_path}/config/settings.ini"
-python3 "${simulaqron_path}/settings.py"
+python3 "${simulaqron_path}/simulaqron/settings.py"

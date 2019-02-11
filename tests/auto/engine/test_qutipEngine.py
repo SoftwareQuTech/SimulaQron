@@ -29,7 +29,7 @@
 
 import unittest
 
-from SimulaQron.virtNode.qutipSimulator import qutipEngine
+from simulaqron.virtNode.qutipSimulator import qutipEngine
 
 
 class TestQutipEngine(unittest.TestCase):
