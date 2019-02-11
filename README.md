@@ -10,5 +10,7 @@ Importantly, SimulaQron is an application level simulator, with the sole purpose
 Documentation and examples are explained in the html documentation 
 https://softwarequtech.github.io/SimulaQron/html/index.html
 
+For upcoming and previous changes see the file [CHANGELOG.md]()
+
 More info including a competition at
 http://www.simulaqron.org
