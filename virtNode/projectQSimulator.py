@@ -33,11 +33,10 @@ except ModuleNotFoundError:
     raise RuntimeError("If you want to use the projectq backend you need to install the python package 'projectq'")
 import numpy as np
 
-from SimulaQron.virtNode.basics import quantumError, noQubitError
-from SimulaQron.virtNode.crudeSimulator import Engine
+from SimulaQron.virtNode.basics import quantumEngine, quantumError, noQubitError
 
 
-class projectQEngine(Engine):
+class projectQEngine(quantumEngine):
     """
     Basic quantum engine which uses ProjectQ.
 
@@ -45,12 +44,12 @@ class projectQEngine(Engine):
         maxQubits:	maximum number of qubits this engine will support.
     """
 
-    def __init__(self, maxQubits=10):
+    def __init__(self, node, num, maxQubits=10):
         """
         Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.
         """
 
-        super().__init__(maxQubits=maxQubits)
+        super().__init__(node=node, num=num, maxQubits=maxQubits)
 
         # We start with no active qubits
         self.activeQubits = 0
@@ -338,27 +337,3 @@ class projectQEngine(Engine):
 
             self.activeQubits = newNum
 
-
-class quantumRegister(projectQEngine):
-    """
-    A simulated quantum register. The qubits who are simulated in this register may be distributed over
-    different quantum nodes.
-    """
-
-    def __init__(self, node, num, maxQubits=10):
-        """
-        Initialize the quantum register at the given node.
-
-        Arguments
-        node		node this register is started from
-        num		number of this register
-        maxQubits	maximum number of qubits this register supports
-        """
-        super().__init__(maxQubits=maxQubits)
-
-        # Each register has a number, this may be used be the ``outside`` application
-        # using this simulator
-        self.num = num
-
-        # Node that actually simulates this register
-        self.simNode = node

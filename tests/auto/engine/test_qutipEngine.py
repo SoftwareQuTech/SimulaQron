@@ -27,81 +27,58 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import unittest
 
-from SimulaQron.virtNode.crudeSimulator import simpleEngine
-
-
-def testSimpleEngine():
-    print("RUNNING TESTS: Simple Engine\n")
-    tracingTest()
-    gateTest()
-    measureTest()
+from SimulaQron.virtNode.qutipSimulator import qutipEngine
 
 
-def tracingTest():
-    print("Testing the partial trace...")
-    se = simpleEngine(10)
-    se2 = simpleEngine(10)
+class TestQutipEngine(unittest.TestCase):
+    def test_tracing(self):
+        se = qutipEngine("alice", 0, 10)
+        se2 = qutipEngine("Alice", 0, 10)
 
-    se.add_fresh_qubit()
-    se.add_fresh_qubit()
-    se.add_fresh_qubit()
+        se.add_fresh_qubit()
+        se.add_fresh_qubit()
+        se.add_fresh_qubit()
 
-    se2.add_fresh_qubit()
-    se2.add_fresh_qubit()
-    se2.add_fresh_qubit()
+        se2.add_fresh_qubit()
+        se2.add_fresh_qubit()
+        se2.add_fresh_qubit()
 
-    se.apply_X(0)
-    se.apply_X(2)
-    se2.apply_X(0)
-    se2.apply_X(1)
+        se.apply_X(0)
+        se.apply_X(2)
+        se2.apply_X(0)
+        se2.apply_X(1)
 
-    se.remove_qubit(1)
-    se2.remove_qubit(2)
+        se.remove_qubit(1)
+        se2.remove_qubit(2)
 
-    if se.qubitReg != se2.qubitReg:
-        print("ERROR: Partial trace failed\n")
+        self.assertEqual(se.qubitReg, se2.qubitReg)
 
-    print("ok\n")
+    def test_gates(self):
+        se = qutipEngine("alice", 0, 10)
+        se.add_fresh_qubit()
+        savedQubit = se.qubitReg
 
+        se.apply_H(0)
+        se.apply_Z(0)
+        se.apply_H(0)
+        se.apply_X(0)
 
-def gateTest():
-    print("Testing the gates...")
-    se = simpleEngine(10)
-    se.add_fresh_qubit()
-    savedQubit = se.qubitReg
+        self.assertEqual(savedQubit, se.qubitReg)
 
-    se.apply_H(0)
-    se.apply_Z(0)
-    se.apply_H(0)
-    se.apply_X(0)
+    def test_measure(self):
+        se = qutipEngine("alice", 0)
 
-    if savedQubit != se.qubitReg:
-        print("ERROR: Gate test failed\n")
+        se.add_fresh_qubit()
+        outcome = se.measure_qubit(0)
+        self.assertEqual(outcome, 0)
 
-    print("ok\n")
-
-
-def measureTest():
-    print("Testing a measurement...")
-    se = simpleEngine()
-
-    se.add_fresh_qubit()
-    outcome = se.measure_qubit(0)
-    if outcome != 0:
-        print("ERROR: Measurement test failed\n")
-
-    se.add_fresh_qubit()
-    se.apply_X(0)
-    outcome = se.measure_qubit(0)
-    if outcome != 1:
-        print("ERROR: Measurement test failed\n")
-
-    print("ok\n")
+        se.add_fresh_qubit()
+        se.apply_X(0)
+        outcome = se.measure_qubit(0)
+        self.assertEqual(outcome, 1)
 
 
-def main():
-    testSimpleEngine()
-
-
-main()
+if __name__ == '__main__':
+    unittest.main()
