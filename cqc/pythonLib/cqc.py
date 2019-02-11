@@ -92,6 +92,7 @@ from SimulaQron.cqc.backend.cqcHeader import (
 from SimulaQron.cqc.backend.entInfoHeader import EntInfoHeader
 from SimulaQron.general.hostConfig import cqc_node_id_from_addrinfo, networkConfig
 from SimulaQron.settings import Settings
+from SimulaQron.toolbox import get_simulaqron_path
 
 logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=Settings.CONF_LOGGING_LEVEL_FRONTEND)
 
@@ -181,8 +182,8 @@ class CQCConnection:
         - **Arguments**
             :param name:        Name of the host.
             :param socket_address: tuple (str, int) of ip and port number.
-            :param cqcFile:    Path to cqcFile. If None, '$NETSIM/config/cqcNodes.cfg is used, unless socket_address
-            :param appFile:    Path to appFile. If None, '$NETSIM/config/appNodes.cfg is used.
+            :param cqcFile:    Path to cqcFile. If None, '$config/cqcNodes.cfg is used, unless socket_address
+            :param appFile:    Path to appFile. If None, '$config/appNodes.cfg is used.
             :param appID:        Application ID. If set to None, defaults to a nonused ID.
             :param pend_messages: True if you want to wait with sending messages to the back end.
                     Use flush() to send all pending messages in one go as a sequence to the server
@@ -225,10 +226,13 @@ class CQCConnection:
         # Classical connections in the application network
         self._classicalConn = {}
 
+        # Get path to SimulaQron folder
+        simulaqron_path = get_simulaqron_path.main()
+
         if socket_address is None:
             # This file defines the network of CQC servers interfacing to virtual quantum nodes
             if cqcFile is None:
-                self.cqcFile = os.environ.get("NETSIM") + "/config/cqcNodes.cfg"
+                self.cqcFile = os.path.join(simulaqron_path, "config/cqcNodes.cfg")
             else:
                 self.cqcFile = cqcFile
 
@@ -275,7 +279,7 @@ class CQCConnection:
 
                 # This file defines the application network
         if appFile is None:
-            self.appFile = os.environ.get("NETSIM") + "/config/appNodes.cfg"
+            self.appFile = os.path.join(simulaqron_path, "config/appNodes.cfg")
 
             # Read configuration files for the application network
         if os.path.exists(self.appFile):

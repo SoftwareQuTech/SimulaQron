@@ -251,6 +251,9 @@ class simulatedQubit(pb.Referenceable):
         """
         Returns the state of the qubits in the list qList by tracing out the rest.
         """
+        backend = settings.Settings.CONF_BACKEND
+        if backend != "qutip":
+            raise RuntimeError("Cannot get reduced qubit state using backend {}".format(backend))
         logging.debug("VIRTUAL NODE %s: Returning qubit %d", self.node.name, self.num)
         return self.register.get_qubits_RI([self.num])
 

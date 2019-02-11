@@ -1,14 +1,14 @@
-#!/usr/bin/env sh
-ALL_PIDS=$(ps aux | grep python3 | grep -E "Test|setup|start" | awk {'print $2'})
+#!/usr/bin/env bash
+ALL_PIDS=$(ps aux | grep python | grep -E "Test|setup|start" | awk {'print $2'})
 if [ "$ALL_PIDS" != "" ]
 then
         kill -9 $ALL_PIDS
 fi
 
 # Get the path to the SimulaQron folder
-this_file_path=$(realpath "$0")
+this_file_path=$0
 this_folder_path=$(dirname "${this_file_path}")
-simulaqron_path=${this_folder_path%/run}
+simulaqron_path=$(${this_folder_path}/../toolbox/get_simulaqron_path.py)
 
 # if no arguments were given we take the list of current Nodes
 if [ "$#" -eq 0 ] ;

@@ -1,7 +1,11 @@
 import sys
 import os
 
-netsim_path = os.environ["NETSIM"] + "/"
+from SimulaQron.toolbox import get_simulaqron_path
+
+# Get path to SimulaQron folder
+simulaqron_path = get_simulaqron_path.main()
+
 tot_nr = int(sys.argv[1])
 
 # configure run files for nodes
@@ -22,4 +26,4 @@ with open("run_v2.sh", "w") as f:
 
 nodes = "".join(["n" + str(i) + " " for i in range(tot_nr)])
 
-os.system("python3 " + netsim_path + "configFiles.py " + nodes)
+os.system("python3 " + simulaqron_path + "configFiles.py " + nodes)

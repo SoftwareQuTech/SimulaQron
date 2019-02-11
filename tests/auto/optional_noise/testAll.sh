@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Get the path to the SimulaQron folder
+this_file_path=$0
+this_folder_path=$(dirname "${this_file_path}")
+simulaqron_path=$(${this_folder_path}/../../../toolbox/get_simulaqron_path.py)
+
 while [ "$#" -gt 0 ]; do
     key="$1"
     case $key in
@@ -42,7 +47,7 @@ if [ "$QUICK" = y ]; then
 fi
 
 echo "Starting SimulaQron server (noisy setting and using $BACKEND as backend))"
-sh "${NETSIM}/run/startAll.sh" -nd "Alice" --noisy_qubits "True" --t1 "0.0001" --backend "$BACKEND"
+sh "$simulaqron_path/run/startAll.sh" -nd "Alice" --noisy_qubits "True" --t1 "0.0001" --backend "$BACKEND"
 sleep 1s
 echo "Started SimulaQron server (noise setting)"
-python3 "${NETSIM}/tests/auto/optional_noise/test_optional_noise.py"
+python3 "$simulaqron_path/tests/auto/optional_noise/test_optional_noise.py"

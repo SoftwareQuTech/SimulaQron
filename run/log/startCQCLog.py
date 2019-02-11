@@ -6,6 +6,7 @@ from SimulaQron.settings import Settings
 from SimulaQron.general.hostConfig import networkConfig
 from SimulaQron.cqc.backend.cqcProtocol import CQCFactory
 from SimulaQron.cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
+from SimulaQron.toolbox import get_simulaqron_path
 from twisted.internet.error import CannotListenError
 from twisted.internet import reactor
 
@@ -32,8 +33,11 @@ def setup_CQC_server(names, hosts, factories):
 
 
 def main(names):
+    # Get path to SimulaQron folder
+    simulaqron_path = get_simulaqron_path.main()
+
     # This file defines the network of CQC servers interfacing to virtual quantum nodes
-    cqcFile = os.environ.get("NETSIM") + "/config/cqcNodes.cfg"
+    cqcFile = os.path.join(simulaqron_path, "config/cqcNodes.cfg")
 
     # Read configuration files for the virtual quantum, as well as the classical network
     cqcNet = networkConfig(cqcFile)

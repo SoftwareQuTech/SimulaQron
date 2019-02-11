@@ -32,10 +32,9 @@ import os
 
 from SimulaQron.local.setup import setup_local
 from SimulaQron.general.hostConfig import networkConfig
+from SimulaQron.toolbox import get_simulaqron_path
 from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
-
-from qutip import Qobj
 
 
 #####################################################################################################
@@ -101,28 +100,9 @@ class localNode(pb.Root):
 
         q = yield self.virtRoot.callRemote("get_virtual_ref", virtualNum)
 
-        # Just print the qubit we received
-        (realRho, imagRho) = yield q.callRemote("get_qubit")
-        rho = self.assemble_qubit(realRho, imagRho)
-
-        print("Qubit is:", rho)
-
         # Measure it
-        yield q.callRemote("apply_X")
-        # outcome = yield q.callRemote("measure")
-        # print("Outcome was: %d", outcome)
-
-    def assemble_qubit(self, realM, imagM):
-        """
-        Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
-        We need this since Twisted PB does not support sending complex valued object natively.
-        """
-        M = realM
-        for s in range(len(M)):
-            for t in range(len(M)):
-                M[s][t] = realM[s][t] + 1j * imagM[s][t]
-
-        return Qobj(M)
+        outcome = yield q.callRemote("measure")
+        print("Charlie's outcome was: {}".format(outcome))
 
 
 #####################################################################################################
@@ -130,12 +110,12 @@ class localNode(pb.Root):
 # main
 #
 def main():
-
     # In this example, we are Bob.
     myName = "Charlie"
 
     # This file defines the network of virtual quantum nodes
-    virtualFile = os.environ.get("NETSIM") + "/config/virtualNodes.cfg"
+    simulaqron_path = get_simulaqron_path.main()
+    virtualFile = os.path.join(simulaqron_path, "config/virtualNodes.cfg")
 
     # This file defines the nodes acting as servers in the classical communication network
     classicalFile = os.path.join(os.path.dirname(__file__), "classicalNet.cfg")

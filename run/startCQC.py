@@ -6,7 +6,6 @@ from SimulaQron.cqc.backend.cqcProtocol import CQCFactory
 from SimulaQron.cqc.backend.cqcMessageHandler import SimulaqronCQCHandler
 from SimulaQron.general.hostConfig import networkConfig
 from SimulaQron.settings import Settings
-from SimulaQron.toolbox import get_simulaqron_path
 from twisted.internet import reactor
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
 import os
