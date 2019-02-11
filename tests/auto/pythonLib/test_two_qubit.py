@@ -29,7 +29,6 @@
 import unittest
 
 from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
-import qutip
 import numpy as np
 import sys
 
@@ -37,25 +36,25 @@ import sys
 def calc_exp_values(q):
     """
     Calculates the expected value for measurements in the X,Y and Z basis and returns these in a tuple.
-    q should be a qutip object representing a density matrix
+    q should be a numpy array representing a qubit density matrix
     """
     # eigenvectors
-    z0 = qutip.basis(2, 0)
-    z1 = qutip.basis(2, 1)
+    z0 = np.array([[1], [0]])
+    z1 = np.array([[0], [1]])
     x1 = 1 / np.sqrt(2) * (z0 - z1)
     y1 = 1 / np.sqrt(2) * (z0 - 1j * z1)
 
     # projectors
-    P_X1 = x1 * x1.dag()
-    P_Y1 = y1 * y1.dag()
-    P_Z1 = z1 * z1.dag()
+    P_X1 = np.dot(x1, np.transpose(np.conj(x1)))
+    P_Y1 = np.dot(y1, np.transpose(np.conj(y1)))
+    P_Z1 = np.dot(z1, np.transpose(np.conj(z1)))
 
     # probabilities
-    p_x = (P_X1 * q).tr()
-    p_y = (P_Y1 * q).tr()
-    p_z = (P_Z1 * q).tr()
+    p_x = np.real(np.trace(np.dot(P_X1, q)))
+    p_y = np.real(np.trace(np.dot(P_Y1, q)))
+    p_z = np.real(np.trace(np.dot(P_Z1, q)))
 
-    return (p_x, p_y, p_z)
+    return p_x, p_y, p_z
 
 
 def prep_CNOT_control_CQC(cqc):
@@ -138,15 +137,16 @@ def prep_recv_CQC(cqc):
     return qB
 
 
-def prep_mixed_qutip():
-    q = qutip.qeye(2) / 2
+def prep_mixed_state():
+    q = np.eye(2) / 2
     return q
 
 
-def prep_H_qutip():
-    q = qutip.basis(2)
-    H = 1 / np.sqrt(2) * (qutip.sigmax() + qutip.sigmaz())
-    return qutip.ket2dm(H * q)
+def prep_H_state():
+    q = np.array([[1], [0]])
+    H = np.array([[1, 1], [1, -1]]) / np.sqrt(2)
+    q2 = np.dot(H, q)
+    return np.dot(q2, np.transpose(np.conj(q2)))
 
 
 #####################################################################################################
@@ -160,7 +160,7 @@ class TwoQubitGateTest(unittest.TestCase):
         with CQCConnection("Bob", appID=0) as cqc:
             # Test CNOT control
             sys.stdout.write("Testing CNOT control:")
-            exp_values = calc_exp_values(prep_mixed_qutip())
+            exp_values = calc_exp_values(prep_mixed_state())
             ans = cqc.test_preparation(prep_CNOT_control_CQC, exp_values, iterations=self.iterations)
             sys.stdout.write("\r")
             self.assertTrue(ans)
@@ -169,7 +169,7 @@ class TwoQubitGateTest(unittest.TestCase):
         with CQCConnection("Bob", appID=0) as cqc:
             # Test CNOT target
             sys.stdout.write("Testing CNOT target:")
-            exp_values = calc_exp_values(prep_mixed_qutip())
+            exp_values = calc_exp_values(prep_mixed_state())
             ans = cqc.test_preparation(prep_CNOT_target_CQC, exp_values, iterations=self.iterations)
             sys.stdout.write("\r")
             self.assertTrue(ans)
@@ -178,7 +178,7 @@ class TwoQubitGateTest(unittest.TestCase):
         with CQCConnection("Bob", appID=0) as cqc:
             # Test CPHASE control
             sys.stdout.write("Testing CPHASE control:")
-            exp_values = calc_exp_values(prep_mixed_qutip())
+            exp_values = calc_exp_values(prep_mixed_state())
             ans = cqc.test_preparation(prep_CPHASE_control_CQC, exp_values, iterations=self.iterations)
             sys.stdout.write("\r")
             self.assertTrue(ans)
@@ -187,7 +187,7 @@ class TwoQubitGateTest(unittest.TestCase):
         with CQCConnection("Bob", appID=0) as cqc:
             # Test CPHASE target
             sys.stdout.write("Testing CPHASE target:")
-            exp_values = calc_exp_values(prep_mixed_qutip())
+            exp_values = calc_exp_values(prep_mixed_state())
             ans = cqc.test_preparation(prep_CPHASE_target_CQC, exp_values, iterations=self.iterations)
             sys.stdout.write("\r")
             self.assertTrue(ans)
@@ -196,7 +196,7 @@ class TwoQubitGateTest(unittest.TestCase):
         with CQCConnection("Bob", appID=0) as cqc:
             # Test EPR1
             sys.stdout.write("Testing EPR1:")
-            exp_values = calc_exp_values(prep_mixed_qutip())
+            exp_values = calc_exp_values(prep_mixed_state())
             ans = cqc.test_preparation(prep_EPR1_CQC, exp_values, iterations=self.iterations)
             sys.stdout.write("\r")
             self.assertTrue(ans)
@@ -205,7 +205,7 @@ class TwoQubitGateTest(unittest.TestCase):
         with CQCConnection("Bob", appID=0) as cqc:
             # Test EPR2
             sys.stdout.write("Testing EPR2:")
-            exp_values = calc_exp_values(prep_mixed_qutip())
+            exp_values = calc_exp_values(prep_mixed_state())
             ans = cqc.test_preparation(prep_EPR2_CQC, exp_values, iterations=self.iterations)
             sys.stdout.write("\r")
             self.assertTrue(ans)
@@ -214,7 +214,7 @@ class TwoQubitGateTest(unittest.TestCase):
         with CQCConnection("Bob", appID=0) as cqc:
             # Test send control
             sys.stdout.write("Testing send:")
-            exp_values = calc_exp_values(prep_H_qutip())
+            exp_values = calc_exp_values(prep_H_state())
             ans = cqc.test_preparation(prep_send_CQC, exp_values, iterations=self.iterations)
             sys.stdout.write("\r")
             self.assertTrue(ans)
@@ -223,7 +223,7 @@ class TwoQubitGateTest(unittest.TestCase):
         with CQCConnection("Bob", appID=0) as cqc:
             # Test recv target
             sys.stdout.write("Testing recv:")
-            exp_values = calc_exp_values(prep_H_qutip())
+            exp_values = calc_exp_values(prep_H_state())
             ans = cqc.test_preparation(prep_recv_CQC, exp_values, iterations=self.iterations)
             sys.stdout.write("\r")
             self.assertTrue(ans)

@@ -46,9 +46,19 @@ simulaqron_path=$(${this_folder_path}/../toolbox/get_simulaqron_path.py)
 
  if [ "$FULL" = "y" ]; then
      if [ "$BACKEND" = "qutip" ]; then
-         sh testAll.sh --full --qutip
+         has_qutip=$(${simulaqron_path}/toolbox/has_module.py qutip)
+         if [ "$has_qutip" = "Y" ]; then
+             sh testAll.sh --full --qutip
+         else
+             echo "Cannot run tests for qutip backend if qutip is not installed as a module"
+         fi
      elif [ "$BACKEND" = "projectq" ]; then
-         sh testAll.sh --full --projectq
+         has_projectq=$(${simulaqron_path}/toolbox/has_module.py projectq)
+         if [ "$has_projectq" = "Y" ]; then
+             sh testAll.sh --full --projectq
+         else
+             echo "Cannot run tests for projectq backend if projectq is not installed as a module"
+         fi
      elif [ "$BACKEND" = "stabilizer" ]; then
          sh testAll.sh --full --stabilizer
      else
@@ -56,9 +66,19 @@ simulaqron_path=$(${this_folder_path}/../toolbox/get_simulaqron_path.py)
      fi
  else
      if [ "$BACKEND" = "qutip" ]; then
-         sh testAll.sh --quick --qutip
+         has_qutip=$(${simulaqron_path}/toolbox/has_module.py qutip)
+         if [ "$has_qutip" = "Y" ]; then
+             sh testAll.sh --quick --qutip
+         else
+             echo "Cannot run tests for qutip backend if qutip is not installed as a module"
+         fi
      elif [ "$BACKEND" = "projectq" ]; then
-         sh testAll.sh --quick --projectq
+         has_projectq=$(${simulaqron_path}/toolbox/has_module.py projectq)
+         if [ "$has_projectq" = "Y" ]; then
+             sh testAll.sh --quick --projectq
+         else
+             echo "Cannot run tests for projectq backend if projectq is not installed as a module"
+         fi
      elif [ "$BACKEND" = "stabilizer" ]; then
          sh testAll.sh --quick --stabilizer
      else

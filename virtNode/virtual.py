@@ -27,6 +27,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import logging
+import random
+
 from collections import deque
 
 from twisted.spread import pb
@@ -39,11 +42,16 @@ from twisted.spread.pb import RemoteError
 from SimulaQron.virtNode.basics import quantumError, noQubitError, virtNetError
 from SimulaQron.virtNode.quantum import simulatedQubit
 from SimulaQron.general.hostConfig import networkConfig
-from SimulaQron.virtNode import crudeSimulator, projectQSimulator, stabilizerSimulator
 from SimulaQron.settings import Settings
 
-import logging
-import random
+if Settings.CONF_BACKEND == "qutip":
+    from SimulaQron.virtNode.qutipSimulator import qutipEngine
+elif Settings.CONF_BACKEND == "projectq":
+    from SimulaQron.virtNode.projectQSimulator import projectQEngine
+elif Settings.CONF_BACKEND == "stabilizer":
+    from SimulaQron.virtNode.stabilizerSimulator import stabilizerEngine
+else:
+    raise quantumError("Unknown backend {}".format(Settings.CONF_BACKEND))
 
 
 ######
@@ -433,11 +441,11 @@ class virtualNode(pb.Root):
             self.numRegs = self.numRegs + 1
             regNum = self.get_new_reg_num()
             if Settings.CONF_BACKEND == "qutip":
-                newReg = crudeSimulator.quantumRegister(self.myID, regNum, maxQubits)
+                newReg = qutipEngine(self.myID, regNum, maxQubits)
             elif Settings.CONF_BACKEND == "projectq":
-                newReg = projectQSimulator.quantumRegister(self.myID, regNum, maxQubits)
+                newReg = projectQEngine(self.myID, regNum, maxQubits)
             elif Settings.CONF_BACKEND == "stabilizer":
-                newReg = stabilizerSimulator.quantumRegister(self.myID, regNum, maxQubits)
+                newReg = stabilizerEngine(self.myID, regNum, maxQubits)
             else:
                 raise quantumError("Unknown backend {}".format(Settings.CONF_BACKEND))
 

@@ -27,12 +27,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from SimulaQron.virtNode.basics import quantumError, noQubitError
-from SimulaQron.virtNode.crudeSimulator import Engine
+from SimulaQron.virtNode.basics import quantumEngine, quantumError, noQubitError
 from SimulaQron.toolbox.stabilizerStates import StabilizerState
 
 
-class stabilizerEngine(Engine):
+class stabilizerEngine(quantumEngine):
     """
     Basic quantum engine which uses stabilizer formalism. Thus only Clifford operations can be performed
 
@@ -40,12 +39,12 @@ class stabilizerEngine(Engine):
         maxQubits:	maximum number of qubits this engine will support.
     """
 
-    def __init__(self, maxQubits=10):
+    def __init__(self, node, num, maxQubits=10):
         """
         Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.
         """
 
-        super().__init__(maxQubits=maxQubits)
+        super().__init__(node=node, num=num, maxQubits=maxQubits)
 
         self.qubitReg = StabilizerState()
 
@@ -74,13 +73,11 @@ class stabilizerEngine(Engine):
         This should be in the form required by the StabilizerState class.
         """
 
+        # Create the qubit
         try:
             qubit = StabilizerState(newQubit)
         except Exception:
             raise ValueError("'newQubits' was not in the correct form to be given as an argument to StabilizerState")
-
-        # Create the qubit
-        qubit = StabilizerState(newQubit)
 
         num = self.activeQubits
 
@@ -256,34 +253,4 @@ class stabilizerEngine(Engine):
         if newNum > self.maxQubits:
             raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
 
-        try:
-            self.qubitReg = self.qubitReg.tensor_product(StabilizerState(R))
-        except Exception as err:
-            print(err)
-            print("R: {}".format(R))
-            print("I: {}".format(I))
-
-
-class quantumRegister(stabilizerEngine):
-    """
-    A simulated quantum register. The qubits who are simulated in this register may be distributed over
-    different quantum nodes.
-    """
-
-    def __init__(self, node, num, maxQubits=10):
-        """
-        Initialize the quantum register at the given node.
-
-        Arguments
-        node		node this register is started from
-        num		number of this register
-        maxQubits	maximum number of qubits this register supports
-        """
-        super().__init__(maxQubits=maxQubits)
-
-        # Each register has a number, this may be used be the ``outside`` application
-        # using this simulator
-        self.num = num
-
-        # Node that actually simulates this register
-        self.simNode = node
+        self.qubitReg = self.qubitReg.tensor_product(StabilizerState(R))

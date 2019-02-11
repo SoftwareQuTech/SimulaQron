@@ -31,7 +31,6 @@
 import os
 import logging
 
-import qutip as qp
 import numpy as np
 
 from twisted.spread import pb
@@ -78,8 +77,8 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
         # Output state
         (realRho, imagRho) = yield virtRoot.callRemote("get_multiple_qubits", [qA, qB])
         rho = assemble_qubit(realRho, imagRho)
-        expectedRho = qp.Qobj([[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]])
-        correct = rho == expectedRho
+        expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
+        correct = np.all(np.isclose(rho, expectedRho))
     elif Settings.CONF_BACKEND == "projectq":
         (realvec, imagvec, _, _, _) = yield virtRoot.callRemote("get_register", qA)
         state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
