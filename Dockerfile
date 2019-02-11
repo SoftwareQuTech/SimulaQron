@@ -75,5 +75,4 @@ RUN pip install qutip
 RUN cd cqc/rustLib && cargo update
 
 # Setup the necessary environment variables
-ENV NETSIM=$WORKSPACE/SimulaQron
-ENV PYTHONPATH=$WORKSPACE:$PYTHONPATH
+ENV PYTHONPATH=$WORKSPACE/SimulaQron:$PYTHONPATH
