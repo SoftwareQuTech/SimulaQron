@@ -254,4 +254,3 @@ class stabilizerEngine(quantumEngine):
             raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
 
         self.qubitReg = self.qubitReg.tensor_product(StabilizerState(R))
-

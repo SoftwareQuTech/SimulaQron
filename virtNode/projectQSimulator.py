@@ -336,4 +336,3 @@ class projectQEngine(quantumEngine):
             self.qubitReg += list(qreg)
 
             self.activeQubits = newNum
-

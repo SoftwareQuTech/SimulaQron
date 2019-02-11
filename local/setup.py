@@ -31,8 +31,6 @@ from twisted.spread import pb
 from twisted.internet import reactor
 from twisted.internet.defer import DeferredList
 
-from qutip import Qobj
-
 import logging
 import time
 
@@ -164,7 +162,7 @@ def localError(reason):
 
 def assemble_qubit(realM, imagM):
     """
-    Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
+    Reconstitute the qubit as array from its real and imaginary components given as a list.
     We need this since Twisted PB does not support sending complex valued object natively.
     """
     M = realM
@@ -172,4 +170,4 @@ def assemble_qubit(realM, imagM):
         for t in range(len(M)):
             M[s][t] = realM[s][t] + 1j * imagM[s][t]
 
-    return Qobj(M)
+    return M

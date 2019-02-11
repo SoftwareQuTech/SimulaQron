@@ -41,12 +41,6 @@ from SimulaQron.local.setup import setup_local, assemble_qubit
 from SimulaQron.settings import Settings
 from SimulaQron.toolbox.stabilizerStates import StabilizerState
 
-if Settings.CONF_BACKEND == "qutip":
-    try:
-        import qutip as qp
-    except ModuleNotFoundError:
-        raise RuntimeError("If you want to use the qutip backend you need to install the python package 'qutip'")
-
 
 #####################################################################################################
 #
@@ -124,8 +118,8 @@ class localNode(pb.Root):
             # Output state
             (realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits", [qA, q])
             rho = assemble_qubit(realRho, imagRho)
-            expectedRho = qp.Qobj([[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]])
-            correct = rho == expectedRho
+            expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
+            correct = np.all(np.isclose(rho, expectedRho))
         elif Settings.CONF_BACKEND == "projectq":
             (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", qA)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]

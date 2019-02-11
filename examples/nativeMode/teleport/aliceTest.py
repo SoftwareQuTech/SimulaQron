@@ -29,6 +29,7 @@
 
 import logging
 import os
+import numpy as np
 
 from SimulaQron.local.setup import setup_local, assemble_qubit
 from SimulaQron.general.hostConfig import networkConfig
@@ -72,7 +73,7 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
     # For information purposes, let's print the state of that qubit
     if Settings.CONF_BACKEND == "qutip":
         realRho, imagRho = yield q1.callRemote("get_qubit")
-        state = assemble_qubit(realRho, imagRho)
+        state = np.array(assemble_qubit(realRho, imagRho), dtype=complex)
     elif Settings.CONF_BACKEND == "projectq":
         realvec, imagvec = yield virtRoot.callRemote("get_register_RI", q1)
         state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
@@ -82,7 +83,7 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
     else:
         ValueError("Unknown backend {}".format(Settings.CONF_BACKEND))
 
-    print("Qubit to be teleported is: ", state)
+    print("Qubit to be teleported is:\n{}".format(state))
 
     # Create qubit for teleportation
     qA = yield virtRoot.callRemote("new_qubit_inreg", qReg)
