@@ -2,7 +2,12 @@
 
 # start the nodes ['Alice', 'Bob', 'Charlie', 'David', 'Eve']
 
-cd "$NETSIM"/run
+# Get the path to the SimulaQron folder
+this_file_path=$0
+this_folder_path=$(dirname "${this_file_path}")
+simulaqron_path=$(${this_folder_path}/../toolbox/get_simulaqron_path.py)
+
+cd "$simulaqron_path"/run
 
 for name in "$@"
 do

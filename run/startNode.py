@@ -39,7 +39,11 @@ logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=Settin
 # args.hostName instead of sys.argv[1] ?
 logging.debug("Starting VIRTUAL NODE %s", sys.argv[1])
 
-virtualFile = os.environ.get("NETSIM") + "/config/virtualNodes.cfg"
+# Get path to SimulaQron folder
+path_to_this_folder = os.path.dirname(os.path.abspath(__file__))
+simulaqron_path = os.path.split(path_to_this_folder)[0]
+
+virtualFile = os.path.join(simulaqron_path, "config/virtualNodes.cfg")
 be = backEnd(sys.argv[1].strip(), virtualFile)
 
 node = be.start(maxQubits=Settings.CONF_MAXQUBITS, maxRegisters=Settings.CONF_MAXREGS)

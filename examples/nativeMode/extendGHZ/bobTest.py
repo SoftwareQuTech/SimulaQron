@@ -30,12 +30,11 @@
 import logging
 import os
 
-from SimulaQron.local.setup import setup_local, assemble_qubit
+from SimulaQron.local.setup import setup_local
 from SimulaQron.general.hostConfig import networkConfig
+from SimulaQron.toolbox import get_simulaqron_path
 from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
-
-from qutip import Qobj
 
 
 #####################################################################################################
@@ -110,26 +109,14 @@ class localNode(pb.Root):
         # Create the GHZ state by entangling the fresh qubit
         yield eprB.callRemote("cnot_onto", q)
 
-        (R, I) = yield self.virtRoot.callRemote("get_multiple_qubits", [eprB, q])
-        M = assemble_qubit(R, I)
-        qt = Qobj(M)
-        print("Matrix: ", qt)
         # Send the new qubit to Charlie
         charlie = self.classicalNet.hostDict["Charlie"]
         remoteNum = yield self.virtRoot.callRemote("send_qubit", q, "Charlie")
         yield charlie.root.callRemote("receive_ghz", remoteNum)
 
-    def assemble_qubit(self, realM, imagM):
-        """
-        Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
-        We need this since Twisted PB does not support sending complex valued object natively.
-        """
-        M = realM
-        for s in range(len(M)):
-            for t in range(len(M)):
-                M[s][t] = realM[s][t] + 1j * imagM[s][t]
-
-        return Qobj(M)
+        # Measure our qubit
+        outcome = yield eprB.callRemote("measure")
+        print("Bob's outcome was: {}".format(outcome))
 
 
 #####################################################################################################
@@ -137,12 +124,12 @@ class localNode(pb.Root):
 # main
 #
 def main():
-
     # In this example, we are Charlie.
     myName = "Bob"
 
     # This file defines the network of virtual quantum nodes
-    virtualFile = os.environ.get("NETSIM") + "/config/virtualNodes.cfg"
+    simulaqron_path = get_simulaqron_path.main()
+    virtualFile = os.path.join(simulaqron_path, "config/virtualNodes.cfg")
 
     # This file defines the nodes acting as servers in the classical communication network
     classicalFile = os.path.join(os.path.dirname(__file__), "classicalNet.cfg")

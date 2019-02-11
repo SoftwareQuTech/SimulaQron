@@ -33,6 +33,9 @@ import os
 
 from SimulaQron.local.setup import setup_local
 from SimulaQron.general.hostConfig import networkConfig
+from SimulaQron.toolbox import get_simulaqron_path
+from SimulaQron.settings import Settings
+from SimulaQron.toolbox.stabilizerStates import StabilizerState
 from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
 
@@ -110,11 +113,21 @@ class localNode(pb.Root):
         if a == 1:
             yield eprB.callRemote("apply_Z")
 
-            # Just print the qubit we received
-        (realRho, imagRho) = yield eprB.callRemote("get_qubit")
-        rho = self.assemble_qubit(realRho, imagRho)
+        # Just print the qubit we received
+        if Settings.CONF_BACKEND == "qutip":
+            print("here")
+            (realRho, imagRho) = yield eprB.callRemote("get_qubit")
+            state = self.assemble_qubit(realRho, imagRho)
+        elif Settings.CONF_BACKEND == "projectq":
+            realvec, imagvec = yield self.virtRoot.callRemote("get_register_RI", eprB)
+            state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
+        elif Settings.CONF_BACKEND == "stabilizer":
+            array, _, = yield self.virtRoot.callRemote("get_register_RI", eprB)
+            state = StabilizerState(array)
+        else:
+            ValueError("Unknown backend {}".format(Settings.CONF_BACKEND))
 
-        print("Qubit is:", rho)
+        print("Qubit is:", state)
 
     def assemble_qubit(self, realM, imagM):
         """
@@ -139,7 +152,8 @@ def main():
     myName = "Bob"
 
     # This file defines the network of virtual quantum nodes
-    virtualFile = os.environ.get("NETSIM") + "/config/virtualNodes.cfg"
+    simulaqron_path = get_simulaqron_path.main()
+    virtualFile = os.path.join(simulaqron_path, "config/virtualNodes.cfg")
 
     # This file defines the nodes acting as servers in the classical communication network
     classicalFile = "classicalNet.cfg"

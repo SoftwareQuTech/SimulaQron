@@ -117,11 +117,15 @@ def setup_CQC_server(myName, cqc_factory):
 
 
 def main(myName):
+    # Get path to SimulaQron folder
+    path_to_this_folder = os.path.dirname(os.path.abspath(__file__))
+    simulaqron_path = os.path.split(path_to_this_folder)[0]
+
     # This file defines the network of virtual quantum nodes
-    virtualFile = os.environ.get("NETSIM") + "/config/virtualNodes.cfg"
+    virtualFile = os.path.join(simulaqron_path, "config/virtualNodes.cfg")
 
     # This file defines the network of CQC servers interfacing to virtual quantum nodes
-    cqcFile = os.environ.get("NETSIM") + "/config/cqcNodes.cfg"
+    cqcFile = os.path.join(simulaqron_path, "config/cqcNodes.cfg")
 
     # Read configuration files for the virtual quantum, as well as the classical network
     virtualNet = networkConfig(virtualFile)

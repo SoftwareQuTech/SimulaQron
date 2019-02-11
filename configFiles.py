@@ -61,18 +61,18 @@ def construct_node_configs(nodes):
     if nrNodes == 0:
         return
 
-    # Get path from environment variable
-    netsim_path = os.environ["NETSIM"] + "/"
+    # Get path to SimulaQron folder
+    simulaqron_path = os.path.dirname(os.path.abspath(__file__))
 
     # Get path to configuration files
     conf_files = [
-        netsim_path + "config/virtualNodes.cfg",
-        netsim_path + "config/cqcNodes.cfg",
-        netsim_path + "config/appNodes.cfg",
+        os.path.join(simulaqron_path, "config/virtualNodes.cfg"),
+        os.path.join(simulaqron_path, "config/cqcNodes.cfg"),
+        os.path.join(simulaqron_path, "config/appNodes.cfg")
     ]
 
     # File for just a simple list of the nodes
-    node_file = netsim_path + "config/Nodes.cfg"
+    node_file = os.path.join(simulaqron_path, "config/Nodes.cfg")
     # What port numbers to start with
     start_nr = [8801, 8801 + nrNodes, 8801 + 2 * nrNodes]
 
@@ -102,7 +102,7 @@ def construct_node_configs(nodes):
 
 def construct_topology_config(topology, nodes, save_fig=True):
     """
-    Constructs a json file at $NETSIM/config/topology.json, used to define the topology of the network.
+    Constructs a json file at config/topology.json, used to define the topology of the network.
     :param topology: str
         Should be one of the following: None, 'complete', 'ring', 'random_tree'.
     :param nodes: list of str
@@ -155,12 +155,16 @@ def construct_topology_config(topology, nodes, save_fig=True):
         else:
             raise ValueError("Unknown topology name")
 
+        # Get path to SimulaQron folder
+        simulaqron_path = os.path.dirname(os.path.abspath(__file__))
+
         if save_fig:
             network = nx.from_dict_of_lists(adjacency_dct)
             nx.draw(network, with_labels=True)
-            plt.savefig(os.environ["NETSIM"] + "/config/topology.png")
+            fig_path = os.path.join(simulaqron_path, "config/topology.png")
+            plt.savefig(fig_path)
 
-        topology_file = os.environ["NETSIM"] + "/config/topology.json"
+        topology_file = os.path.join(simulaqron_path, "config/topology.json")
         with open(topology_file, "w") as top_file:
             json.dump(adjacency_dct, top_file)
 
