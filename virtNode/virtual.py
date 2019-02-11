@@ -45,11 +45,11 @@ from SimulaQron.general.hostConfig import networkConfig
 from SimulaQron.settings import Settings
 
 if Settings.CONF_BACKEND == "qutip":
-    from SimulaQron.virtNode import crudeSimulator
+    from SimulaQron.virtNode.qutipSimulator import qutipEngine
 elif Settings.CONF_BACKEND == "projectq":
-    from SimulaQron.virtNode import projectQSimulator
+    from SimulaQron.virtNode.projectQSimulator import projectQEngine
 elif Settings.CONF_BACKEND == "stabilizer":
-    from SimulaQron.virtNode import stabilizerSimulator
+    from SimulaQron.virtNode.stabilizerSimulator import stabilizerEngine
 else:
     raise quantumError("Unknown backend {}".format(Settings.CONF_BACKEND))
 
@@ -441,11 +441,11 @@ class virtualNode(pb.Root):
             self.numRegs = self.numRegs + 1
             regNum = self.get_new_reg_num()
             if Settings.CONF_BACKEND == "qutip":
-                newReg = crudeSimulator.quantumRegister(self.myID, regNum, maxQubits)
+                newReg = qutipEngine(self.myID, regNum, maxQubits)
             elif Settings.CONF_BACKEND == "projectq":
-                newReg = projectQSimulator.quantumRegister(self.myID, regNum, maxQubits)
+                newReg = projectQEngine(self.myID, regNum, maxQubits)
             elif Settings.CONF_BACKEND == "stabilizer":
-                newReg = stabilizerSimulator.quantumRegister(self.myID, regNum, maxQubits)
+                newReg = stabilizerEngine(self.myID, regNum, maxQubits)
             else:
                 raise quantumError("Unknown backend {}".format(Settings.CONF_BACKEND))
 
