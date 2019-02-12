@@ -31,22 +31,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef CQC_H
 #define CQC_H
 
-#include "entID.h"
+#include <stdint.h>
 
 /* Basic CQC Header format */
 
 #define CQC_HDR_LENGTH 		8
 typedef struct
 {
-	uint8_t version; /* Pretty wasteful to use a char for that. 3 bits would be plenty, but only done for python now as the total must be 4 bytes */
+	uint8_t version;        /* CQC interface version  */
 	uint8_t type;		/* Packet control type */
 	uint16_t app_id; 	/* Application ID */
 	uint32_t length;	/* Total length of command instructions to send */
-	void *payload; 		/* Pointer to cmd payload */
 } __attribute__((__packed__)) cqcHeader;
 
 /* CQC Version */
-#define CQC_VERSION 		0
+#define CQC_VERSION 		2
 
 /* Possible CQC Types */
 
@@ -66,6 +65,8 @@ typedef struct
 #define	CQC_ERR_NOQUBIT		21	/* No more qubits available */
 #define	CQC_ERR_UNSUPP		22	/* Command sequence not supported */
 #define	CQC_ERR_TIMEOUT		23	/* Timeout */
+#define	CQC_ERR_INUSE		24	/* Qubit already in use */
+#define	CQC_ERR_UNKNOWN		25	/* Unknown qubit ID */
 
 /*
 	Definitions for the command header and commands.
@@ -77,7 +78,6 @@ typedef struct
 	uint16_t qubit_id;	/* Qubit to perform the operation on */
 	uint8_t instr;		/* Instruction to execute */
 	uint8_t options;	/* Options when executing the command */
-	void *extraCmd;		/* Additional details for this command */
 } __attribute__((__packed__)) cmdHeader;
 
 /* Possible commands */
@@ -110,36 +110,90 @@ typedef struct
 #define CQC_OPT_BLOCK		0x04	/* Block until command is done */
 #define CQC_OPT_IFTHEN		0x08	/* Execute commands depending on outcome */
 
-/* Additional cmd details (optional) */
-#define CQC_CMD_XTRA_LENGTH	16
+/* Additional header used to indicate size of a sequence. Used when sending
+ * multiple commands at once. It tells the backend how many more messages are
+ * coming. */
+#define CQC_SEQ_HDR_LENGTH      1
 typedef struct
 {
-	uint16_t xtra_qubit_id;	/* ID of the additional qubit */
-	uint16_t remote_app_id;	/* Remote application ID */
-	uint32_t remote_node;	/* IP of the remote node */
-	uint32_t cmdLength;	/* Length of the cmds to exectute upon completion */
-	uint16_t remote_port;	/* Port of the remote node for control info */
-	uint8_t steps;		/* Angle step of rotation (ROT) OR number of repetitions (FACTORY) */
-	uint8_t unused;	/* Need 4 byte segments */
-	void *cmdPayload;	/* Details to execute when done with this command */
-} __attribute__((__packed__)) xtraCmdHeader;
+        uint8_t cmd_length;     /* The length (in bytes) of messages still to come */
+} __attribute__((__packed__)) sequenceHeader;
 
-/*
-	Definitions for the packet sent upon notifications.
-*/
-#define CQC_NOTIFY_LENGTH	20
+/* Additional header used to define the rotation angle of a rotation gate. */
+#define CQC_ROT_HDR_LENGTH      1
 typedef struct
 {
-	uint16_t qubit_id;	/* ID of the received qubit, if any */
-	uint16_t remote_app_id;	/* Remote application ID */
-	uint32_t remote_node;	/* IP of the remote node */
-	uint64_t datetime;	/* Time of qubit */
-	uint16_t remote_port;	/* Port of the remote node for control info */
-	uint8_t outcome;	/* Measurement outcome */
-	uint8_t unused;	/* Need 4 byte segments */
-} __attribute__((__packed__)) notifyHeader;
+        uint8_t step;           /* Angle step of rotation (increments in 1/256 per step) */
+} __attribute__((__packed__)) rotationHeader;
 
-#endif
+/* Additional header used to send a qubit_id. */
+#define CQC_QUBIT_HDR_LENGTH    2
+typedef struct
+{
+        uint16_t qubit_id;      /* Qubit_id of the target qubit */
+} __attribute__((__packed__)) extraQubitHeader;
+
+/* Additional header used to send to which node to send information to. Used in
+ * send and EPR commands. */
+#define CQC_COMM_HDR_LENGTH     8
+typedef struct
+{
+	uint16_t remote_app_id;	/* Remote application ID */
+	uint16_t remote_port;	/* Port of the remote node for control info */
+	uint32_t remote_node;	/* IP of the remote node */
+} __attribute__((__packed__)) communicationHeader;
+
+/* Additional header used to send factory information. Factory commands are
+ * used to tell the backend to do the following command or a sequence of
+ * commands multiple times. */
+#define CQC_FACTORY_HDR_LENGTH  2
+typedef struct
+{
+        uint8_t num_iter;       /* Number of iterations to do the sequence */
+        uint8_t options;        /* Options when executing the factory */
+} __attribute__((__packed__)) factoryHeader;
+
+/* Additional header used to send the outcome of a measurement. */
+#define CQC_MEASOUT_HDR_LENGTH  1
+typedef struct
+{
+        uint8_t meas_out;       /* Measurement outcome */
+} __attribute__((__packed__)) measoutHeader;
+
+/* Additional header used to send time information (return of
+ * CQC_TP_GET_TIME). */
+#define CQC_TIMEINFO_HDR_LENGTH 8
+typedef struct
+{
+        uint64_t datetime;      /* Time of creation */
+} __attribute__((__packed__)) timeinfoHeader;
+
+
+/* When an EPR-pair is created the CQC Backend will return information about
+ * the entanglement which can be used in a entanglement management
+ * protocol. The entanglement information header contains information about the
+ * parties that share the EPR-pair, the time of creation, how good the
+ * entanglement is (goodness). Furthermore, the entanglement information header
+ * contain a entanglement ID (id_AB) which can be used to keep track of the
+ * entanglement in the network. The entanglement ID is incremented with respect
+ * to the pair of nodes and who initialized the entanglement (DF). For this
+ * reason the entanglement ID together with the nodes and the directionality
+ * flag gives a unique way to identify the entanglement in the network. */
+typedef struct
+{
+	uint32_t node_A;        /* IP of this node */
+	uint16_t port_A;        /* Port of this node */
+	uint16_t app_id_A;      /* App ID of this node */
+	uint32_t node_B;        /* IP of other node */
+	uint16_t port_B;        /* Port of other node */
+	uint16_t app_id_B;      /* App ID of other node */
+	uint32_t id_AB;		/* Entanglement identifier */
+	uint64_t timestamp;	/* Creation time */
+	uint64_t tog;		/* Time of goodness */
+	uint16_t goodness;	/* Goodness parameter */
+	uint8_t df;		/* Directionality flag creation */
+	uint8_t unused;		/* Not used - align */
+} __attribute__((__packed__)) entanglementHeader;
 
 /*
 	CQC Library Definitions
@@ -148,11 +202,8 @@ typedef struct
 /* Definitions to access and manage CQC */
 typedef struct
 {
-	/* Socket handling to CQC Backend */
-	int sockfd;
-
-	/* Application details */
-	int app_id;
+	int sockfd;             /* Socket handling to CQC Backend */
+	int app_id;             /* Application details */
 } cqc_lib;
 
 /* CQC Command buffer */
@@ -166,22 +217,56 @@ typedef struct
  	CQC Function Definitions
 */
 
-
 cqc_lib * cqc_init(int app_id);
 void cqc_error(uint8_t type);
 int cqc_connect(cqc_lib *cqc, char *hostname, int portno);
 int cqc_cleanup(cqc_lib *cqc);
-int cqc_simple_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id, uint8_t notify);
-int cqc_full_cmd(cqc_lib *cqc, uint8_t command, uint16_t qubit_id, char notify, char action, char block, uint16_t xtra_id, uint8_t steps, uint16_t r_app_id, uint32_t r_node, uint16_t r_port, uint32_t cmdLength);
+int cqc_simple_cmd(cqc_lib *cqc,
+                   uint8_t command,
+                   uint16_t qubit_id,
+                   uint8_t notify);
+int cqc_full_cmd(cqc_lib *cqc,
+                 uint8_t command,
+                 uint16_t qubit_id,
+                 char notify,
+                 char action,
+                 char block,
+                 uint16_t xtra_id,
+                 uint8_t steps,
+                 uint16_t r_app_id,
+                 uint32_t r_node,
+                 uint16_t r_port,
+                 uint32_t cmdLength);
 
 int cqc_hello(cqc_lib *cqc);
-int cqc_send(cqc_lib *cqc, uint16_t qubit_id, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port);
+int cqc_send(cqc_lib *cqc,
+             uint16_t qubit_id,
+             uint16_t remote_app_id,
+             uint32_t remote_node,
+             uint16_t remote_port);
 uint16_t cqc_recv(cqc_lib *cqc);
-int cqc_epr(cqc_lib *cqc, uint16_t remote_app_id, uint32_t remote_node, uint16_t remote_port);
+int cqc_epr(cqc_lib *cqc,
+            uint16_t remote_app_id,
+            uint32_t remote_node,
+            uint16_t remote_port);
 int cqc_measure(cqc_lib *cqc, uint16_t qubit_id);
 int cqc_wait_until_done(cqc_lib *cqc, unsigned int reps);
 int cqc_wait_until_newok(cqc_lib *cqc);
-int cqc_twoqubit(cqc_lib *cqc, uint8_t command, uint16_t qubit1, uint16_t qubit2);
-float cqc_tomography_dir(cqc_lib *cqc, uint16_t (*func)(cqc_lib *), uint32_t iter, uint8_t dir);
-int cqc_test_qubit(cqc_lib *cqc, uint16_t (*func)(cqc_lib *), uint32_t iter, float epsilon, float exp_x, float exp_y, float exp_z);
+int cqc_twoqubit(cqc_lib *cqc,
+                 uint8_t command,
+                 uint16_t qubit1,
+                 uint16_t qubit2);
+float cqc_tomography_dir(cqc_lib *cqc,
+                         uint16_t (*func)(cqc_lib *),
+                         uint32_t iter,
+                         uint8_t dir);
+int cqc_test_qubit(cqc_lib *cqc,
+                   uint16_t (*func)(cqc_lib *),
+                   uint32_t iter,
+                   float epsilon,
+                   float exp_x,
+                   float exp_y,
+                   float exp_z);
 int cqc_wait_until_newok(cqc_lib *cqc);
+
+#endif
