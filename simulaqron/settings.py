@@ -120,7 +120,7 @@ class Settings:
 
         if _backend_handler.lower() == "log":
             cls.CONF_BACKEND_HANDLER = CQCLogMessageHandler
-        else:  # default simulqron  (elif backend_handler.lower() == "simulqron")
+        else:  # default simulaqron  (elif backend_handler.lower() == "simulaqron")
             cls.CONF_BACKEND_HANDLER = SimulaqronCQCHandler
 
         if "Backend" in backend:

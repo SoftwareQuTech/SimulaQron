@@ -46,14 +46,14 @@ simulaqron_path=$(${this_folder_path}/../simulaqron/toolbox/get_simulaqron_path.
 
  if [ "$FULL" = "y" ]; then
      if [ "$BACKEND" = "qutip" ]; then
-         has_qutip=$(${simulaqron_path}/simulqron/toolbox/has_module.py qutip)
+         has_qutip=$(${simulaqron_path}/simulaqron/toolbox/has_module.py qutip)
          if [ "$has_qutip" = "Y" ]; then
              sh testAll.sh --full --qutip
          else
              echo "Cannot run tests for qutip backend if qutip is not installed as a module"
          fi
      elif [ "$BACKEND" = "projectq" ]; then
-         has_projectq=$(${simulaqron_path}/simulqron/toolbox/has_module.py projectq)
+         has_projectq=$(${simulaqron_path}/simulaqron/toolbox/has_module.py projectq)
          if [ "$has_projectq" = "Y" ]; then
              sh testAll.sh --full --projectq
          else
