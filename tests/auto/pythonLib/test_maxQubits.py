@@ -1,6 +1,6 @@
 import unittest
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit, CQCNoQubitError
-from SimulaQron.settings import Settings
+from cqc.pythonLib import CQCConnection, qubit, CQCNoQubitError
+from simulaqron.settings import Settings
 
 
 class TestMaxQubit(unittest.TestCase):

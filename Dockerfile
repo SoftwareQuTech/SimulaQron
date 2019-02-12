@@ -65,15 +65,10 @@ ADD . $WORKSPACE/SimulaQron
 WORKDIR $WORKSPACE/SimulaQron
 
 # SimulaQron dependencies
-# projectq fails to install without pybind11 pre-installed
-# qutip is also badly behaved so installed separately
-RUN pip install pybind11
-RUN cat ./requirements.txt | sed /qutip/d | xargs pip install
-RUN pip install qutip
+RUN pip install -r ./requirements.txt
 
 # Fetch rustLib dependencies
 RUN cd cqc/rustLib && cargo update
 
 # Setup the necessary environment variables
-ENV NETSIM=$WORKSPACE/SimulaQron
-ENV PYTHONPATH=$WORKSPACE:$PYTHONPATH
+ENV PYTHONPATH=$WORKSPACE/SimulaQron:$PYTHONPATH

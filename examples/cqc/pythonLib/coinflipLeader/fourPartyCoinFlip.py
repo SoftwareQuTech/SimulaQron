@@ -1,4 +1,4 @@
-from SimulaQron.cqc.pythonLib.protocols.coinflip_leader import CoinflipConsensus
+from cqc.pythonLib_protocols.coinflip_leader import CoinflipConsensus
 
 
 def main():

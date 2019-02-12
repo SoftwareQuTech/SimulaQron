@@ -1,4 +1,4 @@
-from SimulaQron.cqc.pythonLib.cqc import qubit
+from cqc.pythonLib import qubit
 import numpy as np
 
 

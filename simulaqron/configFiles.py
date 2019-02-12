@@ -46,7 +46,8 @@ from argparse import ArgumentParser
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from SimulaQron.settings import Settings
+from simulaqron.settings import Settings
+from simulaqron.toolbox import get_simulaqron_path
 
 
 def construct_node_configs(nodes):
@@ -62,7 +63,7 @@ def construct_node_configs(nodes):
         return
 
     # Get path to SimulaQron folder
-    simulaqron_path = os.path.dirname(os.path.abspath(__file__))
+    simulaqron_path = get_simulaqron_path.main()
 
     # Get path to configuration files
     conf_files = [
@@ -156,7 +157,7 @@ def construct_topology_config(topology, nodes, save_fig=True):
             raise ValueError("Unknown topology name")
 
         # Get path to SimulaQron folder
-        simulaqron_path = os.path.dirname(os.path.abspath(__file__))
+        simulaqron_path = get_simulaqron_path.main()
 
         if save_fig:
             network = nx.from_dict_of_lists(adjacency_dct)

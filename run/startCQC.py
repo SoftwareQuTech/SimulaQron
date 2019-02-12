@@ -1,11 +1,11 @@
 import logging
 
 import sys
-from SimulaQron.cqc.backend.cqcConfig import CQC_CONF_LINK_WAIT_TIME
-from SimulaQron.cqc.backend.cqcProtocol import CQCFactory
-from SimulaQron.cqc.backend.cqcMessageHandler import SimulaqronCQCHandler
-from SimulaQron.general.hostConfig import networkConfig
-from SimulaQron.settings import Settings
+from cqc.backend.cqcConfig import CQC_CONF_LINK_WAIT_TIME
+from cqc.backend.cqcProtocol import CQCFactory
+from cqc.backend.cqcMessageHandler import SimulaqronCQCHandler
+from simulaqron.general.hostConfig import networkConfig
+from simulaqron.settings import Settings
 from twisted.internet import reactor
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
 import os

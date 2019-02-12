@@ -35,13 +35,14 @@ from configparser import ConfigParser
 
 import os
 
-from SimulaQron.cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
-from SimulaQron.cqc.backend.cqcMessageHandler import SimulaqronCQCHandler
+from cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
+from cqc.backend.cqcMessageHandler import SimulaqronCQCHandler
+from simulaqron.toolbox import get_simulaqron_path
 
 
 class Settings:
     # Get path to SimulaQron folder
-    simulaqron_path = os.path.dirname(os.path.abspath(__file__))
+    simulaqron_path = get_simulaqron_path.main()
 
     _settings_file = os.path.join(simulaqron_path, "config/settings.ini")
     _config = ConfigParser()
@@ -119,7 +120,7 @@ class Settings:
 
         if _backend_handler.lower() == "log":
             cls.CONF_BACKEND_HANDLER = CQCLogMessageHandler
-        else:  # default simulqron  (elif backend_handler.lower() == "simulqron")
+        else:  # default simulaqron  (elif backend_handler.lower() == "simulaqron")
             cls.CONF_BACKEND_HANDLER = SimulaqronCQCHandler
 
         if "Backend" in backend:

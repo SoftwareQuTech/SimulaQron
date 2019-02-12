@@ -33,8 +33,8 @@ import logging
 import numpy as np
 import time
 
-from SimulaQron.cqc.backend.cqcConfig import CQC_CONF_WAIT_TIME_RECV, CQC_CONF_RECV_TIMEOUT, CQC_CONF_RECV_EPR_TIMEOUT
-from SimulaQron.cqc.backend.cqcHeader import (
+from cqc.backend.cqcConfig import CQC_CONF_WAIT_TIME_RECV, CQC_CONF_RECV_TIMEOUT, CQC_CONF_RECV_EPR_TIMEOUT
+from cqc.backend.cqcHeader import (
     CQCCmdHeader,
     CQC_CMD_SEND,
     CQC_CMD_EPR,
@@ -92,8 +92,8 @@ from SimulaQron.cqc.backend.cqcHeader import (
     CQC_TP_EPR_OK,
     CQC_TP_NEW_OK,
 )
-from SimulaQron.cqc.backend.entInfoHeader import EntInfoHeader, ENT_INFO_LENGTH
-from SimulaQron.virtNode.basics import quantumError, noQubitError
+from cqc.backend.entInfoHeader import EntInfoHeader, ENT_INFO_LENGTH
+from simulaqron.virtNode.basics import quantumError, noQubitError
 from twisted.internet.defer import DeferredLock, inlineCallbacks
 from twisted.spread.pb import RemoteError
 

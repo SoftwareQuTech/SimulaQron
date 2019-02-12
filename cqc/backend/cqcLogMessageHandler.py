@@ -32,8 +32,8 @@ This class interfaces cqcMessageHandler, and is for testing purposes only
 
 import logging
 
-from SimulaQron.cqc.backend.cqcMessageHandler import CQCMessageHandler
-from SimulaQron.cqc.backend.cqcHeader import (
+from cqc.backend.cqcMessageHandler import CQCMessageHandler
+from cqc.backend.cqcHeader import (
     CQCCmdHeader,
     CQCXtraHeader,
     CQC_CMD_HDR_LENGTH,
@@ -60,7 +60,7 @@ import time
 import os
 import json
 
-from SimulaQron.cqc.backend.entInfoHeader import EntInfoHeader, ENT_INFO_LENGTH
+from cqc.backend.entInfoHeader import EntInfoHeader, ENT_INFO_LENGTH
 
 
 class CQCLogMessageHandler(CQCMessageHandler):

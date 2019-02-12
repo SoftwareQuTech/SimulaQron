@@ -28,7 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
+from cqc.pythonLib import CQCConnection, qubit
 
 
 #####################################################################################################

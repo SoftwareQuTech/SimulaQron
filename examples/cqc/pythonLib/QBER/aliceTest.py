@@ -29,7 +29,7 @@
 
 import sys
 import json
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection, CQCNoQubitError
+from cqc.pythonLib import CQCConnection, CQCNoQubitError
 
 
 def main(nr_runs):

@@ -2,11 +2,11 @@ import logging
 import os
 import sys
 
-from SimulaQron.settings import Settings
-from SimulaQron.general.hostConfig import networkConfig
-from SimulaQron.cqc.backend.cqcProtocol import CQCFactory
-from SimulaQron.cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
-from SimulaQron.toolbox import get_simulaqron_path
+from simulaqron.settings import Settings
+from simulaqron.general.hostConfig import networkConfig
+from cqc.backend.cqcProtocol import CQCFactory
+from cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
+from simulaqron.toolbox import get_simulaqron_path
 from twisted.internet.error import CannotListenError
 from twisted.internet import reactor
 

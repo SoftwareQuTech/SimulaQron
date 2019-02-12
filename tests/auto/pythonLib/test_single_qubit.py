@@ -28,8 +28,8 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import unittest
 
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit, CQCUnsuppError
-from SimulaQron.settings import Settings
+from cqc.pythonLib import CQCConnection, qubit, CQCUnsuppError
+from simulaqron.settings import Settings
 import numpy as np
 from scipy.linalg import expm
 import sys

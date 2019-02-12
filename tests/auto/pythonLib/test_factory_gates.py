@@ -36,8 +36,8 @@ import unittest
 
 import numpy as np
 from scipy.linalg import expm
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit, CQCUnsuppError
-from SimulaQron.settings import Settings
+from cqc.pythonLib import CQCConnection, qubit, CQCUnsuppError
+from simulaqron.settings import Settings
 
 
 def calc_exp_values_single(q):

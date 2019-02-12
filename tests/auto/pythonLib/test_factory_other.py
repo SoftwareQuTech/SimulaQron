@@ -33,7 +33,7 @@
 #
 import unittest
 
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection, CQCNoQubitError, qubit
+from cqc.pythonLib import CQCConnection, CQCNoQubitError, qubit
 
 
 class CQCFactoryTest(unittest.TestCase):

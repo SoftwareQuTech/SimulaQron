@@ -35,7 +35,7 @@ import time
 #
 import unittest
 
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
+from cqc.pythonLib import CQCConnection, qubit
 
 
 class OthersTest(unittest.TestCase):

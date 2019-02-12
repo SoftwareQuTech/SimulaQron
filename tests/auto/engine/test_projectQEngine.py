@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
 
-from SimulaQron.virtNode.projectQSimulator import projectQEngine
-from SimulaQron.virtNode.basics import noQubitError, quantumError
+from simulaqron.virtNode.projectQSimulator import projectQEngine
+from simulaqron.virtNode.basics import noQubitError, quantumError
 
 from projectq.types._qubit import Qureg
 
