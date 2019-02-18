@@ -206,13 +206,6 @@ typedef struct
 	int app_id;             /* Application details */
 } cqc_lib;
 
-/* CQC Command buffer */
-typedef struct
-{
-	char *cmd_buf;
-	int cmd_length;
-} cqc_cmd_buf;
-
 /*
  	CQC Function Definitions
 */
