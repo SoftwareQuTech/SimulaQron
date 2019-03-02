@@ -7,7 +7,7 @@ Starting the SimulaQron backend
 
 The backend of a SimulaQron network is a set of running virtual nodes and their corresponding CQC servers. To start the backend of a SimulaQron network run the command ``./cli/main.py network start-all``.
 
-With no arguments, a network is setup using the files in the ``$NETSIM/config`` directory. If no files exist in this directory, the ``./cli/main.py network start-all`` command will generate config files for five nodes (Alice, Bobm Charlie, David, and Eve) in a fully connected topology (every node is connected to every other node).
+With no arguments, a network is setup using the files in the ``$NETSIM/config`` directory. If no files exist in this directory, the ``./cli/main.py network start-all`` command will generate config files for five nodes (Alice, Bob Charlie, David, and Eve) in a fully connected topology (every node is connected to every other node).
 
 .. warning:: ``./cli/main.py network start-all`` can fail if any of the ports specified in the config files are already in use by a running SimulaQron network or another program.
 
@@ -29,7 +29,7 @@ The --nodes and --nrnodes can be combined. Let's say you want a network with 10 
 
 Which will start up a network with the nodes Alice, Bob, Charlie, Node0, Node1, ..., Node6. If --nrnodes is less than the entries in --nodes, then --nrnodes is ignored. The two keywords can also be specified shorter as -nd and -nn respectively. So the above can also be done as::
 
-    ./cli/main.py network start-all -nd Alice,Bob,Charlie -nn 10
+    ./cli/main.py network start-all -n Alice,Bob,Charlie -N 10
 
 You can also specify a topology of the network. For example if you want 10 nodes in a ring topology, type::
 
@@ -47,7 +47,7 @@ Along with setting up the network with the specified topology a .png figure is a
 
 As a final example let's combine all the arguments specified above and create a network using 15 nodes, where two of then are called Alice and Bob and the topology of the network is randomly generated as a connected graph with 20 edges::
 
-    ./cli/main.py network start-all -nd Alice,Bob -nn 15 -tp random_connected_20
+    ./cli/main.py network start-all -n Alice,Bob -N 15 -t random_connected_20
 
 The network that is then started might look like this (you can find a similar picture for you network at `config/topology.png`:
 
