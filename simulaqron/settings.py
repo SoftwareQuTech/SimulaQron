@@ -39,15 +39,7 @@ from cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
 from cqc.backend.cqcMessageHandler import SimulaqronCQCHandler
 from simulaqron.toolbox import get_simulaqron_path
 
-
-class Settings:
-    # Get path to SimulaQron folder
-    simulaqron_path = get_simulaqron_path.main()
-
-    _settings_file = os.path.join(simulaqron_path, "config/settings.ini")
-    _config = ConfigParser()
-
-    # default settings for if file is not ready yet
+class _DefaultSettings:
     CONF_MAXQUBITS = 20
     CONF_MAXREGS = 1000
     CONF_WAIT_TIME = 0.5
@@ -58,6 +50,26 @@ class Settings:
     CONF_TOPOLOGY_FILE = ""
     CONF_NOISY_QUBITS = False
     CONF_T1 = 1
+
+
+class Settings:
+    # Get path to SimulaQron folder
+    simulaqron_path = get_simulaqron_path.main()
+
+    _settings_file = os.path.join(simulaqron_path, "config/settings.ini")
+    _config = ConfigParser()
+
+    # default settings for if file is not ready yet
+    CONF_MAXQUBITS = _DefaultSettings.CONF_MAXQUBITS
+    CONF_MAXREGS = _DefaultSettings.CONF_MAXREGS
+    CONF_WAIT_TIME = _DefaultSettings.CONF_WAIT_TIME
+    CONF_LOGGING_LEVEL_BACKEND = _DefaultSettings.CONF_LOGGING_LEVEL_BACKEND
+    CONF_LOGGING_LEVEL_FRONTEND = _DefaultSettings.CONF_LOGGING_LEVEL_FRONTEND
+    CONF_BACKEND_HANDLER = _DefaultSettings.CONF_BACKEND_HANDLER
+    CONF_BACKEND = _DefaultSettings.CONF_BACKEND
+    CONF_TOPOLOGY_FILE = _DefaultSettings.CONF_TOPOLOGY_FILE
+    CONF_NOISY_QUBITS = _DefaultSettings.CONF_NOISY_QUBITS
+    CONF_T1 = _DefaultSettings.CONF_T1
 
     @classmethod
     def init_settings(cls):
@@ -173,6 +185,25 @@ class Settings:
     @classmethod
     def set_setting(cls, section, key, value):
         cls._config[section][key] = value
+        cls.save_settings()
+
+    @classmethod
+    def default_settings(cls):
+        cls.CONF_MAXQUBITS = _DefaultSettings.CONF_MAXQUBITS
+        cls.CONF_MAXREGS = _DefaultSettings.CONF_MAXREGS
+        cls.CONF_WAIT_TIME = _DefaultSettings.CONF_WAIT_TIME
+        cls.CONF_LOGGING_LEVEL_BACKEND = _DefaultSettings.CONF_LOGGING_LEVEL_BACKEND
+        cls.CONF_LOGGING_LEVEL_FRONTEND = _DefaultSettings.CONF_LOGGING_LEVEL_FRONTEND
+        cls.CONF_BACKEND_HANDLER = _DefaultSettings.CONF_BACKEND_HANDLER
+        cls.CONF_BACKEND = _DefaultSettings.CONF_BACKEND
+        cls.CONF_TOPOLOGY_FILE = _DefaultSettings.CONF_TOPOLOGY_FILE
+        cls.CONF_NOISY_QUBITS = _DefaultSettings.CONF_NOISY_QUBITS
+        cls.CONF_T1 = _DefaultSettings.CONF_T1
+
+        os.remove(cls._settings_file)
+
+        cls._config = ConfigParser()
+        cls.init_settings()
         cls.save_settings()
 
 

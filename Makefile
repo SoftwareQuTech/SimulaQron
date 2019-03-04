@@ -1,6 +1,7 @@
 PYTHON        = python3
 PIP           = pip3
-RUN_TESTS     = tests/runTests.sh
+QUICK_TESTS   = tests/auto/quick
+ALL_TESTS     = tests/auto
 CQC_DIR		  = cqc
 EXAMPLES_DIR  = examples
 GENERAL_DIR   = general
@@ -23,32 +24,35 @@ python-deps:
 	@cat requirements.txt | xargs -n 1 -L 1 $(PIP) install
 
 tests:
-	@sh $(RUN_TESTS) --quick --stabilizer
+	@${PYTHON} -m unittest discover -s ${QUICK_TESTS}
 
-tests_qutip:
-	@sh $(RUN_TESTS) --quick --qutip
+tests_all:
+	@${PYTHON} -m unittest discover -s ${ALl_TESTS}
 
-tests_projectq:
-	@sh $(RUN_TESTS) --quick --projectq
+# tests_qutip:
+# 	@sh $(RUN_TESTS) --quick --qutip
 
-tests_stabilizer:
-	@sh $(RUN_TESTS) --quick --stabilizer
+# tests_projectq:
+# 	@sh $(RUN_TESTS) --quick --projectq
 
-full_tests:
-	@sh $(RUN_TESTS) --full --stabilizer
+# tests_stabilizer:
+# 	@sh $(RUN_TESTS) --quick --stabilizer
 
-full_tests_qutip:
-	@sh $(RUN_TESTS) --full --qutip
+# full_tests:
+# 	@sh $(RUN_TESTS) --full --stabilizer
 
-full_tests_projectq:
-	@sh $(RUN_TESTS) --full --projectq
+# full_tests_qutip:
+# 	@sh $(RUN_TESTS) --full --qutip
 
-full_tests_stabilizer:
-	@sh $(RUN_TESTS) --full --stabilizer
+# full_tests_projectq:
+# 	@sh $(RUN_TESTS) --full --projectq
 
-tests_allBackends: tests_qutip tests_projectq tests_stabilizer
+# full_tests_stabilizer:
+# 	@sh $(RUN_TESTS) --full --stabilizer
 
-full_tests_allBackends: full_tests_qutip full_tests_projectq full_tests_stabilizer
+# tests_allBackends: tests_qutip tests_projectq tests_stabilizer
+
+# full_tests_allBackends: full_tests_qutip full_tests_projectq full_tests_stabilizer
 
 verify: clean python-deps lint tests
 

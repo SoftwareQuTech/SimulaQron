@@ -175,7 +175,8 @@ def createXtraHeader(command, values):
 class CQCConnection:
     _appIDs = {}
 
-    def __init__(self, name, socket_address=None, cqcFile=None, appFile=None, appID=None, pend_messages=False):
+    def __init__(self, name, socket_address=None, cqcFile=None, appFile=None, appID=None, pend_messages=False,
+                 retry_connection=True):
         """
         Initialize a connection to the cqc server.
 
@@ -268,14 +269,16 @@ class CQCConnection:
                 self._s = socket.socket(addr[0], addr[1], addr[2])
                 self._s.connect(addr[4])
                 break
-            except ConnectionRefusedError:
+            except ConnectionRefusedError as err:
                 logging.debug("App {} : Could not connect to  CQC server, trying again...".format(self.name))
                 time.sleep(CQC_CONF_LINK_WAIT_TIME)
                 self._s.close()
-            except Exception as e:
+                if not retry_connection:
+                    raise err
+            except Exception as err:
                 logging.warning("App {} : Critical error when connection to CQC server: {}".format(self.name, e))
                 self._s.close()
-                raise e
+                raise err
 
                 # This file defines the application network
         if appFile is None:

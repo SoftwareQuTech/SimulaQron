@@ -50,14 +50,19 @@ from simulaqron.settings import Settings
 from simulaqron.toolbox import get_simulaqron_path
 
 
-def construct_node_configs(nodes):
+def construct_node_configs(nodes=None):
     """
     Constructs the config files for the nodes and their port numbers.
     Port number used will start from 8801 and end at '8801 + 3*len(nodes)'.
-    :param nodes: list of str
+    :param nodes: list of str or None
         List of the names of the nodes.
+        If None then the nodes Alice, Bob, Charlie, David and Eve is used.
     :return: None
     """
+    # Default
+    if nodes is None:
+        nodes = ["Alice", "Bob", "Charlie", "David", "Eve"]
+
     nrNodes = len(nodes)
     if nrNodes == 0:
         return
@@ -113,7 +118,9 @@ def construct_topology_config(topology, nodes, save_fig=True):
     :return: None
     """
     if topology:
-        if topology == "complete":
+        if isinstance(topology, dict):
+            adjacency_dct = {node: topology[node] for node in nodes}
+        elif topology == "complete":
             adjacency_dct = {}
             for i, node in enumerate(nodes):
                 adjacency_dct[node] = nodes[:i] + nodes[i + 1 :]

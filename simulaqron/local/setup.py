@@ -28,7 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from twisted.spread import pb
-from twisted.internet import reactor
+from twisted.internet import reactor, error
 from twisted.internet.defer import DeferredList
 
 import logging
@@ -43,7 +43,7 @@ import time
 # and other classical communication servers.
 
 
-def setup_local(myName, virtualNet, classicalNet, lNode, func):
+def setup_local(myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
     """
     Sets up
     - local classical communication server (if desired according to the configuration file)
@@ -51,11 +51,12 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func):
     - client connections to all other classical communication servers
 
     Arguments
-    myName        name of this node (string)
-    virtualNet    servers of the virtual nodes (dictionary of host objects)
-    classicalNet    servers on the classical communication network (dictionary of host objects)
-    lNode        Twisted PB root to use as local server (if applicable)
-    func        function to run if all connections are set up
+    myName            name of this node (string)
+    virtualNet        servers of the virtual nodes (dictionary of host objects)
+    classicalNet      servers on the classical communication network (dictionary of host objects)
+    lNode             Twisted PB root to use as local server (if applicable)
+    func              function to run if all connections are set up
+    *args, **kwargs   additional arguments to be given to func
     """
 
     # Initialize Twisted callback framework
@@ -94,9 +95,12 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func):
             dList.append(nb.factory.getRootObject())
 
     deferList = DeferredList(dList, consumeErrors=True)
-    deferList.addCallback(init_register, myName, virtualNet, classicalNet, lNode, func)
+    deferList.addCallback(init_register, myName, virtualNet, classicalNet, lNode, func, *args, **kwargs)
     deferList.addErrback(localError)
-    reactor.run()
+    try:
+        reactor.run()
+    except error.ReactorNotRestartable:
+        pass
 
 
 ##################################################################################################
@@ -108,7 +112,7 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func):
 #
 
 
-def init_register(resList, myName, virtualNet, classicalNet, lNode, func):
+def init_register(resList, myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
 
     logging.info("LOCAL %s: All connections set up.", myName)
 
@@ -136,11 +140,11 @@ def init_register(resList, myName, virtualNet, classicalNet, lNode, func):
 
                 # On the local virtual node, we still want to initialize a qubit register
     defer = virtRoot.callRemote("add_register")
-    defer.addCallback(fill_register, myName, lNode, virtRoot, classicalNet, func)
+    defer.addCallback(fill_register, myName, lNode, virtRoot, classicalNet, func, *args, **kwargs)
     defer.addErrback(localError)
 
 
-def fill_register(obj, myName, lNode, virtRoot, classicalNet, func):
+def fill_register(obj, myName, lNode, virtRoot, classicalNet, func, *args, **kwargs):
     logging.debug("LOCAL %s: Created quantum register at virtual node.", myName)
     qReg = obj
 
@@ -149,7 +153,7 @@ def fill_register(obj, myName, lNode, virtRoot, classicalNet, func):
         lNode.set_virtual_reg(qReg)
 
         # Run client side function
-    func(qReg, virtRoot, myName, classicalNet)
+    func(qReg, virtRoot, myName, classicalNet, *args, **kwargs)
 
 
 def localError(reason):
