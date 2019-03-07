@@ -1,12 +1,63 @@
 #!/usr/bin/env python3
 import os
+import time
 import click
 import logging
+from daemons.prefab import run
 
 from simulaqron.network import Network
 from simulaqron.settings import Settings
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+
+
+class SimulaQronDaemon(run.RunDaemon):
+    def __init__(self, pidfile, name=None, nrnodes=None, nodes=None, topology=None, quiet=False, verbose=False):
+        super().__init__(pidfile=pidfile)
+        self.name = name
+        self.nrnodes = nrnodes
+        self.nodes = nodes
+        self.topology = topology
+        self.quiet = quiet
+        self.verbose = verbose
+
+    def run(self):
+        """Starts all nodes defined in netsim's config directory."""
+
+        if self.nrnodes or self.nodes or self.topology:
+            if self.nodes:
+                nodes = self.nodes.split(",")
+            else:
+                nodes = []
+
+            if self.nrnodes and (self.nrnodes > len(nodes)):
+                nodes += ["Node{}".format(i) for i in range(self.nrnodes - len(nodes))]
+        else:
+            nodes = self.nodes
+
+        if self.verbose:
+            self._set_log_level("debug")
+        else:
+            if self.quiet:
+                self._set_log_level("warning")
+            else:
+                self._set_log_level("info")
+
+        network = Network(name=self.name, nodes=nodes, topology=self.topology)
+        network.start()
+
+        while True:
+            time.sleep(0.1)
+
+    @staticmethod
+    def _set_log_level(level):
+        Settings.set_setting("BACKEND", "loglevel", level)
+        Settings.set_setting("FRONTEND", "loglevel", level)
+
+        logging.basicConfig(
+            format="%(asctime)s:%(levelname)s:%(message)s",
+            level=Settings.log_levels[level],
+        )
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -20,6 +71,12 @@ def cli():
 
 
 @cli.command()
+@click.option(
+    "--name",
+    help="Give the network a name to be able to start multiple (default: default)",
+    type=click.STRING,
+    default=None,
+)
 @click.option(
     "-N",
     "--nrnodes",
@@ -53,52 +110,41 @@ def cli():
     help="Print debug output (overrides the -q flag).",
     is_flag=True,
 )
-def start(nrnodes, nodes, topology, quiet, verbose):
-    """Starts all nodes defined in netsim's config directory."""
-    logging.basicConfig(
-        format="%(asctime)s:%(levelname)s:%(message)s",
-        level=Settings.CONF_LOGGING_LEVEL_BACKEND,
-    )
-    logger = logging.getLogger(__name__)
+def start(name, nrnodes, nodes, topology, quiet, verbose):
+    """Starts a network with the given parameters or from config files."""
+    if name is None:
+        name = "default"
+    pidfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "simulaqron_network_{}.pid".format(name))
+    if os.path.exists(pidfile):
+        logging.warning("Network with name {} is already running".format(name))
+        return
+    d = SimulaQronDaemon(pidfile=pidfile, name=name, nrnodes=nrnodes, nodes=nodes, topology=topology, quiet=quiet,
+                         verbose=verbose)
+    d.start()
 
-    if nrnodes or nodes or topology:
-        if nodes:
-            nodes = nodes.split(",")
-        else:
-            nodes = []
+###############
+# stop command #
+###############
 
-        if nrnodes and (nrnodes > len(nodes)):
-            nodes += ["Node{}".format(i) for i in range(nrnodes - len(nodes))]
 
-    if verbose:
-        Settings.set_setting("BACKEND", "loglevel", "debug")
-        Settings.set_setting("FRONTEND", "loglevel", "debug")
-    else:
-        if quiet:
-            Settings.set_setting("BACKEND", "loglevel", "warning")
-            Settings.set_setting("FRONTEND", "loglevel", "warning")
-        else:
-            Settings.set_setting("BACKEND", "loglevel", "info")
-            Settings.set_setting("FRONTEND", "loglevel", "info")
+@cli.command()
+@click.option(
+    "--name",
+    help="Stop the network with then a given name (default: default)",
+    type=click.STRING,
+    default=None,
+)
+def stop(name):
+    """Stops a network."""
+    if name is None:
+        name = "default"
+    pidfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "simulaqron_network_{}.pid".format(name))
+    if not os.path.exists(pidfile):
+        logging.warning("Network with name {} is not running".format(name))
+        return
+    d = SimulaQronDaemon(pidfile=pidfile)
+    d.stop()
 
-    network = Network(nodes=nodes, topology=topology)
-    network.start()
-
-    if verbose or (not quiet):
-        to_print = "--------------------------------------------------\n"
-        to_print += "| Network is now running with process ID {: <5}.  |\n".format(os.getpid())
-        to_print += "| If the process is running in the foreground,   |\n"
-        to_print += "| press any button to kill the network or press  |\n"
-        to_print += "| CTRL-Z to put the process in the background.   |\n"
-        to_print += "| If the process is running in the background,   |\n"
-        to_print += "| type e.g. 'kill -9 {: <5}' to kill the network. |\n".format(os.getpid())
-        to_print += "--------------------------------------------------\n"
-
-        Settings.set_setting("BACKEND", "loglevel", "warning")
-        Settings.set_setting("FRONTEND", "loglevel", "warning")
-    else:
-        to_print = ""
-    input(to_print)
 
 ###############
 # set command #
@@ -239,5 +285,9 @@ def t1():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        format="%(asctime)s:%(levelname)s:%(message)s",
+        level=Settings.CONF_LOGGING_LEVEL_BACKEND,
+    )
     cli()
 

@@ -27,12 +27,14 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import logging
+import time
 from twisted.spread import pb
 from twisted.internet import reactor, error
 from twisted.internet.defer import DeferredList
 
-import logging
-import time
+from simulaqron.settings import Settings
+
 
 # logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
 #####################################################################################################
@@ -58,6 +60,11 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
     func              function to run if all connections are set up
     *args, **kwargs   additional arguments to be given to func
     """
+
+    logging.basicConfig(
+        format="%(asctime)s:%(levelname)s:%(message)s",
+        level=Settings.CONF_LOGGING_LEVEL_BACKEND,
+    )
 
     # Initialize Twisted callback framework
     dList = []
@@ -114,7 +121,7 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
 
 def init_register(resList, myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
 
-    logging.info("LOCAL %s: All connections set up.", myName)
+    logging.debug("LOCAL %s: All connections set up.", myName)
 
     # Retrieve the connection to the local virtual node, if successfull
     j = 0
