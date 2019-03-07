@@ -15,15 +15,9 @@ from simulaqron.settings import Settings
 from simulaqron.toolbox import get_simulaqron_path
 
 
-logging.basicConfig(
-    format="%(asctime)s:%(levelname)s:%(message)s",
-    level=Settings.CONF_LOGGING_LEVEL_BACKEND,
-)
-
-
 def init_register(virtRoot, myName, node):
     """Retrieves the relevant root objects to talk to such remote connections"""
-    logging.info("LOCAL %s: All connections set up.", myName)
+    logging.debug("LOCAL %s: All connections set up.", myName)
     # Set the virtual node
     node.set_virtual_node(virtRoot)
     # Start listening to CQC messages
@@ -100,14 +94,38 @@ def setup_CQC_server(myName, cqc_factory):
 
 
 def sigterm_handler(_signo, _stack_frame):
-    print("Shutting down")
     reactor.stop()
 
 
 def main(myName):
     """Start the indicated backend CQC Server"""
+    # for i in [x for x in dir(signal) if x.startswith("SIG")]:
+    #     try:
+    #         signum = getattr(signal, i)
+    #         signal.signal(signum, lambda signo, stack: sigterm_handler(myName, signo, stack))
+    #     except (OSError, RuntimeError, ValueError) as m:  # OSError for Python3, RuntimeError for 2
+    #         print("Skipping {}".format(i))
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)
+    # signal.signal(signal.SIGABRT, sigterm_handler)
+    # signal.signal(signal.SIGFPE, sigterm_handler)
+    # signal.signal(signal.SIGILL, sigterm_handler)
+    # signal.signal(signal.SIGSEGV, sigterm_handler)
+    # signal.signal(signal.SIGQUIT, sigterm_handler)
+    # # signal.signal(signal.SIGKILL, sigterm_handler)
+    # signal.signal(signal.SIGPIPE, sigterm_handler)
+    # signal.SIGC
+    # signal.signal(signal.CTRL_BREAK_EVENT, sigterm_handler)
+    # signal.signal(signal.CTRL_C_EVENT, sigterm_handler)
+    # signal.sigpending()
+    # signal.Signals
+    # signal.
+    # signal.Any
+
+    logging.basicConfig(
+        format="%(asctime)s:%(levelname)s:%(message)s",
+        level=Settings.CONF_LOGGING_LEVEL_BACKEND,
+    )
 
     # Get path to SimulaQron folder
     simulaqron_path = get_simulaqron_path.main()

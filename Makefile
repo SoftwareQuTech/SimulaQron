@@ -10,9 +10,15 @@ RUN_DIR       = run
 TESTS_DIR     = tests
 TOOLBOX_DIR   = toolbox
 VIRTNODE_DIR  = virtNode
+CLI           = cli
 
-clean:
+delete_pyc:
 	@find . -name '*.pyc' -delete
+
+delete_pid:
+	@rm ${CLI}/*.pid
+
+clean: delete_pyc delete_pid
 
 format:
 	black -l 120 .

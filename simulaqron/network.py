@@ -49,7 +49,12 @@ from cqc.pythonLib import CQCConnection
 
 
 class Network:
-    def __init__(self, nodes=None, topology=None):
+    def __init__(self, name=None, nodes=None, topology=None):
+        if name is None:
+            self.name = "default"
+        else:
+            self.name = name
+
         simulaqron_path = get_simulaqron_path.main()
 
         # Set the nodes
@@ -108,9 +113,11 @@ class Network:
             self.processes += [process_virtual, process_cqc]
 
     def start(self, wait_until_running=True):
+        logging.info("Starting network with name {}".format(self.name))
         for p in self.processes:
             if not p.is_alive():
-                logging.info("Starting process {}".format(p.name))
+                logging.debug("Starting process {}".format(p.name))
+                p.deamon = True
                 p.start()
 
         if wait_until_running:
@@ -127,7 +134,7 @@ class Network:
             return
 
         self._running = False
-        logging.info("Stopping network")
+        logging.info("Stopping network with name {}".format(self.name))
         for p in self.processes:
             while p.is_alive():
                 time.sleep(0.1)

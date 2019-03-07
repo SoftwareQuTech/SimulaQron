@@ -71,16 +71,17 @@ class Settings:
     CONF_NOISY_QUBITS = _DefaultSettings.CONF_NOISY_QUBITS
     CONF_T1 = _DefaultSettings.CONF_T1
 
+    log_levels = {
+        "info": logging.INFO,
+        "debug": logging.DEBUG,
+        "warning": logging.WARNING,
+        "error": logging.ERROR,
+        "critical": logging.CRITICAL
+    }
+
     @classmethod
     def init_settings(cls):
 
-        _log_levels = {
-            "info": logging.INFO,
-            "debug": logging.DEBUG,
-            "warning": logging.WARNING,
-            "error": logging.ERROR,
-            "critical": logging.CRITICAL
-        }
         _config = cls._config
         _config.read(cls._settings_file)
 
@@ -110,15 +111,15 @@ class Settings:
 
         if "LogLevel" in backend:
             _log_level = backend['LogLevel'].lower()
-            if _log_level in _log_levels:
-                cls.CONF_LOGGING_LEVEL_BACKEND = _log_levels[_log_level]
+            if _log_level in cls.log_levels:
+                cls.CONF_LOGGING_LEVEL_BACKEND = cls.log_levels[_log_level]
             else:
-                backend['LogLevel'] = list(_log_levels.keys())[
-                    list(_log_levels.values()).index(cls.CONF_LOGGING_LEVEL_BACKEND)]
+                backend['LogLevel'] = list(cls.log_levels.keys())[
+                    list(cls.log_levels.values()).index(cls.CONF_LOGGING_LEVEL_BACKEND)]
 
         else:
-            backend['LogLevel'] = list(_log_levels.keys())[
-                list(_log_levels.values()).index(cls.CONF_LOGGING_LEVEL_BACKEND)]
+            backend['LogLevel'] = list(cls.log_levels.keys())[
+                list(cls.log_levels.values()).index(cls.CONF_LOGGING_LEVEL_BACKEND)]
             config_changed = True
 
         if "BackendHandler" in backend:
@@ -163,15 +164,15 @@ class Settings:
 
         if "LogLevel" in frontend:
             _log_level = frontend['LogLevel'].lower()
-            if _log_level in _log_levels:
-                cls.CONF_LOGGING_LEVEL_FRONTEND = _log_levels[_log_level]
+            if _log_level in cls.log_levels:
+                cls.CONF_LOGGING_LEVEL_FRONTEND = cls.log_levels[_log_level]
             else:
-                frontend['LogLevel'] = list(_log_levels.keys())[
-                    list(_log_levels.values()).index(cls.CONF_LOGGING_LEVEL_FRONTEND)]
+                frontend['LogLevel'] = list(cls.log_levels.keys())[
+                    list(cls.log_levels.values()).index(cls.CONF_LOGGING_LEVEL_FRONTEND)]
 
         else:
-            frontend['LogLevel'] = list(_log_levels.keys())[
-                list(_log_levels.values()).index(cls.CONF_LOGGING_LEVEL_FRONTEND)]
+            frontend['LogLevel'] = list(cls.log_levels.keys())[
+                list(cls.log_levels.values()).index(cls.CONF_LOGGING_LEVEL_FRONTEND)]
             config_changed = True
 
         if config_changed:
