@@ -14,14 +14,12 @@ PID_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".simulaqr
 
 
 class SimulaQronDaemon(run.RunDaemon):
-    def __init__(self, pidfile, name=None, nrnodes=None, nodes=None, topology=None, quiet=False, verbose=False):
+    def __init__(self, pidfile, name=None, nrnodes=None, nodes=None, topology=None):
         super().__init__(pidfile=pidfile)
         self.name = name
         self.nrnodes = nrnodes
         self.nodes = nodes
         self.topology = topology
-        self.quiet = quiet
-        self.verbose = verbose
 
     def run(self):
         """Starts all nodes defined in netsim's config directory."""
@@ -37,29 +35,11 @@ class SimulaQronDaemon(run.RunDaemon):
         else:
             nodes = self.nodes
 
-        if self.verbose:
-            self._set_log_level("debug")
-        else:
-            if self.quiet:
-                self._set_log_level("warning")
-            else:
-                self._set_log_level("info")
-
         network = Network(name=self.name, nodes=nodes, topology=self.topology)
         network.start()
 
         while True:
             time.sleep(0.1)
-
-    @staticmethod
-    def _set_log_level(level):
-        Settings.set_setting("BACKEND", "loglevel", level)
-        Settings.set_setting("FRONTEND", "loglevel", level)
-
-        logging.basicConfig(
-            format="%(asctime)s:%(levelname)s:%(message)s",
-            level=Settings.log_levels[level],
-        )
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -100,19 +80,7 @@ def cli():
     type=click.STRING,
     default=None,
 )
-@click.option(
-    "-q",
-    "--quiet",
-    help="No output, except warnings and errors.",
-    is_flag=True,
-)
-@click.option(
-    "-v",
-    "--verbose",
-    help="Print debug output (overrides the -q flag).",
-    is_flag=True,
-)
-def start(name, nrnodes, nodes, topology, quiet, verbose):
+def start(name, nrnodes, nodes, topology):
     """Starts a network with the given parameters or from config files."""
     if name is None:
         name = "default"
@@ -120,8 +88,7 @@ def start(name, nrnodes, nodes, topology, quiet, verbose):
     if os.path.exists(pidfile):
         logging.warning("Network with name {} is already running".format(name))
         return
-    d = SimulaQronDaemon(pidfile=pidfile, name=name, nrnodes=nrnodes, nodes=nodes, topology=topology, quiet=quiet,
-                         verbose=verbose)
+    d = SimulaQronDaemon(pidfile=pidfile, name=name, nrnodes=nrnodes, nodes=nodes, topology=topology)
     d.start()
 
 ###############
