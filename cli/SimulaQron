@@ -7,6 +7,7 @@ from daemons.prefab import run
 
 from simulaqron.network import Network
 from simulaqron.settings import Settings
+from simulaqron.toolbox import manage_nodes
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -282,6 +283,78 @@ def noisy_qubits():
 def t1():
     """The effective T1 to be used for noisy qubits"""
     print(Settings.CONF_T1)
+
+###############
+# node command #
+###############
+
+
+@cli.group()
+def nodes():
+    """
+    Manage the nodes in the simulated network.
+
+    NOTE: This needs to be done before starting the network.
+    """
+    pass
+
+@nodes.command()
+@click.argument('name', type=str)
+@click.option('--hostname', type=str, help="The host name of the node, e.g. localhost (default) or 192.168.0.1")
+@click.option('--app-port', type=int, help="Port number for the application.\n"
+                                           "If not specified a random unused port between 8000 and 9000 will be used.")
+@click.option('--cqc-port', type=int, help="Port number for the cqc server.\n"
+                                           "If not specified a random unused port between 8000 and 9000 will be used.")
+@click.option('--vnode-port', type=int, help="Port number for the virtual node.\n"
+                                             "If not specified a random unused port between "
+                                             "8000 and 9000 will be used.")
+@click.option('--neighbors', type=str)
+def add(name, hostname=None, app_port=None, cqc_port=None, vnode_port=None, neighbors=None):
+    """
+    Add a node to the network.
+
+    NAME: The name of the node, e.g. Alice
+
+    HOSTNAME: The host name of the node, e.g. localhost or 192.168.0.1
+    """
+    print(neighbors)
+    return
+    manage_nodes.add_node(name, hostname=hostname, app_port=app_port, cqc_port=cqc_port, vnode_port=vnode_port)
+
+
+@nodes.command()
+@click.argument('name', type=str)
+def remove(name):
+    """
+    Remove a node to the network.
+
+    NAME: The name of the node, e.g. Alice
+    """
+    manage_nodes.remove_node(name)
+    pass
+
+
+@nodes.command()
+def default():
+    """
+    Sets the default nodes of the network.
+
+    The default network consists of the five nodes:
+    Alice, Bob, Charlie, David, Eve
+    """
+    manage_nodes.set_default_nodes()
+
+
+@nodes.command()
+def get_nodes():
+    """
+    Sets the default nodes of the network.
+
+    The default network consists of the five nodes:
+    Alice, Bob, Charlie, David, Eve
+    """
+    nodes = manage_nodes.get_nodes()
+    print(("{} " * len(nodes))[:-1].format(*nodes))
 
 
 if __name__ == "__main__":
