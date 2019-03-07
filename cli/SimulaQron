@@ -10,6 +10,7 @@ from simulaqron.settings import Settings
 from simulaqron.toolbox import manage_nodes
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+PID_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".simulaqron_pids")
 
 
 class SimulaQronDaemon(run.RunDaemon):
@@ -115,7 +116,7 @@ def start(name, nrnodes, nodes, topology, quiet, verbose):
     """Starts a network with the given parameters or from config files."""
     if name is None:
         name = "default"
-    pidfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "simulaqron_network_{}.pid".format(name))
+    pidfile = os.path.join(PID_FOLDER, "simulaqron_network_{}.pid".format(name))
     if os.path.exists(pidfile):
         logging.warning("Network with name {} is already running".format(name))
         return
@@ -139,7 +140,7 @@ def stop(name):
     """Stops a network."""
     if name is None:
         name = "default"
-    pidfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "simulaqron_network_{}.pid".format(name))
+    pidfile = os.path.join(PID_FOLDER, "simulaqron_network_{}.pid".format(name))
     if not os.path.exists(pidfile):
         logging.warning("Network with name {} is not running".format(name))
         return
@@ -300,15 +301,21 @@ def nodes():
 
 @nodes.command()
 @click.argument('name', type=str)
-@click.option('--hostname', type=str, help="The host name of the node, e.g. localhost (default) or 192.168.0.1")
-@click.option('--app-port', type=int, help="Port number for the application.\n"
-                                           "If not specified a random unused port between 8000 and 9000 will be used.")
-@click.option('--cqc-port', type=int, help="Port number for the cqc server.\n"
-                                           "If not specified a random unused port between 8000 and 9000 will be used.")
-@click.option('--vnode-port', type=int, help="Port number for the virtual node.\n"
-                                             "If not specified a random unused port between "
-                                             "8000 and 9000 will be used.")
-@click.option('--neighbors', type=str)
+@click.option('--hostname', type=str,
+              help="The host name of the node, e.g. localhost (default) or 192.168.0.1")
+@click.option('--app-port', type=int,
+              help="Port number for the application.\n \
+                    If not specified a random unused port between 8000 and 9000 will be used.")
+@click.option('--cqc-port', type=int,
+              help="Port number for the cqc server.\n \
+                    If not specified a random unused port between 8000 and 9000 will be used.")
+@click.option('--vnode-port', type=int,
+              help="Port number for the virtual node.\n \
+                    If not specified a random unused port between 8000 and 9000 will be used.")
+@click.option('--neighbors', type=str,
+              help="The neighbors of the node in the network seperated by ',' (no space).\n \
+                    For example '--neighbors Bob,Charlie,David'.\n \
+                    If not specified all current nodes in the network will be neighbors.")
 def add(name, hostname=None, app_port=None, cqc_port=None, vnode_port=None, neighbors=None):
     """
     Add a node to the network.
@@ -317,9 +324,9 @@ def add(name, hostname=None, app_port=None, cqc_port=None, vnode_port=None, neig
 
     HOSTNAME: The host name of the node, e.g. localhost or 192.168.0.1
     """
-    print(neighbors)
-    return
-    manage_nodes.add_node(name, hostname=hostname, app_port=app_port, cqc_port=cqc_port, vnode_port=vnode_port)
+    neighbors = neighbors.split(',')
+    manage_nodes.add_node(name, hostname=hostname, app_port=app_port, cqc_port=cqc_port, vnode_port=vnode_port,
+                          neighbors=neighbors)
 
 
 @nodes.command()
@@ -346,13 +353,8 @@ def default():
 
 
 @nodes.command()
-def get_nodes():
-    """
-    Sets the default nodes of the network.
-
-    The default network consists of the five nodes:
-    Alice, Bob, Charlie, David, Eve
-    """
+def get():
+    """Get the current nodes of the network."""
     nodes = manage_nodes.get_nodes()
     print(("{} " * len(nodes))[:-1].format(*nodes))
 
