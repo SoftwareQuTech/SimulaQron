@@ -183,8 +183,8 @@ class CQCConnection:
         - **Arguments**
             :param name:        Name of the host.
             :param socket_address: tuple (str, int) of ip and port number.
-            :param cqcFile:    Path to cqcFile. If None, '$config/cqcNodes.cfg is used, unless socket_address
-            :param appFile:    Path to appFile. If None, '$config/appNodes.cfg is used.
+            :param cqcFile:    Path to cqcFile. If None, 'Setting.CONF_CQC_FILE' is used, unless socket_address
+            :param appFile:    Path to appFile. If None, 'Setting.CONF_APP_FILE' is used.
             :param appID:        Application ID. If set to None, defaults to a nonused ID.
             :param pend_messages: True if you want to wait with sending messages to the back end.
                     Use flush() to send all pending messages in one go as a sequence to the server
@@ -233,7 +233,7 @@ class CQCConnection:
         if socket_address is None:
             # This file defines the network of CQC servers interfacing to virtual quantum nodes
             if cqcFile is None:
-                self.cqcFile = os.path.join(simulaqron_path, "config/cqcNodes.cfg")
+                self.cqcFile = Settings.CONF_CQC_FILE
             else:
                 self.cqcFile = cqcFile
 
@@ -282,7 +282,7 @@ class CQCConnection:
 
                 # This file defines the application network
         if appFile is None:
-            self.appFile = os.path.join(simulaqron_path, "config/appNodes.cfg")
+            self.appFile = Settings.CONF_APP_FILE
 
             # Read configuration files for the application network
         if os.path.exists(self.appFile):

@@ -56,7 +56,7 @@ def main(name):
         level=Settings.CONF_LOGGING_LEVEL_BACKEND,
     )
     logging.debug("Starting VIRTUAL NODE %s", name)
-    virtualFile = os.path.join(simulaqron_path, "config", "virtualNodes.cfg")
+    virtualFile = Settings.CONF_VNODE_FILE
     be = backEnd(name, virtualFile)
     be.start(maxQubits=Settings.CONF_MAXQUBITS, maxRegisters=Settings.CONF_MAXREGS)
 
