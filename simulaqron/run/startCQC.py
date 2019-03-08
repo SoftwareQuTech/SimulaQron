@@ -99,28 +99,8 @@ def sigterm_handler(_signo, _stack_frame):
 
 def main(myName):
     """Start the indicated backend CQC Server"""
-    # for i in [x for x in dir(signal) if x.startswith("SIG")]:
-    #     try:
-    #         signum = getattr(signal, i)
-    #         signal.signal(signum, lambda signo, stack: sigterm_handler(myName, signo, stack))
-    #     except (OSError, RuntimeError, ValueError) as m:  # OSError for Python3, RuntimeError for 2
-    #         print("Skipping {}".format(i))
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)
-    # signal.signal(signal.SIGABRT, sigterm_handler)
-    # signal.signal(signal.SIGFPE, sigterm_handler)
-    # signal.signal(signal.SIGILL, sigterm_handler)
-    # signal.signal(signal.SIGSEGV, sigterm_handler)
-    # signal.signal(signal.SIGQUIT, sigterm_handler)
-    # # signal.signal(signal.SIGKILL, sigterm_handler)
-    # signal.signal(signal.SIGPIPE, sigterm_handler)
-    # signal.SIGC
-    # signal.signal(signal.CTRL_BREAK_EVENT, sigterm_handler)
-    # signal.signal(signal.CTRL_C_EVENT, sigterm_handler)
-    # signal.sigpending()
-    # signal.Signals
-    # signal.
-    # signal.Any
 
     logging.basicConfig(
         format="%(asctime)s:%(levelname)s:%(message)s",
@@ -131,10 +111,10 @@ def main(myName):
     simulaqron_path = get_simulaqron_path.main()
 
     # This file defines the network of virtual quantum nodes
-    virtualFile = os.path.join(simulaqron_path, "config/virtualNodes.cfg")
+    virtualFile = Settings.CONF_VNODE_FILE
 
     # This file defines the network of CQC servers interfacing to virtual quantum nodes
-    cqcFile = os.path.join(simulaqron_path, "config/cqcNodes.cfg")
+    cqcFile = Settings.CONF_CQC_FILE
 
     # Read configuration files for the virtual quantum, as well as the classical network
     virtualNet = networkConfig(virtualFile)

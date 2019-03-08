@@ -176,6 +176,34 @@ def topology_file(value):
 
 
 @set.command()
+@click.argument('value', type=str)
+def app_file(value):
+    """The path to the topology file to be used, can be ""."""
+    Settings.set_setting("BACKEND", "app_file", value)
+
+
+@set.command()
+@click.argument('value', type=str)
+def cqc_file(value):
+    """The path to the topology file to be used, can be ""."""
+    Settings.set_setting("BACKEND", "cqc_file", value)
+
+
+@set.command()
+@click.argument('value', type=str)
+def vnode_file(value):
+    """The path to the topology file to be used, can be ""."""
+    Settings.set_setting("BACKEND", "vnode_file", value)
+
+
+@set.command()
+@click.argument('value', type=str)
+def nodes_file(value):
+    """The path to the topology file to be used, can be ""."""
+    Settings.set_setting("BACKEND", "nodes_file", value)
+
+
+@set.command()
 @click.argument('value', type=click.Choice("on", "off"))
 def noisy_qubits(value):
     """Whether qubits should be noisy (on/off)"""
@@ -239,6 +267,30 @@ def topology_file():
 
 
 @get.command()
+def app_file():
+    """The path to the topology file to be used, can be ""."""
+    print(Settings.CONF_APP_FILE)
+
+
+@get.command()
+def cqc_file():
+    """The path to the topology file to be used, can be ""."""
+    print(Settings.CONF_CQC_FILE)
+
+
+@get.command()
+def vnode_file():
+    """The path to the topology file to be used, can be ""."""
+    print(Settings.CONF_VNODE_FILE)
+
+
+@get.command()
+def nodes_file():
+    """The path to the topology file to be used, can be ""."""
+    print(Settings.CONF_NODES_FILE)
+
+
+@get.command()
 def noisy_qubits():
     """Whether qubits should be noisy (on/off)"""
     if Settings.CONF_NOISY_QUBITS == 'True':
@@ -265,6 +317,7 @@ def nodes():
     NOTE: This needs to be done before starting the network.
     """
     pass
+
 
 @nodes.command()
 @click.argument('name', type=str)

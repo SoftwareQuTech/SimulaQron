@@ -59,7 +59,7 @@ class Network:
 
         # Set the nodes
         if nodes is None:
-            node_config_file = os.path.join(simulaqron_path, "config", "Nodes.cfg")
+            node_config_file = Settings.CONF_NODES_FILE
             self.nodes = load_node_names(node_config_file)
         else:
             self.nodes = nodes

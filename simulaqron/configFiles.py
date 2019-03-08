@@ -72,13 +72,13 @@ def construct_node_configs(nodes=None):
 
     # Get path to configuration files
     conf_files = [
-        os.path.join(simulaqron_path, "config/virtualNodes.cfg"),
-        os.path.join(simulaqron_path, "config/cqcNodes.cfg"),
-        os.path.join(simulaqron_path, "config/appNodes.cfg")
+        Settings.CONF_VNODE_FILE,
+        Settings.CONF_CQC_FILE,
+        Settings.CONF_APP_FILE
     ]
 
     # File for just a simple list of the nodes
-    node_file = os.path.join(simulaqron_path, "config/Nodes.cfg")
+    node_file = Settings.CONF_NODES_FILE
     # What port numbers to start with
     start_nr = [8801, 8801 + nrNodes, 8801 + 2 * nrNodes]
 

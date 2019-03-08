@@ -8,11 +8,10 @@ from simulaqron.general.hostConfig import load_node_names, networkConfig
 from simulaqron.settings import Settings
 
 
+config_files = [Settings.CONF_APP_FILE, Settings.CONF_CQC_FILE, Settings.CONF_VNODE_FILE]
+node_config_file = Settings.CONF_NODES_FILE
 simulaqron_path = get_simulaqron_path.main()
 config_folder = "config"
-config_file_names = ["appNodes.cfg", "cqcNodes.cfg", "virtualNodes.cfg"]
-config_files = [os.path.join(simulaqron_path, config_folder, file) for file in config_file_names]
-node_config_file = os.path.join(simulaqron_path, config_folder, "Nodes.cfg")
 default_topology_file = os.path.join(simulaqron_path, config_folder, "topology.json")
 
 
@@ -53,7 +52,7 @@ def add_node(name, hostname=None, app_port=None, cqc_port=None, vnode_port=None,
         with open(config_file, 'a') as f:
             f.write("{}, {}, {}\n".format(name, hostname, port))
 
-    node_config_path = os.path.join(simulaqron_path, "config", "Nodes.cfg")
+    node_config_path = Settings.CONF_NODES_FILE
     with open(node_config_path, 'a') as f:
         f.write(name + "\n")
 
@@ -160,7 +159,7 @@ def get_nodes():
     Returns a list of the current nodes set in the config files.
     :return: list of str
     """
-    nodes_config_file = os.path.join(simulaqron_path, "config", "Nodes.cfg")
+    nodes_config_file = Settings.CONF_NODES_FILE
     current_nodes = load_node_names(nodes_config_file)
 
     return current_nodes

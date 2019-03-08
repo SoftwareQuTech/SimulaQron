@@ -53,6 +53,7 @@ class _DefaultSettings:
     CONF_APP_FILE = os.path.join(config_folder, "appNodes.cfg")
     CONF_CQC_FILE = os.path.join(config_folder, "cqcNodes.cfg")
     CONF_VNODE_FILE = os.path.join(config_folder, "virtualNodes.cfg")
+    CONF_NODES_FILE = os.path.join(config_folder, "Nodes.cfg")
     CONF_TOPOLOGY_FILE = ""
     CONF_NOISY_QUBITS = False
     CONF_T1 = 1
@@ -77,6 +78,7 @@ class Settings:
     CONF_APP_FILE = _DefaultSettings.CONF_APP_FILE
     CONF_CQC_FILE = _DefaultSettings.CONF_CQC_FILE
     CONF_VNODE_FILE = _DefaultSettings.CONF_VNODE_FILE
+    CONF_NODES_FILE = _DefaultSettings.CONF_NODES_FILE
     CONF_NOISY_QUBITS = _DefaultSettings.CONF_NOISY_QUBITS
     CONF_T1 = _DefaultSettings.CONF_T1
 
@@ -156,9 +158,27 @@ class Settings:
             config_changed = True
 
         if "App_File" in backend:
-            cls.CONF_TOPOLOGY_FILE = backend['App_File']
+            cls.CONF_APP_FILE = backend['App_File']
         else:
-            backend['App_File'] = cls.CONF_TOPOLOGY_FILE
+            backend['App_File'] = cls.CONF_APP_FILE
+            config_changed = True
+
+        if "Cqc_File" in backend:
+            cls.CONF_CQC_FILE = backend['Cqc_File']
+        else:
+            backend['Cqc_File'] = cls.CONF_CQC_FILE
+            config_changed = True
+
+        if "Vnode_File" in backend:
+            cls.CONF_VNODE_FILE = backend['Vnode_File']
+        else:
+            backend['Vnode_File'] = cls.CONF_VNODE_FILE
+            config_changed = True
+
+        if "Nodes_File" in backend:
+            cls.CONF_NODES_FILE = backend['Nodes_File']
+        else:
+            backend['Nodes_File'] = cls.CONF_NODES_FILE
             config_changed = True
 
         if "noisy_qubits" in backend:
