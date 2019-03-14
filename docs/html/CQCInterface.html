@@ -13,6 +13,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -53,6 +54,8 @@
 <li><a class="reference internal" href="#cqc-communication-header">CQC Communication Header</a></li>
 <li><a class="reference internal" href="#cqc-factory-header">CQC Factory Header</a></li>
 <li><a class="reference internal" href="#cqc-notify-header">CQC Notify Header</a></li>
+<li><a class="reference internal" href="#cqc-meas-out-header">CQC Meas Out Header</a></li>
+<li><a class="reference internal" href="#cqc-timeinfo-header">CQC Timeinfo Header</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#entanglement-header-format">Entanglement Header format</a><ul>
@@ -104,7 +107,7 @@
 <a class="reference internal" href="ExamplespythonLib.html"><span class="doc">Examples using the python library</span></a>.</p>
 <p>Upon establishing a connection to the CQC Backend, the following packet format can be used to issue commands to the simulated quantum network. Each interaction to and from the interface starts with a CQC Header, followed by additional headers as appropriate to the message type.</p>
 <p>When accessing the interface directly, you must keep track of qubit IDs for each application ID yourself. It is a deliberate choice that the CQC Backend does not itself keep track of qubit or application IDs, leaving such management to you (and indeed higher levels of abstraction if you wish).
-When a qubit is created with the command <cite>CQC_CMD_NEW</cite> a CQC message will be returned of the type <cite>CQC_TP_NEW_OK</cite> followed by a notification header containing the qubit ID.
+When a qubit is created with the command <cite>CQC_CMD_NEW</cite> a CQC message will be returned of the type <cite>CQC_TP_NEW_OK</cite> followed by a CQCXtraQubitHeader containing the qubit ID.
 Note that if the option notify, see below, is set to true a message of type <cite>CQC_TP_DONE</cite> will also be returned, after the notification header, saying that the command is finished.</p>
 </div>
 <div class="section" id="cqc-header-format">
@@ -114,9 +117,9 @@ Note that if the option notify, see below, is set to true a message of type <cit
 <table border="1" class="docutils">
 <colgroup>
 <col width="10%" />
-<col width="25%" />
+<col width="24%" />
 <col width="8%" />
-<col width="57%" />
+<col width="58%" />
 </colgroup>
 <thead valign="bottom">
 <tr class="row-odd"><th class="head">Function</th>
@@ -129,7 +132,7 @@ Note that if the option notify, see below, is set to true a message of type <cit
 <tr class="row-even"><td>version</td>
 <td>unsigned integer (uint8_t)</td>
 <td>1 byte</td>
-<td>Current version is 1</td>
+<td>Current version is 2</td>
 </tr>
 <tr class="row-odd"><td>type</td>
 <td>unsigned integer (uint8_t)</td>
@@ -144,7 +147,7 @@ Note that if the option notify, see below, is set to true a message of type <cit
 <tr class="row-odd"><td>length</td>
 <td>unsigned integer (uint32_t)</td>
 <td>4 bytes</td>
-<td>Total length of the CQC instruction packet</td>
+<td>Total length of the CQC instruction packet (excluding this header)</td>
 </tr>
 </tbody>
 </table>
@@ -176,10 +179,10 @@ Note that if the option notify, see below, is set to true a message of type <cit
 <p>If the message type is <cite>CQC_TP_COMMAND</cite>, <cite>CQC_TP_FACTORY</cite> or <cite>CQC_TP_GET_TIME</cite>, then the following additional command header must be supplied. It identifies the specific instruction to execute, as well as the qubit ID on which to perform this instructions. For rotations, two qubit gates, request to send or receive, and produce entanglement, the additional headers are required supplying further information.</p>
 <p>If <cite>CQC_OPT_NOTIFY</cite> set to true, each of these commmands return a CQC message of type <cite>CQC_TP_DONE</cite>. Some commands also return additional messages before the optional done-message, as described below:</p>
 <ul class="simple">
-<li><cite>CQC_CMD_NEW</cite>: Returns <cite>CQC_TP_NEW_OK</cite> followed by a notify header containing the qubit ID.</li>
-<li><cite>CQC_CMD_MEASURE(_INPLACE)</cite>: Returns <cite>CQC_TP_MEASOUT</cite> followed by a notify header containing the measurement outcome.</li>
-<li><cite>CQC_CMD_RECV</cite>: Returns <cite>CQC_TP_RECV</cite> followed by a notify header containing the qubit ID.</li>
-<li><cite>CQC_CMD_EPR(_RECV)</cite>: Returns <cite>CQC_TP_EPR_OK</cite> followed by an entanglement information header.</li>
+<li><cite>CQC_CMD_NEW</cite>: Returns <cite>CQC_TP_NEW_OK</cite> followed by a <cite>CQCXtraQubitHeader</cite> containing the qubit ID.</li>
+<li><cite>CQC_CMD_MEASURE(_INPLACE)</cite>: Returns <cite>CQC_TP_MEASOUT</cite> followed by a <cite>CQCMeasOutHeader</cite> containing the measurement outcome.</li>
+<li><cite>CQC_CMD_RECV</cite>: Returns <cite>CQC_TP_RECV</cite> followed by a <cite>CQCXtraQubitHeader</cite> containing the qubit ID.</li>
+<li><cite>CQC_CMD_EPR(_RECV)</cite>: Returns <cite>CQC_TP_EPR_OK</cite> followed by <cite>CQCXtraQubitHeader</cite> and an entanglement information header.</li>
 </ul>
 <p>Example sequences of headers:</p>
 <ul class="simple">
@@ -376,7 +379,7 @@ The following commands require an xtra header when issued to the CQC Backend: CQ
 </div>
 <div class="section" id="cqc-extra-qubit-header">
 <h3>CQC Extra Qubit Header<a class="headerlink" href="#cqc-extra-qubit-header" title="Permalink to this headline">¶</a></h3>
-<p>Additional header used to send the qubit_id of a secondary qubit for two qubit gates</p>
+<p>Additional header used to send a qubit_id</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="12%" />
@@ -423,15 +426,15 @@ The following commands require an xtra header when issued to the CQC Backend: CQ
 <td>2 bytes</td>
 <td>Remote Application ID</td>
 </tr>
-<tr class="row-odd"><td>remote_node</td>
-<td>unsigned int (uint32_t)</td>
-<td>4 bytes</td>
-<td>IP of the remote node (IPv4)</td>
-</tr>
-<tr class="row-even"><td>remote_port</td>
+<tr class="row-odd"><td>remote_port</td>
 <td>unsigned int (uint16_t)</td>
 <td>2 bytes</td>
 <td>Port of the remode node for sending classical control info</td>
+</tr>
+<tr class="row-even"><td>remote_node</td>
+<td>unsigned int (uint32_t)</td>
+<td>4 bytes</td>
+<td>IP of the remote node (IPv4)</td>
 </tr>
 </tbody>
 </table>
@@ -474,7 +477,8 @@ The following commands require an xtra header when issued to the CQC Backend: CQ
 </div>
 <div class="section" id="cqc-notify-header">
 <h3>CQC Notify Header<a class="headerlink" href="#cqc-notify-header" title="Permalink to this headline">¶</a></h3>
-<p>In some cases, the CQC Backend will return notifications to the client that require additional information. For example, where a qubit was received from, the lifetime of a qubit, the measurement outcome etc.</p>
+<p><strong>The CQCNotifyHeader is deprecated and will be removed in the future. It is split up in `CQCXtraQubitHeader`, `CQCMeasOutHeader`and `CQCTimeinfoHeader` now.</strong>
+In some cases, the CQC Backend will return notifications to the client that require additional information. For example, where a qubit was received from, the lifetime of a qubit, the measurement outcome etc.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="12%" />
@@ -524,6 +528,58 @@ The following commands require an xtra header when issued to the CQC Backend: CQ
 <td>unsigned int (uint8_t)</td>
 <td>1 byte</td>
 <td>4 byte align</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="cqc-meas-out-header">
+<h3>CQC Meas Out Header<a class="headerlink" href="#cqc-meas-out-header" title="Permalink to this headline">¶</a></h3>
+<p>Additional header used to send the outcome of a measurement.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="24%" />
+<col width="9%" />
+<col width="55%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Function</th>
+<th class="head">Type</th>
+<th class="head">Length</th>
+<th class="head">Comments</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>meas_out</td>
+<td>unsigned int (uint8_t)</td>
+<td>1 byte</td>
+<td>Measurement outcome</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="cqc-timeinfo-header">
+<h3>CQC Timeinfo Header<a class="headerlink" href="#cqc-timeinfo-header" title="Permalink to this headline">¶</a></h3>
+<p>Additional header used to send time information (return of <cite>CQC_TP_GET_TIME</cite>).</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="24%" />
+<col width="9%" />
+<col width="55%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Function</th>
+<th class="head">Type</th>
+<th class="head">Length</th>
+<th class="head">Comments</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>datetime</td>
+<td>unsigned int (uint64_t)</td>
+<td>8 bytes</td>
+<td>Time of creation</td>
 </tr>
 </tbody>
 </table>
@@ -645,7 +701,7 @@ For this reason the entanglement ID together with the nodes and the directionali
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
   </body>
 </html>

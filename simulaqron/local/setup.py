@@ -58,7 +58,7 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
     classicalNet      servers on the classical communication network (dictionary of host objects)
     lNode             Twisted PB root to use as local server (if applicable)
     func              function to run if all connections are set up
-    *args, **kwargs   additional arguments to be given to func
+    args, kwargs   additional arguments to be given to func
     """
 
     logging.basicConfig(

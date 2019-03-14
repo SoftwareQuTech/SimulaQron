@@ -854,7 +854,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
     @inlineCallbacks
     def cmd_reset(self, cqc_header, cmd, xtra):
         """
-        Reset Qubit to |0>
+        Reset Qubit to \|0\>
         """
         logging.debug("CQC %s: Reset App ID %d qubit id %d", self.name, cqc_header.app_id, cmd.qubit_id)
         try:

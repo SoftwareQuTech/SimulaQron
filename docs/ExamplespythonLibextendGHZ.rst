@@ -40,7 +40,7 @@ Programming Alice
 
 Here we program what Alice should do using the python library::
 
-	from SimulaQron.cqc.pythonLib.cqc import CQCConnection
+	from cqc.pythonLib import CQCConnection
 
 	#####################################################################################################
 	#
@@ -70,7 +70,7 @@ Programming Bob
 
 Here we program what Bob should do using the python library::
 
-	from SimulaQron.cqc.pythonLib.cqc import CQCConnection
+	from cqc.pythonLib import CQCConnection
 
 	#####################################################################################################
 	#
@@ -109,7 +109,7 @@ Programming Charlie
 
 Here we program what Charlie should do using the python library::
 
-	from SimulaQron.cqc.pythonLib.cqc import CQCConnection
+	from cqc.pythonLib import CQCConnection
 
 	#####################################################################################################
 	#

@@ -13,6 +13,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -105,7 +106,7 @@ Alice will teleport a state (in this case the <span class="math notranslate nohi
 <div class="section" id="setting-up">
 <h2>Setting up<a class="headerlink" href="#setting-up" title="Permalink to this headline">¶</a></h2>
 <p>We will run everything locally (localhost) using two nodes, Alice and Bob. Start up the backend of the simulation by running:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startAll</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">nodes</span> <span class="s2">&quot;Alice Bob&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">main</span><span class="o">.</span><span class="n">py</span> <span class="n">network</span> <span class="n">start</span><span class="o">-</span><span class="nb">all</span> <span class="o">--</span><span class="n">nodes</span> <span class="n">Alice</span><span class="p">,</span><span class="n">Bob</span>
 </pre></div>
 </div>
 <p>The below example can then be executed when in the folder <cite>examples/cqc/pythonLib/teleport</cite> typing:</p>
@@ -117,7 +118,7 @@ Alice will teleport a state (in this case the <span class="math notranslate nohi
 <div class="section" id="programming-alice">
 <h2>Programming Alice<a class="headerlink" href="#programming-alice" title="Permalink to this headline">¶</a></h2>
 <p>Here we program what Alice should do using the python library:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">SimulaQron.cqc.pythonLib.cqc</span> <span class="k">import</span> <span class="n">CQCConnection</span><span class="p">,</span> <span class="n">qubit</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cqc.pythonLib</span> <span class="k">import</span> <span class="n">CQCConnection</span><span class="p">,</span> <span class="n">qubit</span>
 
 <span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
@@ -160,7 +161,7 @@ Alice will teleport a state (in this case the <span class="math notranslate nohi
 <div class="section" id="programming-bob">
 <h2>Programming Bob<a class="headerlink" href="#programming-bob" title="Permalink to this headline">¶</a></h2>
 <p>Here we program what Bob should do using the python library:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">SimulaQron.cqc.pythonLib.cqc</span> <span class="k">import</span> <span class="n">CQCConnection</span><span class="p">,</span> <span class="n">qubit</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cqc.pythonLib</span> <span class="k">import</span> <span class="n">CQCConnection</span><span class="p">,</span> <span class="n">qubit</span>
 
 <span class="c1">#####################################################################################################</span>
 <span class="c1">#</span>
@@ -229,7 +230,7 @@ Alice will teleport a state (in this case the <span class="math notranslate nohi
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
   </body>
 </html>

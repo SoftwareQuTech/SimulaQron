@@ -1,0 +1,328 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>simulaqron.settings &#8212; SimulaQron 1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for simulaqron.settings</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2017, Stephanie Wehner and Axel Dahlberg</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c1"># modification, are permitted provided that the following conditions are met:</span>
+<span class="c1"># 1. Redistributions of source code must retain the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer.</span>
+<span class="c1"># 2. Redistributions in binary form must reproduce the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer in the</span>
+<span class="c1">#    documentation and/or other materials provided with the distribution.</span>
+<span class="c1"># 3. All advertising materials mentioning features or use of this software</span>
+<span class="c1">#    must display the following acknowledgement:</span>
+<span class="c1">#    This product includes software developed by Stephanie Wehner, QuTech.</span>
+<span class="c1"># 4. Neither the name of the QuTech organization nor the</span>
+<span class="c1">#    names of its contributors may be used to endorse or promote products</span>
+<span class="c1">#    derived from this software without specific prior written permission.</span>
+<span class="c1">#</span>
+<span class="c1"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER &#39;&#39;AS IS&#39;&#39; AND ANY</span>
+<span class="c1"># EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED</span>
+<span class="c1"># WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE</span>
+<span class="c1"># DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY</span>
+<span class="c1"># DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES</span>
+<span class="c1"># (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES</span>
+<span class="c1"># LOSS OF USE, DATA, OR PROFITS OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND</span>
+<span class="c1"># ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<span class="c1"># (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS</span>
+<span class="c1"># SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+
+<span class="c1">#########################</span>
+<span class="c1"># SETTINGS FOR SIMULAQRON</span>
+<span class="c1">#########################</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">configparser</span> <span class="k">import</span> <span class="n">ConfigParser</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">cqc.backend.cqcLogMessageHandler</span> <span class="k">import</span> <span class="n">CQCLogMessageHandler</span>
+<span class="kn">from</span> <span class="nn">cqc.backend.cqcMessageHandler</span> <span class="k">import</span> <span class="n">SimulaqronCQCHandler</span>
+<span class="kn">from</span> <span class="nn">simulaqron.toolbox</span> <span class="k">import</span> <span class="n">get_simulaqron_path</span>
+
+<span class="n">simulaqron_path</span> <span class="o">=</span> <span class="n">get_simulaqron_path</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+<span class="n">config_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">simulaqron_path</span><span class="p">,</span> <span class="s2">&quot;config&quot;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">_DefaultSettings</span><span class="p">:</span>
+    <span class="n">CONF_MAXQUBITS</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">CONF_MAXREGS</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="n">CONF_WAIT_TIME</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">CONF_LOGGING_LEVEL_BACKEND</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span>
+    <span class="n">CONF_LOGGING_LEVEL_FRONTEND</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span>
+    <span class="n">CONF_BACKEND_HANDLER</span> <span class="o">=</span> <span class="n">SimulaqronCQCHandler</span>
+    <span class="n">CONF_BACKEND</span> <span class="o">=</span> <span class="s2">&quot;stabilizer&quot;</span>
+    <span class="n">CONF_APP_FILE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_folder</span><span class="p">,</span> <span class="s2">&quot;appNodes.cfg&quot;</span><span class="p">)</span>
+    <span class="n">CONF_CQC_FILE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_folder</span><span class="p">,</span> <span class="s2">&quot;cqcNodes.cfg&quot;</span><span class="p">)</span>
+    <span class="n">CONF_VNODE_FILE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_folder</span><span class="p">,</span> <span class="s2">&quot;virtualNodes.cfg&quot;</span><span class="p">)</span>
+    <span class="n">CONF_NODES_FILE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_folder</span><span class="p">,</span> <span class="s2">&quot;Nodes.cfg&quot;</span><span class="p">)</span>
+    <span class="n">CONF_TOPOLOGY_FILE</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">CONF_NOISY_QUBITS</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">CONF_T1</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+<div class="viewcode-block" id="Settings"><a class="viewcode-back" href="../../simulaqron.html#simulaqron.settings.Settings">[docs]</a><span class="k">class</span> <span class="nc">Settings</span><span class="p">:</span>
+    <span class="c1"># Get path to SimulaQron folder</span>
+    <span class="n">simulaqron_path</span> <span class="o">=</span> <span class="n">get_simulaqron_path</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+
+    <span class="n">_settings_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">simulaqron_path</span><span class="p">,</span> <span class="s2">&quot;config/settings.ini&quot;</span><span class="p">)</span>
+    <span class="n">_config</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
+
+    <span class="c1"># default settings for if file is not ready yet</span>
+    <span class="n">CONF_MAXQUBITS</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_MAXQUBITS</span>
+    <span class="n">CONF_MAXREGS</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_MAXREGS</span>
+    <span class="n">CONF_WAIT_TIME</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_WAIT_TIME</span>
+    <span class="n">CONF_LOGGING_LEVEL_BACKEND</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_BACKEND</span>
+    <span class="n">CONF_LOGGING_LEVEL_FRONTEND</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_FRONTEND</span>
+    <span class="n">CONF_BACKEND_HANDLER</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_BACKEND_HANDLER</span>
+    <span class="n">CONF_BACKEND</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_BACKEND</span>
+    <span class="n">CONF_TOPOLOGY_FILE</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_TOPOLOGY_FILE</span>
+    <span class="n">CONF_APP_FILE</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_APP_FILE</span>
+    <span class="n">CONF_CQC_FILE</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_CQC_FILE</span>
+    <span class="n">CONF_VNODE_FILE</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_VNODE_FILE</span>
+    <span class="n">CONF_NODES_FILE</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_NODES_FILE</span>
+    <span class="n">CONF_NOISY_QUBITS</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_NOISY_QUBITS</span>
+    <span class="n">CONF_T1</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_T1</span>
+
+    <span class="n">log_levels</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;info&quot;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+        <span class="s2">&quot;debug&quot;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
+        <span class="s2">&quot;warning&quot;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span>
+        <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
+        <span class="s2">&quot;critical&quot;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">CRITICAL</span>
+    <span class="p">}</span>
+
+<div class="viewcode-block" id="Settings.init_settings"><a class="viewcode-back" href="../../simulaqron.html#simulaqron.settings.Settings.init_settings">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">init_settings</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+
+        <span class="n">_config</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_config</span>
+        <span class="n">_config</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_settings_file</span><span class="p">)</span>
+
+        <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="s2">&quot;BACKEND&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_config</span><span class="p">:</span>
+            <span class="n">_config</span><span class="p">[</span><span class="s1">&#39;BACKEND&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">_config</span><span class="p">[</span><span class="s1">&#39;BACKEND&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;MaxQubits_Per_Node&quot;</span> <span class="ow">in</span> <span class="n">backend</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_MAXQUBITS</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">backend</span><span class="p">[</span><span class="s1">&#39;MaxQubits_Per_Node&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_config</span><span class="p">[</span><span class="s1">&#39;BACKEND&#39;</span><span class="p">][</span><span class="s1">&#39;MaxQubits_Per_Node&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">CONF_MAXQUBITS</span><span class="p">)</span>
+            <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;MaxRegisters_Per_Node&quot;</span> <span class="ow">in</span> <span class="n">backend</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_MAXREGS</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">backend</span><span class="p">[</span><span class="s1">&#39;MaxRegisters_Per_Node&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_config</span><span class="p">[</span><span class="s1">&#39;BACKEND&#39;</span><span class="p">][</span><span class="s1">&#39;MaxRegisters_Per_Node&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">CONF_MAXREGS</span><span class="p">)</span>
+            <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;WaitTime&quot;</span> <span class="ow">in</span> <span class="n">backend</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_WAIT_TIME</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">backend</span><span class="p">[</span><span class="s1">&#39;WaitTime&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;WaitTime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">CONF_WAIT_TIME</span><span class="p">)</span>
+            <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;LogLevel&quot;</span> <span class="ow">in</span> <span class="n">backend</span><span class="p">:</span>
+            <span class="n">_log_level</span> <span class="o">=</span> <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;LogLevel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">_log_level</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">log_levels</span><span class="p">:</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_BACKEND</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">log_levels</span><span class="p">[</span><span class="n">_log_level</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;LogLevel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">log_levels</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span>
+                    <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">log_levels</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_BACKEND</span><span class="p">)]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;LogLevel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">log_levels</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span>
+                <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">log_levels</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_BACKEND</span><span class="p">)]</span>
+            <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;BackendHandler&quot;</span> <span class="ow">in</span> <span class="n">backend</span><span class="p">:</span>
+            <span class="n">_backend_handler</span> <span class="o">=</span> <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;BackendHandler&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;BackendHandler&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;simulaqron&quot;</span>
+            <span class="n">_backend_handler</span> <span class="o">=</span> <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;BackendHandler&#39;</span><span class="p">]</span>
+            <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">_backend_handler</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_BACKEND_HANDLER</span> <span class="o">=</span> <span class="n">CQCLogMessageHandler</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># default simulqron  (elif backend_handler.lower() == &quot;simulqron&quot;)</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_BACKEND_HANDLER</span> <span class="o">=</span> <span class="n">SimulaqronCQCHandler</span>
+
+        <span class="k">if</span> <span class="s2">&quot;Backend&quot;</span> <span class="ow">in</span> <span class="n">backend</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_BACKEND</span> <span class="o">=</span> <span class="n">backend</span><span class="p">[</span><span class="s2">&quot;backend&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">backend</span><span class="p">[</span><span class="s2">&quot;backend&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_BACKEND</span>
+            <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;Topology_File&quot;</span> <span class="ow">in</span> <span class="n">backend</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_TOPOLOGY_FILE</span> <span class="o">=</span> <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;Topology_File&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;Topology_File&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_TOPOLOGY_FILE</span>
+            <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;App_File&quot;</span> <span class="ow">in</span> <span class="n">backend</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_APP_FILE</span> <span class="o">=</span> <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;App_File&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;App_File&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_APP_FILE</span>
+            <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;Cqc_File&quot;</span> <span class="ow">in</span> <span class="n">backend</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_CQC_FILE</span> <span class="o">=</span> <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;Cqc_File&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;Cqc_File&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_CQC_FILE</span>
+            <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;Vnode_File&quot;</span> <span class="ow">in</span> <span class="n">backend</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_VNODE_FILE</span> <span class="o">=</span> <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;Vnode_File&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;Vnode_File&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_VNODE_FILE</span>
+            <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;Nodes_File&quot;</span> <span class="ow">in</span> <span class="n">backend</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_NODES_FILE</span> <span class="o">=</span> <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;Nodes_File&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;Nodes_File&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_NODES_FILE</span>
+            <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;noisy_qubits&quot;</span> <span class="ow">in</span> <span class="n">backend</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_NOISY_QUBITS</span> <span class="o">=</span> <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;noisy_qubits&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;True&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;noisy_qubits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">CONF_NOISY_QUBITS</span><span class="p">)</span>
+            <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;T1&quot;</span> <span class="ow">in</span> <span class="n">backend</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_T1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">backend</span><span class="p">[</span><span class="s1">&#39;T1&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">backend</span><span class="p">[</span><span class="s1">&#39;T1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">CONF_T1</span><span class="p">)</span>
+            <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;FRONTEND&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_config</span><span class="p">:</span>
+            <span class="n">_config</span><span class="p">[</span><span class="s1">&#39;FRONTEND&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">frontend</span> <span class="o">=</span> <span class="n">_config</span><span class="p">[</span><span class="s1">&#39;FRONTEND&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;LogLevel&quot;</span> <span class="ow">in</span> <span class="n">frontend</span><span class="p">:</span>
+            <span class="n">_log_level</span> <span class="o">=</span> <span class="n">frontend</span><span class="p">[</span><span class="s1">&#39;LogLevel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">_log_level</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">log_levels</span><span class="p">:</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_FRONTEND</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">log_levels</span><span class="p">[</span><span class="n">_log_level</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">frontend</span><span class="p">[</span><span class="s1">&#39;LogLevel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">log_levels</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span>
+                    <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">log_levels</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_FRONTEND</span><span class="p">)]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">frontend</span><span class="p">[</span><span class="s1">&#39;LogLevel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">log_levels</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span>
+                <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">log_levels</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_FRONTEND</span><span class="p">)]</span>
+            <span class="n">config_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">config_changed</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">save_settings</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Settings.save_settings"><a class="viewcode-back" href="../../simulaqron.html#simulaqron.settings.Settings.save_settings">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">save_settings</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_settings_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Settings.set_setting"><a class="viewcode-back" href="../../simulaqron.html#simulaqron.settings.Settings.set_setting">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">set_setting</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="n">section</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">save_settings</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Settings.default_settings"><a class="viewcode-back" href="../../simulaqron.html#simulaqron.settings.Settings.default_settings">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">default_settings</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_MAXQUBITS</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_MAXQUBITS</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_MAXREGS</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_MAXREGS</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_WAIT_TIME</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_WAIT_TIME</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_BACKEND</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_BACKEND</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_FRONTEND</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_FRONTEND</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_BACKEND_HANDLER</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_BACKEND_HANDLER</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_BACKEND</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_BACKEND</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_TOPOLOGY_FILE</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_TOPOLOGY_FILE</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_NOISY_QUBITS</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_NOISY_QUBITS</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">CONF_T1</span> <span class="o">=</span> <span class="n">_DefaultSettings</span><span class="o">.</span><span class="n">CONF_T1</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_settings_file</span><span class="p">)</span>
+
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">init_settings</span><span class="p">()</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">save_settings</span><span class="p">()</span></div></div>
+
+
+<span class="n">Settings</span><span class="o">.</span><span class="n">init_settings</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+  </body>
+</html>

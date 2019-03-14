@@ -35,7 +35,8 @@ The documentation below assumes familiarity with classical network programming c
    CQCInterface
    PythonLib
    Examples
-   SimulaQron
+   simulaqron
+   cqc
 
 
 Indices and tables

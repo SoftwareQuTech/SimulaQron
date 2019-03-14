@@ -184,7 +184,7 @@ If a simulated network (consisting of virtual nodes and CQC servers) are setup o
 
 Given the ip and port number of the CQC server of a node, you can send CQC messages over TCP using in any way you prefer. To know how these messages should look like to perform certain instructions, refer to :doc:`CQCInterface`.
 
-An easier way to send CQC messages to a CQC server of a node is to use the provided Python library. Assuming that you have a file in the form of the config/cqcNodes.cfg above, i.e. consisting of lines of the form `[name], [hostname/ip], [port]` you can then easily instanciate an object of the class :code:`SimulaQron.cqc.pythonLib.cqc.CQCConnection` which will communicate with the CQC server for you, using the CQC interface.
+An easier way to send CQC messages to a CQC server of a node is to use the provided Python library. Assuming that you have a file in the form of the config/cqcNodes.cfg above, i.e. consisting of lines of the form `[name], [hostname/ip], [port]` you can then easily instanciate an object of the class :code:`cqc.pythonLib.CQCConnection` which will communicate with the CQC server for you, using the CQC interface.
 
 Let's assume that you have a file cqcNodes_example.cfg which consist of the following lines::
 
@@ -194,7 +194,7 @@ Let's assume that you have a file cqcNodes_example.cfg which consist of the foll
 
 you can connect to the CQC server for the node Alice at 1.1.1.1 and port number 8801 by executing the following Python code::
 
-    from SimulaQron.cqc.pythonLib.cqc import CQCConnection
+    from cqc.pythonLib import CQCConnection
 
     cqc = CQCConnection("Alice", cqcFile=/path/to/cqcNodes_example.cfg)
 

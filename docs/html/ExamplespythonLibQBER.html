@@ -13,6 +13,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -117,7 +118,7 @@ You can also tune the coherence time <code class="code docutils literal notransl
 <div class="section" id="setting-up">
 <h2>Setting up<a class="headerlink" href="#setting-up" title="Permalink to this headline">¶</a></h2>
 <p>We will run everything locally (localhost) using two nodes, Alice and Bob. Start up the backend of the simulation by running (to make this example more interesting you should before turn on the noise on the qubits as described above):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startAll</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">nodes</span> <span class="s2">&quot;Alice Bob&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">main</span><span class="o">.</span><span class="n">py</span> <span class="n">network</span> <span class="n">start</span><span class="o">-</span><span class="nb">all</span> <span class="o">--</span><span class="n">nodes</span> <span class="n">Alice</span><span class="p">,</span><span class="n">Bob</span>
 </pre></div>
 </div>
 <p>The below example can then be executed when in the folder <cite>examples/cqc/pythonLib/teleport</cite> typing:</p>
@@ -264,7 +265,7 @@ You can also tune the coherence time <code class="code docutils literal notransl
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
   </body>
 </html>

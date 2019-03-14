@@ -13,6 +13,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -43,7 +44,6 @@
   <ul>
 <li><a class="reference internal" href="#">Getting started</a><ul>
 <li><a class="reference internal" href="#setup">Setup</a><ul>
-<li><a class="reference internal" href="#setting-up-a-virtual-environment">Setting up a virtual environment</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#verifying-the-installation">Verifying the installation</a></li>
 </ul>
@@ -96,22 +96,6 @@
 <div class="section" id="setup">
 <h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
 <p>SimulaQron requires <a class="reference external" href="https://python.org/">Python 3</a>  and <a class="reference external" href="http://twistedmatrix.com/trac/">Twisted</a>  along with the packages <em>scipy</em>, <em>Cython</em>, <em>service_identity</em>, <em>qutip</em>, <em>matplotlib</em>, <em>networkx</em>, <em>projectq</em> and <em>bitstring</em>.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">It is assumed that if you type <code class="code docutils literal notranslate"><span class="pre">python</span></code> in a terminal Python 3.x starts. If typing <code class="code docutils literal notranslate"><span class="pre">python</span></code> starts Python 2.x for you and you do not know how to fix this, see below:</p>
-</div>
-<div class="section" id="setting-up-a-virtual-environment">
-<h3>Setting up a virtual environment<a class="headerlink" href="#setting-up-a-virtual-environment" title="Permalink to this headline">¶</a></h3>
-<p>A virtual environment can be setup using <a class="reference external" href="https://virtualenv.pypa.io/en/stable/">virtualenv</a> or <a class="reference external" href="https://conda.io/docs/">conda</a>. For someone new to Python, using conda is the easy option and we give a brief description here. Further details can be found at <a class="reference external" href="https://conda.io/docs/user-guide/getting-started.html#managing-environments">https://conda.io/docs/user-guide/getting-started.html#managing-environments</a>.</p>
-<p>To install conda, follow the link below that corresponds to your operating system:</p>
-<ul class="simple">
-<li><a class="reference external" href="https://conda.io/docs/user-guide/install/linux.html">Linux</a></li>
-<li><a class="reference external" href="https://conda.io/docs/user-guide/install/macos.html">OSX</a></li>
-<li><a class="reference external" href="https://conda.io/docs/user-guide/install/windows.html">Windows</a></li>
-</ul>
-<p>and go through the instructions to install conda. When you download the installer, make sure to choose the 3.x version.
-Alternatively you can use the dockerfile in the root of the repository.</p>
-</div>
 <div class="section" id="installation">
 <h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h3>
 <p>To install SimulaQron itself, you can clone the git repository. Do:</p>
@@ -160,14 +144,14 @@ We will here illustrate how to use SimulaQron with the Python library.</p>
 <div class="section" id="starting-the-simulaqron-backend">
 <h3>Starting the SimulaQron backend<a class="headerlink" href="#starting-the-simulaqron-backend" title="Permalink to this headline">¶</a></h3>
 <p>By default SimulaQron uses the five nodes Alice, Bob, Charlie, David and Eve on your local computers. In this example there will be two processes for each node listening to incoming messages on a certain port number. These make up the simulation backend and the CQC server. To start the processes and thus the backend of SimulaQron simply type:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startAll</span><span class="o">.</span><span class="n">sh</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">main</span><span class="o">.</span><span class="n">py</span> <span class="n">network</span> <span class="n">start</span><span class="o">-</span><span class="nb">all</span>
 </pre></div>
 </div>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">Running <code class="code docutils literal notranslate"><span class="pre">sh</span> <span class="pre">run/startAll.sh</span></code> will be default start up servers on localhost (i.e., your own computer), using port numbers 8801-8811, to form the simulated quantum internet hardware. SimulaQron does not provide any access control to its simulated hardware, so you are responsible to securing access should this be relevant for you. You can also run the different simulated nodes on different computers. We do not take any responsibility for problems caused by SimulaQron.</p>
+<p class="last">Running <code class="code docutils literal notranslate"><span class="pre">./cli/main.py</span> <span class="pre">network</span> <span class="pre">start-all</span></code> will be default start up servers on localhost (i.e., your own computer), using port numbers 8801-8811, to form the simulated quantum internet hardware. SimulaQron does not provide any access control to its simulated hardware, so you are responsible to securing access should this be relevant for you. You can also run the different simulated nodes on different computers. We do not take any responsibility for problems caused by SimulaQron.</p>
 </div>
-<p>For more information on what <code class="code docutils literal notranslate"><span class="pre">sh</span> <span class="pre">run/startAll.sh</span></code> does, how to change the nodes and the ports of the network, the topology etc, see <a class="reference internal" href="ConfNodes.html"><span class="doc">Configuring the simulated network</span></a>.</p>
+<p>For more information on what <code class="code docutils literal notranslate"><span class="pre">./cli/main.py</span> <span class="pre">network</span> <span class="pre">start-all</span></code> does, how to change the nodes and the ports of the network, the topology etc, see <a class="reference internal" href="ConfNodes.html"><span class="doc">Configuring the simulated network</span></a>.</p>
 </div>
 <div class="section" id="running-a-protocol">
 <h3>Running a protocol<a class="headerlink" href="#running-a-protocol" title="Permalink to this headline">¶</a></h3>
@@ -248,7 +232,7 @@ The full code in aliceTest.py is:</p>
 <dd><ul class="first last">
 <li><code class="code docutils literal notranslate"><span class="pre">maxqubits_per_node</span></code> (default 20): This is the maximum virtual qubits a node can store. Note that a node can still have more simulated qubits.</li>
 <li><code class="code docutils literal notranslate"><span class="pre">maxregisters_per_node</span></code> (default 1000): This is the maximum of qubit registers a virtual node can store.</li>
-<li><code class="code docutils literal notranslate"><span class="pre">waittime</span></code> (default 0.5): This is the amount of time that the virtual nodes will wait to try to set up connection between them (when running <code class="code docutils literal notranslate"><span class="pre">sh</span> <span class="pre">run/startAll.sh</span></code>. If you’re setting up SimulaQron between multiple computers, you may wish to increase this.</li>
+<li><code class="code docutils literal notranslate"><span class="pre">waittime</span></code> (default 0.5): This is the amount of time that the virtual nodes will wait to try to set up connection between them (when running <code class="code docutils literal notranslate"><span class="pre">./cli/main.py</span> <span class="pre">network</span> <span class="pre">start-all</span></code>). If you’re setting up SimulaQron between multiple computers, you may wish to increase this.</li>
 <li><code class="code docutils literal notranslate"><span class="pre">loglevel</span></code> (default <cite>warning</cite>): Determines which logging messages should be printed from the backend. Options are <cite>critical</cite>, <cite>error</cite>, <cite>warning</cite>, <cite>info</cite> and <cite>debug</cite>, with increasing amount of logging. Setting the log-level to <cite>debug</cite> will print a lot of messages.</li>
 <li><code class="code docutils literal notranslate"><span class="pre">backendhandler</span></code> (default <cite>simulaqron</cite>): This is to set different types of backends for parsing the CQC messages. Current options are <cite>simulaqron</cite> and <cite>log</cite> (simply log the CQC messages). Unless you know what you’re doing don’t change this!</li>
 <li><code class="code docutils literal notranslate"><span class="pre">backend</span></code> (default <cite>projectq</cite>): Current choices are: <cite>qutip</cite> (mixed states), <cite>projectq</cite> (pure states) and <cite>stabilizer</cite> (stabilizer states and only Clifford operations).</li>
@@ -305,7 +289,7 @@ The full code in aliceTest.py is:</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
   </body>
 </html>

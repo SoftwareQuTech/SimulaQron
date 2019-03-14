@@ -290,7 +290,7 @@ class StabilizerState:
 
     def add_qubit(self):
         """
-        Appends a qubit in the state |0> to the current state
+        Appends a qubit in the state \|0\> to the current state
         :return: None
         """
         z0 = StabilizerState([[0, 1]])
@@ -304,15 +304,17 @@ class StabilizerState:
         self._group = self.boolean_gaussian_elimination(self._group)
 
     def tensor_product(self, other):
-        """
+        r"""
         Performs the tensor product with another StabilizerState and returns a new
         StabilizerState.
 
         This can also be done using '*' as for example:
-            s1 = StabilizerState([[0, 1]])  # The state |0>
-            s2 = StabilizerState([[0, 1]])  # The state |0>
 
-            s3 = s1 * s2  # This is then the state |00>
+            s1 = StabilizerState([[0, 1]])  # The state \|0\>
+            s2 = StabilizerState([[0, 1]])  # The state \|0\>
+
+            s3 = s1 * s2  # This is then the state \|00\>
+
         :param other: The other StabilizerState to perform the tensor product with
         :type other: :obj:`StabilizerState`
         :return: The tensor product of self and other
@@ -342,8 +344,11 @@ class StabilizerState:
         Returns the numpy array representing the stabilizer group of this state.
         See doc-string for __init__ how the elements of this numpy array are treated.
         Since, the __init__ takes an array as input, given a StabilizerState 's1' on can do:
+
             s2 = StabilizerState(to_array(s1))
+
         and 's1' and 's2' will represent the same state.
+
         :return: The generators of this stabilizer group as a numpy array
         :rtype: :obj:`numpy.array`
         """

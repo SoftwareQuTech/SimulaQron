@@ -1,0 +1,354 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>simulaqron.virtNode.basics &#8212; SimulaQron 1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for simulaqron.virtNode.basics</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2017, Stephanie Wehner and Axel Dahlberg</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c1"># modification, are permitted provided that the following conditions are met:</span>
+<span class="c1"># 1. Redistributions of source code must retain the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer.</span>
+<span class="c1"># 2. Redistributions in binary form must reproduce the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer in the</span>
+<span class="c1">#    documentation and/or other materials provided with the distribution.</span>
+<span class="c1"># 3. All advertising materials mentioning features or use of this software</span>
+<span class="c1">#    must display the following acknowledgement:</span>
+<span class="c1">#    This product includes software developed by Stephanie Wehner, QuTech.</span>
+<span class="c1"># 4. Neither the name of the QuTech organization nor the</span>
+<span class="c1">#    names of its contributors may be used to endorse or promote products</span>
+<span class="c1">#    derived from this software without specific prior written permission.</span>
+<span class="c1">#</span>
+<span class="c1"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER &#39;&#39;AS IS&#39;&#39; AND ANY</span>
+<span class="c1"># EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED</span>
+<span class="c1"># WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE</span>
+<span class="c1"># DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY</span>
+<span class="c1"># DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES</span>
+<span class="c1"># (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;</span>
+<span class="c1"># LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND</span>
+<span class="c1"># ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<span class="c1"># (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS</span>
+<span class="c1"># SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">from</span> <span class="nn">twisted.spread</span> <span class="k">import</span> <span class="n">pb</span>
+
+
+<div class="viewcode-block" id="quantumError"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumError">[docs]</a><span class="k">class</span> <span class="nc">quantumError</span><span class="p">(</span><span class="n">pb</span><span class="o">.</span><span class="n">Error</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="noQubitError"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.noQubitError">[docs]</a><span class="k">class</span> <span class="nc">noQubitError</span><span class="p">(</span><span class="n">quantumError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="virtNetError"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.virtNetError">[docs]</a><span class="k">class</span> <span class="nc">virtNetError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="quantumEngine"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine">[docs]</a><span class="k">class</span> <span class="nc">quantumEngine</span><span class="p">(</span><span class="n">pb</span><span class="o">.</span><span class="n">Referenceable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Basic quantum engine. Abstract class meant to be subclassed to implement different simulation backends.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        Arguments</span>
+<span class="sd">        node		node this register is started from</span>
+<span class="sd">        num		number of this register</span>
+<span class="sd">        maxQubits	maximum number of qubits this register supports</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">maxQubits</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxQubits</span> <span class="o">=</span> <span class="n">maxQubits</span>
+
+        <span class="c1"># Each register has a number, this may be used be the ``outside`` application</span>
+        <span class="c1"># using this simulator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num</span> <span class="o">=</span> <span class="n">num</span>
+
+        <span class="c1"># Node that actually simulates this register</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simNode</span> <span class="o">=</span> <span class="n">node</span>
+
+<div class="viewcode-block" id="quantumEngine.add_fresh_qubit"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.add_fresh_qubit">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">add_fresh_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a new qubit initialized in the \|0\&gt; state.</span>
+<span class="sd">        :return: The qubit number</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.add_qubit"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.add_qubit">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">add_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newQubit</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add new qubit in the state described by the density matrix newQubit</span>
+<span class="sd">        :return: The qubit number</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.remove_qubit"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.remove_qubit">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">remove_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes the qubit with the desired number qubitNum</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.get_register_RI"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.get_register_RI">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_register_RI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves the entire register in real and imaginary parts and returns the result as a</span>
+<span class="sd">        list. Twisted only likes to send real valued lists, not complex ones.</span>
+<span class="sd">        :return: The real and imaginary parts of a qubit state</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.apply_H"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.apply_H">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">apply_H</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a Hadamard gate to the qubits with number qubitNum.</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.apply_K"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.apply_K">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">apply_K</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a K gate to the qubits with number qubitNum. Maps computational basis to Y eigenbasis.</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.apply_X"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.apply_X">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">apply_X</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a X gate to the qubits with number qubitNum.</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.apply_Z"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.apply_Z">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">apply_Z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a Z gate to the qubits with number qubitNum.</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.apply_Y"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.apply_Y">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">apply_Y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a Y gate to the qubits with number qubitNum.</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.apply_T"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.apply_T">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">apply_T</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a T gate to the qubits with number qubitNum.</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.apply_rotation"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.apply_rotation">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">apply_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError</span>
+<span class="sd">        is raised.</span>
+
+<span class="sd">        :param qubitNum: int</span>
+<span class="sd">            Qubit number</span>
+<span class="sd">        :param n: tuple</span>
+<span class="sd">            A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)</span>
+<span class="sd">        :param a: float</span>
+<span class="sd">            The rotation angle in radians.</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.apply_CNOT"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.apply_CNOT">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">apply_CNOT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum1</span><span class="p">,</span> <span class="n">qubitNum2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies the CNOT to the qubit with the numbers qubitNum1 and qubitNum2.</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.apply_CPHASE"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.apply_CPHASE">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">apply_CPHASE</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum1</span><span class="p">,</span> <span class="n">qubitNum2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies the CPHASE to the qubit with the numbers qubitNum1 and qubitNum2.</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.apply_onequbit_gate"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.apply_onequbit_gate">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">apply_onequbit_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gateU</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a unitary gate to the specified qubit.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        gateU   	unitary to apply as Qobj</span>
+<span class="sd">        qubitNum 	the number of the qubit this gate is applied to</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.apply_twoqubit_gate"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.apply_twoqubit_gate">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">apply_twoqubit_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gateU</span><span class="p">,</span> <span class="n">qubit1</span><span class="p">,</span> <span class="n">qubit2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a unitary gate to the two specified qubits.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        gateU		unitary to apply as Qobj</span>
+<span class="sd">        qubit1 		the first qubit</span>
+<span class="sd">        qubit2		the second qubit</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.measure_qubit_inplace"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.measure_qubit_inplace">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">measure_qubit_inplace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Measures the desired qubit in the standard basis. This returns the classical outcome. The quantum register</span>
+<span class="sd">        is in the post-measurment state corresponding to the obtained outcome.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        qubitNum	qubit to be measured</span>
+<span class="sd">        :return: The meaurement outcome</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.measure_qubit"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.measure_qubit">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">measure_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Measures the desired qubit in the standard basis. This returns the classical outcome and deletes the qubit.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        qubitNum	qubit to be measured</span>
+<span class="sd">        :return: The meaurement outcome</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.replace_qubit"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.replace_qubit">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">replace_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replaces the qubit at position qubitNum with the one given by state.</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.absorb"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.absorb">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">absorb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Absorb the qubits from the other engine into this one. This is done by tensoring the state at the end.</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="quantumEngine.absorb_parts"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.absorb_parts">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">absorb_parts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">activeQ</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Absorb the qubits, given in pieces</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        R		real part of the qubit state as a list</span>
+<span class="sd">        I		imaginary part as a list</span>
+<span class="sd">        activeQ		active number of qubits</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+  </body>
+</html>

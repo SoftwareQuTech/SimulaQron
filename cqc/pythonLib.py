@@ -847,7 +847,7 @@ class CQCConnection:
     def _extract_header(self, header_class):
         """
         Extracts the given header class from the first part of the current buffer.
-        :param header_class: Subclassed from `SimulaQron.cqc.backend.cqcHeader.Header`
+        :param header_class: Subclassed from `cqc.backend.cqcHeader.Header`
         :return: An instance of the class
         """
         if not issubclass(header_class, Header):
@@ -911,7 +911,7 @@ class CQCConnection:
 
         :param message: str
             the cqc message to be parsed
-        :param q: :obj:`SimulaQron.cqc.pythonLib.cqc.qubit`
+        :param q: :obj:`cqc.pythonLib.qubit`
             the qubit object we should save the qubit to
         :param is_factory: bool
             whether the returned message came from a factory. If so, do not change the qubit, but create a new one

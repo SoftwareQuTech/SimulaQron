@@ -54,6 +54,7 @@ def construct_node_configs(nodes=None):
     """
     Constructs the config files for the nodes and their port numbers.
     Port number used will start from 8801 and end at '8801 + 3*len(nodes)'.
+
     :param nodes: list of str or None
         List of the names of the nodes.
         If None then the nodes Alice, Bob, Charlie, David and Eve is used.
@@ -109,6 +110,7 @@ def construct_node_configs(nodes=None):
 def construct_topology_config(topology, nodes, save_fig=True):
     """
     Constructs a json file at config/topology.json, used to define the topology of the network.
+
     :param topology: str
         Should be one of the following: None, 'complete', 'ring', 'random_tree'.
     :param nodes: list of str
@@ -184,6 +186,7 @@ def construct_topology_config(topology, nodes, save_fig=True):
 def get_random_tree(nodes):
     """
     Constructs a dictionary describing a random tree, with the name of the vertices are taken from the 'nodes'
+
     :param nodes: list of str
         Name of the nodes to be used
     :return: dct
@@ -205,6 +208,7 @@ def get_random_connected(nodes, nr_edges):
     """
     Constructs a dictionary describing a random connected graph with a specified number of edges,
     with the name of the vertices are taken from the 'nodes'
+
     :param nodes: list of str
         Name of the nodes to be used
     :param nr_edges: int
