@@ -40,4 +40,23 @@ _verified:
 
 verify: clean python-deps lint tests _verified
 
+remove_build:
+	@rm -r build
+
+remove_dist:
+	@rm -r dist
+
+remove_egg_info:
+	@rm -r *.egg-info
+
+clear_build: remove_build remove_dist remove_egg_info
+
+_build_simulaqron:
+	@${PYTHON} setup.py sdist bdist_wheel
+
+build: clear_build _build_simulaqron _build_cqc
+
+_build_cqc:
+	@${PYTHON} cqc/setup.py sdist bdist_wheel
+
 .PHONY: clean format lint python-deps tests full_tests verify
