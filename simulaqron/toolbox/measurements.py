@@ -39,11 +39,11 @@ def parity_meas(qubits, bases, node, negative=False):
     provided 'node'.
 
     :param qubits: List of qubits to be measured.
-    :type qubits: list of :obj: `SimulaQron.cqc.pythonLib.cqc.qubit`
+    :type qubits: list of :obj: `cqc.pythonLib.qubit`
     :param bases: String specifying the Pauli-bases of the measurement. Example bases="IXY" for three qubits.
     :type bases: str
     :param node: The node storing the qubits. Used for creating an ancilla qubit.
-    :type node: :obj: `SimulaQron.cqc.pythonLib.cqc.CQCConnection`
+    :type node: :obj: `cqc.pythonLib.CQCConnection`
     :param negative: If the measurement outcome should be flipped or not.
     :type negative: bool
     :return: The measurement outcome 0 or 1, where 0 correspond to the +1 eigenvalue of the measurement operator.

@@ -1,0 +1,145 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>cqc.pythonLib_protocols.coinflip_leader &#8212; SimulaQron 1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cqc.pythonLib_protocols.coinflip_leader</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">cqc.pythonLib</span> <span class="k">import</span> <span class="n">CQCConnection</span><span class="p">,</span> <span class="n">qubit</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+
+<div class="viewcode-block" id="CoinflipConsensus"><a class="viewcode-back" href="../../../cqc.pythonLib_protocols.html#cqc.pythonLib_protocols.coinflip_leader.CoinflipConsensus">[docs]</a><span class="k">class</span> <span class="nc">CoinflipConsensus</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inits the algo with the list of candidates ids.</span>
+<span class="sd">        :param queue: the list of candidates ids.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">queue</span>
+
+    <span class="k">def</span> <span class="nf">_atomic_flip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate1</span><span class="p">,</span> <span class="n">candidate2</span><span class="p">,</span> <span class="n">coeff</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs the basic biased coinflip between two parties.</span>
+<span class="sd">        :param candidate1: the first party id.</span>
+<span class="sd">        :param candidate2: the second party id.</span>
+<span class="sd">        :param coeff: bias.</span>
+<span class="sd">        :return: the winner id.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">CQCConnection</span><span class="p">(</span><span class="n">candidate1</span><span class="p">)</span> <span class="k">as</span> <span class="n">Alice</span><span class="p">:</span>
+            <span class="n">qA</span> <span class="o">=</span> <span class="n">qubit</span><span class="p">(</span><span class="n">Alice</span><span class="p">)</span>
+            <span class="n">qB</span> <span class="o">=</span> <span class="n">qubit</span><span class="p">(</span><span class="n">Alice</span><span class="p">)</span>
+
+            <span class="c1"># Bias</span>
+            <span class="n">angle</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="n">coeff</span><span class="p">)</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">angle</span> <span class="o">*</span> <span class="mi">256</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
+            <span class="n">qA</span><span class="o">.</span><span class="n">rot_Y</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+            <span class="n">qA</span><span class="o">.</span><span class="n">cnot</span><span class="p">(</span><span class="n">qB</span><span class="p">)</span>
+            <span class="n">qB</span><span class="o">.</span><span class="n">X</span><span class="p">()</span>
+
+            <span class="c1"># Send qubit qB to Bob.</span>
+            <span class="n">Alice</span><span class="o">.</span><span class="n">sendQubit</span><span class="p">(</span><span class="n">qB</span><span class="p">,</span> <span class="n">candidate2</span><span class="p">)</span>
+
+            <span class="c1"># Measure the qubits.</span>
+            <span class="n">measured_value</span> <span class="o">=</span> <span class="n">qA</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
+
+            <span class="k">with</span> <span class="n">CQCConnection</span><span class="p">(</span><span class="n">candidate2</span><span class="p">)</span> <span class="k">as</span> <span class="n">Bob</span><span class="p">:</span>
+                <span class="n">qB</span> <span class="o">=</span> <span class="n">Bob</span><span class="o">.</span><span class="n">recvQubit</span><span class="p">()</span>
+                <span class="n">bob_value</span> <span class="o">=</span> <span class="n">qB</span><span class="o">.</span><span class="n">measure</span><span class="p">()</span>
+                <span class="k">assert</span> <span class="n">measured_value</span> <span class="o">+</span> <span class="n">bob_value</span> <span class="o">==</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">measured_value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># `candidate1` is a winner.</span>
+                <span class="k">return</span> <span class="n">candidate1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">candidate2</span>
+
+<div class="viewcode-block" id="CoinflipConsensus.leader"><a class="viewcode-back" href="../../../cqc.pythonLib_protocols.html#cqc.pythonLib_protocols.coinflip_leader.CoinflipConsensus.leader">[docs]</a>    <span class="k">def</span> <span class="nf">leader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes the coinflip leader election algo.</span>
+<span class="sd">        :return: the selected leader id.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span>
+
+        <span class="n">winner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># This is calculated to bias the every next coinflip to</span>
+            <span class="c1"># equalize candidates&#39; chances to win.</span>
+            <span class="n">coeff</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">winner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atomic_flip</span><span class="p">(</span><span class="n">winner</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">coeff</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">winner</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+  </body>
+</html>

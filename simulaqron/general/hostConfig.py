@@ -47,6 +47,17 @@ def cqc_node_id_from_addrinfo(addr):
     return cqc_node_id(fam, ip)
 
 
+def load_node_names(config_file):
+    """
+    Load list of nodes from Nodes.cfg file
+
+    :param config_file: str
+        pointing to Nodes.cfg file
+    """
+    with open(config_file, 'r') as f:
+        return [line.strip() for line in f.readlines()]
+
+
 class networkConfig(pb.Referenceable):
     def __init__(self, filename):
         """

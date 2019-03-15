@@ -435,18 +435,15 @@ Starting
 
 We first start the virtual quantum node backend, by executing::
 
-	cd "$NETSIM"/run
-	python startNode.py Alice &
-	python startNode.py Bob &
-	python startNode.py David &
-	python startNode.py Charlie &
-
-where $NETSIM is the environment variable defining the SimulaQron directory as outlined in :doc:`GettingStarted`.
+	python3 simulaqron/run/startNode.py Alice &
+	python3 simulaqron/run/startNode.py Bob &
+	python3 simulaqron/run/startNode.py David &
+	python3 simulaqron/run/startNode.py Charlie &
 
 We then start up the programs for the parties themselves. These will connect to the virtual quantum nodes, and execute the quantum commands and classical communication outlined above, in the same directory as we placed classicalNet.cfg::
 
-	python bobTest.py &
-	python charlieTest.py &
-	python davidTest.py &
-	python aliceTest.py
+	python3 bobTest.py &
+	python3 charlieTest.py &
+	python3 davidTest.py &
+	python3 aliceTest.py
 

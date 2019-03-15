@@ -50,14 +50,20 @@ from simulaqron.settings import Settings
 from simulaqron.toolbox import get_simulaqron_path
 
 
-def construct_node_configs(nodes):
+def construct_node_configs(nodes=None):
     """
     Constructs the config files for the nodes and their port numbers.
     Port number used will start from 8801 and end at '8801 + 3*len(nodes)'.
-    :param nodes: list of str
+
+    :param nodes: list of str or None
         List of the names of the nodes.
+        If None then the nodes Alice, Bob, Charlie, David and Eve is used.
     :return: None
     """
+    # Default
+    if nodes is None:
+        nodes = ["Alice", "Bob", "Charlie", "David", "Eve"]
+
     nrNodes = len(nodes)
     if nrNodes == 0:
         return
@@ -67,13 +73,13 @@ def construct_node_configs(nodes):
 
     # Get path to configuration files
     conf_files = [
-        os.path.join(simulaqron_path, "config/virtualNodes.cfg"),
-        os.path.join(simulaqron_path, "config/cqcNodes.cfg"),
-        os.path.join(simulaqron_path, "config/appNodes.cfg")
+        Settings.CONF_VNODE_FILE,
+        Settings.CONF_CQC_FILE,
+        Settings.CONF_APP_FILE
     ]
 
     # File for just a simple list of the nodes
-    node_file = os.path.join(simulaqron_path, "config/Nodes.cfg")
+    node_file = Settings.CONF_NODES_FILE
     # What port numbers to start with
     start_nr = [8801, 8801 + nrNodes, 8801 + 2 * nrNodes]
 
@@ -104,6 +110,7 @@ def construct_node_configs(nodes):
 def construct_topology_config(topology, nodes, save_fig=True):
     """
     Constructs a json file at config/topology.json, used to define the topology of the network.
+
     :param topology: str
         Should be one of the following: None, 'complete', 'ring', 'random_tree'.
     :param nodes: list of str
@@ -113,7 +120,9 @@ def construct_topology_config(topology, nodes, save_fig=True):
     :return: None
     """
     if topology:
-        if topology == "complete":
+        if isinstance(topology, dict):
+            adjacency_dct = {node: topology[node] for node in nodes}
+        elif topology == "complete":
             adjacency_dct = {}
             for i, node in enumerate(nodes):
                 adjacency_dct[node] = nodes[:i] + nodes[i + 1 :]
@@ -177,6 +186,7 @@ def construct_topology_config(topology, nodes, save_fig=True):
 def get_random_tree(nodes):
     """
     Constructs a dictionary describing a random tree, with the name of the vertices are taken from the 'nodes'
+
     :param nodes: list of str
         Name of the nodes to be used
     :return: dct
@@ -198,6 +208,7 @@ def get_random_connected(nodes, nr_edges):
     """
     Constructs a dictionary describing a random connected graph with a specified number of edges,
     with the name of the vertices are taken from the 'nodes'
+
     :param nodes: list of str
         Name of the nodes to be used
     :param nr_edges: int

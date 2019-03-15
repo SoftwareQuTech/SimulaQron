@@ -1,0 +1,264 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>simulaqron.toolbox.manage_nodes &#8212; SimulaQron 1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for simulaqron.toolbox.manage_nodes</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="k">import</span> <span class="n">closing</span>
+<span class="kn">from</span> <span class="nn">socket</span> <span class="k">import</span> <span class="n">AF_INET</span><span class="p">,</span> <span class="n">SOCK_STREAM</span><span class="p">,</span> <span class="n">socket</span>
+
+<span class="kn">from</span> <span class="nn">simulaqron.toolbox</span> <span class="k">import</span> <span class="n">get_simulaqron_path</span>
+<span class="kn">from</span> <span class="nn">simulaqron.general.hostConfig</span> <span class="k">import</span> <span class="n">load_node_names</span><span class="p">,</span> <span class="n">networkConfig</span>
+<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="k">import</span> <span class="n">Settings</span>
+
+
+<span class="n">config_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">Settings</span><span class="o">.</span><span class="n">CONF_APP_FILE</span><span class="p">,</span> <span class="n">Settings</span><span class="o">.</span><span class="n">CONF_CQC_FILE</span><span class="p">,</span> <span class="n">Settings</span><span class="o">.</span><span class="n">CONF_VNODE_FILE</span><span class="p">]</span>
+<span class="n">node_config_file</span> <span class="o">=</span> <span class="n">Settings</span><span class="o">.</span><span class="n">CONF_NODES_FILE</span>
+<span class="n">simulaqron_path</span> <span class="o">=</span> <span class="n">get_simulaqron_path</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+<span class="n">config_folder</span> <span class="o">=</span> <span class="s2">&quot;config&quot;</span>
+<span class="n">default_topology_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">simulaqron_path</span><span class="p">,</span> <span class="n">config_folder</span><span class="p">,</span> <span class="s2">&quot;topology.json&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="add_node"><a class="viewcode-back" href="../../../simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.add_node">[docs]</a><span class="k">def</span> <span class="nf">add_node</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">hostname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">app_port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cqc_port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vnode_port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">neighbors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a node with the given name from the config files.</span>
+<span class="sd">    If the port numbers a not specified, unused ones will be chosen between 8000 and 9000.</span>
+
+<span class="sd">    :param name: str</span>
+<span class="sd">        Name of the node, e.g. Alice</span>
+<span class="sd">    :param hostname: str or None</span>
+<span class="sd">        Hostname, e.g. localhost (default) or 192.168.0.1</span>
+<span class="sd">    :param app_port: int or None</span>
+<span class="sd">        Port number for the application</span>
+<span class="sd">    :param cqc_port: int or None</span>
+<span class="sd">        Port number for the cqc server</span>
+<span class="sd">    :param vnode_port: int or None</span>
+<span class="sd">        Port number for the virtual node</span>
+<span class="sd">    :param neighbors: (list of str) or None</span>
+<span class="sd">        A list of neighbors, of this node, if None all current nodes in the network will be adjacent to the added node.</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">get_nodes</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot add node </span><span class="si">{}</span><span class="s2">, already in the network.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">hostname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">hostname</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span>
+
+    <span class="n">ports</span> <span class="o">=</span> <span class="p">[</span><span class="n">app_port</span><span class="p">,</span> <span class="n">cqc_port</span><span class="p">,</span> <span class="n">vnode_port</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">config_file</span><span class="p">,</span> <span class="n">port</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">config_files</span><span class="p">,</span> <span class="n">ports</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="n">_get_unused_port</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">avail</span> <span class="o">=</span> <span class="n">_check_port_available</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">avail</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot add node, since port </span><span class="si">{}</span><span class="s2"> is already in use.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">port</span><span class="p">))</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span>
+
+    <span class="n">node_config_path</span> <span class="o">=</span> <span class="n">Settings</span><span class="o">.</span><span class="n">CONF_NODES_FILE</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">node_config_path</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Update topology</span>
+    <span class="k">if</span> <span class="n">Settings</span><span class="o">.</span><span class="n">CONF_TOPOLOGY_FILE</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">topology_file</span> <span class="o">=</span> <span class="n">default_topology_file</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">topology_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">simulaqron_path</span><span class="p">,</span> <span class="n">Settings</span><span class="o">.</span><span class="n">CONF_TOPOLOGY_FILE</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">topology_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">topology</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">neighbors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">neighbors</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">get_nodes</span><span class="p">()</span> <span class="k">if</span> <span class="n">node</span> <span class="o">!=</span> <span class="n">name</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">node_neighbors</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">node</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">node_neighbors</span><span class="p">):</span>
+            <span class="n">node_neighbors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="n">node_neighbors</span><span class="p">):</span>
+            <span class="n">node_neighbors</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">topology</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">neighbors</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">topology_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_unused_port</span><span class="p">(</span><span class="n">hostname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns an unused port in the interval 8000 to 9000, if such exists, otherwise returns None.</span>
+<span class="sd">    :param hostname: str</span>
+<span class="sd">        Hostname, e.g. localhost or 192.168.0.1</span>
+<span class="sd">    :return: int or None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8000</span><span class="p">,</span> <span class="mi">9001</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_check_port_available</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">port</span>
+
+
+<span class="k">def</span> <span class="nf">_check_port_available</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks if the given port is not already set in the config files or used by some other process.</span>
+<span class="sd">    :param hostname: str</span>
+<span class="sd">        Hostname, e.g. localhost or 192.168.0.1</span>
+<span class="sd">    :param port: int</span>
+<span class="sd">        The port number</span>
+<span class="sd">    :return: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">config_file</span> <span class="ow">in</span> <span class="n">config_files</span><span class="p">:</span>
+        <span class="n">network_config</span> <span class="o">=</span> <span class="n">networkConfig</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">network_config</span><span class="o">.</span><span class="n">hostDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">port</span> <span class="o">==</span> <span class="n">host</span><span class="o">.</span><span class="n">port</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">_check_socket_is_free</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_check_socket_is_free</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">closing</span><span class="p">(</span><span class="n">socket</span><span class="p">(</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">SOCK_STREAM</span><span class="p">))</span> <span class="k">as</span> <span class="n">sock</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sock</span><span class="o">.</span><span class="n">connect_ex</span><span class="p">((</span><span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># Open</span>
+
+    <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># Closed (available)</span>
+
+
+<div class="viewcode-block" id="remove_node"><a class="viewcode-back" href="../../../simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.remove_node">[docs]</a><span class="k">def</span> <span class="nf">remove_node</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes the node with the given name from the config files.</span>
+<span class="sd">    :param name: str</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">config_files</span> <span class="o">+</span> <span class="p">[</span><span class="n">node_config_file</span><span class="p">]:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+        <span class="n">new_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">new_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">new_lines</span><span class="p">)</span>
+
+    <span class="n">topology_file</span> <span class="o">=</span> <span class="n">Settings</span><span class="o">.</span><span class="n">CONF_TOPOLOGY_FILE</span>
+    <span class="k">if</span> <span class="n">topology_file</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">topology_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">simulaqron_path</span><span class="p">,</span> <span class="n">topology_file</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">topology_file_path</span> <span class="o">=</span> <span class="n">default_topology_file</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">topology_file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">topology</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">topology</span><span class="p">:</span>
+        <span class="n">topology</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">neighbors</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">:</span>
+            <span class="n">neighbors</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">topology_file_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_nodes"><a class="viewcode-back" href="../../../simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.get_nodes">[docs]</a><span class="k">def</span> <span class="nf">get_nodes</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a list of the current nodes set in the config files.</span>
+<span class="sd">    :return: list of str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nodes_config_file</span> <span class="o">=</span> <span class="n">Settings</span><span class="o">.</span><span class="n">CONF_NODES_FILE</span>
+    <span class="n">current_nodes</span> <span class="o">=</span> <span class="n">load_node_names</span><span class="p">(</span><span class="n">nodes_config_file</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">current_nodes</span></div>
+
+
+<div class="viewcode-block" id="set_default_nodes"><a class="viewcode-back" href="../../../simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.set_default_nodes">[docs]</a><span class="k">def</span> <span class="nf">set_default_nodes</span><span class="p">():</span>
+    <span class="n">current_nodes</span> <span class="o">=</span> <span class="n">get_nodes</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">current_nodes</span><span class="p">:</span>
+        <span class="n">remove_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+    <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;Charlie&quot;</span><span class="p">,</span> <span class="s2">&quot;David&quot;</span><span class="p">,</span> <span class="s2">&quot;Eve&quot;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">hostname</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;localhost&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span><span class="p">):</span>
+        <span class="n">add_node</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">hostname</span><span class="p">)</span>
+
+    <span class="n">topology</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+        <span class="n">topology</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">neighbor</span> <span class="k">for</span> <span class="n">neighbor</span> <span class="ow">in</span> <span class="n">nodes</span> <span class="k">if</span> <span class="n">neighbor</span> <span class="o">!=</span> <span class="n">node</span><span class="p">]</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">default_topology_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+  </body>
+</html>

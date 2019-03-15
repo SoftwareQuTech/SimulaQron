@@ -9,6 +9,6 @@ A C, Python, and Rust Library for programming SimulaQron using the CQC Interface
 	:maxdepth: 2
 	:caption: Examples using the Classical-Quantum Combiner Interface
 
-	ExamplescLib
 	ExamplespythonLib
+	ExamplescLib
 

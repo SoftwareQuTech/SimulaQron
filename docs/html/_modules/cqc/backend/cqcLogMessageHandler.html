@@ -1,0 +1,559 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>cqc.backend.cqcLogMessageHandler &#8212; SimulaQron 1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cqc.backend.cqcLogMessageHandler</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2018, Stephanie Wehner and Axel Dahlberg</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c1"># modification, are permitted provided that the following conditions are met:</span>
+<span class="c1"># 1. Redistributions of source code must retain the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer.</span>
+<span class="c1"># 2. Redistributions in binary form must reproduce the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer in the</span>
+<span class="c1">#    documentation and/or other materials provided with the distribution.</span>
+<span class="c1"># 3. All advertising materials mentioning features or use of this software</span>
+<span class="c1">#    must display the following acknowledgement:</span>
+<span class="c1">#    This product includes software developed by Stephanie Wehner, QuTech.</span>
+<span class="c1"># 4. Neither the name of the QuTech organization nor the</span>
+<span class="c1">#    names of its contributors may be used to endorse or promote products</span>
+<span class="c1">#    derived from this software without specific prior written permission.</span>
+<span class="c1">#</span>
+<span class="c1"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER &#39;&#39;AS IS&#39;&#39; AND ANY</span>
+<span class="c1"># EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED</span>
+<span class="c1"># WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE</span>
+<span class="c1"># DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY</span>
+<span class="c1"># DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES</span>
+<span class="c1"># (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;</span>
+<span class="c1"># LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND</span>
+<span class="c1"># ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<span class="c1"># (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS</span>
+<span class="c1"># SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This class interfaces cqcMessageHandler, and is for testing purposes only</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">cqc.backend.cqcMessageHandler</span> <span class="k">import</span> <span class="n">CQCMessageHandler</span>
+<span class="kn">from</span> <span class="nn">cqc.backend.cqcHeader</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">CQCCmdHeader</span><span class="p">,</span>
+    <span class="n">CQCXtraHeader</span><span class="p">,</span>
+    <span class="n">CQC_CMD_HDR_LENGTH</span><span class="p">,</span>
+    <span class="n">CQC_CMD_XTRA_LENGTH</span><span class="p">,</span>
+    <span class="n">CQC_TIMEINFO_HDR_LENGTH</span><span class="p">,</span>
+    <span class="n">CQC_MEAS_OUT_HDR_LENGTH</span><span class="p">,</span>
+    <span class="n">CQC_XTRA_QUBIT_HDR_LENGTH</span><span class="p">,</span>
+    <span class="n">CQCFactoryHeader</span><span class="p">,</span>
+    <span class="n">CQCCommunicationHeader</span><span class="p">,</span>
+    <span class="n">CQCXtraQubitHeader</span><span class="p">,</span>
+    <span class="n">CQCRotationHeader</span><span class="p">,</span>
+    <span class="n">CQCNotifyHeader</span><span class="p">,</span>
+    <span class="n">CQCTimeinfoHeader</span><span class="p">,</span>
+    <span class="n">CQCMeasOutHeader</span><span class="p">,</span>
+    <span class="n">CQC_TP_NEW_OK</span><span class="p">,</span>
+    <span class="n">CQC_NOTIFY_LENGTH</span><span class="p">,</span>
+    <span class="n">CQC_TP_INF_TIME</span><span class="p">,</span>
+    <span class="n">CQC_TP_MEASOUT</span><span class="p">,</span>
+    <span class="n">CQC_TP_RECV</span><span class="p">,</span>
+    <span class="n">CQC_TP_EPR_OK</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">cqc.backend.entInfoHeader</span> <span class="k">import</span> <span class="n">EntInfoHeader</span><span class="p">,</span> <span class="n">ENT_INFO_LENGTH</span>
+
+
+<div class="viewcode-block" id="CQCLogMessageHandler"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler">[docs]</a><span class="k">class</span> <span class="nc">CQCLogMessageHandler</span><span class="p">(</span><span class="n">CQCMessageHandler</span><span class="p">):</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+    <span class="n">cur_qubit_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">logData</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">factory</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="n">factory</span>
+        <span class="n">CQCLogMessageHandler</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/logFile.json&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">CQCLogMessageHandler</span><span class="o">.</span><span class="n">dir_path</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.parse_data"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.parse_data">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">parse_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="n">comment</span><span class="p">,</span> <span class="n">node_name</span><span class="p">):</span>
+        <span class="n">subdata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;node_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_name</span>
+        <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;cqc_header&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;cmd_header&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">parse_cmd</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">xtra</span><span class="p">:</span>
+            <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;xtra_header&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">parse_xtra</span><span class="p">(</span><span class="n">xtra</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">logData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subdata</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">logData</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.parse_handle_data"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.parse_handle_data">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">parse_handle_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">comment</span><span class="p">,</span> <span class="n">node_name</span><span class="p">):</span>
+        <span class="n">cmd_l</span> <span class="o">=</span> <span class="n">CQC_CMD_HDR_LENGTH</span>
+        <span class="n">xtra_l</span> <span class="o">=</span> <span class="n">CQC_CMD_XTRA_LENGTH</span>
+        <span class="n">subdata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;node_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_name</span>
+        <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;cqc_header&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">cmd_l</span><span class="p">:</span>
+            <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;cmd_header&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">parse_cmd</span><span class="p">(</span><span class="n">CQCCmdHeader</span><span class="p">(</span><span class="n">data</span><span class="p">[:</span><span class="n">cmd_l</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">cmd_l</span> <span class="o">+</span> <span class="n">xtra_l</span><span class="p">:</span>
+            <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;xtra_header&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">parse_xtra</span><span class="p">(</span><span class="n">CQCXtraHeader</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">cmd_l</span><span class="p">:</span> <span class="n">cmd_l</span> <span class="o">+</span> <span class="n">xtra_l</span><span class="p">]))</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">logData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subdata</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">logData</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.parse_handle_factory"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.parse_handle_factory">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">parse_handle_factory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">comment</span><span class="p">,</span> <span class="n">node_name</span><span class="p">):</span>
+        <span class="n">subdata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;node_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_name</span>
+        <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;cqc_header&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">fact_hdr</span> <span class="o">=</span> <span class="n">CQCFactoryHeader</span><span class="p">(</span><span class="n">data</span><span class="p">[:</span> <span class="n">CQCFactoryHeader</span><span class="o">.</span><span class="n">HDR_LENGTH</span><span class="p">])</span>
+        <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;factory_iterations&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fact_hdr</span><span class="o">.</span><span class="n">num_iter</span>
+        <span class="n">subdata</span><span class="p">[</span><span class="s2">&quot;notify&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fact_hdr</span><span class="o">.</span><span class="n">notify</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">logData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subdata</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">logData</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.parse_header"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.parse_header">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">parse_header</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">header</span><span class="p">):</span>
+        <span class="n">header_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">header_data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">tp</span>
+        <span class="n">header_data</span><span class="p">[</span><span class="s2">&quot;app_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">app_id</span>
+        <span class="n">header_data</span><span class="p">[</span><span class="s2">&quot;header_length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span>
+        <span class="n">header_data</span><span class="p">[</span><span class="s2">&quot;is_set&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">is_set</span>
+        <span class="k">return</span> <span class="n">header_data</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.parse_cmd"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.parse_cmd">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">parse_cmd</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+        <span class="n">cmd_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">cmd_data</span><span class="p">[</span><span class="s2">&quot;notify&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">notify</span>
+        <span class="n">cmd_data</span><span class="p">[</span><span class="s2">&quot;block&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">block</span>
+        <span class="n">cmd_data</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">action</span>
+        <span class="n">cmd_data</span><span class="p">[</span><span class="s2">&quot;is_set&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">is_set</span>
+        <span class="n">cmd_data</span><span class="p">[</span><span class="s2">&quot;qubit_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span>
+        <span class="n">cmd_data</span><span class="p">[</span><span class="s2">&quot;instruction&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">instr</span>
+        <span class="k">return</span> <span class="n">cmd_data</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.parse_xtra"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.parse_xtra">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">parse_xtra</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xtra</span><span class="p">,</span> <span class="n">CQCCommunicationHeader</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">parse_com_hdr</span><span class="p">(</span><span class="n">xtra</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xtra</span><span class="p">,</span> <span class="n">CQCXtraQubitHeader</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">parse_xtra_qubit_hdr</span><span class="p">(</span><span class="n">xtra</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xtra</span><span class="p">,</span> <span class="n">CQCRotationHeader</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">parse_rot_hdr</span><span class="p">(</span><span class="n">xtra</span><span class="p">)</span>
+        <span class="n">xtra_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">xtra_data</span><span class="p">[</span><span class="s2">&quot;is_set&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xtra</span><span class="o">.</span><span class="n">is_set</span>
+        <span class="n">xtra_data</span><span class="p">[</span><span class="s2">&quot;qubit_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xtra</span><span class="o">.</span><span class="n">qubit_id</span>
+        <span class="n">xtra_data</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xtra</span><span class="o">.</span><span class="n">step</span>
+        <span class="n">xtra_data</span><span class="p">[</span><span class="s2">&quot;remote_app_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xtra</span><span class="o">.</span><span class="n">remote_app_id</span>
+        <span class="n">xtra_data</span><span class="p">[</span><span class="s2">&quot;remote_node&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xtra</span><span class="o">.</span><span class="n">remote_node</span>
+        <span class="n">xtra_data</span><span class="p">[</span><span class="s2">&quot;remote_port&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xtra</span><span class="o">.</span><span class="n">remote_port</span>
+        <span class="n">xtra_data</span><span class="p">[</span><span class="s2">&quot;cmdLength&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xtra</span><span class="o">.</span><span class="n">cmdLength</span>
+        <span class="k">return</span> <span class="n">xtra_data</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.parse_rot_hdr"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.parse_rot_hdr">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">parse_rot_hdr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">com_hdr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Communication header</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rot_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">rot_data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Rotation header&quot;</span>
+        <span class="n">rot_data</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">com_hdr</span><span class="o">.</span><span class="n">step</span>
+        <span class="k">return</span> <span class="n">rot_data</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.parse_com_hdr"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.parse_com_hdr">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">parse_com_hdr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">com_hdr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Communication header</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">com_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">com_data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Communication header&quot;</span>
+        <span class="n">com_data</span><span class="p">[</span><span class="s2">&quot;remote_app_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">com_hdr</span><span class="o">.</span><span class="n">remote_app_id</span>
+        <span class="n">com_data</span><span class="p">[</span><span class="s2">&quot;remote_node&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">com_hdr</span><span class="o">.</span><span class="n">remote_node</span>
+        <span class="n">com_data</span><span class="p">[</span><span class="s2">&quot;remote_port&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">com_hdr</span><span class="o">.</span><span class="n">remote_port</span>
+        <span class="k">return</span> <span class="n">com_data</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.parse_xtra_qubit_hdr"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.parse_xtra_qubit_hdr">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">parse_xtra_qubit_hdr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">com_hdr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Communication header</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">com_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">com_data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Extra qubit header&quot;</span>
+        <span class="n">com_data</span><span class="p">[</span><span class="s2">&quot;qubit_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">com_hdr</span><span class="o">.</span><span class="n">qubit_id</span>
+        <span class="k">return</span> <span class="n">com_data</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.handle_hello"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.handle_hello">[docs]</a>    <span class="k">def</span> <span class="nf">handle_hello</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Hello just requires us to return hello - for testing availability.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_handle_data</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s2">&quot;Handle Hello&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">handle_hello</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.handle_factory"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.handle_factory">[docs]</a>    <span class="k">def</span> <span class="nf">handle_factory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># Calls process_command, which should also log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_handle_factory</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s2">&quot;Handle factory&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">handle_factory</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.handle_time"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.handle_time">[docs]</a>    <span class="k">def</span> <span class="nf">handle_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_handle_data</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s2">&quot;Handle time&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="c1"># Read the command header to learn the qubit ID</span>
+        <span class="n">raw_cmd_header</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="n">CQC_CMD_HDR_LENGTH</span><span class="p">]</span>
+        <span class="n">cmd_hdr</span> <span class="o">=</span> <span class="n">CQCCmdHeader</span><span class="p">(</span><span class="n">raw_cmd_header</span><span class="p">)</span>
+        <span class="c1"># Craft reply</span>
+        <span class="c1"># First send an appropriate CQC Header</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">CQC_NOTIFY_LENGTH</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">CQC_TIMEINFO_HDR_LENGTH</span>
+        <span class="n">cqc_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_return_message</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span> <span class="n">CQC_TP_INF_TIME</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">cqc_version</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cqc_msg</span><span class="p">)</span>
+        <span class="c1"># Then we send a notify header with the timing details</span>
+        <span class="c1"># We do not have a qubit, so no timestamp either.</span>
+        <span class="c1"># So let&#39;s send back some random date</span>
+        <span class="n">datetime</span> <span class="o">=</span> <span class="mi">758505600</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCNotifyHeader</span><span class="p">()</span>
+            <span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">cmd_hdr</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCTimeinfoHeader</span><span class="p">()</span>
+            <span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">datetime</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_i"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_i">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_i</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Identity&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_x"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_x">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;X gate&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_y"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_y">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Y gate&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_z"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_z">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Z gate&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_t"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_t">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;T gate&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_h"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_h">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;H gate&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_k"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_k">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;K gate&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_rotx"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_rotx">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_rotx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Rotate x&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_roty"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_roty">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_roty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Rotate y&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_rotz"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_rotz">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_rotz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Rotate z&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_cnot"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_cnot">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_cnot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;CNOT gate&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_cphase"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_cphase">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_cphase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;CPhase gate&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_measure"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_measure">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Measure&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="c1"># We&#39;ll always have 2 as outcome</span>
+        <span class="k">if</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">CQC_NOTIFY_LENGTH</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">CQC_MEAS_OUT_HDR_LENGTH</span>
+        <span class="n">cqc_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_return_message</span><span class="p">(</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span> <span class="n">CQC_TP_MEASOUT</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
+                                             <span class="n">cqc_version</span><span class="o">=</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+
+        <span class="n">outcome</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">if</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCNotifyHeader</span><span class="p">()</span>
+            <span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCMeasOutHeader</span><span class="p">()</span>
+            <span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cqc_msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_measure_inplace"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_measure_inplace">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_measure_inplace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Measure in place&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="c1"># We&#39;ll always have 2 as outcome</span>
+        <span class="k">if</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">CQC_NOTIFY_LENGTH</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">CQC_MEAS_OUT_HDR_LENGTH</span>
+        <span class="n">cqc_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_return_message</span><span class="p">(</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span> <span class="n">CQC_TP_MEASOUT</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
+                                             <span class="n">cqc_version</span><span class="o">=</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+
+        <span class="n">outcome</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">if</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCNotifyHeader</span><span class="p">()</span>
+            <span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span><span class="p">,</span> <span class="n">outcome</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCMeasOutHeader</span><span class="p">()</span>
+            <span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cqc_msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_reset"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_reset">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Rest&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_send"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_send">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Send&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_recv"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_recv">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Receive&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">q_id</span> <span class="o">=</span> <span class="n">CQCLogMessageHandler</span><span class="o">.</span><span class="n">cur_qubit_id</span>
+        <span class="n">CQCLogMessageHandler</span><span class="o">.</span><span class="n">cur_qubit_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">CQC_NOTIFY_LENGTH</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">CQC_XTRA_QUBIT_HDR_LENGTH</span>
+        <span class="n">recv_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_return_message</span><span class="p">(</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span> <span class="n">CQC_TP_RECV</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
+                                              <span class="n">cqc_version</span><span class="o">=</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCNotifyHeader</span><span class="p">()</span>
+            <span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCXtraQubitHeader</span><span class="p">()</span>
+            <span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">qubit_id</span><span class="o">=</span><span class="n">q_id</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">recv_msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_epr"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_epr">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_epr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Create EPR&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="c1"># Get ip and port of this host</span>
+        <span class="n">host_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">ip</span>
+        <span class="n">host_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">port</span>
+        <span class="n">host_app_id</span> <span class="o">=</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span>
+
+        <span class="c1"># Get ip and port of remote host</span>
+        <span class="n">remote_node</span> <span class="o">=</span> <span class="n">xtra</span><span class="o">.</span><span class="n">remote_node</span>
+        <span class="n">remote_port</span> <span class="o">=</span> <span class="n">xtra</span><span class="o">.</span><span class="n">remote_port</span>
+        <span class="n">remote_app_id</span> <span class="o">=</span> <span class="n">xtra</span><span class="o">.</span><span class="n">remote_app_id</span>
+
+        <span class="c1"># Create the first qubit</span>
+        <span class="p">(</span><span class="n">succ</span><span class="p">,</span> <span class="n">q_id1</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_new</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="n">return_q_id</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_succ</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
+            <span class="k">return</span>
+
+            <span class="c1"># Create the second qubit</span>
+        <span class="p">(</span><span class="n">succ</span><span class="p">,</span> <span class="n">q_id2</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_new</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="n">return_q_id</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_succ</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
+            <span class="k">return</span>
+
+            <span class="c1"># Create headers for qubits</span>
+        <span class="n">cmd1</span> <span class="o">=</span> <span class="n">CQCCmdHeader</span><span class="p">()</span>
+        <span class="n">cmd1</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">cmd2</span> <span class="o">=</span> <span class="n">CQCCmdHeader</span><span class="p">()</span>
+        <span class="n">cmd2</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">xtra_cnot</span> <span class="o">=</span> <span class="n">CQCXtraQubitHeader</span><span class="p">()</span>
+        <span class="n">xtra_cnot</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id2</span><span class="p">)</span>
+
+        <span class="c1"># Produce EPR-pair</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cmd_h</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cmd_cnot</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd1</span><span class="p">,</span> <span class="n">xtra_cnot</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">CQC_NOTIFY_LENGTH</span> <span class="o">+</span> <span class="n">ENT_INFO_LENGTH</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">CQC_XTRA_QUBIT_HDR_LENGTH</span> <span class="o">+</span> <span class="n">ENT_INFO_LENGTH</span>
+        <span class="n">msg_ok</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_return_message</span><span class="p">(</span>
+            <span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span> <span class="n">CQC_TP_EPR_OK</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg_ok</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCNotifyHeader</span><span class="p">()</span>
+            <span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: Notify </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">hdr</span><span class="o">.</span><span class="n">printable</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCXtraQubitHeader</span><span class="p">()</span>
+            <span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">qubit_id</span><span class="o">=</span><span class="n">q_id1</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CQC </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">hdr</span><span class="o">.</span><span class="n">printable</span><span class="p">())</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c1"># Send entanglement info</span>
+        <span class="n">ent_id</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">ent_info</span> <span class="o">=</span> <span class="n">EntInfoHeader</span><span class="p">()</span>
+        <span class="n">ent_info</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span>
+            <span class="n">host_node</span><span class="p">,</span>
+            <span class="n">host_port</span><span class="p">,</span>
+            <span class="n">host_app_id</span><span class="p">,</span>
+            <span class="n">remote_node</span><span class="p">,</span>
+            <span class="n">remote_port</span><span class="p">,</span>
+            <span class="n">remote_app_id</span><span class="p">,</span>
+            <span class="n">ent_id</span><span class="p">,</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()),</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">msg_ent_info</span> <span class="o">=</span> <span class="n">ent_info</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg_ent_info</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_epr_recv"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_epr_recv">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_epr_recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Receive EPR&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">q_id</span> <span class="o">=</span> <span class="n">CQCLogMessageHandler</span><span class="o">.</span><span class="n">cur_qubit_id</span>
+        <span class="n">CQCLogMessageHandler</span><span class="o">.</span><span class="n">cur_qubit_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># We&#39;re not sending the entanglement info atm, because we do not have any</span>
+
+        <span class="k">if</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">CQC_NOTIFY_LENGTH</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">CQC_XTRA_QUBIT_HDR_LENGTH</span>
+        <span class="n">cqc_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_return_message</span><span class="p">(</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span> <span class="n">CQC_TP_RECV</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
+                                             <span class="n">cqc_version</span><span class="o">=</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCNotifyHeader</span><span class="p">()</span>
+            <span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCXtraQubitHeader</span><span class="p">()</span>
+            <span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">qubit_id</span><span class="o">=</span><span class="n">q_id</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cqc_msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_new"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_new">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_new</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="n">return_q_id</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_succ</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">to_file</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">to_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Create new qubit&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">q_id</span> <span class="o">=</span> <span class="n">CQCLogMessageHandler</span><span class="o">.</span><span class="n">cur_qubit_id</span>
+        <span class="n">CQCLogMessageHandler</span><span class="o">.</span><span class="n">cur_qubit_id</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">return_q_id</span><span class="p">:</span>
+            <span class="c1"># Send message we created a qubit back</span>
+            <span class="k">if</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="n">CQC_NOTIFY_LENGTH</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="n">CQC_XTRA_QUBIT_HDR_LENGTH</span>
+            <span class="n">cqc_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_return_message</span><span class="p">(</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">app_id</span><span class="p">,</span> <span class="n">CQC_TP_NEW_OK</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
+                                                 <span class="n">cqc_version</span><span class="o">=</span><span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cqc_msg</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">cqc_header</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCNotifyHeader</span><span class="p">()</span>
+                <span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">q_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">hdr</span> <span class="o">=</span> <span class="n">CQCXtraQubitHeader</span><span class="p">()</span>
+                <span class="n">hdr</span><span class="o">.</span><span class="n">setVals</span><span class="p">(</span><span class="n">qubit_id</span><span class="o">=</span><span class="n">q_id</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">return_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">return_q_id</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">q_id</span>
+        <span class="k">elif</span> <span class="n">return_succ</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_allocate"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_allocate">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_allocate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Allocate multipe qubits.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Allocating qubits&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">num_qubits</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span>
+        <span class="n">cmd</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_qubits</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cmd_new</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="n">to_file</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CQCLogMessageHandler.cmd_release"><a class="viewcode-back" href="../../../cqc.backend.html#cqc.backend.cqcLogMessageHandler.CQCLogMessageHandler.cmd_release">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">cqc_header</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">xtra</span><span class="p">,</span> <span class="s2">&quot;Releasing qubit&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+  </body>
+</html>

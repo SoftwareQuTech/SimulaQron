@@ -28,11 +28,11 @@ Setting up
 
 We will run everything locally (localhost) using two nodes, Alice and Bob. Start up the backend of the simulation by running::
 
-    sh run/startAll.sh --nodes "Alice Bob"
+    ./cli/SimulaQron start --nodes Alice,Bob
 
 The below example can then be executed when in the folder `examples/cqc/pythonLib/teleport` typing::
 
-    sh doNew.sh
+    sh run.sh
 
 which will execute the Python scripts `aliceTest.py` and `bobTest.py` containing the code below.
 
@@ -42,7 +42,7 @@ Programming Alice
 
 Here we program what Alice should do using the python library::
 
-        from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
+        from cqc.pythonLib import CQCConnection, qubit
 
         #####################################################################################################
         #
@@ -86,7 +86,7 @@ Programming Bob
 
 Here we program what Bob should do using the python library::
 
-        from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
+        from cqc.pythonLib import CQCConnection, qubit
 
         #####################################################################################################
         #

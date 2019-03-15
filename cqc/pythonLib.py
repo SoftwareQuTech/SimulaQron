@@ -175,15 +175,16 @@ def createXtraHeader(command, values):
 class CQCConnection:
     _appIDs = {}
 
-    def __init__(self, name, socket_address=None, cqcFile=None, appFile=None, appID=None, pend_messages=False):
+    def __init__(self, name, socket_address=None, cqcFile=None, appFile=None, appID=None, pend_messages=False,
+                 retry_connection=True):
         """
         Initialize a connection to the cqc server.
 
         - **Arguments**
             :param name:        Name of the host.
             :param socket_address: tuple (str, int) of ip and port number.
-            :param cqcFile:    Path to cqcFile. If None, '$config/cqcNodes.cfg is used, unless socket_address
-            :param appFile:    Path to appFile. If None, '$config/appNodes.cfg is used.
+            :param cqcFile:    Path to cqcFile. If None, 'Setting.CONF_CQC_FILE' is used, unless socket_address
+            :param appFile:    Path to appFile. If None, 'Setting.CONF_APP_FILE' is used.
             :param appID:        Application ID. If set to None, defaults to a nonused ID.
             :param pend_messages: True if you want to wait with sending messages to the back end.
                     Use flush() to send all pending messages in one go as a sequence to the server
@@ -232,7 +233,7 @@ class CQCConnection:
         if socket_address is None:
             # This file defines the network of CQC servers interfacing to virtual quantum nodes
             if cqcFile is None:
-                self.cqcFile = os.path.join(simulaqron_path, "config/cqcNodes.cfg")
+                self.cqcFile = Settings.CONF_CQC_FILE
             else:
                 self.cqcFile = cqcFile
 
@@ -268,18 +269,20 @@ class CQCConnection:
                 self._s = socket.socket(addr[0], addr[1], addr[2])
                 self._s.connect(addr[4])
                 break
-            except ConnectionRefusedError:
+            except ConnectionRefusedError as err:
                 logging.debug("App {} : Could not connect to  CQC server, trying again...".format(self.name))
                 time.sleep(CQC_CONF_LINK_WAIT_TIME)
                 self._s.close()
-            except Exception as e:
+                if not retry_connection:
+                    raise err
+            except Exception as err:
                 logging.warning("App {} : Critical error when connection to CQC server: {}".format(self.name, e))
                 self._s.close()
-                raise e
+                raise err
 
                 # This file defines the application network
         if appFile is None:
-            self.appFile = os.path.join(simulaqron_path, "config/appNodes.cfg")
+            self.appFile = Settings.CONF_APP_FILE
 
             # Read configuration files for the application network
         if os.path.exists(self.appFile):
@@ -844,7 +847,7 @@ class CQCConnection:
     def _extract_header(self, header_class):
         """
         Extracts the given header class from the first part of the current buffer.
-        :param header_class: Subclassed from `SimulaQron.cqc.backend.cqcHeader.Header`
+        :param header_class: Subclassed from `cqc.backend.cqcHeader.Header`
         :return: An instance of the class
         """
         if not issubclass(header_class, Header):
@@ -908,7 +911,7 @@ class CQCConnection:
 
         :param message: str
             the cqc message to be parsed
-        :param q: :obj:`SimulaQron.cqc.pythonLib.cqc.qubit`
+        :param q: :obj:`cqc.pythonLib.qubit`
             the qubit object we should save the qubit to
         :param is_factory: bool
             whether the returned message came from a factory. If so, do not change the qubit, but create a new one
