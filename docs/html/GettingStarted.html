@@ -134,8 +134,11 @@ you use bash (e.g., standard on OSX or the GIT Bash install on Windows 10), othe
 </pre></div>
 </div>
 <p>in a terminal at the root of the repository. This command will clear any .pyc files in this directory, check that the needed python packages are installed (and if not install these using pip) and run the automated tests. By default a shorter version of the tests are run. If you wish to run the full tests type <code class="code docutils literal notranslate"><span class="pre">make</span> <span class="pre">full_tests</span></code>. Not however that the full tests can take quite some time since they perform quantum tomography to tests operations on the qubits.
-By default the <em>stabilizer</em> engine will be used.
-.. If you wish to run the tests with the <em>qutip</em> backend instead, type <code class="code docutils literal notranslate"><span class="pre">make</span> <span class="pre">tests_qutip</span></code> or <code class="code docutils literal notranslate"><span class="pre">make</span> <span class="pre">full_tests_qutip</span></code>. If you want to run all tests with all three backends, type <code class="code docutils literal notranslate"><span class="pre">make</span> <span class="pre">full_tests_allBackends</span></code>. Note that running the full tests with all backends takes a lot of time.</p>
+By default the <em>stabilizer</em> engine will be used.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">During the tests you might see quite some error messages. This is to be expected since some tests test that errors are handled correctly when something goes wrong. If the tests pass it will say OK in the end.</p>
+</div>
 </div>
 </div>
 <div class="section" id="testing-a-simple-example">

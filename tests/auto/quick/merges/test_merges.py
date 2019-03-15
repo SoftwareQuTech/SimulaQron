@@ -319,7 +319,6 @@ class TestBothLocalNotSameReg(TestBothLocal):
 
         send_end.send(correct)
 
-
         reactor.stop()
 
 

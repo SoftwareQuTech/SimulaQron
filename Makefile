@@ -16,7 +16,7 @@ delete_pyc:
 	@find . -name '*.pyc' -delete
 
 delete_pid:
-	@rm ${CLI}/*.pid
+	@find ${CLI} -name '*.pid' -delete
 
 clean: delete_pyc delete_pid
 
@@ -35,31 +35,9 @@ tests:
 tests_all:
 	@${PYTHON} -m unittest discover -s ${ALl_TESTS}
 
-# tests_qutip:
-# 	@sh $(RUN_TESTS) --quick --qutip
+_verified:
+	@echo "SimulaQron is verified!"
 
-# tests_projectq:
-# 	@sh $(RUN_TESTS) --quick --projectq
-
-# tests_stabilizer:
-# 	@sh $(RUN_TESTS) --quick --stabilizer
-
-# full_tests:
-# 	@sh $(RUN_TESTS) --full --stabilizer
-
-# full_tests_qutip:
-# 	@sh $(RUN_TESTS) --full --qutip
-
-# full_tests_projectq:
-# 	@sh $(RUN_TESTS) --full --projectq
-
-# full_tests_stabilizer:
-# 	@sh $(RUN_TESTS) --full --stabilizer
-
-# tests_allBackends: tests_qutip tests_projectq tests_stabilizer
-
-# full_tests_allBackends: full_tests_qutip full_tests_projectq full_tests_stabilizer
-
-verify: clean python-deps lint tests
+verify: clean python-deps lint tests _verified
 
 .PHONY: clean format lint python-deps tests full_tests verify

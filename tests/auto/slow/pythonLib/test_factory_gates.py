@@ -569,13 +569,8 @@ class FactoryGateTest(unittest.TestCase):
             sys.stdout.write("Testing CNOT factory control even:")
             exp_values = calc_exp_values_single(prep_H_state())
             ans = cqc.test_preparation(prep_CNOT_control_CQC_FACTORY_even, exp_values, iterations=self.iterations)
-            # for _ in range(1):
-            #     freqs = cqc.tomography(prep_CNOT_control_CQC_FACTORY_even, 1, progress=False)
-            #     print("\nfreqs: {}".format(freqs))
             sys.stdout.write("\r")
-            # print("exp_values: {}".format(exp_values))
             self.assertTrue(ans)
-            # raise RuntimeError()
 
             # Test CNOT Factory Control odd
             sys.stdout.write("Testing CNOT factory control odd:")

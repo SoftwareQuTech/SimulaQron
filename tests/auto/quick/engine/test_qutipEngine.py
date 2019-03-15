@@ -29,10 +29,29 @@
 
 import unittest
 
-from simulaqron.virtNode.qutipSimulator import qutipEngine
+from simulaqron.toolbox import has_module
+
+if has_module.main("qutip"):
+
+    from simulaqron.virtNode.qutipSimulator import qutipEngine
+
+    _has_module = True
+
+else:
+
+    _has_module = False
+
+
+def if_has_module(test):
+    def new_test(self):
+        if _has_module:
+            test(self)
+
+    return new_test
 
 
 class TestQutipEngine(unittest.TestCase):
+    @if_has_module
     def test_tracing(self):
         se = qutipEngine("alice", 0, 10)
         se2 = qutipEngine("Alice", 0, 10)
@@ -55,6 +74,7 @@ class TestQutipEngine(unittest.TestCase):
 
         self.assertEqual(se.qubitReg, se2.qubitReg)
 
+    @if_has_module
     def test_gates(self):
         se = qutipEngine("alice", 0, 10)
         se.add_fresh_qubit()
@@ -67,6 +87,7 @@ class TestQutipEngine(unittest.TestCase):
 
         self.assertEqual(savedQubit, se.qubitReg)
 
+    @if_has_module
     def test_measure(self):
         se = qutipEngine("alice", 0)
 
@@ -81,4 +102,5 @@ class TestQutipEngine(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    if _has_module:
+        unittest.main()

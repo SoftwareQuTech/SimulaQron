@@ -148,7 +148,6 @@
 <span class="kn">from</span> <span class="nn">cqc.backend.entInfoHeader</span> <span class="k">import</span> <span class="n">EntInfoHeader</span>
 <span class="kn">from</span> <span class="nn">simulaqron.general.hostConfig</span> <span class="k">import</span> <span class="n">cqc_node_id_from_addrinfo</span><span class="p">,</span> <span class="n">networkConfig</span>
 <span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="k">import</span> <span class="n">Settings</span>
-<span class="kn">from</span> <span class="nn">simulaqron.toolbox</span> <span class="k">import</span> <span class="n">get_simulaqron_path</span>
 
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2">:</span><span class="si">%(levelname)s</span><span class="s2">:</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">Settings</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_FRONTEND</span><span class="p">)</span>
 
@@ -283,9 +282,6 @@
         <span class="c1"># Classical connections in the application network</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_classicalConn</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># Get path to SimulaQron folder</span>
-        <span class="n">simulaqron_path</span> <span class="o">=</span> <span class="n">get_simulaqron_path</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
-
         <span class="k">if</span> <span class="n">socket_address</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># This file defines the network of CQC servers interfacing to virtual quantum nodes</span>
             <span class="k">if</span> <span class="n">cqcFile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -332,7 +328,7 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">retry_connection</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">err</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2"> : Critical error when connection to CQC server: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2"> : Critical error when connection to CQC server: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                 <span class="k">raise</span> <span class="n">err</span>
 

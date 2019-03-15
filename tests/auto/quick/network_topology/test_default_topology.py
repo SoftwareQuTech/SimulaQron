@@ -12,8 +12,6 @@ class TestDefaultTopology(unittest.TestCase):
         cls.node_names = ["Alice", "Bob", "Charlie"]
         cls.network = Network(cls.node_names)
         cls.network.start()
-        print(cls.network.topology)
-        print(Settings.CONF_TOPOLOGY_FILE)
 
     @classmethod
     def tearDownClass(cls):

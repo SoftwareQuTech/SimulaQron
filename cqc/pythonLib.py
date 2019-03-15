@@ -92,7 +92,6 @@ from cqc.backend.cqcHeader import (
 from cqc.backend.entInfoHeader import EntInfoHeader
 from simulaqron.general.hostConfig import cqc_node_id_from_addrinfo, networkConfig
 from simulaqron.settings import Settings
-from simulaqron.toolbox import get_simulaqron_path
 
 logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=Settings.CONF_LOGGING_LEVEL_FRONTEND)
 
@@ -227,9 +226,6 @@ class CQCConnection:
         # Classical connections in the application network
         self._classicalConn = {}
 
-        # Get path to SimulaQron folder
-        simulaqron_path = get_simulaqron_path.main()
-
         if socket_address is None:
             # This file defines the network of CQC servers interfacing to virtual quantum nodes
             if cqcFile is None:
@@ -276,7 +272,7 @@ class CQCConnection:
                 if not retry_connection:
                     raise err
             except Exception as err:
-                logging.warning("App {} : Critical error when connection to CQC server: {}".format(self.name, e))
+                logging.warning("App {} : Critical error when connection to CQC server: {}".format(self.name, err))
                 self._s.close()
                 raise err
 
