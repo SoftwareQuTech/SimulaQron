@@ -13,6 +13,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -106,6 +107,8 @@ The main challenge of SimulaQron is to allow the simulation of virtual qubits at
 <li class="toctree-l2"><a class="reference internal" href="ConfNodes.html#starting-the-simulaqron-backend">Starting the SimulaQron backend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ConfNodes.html#configuring-the-network-topology">Configuring the network topology</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ConfNodes.html#manual-setup">Manual setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ConfNodes.html#multiple-networks">Multiple networks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ConfNodes.html#starting-a-network-from-python">Starting a network from Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ConfNodes.html#connecting-to-a-remote-simulated-network">Connecting to a remote simulated network</a></li>
 </ul>
 </li>
@@ -121,14 +124,23 @@ The main challenge of SimulaQron is to allow the simulation of virtual qubits at
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Examples.html">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ExamplesDirect.html">Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ExamplesNodeOS.html">Programming via the Classical-Quantum Combiner Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExamplesDirect.html">Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="SimulaQron.html">SimulaQron package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="SimulaQron.html#subpackages">Subpackages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="SimulaQron.html#module-SimulaQron.conf">SimulaQron.conf module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="SimulaQron.html#module-SimulaQron">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulaqron.html">simulaqron package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.html#module-simulaqron.configFiles">simulaqron.configFiles module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.html#module-simulaqron.network">simulaqron.network module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.html#module-simulaqron">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cqc.html">cqc package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cqc.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cqc.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cqc.html#module-cqc.pythonLib">simulaqron.pythonLib module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cqc.html#module-cqc">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -166,7 +178,7 @@ The main challenge of SimulaQron is to allow the simulation of virtual qubits at
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
   </body>
 </html>

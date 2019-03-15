@@ -12,7 +12,7 @@ Our objective will be to realize the following protocol which will generate 1 sh
 
 Before seeing how this example works, let us again simply run the code::
 
-	cd examples/corrRNG
+	cd examples/nativeMode/corrRNG
 	sh doNew.sh
 
 Next to a considerable about of debugging information, you should be seeing the following two lines::
@@ -60,11 +60,8 @@ The first thing that happens if we execute the script doNew.sh is that after som
 
 	#!/bin/sh
 
-	cd "$NETSIM/examples/corrRNG"
-	python bobTest.py &
-
-	# Note that this assumes Bob's server is up. Given we run everything locally there is essentially no delay though.
-	python aliceTest.py
+	python3 bobTest.py &
+	python3 aliceTest.py
 
 Let us now look at the programs for Alice and Bob. Alice will merely run a client on the classical communication network that connects to Bob to be found in aliceTest.py. Using the template (see general Examples section) which establishes the connections to the local virtual nodes, we thus need to provide client code for Alice to implement the protocol above. The function runClientNode will automatically be executed once Alice connected to her local virtual quantum node simulating the underlying hardware, and to Bob's server::
 
