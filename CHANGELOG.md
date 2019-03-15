@@ -4,8 +4,8 @@ CHANGELOG
 For more details refer to the [documentation](https://softwarequtech.github.io/SimulaQron/html/index.html).
 
 
-Upcoming
---------
+2019-03-15 (v1.3)
+-----------------
 
 These are changes in Develop which will be merged to master.
 
@@ -22,3 +22,6 @@ These are changes in Develop which will be merged to master.
   New is also the class `simulaqron.network.Network` which makes is easy to start a network within Python, see docs.
   
 - All test are now unittests and can be started as `make tests` or `make tests_full` for a longer test.
+
+Upcoming
+--------
