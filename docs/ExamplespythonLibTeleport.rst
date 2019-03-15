@@ -28,11 +28,11 @@ Setting up
 
 We will run everything locally (localhost) using two nodes, Alice and Bob. Start up the backend of the simulation by running::
 
-    ./cli/main.py network start-all --nodes Alice,Bob
+    ./cli/SimulaQron start --nodes Alice,Bob
 
 The below example can then be executed when in the folder `examples/cqc/pythonLib/teleport` typing::
 
-    sh doNew.sh
+    sh run.sh
 
 which will execute the Python scripts `aliceTest.py` and `bobTest.py` containing the code below.
 

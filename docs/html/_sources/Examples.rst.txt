@@ -5,5 +5,5 @@ Examples
 	:maxdepth: 2
 	:caption: Ways to Program:
 
-	ExamplesDirect
 	ExamplesNodeOS
+	ExamplesDirect

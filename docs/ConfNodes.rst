@@ -5,9 +5,10 @@ Configuring the simulated network
 Starting the SimulaQron backend
 -------------------------------
 
-The backend of a SimulaQron network is a set of running virtual nodes and their corresponding CQC servers. To start the backend of a SimulaQron network run the command ``./cli/main.py network start-all``.
+The backend of a SimulaQron network is a set of running virtual nodes and their corresponding CQC servers. To start the backend of a SimulaQron network run the command ``./cli/SimulaQron start``.
 
-With no arguments, a network is setup using the files in the ``$NETSIM/config`` directory. If no files exist in this directory, the ``./cli/main.py network start-all`` command will generate config files for five nodes (Alice, Bob Charlie, David, and Eve) in a fully connected topology (every node is connected to every other node).
+With no arguments, a network is setup using the files in the ``config`` directory.
+.. If no files exist in this directory, the ``./cli/main.py network start-all`` command will generate config files for five nodes (Alice, Bob Charlie, David, and Eve) in a fully connected topology (every node is connected to every other node).
 
 .. warning:: ``./cli/main.py network start-all`` can fail if any of the ports specified in the config files are already in use by a running SimulaQron network or another program.
 
@@ -15,25 +16,25 @@ To setup a specific topology see section :ref:`topologyConf`. For setting up the
 
 If you want to start a network with for example the three nodes Alex, Bart, Curt, simply type::
 
-    ./cli/main.py network start-all --nodes Alex,Bart,Curt
+    ./cli/SimulaQron start --nodes Alex,Bart,Curt
 
 If you simply want a network with 10 nodes, type::
 
-    ./cli/main.py network start-all --nrnodes 10
+    ./cli/SimulaQron start --nrnodes 10
 
 This will start up a network where the nodes are called Node0, Node1, ..., Node9.
 
 The --nodes and --nrnodes can be combined. Let's say you want a network with 10 nodes and that three of the nodes are called Alice, Bob and Charlie, type::
 
-    ./cli/main.py network start-all --nodes Alice,Bob,Charlie --nrnodes 10
+    ./cli/SimulaQron start --nodes Alice,Bob,Charlie --nrnodes 10
 
 Which will start up a network with the nodes Alice, Bob, Charlie, Node0, Node1, ..., Node6. If --nrnodes is less than the entries in --nodes, then --nrnodes is ignored. The two keywords can also be specified shorter as -nd and -nn respectively. So the above can also be done as::
 
-    ./cli/main.py network start-all -n Alice,Bob,Charlie -N 10
+    ./cli/SimulaQron start -n Alice,Bob,Charlie -N 10
 
 You can also specify a topology of the network. For example if you want 10 nodes in a ring topology, type::
 
-    ./cli/main.py network start-all --nrnodes 10 --topology ring
+    ./cli/SimulaQron start --nrnodes 10 --topology ring
 
 In this network Node :math:`i` can create EPR pairs and send qubits to Node :math:`i-1 \pmod{10}` and Node :math:`i+1 \pmod{10}`. However, if a CQC message is sent to for example Node2 to produce entanglement with Node5, a error message (CQC_ERR_UNSUPP) will be returned. The options for the automatically generated topologies are currently:
 
@@ -47,7 +48,7 @@ Along with setting up the network with the specified topology a .png figure is a
 
 As a final example let's combine all the arguments specified above and create a network using 15 nodes, where two of then are called Alice and Bob and the topology of the network is randomly generated as a connected graph with 20 edges::
 
-    ./cli/main.py network start-all -n Alice,Bob -N 15 -t random_connected_20
+    ./cli/SimulaQron start -n Alice,Bob -N 15 -t random_connected_20
 
 The network that is then started might look like this (you can find a similar picture for you network at `config/topology.png`:
 
@@ -64,7 +65,7 @@ To create a custom topology, see the next section.
 Configuring the network topology
 --------------------------------
 
-As seen in the previous section a pre-defined network topology can be used by passing an argument when running `./cli/main.py network start-all`. The topology is then specified to SimulaQron as a .json-file stored at config/topology.json. The content of this .json file is a dictionary where the keys are the names of the nodes and the values a list of the neighbors. For example, a file specifying a topology where Alice is adjacent to Bob, Bob is adjacent to Alice and Charlie and Charlie is adjacent to Bob would be::
+As seen in the previous section a pre-defined network topology can be used by passing an argument when running `./cli/SimulaQron start`. The topology is then specified to SimulaQron as a .json-file stored at config/topology.json. The content of this .json file is a dictionary where the keys are the names of the nodes and the values a list of the neighbors. For example, a file specifying a topology where Alice is adjacent to Bob, Bob is adjacent to Alice and Charlie and Charlie is adjacent to Bob would be::
 
     {
      "Alice": ["Bob"],
@@ -74,9 +75,11 @@ As seen in the previous section a pre-defined network topology can be used by pa
 
 .. note:: Undirected topologies are also supported. That is, networks where for example Alice can send a qubit to Bob but Bob cannot send a qubit to Alice.
 
-You can create your own .json file specifying the network topology you want to use. When doing so, make sure that the names of the nonodes you use are consistent with the nodes used by SimulaQron. To have SimulaQron use your specified topology, set the entry :code:`topology_file` in the file config/settings to be the relative path to the .json file, as seen from the root of the repository.
+You can create your own .json file specifying the network topology you want to use. When doing so, make sure that the names of the nodes you use are consistent with the nodes used by SimulaQron. To have SimulaQron use your specified topology, set the setting :code:`topology-file` to be the relative path to the .json file, as seen from the root of the repository by::
 
-.. note:: When using the keyword argument --topology (or -tp) for ``./cli/main.py network start-all``, the file config/topology.json is overwritten. It is therefore recommended to create your own topology-file with another name or in a different directory, to not accidentally overwrite your file.
+    ./cli/SimulaQron set topology-file path/to/file
+
+.. note:: When using the keyword argument --topology (or -tp) for ``./cli/SimulaQron start``, the file config/topology.json is overwritten. It is therefore recommended to create your own topology-file with another name or in a different directory, to not accidentally overwrite your file.
 
 .. _manualSetup:
 
@@ -84,95 +87,146 @@ You can create your own .json file specifying the network topology you want to u
 Manual setup
 ------------
 
-In this section we describe what the file ``./cli/main.py network start-all`` does and how one can manually start up the SimulaQron and editing the nodes and port numbers used. This is useful if you don't want ``./cli/main.py network start-all`` to automatically set the port numbers for you. Depending on what arguments are given to ``./cli/main.py network start-all``, the following is done:
+In this section we describe how nodes, topology and port settings can be configured for SimulaQron. This is useful if you don't want ``./cli/SimulaQron start`` to automatically set the port numbers for you. Depending on what arguments are given to ``./cli/SimulaQron start``, the following is done:
 
-* If no arguments to ``./cli/main.py network start-all`` are given then SimulaQron will start using the configuration specified by the files in the directory config. If there the file config/Nodes.cfg doesn't exist then it will be created and the files config/{virtualNodes.cfg, cqcNodes.cfg, appNodes.cfg} will be overwritten using the nodes Alice, Bob, Charlie, David and Eve.
+* If no arguments to ``./cli/SimulaQron start`` are given then SimulaQron will start using the configuration specified by the current configuration files, which consist of the files *nodes-file* (default config/Nodes.cfg), *app-file* (default config/appNodes.cfg), *cqc-file* (default config/cqcNodes.cfg), *vnode-file* (default config/virtualNodes.cfg) and *topology-file* (default ""), but can be set by the command::
 
-* If the arguments --nodes (-nd) or --nrnodes (-nn) are used for ``./cli/main.py network start-all`` then the files config/{Nodes.cfg, virtualNodes.cfg, cqcNodes.cfg, appNodes.cfg} are overwritten using the specified nodes. Port numbers will be used froThe files run/startVNodes.sh and run/startCQCNodes.sh are then called. What these scripts in turn do is specified below.m 8801.
+    ./cli/SimulaQron set FILE PATH
 
-* If the argument --topology (-tp) is used then the files config/topology.json and config/topology.png will be overwritten which the specified topology and the entry :code:`topology_file` in config/settings.ini will be set to point to this file.
+* If the arguments --nodes (-n) or --nrnodes (-N) are used for ``./cli/SimulaQron start`` then the files *nodes-file*, *vnode-file*, *cqc-file* and *app-file* are overwritten using the specified nodes. Port numbers will be used between 8000 and 8000.
 
-The files run/startVNodes.sh and run/startCQCNodes.sh are then called. What these scripts in turn do is specified below.
+* If the argument --topology (-tp) is used then the files config/topology.json and config/topology.png will be overwritten which the specified topology and the entry :code:`topology-file` in the settings will be set to point to this file.
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Starting the virtual node servers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+To change the nodes and the port numbers used in the network you can either edit the files *nodes-file*, *vnode-file*, *cqc-file* and *app-file* or use the command line interface. To see the current nodes type::
 
-By default SimulaQron uses the five nodes Alice, Bob, Charlie, David and Eve on your local computers.
+    ./cli/SimulaQron nodes get
 
-You may do so by executing::
+To set the nodes back to the default (Alice, Bob, Charlie, David, Eve) type::
 
-	sh run/startVNodes.sh
+    ./cli/SimulaQron nodes default
 
-Let us now see in detail what happens when you execute this example script. 
-The configuration for the test network is read from config/virtualNodes.cfg. This file defines which virtualNodes to start up and what their names are. The example runs them all locally, but you can as well run them on remote hosts by using one such file on each host.
+To add a node from the network type::
 
-For the example, this file is::
+    ./cli/SimulaQron nodes add NAME
 
-	# Network configuration file
-	# 
-	# For each host its informal name, as well as its location in the network must
-	# be listed.
-	#
-	# [name], [hostname], [port number]
-	#
+where you can also optionally specify the host-name, port-numbers and neighbors of the node.
+To remove a node from the network type::
 
-	Alice, localhost, 8801
-	Bob, localhost, 8802
-	Charlie, localhost, 8803
+    ./cli/SimulaQron nodes remove NAME
 
-Provided a configuration in the file above, you can run::
+-----------------
+Multiple networks
+-----------------
 
-	python run/startNode.py Alice & 
+To run multiple networks at the same time you need to given them different names by using the --name flag::
 
-To start the virtual node for Alice. The script startVNodes.sh then simply starts any number of desired virtual nodes::
+    ./cli/SimulaQron start --name NETWORK
 
-	# startVNodes.sh - start the node Alice, Bob and Charlie 
+To stop a network with a specific name type::
 
-	cd "$NETSIM"/run
-	python startNode.py Alice &
-	python startNode.py Bob &
-	python startNode.py Charlie &
+    ./cli/SimulaQron stop --name NETWORK
 
-Provided the virtual nodes started successfully you now have a network of 3 simulated quantum nodes that accept connections on the ports indicated above to allow an application program to access qubits on the virtual node servers. The 3 virtual nodes have also established connections to each other in order to exchange simulated quantum traffic. 
+.. note:: By default the network name is "default".
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Starting the CQC servers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------
+Starting a network from Python
+------------------------------
 
-Similarly to the virtual nodes we also need to start the CQC servers, which provide the possibility to talk to SimulaQron using the CQC interface.
-A test configuration of CQC servers will start 3 nodes, Alice, Bob and Charlie on your local computers. You may do so by executing::
+You can also start a network within a Python script (this is in fact what ./cli/SimulaQron does), by using the class :code:`simulaqron.network.Network`. To setup a network by name "test" with the nodes Alice, Bob and Charlie, where Bob is connected with Alice and Charlie but Alice and Charlie are not connected use the following code code::
 
-	sh run/startCQCNodes.sh
+    from simulaqron.network import Network
 
-The configuration for the CQC network is read from config/cqcNodes.cfg. This file defines which CQC servers to start up and what their names are.
+    # Setup the network
+    nodes = ["Alice", "Bob", "Charlie"]
+    topology = {"Alice": ["Bob"], "Bob": ["Alice", "Charlie"], "Charlie": ["Bob"]}
+    network = Network(name="test", nodes=nodes, topology=topology)
 
-.. note:: The names for the virtual nodes and the CQC servers have to be the same.
+    # Start the network
+    network.start()
 
-For the example, this file is::
+By default the method :code:`simulaqron.network.Network.start`, only returns when the network is running, i.e. all the connections are established. To avoid this use the argument :code:`wait_until_running=False`.
 
-	# Network configuration file
-	# 
-	# For each host its informal name, as well as its location in the network must
-	# be listed.
-	#
-	# [name], [hostname], [port number]
-	#
+.. note:: The network will stop when the network-object goes out of scope and is handled by the Python garbade collector. The network can be manually stopped with the method :code:`simulaqron.network.Network.stop`.
 
-	Alice, localhost, 8821
-	Bob, localhost, 8822
-	Charlie, localhost, 8823
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. Starting the virtual node servers
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The script startCQCNodes.sh starts any number of desired CQC servers::
+.. By default SimulaQron uses the five nodes Alice, Bob, Charlie, David and Eve on your local computers.
 
-	# startCQCNodes.sh - start the node Alice, Bob and Charlie 
+.. You may do so by executing::
 
-	cd "$NETSIM"/run
-	python startCQC.py Alice &
-	python startCQC.py Bob &
-	python startCQC.py Charlie &
+.. 	sh run/startVNodes.sh
 
-Provided the CQC servers started successfully you now have a network of 3 simulated quantum nodes that accept connections on the ports indicated above and takes messages specified by the CQC header.
+.. Let us now see in detail what happens when you execute this example script. 
+.. The configuration for the test network is read from config/virtualNodes.cfg. This file defines which virtualNodes to start up and what their names are. The example runs them all locally, but you can as well run them on remote hosts by using one such file on each host.
+
+.. For the example, this file is::
+
+.. 	# Network configuration file
+.. 	# 
+.. 	# For each host its informal name, as well as its location in the network must
+.. 	# be listed.
+.. 	#
+.. 	# [name], [hostname], [port number]
+.. 	#
+
+.. 	Alice, localhost, 8801
+.. 	Bob, localhost, 8802
+.. 	Charlie, localhost, 8803
+
+.. Provided a configuration in the file above, you can run::
+
+.. 	python3 run/startNode.py Alice & 
+
+.. To start the virtual node for Alice. The script startVNodes.sh then simply starts any number of desired virtual nodes::
+
+.. 	# startVNodes.sh - start the node Alice, Bob and Charlie 
+
+.. 	cd "$NETSIM"/run
+.. 	python3 startNode.py Alice &
+.. 	python3 startNode.py Bob &
+.. 	python3 startNode.py Charlie &
+
+.. Provided the virtual nodes started successfully you now have a network of 3 simulated quantum nodes that accept connections on the ports indicated above to allow an application program to access qubits on the virtual node servers. The 3 virtual nodes have also established connections to each other in order to exchange simulated quantum traffic. 
+
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. Starting the CQC servers
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. Similarly to the virtual nodes we also need to start the CQC servers, which provide the possibility to talk to SimulaQron using the CQC interface.
+.. A test configuration of CQC servers will start 3 nodes, Alice, Bob and Charlie on your local computers. You may do so by executing::
+
+.. 	sh run/startCQCNodes.sh
+
+.. The configuration for the CQC network is read from config/cqcNodes.cfg. This file defines which CQC servers to start up and what their names are.
+
+.. .. note:: The names for the virtual nodes and the CQC servers have to be the same.
+
+.. For the example, this file is::
+
+.. 	# Network configuration file
+.. 	# 
+.. 	# For each host its informal name, as well as its location in the network must
+.. 	# be listed.
+.. 	#
+.. 	# [name], [hostname], [port number]
+.. 	#
+
+.. 	Alice, localhost, 8821
+.. 	Bob, localhost, 8822
+.. 	Charlie, localhost, 8823
+
+.. The script startCQCNodes.sh starts any number of desired CQC servers::
+
+.. 	# startCQCNodes.sh - start the node Alice, Bob and Charlie 
+
+.. 	cd "$NETSIM"/run
+.. 	python3 startCQC.py Alice &
+.. 	python3 startCQC.py Bob &
+.. 	python3 startCQC.py Charlie &
+
+.. Provided the CQC servers started successfully you now have a network of 3 simulated quantum nodes that accept connections on the ports indicated above and takes messages specified by the CQC header.
 
 .. _remoteNetwork:
 

@@ -18,7 +18,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="simulaqron.general package" href="simulaqron.general.html" />
-    <link rel="prev" title="Distribute a GHZ-state" href="ExamplespythonLibextendGHZ.html" /> 
+    <link rel="prev" title="Distributing a graph state" href="NativeModeGraphState.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -33,7 +33,7 @@
           <a href="simulaqron.general.html" title="simulaqron.general package"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="ExamplespythonLibextendGHZ.html" title="Distribute a GHZ-state"
+          <a href="NativeModeGraphState.html" title="Distributing a graph state"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 1.0 documentation</a> &#187;</li> 
       </ul>
@@ -47,15 +47,14 @@
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-simulaqron.configFiles">simulaqron.configFiles module</a></li>
 <li><a class="reference internal" href="#module-simulaqron.network">simulaqron.network module</a></li>
-<li><a class="reference internal" href="#module-simulaqron.settings">simulaqron.settings module</a></li>
 <li><a class="reference internal" href="#module-simulaqron">Module contents</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="ExamplespythonLibextendGHZ.html"
-                        title="previous chapter">Distribute a GHZ-state</a></p>
+  <p class="topless"><a href="NativeModeGraphState.html"
+                        title="previous chapter">Distributing a graph state</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="simulaqron.general.html"
                         title="next chapter">simulaqron.general package</a></p>
@@ -262,116 +261,6 @@ keys are the names of the nodes and values their neighbors</td>
 </dd></dl>
 
 </div>
-<div class="section" id="module-simulaqron.settings">
-<span id="simulaqron-settings-module"></span><h2>simulaqron.settings module<a class="headerlink" href="#module-simulaqron.settings" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="simulaqron.settings.Settings">
-<em class="property">class </em><code class="descclassname">simulaqron.settings.</code><code class="descname">Settings</code><a class="reference internal" href="_modules/simulaqron/settings.html#Settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.settings.Settings" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.CONF_APP_FILE">
-<code class="descname">CONF_APP_FILE</code><em class="property"> = '/home/axel/Documents/SimulaQron/config/appNodes.cfg'</em><a class="headerlink" href="#simulaqron.settings.Settings.CONF_APP_FILE" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.CONF_BACKEND">
-<code class="descname">CONF_BACKEND</code><em class="property"> = 'stabilizer'</em><a class="headerlink" href="#simulaqron.settings.Settings.CONF_BACKEND" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.CONF_BACKEND_HANDLER">
-<code class="descname">CONF_BACKEND_HANDLER</code><a class="headerlink" href="#simulaqron.settings.Settings.CONF_BACKEND_HANDLER" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="cqc.backend.html#cqc.backend.cqcMessageHandler.SimulaqronCQCHandler" title="cqc.backend.cqcMessageHandler.SimulaqronCQCHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.backend.cqcMessageHandler.SimulaqronCQCHandler</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.CONF_CQC_FILE">
-<code class="descname">CONF_CQC_FILE</code><em class="property"> = '/home/axel/Documents/SimulaQron/config/cqcNodes.cfg'</em><a class="headerlink" href="#simulaqron.settings.Settings.CONF_CQC_FILE" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.CONF_LOGGING_LEVEL_BACKEND">
-<code class="descname">CONF_LOGGING_LEVEL_BACKEND</code><em class="property"> = 30</em><a class="headerlink" href="#simulaqron.settings.Settings.CONF_LOGGING_LEVEL_BACKEND" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.CONF_LOGGING_LEVEL_FRONTEND">
-<code class="descname">CONF_LOGGING_LEVEL_FRONTEND</code><em class="property"> = 30</em><a class="headerlink" href="#simulaqron.settings.Settings.CONF_LOGGING_LEVEL_FRONTEND" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.CONF_MAXQUBITS">
-<code class="descname">CONF_MAXQUBITS</code><em class="property"> = 20</em><a class="headerlink" href="#simulaqron.settings.Settings.CONF_MAXQUBITS" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.CONF_MAXREGS">
-<code class="descname">CONF_MAXREGS</code><em class="property"> = 1000</em><a class="headerlink" href="#simulaqron.settings.Settings.CONF_MAXREGS" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.CONF_NODES_FILE">
-<code class="descname">CONF_NODES_FILE</code><em class="property"> = '/home/axel/Documents/SimulaQron/config/Nodes.cfg'</em><a class="headerlink" href="#simulaqron.settings.Settings.CONF_NODES_FILE" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.CONF_NOISY_QUBITS">
-<code class="descname">CONF_NOISY_QUBITS</code><em class="property"> = False</em><a class="headerlink" href="#simulaqron.settings.Settings.CONF_NOISY_QUBITS" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.CONF_T1">
-<code class="descname">CONF_T1</code><em class="property"> = 1.0</em><a class="headerlink" href="#simulaqron.settings.Settings.CONF_T1" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.CONF_TOPOLOGY_FILE">
-<code class="descname">CONF_TOPOLOGY_FILE</code><em class="property"> = ''</em><a class="headerlink" href="#simulaqron.settings.Settings.CONF_TOPOLOGY_FILE" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.CONF_VNODE_FILE">
-<code class="descname">CONF_VNODE_FILE</code><em class="property"> = '/home/axel/Documents/SimulaQron/config/virtualNodes.cfg'</em><a class="headerlink" href="#simulaqron.settings.Settings.CONF_VNODE_FILE" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.CONF_WAIT_TIME">
-<code class="descname">CONF_WAIT_TIME</code><em class="property"> = 0.5</em><a class="headerlink" href="#simulaqron.settings.Settings.CONF_WAIT_TIME" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="classmethod">
-<dt id="simulaqron.settings.Settings.default_settings">
-<em class="property">classmethod </em><code class="descname">default_settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/settings.html#Settings.default_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.settings.Settings.default_settings" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="classmethod">
-<dt id="simulaqron.settings.Settings.init_settings">
-<em class="property">classmethod </em><code class="descname">init_settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/settings.html#Settings.init_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.settings.Settings.init_settings" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.log_levels">
-<code class="descname">log_levels</code><em class="property"> = {'critical': 50, 'debug': 10, 'error': 40, 'info': 20, 'warning': 30}</em><a class="headerlink" href="#simulaqron.settings.Settings.log_levels" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="classmethod">
-<dt id="simulaqron.settings.Settings.save_settings">
-<em class="property">classmethod </em><code class="descname">save_settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/settings.html#Settings.save_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.settings.Settings.save_settings" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="classmethod">
-<dt id="simulaqron.settings.Settings.set_setting">
-<em class="property">classmethod </em><code class="descname">set_setting</code><span class="sig-paren">(</span><em>section</em>, <em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/settings.html#Settings.set_setting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.settings.Settings.set_setting" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="simulaqron.settings.Settings.simulaqron_path">
-<code class="descname">simulaqron_path</code><em class="property"> = '/home/axel/Documents/SimulaQron'</em><a class="headerlink" href="#simulaqron.settings.Settings.simulaqron_path" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
 <div class="section" id="module-simulaqron">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-simulaqron" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -396,7 +285,7 @@ keys are the names of the nodes and values their neighbors</td>
           <a href="simulaqron.general.html" title="simulaqron.general package"
              >next</a> |</li>
         <li class="right" >
-          <a href="ExamplespythonLibextendGHZ.html" title="Distribute a GHZ-state"
+          <a href="NativeModeGraphState.html" title="Distributing a graph state"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 1.0 documentation</a> &#187;</li> 
       </ul>

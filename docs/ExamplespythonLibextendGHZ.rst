@@ -26,11 +26,11 @@ Setting up
 
 We will run everything locally (localhost) using two nodes, Alice, Bob and Charlie. Start up the backend of the simulation by running::
 
-    ./cli/main.py network start-all --nodes Alice,Bob,Charlie
+    ./cli/SimulaQron start --nodes Alice,Bob,Charlie
 
 The below example can then be executed when in the folder `examples/cqc/pythonLib/extendGHZ` typing::
 
-    sh doNew.sh
+    sh run.sh
 
 which will execute the Python scripts `aliceTest.py`, `bobTest.py` and `charlieTest.py` containing the code below.
 

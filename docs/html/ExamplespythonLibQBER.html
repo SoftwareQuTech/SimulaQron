@@ -91,8 +91,11 @@
 <h1>Estimating QBER<a class="headerlink" href="#estimating-qber" title="Permalink to this headline">¶</a></h1>
 <p>In this example the two nodes Alice and Bob will estimate the QBER (qubit error rate) of their produced entangled pairs.
 To make the below example more interesting you should try to turn on the probabilistic noise option in SimulaQron.
-You can do this be setting the entry <code class="code docutils literal notranslate"><span class="pre">noisy_qubits</span></code> to <code class="code docutils literal notranslate"><span class="pre">True</span></code> in the settings-file <cite>config/settings.ini</cite>.
-You can also tune the coherence time <code class="code docutils literal notranslate"><span class="pre">t1</span></code> of the qubits (lower means more noisy).</p>
+You can do this be setting the entry <code class="code docutils literal notranslate"><span class="pre">noisy-qubits</span></code> to <code class="code docutils literal notranslate"><span class="pre">True</span></code> by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="nb">set</span> <span class="n">noisy</span><span class="o">-</span><span class="n">qubits</span> <span class="n">on</span>
+</pre></div>
+</div>
+<p>You can also tune the coherence time <code class="code docutils literal notranslate"><span class="pre">t1</span></code> of the qubits (lower means more noisy).</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">This probabilistic noise in SimulaQron is not intended and should not be used to benchmark the performence of protocols in noisy settings, since noise is applied in a rate related to the wall clock time of your computer. Thus, if your computer or network is slower, more noise will be applied to the qubits! However you can use this example to tune the <code class="code docutils literal notranslate"><span class="pre">t1</span></code>-parameter to a realistic value for your setup. A realistic QBER is around 5 -10 %.</p>
@@ -118,18 +121,18 @@ You can also tune the coherence time <code class="code docutils literal notransl
 <div class="section" id="setting-up">
 <h2>Setting up<a class="headerlink" href="#setting-up" title="Permalink to this headline">¶</a></h2>
 <p>We will run everything locally (localhost) using two nodes, Alice and Bob. Start up the backend of the simulation by running (to make this example more interesting you should before turn on the noise on the qubits as described above):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">main</span><span class="o">.</span><span class="n">py</span> <span class="n">network</span> <span class="n">start</span><span class="o">-</span><span class="nb">all</span> <span class="o">--</span><span class="n">nodes</span> <span class="n">Alice</span><span class="p">,</span><span class="n">Bob</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="n">start</span> <span class="o">--</span><span class="n">nodes</span> <span class="n">Alice</span><span class="p">,</span><span class="n">Bob</span>
 </pre></div>
 </div>
-<p>The below example can then be executed when in the folder <cite>examples/cqc/pythonLib/teleport</cite> typing:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">doNew</span><span class="o">.</span><span class="n">sh</span>
+<p>The below example can then be executed when in the folder <cite>examples/cqc/pythonLib/QBER</cite> typing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
 <p>which will execute the Python scripts <cite>aliceTest.py</cite> and <cite>bobTest.py</cite> containing the code below. By default 500 EPR pairs are produced to estimate the QBER, see above. You can choose to produce a different number of pairs by passing this as an argument. For example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">doNew</span><span class="o">.</span><span class="n">sh</span> <span class="mi">300</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">.</span><span class="n">sh</span> <span class="mi">300</span>
 </pre></div>
 </div>
-<p>When running this example the estimated QBER will be printed. If the noise in SimulaQron (in <cite>config/settings.ini</cite>) the QBER should be 0.</p>
+<p>When running this example the estimated QBER will be printed. If the noise in SimulaQron is off the QBER should be 0.</p>
 </div>
 <div class="section" id="programming-alice">
 <h2>Programming Alice<a class="headerlink" href="#programming-alice" title="Permalink to this headline">¶</a></h2>

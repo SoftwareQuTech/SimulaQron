@@ -282,15 +282,13 @@ for the qubit with that identfier and then processes the relevant quantum instru
 <div class="section" id="starting">
 <h2>Starting<a class="headerlink" href="#starting" title="Permalink to this headline">¶</a></h2>
 <p>We first start the virtual quantum node backend, by executing:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="s2">&quot;$NETSIM&quot;</span><span class="o">/</span><span class="n">run</span>
-<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Alice</span> <span class="o">&amp;</span>
-<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Bob</span> <span class="o">&amp;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">simulaqron</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Alice</span> <span class="o">&amp;</span>
+<span class="n">python3</span> <span class="n">simulaqron</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Bob</span> <span class="o">&amp;</span>
 </pre></div>
 </div>
-<p>where $NETSIM is the environment variable defining the SimulaQron directory as outlined in <a class="reference internal" href="GettingStarted.html"><span class="doc">Getting started</span></a>.</p>
 <p>We then start up the programs for Alice and Bob themselves. These will connect to the virtual quantum nodes, and execute the quantum commands and classical communication outlined above, in the same directory as we placed classicalNet.cfg:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">bobTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
-<span class="n">python</span> <span class="n">aliceTest</span><span class="o">.</span><span class="n">py</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">bobTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
+<span class="n">python3</span> <span class="n">aliceTest</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 </div>

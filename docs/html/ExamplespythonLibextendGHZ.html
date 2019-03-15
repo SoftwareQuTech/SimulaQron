@@ -17,7 +17,7 @@
     <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="simulaqron package" href="simulaqron.html" />
+    <link rel="next" title="Example using the C library" href="ExamplescLib.html" />
     <link rel="prev" title="Estimating QBER" href="ExamplespythonLibQBER.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -30,7 +30,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="simulaqron.html" title="simulaqron package"
+          <a href="ExamplescLib.html" title="Example using the C library"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="ExamplespythonLibQBER.html" title="Estimating QBER"
@@ -59,8 +59,8 @@
   <p class="topless"><a href="ExamplespythonLibQBER.html"
                         title="previous chapter">Estimating QBER</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="simulaqron.html"
-                        title="next chapter">simulaqron package</a></p>
+  <p class="topless"><a href="ExamplescLib.html"
+                        title="next chapter">Example using the C library</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -106,11 +106,11 @@ Alice and Bob will make an EPR-pair which Bob will extend to Charlie, such that 
 <div class="section" id="setting-up">
 <h2>Setting up<a class="headerlink" href="#setting-up" title="Permalink to this headline">¶</a></h2>
 <p>We will run everything locally (localhost) using two nodes, Alice, Bob and Charlie. Start up the backend of the simulation by running:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">main</span><span class="o">.</span><span class="n">py</span> <span class="n">network</span> <span class="n">start</span><span class="o">-</span><span class="nb">all</span> <span class="o">--</span><span class="n">nodes</span> <span class="n">Alice</span><span class="p">,</span><span class="n">Bob</span><span class="p">,</span><span class="n">Charlie</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="n">start</span> <span class="o">--</span><span class="n">nodes</span> <span class="n">Alice</span><span class="p">,</span><span class="n">Bob</span><span class="p">,</span><span class="n">Charlie</span>
 </pre></div>
 </div>
 <p>The below example can then be executed when in the folder <cite>examples/cqc/pythonLib/extendGHZ</cite> typing:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">doNew</span><span class="o">.</span><span class="n">sh</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
 <p>which will execute the Python scripts <cite>aliceTest.py</cite>, <cite>bobTest.py</cite> and <cite>charlieTest.py</cite> containing the code below.</p>
@@ -229,7 +229,7 @@ Alice and Bob will make an EPR-pair which Bob will extend to Charlie, such that 
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="simulaqron.html" title="simulaqron package"
+          <a href="ExamplescLib.html" title="Example using the C library"
              >next</a> |</li>
         <li class="right" >
           <a href="ExamplespythonLibQBER.html" title="Estimating QBER"

@@ -31,14 +31,6 @@ simulaqron.network module
     :undoc-members:
     :show-inheritance:
 
-simulaqron.settings module
---------------------------
-
-.. automodule:: simulaqron.settings
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 Module contents
 ---------------
 

@@ -17,7 +17,7 @@
     <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Programming via the Classical-Quantum Combiner Interface" href="ExamplesNodeOS.html" />
+    <link rel="next" title="simulaqron package" href="simulaqron.html" />
     <link rel="prev" title="Teleporting a Qubit" href="NativeModeTeleport.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -30,7 +30,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="ExamplesNodeOS.html" title="Programming via the Classical-Quantum Combiner Interface"
+          <a href="simulaqron.html" title="simulaqron package"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="NativeModeTeleport.html" title="Teleporting a Qubit"
@@ -61,8 +61,8 @@
   <p class="topless"><a href="NativeModeTeleport.html"
                         title="previous chapter">Teleporting a Qubit</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="ExamplesNodeOS.html"
-                        title="next chapter">Programming via the Classical-Quantum Combiner Interface</a></p>
+  <p class="topless"><a href="simulaqron.html"
+                        title="next chapter">simulaqron package</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -496,19 +496,17 @@ Although the order described here is slightly different the end result is still 
 <div class="section" id="starting">
 <h2>Starting<a class="headerlink" href="#starting" title="Permalink to this headline">¶</a></h2>
 <p>We first start the virtual quantum node backend, by executing:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="s2">&quot;$NETSIM&quot;</span><span class="o">/</span><span class="n">run</span>
-<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Alice</span> <span class="o">&amp;</span>
-<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Bob</span> <span class="o">&amp;</span>
-<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">David</span> <span class="o">&amp;</span>
-<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Charlie</span> <span class="o">&amp;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">simulaqron</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Alice</span> <span class="o">&amp;</span>
+<span class="n">python3</span> <span class="n">simulaqron</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Bob</span> <span class="o">&amp;</span>
+<span class="n">python3</span> <span class="n">simulaqron</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">David</span> <span class="o">&amp;</span>
+<span class="n">python3</span> <span class="n">simulaqron</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Charlie</span> <span class="o">&amp;</span>
 </pre></div>
 </div>
-<p>where $NETSIM is the environment variable defining the SimulaQron directory as outlined in <a class="reference internal" href="GettingStarted.html"><span class="doc">Getting started</span></a>.</p>
 <p>We then start up the programs for the parties themselves. These will connect to the virtual quantum nodes, and execute the quantum commands and classical communication outlined above, in the same directory as we placed classicalNet.cfg:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">bobTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
-<span class="n">python</span> <span class="n">charlieTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
-<span class="n">python</span> <span class="n">davidTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
-<span class="n">python</span> <span class="n">aliceTest</span><span class="o">.</span><span class="n">py</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">bobTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
+<span class="n">python3</span> <span class="n">charlieTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
+<span class="n">python3</span> <span class="n">davidTest</span><span class="o">.</span><span class="n">py</span> <span class="o">&amp;</span>
+<span class="n">python3</span> <span class="n">aliceTest</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 </div>
@@ -530,7 +528,7 @@ Although the order described here is slightly different the end result is still 
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="ExamplesNodeOS.html" title="Programming via the Classical-Quantum Combiner Interface"
+          <a href="simulaqron.html" title="simulaqron package"
              >next</a> |</li>
         <li class="right" >
           <a href="NativeModeTeleport.html" title="Teleporting a Qubit"
