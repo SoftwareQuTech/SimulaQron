@@ -6,14 +6,13 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Configuring the simulated network &#8212; SimulaQron 1.0 documentation</title>
+    <title>Configuring the simulated network &#8212; SimulaQron 1.2 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
     <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -35,7 +34,7 @@
         <li class="right" >
           <a href="GettingStarted.html" title="Getting started"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 1.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 1.2 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -45,9 +44,11 @@
 <li><a class="reference internal" href="#">Configuring the simulated network</a><ul>
 <li><a class="reference internal" href="#starting-the-simulaqron-backend">Starting the SimulaQron backend</a></li>
 <li><a class="reference internal" href="#configuring-the-network-topology">Configuring the network topology</a></li>
-<li><a class="reference internal" href="#manual-setup">Manual setup</a></li>
-<li><a class="reference internal" href="#multiple-networks">Multiple networks</a></li>
-<li><a class="reference internal" href="#starting-a-network-from-python">Starting a network from Python</a></li>
+<li><a class="reference internal" href="#manual-setup">Manual setup</a><ul>
+<li><a class="reference internal" href="#starting-the-virtual-node-servers">Starting the virtual node servers</a></li>
+<li><a class="reference internal" href="#starting-the-cqc-servers">Starting the CQC servers</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#connecting-to-a-remote-simulated-network">Connecting to a remote simulated network</a></li>
 </ul>
 </li>
@@ -90,33 +91,30 @@
 <h1>Configuring the simulated network<a class="headerlink" href="#configuring-the-simulated-network" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="starting-the-simulaqron-backend">
 <h2>Starting the SimulaQron backend<a class="headerlink" href="#starting-the-simulaqron-backend" title="Permalink to this headline">¶</a></h2>
-<p>The backend of a SimulaQron network is a set of running virtual nodes and their corresponding CQC servers. To start the backend of a SimulaQron network run the command <code class="docutils literal notranslate"><span class="pre">./cli/SimulaQron</span> <span class="pre">start</span></code>.</p>
-<p>With no arguments, a network is setup using the files in the <code class="docutils literal notranslate"><span class="pre">config</span></code> directory.
-.. If no files exist in this directory, the <code class="docutils literal notranslate"><span class="pre">./cli/main.py</span> <span class="pre">network</span> <span class="pre">start-all</span></code> command will generate config files for five nodes (Alice, Bob Charlie, David, and Eve) in a fully connected topology (every node is connected to every other node).</p>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last"><code class="docutils literal notranslate"><span class="pre">./cli/main.py</span> <span class="pre">network</span> <span class="pre">start-all</span></code> can fail if any of the ports specified in the config files are already in use by a running SimulaQron network or another program.</p>
-</div>
-<p>To setup a specific topology see section <a class="reference internal" href="#topologyconf"><span class="std std-ref">Configuring the network topology</span></a>. For setting up the config files manually, see section <a class="reference internal" href="#manualsetup"><span class="std std-ref">Manual setup</span></a> below. Finally for instructions on how to connect to an already runnning simulated network using CQC, see section <a class="reference internal" href="#remotenetwork"><span class="std std-ref">Connecting to a remote simulated network</span></a>.</p>
+<p>The backend of SimulaQron, i.e. the virtual nodes and the corresponding CQC servers can be started by running the file run/startAll.sh. If no arguments are given, a network is setup using the files in the folder config. By default this network consist of the five nodes Alice, Bob, Charlie, David and Eve, in a fully connected topology. One can easily also setup networks using different nodes and topologies by providing arguments to run/startAll.sh as described in this section. To setup a specific topology see the next section <a class="reference internal" href="#topologyconf"><span class="std std-ref">Configuring the network topology</span></a>. How to manually setup a network by editing the config files, see the section <a class="reference internal" href="#manualsetup"><span class="std std-ref">Manual setup</span></a> below. This is useful if you don’t want run/startAll.sh to choose the port numbers used for the servers. Finally, to know how to connect to an already running simulated network using CQC, see section <a class="reference internal" href="#remotenetwork"><span class="std std-ref">Connecting to a remote simulated network</span></a>.</p>
 <p>If you want to start a network with for example the three nodes Alex, Bart, Curt, simply type:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="n">start</span> <span class="o">--</span><span class="n">nodes</span> <span class="n">Alex</span><span class="p">,</span><span class="n">Bart</span><span class="p">,</span><span class="n">Curt</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startAll</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">nodes</span> <span class="s2">&quot;Alex Bart Curt&quot;</span>
 </pre></div>
 </div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This will kill python processes containing the keywords <cite>Test</cite>, <cite>start</cite> or <cite>setup</cite>, edit files in the directory config and start servers at <cite>localhost</cite> using port numbers from 8801 to 8800 + 2 * (# nodes).</p>
+</div>
 <p>If you simply want a network with 10 nodes, type:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="n">start</span> <span class="o">--</span><span class="n">nrnodes</span> <span class="mi">10</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startAll</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">nrnodes</span> <span class="mi">10</span>
 </pre></div>
 </div>
 <p>This will start up a network where the nodes are called Node0, Node1, …, Node9.</p>
 <p>The –nodes and –nrnodes can be combined. Let’s say you want a network with 10 nodes and that three of the nodes are called Alice, Bob and Charlie, type:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="n">start</span> <span class="o">--</span><span class="n">nodes</span> <span class="n">Alice</span><span class="p">,</span><span class="n">Bob</span><span class="p">,</span><span class="n">Charlie</span> <span class="o">--</span><span class="n">nrnodes</span> <span class="mi">10</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startAll</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">nodes</span> <span class="s2">&quot;Alice Bob Charlie&quot;</span> <span class="o">--</span><span class="n">nrnodes</span> <span class="mi">10</span>
 </pre></div>
 </div>
 <p>Which will start up a network with the nodes Alice, Bob, Charlie, Node0, Node1, …, Node6. If –nrnodes is less than the entries in –nodes, then –nrnodes is ignored. The two keywords can also be specified shorter as -nd and -nn respectively. So the above can also be done as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="n">start</span> <span class="o">-</span><span class="n">n</span> <span class="n">Alice</span><span class="p">,</span><span class="n">Bob</span><span class="p">,</span><span class="n">Charlie</span> <span class="o">-</span><span class="n">N</span> <span class="mi">10</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startAll</span><span class="o">.</span><span class="n">sh</span> <span class="o">-</span><span class="n">nd</span> <span class="s2">&quot;Alice Bob Charlie&quot;</span> <span class="o">-</span><span class="n">nn</span> <span class="mi">10</span>
 </pre></div>
 </div>
 <p>You can also specify a topology of the network. For example if you want 10 nodes in a ring topology, type:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="n">start</span> <span class="o">--</span><span class="n">nrnodes</span> <span class="mi">10</span> <span class="o">--</span><span class="n">topology</span> <span class="n">ring</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startAll</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">nrnodes</span> <span class="mi">10</span> <span class="o">--</span><span class="n">topology</span> <span class="n">ring</span>
 </pre></div>
 </div>
 <p>In this network Node <span class="math notranslate nohighlight">\(i\)</span> can create EPR pairs and send qubits to Node <span class="math notranslate nohighlight">\(i-1 \pmod{10}\)</span> and Node <span class="math notranslate nohighlight">\(i+1 \pmod{10}\)</span>. However, if a CQC message is sent to for example Node2 to produce entanglement with Node5, a error message (CQC_ERR_UNSUPP) will be returned. The options for the automatically generated topologies are currently:</p>
@@ -129,7 +127,7 @@
 </ul>
 <p>Along with setting up the network with the specified topology a .png figure is also generated and stored as config/topology.png. This is useful if a random network is used, to easily visualize the network used.</p>
 <p>As a final example let’s combine all the arguments specified above and create a network using 15 nodes, where two of then are called Alice and Bob and the topology of the network is randomly generated as a connected graph with 20 edges:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="n">start</span> <span class="o">-</span><span class="n">n</span> <span class="n">Alice</span><span class="p">,</span><span class="n">Bob</span> <span class="o">-</span><span class="n">N</span> <span class="mi">15</span> <span class="o">-</span><span class="n">t</span> <span class="n">random_connected_20</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startAll</span><span class="o">.</span><span class="n">sh</span> <span class="o">-</span><span class="n">nd</span> <span class="s2">&quot;Alice Bob&quot;</span> <span class="o">-</span><span class="n">nn</span> <span class="mi">15</span> <span class="o">-</span><span class="n">tp</span> <span class="n">random_connected_20</span>
 </pre></div>
 </div>
 <p>The network that is then started might look like this (you can find a similar picture for you network at <cite>config/topology.png</cite>:</p>
@@ -138,7 +136,7 @@
 </div>
 <div class="section" id="configuring-the-network-topology">
 <span id="topologyconf"></span><h2>Configuring the network topology<a class="headerlink" href="#configuring-the-network-topology" title="Permalink to this headline">¶</a></h2>
-<p>As seen in the previous section a pre-defined network topology can be used by passing an argument when running <cite>./cli/SimulaQron start</cite>. The topology is then specified to SimulaQron as a .json-file stored at config/topology.json. The content of this .json file is a dictionary where the keys are the names of the nodes and the values a list of the neighbors. For example, a file specifying a topology where Alice is adjacent to Bob, Bob is adjacent to Alice and Charlie and Charlie is adjacent to Bob would be:</p>
+<p>As seen in the previous section a pre-defined network topology can be used by passing an argument when running run/startAll.sh. The topology is then specified to SimulaQron as a .json-file stored at config/topology.json. The content of this .json file is a dictionary where the keys are the names of the nodes and the values a list of the neighbors. For example, a file specifying a topology where Alice is adjacent to Bob, Bob is adjacent to Alice and Charlie and Charlie is adjacent to Bob would be:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
  <span class="s2">&quot;Alice&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Bob&quot;</span><span class="p">],</span>
  <span class="s2">&quot;Bob&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;Charlie&quot;</span><span class="p">]</span>
@@ -150,87 +148,102 @@
 <p class="first admonition-title">Note</p>
 <p class="last">Undirected topologies are also supported. That is, networks where for example Alice can send a qubit to Bob but Bob cannot send a qubit to Alice.</p>
 </div>
-<p>You can create your own .json file specifying the network topology you want to use. When doing so, make sure that the names of the nodes you use are consistent with the nodes used by SimulaQron. To have SimulaQron use your specified topology, set the setting <code class="code docutils literal notranslate"><span class="pre">topology-file</span></code> to be the relative path to the .json file, as seen from the root of the repository by:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="nb">set</span> <span class="n">topology</span><span class="o">-</span><span class="n">file</span> <span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span>
-</pre></div>
-</div>
+<p>You can create your own .json file specifying the network topology you want to use. When doing so, make sure that the names of the nonodes you use are consistent with the nodes used by SimulaQron. To have SimulaQron use your specified topology, set the entry <code class="code docutils literal notranslate"><span class="pre">topology_file</span></code> in the file config/settings to be the relative path to the .json file, as seen from the root of the repository.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">When using the keyword argument –topology (or -tp) for <code class="docutils literal notranslate"><span class="pre">./cli/SimulaQron</span> <span class="pre">start</span></code>, the file config/topology.json is overwritten. It is therefore recommended to create your own topology-file with another name or in a different directory, to not accidentally overwrite your file.</p>
+<p class="last">When using the keyword argument –topology (or -tp) for run/startAll.sh, the file config/topology.json is overwritten. It is therefore recommended to create your own topology-file with another name or in a different directory, to not accidentally overwrite your file.</p>
 </div>
 </div>
 <div class="section" id="manual-setup">
 <span id="manualsetup"></span><h2>Manual setup<a class="headerlink" href="#manual-setup" title="Permalink to this headline">¶</a></h2>
-<p>In this section we describe how nodes, topology and port settings can be configured for SimulaQron. This is useful if you don’t want <code class="docutils literal notranslate"><span class="pre">./cli/SimulaQron</span> <span class="pre">start</span></code> to automatically set the port numbers for you. Depending on what arguments are given to <code class="docutils literal notranslate"><span class="pre">./cli/SimulaQron</span> <span class="pre">start</span></code>, the following is done:</p>
-<ul>
-<li><p class="first">If no arguments to <code class="docutils literal notranslate"><span class="pre">./cli/SimulaQron</span> <span class="pre">start</span></code> are given then SimulaQron will start using the configuration specified by the current configuration files, which consist of the files <em>nodes-file</em> (default config/Nodes.cfg), <em>app-file</em> (default config/appNodes.cfg), <em>cqc-file</em> (default config/cqcNodes.cfg), <em>vnode-file</em> (default config/virtualNodes.cfg) and <em>topology-file</em> (default “”), but can be set by the command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="nb">set</span> <span class="n">FILE</span> <span class="n">PATH</span>
-</pre></div>
-</div>
-</li>
-<li><p class="first">If the arguments –nodes (-n) or –nrnodes (-N) are used for <code class="docutils literal notranslate"><span class="pre">./cli/SimulaQron</span> <span class="pre">start</span></code> then the files <em>nodes-file</em>, <em>vnode-file</em>, <em>cqc-file</em> and <em>app-file</em> are overwritten using the specified nodes. Port numbers will be used between 8000 and 8000.</p>
-</li>
-<li><p class="first">If the argument –topology (-tp) is used then the files config/topology.json and config/topology.png will be overwritten which the specified topology and the entry <code class="code docutils literal notranslate"><span class="pre">topology-file</span></code> in the settings will be set to point to this file.</p>
-</li>
+<p>In this section we describe what the file run/startAll.sh does and how one can manually start up the SimulaQron and editing the nodes and port numbers used. This is useful if you don’t want run/startAll.sh to automatically set the port numbers for you. Depending on what arguments are given to run/startAll.sh, the following is done:</p>
+<ul class="simple">
+<li>If no arguments to run/startAll.sh are given then SimulaQron will start using the configuration specified by the files in the directory config. If there the file config/Nodes.cfg doesn’t exist then it will be created and the files config/{virtualNodes.cfg, cqcNodes.cfg, appNodes.cfg} will be overwritten using the nodes Alice, Bob, Charlie, David and Eve.</li>
+<li>If the arguments –nodes (-nd) or –nrnodes (-nn) are used for run/startAll.sh then the files config/{Nodes.cfg, virtualNodes.cfg, cqcNodes.cfg, appNodes.cfg} are overwritten using the specified nodes. Port numbers will be used froThe files run/startVNodes.sh and run/startCQCNodes.sh are then called. What these scripts in turn do is specified below.m 8801.</li>
+<li>If the argument –topology (-tp) is used then the files config/topology.json and config/topology.png will be overwritten which the specified topology and the entry <code class="code docutils literal notranslate"><span class="pre">topology_file</span></code> in config/settings.ini will be set to point to this file.</li>
 </ul>
-<p>To change the nodes and the port numbers used in the network you can either edit the files <em>nodes-file</em>, <em>vnode-file</em>, <em>cqc-file</em> and <em>app-file</em> or use the command line interface. To see the current nodes type:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="n">nodes</span> <span class="n">get</span>
+<p>The files run/startVNodes.sh and run/startCQCNodes.sh are then called. What these scripts in turn do is specified below.</p>
+<div class="section" id="starting-the-virtual-node-servers">
+<h3>Starting the virtual node servers<a class="headerlink" href="#starting-the-virtual-node-servers" title="Permalink to this headline">¶</a></h3>
+<p>By default SimulaQron uses the five nodes Alice, Bob, Charlie, David and Eve on your local computers.</p>
+<p>You may do so by executing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startVNodes</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
-<p>To set the nodes back to the default (Alice, Bob, Charlie, David, Eve) type:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="n">nodes</span> <span class="n">default</span>
+<p>Let us now see in detail what happens when you execute this example script.
+The configuration for the test network is read from config/virtualNodes.cfg. This file defines which virtualNodes to start up and what their names are. The example runs them all locally, but you can as well run them on remote hosts by using one such file on each host.</p>
+<p>For the example, this file is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Network configuration file</span>
+<span class="c1">#</span>
+<span class="c1"># For each host its informal name, as well as its location in the network must</span>
+<span class="c1"># be listed.</span>
+<span class="c1">#</span>
+<span class="c1"># [name], [hostname], [port number]</span>
+<span class="c1">#</span>
+
+<span class="n">Alice</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8801</span>
+<span class="n">Bob</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8802</span>
+<span class="n">Charlie</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8803</span>
 </pre></div>
 </div>
-<p>To add a node from the network type:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="n">nodes</span> <span class="n">add</span> <span class="n">NAME</span>
+<p>Provided a configuration in the file above, you can run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">/</span><span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Alice</span> <span class="o">&amp;</span>
 </pre></div>
 </div>
-<p>where you can also optionally specify the host-name, port-numbers and neighbors of the node.
-To remove a node from the network type:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="n">nodes</span> <span class="n">remove</span> <span class="n">NAME</span>
+<p>To start the virtual node for Alice. The script startVNodes.sh then simply starts any number of desired virtual nodes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># startVNodes.sh - start the node Alice, Bob and Charlie</span>
+
+<span class="n">cd</span> <span class="s2">&quot;$NETSIM&quot;</span><span class="o">/</span><span class="n">run</span>
+<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Alice</span> <span class="o">&amp;</span>
+<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Bob</span> <span class="o">&amp;</span>
+<span class="n">python</span> <span class="n">startNode</span><span class="o">.</span><span class="n">py</span> <span class="n">Charlie</span> <span class="o">&amp;</span>
 </pre></div>
 </div>
+<p>Provided the virtual nodes started successfully you now have a network of 3 simulated quantum nodes that accept connections on the ports indicated above to allow an application program to access qubits on the virtual node servers. The 3 virtual nodes have also established connections to each other in order to exchange simulated quantum traffic.</p>
 </div>
-<div class="section" id="multiple-networks">
-<h2>Multiple networks<a class="headerlink" href="#multiple-networks" title="Permalink to this headline">¶</a></h2>
-<p>To run multiple networks at the same time you need to given them different names by using the –name flag:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="n">start</span> <span class="o">--</span><span class="n">name</span> <span class="n">NETWORK</span>
+<div class="section" id="starting-the-cqc-servers">
+<h3>Starting the CQC servers<a class="headerlink" href="#starting-the-cqc-servers" title="Permalink to this headline">¶</a></h3>
+<p>Similarly to the virtual nodes we also need to start the CQC servers, which provide the possibility to talk to SimulaQron using the CQC interface.
+A test configuration of CQC servers will start 3 nodes, Alice, Bob and Charlie on your local computers. You may do so by executing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="n">run</span><span class="o">/</span><span class="n">startCQCNodes</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
-<p>To stop a network with a specific name type:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">cli</span><span class="o">/</span><span class="n">SimulaQron</span> <span class="n">stop</span> <span class="o">--</span><span class="n">name</span> <span class="n">NETWORK</span>
-</pre></div>
-</div>
+<p>The configuration for the CQC network is read from config/cqcNodes.cfg. This file defines which CQC servers to start up and what their names are.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">By default the network name is “default”.</p>
+<p class="last">The names for the virtual nodes and the CQC servers have to be the same.</p>
 </div>
-</div>
-<div class="section" id="starting-a-network-from-python">
-<h2>Starting a network from Python<a class="headerlink" href="#starting-a-network-from-python" title="Permalink to this headline">¶</a></h2>
-<p>You can also start a network within a Python script (this is in fact what ./cli/SimulaQron does), by using the class <code class="code docutils literal notranslate"><span class="pre">simulaqron.network.Network</span></code>. To setup a network by name “test” with the nodes Alice, Bob and Charlie, where Bob is connected with Alice and Charlie but Alice and Charlie are not connected use the following code code:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">simulaqron.network</span> <span class="k">import</span> <span class="n">Network</span>
+<p>For the example, this file is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Network configuration file</span>
+<span class="c1">#</span>
+<span class="c1"># For each host its informal name, as well as its location in the network must</span>
+<span class="c1"># be listed.</span>
+<span class="c1">#</span>
+<span class="c1"># [name], [hostname], [port number]</span>
+<span class="c1">#</span>
 
-<span class="c1"># Setup the network</span>
-<span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;Charlie&quot;</span><span class="p">]</span>
-<span class="n">topology</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Alice&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Bob&quot;</span><span class="p">],</span> <span class="s2">&quot;Bob&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;Charlie&quot;</span><span class="p">],</span> <span class="s2">&quot;Charlie&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Bob&quot;</span><span class="p">]}</span>
-<span class="n">network</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">topology</span><span class="o">=</span><span class="n">topology</span><span class="p">)</span>
-
-<span class="c1"># Start the network</span>
-<span class="n">network</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">Alice</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8821</span>
+<span class="n">Bob</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8822</span>
+<span class="n">Charlie</span><span class="p">,</span> <span class="n">localhost</span><span class="p">,</span> <span class="mi">8823</span>
 </pre></div>
 </div>
-<p>By default the method <code class="code docutils literal notranslate"><span class="pre">simulaqron.network.Network.start</span></code>, only returns when the network is running, i.e. all the connections are established. To avoid this use the argument <code class="code docutils literal notranslate"><span class="pre">wait_until_running=False</span></code>.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The network will stop when the network-object goes out of scope and is handled by the Python garbade collector. The network can be manually stopped with the method <code class="code docutils literal notranslate"><span class="pre">simulaqron.network.Network.stop</span></code>.</p>
+<p>The script startCQCNodes.sh starts any number of desired CQC servers:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># startCQCNodes.sh - start the node Alice, Bob and Charlie</span>
+
+<span class="n">cd</span> <span class="s2">&quot;$NETSIM&quot;</span><span class="o">/</span><span class="n">run</span>
+<span class="n">python</span> <span class="n">startCQC</span><span class="o">.</span><span class="n">py</span> <span class="n">Alice</span> <span class="o">&amp;</span>
+<span class="n">python</span> <span class="n">startCQC</span><span class="o">.</span><span class="n">py</span> <span class="n">Bob</span> <span class="o">&amp;</span>
+<span class="n">python</span> <span class="n">startCQC</span><span class="o">.</span><span class="n">py</span> <span class="n">Charlie</span> <span class="o">&amp;</span>
+</pre></div>
+</div>
+<p>Provided the CQC servers started successfully you now have a network of 3 simulated quantum nodes that accept connections on the ports indicated above and takes messages specified by the CQC header.</p>
 </div>
 </div>
 <div class="section" id="connecting-to-a-remote-simulated-network">
 <span id="remotenetwork"></span><h2>Connecting to a remote simulated network<a class="headerlink" href="#connecting-to-a-remote-simulated-network" title="Permalink to this headline">¶</a></h2>
 <p>If a simulated network (consisting of virtual nodes and CQC servers) are setup on a remote computer (or on your own computer), CQC messages can be sent to the correct address and port numbers to control the nodes of the network. In this section we describe how to do this.</p>
 <p>Given the ip and port number of the CQC server of a node, you can send CQC messages over TCP using in any way you prefer. To know how these messages should look like to perform certain instructions, refer to <a class="reference internal" href="CQCInterface.html"><span class="doc">CQC Interface</span></a>.</p>
-<p>An easier way to send CQC messages to a CQC server of a node is to use the provided Python library. Assuming that you have a file in the form of the config/cqcNodes.cfg above, i.e. consisting of lines of the form <cite>[name], [hostname/ip], [port]</cite> you can then easily instanciate an object of the class <code class="code docutils literal notranslate"><span class="pre">cqc.pythonLib.CQCConnection</span></code> which will communicate with the CQC server for you, using the CQC interface.</p>
+<p>An easier way to send CQC messages to a CQC server of a node is to use the provided Python library. Assuming that you have a file in the form of the config/cqcNodes.cfg above, i.e. consisting of lines of the form <cite>[name], [hostname/ip], [port]</cite> you can then easily instanciate an object of the class <code class="code docutils literal notranslate"><span class="pre">SimulaQron.cqc.pythonLib.cqc.CQCConnection</span></code> which will communicate with the CQC server for you, using the CQC interface.</p>
 <p>Let’s assume that you have a file cqcNodes_example.cfg which consist of the following lines:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Alice</span><span class="p">,</span> <span class="mf">1.1</span><span class="o">.</span><span class="mf">1.1</span><span class="p">,</span> <span class="mi">8801</span>
 <span class="n">Bob</span><span class="p">,</span> <span class="mf">2.2</span><span class="o">.</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">8802</span>
@@ -238,7 +251,7 @@ To remove a node from the network type:</p>
 </pre></div>
 </div>
 <p>you can connect to the CQC server for the node Alice at 1.1.1.1 and port number 8801 by executing the following Python code:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cqc.pythonLib</span> <span class="k">import</span> <span class="n">CQCConnection</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">SimulaQron.cqc.pythonLib.cqc</span> <span class="k">import</span> <span class="n">CQCConnection</span>
 
 <span class="n">cqc</span> <span class="o">=</span> <span class="n">CQCConnection</span><span class="p">(</span><span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="n">cqcFile</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">cqcNodes_example</span><span class="o">.</span><span class="n">cfg</span><span class="p">)</span>
 </pre></div>
@@ -272,12 +285,12 @@ To remove a node from the network type:</p>
         <li class="right" >
           <a href="GettingStarted.html" title="Getting started"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 1.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 1.2 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
     </div>
   </body>
 </html>

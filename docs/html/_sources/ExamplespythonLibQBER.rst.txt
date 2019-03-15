@@ -3,10 +3,7 @@ Estimating QBER
 
 In this example the two nodes Alice and Bob will estimate the QBER (qubit error rate) of their produced entangled pairs.
 To make the below example more interesting you should try to turn on the probabilistic noise option in SimulaQron.
-You can do this be setting the entry :code:`noisy-qubits` to :code:`True` by::
-
-    ./cli/SimulaQron set noisy-qubits on
-
+You can do this be setting the entry :code:`noisy_qubits` to :code:`True` in the settings-file `config/settings.ini`.
 You can also tune the coherence time :code:`t1` of the qubits (lower means more noisy).
 
 .. note:: This probabilistic noise in SimulaQron is not intended and should not be used to benchmark the performence of protocols in noisy settings, since noise is applied in a rate related to the wall clock time of your computer. Thus, if your computer or network is slower, more noise will be applied to the qubits! However you can use this example to tune the :code:`t1`-parameter to a realistic value for your setup. A realistic QBER is around 5 -10 %.
@@ -36,17 +33,17 @@ Setting up
 
 We will run everything locally (localhost) using two nodes, Alice and Bob. Start up the backend of the simulation by running (to make this example more interesting you should before turn on the noise on the qubits as described above)::
 
-    ./cli/SimulaQron start --nodes Alice,Bob
+    sh run/startAll.sh --nodes "Alice Bob"
 
-The below example can then be executed when in the folder `examples/cqc/pythonLib/QBER` typing::
+The below example can then be executed when in the folder `examples/cqc/pythonLib/teleport` typing::
 
-    sh run.sh
+    sh doNew.sh
 
 which will execute the Python scripts `aliceTest.py` and `bobTest.py` containing the code below. By default 500 EPR pairs are produced to estimate the QBER, see above. You can choose to produce a different number of pairs by passing this as an argument. For example::
 
-    sh run.sh 300
+    sh doNew.sh 300
 
-When running this example the estimated QBER will be printed. If the noise in SimulaQron is off the QBER should be 0.
+When running this example the estimated QBER will be printed. If the noise in SimulaQron (in `config/settings.ini`) the QBER should be 0.
 
 -----------------
 Programming Alice

@@ -63,7 +63,7 @@ Nevertheless, as a guide to the backend, it consists of three essential componen
     This corresponds to one quantum register full of qubits across which gates can be performed. Should you wish to use a different backend, you may wish to add a different engine.
     The three current backends give different runtimes due to how quantum states are stored and manipulated.
     In the stabilizer formalism, only Clifford operations can be performed and the simulation is in fact efficient in the number of qubits.
-    See figure XXX for a comparison of runtimes to create a GHZ-state on a number of qubits using the three different backends.
+    See the figure below for a comparison of runtimes to create a GHZ-state on a number of qubits using the three different backends.
 
 .. image:: figs/runtime_qutip_vs_projectq_vs_stabilizer.png
     :width: 700px
