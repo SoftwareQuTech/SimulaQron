@@ -30,8 +30,9 @@
 import logging
 import os
 
-from SimulaQron.local.setup import setup_local
-from SimulaQron.general.hostConfig import networkConfig
+from simulaqron.local.setup import setup_local
+from simulaqron.general.hostConfig import networkConfig
+from simulaqron.toolbox import get_simulaqron_path
 from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
 from twisted.internet import reactor
@@ -116,12 +117,12 @@ class localNode(pb.Root):
 # main
 #
 def main():
-
     # In this example, we are Alice.
     myName = "Alice"
 
     # This file defines the network of virtual quantum nodes
-    virtualFile = os.environ.get("NETSIM") + "/config/virtualNodes.cfg"
+    simulaqron_path = get_simulaqron_path.main()
+    virtualFile = os.path.join(simulaqron_path, "config/virtualNodes.cfg")
 
     # This file defines the nodes acting as servers in the classical communication network
     classicalFile = os.path.join(os.path.dirname(__file__), "classicalNet.cfg")

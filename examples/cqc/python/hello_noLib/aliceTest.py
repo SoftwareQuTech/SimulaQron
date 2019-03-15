@@ -31,8 +31,9 @@ import logging
 import os
 import socket
 
-from SimulaQron.general.hostConfig import networkConfig
-from SimulaQron.cqc.backend.cqcHeader import CQCHeader, CQC_TP_HELLO, CQC_VERSION
+from simulaqron.general.hostConfig import networkConfig
+from cqc.backend.cqcHeader import CQCHeader, CQC_TP_HELLO, CQC_VERSION
+from simulaqron.toolbox import get_simulaqron_path
 
 
 #####################################################################################################
@@ -43,13 +44,14 @@ def init(name, cqcFile=None):
     """
     Initialize a connection to the cqc server with the name given as input.
     A path to a configure file for the cqc network can be given,
-    if it's not given the config file '$NETSIM/config/cqcNodes.cfg' will be used.
+    if it's not given the config file 'config/cqcNodes.cfg' will be used.
     Returns a socket object.
     """
 
     # This file defines the network of CQC servers interfacing to virtual quantum nodes
     if cqcFile is None:
-        cqcFile = os.environ.get("NETSIM") + "/config/cqcNodes.cfg"
+        simulaqron_path = get_simulaqron_path.main()
+        cqcFile = os.path.join(simulaqron_path, "config/cqcNodes.cfg")
 
         # Read configuration files for the cqc network
     cqcNet = networkConfig(cqcFile)
@@ -90,6 +92,7 @@ def main():
     cqc = init(myName)
 
     # Send Hello message
+    print("App {} tells CQC: 'HELLO'".format(myName))
     hdr = CQCHeader()
     hdr.setVals(CQC_VERSION, CQC_TP_HELLO, 0, 0)
     msg = hdr.pack()

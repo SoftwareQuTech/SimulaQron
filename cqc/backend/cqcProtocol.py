@@ -33,8 +33,9 @@ import os
 from twisted.internet.defer import DeferredLock, inlineCallbacks
 from twisted.internet.protocol import Factory, Protocol, connectionDone
 
-from SimulaQron.cqc.backend.cqcHeader import CQC_HDR_LENGTH, CQC_VERSION, CQCHeader
-from SimulaQron.settings import Settings
+from cqc.backend.cqcHeader import CQC_HDR_LENGTH, CQC_VERSION, CQCHeader
+from simulaqron.settings import Settings
+from simulaqron.toolbox import get_simulaqron_path
 
 
 ###############################################################################
@@ -108,7 +109,7 @@ class CQCFactory(Factory):
         :param topology_file: str
             The relative path to the json-file defining the topology. It will
             be assumed that the absolute path to the file is
-            ${NETSIM}/topology_file.
+            $simulaqron_path/topology_file.
             If topology is an empty string then a fully connected topology will
             be used.
         :return: None
@@ -116,8 +117,11 @@ class CQCFactory(Factory):
         if topology_file == "":
             return
         else:
+            # Get path to SimulaQron folder
+            simulaqron_path = get_simulaqron_path.main()
+
             # Get the absolute path to the file
-            abs_path = os.environ["NETSIM"] + "/" + topology_file
+            abs_path = os.path.join(simulaqron_path, topology_file)
             try:
                 with open(abs_path, "r") as top_file:
                     try:
@@ -197,7 +201,7 @@ class CQCProtocol(Protocol):
         # Convenience
         self.name = self.factory.name
 
-        logging.info("CQC %s: Initialized Protocol", self.name)
+        logging.debug("CQC %s: Initialized Protocol", self.name)
 
     def connectionMade(self):
         pass

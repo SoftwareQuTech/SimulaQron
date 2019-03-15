@@ -1,4 +1,4 @@
-from SimulaQron.cqc.pythonLib.cqc import CQCConnection, qubit
+from cqc.pythonLib import CQCConnection, qubit
 
 import sys
 

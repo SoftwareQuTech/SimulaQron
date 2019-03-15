@@ -1,4 +1,4 @@
 #!/bin/sh
 
-python aliceTest.py $@ &
-python bobTest.py $@ &
+python3 aliceTest.py $@ &
+python3 bobTest.py $@ &

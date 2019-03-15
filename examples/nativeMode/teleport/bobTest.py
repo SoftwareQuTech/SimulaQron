@@ -30,13 +30,15 @@
 
 import logging
 import os
+import numpy as np
 
-from SimulaQron.local.setup import setup_local
-from SimulaQron.general.hostConfig import networkConfig
+from simulaqron.local.setup import setup_local, assemble_qubit
+from simulaqron.general.hostConfig import networkConfig
+from simulaqron.toolbox import get_simulaqron_path
+from simulaqron.settings import Settings
+from simulaqron.toolbox.stabilizerStates import StabilizerState
 from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
-
-from qutip import Qobj
 
 
 #####################################################################################################
@@ -110,23 +112,21 @@ class localNode(pb.Root):
         if a == 1:
             yield eprB.callRemote("apply_Z")
 
-            # Just print the qubit we received
-        (realRho, imagRho) = yield eprB.callRemote("get_qubit")
-        rho = self.assemble_qubit(realRho, imagRho)
+        # Just print the qubit we received
+        if Settings.CONF_BACKEND == "qutip":
+            print("here")
+            (realRho, imagRho) = yield eprB.callRemote("get_qubit")
+            state = np.array(assemble_qubit(realRho, imagRho), dtype=complex)
+        elif Settings.CONF_BACKEND == "projectq":
+            realvec, imagvec = yield self.virtRoot.callRemote("get_register_RI", eprB)
+            state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
+        elif Settings.CONF_BACKEND == "stabilizer":
+            array, _, = yield self.virtRoot.callRemote("get_register_RI", eprB)
+            state = StabilizerState(array)
+        else:
+            ValueError("Unknown backend {}".format(Settings.CONF_BACKEND))
 
-        print("Qubit is:", rho)
-
-    def assemble_qubit(self, realM, imagM):
-        """
-        Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
-        We need this since Twisted PB does not support sending complex valued object natively.
-        """
-        M = realM
-        for s in range(len(M)):
-            for t in range(len(M)):
-                M[s][t] = realM[s][t] + 1j * imagM[s][t]
-
-        return Qobj(M)
+        print("Qubit is:\n{}".format(state))
 
 
 #####################################################################################################
@@ -139,7 +139,8 @@ def main():
     myName = "Bob"
 
     # This file defines the network of virtual quantum nodes
-    virtualFile = os.environ.get("NETSIM") + "/config/virtualNodes.cfg"
+    simulaqron_path = get_simulaqron_path.main()
+    virtualFile = os.path.join(simulaqron_path, "config/virtualNodes.cfg")
 
     # This file defines the nodes acting as servers in the classical communication network
     classicalFile = "classicalNet.cfg"

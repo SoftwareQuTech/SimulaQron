@@ -29,9 +29,13 @@
 
 import logging
 import os
+import numpy as np
 
-from SimulaQron.local.setup import setup_local, assemble_qubit
-from SimulaQron.general.hostConfig import networkConfig
+from simulaqron.local.setup import setup_local, assemble_qubit
+from simulaqron.general.hostConfig import networkConfig
+from simulaqron.toolbox import get_simulaqron_path
+from simulaqron.toolbox.stabilizerStates import StabilizerState
+from simulaqron.settings import Settings
 from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
 from twisted.internet import reactor
@@ -61,16 +65,29 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
 
     # Create 3 qubits
     q1 = yield virtRoot.callRemote("new_qubit_inreg", qReg)
-    qA = yield virtRoot.callRemote("new_qubit_inreg", qReg)
-    qB = yield virtRoot.callRemote("new_qubit_inreg", qReg)
 
     # Prepare the first one in the |-> state
     # yield q1.callRemote("apply_X")
     yield q1.callRemote("apply_H")
 
     # For information purposes, let's print the state of that qubit
-    (R, I) = yield q1.callRemote("get_qubit")
-    print("Qubit to be teleported is: ", assemble_qubit(R, I))
+    if Settings.CONF_BACKEND == "qutip":
+        realRho, imagRho = yield q1.callRemote("get_qubit")
+        state = np.array(assemble_qubit(realRho, imagRho), dtype=complex)
+    elif Settings.CONF_BACKEND == "projectq":
+        realvec, imagvec = yield virtRoot.callRemote("get_register_RI", q1)
+        state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
+    elif Settings.CONF_BACKEND == "stabilizer":
+        array, _ = yield virtRoot.callRemote("get_register_RI", q1)
+        state = StabilizerState(array)
+    else:
+        ValueError("Unknown backend {}".format(Settings.CONF_BACKEND))
+
+    print("Qubit to be teleported is:\n{}".format(state))
+
+    # Create qubit for teleportation
+    qA = yield virtRoot.callRemote("new_qubit_inreg", qReg)
+    qB = yield virtRoot.callRemote("new_qubit_inreg", qReg)
 
     # Put qubits A and B in an EPR state
     yield qA.callRemote("apply_H")
@@ -133,7 +150,8 @@ def main():
     myName = "Alice"
 
     # This file defines the network of virtual quantum nodes
-    virtualFile = os.environ.get("NETSIM") + "/config/virtualNodes.cfg"
+    simulaqron_path = get_simulaqron_path.main()
+    virtualFile = os.path.join(simulaqron_path, "config/virtualNodes.cfg")
 
     # This file defines the nodes acting as servers in the classical communication network
     classicalFile = "classicalNet.cfg"

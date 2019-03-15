@@ -32,7 +32,7 @@ import logging
 import struct
 import bitstring
 
-from SimulaQron.cqc.backend.cqcHeader import Header
+from cqc.backend.cqcHeader import Header
 
 # Lengths of the headers in bytes
 ENT_INFO_LENGTH = 40  # Length of a entanglement information header

@@ -33,8 +33,8 @@ import logging
 import numpy as np
 import time
 
-from SimulaQron.cqc.backend.cqcConfig import CQC_CONF_WAIT_TIME_RECV, CQC_CONF_RECV_TIMEOUT, CQC_CONF_RECV_EPR_TIMEOUT
-from SimulaQron.cqc.backend.cqcHeader import (
+from cqc.backend.cqcConfig import CQC_CONF_WAIT_TIME_RECV, CQC_CONF_RECV_TIMEOUT, CQC_CONF_RECV_EPR_TIMEOUT
+from cqc.backend.cqcHeader import (
     CQCCmdHeader,
     CQC_CMD_SEND,
     CQC_CMD_EPR,
@@ -92,8 +92,8 @@ from SimulaQron.cqc.backend.cqcHeader import (
     CQC_TP_EPR_OK,
     CQC_TP_NEW_OK,
 )
-from SimulaQron.cqc.backend.entInfoHeader import EntInfoHeader, ENT_INFO_LENGTH
-from SimulaQron.virtNode.basics import quantumError, noQubitError
+from cqc.backend.entInfoHeader import EntInfoHeader, ENT_INFO_LENGTH
+from simulaqron.virtNode.basics import quantumError, noQubitError
 from twisted.internet.defer import DeferredLock, inlineCallbacks
 from twisted.spread.pb import RemoteError
 
@@ -854,7 +854,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
     @inlineCallbacks
     def cmd_reset(self, cqc_header, cmd, xtra):
         """
-        Reset Qubit to |0>
+        Reset Qubit to \|0\>
         """
         logging.debug("CQC %s: Reset App ID %d qubit id %d", self.name, cqc_header.app_id, cmd.qubit_id)
         try:
@@ -900,14 +900,14 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         # Lookup the name of the remote node used within SimulaQron
         target_name = self.factory.lookup(xtra.remote_node, xtra.remote_port)
         if target_name is None:
-            logging.debug("CQC %s: Remote node not found %s", self.name, xtra.printable())
+            logging.warning("CQC %s: Remote node not found %s", self.name, xtra.printable())
             err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP, cqc_version=cqc_header.version)
             self.return_messages.append(err_msg)
             return False
 
         # Check so that it is not the same node
         if self.name == target_name:
-            logging.debug("CQC %s: Trying to send from node to itself.", self.name)
+            logging.warning("CQC %s: Trying to send from node to itself.", self.name)
             # self.protocol._send_back_cqc(cqc_header, CQC_ERR_GENERAL)
             err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP, cqc_version=cqc_header.version)
             self.return_messages.append(err_msg)
@@ -915,7 +915,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
         # Check that other node is adjacent to us
         if not self.factory.is_adjacent(target_name):
-            logging.debug(
+            logging.warning(
                 "CQC {}: Node {} is not adjacent to {} in the specified topology.".format(
                     self.name, target_name, self.name
                 )
@@ -1095,14 +1095,14 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         # Lookup the name of the remote node used within SimulaQron
         target_name = self.factory.lookup(remote_node, remote_port)
         if target_name is None:
-            logging.debug("CQC %s: Remote node not found %s", self.name, xtra.printable())
+            logging.warning("CQC %s: Remote node not found %s", self.name, xtra.printable())
             err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP, cqc_version=cqc_header.version)
             self.return_messages.append(err_msg)
             return False
 
         # Check so that it is not the same node
         if self.name == target_name:
-            logging.debug("CQC %s: Trying to create EPR from node to itself.", self.name)
+            logging.warning("CQC %s: Trying to create EPR from node to itself.", self.name)
             # self.protocol._send_back_cqc(cqc_header, CQC_ERR_GENERAL)
             err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP, cqc_version=cqc_header.version)
             self.return_messages.append(err_msg)
@@ -1110,7 +1110,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
 
         # Check that other node is adjacent to us
         if not self.factory.is_adjacent(target_name):
-            logging.debug(
+            logging.warning(
                 "CQC {}: Node {} is not adjacent to {} in the specified topology.".format(
                     self.name, target_name, self.name
                 )
@@ -1669,7 +1669,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
     @inlineCallbacks
     def apply_two_qubit_gate(self, cqc_header, cmd, xtra, gate):
         if not xtra:
-            logging.debug("CQC %s: Missing XTRA Header", self.name)
+            logging.warning("CQC %s: Missing XTRA Header", self.name)
             err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP, cqc_version=cqc_header.version)
             self.return_messages.append(err_msg)
             return False

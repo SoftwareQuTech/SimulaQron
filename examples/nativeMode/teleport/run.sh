@@ -1,8 +1,7 @@
 #!/bin/sh
 
-cd "$NETSIM/examples/nativeMode/teleport"
-python bobTest.py &
-python aliceTest.py
+python3 bobTest.py &
+python3 aliceTest.py
 
 
 
