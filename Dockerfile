@@ -41,19 +41,17 @@
 # has, run `docker ps`.
 
 FROM ubuntu:18.04
-LABEL author="Wojciech Kozlowski <wk@wojciechkozlowski.eu>"
+LABEL author="Wojciech Kozlowski <w.kozlowski@tudelft.nl>"
 
 # Update docker image
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get upgrade -y
 
-# Install Rust and cargo
+# Install Rust and Cargo and update
 RUN apt-get install -y rustc cargo
 
 # Install Python 3
 RUN apt-get install -y python3 python3-pip python3-tk
-RUN ln -s /usr/bin/python3 /usr/bin/python
-RUN ln -s /usr/bin/pip3 /usr/bin/pip
 
 # Set a UTF-8 locale - this is needed for some python packages to play nice
 RUN apt-get -y install language-pack-en
@@ -65,7 +63,7 @@ ADD . $WORKSPACE/SimulaQron
 WORKDIR $WORKSPACE/SimulaQron
 
 # SimulaQron dependencies
-RUN pip install -r ./requirements.txt
+RUN pip3 install -r ./requirements.txt
 
 # Fetch rustLib dependencies
 RUN cd cqc/rustLib && cargo update
