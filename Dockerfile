@@ -47,7 +47,7 @@ LABEL author="Wojciech Kozlowski <w.kozlowski@tudelft.nl>"
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get upgrade -y
 
-# Install Rust and Cargo and update
+# Install Rust and Cargo
 RUN apt-get install -y rustc cargo
 
 # Install Python 3
