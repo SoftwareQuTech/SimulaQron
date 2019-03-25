@@ -71,11 +71,11 @@ impl Cqc {
             return Err(From::from("Unexpected response"));
         }
 
-        // Extract the Notify header.
-        if !response.notify.is_notify_hdr() {
+        // Extract the Qubit header.
+        if !response.notify.is_qubit_hdr() {
             return Err(From::from("Unexpected response"));
         }
-        let note = response.notify.get_notify_hdr();
+        let note = response.notify.get_qubit_hdr();
 
         Ok(note.qubit_id)
     }
@@ -96,12 +96,12 @@ impl Cqc {
         }
 
         // Extract the Notify header.
-        if !response.notify.is_notify_hdr() {
+        if !response.notify.is_meas_out_hdr() {
             return Err(From::from("Unexpected response"));
         }
-        let note = response.notify.get_notify_hdr();
+        let note = response.notify.get_meas_out_hdr();
 
-        Ok(note.outcome)
+        Ok(note.meas_out as u8)
     }
 
     pub fn wait_until_done(&mut self, reps: usize) -> Result<(), Box<Error>> {
@@ -123,10 +123,10 @@ impl Cqc {
         }
 
         // Extract the Notify header.
-        if !response.notify.is_notify_hdr() {
+        if !response.notify.is_qubit_hdr() {
             return Err(From::from("Unexpected response"));
         }
-        let note = response.notify.get_notify_hdr();
+        let note = response.notify.get_qubit_hdr();
 
         Ok(note.qubit_id)
     }
