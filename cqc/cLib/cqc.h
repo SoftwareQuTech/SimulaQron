@@ -32,6 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CQC_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /* Basic CQC Header format */
 
@@ -131,7 +132,7 @@ typedef struct
 typedef struct
 {
         uint16_t qubit_id;      /* Qubit_id of the target qubit */
-} __attribute__((__packed__)) extraQubitHeader;
+} __attribute__((__packed__)) qubitHeader;
 
 /* Additional header used to send to which node to send information to. Used in
  * send and EPR commands. */
@@ -141,7 +142,7 @@ typedef struct
 	uint16_t remote_app_id;	/* Remote application ID */
 	uint16_t remote_port;	/* Port of the remote node for control info */
 	uint32_t remote_node;	/* IP of the remote node */
-} __attribute__((__packed__)) communicationHeader;
+} __attribute__((__packed__)) commHeader;
 
 /* Additional header used to send factory information. Factory commands are
  * used to tell the backend to do the following command or a sequence of
@@ -179,6 +180,7 @@ typedef struct
  * to the pair of nodes and who initialized the entanglement (DF). For this
  * reason the entanglement ID together with the nodes and the directionality
  * flag gives a unique way to identify the entanglement in the network. */
+#define CQC_ENT_INFO_HDR_LENGTH 40
 typedef struct
 {
 	uint32_t node_A;        /* IP of this node */
@@ -214,34 +216,18 @@ cqc_lib * cqc_init(int app_id);
 void cqc_error(uint8_t type);
 int cqc_connect(cqc_lib *cqc, char *hostname, int portno);
 int cqc_cleanup(cqc_lib *cqc);
+
+int cqc_hello(cqc_lib *cqc);
 int cqc_simple_cmd(cqc_lib *cqc,
                    uint8_t command,
                    uint16_t qubit_id,
-                   uint8_t notify);
-int cqc_full_cmd(cqc_lib *cqc,
-                 uint8_t command,
-                 uint16_t qubit_id,
-                 char notify,
-                 char action,
-                 char block,
-                 uint16_t xtra_id,
-                 uint8_t steps,
-                 uint16_t r_app_id,
-                 uint32_t r_node,
-                 uint16_t r_port,
-                 uint32_t cmdLength);
-
-int cqc_hello(cqc_lib *cqc);
+                   bool notify);
 int cqc_send(cqc_lib *cqc,
              uint16_t qubit_id,
              uint16_t remote_app_id,
-             uint32_t remote_node,
-             uint16_t remote_port);
+             uint16_t remote_port,
+             uint32_t remote_node);
 uint16_t cqc_recv(cqc_lib *cqc);
-int cqc_epr(cqc_lib *cqc,
-            uint16_t remote_app_id,
-            uint32_t remote_node,
-            uint16_t remote_port);
 int cqc_measure(cqc_lib *cqc, uint16_t qubit_id);
 int cqc_wait_until_done(cqc_lib *cqc, unsigned int reps);
 int cqc_wait_until_newok(cqc_lib *cqc);
@@ -260,6 +246,13 @@ int cqc_test_qubit(cqc_lib *cqc,
                    float exp_x,
                    float exp_y,
                    float exp_z);
-int cqc_wait_until_newok(cqc_lib *cqc);
+
+int cqc_epr(cqc_lib *cqc,
+            uint16_t remote_app_id,
+            uint16_t remote_port,
+            uint32_t remote_node,
+            entanglementHeader *ent_info);
+int cqc_epr_recv(cqc_lib *cqc,
+                 entanglementHeader *ent_info);
 
 #endif
