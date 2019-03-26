@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 	qubit = cqc_wait_until_newok(cqc);
 
 	remoteNode.s_addr = ntohl(*((uint32_t *)server->h_addr_list[0]));
-	cqc_send(cqc, qubit, app_id, remoteNode.s_addr, remotePort);
+	cqc_send(cqc, qubit, app_id, remotePort, remoteNode.s_addr);
 	cqc_wait_until_done(cqc, 1);
 
    	return 0;

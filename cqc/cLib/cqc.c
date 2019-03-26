@@ -255,14 +255,14 @@ cqc_send(cqc_lib *cqc,
                           qubit_id,
                           true,
                           false,
-                          true,
+                          false,
                           CQC_COMM_HDR_LENGTH);
 
         /* Prepare message for the specific command */
         memset(&commH, 0x00, sizeof(commH));
-        commH.remote_app_id = remote_app_id;
-        commH.remote_port = remote_port;
-        commH.remote_node = remote_node;
+        commH.remote_app_id = htons(remote_app_id);
+        commH.remote_port = htons(remote_port);
+        commH.remote_node = htonl(remote_node);
 
         /* Send message to the server */
         n = write(cqc->sockfd, &commH, CQC_COMM_HDR_LENGTH);
@@ -474,7 +474,7 @@ cqc_twoqubit(cqc_lib *cqc,
 
         /* Prepare message for the specific command */
         memset(&qubitH, 0x00, sizeof(qubitH));
-        qubitH.qubit_id = qubit2;
+        qubitH.qubit_id = htons(qubit2);
 
         /* Send message to the server */
         n = write(cqc->sockfd, &qubitH, CQC_QUBIT_HDR_LENGTH);
@@ -519,9 +519,9 @@ cqc_epr(cqc_lib *cqc,
 
         /* Prepare message for the specific command */
         memset(&commH, 0x00, sizeof(commH));
-        commH.remote_app_id = remote_app_id;
-        commH.remote_port = remote_port;
-        commH.remote_node = remote_node;
+        commH.remote_app_id = htons(remote_app_id);
+        commH.remote_port = htons(remote_port);
+        commH.remote_node = htonl(remote_node);
 
         /* Send message to the server */
         n = write(cqc->sockfd, &commH, CQC_COMM_HDR_LENGTH);

@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
 	qubit = cqc_recv(cqc);
 
-	(void) qubit;
+        printf("Received qubit %d\n", qubit);
 
    	return 0;
 }

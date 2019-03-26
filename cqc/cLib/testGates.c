@@ -4,13 +4,13 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-// #include <stdlib.h>
-
 #include <netinet/in.h>
 #include <netdb.h>
 
 #include <string.h>
 #include<arpa/inet.h>
+
+#include <math.h>
 
 #include "cqc.h"
 
@@ -130,6 +130,9 @@ int main(int argc, char *argv[]) {
 	cqc_lib *cqc;
 	int app_id;
 	int outcome;
+        int n_iter = 100;
+        int conf = 2;
+        float err = (float) conf / sqrt((double) n_iter);
 
 	/* Retrieve arguments from command line */
    	if (argc < 3) {
@@ -147,12 +150,12 @@ int main(int argc, char *argv[]) {
 	cqc_connect(cqc, hostname, portno);
 
 	/* Test whether we can make the zero state */
-	outcome = cqc_test_qubit(cqc, make_zero, 500, 0.1, 0, 0, 1);
+	printf("Testing |0> preparation......................\n");
+	outcome = cqc_test_qubit(cqc, make_zero, n_iter, err, 0, 0, 1);
 	if (outcome < 0) {
 		fprintf(stderr,"Test failed.\n");
 		exit(0);
 	}
-	printf("Testing |0> preparation......................");
 	if (outcome == 0) {
 		printf("fail\n");
 	} else {
@@ -160,12 +163,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* Test whether we can make the plus state */
-	outcome = cqc_test_qubit(cqc, make_plus, 500, 0.1, 1, 0, 0);
+	printf("Testing |+> preparation......................\n");
+	outcome = cqc_test_qubit(cqc, make_plus, n_iter, err, 1, 0, 0);
 	if (outcome < 0) {
 		fprintf(stderr,"Test failed.\n");
 		exit(0);
 	}
-	printf("Testing |+> preparation......................");
 	if (outcome == 0) {
 		printf("fail\n");
 	} else {
@@ -173,12 +176,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* Test whether we can make the y 0 eigenstate */
-	outcome = cqc_test_qubit(cqc, make_k, 500, 0.1, 0, 1, 0);
+	printf("Testing |1> preparation......................\n");
+	outcome = cqc_test_qubit(cqc, make_k, n_iter, err, 0, 1, 0);
 	if (outcome < 0) {
 		fprintf(stderr,"Test failed.\n");
 		exit(0);
 	}
-	printf("Testing |1> preparation......................");
 	if (outcome == 0) {
 		printf("fail\n");
 	} else {

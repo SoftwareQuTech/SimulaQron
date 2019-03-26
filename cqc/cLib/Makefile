@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-I. -Wall -std=c11
+CFLAGS=-I. -Wall -lm -std=c11
 DEPS = cqc.h
 MAIN = test.o
 OBJ = cqc.o test_cqc.o
