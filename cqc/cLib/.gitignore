@@ -1,5 +1,5 @@
+qubit
 recv
 send
-test
-testGates
+gates
 *.o

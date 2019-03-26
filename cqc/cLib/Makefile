@@ -1,32 +1,27 @@
 CC=gcc
-CFLAGS=-I. -Wall -lm -std=c11
+CFLAGS=-I. -Wall -std=c11
 DEPS = cqc.h
-MAIN = test.o
-OBJ = cqc.o test_cqc.o
-TEST_OBJ = testGates.o
-TEST_FILES = testGates.c
-SEND = cqc.o testSend.o
-RECV = cqc.o testRecv.o
+CORE = cqc.o
+
 .PHONY: clean tests all
 .DEFAULT: all
 
-all: test send recv tests
+all: qubit send recv gates
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-test: $(OBJ) $(MAIN)
-	gcc -o $@ $^ $(CFLAGS)
+qubit: $(CORE) testQubit.o
+	$(CC) -o $@ $^ $(CFLAGS)
 
-send: $(SEND)
-	gcc -o $@ $^ $(CFLAGS)
+send: $(CORE) testSend.o
+	$(CC) -o $@ $^ $(CFLAGS)
 
-recv: $(RECV)
-	gcc -o $@ $^ $(CFLAGS)
+recv: $(CORE) testRecv.o
+	$(CC) -o $@ $^ $(CFLAGS)
 
-tests: $(TESTS)
-	$(CC) -c -o $(TEST_OBJ) $(TEST_FILES) $(CFLAGS)
-	$(CC) -o testGates testGates.o $(OBJ) $(CFLAGS)
+gates: $(CORE) test_cqc.o testGates.o
+	$(CC) -o $@ $^ $(CFLAGS) -lm
 
 clean:
-	rm -f $(MAIN) $(OBJ) $(TEST_OBJ) $(SEND) $(RECV) test testGates send recv
+	rm -f *.o qubit send recv gates
