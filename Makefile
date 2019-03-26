@@ -2,7 +2,6 @@ PYTHON        = python3
 PIP           = pip3
 QUICK_TESTS   = tests/auto/quick
 ALL_TESTS     = tests/auto
-CQC_DIR		  = cqc
 EXAMPLES_DIR  = examples
 GENERAL_DIR   = general
 LOCAL_DIR     = local
@@ -12,13 +11,11 @@ TOOLBOX_DIR   = toolbox
 VIRTNODE_DIR  = virtNode
 CLI           = cli
 
-delete_pyc:
+_delete_pyc:
 	@find . -name '*.pyc' -delete
 
-delete_pid:
+_delete_pid:
 	@find ${CLI} -name '*.pid' -delete
-
-clean: delete_pyc delete_pid
 
 format:
 	black -l 120 .
@@ -40,23 +37,22 @@ _verified:
 
 verify: clean python-deps lint tests _verified
 
-remove_build:
-	@rm -r build
+_remove_build:
+	@rm -f -r build
 
-remove_dist:
-	@rm -r dist
+_remove_dist:
+	@rm -f -r dist
 
-remove_egg_info:
-	@rm -r *.egg-info
+_remove_egg_info:
+	@rm -f -r simulaqron.egg-info
 
-clear_build: remove_build remove_dist remove_egg_info
+_clear_build: _remove_build _remove_dist _remove_egg_info
 
-_build_simulaqron:
+clean: _delete_pyc _delete_pid _clear_build
+
+_build:
 	@${PYTHON} setup.py sdist bdist_wheel
 
-build: clear_build _build_simulaqron _build_cqc
+build: _clear_build _build
 
-_build_cqc:
-	@${PYTHON} cqc/setup.py sdist bdist_wheel
-
-.PHONY: clean format lint python-deps tests full_tests verify
+.PHONY: clean format lint python-deps tests full_tests verify build

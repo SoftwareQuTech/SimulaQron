@@ -32,7 +32,7 @@ import os
 import socket
 
 from simulaqron.general.hostConfig import networkConfig
-from cqc.backend.cqcHeader import CQCHeader, CQC_TP_HELLO, CQC_VERSION
+from cqc.cqcHeader import CQCHeader, CQC_TP_HELLO, CQC_VERSION
 from simulaqron.toolbox import get_simulaqron_path
 
 

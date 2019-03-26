@@ -33,8 +33,7 @@ import logging
 import numpy as np
 import time
 
-from cqc.backend.cqcConfig import CQC_CONF_WAIT_TIME_RECV, CQC_CONF_RECV_TIMEOUT, CQC_CONF_RECV_EPR_TIMEOUT
-from cqc.backend.cqcHeader import (
+from cqc.cqcHeader import (
     CQCCmdHeader,
     CQC_CMD_SEND,
     CQC_CMD_EPR,
@@ -92,8 +91,9 @@ from cqc.backend.cqcHeader import (
     CQC_TP_EPR_OK,
     CQC_TP_NEW_OK,
 )
-from cqc.backend.entInfoHeader import EntInfoHeader, ENT_INFO_LENGTH
+from cqc.entInfoHeader import EntInfoHeader, ENT_INFO_LENGTH
 from simulaqron.virtNode.basics import quantumError, noQubitError
+from simulaqron.settings import Settings
 from twisted.internet.defer import DeferredLock, inlineCallbacks
 from twisted.spread.pb import RemoteError
 
@@ -990,9 +990,9 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         # This will block until a qubit is received.
         no_qubit = True
         virt_qubit = None
-        # CQC_CONF_RECV_TIMEOUT is in 100ms (for legacy reasons there are no plans to change it to seconds)
-        sleep_time = CQC_CONF_WAIT_TIME_RECV  # seconds
-        for _ in range(int(CQC_CONF_RECV_TIMEOUT * 0.1 / sleep_time)):
+        # CONF_RECV_TIMEOUT is in 100ms (for legacy reasons there are no plans to change it to seconds)
+        sleep_time = Settings.CONF_WAIT_TIME_RECV  # seconds
+        for _ in range(int(Settings.CONF_RECV_TIMEOUT * 0.1 / sleep_time)):
             try:
                 virt_qubit = yield self.factory.virtRoot.callRemote("cqc_get_recv", cqc_header.app_id)
             except RemoteError as remote_err:
@@ -1401,9 +1401,9 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         no_qubit = True
         virt_qubit = None
         ent_info = None
-        # CQC_CONF_RECV_EPR_TIMEOUT is in 100ms (for legacy reasons there are no plans to change it to seconds)
-        sleep_time = CQC_CONF_WAIT_TIME_RECV
-        for _ in range(int(CQC_CONF_RECV_EPR_TIMEOUT * 0.1 / sleep_time)):
+        # CONF_RECV_EPR_TIMEOUT is in 100ms (for legacy reasons there are no plans to change it to seconds)
+        sleep_time = Settings.CONF_WAIT_TIME_RECV
+        for _ in range(int(Settings.CONF_RECV_EPR_TIMEOUT * 0.1 / sleep_time)):
             try:
                 data = yield self.factory.virtRoot.callRemote("cqc_get_epr_recv", cqc_header.app_id)
             except RemoteError as remote_err:

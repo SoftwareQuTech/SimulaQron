@@ -5,7 +5,6 @@
 /build/*
 /dist/*
 /simulaqron.egg-info/*
-/cqc.egg-info/*
 
 .idea/*
 
