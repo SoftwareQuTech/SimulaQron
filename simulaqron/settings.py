@@ -35,8 +35,6 @@ from configparser import ConfigParser
 
 import os
 
-from cqc.backend.cqcLogMessageHandler import CQCLogMessageHandler
-from cqc.backend.cqcMessageHandler import SimulaqronCQCHandler
 from simulaqron.toolbox import get_simulaqron_path
 
 simulaqron_path = get_simulaqron_path.main()
@@ -46,9 +44,11 @@ class _DefaultSettings:
     CONF_MAXQUBITS = 20
     CONF_MAXREGS = 1000
     CONF_WAIT_TIME = 0.5
+    CONF_RECV_TIMEOUT = 100  # (x 100 ms)
+    CONF_RECV_EPR_TIMEOUT = 100  # (x 100 ms)
+    CONF_WAIT_TIME_RECV = 0.1  # (seconds)
     CONF_LOGGING_LEVEL_BACKEND = logging.WARNING
     CONF_LOGGING_LEVEL_FRONTEND = logging.WARNING
-    CONF_BACKEND_HANDLER = SimulaqronCQCHandler
     CONF_BACKEND = "stabilizer"
     CONF_APP_FILE = os.path.join(config_folder, "appNodes.cfg")
     CONF_CQC_FILE = os.path.join(config_folder, "cqcNodes.cfg")
@@ -70,9 +70,11 @@ class Settings:
     CONF_MAXQUBITS = _DefaultSettings.CONF_MAXQUBITS
     CONF_MAXREGS = _DefaultSettings.CONF_MAXREGS
     CONF_WAIT_TIME = _DefaultSettings.CONF_WAIT_TIME
+    CONF_RECV_TIMEOUT = _DefaultSettings.CONF_RECV_TIMEOUT
+    CONF_RECV_EPR_TIMEOUT = _DefaultSettings.CONF_RECV_EPR_TIMEOUT
+    CONF_WAIT_TIME_RECV = _DefaultSettings.CONF_WAIT_TIME_RECV
     CONF_LOGGING_LEVEL_BACKEND = _DefaultSettings.CONF_LOGGING_LEVEL_BACKEND
     CONF_LOGGING_LEVEL_FRONTEND = _DefaultSettings.CONF_LOGGING_LEVEL_FRONTEND
-    CONF_BACKEND_HANDLER = _DefaultSettings.CONF_BACKEND_HANDLER
     CONF_BACKEND = _DefaultSettings.CONF_BACKEND
     CONF_TOPOLOGY_FILE = _DefaultSettings.CONF_TOPOLOGY_FILE
     CONF_APP_FILE = _DefaultSettings.CONF_APP_FILE
@@ -120,6 +122,24 @@ class Settings:
             backend['WaitTime'] = str(cls.CONF_WAIT_TIME)
             config_changed = True
 
+        if "RecvTimeout" in backend:
+            cls.CONF_RECV_TIMEOUT = float(backend['RecvTimeout'])
+        else:
+            backend['RecvTimeout'] = str(cls.CONF_RECV_TIMEOUT)
+            config_changed = True
+
+        if "RecvEPRTimeout" in backend:
+            cls.CONF_RECV_EPR_TIMEOUT = float(backend['RecvEPRTimeout'])
+        else:
+            backend['RecvEPRTimeout'] = str(cls.CONF_RECV_EPR_TIMEOUT)
+            config_changed = True
+
+        if "WaitTimeRecv" in backend:
+            cls.CONF_WAIT_TIME_RECV = float(backend['WaitTimeRecv'])
+        else:
+            backend['WaitTimeRecv'] = str(cls.CONF_WAIT_TIME_RECV)
+            config_changed = True
+
         if "LogLevel" in backend:
             _log_level = backend['LogLevel'].lower()
             if _log_level in cls.log_levels:
@@ -132,18 +152,6 @@ class Settings:
             backend['LogLevel'] = list(cls.log_levels.keys())[
                 list(cls.log_levels.values()).index(cls.CONF_LOGGING_LEVEL_BACKEND)]
             config_changed = True
-
-        if "BackendHandler" in backend:
-            _backend_handler = backend['BackendHandler']
-        else:
-            backend['BackendHandler'] = "simulaqron"
-            _backend_handler = backend['BackendHandler']
-            config_changed = True
-
-        if _backend_handler.lower() == 'log':
-            cls.CONF_BACKEND_HANDLER = CQCLogMessageHandler
-        else:  # default simulqron  (elif backend_handler.lower() == "simulqron")
-            cls.CONF_BACKEND_HANDLER = SimulaqronCQCHandler
 
         if "Backend" in backend:
             cls.CONF_BACKEND = backend["backend"]
@@ -230,7 +238,6 @@ class Settings:
         cls.CONF_WAIT_TIME = _DefaultSettings.CONF_WAIT_TIME
         cls.CONF_LOGGING_LEVEL_BACKEND = _DefaultSettings.CONF_LOGGING_LEVEL_BACKEND
         cls.CONF_LOGGING_LEVEL_FRONTEND = _DefaultSettings.CONF_LOGGING_LEVEL_FRONTEND
-        cls.CONF_BACKEND_HANDLER = _DefaultSettings.CONF_BACKEND_HANDLER
         cls.CONF_BACKEND = _DefaultSettings.CONF_BACKEND
         cls.CONF_TOPOLOGY_FILE = _DefaultSettings.CONF_TOPOLOGY_FILE
         cls.CONF_NOISY_QUBITS = _DefaultSettings.CONF_NOISY_QUBITS

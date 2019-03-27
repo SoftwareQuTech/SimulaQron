@@ -6,6 +6,7 @@ Subpackages
 
 .. toctree::
 
+    simulaqron.cqc_backend
     simulaqron.general
     simulaqron.local
     simulaqron.virtNode

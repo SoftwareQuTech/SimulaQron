@@ -14,12 +14,14 @@ PID_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".simulaqr
 
 
 class SimulaQronDaemon(run.RunDaemon):
-    def __init__(self, pidfile, name=None, nrnodes=None, nodes=None, topology=None):
+    def __init__(self, pidfile, name=None, nrnodes=None, nodes=None, topology=None, cqc_file=None, app_file=None):
         super().__init__(pidfile=pidfile)
         self.name = name
         self.nrnodes = nrnodes
         self.nodes = nodes
         self.topology = topology
+        self.cqc_file = cqc_file
+        self.app_file = app_file
 
     def run(self):
         """Starts all nodes defined in netsim's config directory."""
@@ -35,7 +37,8 @@ class SimulaQronDaemon(run.RunDaemon):
         else:
             nodes = self.nodes
 
-        network = Network(name=self.name, nodes=nodes, topology=self.topology)
+        network = Network(name=self.name, nodes=nodes, topology=self.topology, cqc_file=self.cqc_file,
+                          app_file=self.app_file)
         network.start()
 
         while True:
@@ -82,13 +85,15 @@ def cli():
 )
 def start(name, nrnodes, nodes, topology):
     """Starts a network with the given parameters or from config files."""
+    manage_nodes.setup_cqc_files()
     if name is None:
         name = "default"
     pidfile = os.path.join(PID_FOLDER, "simulaqron_network_{}.pid".format(name))
     if os.path.exists(pidfile):
         logging.warning("Network with name {} is already running".format(name))
         return
-    d = SimulaQronDaemon(pidfile=pidfile, name=name, nrnodes=nrnodes, nodes=nodes, topology=topology)
+    d = SimulaQronDaemon(pidfile=pidfile, name=name, nrnodes=nrnodes, nodes=nodes, topology=topology,
+                         cqc_file=Settings.CONF_CQC_FILE, app_file=Settings.CONF_APP_FILE)
     d.start()
 
 ###############
@@ -113,6 +118,22 @@ def stop(name):
         return
     d = SimulaQronDaemon(pidfile=pidfile)
     d.stop()
+
+#################
+# reset command #
+#################
+
+
+@cli.command()
+def reset():
+    """Resets simulaqron"""
+    for entry in os.listdir(PID_FOLDER):
+        if entry.endswith(".pid"):
+            pidfile = os.path.join(PID_FOLDER, entry)
+            d = SimulaQronDaemon(pidfile=pidfile)
+            d.stop()
+            if os.path.exists(pidfile):
+                os.remove(pidfile)
 
 
 ###############
@@ -158,6 +179,21 @@ def max_registers(value):
 def conn_retry_time(value):
     """If setup fails, how long to wait until a retry."""
     Settings.set_setting("BACKEND", "waittime", str(value))
+
+
+@set.command()
+@click.argument('value', type=float)
+def recv_timeout(value):
+    """When receiving a qubit or EPR pair, how long to wait until raising a timeout."""
+    Settings.set_setting("BACKEND", "recvtimeout", str(value))
+    Settings.set_setting("BACKEND", "recveprtimeout", str(value))
+
+
+@set.command()
+@click.argument('value', type=float)
+def recv_retry_time(value):
+    """When receiving a qubit or EPR pair, how long to wait between checks of whether a qubit is received."""
+    Settings.set_setting("BACKEND", "waittimerecv", str(value))
 
 
 @set.command()
@@ -255,6 +291,19 @@ def conn_retry_time():
 
 
 @get.command()
+def recv_timeout():
+    """When receiving a qubit or EPR pair, how long to wait until raising a timeout."""
+    print("RECV: {}, EPR RECV: {}".format(Settings.CONF_RECV_TIMEOUT,
+                                          Settings.CONF_RECV_EPR_TIMEOUT))
+
+
+@get.command()
+def recv_retry_time():
+    """When receiving a qubit or EPR pair, how long to wait between checks of whether a qubit is received."""
+    print(Settings.CONF_WAIT_TIME_RECV)
+
+
+@get.command()
 def log_level():
     """Log level for both backend and frontend."""
     print("Backend: {}, Frontend: {}".format(Settings.CONF_LOGGING_LEVEL_BACKEND, Settings.CONF_LOGGING_LEVEL_FRONTEND))
@@ -268,25 +317,25 @@ def topology_file():
 
 @get.command()
 def app_file():
-    """The path to the topology file to be used, can be ""."""
+    """The path to the app file to be used, can be ""."""
     print(Settings.CONF_APP_FILE)
 
 
 @get.command()
 def cqc_file():
-    """The path to the topology file to be used, can be ""."""
+    """The path to the cqc file to be used, can be ""."""
     print(Settings.CONF_CQC_FILE)
 
 
 @get.command()
 def vnode_file():
-    """The path to the topology file to be used, can be ""."""
+    """The path to the vnode file to be used, can be ""."""
     print(Settings.CONF_VNODE_FILE)
 
 
 @get.command()
 def nodes_file():
-    """The path to the topology file to be used, can be ""."""
+    """The path to the nodes file to be used, can be ""."""
     print(Settings.CONF_NODES_FILE)
 
 

@@ -2,6 +2,8 @@ import os
 import json
 from contextlib import closing
 from socket import AF_INET, SOCK_STREAM, socket
+from configparser import ConfigParser
+from cqc.settings import get_config, set_config
 
 from simulaqron.toolbox import get_simulaqron_path
 from simulaqron.general.hostConfig import load_node_names, networkConfig
@@ -180,3 +182,15 @@ def set_default_nodes():
 
     with open(default_topology_file, 'w') as f:
         json.dump(topology, f)
+
+
+def setup_cqc_files():
+    """
+    Sets up the settings of the cqc packages such that the python-library can find the paths to the files
+    specifying the addresses and ports of the cqc nodes running.
+    :return: None
+    """
+    config = get_config()
+    config['FILEPATHS']['cqc_file'] = Settings.CONF_CQC_FILE
+    config['FILEPATHS']['app_file'] = Settings.CONF_APP_FILE
+    set_config(config)
