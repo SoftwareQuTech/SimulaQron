@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>cqc package &#8212; SimulaQron 1.3 documentation</title>
+    <title>cqc package &#8212; SimulaQron 2.1.0 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -17,7 +17,7 @@
     <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="cqc.backend package" href="cqc.backend.html" />
+    <link rel="next" title="CQC C Library" href="CLib.html" />
     <link rel="prev" title="simulaqron.run package" href="simulaqron.run.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -30,12 +30,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="cqc.backend.html" title="cqc.backend package"
+          <a href="CLib.html" title="CQC C Library"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="simulaqron.run.html" title="simulaqron.run package"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 1.3 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 2.1.0 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -45,7 +45,11 @@
 <li><a class="reference internal" href="#">cqc package</a><ul>
 <li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-cqc.pythonLib">simulaqron.pythonLib module</a></li>
+<li><a class="reference internal" href="#module-cqc.cqcHeader">cqc.cqcHeader module</a></li>
+<li><a class="reference internal" href="#module-cqc.entInfoHeader">cqc.entInfoHeader module</a></li>
+<li><a class="reference internal" href="#module-cqc.hostConfig">cqc.hostConfig module</a></li>
+<li><a class="reference internal" href="#module-cqc.pythonLib">cqc.pythonLib module</a></li>
+<li><a class="reference internal" href="#module-cqc.settings">cqc.settings module</a></li>
 <li><a class="reference internal" href="#module-cqc">Module contents</a></li>
 </ul>
 </li>
@@ -55,8 +59,8 @@
   <p class="topless"><a href="simulaqron.run.html"
                         title="previous chapter">simulaqron.run package</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="cqc.backend.html"
-                        title="next chapter">cqc.backend package</a></p>
+  <p class="topless"><a href="CLib.html"
+                        title="next chapter">CQC C Library</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -86,26 +90,20 @@
             
   <div class="section" id="cqc-package">
 <h1>cqc package<a class="headerlink" href="#cqc-package" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The CQC packages and libraries have been moved to seperate repos at <a class="reference external" href="https://github.com/SoftwareQuTech/CQC-Python">pythonLib</a> and <a class="reference external" href="https://github.com/SoftwareQuTech/CQC-C">cLib</a>. The python library can be installed using pip by the command <code class="code docutils literal notranslate"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">cqc</span></code>.</p>
+</div>
 <div class="section" id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="cqc.backend.html">cqc.backend package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="cqc.backend.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cqc.backend.html#module-cqc.backend.cqcHeader">cqc.backend.cqcHeader module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cqc.backend.html#module-cqc.backend.cqcLogMessageHandler">cqc.backend.cqcLogMessageHandler module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cqc.backend.html#module-cqc.backend.cqcMessageHandler">cqc.backend.cqcMessageHandler module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cqc.backend.html#module-cqc.backend.cqcProtocol">cqc.backend.cqcProtocol module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cqc.backend.html#module-cqc.backend.entInfoHeader">cqc.backend.entInfoHeader module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cqc.backend.html#module-cqc.backend">Module contents</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="CLib.html">CQC C Library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cqc.pythonLib_protocols.html">cqc.pythonLib_protocols package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="cqc.pythonLib_protocols.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cqc.pythonLib_protocols.html#module-cqc.pythonLib_protocols.coinflip_leader">cqc.pythonLib_protocols.coinflip_leader module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cqc.pythonLib_protocols.html#module-cqc.pythonLib_protocols.wstate">cqc.pythonLib_protocols.wstate module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cqc.pythonLib_protocols.html#module-cqc.backend">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cqc.pythonLib_protocols.html#module-cqc.pythonLib_protocols">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="RustLib.html">CQC Rust Library</a></li>
@@ -115,11 +113,432 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-cqc.cqcHeader">
+<span id="cqc-cqcheader-module"></span><h2>cqc.cqcHeader module<a class="headerlink" href="#module-cqc.cqcHeader" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="cqc.cqcHeader.CQCCmdHeader">
+<em class="property">class </em><code class="descclassname">cqc.cqcHeader.</code><code class="descname">CQCCmdHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#CQCCmdHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.CQCCmdHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<p>Header for a command instruction packet.</p>
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCCmdHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 4</em><a class="headerlink" href="#cqc.cqcHeader.CQCCmdHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCCmdHeader.packaging_format">
+<code class="descname">packaging_format</code><em class="property"> = '!HBB'</em><a class="headerlink" href="#cqc.cqcHeader.CQCCmdHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.cqcHeader.CQCCommunicationHeader">
+<em class="property">class </em><code class="descclassname">cqc.cqcHeader.</code><code class="descname">CQCCommunicationHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em>, <em>cqc_version=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#CQCCommunicationHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.CQCCommunicationHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<p>Header used to send information to which node to send information to.
+Used for example in Send and EPR commands
+This header has a size of 8</p>
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCCommunicationHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 8</em><a class="headerlink" href="#cqc.cqcHeader.CQCCommunicationHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCCommunicationHeader.packaging_format">
+<code class="descname">packaging_format</code><em class="property"> = '!HHL'</em><a class="headerlink" href="#cqc.cqcHeader.CQCCommunicationHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCCommunicationHeader.packaging_format_v1">
+<code class="descname">packaging_format_v1</code><em class="property"> = '!HLH'</em><a class="headerlink" href="#cqc.cqcHeader.CQCCommunicationHeader.packaging_format_v1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.cqcHeader.CQCEPRRequestHeader">
+<em class="property">class </em><code class="descclassname">cqc.cqcHeader.</code><code class="descname">CQCEPRRequestHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#CQCEPRRequestHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.CQCEPRRequestHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCEPRRequestHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 16</em><a class="headerlink" href="#cqc.cqcHeader.CQCEPRRequestHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCEPRRequestHeader.package_format">
+<code class="descname">package_format</code><em class="property"> = 'uint:32=remote_ip, float:32=min_fidelity, float:32=max_time, uint:16=remote_port, uint:8=num_pairs, uint:4=priority, uint:1=store, uint:1=atomic, uint:1=measure_directly, uint:1=0'</em><a class="headerlink" href="#cqc.cqcHeader.CQCEPRRequestHeader.package_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.cqcHeader.CQCFactoryHeader">
+<em class="property">class </em><code class="descclassname">cqc.cqcHeader.</code><code class="descname">CQCFactoryHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#CQCFactoryHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.CQCFactoryHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<p>Header used to send factory information</p>
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCFactoryHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 2</em><a class="headerlink" href="#cqc.cqcHeader.CQCFactoryHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCFactoryHeader.package_format">
+<code class="descname">package_format</code><em class="property"> = '!BB'</em><a class="headerlink" href="#cqc.cqcHeader.CQCFactoryHeader.package_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.cqcHeader.CQCHeader">
+<em class="property">class </em><code class="descclassname">cqc.cqcHeader.</code><code class="descname">CQCHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#CQCHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.CQCHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<p>Definition of the general CQC header.</p>
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 8</em><a class="headerlink" href="#cqc.cqcHeader.CQCHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCHeader.packaging_format">
+<code class="descname">packaging_format</code><em class="property"> = '!BBHL'</em><a class="headerlink" href="#cqc.cqcHeader.CQCHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.cqcHeader.CQCMeasOutHeader">
+<em class="property">class </em><code class="descclassname">cqc.cqcHeader.</code><code class="descname">CQCMeasOutHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#CQCMeasOutHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.CQCMeasOutHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<p>Header used to send a measurement outcome.</p>
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCMeasOutHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 1</em><a class="headerlink" href="#cqc.cqcHeader.CQCMeasOutHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCMeasOutHeader.packaging_format">
+<code class="descname">packaging_format</code><em class="property"> = '!B'</em><a class="headerlink" href="#cqc.cqcHeader.CQCMeasOutHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.cqcHeader.CQCNotifyHeader">
+<em class="property">class </em><code class="descclassname">cqc.cqcHeader.</code><code class="descname">CQCNotifyHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#CQCNotifyHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.CQCNotifyHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<p>Header used to specify notification details.</p>
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCNotifyHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 20</em><a class="headerlink" href="#cqc.cqcHeader.CQCNotifyHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCNotifyHeader.packaging_format">
+<code class="descname">packaging_format</code><em class="property"> = '!HHLQHBB'</em><a class="headerlink" href="#cqc.cqcHeader.CQCNotifyHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.cqcHeader.CQCRotationHeader">
+<em class="property">class </em><code class="descclassname">cqc.cqcHeader.</code><code class="descname">CQCRotationHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#CQCRotationHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.CQCRotationHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<p>Header used to define the rotation angle of a gate</p>
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCRotationHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 1</em><a class="headerlink" href="#cqc.cqcHeader.CQCRotationHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCRotationHeader.packaging_format">
+<code class="descname">packaging_format</code><em class="property"> = '!B'</em><a class="headerlink" href="#cqc.cqcHeader.CQCRotationHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.cqcHeader.CQCSequenceHeader">
+<em class="property">class </em><code class="descclassname">cqc.cqcHeader.</code><code class="descname">CQCSequenceHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#CQCSequenceHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.CQCSequenceHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<p>Header used to indicate size of a sequence.
+Currently exactly the same as CQCRotationHeaer.
+Seperate classes used clearity and for possible future adaptability. (Increase length for example)</p>
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCSequenceHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 1</em><a class="headerlink" href="#cqc.cqcHeader.CQCSequenceHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCSequenceHeader.packaging_format">
+<code class="descname">packaging_format</code><em class="property"> = '!B'</em><a class="headerlink" href="#cqc.cqcHeader.CQCSequenceHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.cqcHeader.CQCTimeinfoHeader">
+<em class="property">class </em><code class="descclassname">cqc.cqcHeader.</code><code class="descname">CQCTimeinfoHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#CQCTimeinfoHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.CQCTimeinfoHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<p>Header used to send timing information</p>
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCTimeinfoHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 8</em><a class="headerlink" href="#cqc.cqcHeader.CQCTimeinfoHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCTimeinfoHeader.packaging_format">
+<code class="descname">packaging_format</code><em class="property"> = '!Q'</em><a class="headerlink" href="#cqc.cqcHeader.CQCTimeinfoHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.cqcHeader.CQCXtraHeader">
+<em class="property">class </em><code class="descclassname">cqc.cqcHeader.</code><code class="descname">CQCXtraHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#CQCXtraHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.CQCXtraHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<p>Optional addtional cmd header information. Only relevant for certain commands.</p>
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCXtraHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 16</em><a class="headerlink" href="#cqc.cqcHeader.CQCXtraHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCXtraHeader.packaging_format">
+<code class="descname">packaging_format</code><em class="property"> = '!HHLLHBB'</em><a class="headerlink" href="#cqc.cqcHeader.CQCXtraHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.cqcHeader.CQCXtraQubitHeader">
+<em class="property">class </em><code class="descclassname">cqc.cqcHeader.</code><code class="descname">CQCXtraQubitHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#CQCXtraQubitHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.CQCXtraQubitHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<p>Header used to send qubit of a secondary qubit for two qubit gates</p>
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCXtraQubitHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 2</em><a class="headerlink" href="#cqc.cqcHeader.CQCXtraQubitHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.cqcHeader.CQCXtraQubitHeader.packaging_format">
+<code class="descname">packaging_format</code><em class="property"> = '!H'</em><a class="headerlink" href="#cqc.cqcHeader.CQCXtraQubitHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.cqcHeader.Header">
+<em class="property">class </em><code class="descclassname">cqc.cqcHeader.</code><code class="descname">Header</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#Header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.Header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Abstact class for headers.
+Should be subclassed</p>
+<dl class="attribute">
+<dt id="cqc.cqcHeader.Header.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 0</em><a class="headerlink" href="#cqc.cqcHeader.Header.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.cqcHeader.Header.pack">
+<code class="descname">pack</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#Header.pack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.Header.pack" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Pack data into packet format.
+Don’t override this but rather _pack</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">bytes</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.cqcHeader.Header.packaging_format">
+<code class="descname">packaging_format</code><em class="property"> = '!'</em><a class="headerlink" href="#cqc.cqcHeader.Header.packaging_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.cqcHeader.Header.printable">
+<code class="descname">printable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#Header.printable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.Header.printable" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Produce a printable string for information purposes.
+Don’t override this but rather _printable</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cqc.cqcHeader.Header.setVals">
+<code class="descname">setVals</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#Header.setVals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.Header.setVals" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Set using given values.
+Don’t override this but rather _setVals</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cqc.cqcHeader.Header.unpack">
+<code class="descname">unpack</code><span class="sig-paren">(</span><em>headerBytes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/cqcHeader.html#Header.unpack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.cqcHeader.Header.unpack" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Unpack packet data.
+Don’t override this but rather _unpack</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-cqc.entInfoHeader">
+<span id="cqc-entinfoheader-module"></span><h2>cqc.entInfoHeader module<a class="headerlink" href="#module-cqc.entInfoHeader" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="cqc.entInfoHeader.EntInfoCreateKeepHeader">
+<em class="property">class </em><code class="descclassname">cqc.entInfoHeader.</code><code class="descname">EntInfoCreateKeepHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/entInfoHeader.html#EntInfoCreateKeepHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.entInfoHeader.EntInfoCreateKeepHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<p>Header for a entanglement information packet, where entanglement is kept after generation</p>
+<dl class="attribute">
+<dt id="cqc.entInfoHeader.EntInfoCreateKeepHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 32</em><a class="headerlink" href="#cqc.entInfoHeader.EntInfoCreateKeepHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.entInfoHeader.EntInfoCreateKeepHeader.package_format">
+<code class="descname">package_format</code><em class="property"> = 'uint:4=type, uint:16=mhp_seq, uint:1=DF, uint:11=0, uint:32=ip_A, uint:32=ip_B, uint:16=port_A, uint:16=port_B, float:32=t_create, float:32=t_goodness, float:32=goodness, uint:32=create_id'</em><a class="headerlink" href="#cqc.entInfoHeader.EntInfoCreateKeepHeader.package_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.entInfoHeader.EntInfoCreateKeepHeader.switch_nodes">
+<code class="descname">switch_nodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/entInfoHeader.html#EntInfoCreateKeepHeader.switch_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.entInfoHeader.EntInfoCreateKeepHeader.switch_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Switches the ip and port of the nodes and flips the directionality flag.
+Used to give correct message to both nodes.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.entInfoHeader.EntInfoCreateKeepHeader.type">
+<code class="descname">type</code><em class="property"> = 1</em><a class="headerlink" href="#cqc.entInfoHeader.EntInfoCreateKeepHeader.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.entInfoHeader.EntInfoHeader">
+<em class="property">class </em><code class="descclassname">cqc.entInfoHeader.</code><code class="descname">EntInfoHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/entInfoHeader.html#EntInfoHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.entInfoHeader.EntInfoHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<p>Header for a entanglement information packet. Fo</p>
+<dl class="attribute">
+<dt id="cqc.entInfoHeader.EntInfoHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 40</em><a class="headerlink" href="#cqc.entInfoHeader.EntInfoHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.entInfoHeader.EntInfoHeader.packaging_format">
+<code class="descname">packaging_format</code><em class="property"> = '!LHHLHHLQQHBB'</em><a class="headerlink" href="#cqc.entInfoHeader.EntInfoHeader.packaging_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.entInfoHeader.EntInfoHeader.switch_nodes">
+<code class="descname">switch_nodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/entInfoHeader.html#EntInfoHeader.switch_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.entInfoHeader.EntInfoHeader.switch_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Switches the ip and port of the nodes and flips the directionality flag.
+Used to give correct message to both nodes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.entInfoHeader.EntInfoMeasDirectHeader">
+<em class="property">class </em><code class="descclassname">cqc.entInfoHeader.</code><code class="descname">EntInfoMeasDirectHeader</code><span class="sig-paren">(</span><em>headerBytes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/entInfoHeader.html#EntInfoMeasDirectHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.entInfoHeader.EntInfoMeasDirectHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cqc.cqcHeader.Header" title="cqc.cqcHeader.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">cqc.cqcHeader.Header</span></code></a></p>
+<p>Header for a entanglement information packet, where communication qubit is measured directly after emission.</p>
+<dl class="attribute">
+<dt id="cqc.entInfoHeader.EntInfoMeasDirectHeader.HDR_LENGTH">
+<code class="descname">HDR_LENGTH</code><em class="property"> = 28</em><a class="headerlink" href="#cqc.entInfoHeader.EntInfoMeasDirectHeader.HDR_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.entInfoHeader.EntInfoMeasDirectHeader.package_format">
+<code class="descname">package_format</code><em class="property"> = 'uint:4=type, uint:16=mhp_seq, uint:1=DF, uint:1=meas_out, uint:2=basis, uint:8=0, uint:32=ip_A, uint:32=ip_B, uint:16=port_A, uint:16=port_B, float:32=t_create, float:32=goodness, uint:32=create_id'</em><a class="headerlink" href="#cqc.entInfoHeader.EntInfoMeasDirectHeader.package_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.entInfoHeader.EntInfoMeasDirectHeader.switch_nodes">
+<code class="descname">switch_nodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/entInfoHeader.html#EntInfoMeasDirectHeader.switch_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.entInfoHeader.EntInfoMeasDirectHeader.switch_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Switches the ip and port of the nodes and flips the directionality flag.
+Used to give correct message to both nodes.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cqc.entInfoHeader.EntInfoMeasDirectHeader.type">
+<code class="descname">type</code><em class="property"> = 2</em><a class="headerlink" href="#cqc.entInfoHeader.EntInfoMeasDirectHeader.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-cqc.hostConfig">
+<span id="cqc-hostconfig-module"></span><h2>cqc.hostConfig module<a class="headerlink" href="#module-cqc.hostConfig" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="cqc.hostConfig.cqc_node_id">
+<code class="descclassname">cqc.hostConfig.</code><code class="descname">cqc_node_id</code><span class="sig-paren">(</span><em>fam</em>, <em>ip</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/hostConfig.html#cqc_node_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.hostConfig.cqc_node_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="cqc.hostConfig.cqc_node_id_from_addrinfo">
+<code class="descclassname">cqc.hostConfig.</code><code class="descname">cqc_node_id_from_addrinfo</code><span class="sig-paren">(</span><em>addr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/hostConfig.html#cqc_node_id_from_addrinfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.hostConfig.cqc_node_id_from_addrinfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="cqc.hostConfig.host">
+<em class="property">class </em><code class="descclassname">cqc.hostConfig.</code><code class="descname">host</code><span class="sig-paren">(</span><em>name</em>, <em>hostname</em>, <em>port</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/hostConfig.html#host"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.hostConfig.host" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.flavors.Referenceable</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="cqc.hostConfig.networkConfig">
+<em class="property">class </em><code class="descclassname">cqc.hostConfig.</code><code class="descname">networkConfig</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/hostConfig.html#networkConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.hostConfig.networkConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.flavors.Referenceable</span></code></p>
+<dl class="method">
+<dt id="cqc.hostConfig.networkConfig.print_details">
+<code class="descname">print_details</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/hostConfig.html#networkConfig.print_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.hostConfig.networkConfig.print_details" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints the details of the specified node with name.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cqc.hostConfig.networkConfig.read_config">
+<code class="descname">read_config</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/hostConfig.html#networkConfig.read_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.hostConfig.networkConfig.read_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the configuration file in which each line has the form: node name, hostname, port number.
+For example:
+Alice, localhost, 8888</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-cqc.pythonLib">
-<span id="simulaqron-pythonlib-module"></span><h2>simulaqron.pythonLib module<a class="headerlink" href="#module-cqc.pythonLib" title="Permalink to this headline">¶</a></h2>
+<span id="cqc-pythonlib-module"></span><h2>cqc.pythonLib module<a class="headerlink" href="#module-cqc.pythonLib" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="cqc.pythonLib.CQCConnection">
-<em class="property">class </em><code class="descclassname">cqc.pythonLib.</code><code class="descname">CQCConnection</code><span class="sig-paren">(</span><em>name</em>, <em>socket_address=None</em>, <em>cqcFile=None</em>, <em>appFile=None</em>, <em>appID=None</em>, <em>pend_messages=False</em>, <em>retry_connection=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/pythonLib.html#CQCConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.pythonLib.CQCConnection" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">cqc.pythonLib.</code><code class="descname">CQCConnection</code><span class="sig-paren">(</span><em>name</em>, <em>socket_address=None</em>, <em>cqcFile=None</em>, <em>appFile=None</em>, <em>appID=None</em>, <em>pend_messages=False</em>, <em>retry_connection=True</em>, <em>conn_retry_time=0.1</em>, <em>log_level=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/pythonLib.html#CQCConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.pythonLib.CQCConnection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="method">
 <dt id="cqc.pythonLib.CQCConnection.allocate_qubits">
@@ -1106,6 +1525,24 @@ If notify, the return message is received before the method finishes.</p>
 <dd></dd></dl>
 
 </div>
+<div class="section" id="module-cqc.settings">
+<span id="cqc-settings-module"></span><h2>cqc.settings module<a class="headerlink" href="#module-cqc.settings" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="cqc.settings.get_config">
+<code class="descclassname">cqc.settings.</code><code class="descname">get_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/settings.html#get_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.settings.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the config of cqc
+:return: :obj: configparser.ConfigParser</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cqc.settings.set_config">
+<code class="descclassname">cqc.settings.</code><code class="descname">set_config</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/settings.html#set_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.settings.set_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the config of cqc
+:param config: :obj: configparser.ConfigParser
+:return: None</p>
+</dd></dl>
+
+</div>
 <div class="section" id="module-cqc">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cqc" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -1127,12 +1564,12 @@ If notify, the return message is received before the method finishes.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="cqc.backend.html" title="cqc.backend package"
+          <a href="CLib.html" title="CQC C Library"
              >next</a> |</li>
         <li class="right" >
           <a href="simulaqron.run.html" title="simulaqron.run package"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 1.3 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 2.1.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

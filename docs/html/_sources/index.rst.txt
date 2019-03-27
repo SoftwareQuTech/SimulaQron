@@ -25,6 +25,8 @@ We also have a  `paper <http://iopscience.iop.org/article/10.1088/2058-9565/aad5
 
 The documentation below assumes familiarity with classical network programming concepts, Python, Twisted, as well as an elementary understanding of quantum information. More information on a competition at `Our website <http://www.simulaqron.org/>`_ 
 
+SimulaQron can be installed from pip by the command :code:`pip3 install simulaqron` on MacOS and Linux.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
