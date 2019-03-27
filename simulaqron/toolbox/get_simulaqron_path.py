@@ -6,7 +6,7 @@ import os
 def main():
     path_to_this_file = os.path.abspath(__file__)
     path_to_this_folder = os.path.dirname(path_to_this_file)
-    simulaqron_path = os.path.split(os.path.split(path_to_this_folder)[0])[0]
+    simulaqron_path = os.path.split(path_to_this_folder)[0]
     return simulaqron_path
 
 

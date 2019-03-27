@@ -49,11 +49,14 @@ from cqc.pythonLib import CQCConnection
 
 
 class Network:
-    def __init__(self, name=None, nodes=None, topology=None):
+    def __init__(self, name=None, nodes=None, topology=None, cqc_file=None, app_file=None):
         if name is None:
             self.name = "default"
         else:
             self.name = name
+
+        self._cqc_file = cqc_file
+        self._app_file = app_file
 
         simulaqron_path = get_simulaqron_path.main()
 
@@ -87,7 +90,7 @@ class Network:
     def running(self):
         for node in self.nodes:
             try:
-                cqc = CQCConnection(node, retry_connection=False)
+                cqc = CQCConnection(node, retry_connection=False, cqcFile=self._cqc_file, appFile=self._app_file)
             except ConnectionRefusedError:
                 self._running = False
                 break

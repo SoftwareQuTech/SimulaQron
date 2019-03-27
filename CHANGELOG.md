@@ -7,7 +7,7 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 2019-03-15 (v1.3)
 -----------------
 
-These are changes in Develop which will be merged to master.
+These are changes in Develop was merged to master.
 
 - (Breaking change) The folders `general`, `local`, `toolbox` and `virtNode` and the files `configFiles.py` and `settings.py` will be moved to a folder `simulaqron`, such that imports should be done as `simulaqron.xxx`. Accordingly the PYTHONPATH should now be set to `/your/path/SimulaQron`. Imports of cqc should now instead be `from cqc.pythonLib import CQCConnection`.
 
@@ -25,3 +25,14 @@ These are changes in Develop which will be merged to master.
 
 Upcoming
 --------
+These are changes in Develop will be merged to master.
+
+ - The CQC specification and libraries will move to it's own repos.
+
+ - SimulaQron can now be installed using `pip3 install simulaqron`.
+
+ - If SimulaQron is installed using pip, the command in the terminal will be called `simulaqron` and not `SimulaQron`.
+
+ - There is a new command in the which is useful if something crashed when a simulated network was running. Simply to `simulaqron reset`.
+
+ - All settings can be accessed through the command line interface by the commands `simulaqron set` and `simulaqron get`.

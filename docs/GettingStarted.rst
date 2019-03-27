@@ -5,13 +5,27 @@ Getting started
 Setup
 -----
 
-SimulaQron requires `Python 3 <https://python.org/>`_  and `Twisted <http://twistedmatrix.com/trac/>`_  along with the packages *numpy*, *scipy*, *Cython*, *service_identity*, *matplotlib*, *networkx*, *bitstring*, *black*, *flake8*, *click* and *daemons*.
+SimulaQron requires `Python 3 <https://python.org/>`_  along with the packages *twisted*, *numpy*, *scipy*, *Cython*, *service_identity*, *matplotlib*, *networkx*, *bitstring*, *black*, *flake8*, *click* and *daemons*.
 
-^^^^^^^^^^^^
-Installation
-^^^^^^^^^^^^
+.. note:: matplotlib also requires tkinter which on Linux can be installed by the command :code:`sudo apt install python3-tk`.
 
-To install SimulaQron itself, you can clone the git repository. Do::
+^^^^^^^^^^^^^^^^^^^^^^
+Installation using pip
+^^^^^^^^^^^^^^^^^^^^^^
+
+The easiest way to install SimulaQron is using pip (requires MacOS or Linux). Simply type ::
+
+    pip3 install simulaqron
+
+You can then make use of SimulaQron using the command :code:`simulaqron` in the terminal. For more information on how to use this command see below or type::
+
+    simulaqron -h
+
+^^^^^^^^^^^^^^^^^^^^^^^^
+Installation from source
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you want to get the source code, you can clone the git repository. Do::
 
 	git clone https://github.com/SoftwareQuTech/SimulaQron.git
 
@@ -22,6 +36,10 @@ you use bash (e.g., standard on OSX or the GIT Bash install on Windows 10), othe
 	export PYTHONPATH=yourPath/SimulaQron:$PYTHONPATH
 
 where yourPath is the directory containing SimulaQron. You can add this to your ~/.bashrc or ~/.bash_profile file.
+
+.. note:: If you want to use SimulaQron in the same way as when installed using pip you can use an alias by for example::
+
+    alias simulaqron=yourPath/SimulaQron/simulaqron/SimulaQron.py
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Verifying the installation
@@ -72,15 +90,21 @@ Starting the SimulaQron backend
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 By default SimulaQron uses the five nodes Alice, Bob, Charlie, David and Eve on your local computers. In this example there will be two processes for each node listening to incoming messages on a certain port number. These make up the simulation backend and the CQC server. To start the processes and thus the backend of SimulaQron simply type::
 
-    ./cli/SimulaQron start
+    simulaqron start
 
-.. warning:: Running :code:`./cli/SimulaQron start` will be default start up servers on localhost (i.e., your own computer), using port numbers between 8000 and 9000, to form the simulated quantum internet hardware. SimulaQron does not provide any access control to its simulated hardware, so you are responsible to securing access should this be relevant for you. You can also run the different simulated nodes on different computers. We do not take any responsibility for problems caused by SimulaQron.
+.. warning:: Running :code:`simulaqron start` will be default start up servers on localhost (i.e., your own computer), using port numbers between 8000 and 9000, to form the simulated quantum internet hardware. SimulaQron does not provide any access control to its simulated hardware, so you are responsible to securing access should this be relevant for you. You can also run the different simulated nodes on different computers. We do not take any responsibility for problems caused by SimulaQron.
 
 For more information on what :code:`./cli/SimulaQron start` does, how to change the nodes and the ports of the network, the topology etc, see :doc:`ConfNodes`.
 
 To stop the backend, simply type::
 
-    ./cli/SimulaQron start
+    simulaqron stop
+
+If something went wrong (for example the process was killed before you stopped it) there might be leftover files which makes SimulaQron think that the network is still running. To reset this you can type::
+
+    simulaqron reset
+
+Note that this also kills any currently running network.
 
 ^^^^^^^^^^^^^^^^^^^
 Running a protocol
@@ -93,6 +117,7 @@ Our objective will be to realize the following protocol which will generate 1 sh
 
 * Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`.
 
+The examples can be found in the repo `pythonLib <https://github.com/SoftwareQuTech/CQC-Python>`_.
 Before seeing how this example works, let us again simply run the code::
 
 	cd examples/cqc/pythonLib/corrRNG
@@ -161,13 +186,13 @@ For further examples, see the examples/ folder.
 Settings
 --------
 
-Settings are stored in the file config/settings.ini and are easily accessed through the command line interface. To see what settings can be set, type::
+Settings are easily accessed through the command line interface. To see what settings can be set, type::
 
-    ./cli/SimulaQron set -h
+    simulaqron set -h
 
 To set a setting, for example to use the projectQ backend, type::
 
-    ./cli/SimulaQron set backend projectq
+    simulaqron set backend projectq
 
 .. note:: Settings needs to be set before starting the SimulaQron backend. If the backend is already running, stop it, set the settings and start it again.
 
@@ -186,10 +211,10 @@ To set a setting, for example to use the projectQ backend, type::
 .. * :code:`[FRONTEND]`
 ..     * :code:`loglevel` (default `warning`): Determines which logging messages should be printed from the Python library. Options are `critical`, `error`, `warning`, `info` and `debug`, with increasing amount of logging. Setting the log-level to `debug` will print a lot of messages.
 
-There are also additional settings for CQC backend which can be set in the file cqc/backend/cqcConfig.py:
+.. There are also additional settings for CQC backend which can be set in the file cqc/backend/cqcConfig.py:
 
-* :code:`CQC_CONF_RECV_TIMEOUT` (default 10 s): The time a node will wait for receiving a qubit before sending back an error message using CQC.
-* :code:`CQC_CONF_RECV_EPR_TIMEOUT` (default 10 s): The time a node will wait for receiving a qubit part of an EPR pair before sending back an error message using CQC.
-* :code:`CQC_CONF_WAIT_TIME_RECV` (default 0.1 s): The time between every check if a qubit has been received.
-* :code:`CQC_CONF_LINK_WAIT_TIME` (default 0.5 s): The time between every try to connect to the CQC server.
-* :code:`CQC_CONF_COM_WAIT_TIME` (default 0.1 s): The time between every try to connect applications at other nodes for classical communication.
+.. * :code:`CQC_CONF_RECV_TIMEOUT` (default 10 s): The time a node will wait for receiving a qubit before sending back an error message using CQC.
+.. * :code:`CQC_CONF_RECV_EPR_TIMEOUT` (default 10 s): The time a node will wait for receiving a qubit part of an EPR pair before sending back an error message using CQC.
+.. * :code:`CQC_CONF_WAIT_TIME_RECV` (default 0.1 s): The time between every check if a qubit has been received.
+.. * :code:`CQC_CONF_LINK_WAIT_TIME` (default 0.5 s): The time between every try to connect to the CQC server.
+.. * :code:`CQC_CONF_COM_WAIT_TIME` (default 0.1 s): The time between every try to connect applications at other nodes for classical communication.

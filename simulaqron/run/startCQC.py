@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 import logging
 import sys
-import os
 import signal
 from twisted.internet import reactor
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
 from twisted.spread import pb
 
-from cqc.backend.cqcConfig import CQC_CONF_LINK_WAIT_TIME
-from cqc.backend.cqcProtocol import CQCFactory
-from cqc.backend.cqcMessageHandler import SimulaqronCQCHandler
+from simulaqron.cqc_backend.cqcProtocol import CQCFactory
+from simulaqron.cqc_backend.cqcMessageHandler import SimulaqronCQCHandler
 from simulaqron.general.hostConfig import networkConfig
 from simulaqron.settings import Settings
 from simulaqron.toolbox import get_simulaqron_path
@@ -45,16 +43,15 @@ def connect_to_virtNode(myName, cqc_factory, virtualNet):
 def handle_connection_error(reason, myName, cqc_factory, virtualNet):
     """ Handles errors from trying to connect to local virtual node.
 
-    If a ConnectionRefusedError is raised another try will be made after 
-    CQC_CONF_WAIT_TIME seconds.  CQC_CONF_WAIT_TIME is set in 
-    'cqc/backend/cqcConfig.py'.  Any other error is raised again.
+    If a ConnectionRefusedError is raised another try will be made after
+    Settings.CONF_WAIT_TIME seconds. Any other error is raised again.
     """
     try:
         reason.raiseException()
     except ConnectionRefusedError:
         logging.debug("LOCAL %s: Could not connect, trying again...", myName)
         reactor.callLater(
-            CQC_CONF_LINK_WAIT_TIME,
+            Settings.CONF_WAIT_TIME,
             connect_to_virtNode,
             myName,
             cqc_factory,

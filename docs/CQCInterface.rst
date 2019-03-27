@@ -1,6 +1,8 @@
 CQC Interface 
 =============
 
+.. note:: The CQC packages and libraries have been moved to seperate repos at `pythonLib <https://github.com/SoftwareQuTech/CQC-Python>`_ and `cLib <https://github.com/SoftwareQuTech/CQC-C>`_. The python library can be installed using pip by the command :code:`pip3 install cqc`.
+
 ^^^^^^^^^^^^^
 The interface
 ^^^^^^^^^^^^^
