@@ -119,6 +119,22 @@ def stop(name):
     d = SimulaQronDaemon(pidfile=pidfile)
     d.stop()
 
+#################
+# reset command #
+#################
+
+
+@cli.command()
+def reset():
+    """Resets simulaqron"""
+    for entry in os.listdir(PID_FOLDER):
+        if entry.endswith(".pid"):
+            pidfile = os.path.join(PID_FOLDER, entry)
+            d = SimulaQronDaemon(pidfile=pidfile)
+            d.stop()
+            if os.path.exists(pidfile):
+                os.remove(pidfile)
+
 
 ###############
 # set command #
