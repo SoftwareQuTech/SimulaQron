@@ -23,7 +23,7 @@ cqc.pythonLib_protocols.wstate module
 Module contents
 ---------------
 
-.. automodule:: cqc.backend
+.. automodule:: cqc.pythonLib_protocols
     :members:
     :undoc-members:
     :show-inheritance:
