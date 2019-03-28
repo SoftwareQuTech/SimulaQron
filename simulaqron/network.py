@@ -55,8 +55,14 @@ class Network:
         else:
             self.name = name
 
-        self._cqc_file = cqc_file
-        self._app_file = app_file
+        if cqc_file is None:
+            self._cqc_file = Settings.CONF_CQC_FILE
+        else:
+            self._cqc_file = cqc_file
+        if app_file is None:
+            self._app_file = Settings.CONF_APP_FILE
+        else:
+            self._app_file = app_file
 
         simulaqron_path = get_simulaqron_path.main()
 

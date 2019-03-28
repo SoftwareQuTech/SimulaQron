@@ -150,7 +150,7 @@ class TestMerge(unittest.TestCase):
 
         Settings.default_settings()
         nodes = ["Alice", "Bob", "Charlie"]
-        cls.network = Network(nodes=nodes, cqc_file=Settings.CONF_CQC_FILE, app_file=Settings.CONF_APP_FILE)
+        cls.network = Network(nodes=nodes)
         cls.network.start()
 
     @classmethod
