@@ -14,6 +14,7 @@ from simulaqron.network import Network
 from simulaqron.settings import Settings
 from simulaqron.toolbox.stabilizerStates import StabilizerState
 from simulaqron.toolbox import get_simulaqron_path
+from simulaqron.toolbox.manage_nodes import setup_cqc_files
 
 
 class localNode(pb.Root):
@@ -149,7 +150,7 @@ class TestMerge(unittest.TestCase):
 
         Settings.default_settings()
         nodes = ["Alice", "Bob", "Charlie"]
-        cls.network = Network(nodes=nodes)
+        cls.network = Network(nodes=nodes, cqc_file=Settings.CONF_CQC_FILE, app_file=Settings.CONF_APP_FILE)
         cls.network.start()
 
     @classmethod
