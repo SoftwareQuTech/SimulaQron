@@ -1,6 +1,19 @@
 Using the Python library
 ========================
 
+^^^^^^^^^^^^
+Installation
+^^^^^^^^^^^^
+
+If you have installed SimulaQron using pip, the cqc interface for python should already be installed.
+If needed you can also only install the CQC interface in Python using pip by typing::
+
+    pip3 install cqc
+
+^^^^^
+Usage
+^^^^^
+
 The python library provides a way to program a protocol on a network where the nodes listen to instructions through the classical-quantum combiner (CQC) interface. In the following examples the network is simulated by SimulaQron. But the same examples could be executed on a network with real quantum hardware which allows for instructions through the CQC interface, which is the aim for the 2020 quantum internet demonstrator.
 
 To use the Python library you first need instantiate an object from the class :code:`cqc.pythonLib.CQCConnection`. This should be done in a `context <https://docs.python.org/3/library/contextlib.html>`_, that is using a :code:`with`-statement as follows::

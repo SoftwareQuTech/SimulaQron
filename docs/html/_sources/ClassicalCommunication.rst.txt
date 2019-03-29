@@ -26,7 +26,7 @@ Note that if this method is never called, a socket connection is never opened.
 The socket connection between Alice and Bob are closed after the message is sent.
 This classical communication is thus not built for efficiency but for easy of use for someone not familiar with client/server setup.
 
-The socket addresses used by the built-in classical communication are taken from the file specified by the path in the argument :code:`appFile` when instantiating the :code:`CQCConnection`. If this argument is not specified, the file config/appNodes.cfg is used by default.
+The socket addresses used by the built-in classical communication are taken from the file specified by the path in the argument :code:`appFile` when instantiating the :code:`CQCConnection`. If this argument is not specified, the filepath set in the SimulaQron settings (see :ref:`manualSetup`) is used (SimulaQron needs to be started for this to take effect).
 
 .. image:: figs/servers.png
     :width: 600px

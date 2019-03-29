@@ -10,7 +10,7 @@ In the light of the alternate interface below it may appear inefficient to expor
 
 The second way to run applications is via a higher level interface bundled with SimulaQron, called the classical-quantum combiner (CQC) interface. This interface is universally accessible from any language. It comes with a C and Python library, where the Python CQC is definitely the best place to get started if you have never programmed SimulaQron before. An evolved version of a C library and interface is targeted to be available on the planned 2020 quantum internet demonstrator connecting several Dutch cities. If you want your applications to later use real quantum hardware more easily instead of SimulaQron, then this is the interface to use. Internally, the CQC included in this package, uses SimulaQron's native interface from above in place of real quantum hardware. Examples of how to program using the CQC can be found in :doc:`ExamplesNodeOS`.
 
-.. note:: The C library is currently out of date but is being updated. See corresponding `issue <https://github.com/SoftwareQuTech/SimulaQron/issues/61>`_ at GitHub.
+.. note:: The CQC packages and libraries have been moved to seperate repos at `pythonLib <https://github.com/SoftwareQuTech/CQC-Python>`_ and `cLib <https://github.com/SoftwareQuTech/CQC-C>`_. The python library can be installed using pip by the command :code:`pip3 install cqc`.
 
 .. image:: figs/CQC_schematic_v3.png
     :width: 400px

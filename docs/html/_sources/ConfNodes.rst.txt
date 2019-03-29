@@ -5,36 +5,36 @@ Configuring the simulated network
 Starting the SimulaQron backend
 -------------------------------
 
-The backend of a SimulaQron network is a set of running virtual nodes and their corresponding CQC servers. To start the backend of a SimulaQron network run the command ``./cli/SimulaQron start``.
+The backend of a SimulaQron network is a set of running virtual nodes and their corresponding CQC servers. To start the backend of a SimulaQron network run the command ``simulaqron start``.
 
-With no arguments, a network is setup using the files in the ``config`` directory.
+With no arguments, a network is by default started with the five nodes Alice, Bob, Charlie, David and Eve. How to adjust the nodes and the topology of the network is described below.
 .. If no files exist in this directory, the ``./cli/main.py network start-all`` command will generate config files for five nodes (Alice, Bob Charlie, David, and Eve) in a fully connected topology (every node is connected to every other node).
 
-.. warning:: ``./cli/main.py network start-all`` can fail if any of the ports specified in the config files are already in use by a running SimulaQron network or another program.
+.. warning:: ``simulaqron start`` can fail if any of the ports specified in the config files are already in use by a running SimulaQron network or another program.
 
 To setup a specific topology see section :ref:`topologyConf`. For setting up the config files manually, see section :ref:`manualSetup` below. Finally for instructions on how to connect to an already runnning simulated network using CQC, see section :ref:`remoteNetwork`.
 
 If you want to start a network with for example the three nodes Alex, Bart, Curt, simply type::
 
-    ./cli/SimulaQron start --nodes Alex,Bart,Curt
+    simulaqron start --nodes Alex,Bart,Curt
 
 If you simply want a network with 10 nodes, type::
 
-    ./cli/SimulaQron start --nrnodes 10
+    simulaqron start --nrnodes 10
 
 This will start up a network where the nodes are called Node0, Node1, ..., Node9.
 
 The --nodes and --nrnodes can be combined. Let's say you want a network with 10 nodes and that three of the nodes are called Alice, Bob and Charlie, type::
 
-    ./cli/SimulaQron start --nodes Alice,Bob,Charlie --nrnodes 10
+    simulaqron start --nodes Alice,Bob,Charlie --nrnodes 10
 
 Which will start up a network with the nodes Alice, Bob, Charlie, Node0, Node1, ..., Node6. If --nrnodes is less than the entries in --nodes, then --nrnodes is ignored. The two keywords can also be specified shorter as -nd and -nn respectively. So the above can also be done as::
 
-    ./cli/SimulaQron start -n Alice,Bob,Charlie -N 10
+    simulaqron start -n Alice,Bob,Charlie -N 10
 
 You can also specify a topology of the network. For example if you want 10 nodes in a ring topology, type::
 
-    ./cli/SimulaQron start --nrnodes 10 --topology ring
+    simulaqron start --nrnodes 10 --topology ring
 
 In this network Node :math:`i` can create EPR pairs and send qubits to Node :math:`i-1 \pmod{10}` and Node :math:`i+1 \pmod{10}`. However, if a CQC message is sent to for example Node2 to produce entanglement with Node5, a error message (CQC_ERR_UNSUPP) will be returned. The options for the automatically generated topologies are currently:
 
@@ -48,7 +48,7 @@ Along with setting up the network with the specified topology a .png figure is a
 
 As a final example let's combine all the arguments specified above and create a network using 15 nodes, where two of then are called Alice and Bob and the topology of the network is randomly generated as a connected graph with 20 edges::
 
-    ./cli/SimulaQron start -n Alice,Bob -N 15 -t random_connected_20
+    simulaqron start -n Alice,Bob -N 15 -t random_connected_20
 
 The network that is then started might look like this (you can find a similar picture for you network at `config/topology.png`:
 
@@ -65,7 +65,7 @@ To create a custom topology, see the next section.
 Configuring the network topology
 --------------------------------
 
-As seen in the previous section a pre-defined network topology can be used by passing an argument when running `./cli/SimulaQron start`. The topology is then specified to SimulaQron as a .json-file stored at config/topology.json. The content of this .json file is a dictionary where the keys are the names of the nodes and the values a list of the neighbors. For example, a file specifying a topology where Alice is adjacent to Bob, Bob is adjacent to Alice and Charlie and Charlie is adjacent to Bob would be::
+As seen in the previous section a pre-defined network topology can be used by passing an argument when running `simulaqron start`. The topology is then specified to SimulaQron as a .json-file stored at config/topology.json. The content of this .json file is a dictionary where the keys are the names of the nodes and the values a list of the neighbors. For example, a file specifying a topology where Alice is adjacent to Bob, Bob is adjacent to Alice and Charlie and Charlie is adjacent to Bob would be::
 
     {
      "Alice": ["Bob"],
@@ -77,7 +77,7 @@ As seen in the previous section a pre-defined network topology can be used by pa
 
 You can create your own .json file specifying the network topology you want to use. When doing so, make sure that the names of the nodes you use are consistent with the nodes used by SimulaQron. To have SimulaQron use your specified topology, set the setting :code:`topology-file` to be the relative path to the .json file, as seen from the root of the repository by::
 
-    ./cli/SimulaQron set topology-file path/to/file
+    simulaqron set topology-file path/to/file
 
 .. note:: When using the keyword argument --topology (or -tp) for ``./cli/SimulaQron start``, the file config/topology.json is overwritten. It is therefore recommended to create your own topology-file with another name or in a different directory, to not accidentally overwrite your file.
 
@@ -87,32 +87,45 @@ You can create your own .json file specifying the network topology you want to u
 Manual setup
 ------------
 
-In this section we describe how nodes, topology and port settings can be configured for SimulaQron. This is useful if you don't want ``./cli/SimulaQron start`` to automatically set the port numbers for you. Depending on what arguments are given to ``./cli/SimulaQron start``, the following is done:
+In this section we describe how nodes, topology and port settings can be configured for SimulaQron. This is useful if you don't want ``simulaqron start`` to automatically set the port numbers for you. Depending on what arguments are given to ``simulaqron start``, the following is done:
 
-* If no arguments to ``./cli/SimulaQron start`` are given then SimulaQron will start using the configuration specified by the current configuration files, which consist of the files *nodes-file* (default config/Nodes.cfg), *app-file* (default config/appNodes.cfg), *cqc-file* (default config/cqcNodes.cfg), *vnode-file* (default config/virtualNodes.cfg) and *topology-file* (default ""), but can be set by the command::
+* If no arguments to ``simulaqron start`` are given then SimulaQron will start using the configuration specified by the current configuration files, which consist of the files *nodes-file*, *app-file*, *cqc-file*, *vnode-file* and *topology-file*, but can be set by the command::
 
     ./cli/SimulaQron set FILE PATH
 
-* If the arguments --nodes (-n) or --nrnodes (-N) are used for ``./cli/SimulaQron start`` then the files *nodes-file*, *vnode-file*, *cqc-file* and *app-file* are overwritten using the specified nodes. Port numbers will be used between 8000 and 8000.
+* If the arguments --nodes (-n) or --nrnodes (-N) are used for ``simulaqron start`` then the files *nodes-file*, *vnode-file*, *cqc-file* and *app-file* are overwritten using the specified nodes. Port numbers will be used between 8000 and 8000.
 
 * If the argument --topology (-tp) is used then the files config/topology.json and config/topology.png will be overwritten which the specified topology and the entry :code:`topology-file` in the settings will be set to point to this file.
 
-To change the nodes and the port numbers used in the network you can either edit the files *nodes-file*, *vnode-file*, *cqc-file* and *app-file* or use the command line interface. To see the current nodes type::
+To change the nodes and the port numbers used in the network you can either create your own *nodes-file*, *vnode-file*, *cqc-file* and *app-file* or use the command line interface. When creating your own config files each line should contain the name, hostname/ip and port number of a node (lines starting with # are ignored. For example a config file could look like::
+	# Network configuration file
+	# 
+	# For each host its informal name, as well as its location in the network must
+	# be listed.
+	#
+	# [name], [hostname], [port number]
+	#
 
-    ./cli/SimulaQron nodes get
+	Alice, localhost, 8801
+	Bob, localhost, 8802
+	Charlie, localhost, 8803
+
+To see the current nodes type::
+
+    simulaqron nodes get
 
 To set the nodes back to the default (Alice, Bob, Charlie, David, Eve) type::
 
-    ./cli/SimulaQron nodes default
+    simulaqron nodes default
 
 To add a node from the network type::
 
-    ./cli/SimulaQron nodes add NAME
+    simulaqron nodes add NAME
 
 where you can also optionally specify the host-name, port-numbers and neighbors of the node.
 To remove a node from the network type::
 
-    ./cli/SimulaQron nodes remove NAME
+    simulaqron nodes remove NAME
 
 -----------------
 Multiple networks
@@ -120,19 +133,19 @@ Multiple networks
 
 To run multiple networks at the same time you need to given them different names by using the --name flag::
 
-    ./cli/SimulaQron start --name NETWORK
+    simulaqron start --name NETWORK
 
 To stop a network with a specific name type::
 
-    ./cli/SimulaQron stop --name NETWORK
+    simulaqron stop --name NETWORK
 
-.. note:: By default the network name is "default".
+.. note:: By default the network name is "default". To have multiple networks running at the same time the nodes cannot use the same port numbers.
 
 ------------------------------
 Starting a network from Python
 ------------------------------
 
-You can also start a network within a Python script (this is in fact what ./cli/SimulaQron does), by using the class :code:`simulaqron.network.Network`. To setup a network by name "test" with the nodes Alice, Bob and Charlie, where Bob is connected with Alice and Charlie but Alice and Charlie are not connected use the following code code::
+You can also start a network within a Python script (this is in fact what simulaqron does), by using the class :code:`simulaqron.network.Network`. To setup a network by name "test" with the nodes Alice, Bob and Charlie, where Bob is connected with Alice and Charlie but Alice and Charlie are not connected use the following code code::
 
     from simulaqron.network import Network
 
