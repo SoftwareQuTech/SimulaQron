@@ -29,14 +29,12 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
-import os
 import logging
 import signal
 from twisted.internet import reactor
 
 from simulaqron.virtNode.virtual import backEnd
 from simulaqron.settings import Settings
-from simulaqron.toolbox import get_simulaqron_path
 
 
 def sigterm_handler(_signo, _stack_frame):
@@ -47,9 +45,6 @@ def sigterm_handler(_signo, _stack_frame):
 def main(name):
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)
-
-    # Get path to SimulaQron folder
-    simulaqron_path = get_simulaqron_path.main()
 
     logging.basicConfig(
         format="%(asctime)s:%(levelname)s:%(message)s",

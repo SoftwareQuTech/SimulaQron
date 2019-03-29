@@ -1,0 +1,1 @@
+from simulaqron.tests_run import main as tests

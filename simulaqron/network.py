@@ -50,6 +50,8 @@ from cqc.pythonLib import CQCConnection
 
 class Network:
     def __init__(self, name=None, nodes=None, topology=None, cqc_file=None, app_file=None):
+        self._running = False
+
         if name is None:
             self.name = "default"
         else:
@@ -89,8 +91,6 @@ class Network:
 
         self.processes = []
         self._setup_processes()
-
-        self._running = False
 
     @property
     def running(self):

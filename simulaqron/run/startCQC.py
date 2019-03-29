@@ -10,7 +10,6 @@ from simulaqron.cqc_backend.cqcProtocol import CQCFactory
 from simulaqron.cqc_backend.cqcMessageHandler import SimulaqronCQCHandler
 from simulaqron.general.hostConfig import networkConfig
 from simulaqron.settings import Settings
-from simulaqron.toolbox import get_simulaqron_path
 
 
 def init_register(virtRoot, myName, node):
@@ -76,7 +75,7 @@ def setup_CQC_server(myName, cqc_factory):
         myHost.root = cqc_factory
         myHost.factory = cqc_factory
         reactor.listenTCP(myHost.port, myHost.factory)
-    except CannotListenError as e:
+    except CannotListenError:
         logging.error(
             "LOCAL {}: CQC server address ({}) is already in use.".format(
                 myName, myHost.port
@@ -103,9 +102,6 @@ def main(myName):
         format="%(asctime)s:%(levelname)s:%(message)s",
         level=Settings.CONF_LOGGING_LEVEL_BACKEND,
     )
-
-    # Get path to SimulaQron folder
-    simulaqron_path = get_simulaqron_path.main()
 
     # This file defines the network of virtual quantum nodes
     virtualFile = Settings.CONF_VNODE_FILE

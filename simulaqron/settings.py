@@ -243,7 +243,8 @@ class Settings:
         cls.CONF_NOISY_QUBITS = _DefaultSettings.CONF_NOISY_QUBITS
         cls.CONF_T1 = _DefaultSettings.CONF_T1
 
-        os.remove(cls._settings_file)
+        if os.path.exists(cls._settings_file):
+            os.remove(cls._settings_file)
 
         cls._config = ConfigParser()
         cls.init_settings()

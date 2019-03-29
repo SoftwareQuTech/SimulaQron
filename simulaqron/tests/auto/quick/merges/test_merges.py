@@ -14,7 +14,6 @@ from simulaqron.network import Network
 from simulaqron.settings import Settings
 from simulaqron.toolbox.stabilizerStates import StabilizerState
 from simulaqron.toolbox import get_simulaqron_path
-from simulaqron.toolbox.manage_nodes import setup_cqc_files
 
 
 class localNode(pb.Root):

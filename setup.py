@@ -19,7 +19,7 @@ setuptools.setup(
     include_package_data=True,
     packages=setuptools.find_packages(include=("simulaqron*",)),
     package_data={
-        'simulaqron': ['config/*.cfg', 'config/*.ini', '.simulaqron_pids/__keep__']
+        'simulaqron': ['config/*.cfg', '.simulaqron_pids/__keep__', 'tests/auto/quick/merges/configs/*.cfg']
     },
     install_requires=install_requires,
     classifiers=[
