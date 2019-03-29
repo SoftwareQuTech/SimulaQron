@@ -40,6 +40,7 @@ from simulaqron.toolbox import get_simulaqron_path
 simulaqron_path = get_simulaqron_path.main()
 config_folder = os.path.join(simulaqron_path, "config")
 
+
 class _DefaultSettings:
     CONF_MAXQUBITS = 20
     CONF_MAXREGS = 1000

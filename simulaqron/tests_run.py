@@ -29,9 +29,6 @@ def main(test_type="quick"):
     test_suite = test_loader.discover(start_dir=directory)
     result = test_runner.run(test_suite)
 
-    print("errors: {}".format(result.errors))
-    print("failures: {}".format(result.failures))
-
     return len(result.errors) == 0 and len(result.failures) == 0
 
 
@@ -50,5 +47,4 @@ def parse_args():
 
 if __name__ == '__main__':
     test_type = parse_args()
-    results = main()
-    print("results: {}".format(results))
+    main()
