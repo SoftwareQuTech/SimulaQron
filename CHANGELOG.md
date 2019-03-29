@@ -37,5 +37,10 @@ These are changes in Develop will be merged to master.
 
  - All settings can be accessed through the command line interface by the commands `simulaqron set` and `simulaqron get`.
 
+2019-03-29 (v2.1.1)
+-------------------
+
+Tests can now be run from python from the method `simulaqron.tests`.
+
 Upcoming
 --------

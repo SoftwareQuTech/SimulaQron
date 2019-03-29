@@ -9,7 +9,7 @@ with open("requirements.txt", 'r') as f:
 
 setuptools.setup(
     name="simulaqron",
-    version="2.1.0",
+    version="2.1.1",
     author="Axel Dahlberg",
     author_email="e.a.dahlberg@tudelft.nl",
     description="A simulator for developing Quantum Internet software",
@@ -19,7 +19,7 @@ setuptools.setup(
     include_package_data=True,
     packages=setuptools.find_packages(include=("simulaqron*",)),
     package_data={
-        'simulaqron': ['config/*.cfg', 'config/*.ini', '.simulaqron_pids/__keep__']
+        'simulaqron': ['config/*.cfg', '.simulaqron_pids/__keep__', 'tests/auto/quick/merges/configs/*.cfg']
     },
     install_requires=install_requires,
     classifiers=[

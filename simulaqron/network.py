@@ -50,13 +50,21 @@ from cqc.pythonLib import CQCConnection
 
 class Network:
     def __init__(self, name=None, nodes=None, topology=None, cqc_file=None, app_file=None):
+        self._running = False
+
         if name is None:
             self.name = "default"
         else:
             self.name = name
 
-        self._cqc_file = cqc_file
-        self._app_file = app_file
+        if cqc_file is None:
+            self._cqc_file = Settings.CONF_CQC_FILE
+        else:
+            self._cqc_file = cqc_file
+        if app_file is None:
+            self._app_file = Settings.CONF_APP_FILE
+        else:
+            self._app_file = app_file
 
         simulaqron_path = get_simulaqron_path.main()
 
@@ -83,8 +91,6 @@ class Network:
 
         self.processes = []
         self._setup_processes()
-
-        self._running = False
 
     @property
     def running(self):
