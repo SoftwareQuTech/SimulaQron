@@ -2,7 +2,6 @@ import os
 import json
 from contextlib import closing
 from socket import AF_INET, SOCK_STREAM, socket
-from configparser import ConfigParser
 from cqc.settings import get_config, set_config
 
 from simulaqron.toolbox import get_simulaqron_path

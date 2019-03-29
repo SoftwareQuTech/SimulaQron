@@ -10,7 +10,7 @@ class TestDefaultTopology(unittest.TestCase):
     def setUpClass(cls):
         Settings.default_settings()
         cls.node_names = ["Alice", "Bob", "Charlie"]
-        cls.network = Network(cls.node_names)
+        cls.network = Network(nodes=cls.node_names)
         cls.network.start()
 
     @classmethod

@@ -45,6 +45,8 @@ import random
 from argparse import ArgumentParser
 import networkx as nx
 import matplotlib.pyplot as plt
+import _tkinter
+import logging
 
 from simulaqron.settings import Settings
 from simulaqron.toolbox import get_simulaqron_path
@@ -67,9 +69,6 @@ def construct_node_configs(nodes=None):
     nrNodes = len(nodes)
     if nrNodes == 0:
         return
-
-    # Get path to SimulaQron folder
-    simulaqron_path = get_simulaqron_path.main()
 
     # Get path to configuration files
     conf_files = [
@@ -170,9 +169,13 @@ def construct_topology_config(topology, nodes, save_fig=True):
 
         if save_fig:
             network = nx.from_dict_of_lists(adjacency_dct)
-            nx.draw(network, with_labels=True)
-            fig_path = os.path.join(simulaqron_path, "config/topology.png")
-            plt.savefig(fig_path)
+            try:
+                nx.draw(network, with_labels=True)
+            except _tkinter.TclError as err:
+                logging.warning("Could not draw since there seems to be no screen. Error: {}".format(err))
+            else:
+                fig_path = os.path.join(simulaqron_path, "config/topology.png")
+                plt.savefig(fig_path)
 
         topology_file = os.path.join(simulaqron_path, "config/topology.json")
         with open(topology_file, "w") as top_file:

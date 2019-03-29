@@ -40,6 +40,7 @@ from simulaqron.toolbox import get_simulaqron_path
 simulaqron_path = get_simulaqron_path.main()
 config_folder = os.path.join(simulaqron_path, "config")
 
+
 class _DefaultSettings:
     CONF_MAXQUBITS = 20
     CONF_MAXREGS = 1000
@@ -243,7 +244,8 @@ class Settings:
         cls.CONF_NOISY_QUBITS = _DefaultSettings.CONF_NOISY_QUBITS
         cls.CONF_T1 = _DefaultSettings.CONF_T1
 
-        os.remove(cls._settings_file)
+        if os.path.exists(cls._settings_file):
+            os.remove(cls._settings_file)
 
         cls._config = ConfigParser()
         cls.init_settings()

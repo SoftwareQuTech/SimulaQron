@@ -1,1 +1,1 @@
-{"Alice": ["Bob", "Charlie", "David", "Eve"], "Bob": ["Alice", "Charlie", "David", "Eve"], "Charlie": ["Alice", "Bob", "David", "Eve"], "David": ["Alice", "Bob", "Charlie", "Eve"], "Eve": ["Alice", "Bob", "Charlie", "David"]}
+{"Alice": ["Bob"], "Bob": ["Alice", "Charlie"], "Charlie": ["Bob"]}

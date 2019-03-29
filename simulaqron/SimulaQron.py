@@ -14,14 +14,12 @@ PID_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".simulaqr
 
 
 class SimulaQronDaemon(run.RunDaemon):
-    def __init__(self, pidfile, name=None, nrnodes=None, nodes=None, topology=None, cqc_file=None, app_file=None):
+    def __init__(self, pidfile, name=None, nrnodes=None, nodes=None, topology=None):
         super().__init__(pidfile=pidfile)
         self.name = name
         self.nrnodes = nrnodes
         self.nodes = nodes
         self.topology = topology
-        self.cqc_file = cqc_file
-        self.app_file = app_file
 
     def run(self):
         """Starts all nodes defined in netsim's config directory."""
@@ -37,8 +35,7 @@ class SimulaQronDaemon(run.RunDaemon):
         else:
             nodes = self.nodes
 
-        network = Network(name=self.name, nodes=nodes, topology=self.topology, cqc_file=self.cqc_file,
-                          app_file=self.app_file)
+        network = Network(name=self.name, nodes=nodes, topology=self.topology)
         network.start()
 
         while True:
@@ -92,8 +89,7 @@ def start(name, nrnodes, nodes, topology):
     if os.path.exists(pidfile):
         logging.warning("Network with name {} is already running".format(name))
         return
-    d = SimulaQronDaemon(pidfile=pidfile, name=name, nrnodes=nrnodes, nodes=nodes, topology=topology,
-                         cqc_file=Settings.CONF_CQC_FILE, app_file=Settings.CONF_APP_FILE)
+    d = SimulaQronDaemon(pidfile=pidfile, name=name, nrnodes=nrnodes, nodes=nodes, topology=topology)
     d.start()
 
 ###############
@@ -434,4 +430,3 @@ if __name__ == "__main__":
         level=Settings.CONF_LOGGING_LEVEL_BACKEND,
     )
     cli()
-
