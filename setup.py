@@ -9,7 +9,7 @@ with open("requirements.txt", 'r') as f:
 
 setuptools.setup(
     name="simulaqron",
-    version="2.1.0",
+    version="2.1.1",
     author="Axel Dahlberg",
     author_email="e.a.dahlberg@tudelft.nl",
     description="A simulator for developing Quantum Internet software",

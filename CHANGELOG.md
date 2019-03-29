@@ -23,8 +23,8 @@ These are changes in Develop was merged to master.
   
 - All test are now unittests and can be started as `make tests` or `make tests_full` for a longer test.
 
-Upcoming
---------
+2019-03-28 (v2.1.0)
+-------------------
 These are changes in Develop will be merged to master.
 
  - The CQC specification and libraries will move to it's own repos.
@@ -36,3 +36,11 @@ These are changes in Develop will be merged to master.
  - There is a new command in the which is useful if something crashed when a simulated network was running. Simply to `simulaqron reset`.
 
  - All settings can be accessed through the command line interface by the commands `simulaqron set` and `simulaqron get`.
+
+2019-03-29 (v2.1.1)
+-------------------
+
+Tests can now be run from python from the method `simulaqron.tests`.
+
+Upcoming
+--------
