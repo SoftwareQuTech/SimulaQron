@@ -191,12 +191,6 @@ def setup_cqc_files():
     :return: None
     """
     config = get_config()
-    changed = False
-    if config['FILEPATHS']['cqc_file'] != Settings.CONF_CQC_FILE:
-        config['FILEPATHS']['cqc_file'] = Settings.CONF_CQC_FILE
-        changed = True
-    if config['FILEPATHS']['app_file'] != Settings.CONF_APP_FILE:
-        config['FILEPATHS']['app_file'] = Settings.CONF_APP_FILE
-        changed = True
-    if changed:
-        set_config(config)
+    config['FILEPATHS']['cqc_file'] = Settings.CONF_CQC_FILE
+    config['FILEPATHS']['app_file'] = Settings.CONF_APP_FILE
+    set_config(config)
