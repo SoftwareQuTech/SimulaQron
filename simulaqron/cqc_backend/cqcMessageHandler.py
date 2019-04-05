@@ -405,6 +405,21 @@ class CQCMessageHandler(ABC):
 
         return succ and should_notify
 
+    @staticmethod
+    def new_ent_id(host_app_id, remote_node, remote_app_id):
+        """
+        Returns a new unique entanglement id for the specified host_app_id, remote_node and remote_app_id.
+        Used by cmd_epr.
+        """
+        pair_id = (host_app_id, remote_node, remote_app_id)
+        if pair_id in SimulaqronCQCHandler._next_ent_id:
+            ent_id = SimulaqronCQCHandler._next_ent_id[pair_id]
+            SimulaqronCQCHandler._next_ent_id[pair_id] += 1
+            return ent_id
+        else:
+            SimulaqronCQCHandler._next_ent_id[pair_id] = 1
+            return 0
+
     @abstractmethod
     def handle_hello(self, header, data):
         pass
@@ -1765,20 +1780,6 @@ class SimulaqronCQCHandler(CQCMessageHandler):
             heappush(q_ids, qubit_id)
         del self.factory.qubitList[(app_id, qubit_id)]
 
-    @staticmethod
-    def new_ent_id(host_app_id, remote_node, remote_app_id):
-        """
-        Returns a new unique entanglement id for the specified host_app_id, remote_node and remote_app_id.
-        Used by cmd_epr.
-        """
-        pair_id = (host_app_id, remote_node, remote_app_id)
-        if pair_id in SimulaqronCQCHandler._next_ent_id:
-            ent_id = SimulaqronCQCHandler._next_ent_id[pair_id]
-            SimulaqronCQCHandler._next_ent_id[pair_id] += 1
-            return ent_id
-        else:
-            SimulaqronCQCHandler._next_ent_id[pair_id] = 1
-            return 0
 
 
 class UnknownQubitError(Exception):

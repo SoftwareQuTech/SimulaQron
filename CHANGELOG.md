@@ -42,5 +42,10 @@ These are changes in Develop will be merged to master.
 
 Tests can now be run from python from the method `simulaqron.tests`.
 
+
+2019-04-05 (v2.1.2)
+-------------------
+ - Moved new_ent_id up from simulaqronCQCHandler to CQCMessageHandler
+
 Upcoming
 --------
