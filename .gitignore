@@ -5,6 +5,7 @@
 /build/*
 /dist/*
 /simulaqron.egg-info/*
+/simulaqron/config/*
 
 .idea/*
 
