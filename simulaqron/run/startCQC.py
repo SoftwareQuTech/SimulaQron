@@ -6,7 +6,7 @@ from twisted.internet import reactor
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
 from twisted.spread import pb
 
-from simulaqron.cqc_backend.cqcProtocol import CQCFactory
+from simulaqron.cqc_backend.cqcFactory import CQCFactory
 from simulaqron.cqc_backend.cqcMessageHandler import SimulaqronCQCHandler
 from simulaqron.general.hostConfig import networkConfig
 from simulaqron.settings import Settings

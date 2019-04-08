@@ -47,4 +47,4 @@ def parse_args():
 
 if __name__ == '__main__':
     test_type = parse_args()
-    main()
+    main(test_type=test_type)

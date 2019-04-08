@@ -389,7 +389,9 @@ def add(name, hostname=None, app_port=None, cqc_port=None, vnode_port=None, neig
 
     HOSTNAME: The host name of the node, e.g. localhost or 192.168.0.1
     """
-    neighbors = neighbors.split(',')
+    if neighbors is not None:
+        neighbors = neighbors.split(',')
+        neighbors = [neighbor.strip() for neighbor in neighbors]
     manage_nodes.add_node(name, hostname=hostname, app_port=app_port, cqc_port=cqc_port, vnode_port=vnode_port,
                           neighbors=neighbors)
 
