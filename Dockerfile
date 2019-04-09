@@ -47,9 +47,6 @@ LABEL author="Wojciech Kozlowski <w.kozlowski@tudelft.nl>"
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get upgrade -y
 
-# Install Rust and Cargo
-RUN apt-get install -y rustc cargo
-
 # Install Python 3
 RUN apt-get install -y python3 python3-pip python3-tk
 
@@ -57,16 +54,4 @@ RUN apt-get install -y python3 python3-pip python3-tk
 RUN apt-get -y install language-pack-en
 ENV LANG="en_US.UTF-8"
 
-# Add the working directory
-ARG WORKSPACE=/workspace
-ADD . $WORKSPACE/SimulaQron
-WORKDIR $WORKSPACE/SimulaQron
-
-# SimulaQron dependencies
-RUN pip3 install -r ./requirements.txt
-
-# Fetch rustLib dependencies
-RUN cd cqc/rustLib && cargo update
-
-# Setup the necessary environment variables
-ENV PYTHONPATH=$WORKSPACE/SimulaQron:$PYTHONPATH
+RUN pip3 install simulaqron
