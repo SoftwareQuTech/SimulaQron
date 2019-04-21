@@ -32,7 +32,7 @@ import numpy as np
 
 from cqc.pythonLib import CQCConnection, qubit
 from simulaqron.network import Network
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 
 
 def calc_exp_values(q):
@@ -158,14 +158,14 @@ class TwoQubitGateTest(unittest.TestCase):
         cls.iterations = 100
         sys.stdout.write("Testing two qubit gates gates with {} iterations \r\n".format(cls.iterations))
 
-        Settings.default_settings()
+        simulaqron_settings.default_settings()
         cls.network = Network(nodes=["Alice", "Bob"])
         cls.network.start()
 
     @classmethod
     def tearDownClass(cls):
         cls.network.stop()
-        Settings.default_settings()
+        simulaqron_settings.default_settings()
 
     def testCNOTControl(self):
         with CQCConnection("Bob", appID=0) as cqc:

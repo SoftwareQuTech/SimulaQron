@@ -11,7 +11,7 @@ import sys
 
 from cqc.pythonLib import CQCConnection, qubit
 from simulaqron.network import Network
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 
 
 def prep_z0(cqc):
@@ -57,15 +57,17 @@ class TestOptionalNoise(unittest.TestCase):
         cls.exp_values = (1 / 2, 1 / 2, 1 / 2)
         cls.iterations = 100
 
-        Settings.set_setting("BACKEND", "noisy_qubits", 'True')
-        Settings.set_setting("BACKEND", "t1", '0.0001')
+        simulaqron_settings.default_settings()
+        simulaqron_settings.noisy_qubits = True
+        simulaqron_settings.t1 = 0.0001
+
         cls.network = Network(nodes=["Alice"])
         cls.network.start()
 
     @classmethod
     def tearDownClass(cls):
         cls.network.stop()
-        Settings.default_settings()
+        simulaqron_settings.default_settings()
 
     def test_z0(self):
         with CQCConnection("Alice") as cqc:

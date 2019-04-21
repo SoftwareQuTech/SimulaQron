@@ -5,7 +5,7 @@ import unittest
 from timeit import default_timer as timer
 
 from simulaqron.toolbox import get_simulaqron_path
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 from simulaqron.configFiles import construct_node_configs
 from simulaqron.network import Network
 from simulaqron.general.hostConfig import load_node_names
@@ -25,7 +25,7 @@ class TestInitNetwork(unittest.TestCase):
         with open(topology_config_file, 'w') as f:
             self.topology = {"Test1": ["Test2"], "Test2": ["Test3"], "Test3": []}
             json.dump(self.topology, f)
-        Settings.CONF_TOPOLOGY_FILE = os.path.join("config", "topology.json")
+        simulaqron_settings.topology_file = os.path.join("config", "topology.json")
         # Settings.set_setting("BACKEND", "topology_file", "config/topology.json")
 
     def tearDown(self):
@@ -35,13 +35,13 @@ class TestInitNetwork(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         # Set config files back to default
-        for file in ["Nodes.cfg", "topology.json", "settings.ini"]:
+        for file in ["Nodes.cfg", "topology.json"]:
             simulaqron_path = get_simulaqron_path.main()
             file_path = os.path.join(simulaqron_path, "config", file)
             os.remove(file_path)
 
         construct_node_configs()
-        Settings.default_settings()
+        simulaqron_settings.default_settings()
 
     def check_nodes(self, nodes):
         simulaqron_path = get_simulaqron_path.main()

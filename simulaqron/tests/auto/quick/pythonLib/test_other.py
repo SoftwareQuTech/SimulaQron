@@ -32,20 +32,20 @@ import unittest
 
 from cqc.pythonLib import CQCConnection, qubit
 from simulaqron.network import Network
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 
 
 class OthersTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        Settings.default_settings()
+        simulaqron_settings.default_settings()
         cls.network = Network(nodes=["Alice"])
         cls.network.start()
 
     @classmethod
     def tearDownClass(cls):
         cls.network.stop()
-        Settings.default_settings()
+        simulaqron_settings.default_settings()
 
     def testMeasureInplace(self):
         with CQCConnection("Alice", appID=1) as cqc:

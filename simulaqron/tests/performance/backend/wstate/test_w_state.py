@@ -2,13 +2,13 @@ import sys
 
 from cqc.pythonLib import CQCConnection
 from cqc.pythonLib_protocols import wstate
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 
 from timeit import default_timer as timer
 
 with CQCConnection("Alice") as cqc:
     nmax = int(sys.argv[1])
-    backend = Settings.CONF_BACKEND
+    backend = simulaqron_settings.backend
     times = []
     sizes = []
     for n in range(1, nmax + 1):

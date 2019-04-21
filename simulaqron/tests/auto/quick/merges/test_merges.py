@@ -11,7 +11,7 @@ from twisted.internet.defer import inlineCallbacks
 from simulaqron.general.hostConfig import networkConfig
 from simulaqron.local.setup import setup_local, assemble_qubit
 from simulaqron.network import Network
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox.stabilizerStates import StabilizerState
 from simulaqron.toolbox import get_simulaqron_path
 
@@ -68,24 +68,24 @@ class localNode(pb.Root):
         yield self.q1.callRemote("apply_H")
         yield self.q1.callRemote("cnot_onto", self.q2)
 
-        if Settings.CONF_BACKEND == "qutip":
+        if simulaqron_settings.backend == "qutip":
             # Output state
             (realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits", [self.q1, self.q2])
             rho = assemble_qubit(realRho, imagRho)
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
-        elif Settings.CONF_BACKEND == "projectq":
+        elif simulaqron_settings.backend == "projectq":
             (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", self.q1)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
-        elif Settings.CONF_BACKEND == "stabilizer":
+        elif simulaqron_settings.backend == "stabilizer":
             (array, _) = yield self.virtRoot.callRemote("get_register_RI", self.q1)
             state = StabilizerState(array)
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
             correct = state == expectedState
         else:
-            ValueError("Unknown backend {}".format(Settings.CONF_BACKEND))
+            ValueError("Unknown backend {}".format(simulaqron_settings.backend))
 
         return bool(correct)
 
@@ -116,28 +116,29 @@ class localNode(pb.Root):
             yield q.callRemote("apply_H")
             yield q.callRemote("cnot_onto", qA)
 
-        if Settings.CONF_BACKEND == "qutip":
+        if simulaqron_settings.backend == "qutip":
             # Output state
             (realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits", [qA, q])
             rho = assemble_qubit(realRho, imagRho)
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
-        elif Settings.CONF_BACKEND == "projectq":
+        elif simulaqron_settings.backend == "projectq":
             (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", qA)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
-        elif Settings.CONF_BACKEND == "stabilizer":
+        elif simulaqron_settings.backend == "stabilizer":
             (array, _) = yield self.virtRoot.callRemote("get_register_RI", qA)
             state = StabilizerState(array)
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
             correct = state == expectedState
         else:
-            ValueError("Unknown backend {}".format(Settings.CONF_BACKEND))
+            ValueError("Unknown backend {}".format(simulaqron_settings.backend))
 
         return bool(correct)
 
 
+# @for_all_methods()
 class TestMerge(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -147,7 +148,7 @@ class TestMerge(unittest.TestCase):
         cls.processes = []
         cls.processes_to_wait_for = None
 
-        Settings.default_settings()
+        simulaqron_settings.default_settings()
         nodes = ["Alice", "Bob", "Charlie"]
         cls.network = Network(nodes=nodes)
         cls.network.start()
@@ -159,7 +160,7 @@ class TestMerge(unittest.TestCase):
 
         cls.network.stop()
         reactor.crash()
-        Settings.default_settings()
+        simulaqron_settings.default_settings()
 
     @staticmethod
     def setup_node(name, node_code, classical_net_file, send_end):
@@ -245,24 +246,24 @@ class TestBothLocal(TestMerge):
         yield qA.callRemote("apply_H")
         yield qA.callRemote("cnot_onto", qB)
 
-        if Settings.CONF_BACKEND == "qutip":
+        if simulaqron_settings.backend == "qutip":
             # Output state
             (realRho, imagRho) = yield virtRoot.callRemote("get_multiple_qubits", [qA, qB])
             rho = assemble_qubit(realRho, imagRho)
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
-        elif Settings.CONF_BACKEND == "projectq":
+        elif simulaqron_settings.backend == "projectq":
             (realvec, imagvec, _, _, _) = yield virtRoot.callRemote("get_register", qA)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
-        elif Settings.CONF_BACKEND == "stabilizer":
+        elif simulaqron_settings.backend == "stabilizer":
             (array, _, _, _, _) = yield virtRoot.callRemote("get_register", qA)
             state = StabilizerState(array)
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
             correct = state == expectedState
         else:
-            ValueError("Unknown backend {}".format(Settings.CONF_BACKEND))
+            ValueError("Unknown backend {}".format(simulaqron_settings.backend))
 
         send_end.send(correct)
 
@@ -298,24 +299,24 @@ class TestBothLocalNotSameReg(TestBothLocal):
         yield qA.callRemote("apply_H")
         yield qA.callRemote("cnot_onto", qB)
 
-        if Settings.CONF_BACKEND == "qutip":
+        if simulaqron_settings.backend == "qutip":
             # Output state
             (realRho, imagRho) = yield virtRoot.callRemote("get_multiple_qubits", [qA, qB])
             rho = assemble_qubit(realRho, imagRho)
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
-        elif Settings.CONF_BACKEND == "projectq":
+        elif simulaqron_settings.backend == "projectq":
             (realvec, imagvec, _, _, _) = yield virtRoot.callRemote("get_register", qA)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
-        elif Settings.CONF_BACKEND == "stabilizer":
+        elif simulaqron_settings.backend == "stabilizer":
             (array, _, _, _, _) = yield virtRoot.callRemote("get_register", qA)
             state = StabilizerState(array)
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
             correct = state == expectedState
         else:
-            ValueError("Unknown backend {}".format(Settings.CONF_BACKEND))
+            ValueError("Unknown backend {}".format(simulaqron_settings.backend))
 
         send_end.send(correct)
 

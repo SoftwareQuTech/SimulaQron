@@ -35,7 +35,7 @@ import multiprocessing as mp
 from timeit import default_timer as timer
 
 from simulaqron.toolbox import get_simulaqron_path
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 from simulaqron.general.hostConfig import load_node_names
 from simulaqron.configFiles import construct_node_configs, construct_topology_config
 from simulaqron.run.startNode import main as start_node
@@ -58,11 +58,11 @@ class Network:
             self.name = name
 
         if cqc_file is None:
-            self._cqc_file = Settings.CONF_CQC_FILE
+            self._cqc_file = simulaqron_settings.cqc_file
         else:
             self._cqc_file = cqc_file
         if app_file is None:
-            self._app_file = Settings.CONF_APP_FILE
+            self._app_file = simulaqron_settings.app_file
         else:
             self._app_file = app_file
 
@@ -70,7 +70,7 @@ class Network:
 
         # Set the nodes
         if nodes is None:
-            node_config_file = Settings.CONF_NODES_FILE
+            node_config_file = simulaqron_settings.nodes_file
             self.nodes = load_node_names(node_config_file)
         else:
             self.nodes = nodes
@@ -78,7 +78,7 @@ class Network:
 
         # Set the topology
         if topology is None:
-            rel_topology_config_file = Settings.CONF_TOPOLOGY_FILE
+            rel_topology_config_file = simulaqron_settings.topology_file
             if rel_topology_config_file == '':
                 self.topology = None
             else:

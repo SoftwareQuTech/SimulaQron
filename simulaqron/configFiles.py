@@ -48,7 +48,7 @@ import matplotlib.pyplot as plt
 import _tkinter
 import logging
 
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox import get_simulaqron_path
 
 
@@ -72,13 +72,13 @@ def construct_node_configs(nodes=None):
 
     # Get path to configuration files
     conf_files = [
-        Settings.CONF_VNODE_FILE,
-        Settings.CONF_CQC_FILE,
-        Settings.CONF_APP_FILE
+        simulaqron_settings.vnode_file,
+        simulaqron_settings.cqc_file,
+        simulaqron_settings.app_file
     ]
 
     # File for just a simple list of the nodes
-    node_file = Settings.CONF_NODES_FILE
+    node_file = simulaqron_settings.nodes_file
     # What port numbers to start with
     start_nr = [8801, 8801 + nrNodes, 8801 + 2 * nrNodes]
 
@@ -181,9 +181,9 @@ def construct_topology_config(topology, nodes, save_fig=True):
         with open(topology_file, "w") as top_file:
             json.dump(adjacency_dct, top_file)
 
-        Settings.set_setting("BACKEND", "topology_file", "config/topology.json")
+        simulaqron_settings.topology_file = "config/topology.json"
     else:
-        Settings.set_setting("BACKEND", "topology_file", "")
+        simulaqron_settings.topology_file = ""
 
 
 def get_random_tree(nodes):
@@ -244,12 +244,6 @@ def get_random_connected(nodes, nr_edges):
     return adjacency_dct
 
 
-def set_settings(settings):
-    for section, section_settings in settings.items():
-        for key, value in section_settings.items():
-            Settings.set_setting(section=section, key=key, value=value)
-
-
 def parse_input():
     # Get inputs from terminal
     parser = ArgumentParser()
@@ -264,16 +258,6 @@ def parse_input():
         help="Which topology to use, if None it will be fully connected.",
     )
     parser.add_argument("--nodes", required=False, type=str, default=None, help="Node names to be used in the network")
-    parser.add_argument("--maxqubits_per_node", required=False, type=str, default="")
-    parser.add_argument("--maxregisters_per_node", required=False, type=str, default="")
-    parser.add_argument("--waittime", required=False, type=str, default="")
-    parser.add_argument("--backend_loglevel", required=False, type=str, default="")
-    parser.add_argument("--backendhandler", required=False, type=str, default="")
-    parser.add_argument("--backend", required=False, type=str, default="")
-    parser.add_argument("--topology_file", required=False, type=str, default="")
-    parser.add_argument("--noisy_qubits", required=False, type=str, default="")
-    parser.add_argument("--t1", required=False, type=str, default="")
-    parser.add_argument("--frontend_loglevel", required=False, type=str, default="")
     args = parser.parse_args()
 
     # Get the pre set node names
@@ -299,34 +283,10 @@ def parse_input():
 
     topology = args.topology
 
-    settings = {"BACKEND": {}, "FRONTEND": {}}
-
-    if len(args.maxqubits_per_node) > 0:
-        settings["BACKEND"]["maxqubits_per_node"] = args.maxqubits_per_node
-    if len(args.maxregisters_per_node) > 0:
-        settings["BACKEND"]["maxregisters_per_node"] = args.maxregisters_per_node
-    if len(args.waittime) > 0:
-        settings["BACKEND"]["waittime"] = args.waittime
-    if len(args.backend_loglevel) > 0:
-        settings["BACKEND"]["loglevel"] = args.backend_loglevel
-    if len(args.backendhandler) > 0:
-        settings["BACKEND"]["backendhandler"] = args.backendhandler
-    if len(args.backend) > 0:
-        settings["BACKEND"]["backend"] = args.backend
-    if len(args.topology_file) > 0:
-        settings["BACKEND"]["topology_file"] = args.topology_file
-    if len(args.noisy_qubits) > 0:
-        settings["BACKEND"]["noisy_qubits"] = args.noisy_qubits
-    if len(args.t1) > 0:
-        settings["BACKEND"]["t1"] = args.t1
-    if len(args.frontend_loglevel) > 0:
-        settings["FRONTEND"]["loglevel"] = args.frontend_loglevel
-
-    return nodes, topology, settings
+    return nodes, topology
 
 
 if __name__ == "__main__":
-    nodes, topology, settings = parse_input()
+    nodes, topology = parse_input()
     construct_node_configs(nodes=nodes)
     construct_topology_config(topology=topology, nodes=nodes)
-    set_settings(settings)

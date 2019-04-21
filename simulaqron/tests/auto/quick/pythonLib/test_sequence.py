@@ -35,7 +35,7 @@ import unittest
 
 from cqc.pythonLib import CQCConnection, qubit
 from simulaqron.network import Network
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 
 
 class sequenceTest(unittest.TestCase):
@@ -44,14 +44,14 @@ class sequenceTest(unittest.TestCase):
         cls._alice = None
         cls._bob = None
 
-        Settings.default_settings()
+        simulaqron_settings.default_settings()
         cls.network = Network(nodes=["Alice", "Bob"])
         cls.network.start()
 
     @classmethod
     def tearDownClass(cls):
         cls.network.stop()
-        Settings.default_settings()
+        simulaqron_settings.default_settings()
 
     def testNoSequence(self):
         with CQCConnection("Alice", pend_messages=True) as alice:

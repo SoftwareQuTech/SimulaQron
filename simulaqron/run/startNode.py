@@ -34,7 +34,7 @@ import signal
 from twisted.internet import reactor
 
 from simulaqron.virtNode.virtual import backEnd
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 
 
 def sigterm_handler(_signo, _stack_frame):
@@ -48,12 +48,12 @@ def main(name):
 
     logging.basicConfig(
         format="%(asctime)s:%(levelname)s:%(message)s",
-        level=Settings.CONF_LOGGING_LEVEL_BACKEND,
+        level=simulaqron_settings.log_level,
     )
     logging.debug("Starting VIRTUAL NODE %s", name)
-    virtualFile = Settings.CONF_VNODE_FILE
+    virtualFile = simulaqron_settings.vnode_file
     be = backEnd(name, virtualFile)
-    be.start(maxQubits=Settings.CONF_MAXQUBITS, maxRegisters=Settings.CONF_MAXREGS)
+    be.start(maxQubits=simulaqron_settings.max_qubits, maxRegisters=simulaqron_settings.max_registers)
 
 
 if __name__ == "__main__":

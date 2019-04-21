@@ -35,7 +35,7 @@ import unittest
 
 from cqc.pythonLib import CQCConnection, CQCNoQubitError, qubit
 from simulaqron.network import Network
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 
 
 class CQCFactoryTest(unittest.TestCase):
@@ -43,14 +43,14 @@ class CQCFactoryTest(unittest.TestCase):
     def setUpClass(cls):
         cls.iterations = 8
 
-        Settings.default_settings()
+        simulaqron_settings.default_settings()
         cls.network = Network(nodes=["Alice", "Bob"])
         cls.network.start()
 
     @classmethod
     def tearDownClass(cls):
         cls.network.stop()
-        Settings.default_settings()
+        simulaqron_settings.default_settings()
 
     def testNew(self):
         with CQCConnection("Alice", appID=0, pend_messages=True) as cqc:

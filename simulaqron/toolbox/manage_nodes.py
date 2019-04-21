@@ -6,11 +6,11 @@ from cqc.settings import get_config, set_config
 
 from simulaqron.toolbox import get_simulaqron_path
 from simulaqron.general.hostConfig import load_node_names, networkConfig
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 
 
-config_files = [Settings.CONF_APP_FILE, Settings.CONF_CQC_FILE, Settings.CONF_VNODE_FILE]
-node_config_file = Settings.CONF_NODES_FILE
+config_files = [simulaqron_settings.app_file, simulaqron_settings.cqc_file, simulaqron_settings.vnode_file]
+node_config_file = simulaqron_settings.nodes_file
 simulaqron_path = get_simulaqron_path.main()
 config_folder = "config"
 default_topology_file = os.path.join(simulaqron_path, config_folder, "topology.json")
@@ -53,15 +53,15 @@ def add_node(name, hostname=None, app_port=None, cqc_port=None, vnode_port=None,
         with open(config_file, 'a') as f:
             f.write("{}, {}, {}\n".format(name, hostname, port))
 
-    node_config_path = Settings.CONF_NODES_FILE
+    node_config_path = simulaqron_settings.nodes_file
     with open(node_config_path, 'a') as f:
         f.write(name + "\n")
 
     # Update topology
-    if Settings.CONF_TOPOLOGY_FILE == "":
+    if simulaqron_settings.topology_file == "":
         topology_file = default_topology_file
     else:
-        topology_file = os.path.join(simulaqron_path, Settings.CONF_TOPOLOGY_FILE)
+        topology_file = os.path.join(simulaqron_path, simulaqron_settings.topology_file)
     with open(topology_file, 'r') as f:
         topology = json.load(f)
 
@@ -135,7 +135,7 @@ def remove_node(name):
         with open(file_path, 'w') as f:
             f.writelines(new_lines)
 
-    topology_file = Settings.CONF_TOPOLOGY_FILE
+    topology_file = simulaqron_settings.topology_file
     if topology_file != "":
         topology_file_path = os.path.join(simulaqron_path, topology_file)
     else:
@@ -160,7 +160,7 @@ def get_nodes():
     Returns a list of the current nodes set in the config files.
     :return: list of str
     """
-    nodes_config_file = Settings.CONF_NODES_FILE
+    nodes_config_file = simulaqron_settings.nodes_file
     current_nodes = load_node_names(nodes_config_file)
 
     return current_nodes
@@ -189,7 +189,7 @@ def setup_cqc_files():
     specifying the addresses and ports of the cqc nodes running.
     :return: None
     """
-    config = get_config()
-    config['FILEPATHS']['cqc_file'] = Settings.CONF_CQC_FILE
-    config['FILEPATHS']['app_file'] = Settings.CONF_APP_FILE
-    set_config(config)
+    cqc_config = get_config()
+    cqc_config['FILEPATHS']['cqc_file'] = simulaqron_settings.cqc_file
+    cqc_config['FILEPATHS']['app_file'] = simulaqron_settings.app_file
+    set_config(cqc_config)

@@ -1,13 +1,17 @@
 import unittest
+import logging
 
 from simulaqron.network import Network
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 from cqc.pythonLib import CQCConnection, qubit, CQCUnsuppError
 
 
 class TestRestrictedTopology(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        simulaqron_settings.default_settings()
+        simulaqron_settings._read_user = False
+        simulaqron_settings.log_level = logging.CRITICAL
         nodes = ["Alice", "Bob", "Charlie"]
         cls.network = Network(nodes=nodes, topology="path")
         cls.network.start()
@@ -18,7 +22,7 @@ class TestRestrictedTopology(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.network.stop()
-        Settings.default_settings()
+        simulaqron_settings.default_settings()
 
     def test_send(self):
         for sender_name, receiver_name in self.edges:

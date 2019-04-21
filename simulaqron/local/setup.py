@@ -33,7 +33,7 @@ from twisted.spread import pb
 from twisted.internet import reactor, error
 from twisted.internet.defer import DeferredList
 
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 
 
 # logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
@@ -63,7 +63,7 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
 
     logging.basicConfig(
         format="%(asctime)s:%(levelname)s:%(message)s",
-        level=Settings.CONF_LOGGING_LEVEL_BACKEND,
+        level=simulaqron_settings.log_level,
     )
 
     # Initialize Twisted callback framework

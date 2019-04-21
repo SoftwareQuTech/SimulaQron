@@ -6,7 +6,7 @@ import logging
 from daemons.prefab import run
 
 from simulaqron.network import Network
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox import manage_nodes
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -146,93 +146,93 @@ def set():
 @set.command()
 def default():
     """Sets all settings back to default"""
-    Settings.default_settings()
+    simulaqron_settings.default_settings()
 
 
 @set.command()
 @click.argument('value', type=click.Choice(["stabilizer", "projectq", "qutip"]))
 def backend(value):
     """The backend to use (stabilizer, projectq, qutip)."""
-    Settings.set_setting("BACKEND", "backend", value)
+    simulaqron_settings.set_setting("BACKEND", "backend", value)
 
 
 @set.command()
 @click.argument('value', type=int)
 def max_qubits(value):
     """Max virt-qubits per node and max sim-qubits per register."""
-    Settings.set_setting("BACKEND", "maxqubits_per_node", str(value))
+    simulaqron_settings.set_setting("BACKEND", "maxqubits_per_node", str(value))
 
 
 @set.command()
 @click.argument('value', type=int)
 def max_registers(value):
     """How many registers a node can hold."""
-    Settings.set_setting("BACKEND", "maxregs_per_node", str(value))
+    simulaqron_settings.set_setting("BACKEND", "maxregs_per_node", str(value))
 
 
 @set.command()
 @click.argument('value', type=float)
 def conn_retry_time(value):
     """If setup fails, how long to wait until a retry."""
-    Settings.set_setting("BACKEND", "waittime", str(value))
+    simulaqron_settings.set_setting("BACKEND", "waittime", str(value))
 
 
 @set.command()
 @click.argument('value', type=float)
 def recv_timeout(value):
     """When receiving a qubit or EPR pair, how long to wait until raising a timeout."""
-    Settings.set_setting("BACKEND", "recvtimeout", str(value))
-    Settings.set_setting("BACKEND", "recveprtimeout", str(value))
+    simulaqron_settings.set_setting("BACKEND", "recvtimeout", str(value))
+    simulaqron_settings.set_setting("BACKEND", "recveprtimeout", str(value))
 
 
 @set.command()
 @click.argument('value', type=float)
 def recv_retry_time(value):
     """When receiving a qubit or EPR pair, how long to wait between checks of whether a qubit is received."""
-    Settings.set_setting("BACKEND", "waittimerecv", str(value))
+    simulaqron_settings.set_setting("BACKEND", "waittimerecv", str(value))
 
 
 @set.command()
 @click.argument('value', type=click.Choice(["debug", "info", "warning", "error", "critical"]))
 def log_level(value):
     """Log level for both backend and frontend."""
-    Settings.set_setting("BACKEND", "loglevel", value)
-    Settings.set_setting("FRONTEND", "loglevel", value)
+    simulaqron_settings.set_setting("BACKEND", "loglevel", value)
+    simulaqron_settings.set_setting("FRONTEND", "loglevel", value)
 
 
 @set.command()
 @click.argument('value', type=str)
 def topology_file(value):
     """The path to the topology file to be used, can be ""."""
-    Settings.set_setting("BACKEND", "topology_file", value)
+    simulaqron_settings.set_setting("BACKEND", "topology_file", value)
 
 
 @set.command()
 @click.argument('value', type=str)
 def app_file(value):
     """The path to the topology file to be used, can be ""."""
-    Settings.set_setting("BACKEND", "app_file", value)
+    simulaqron_settings.set_setting("BACKEND", "app_file", value)
 
 
 @set.command()
 @click.argument('value', type=str)
 def cqc_file(value):
     """The path to the topology file to be used, can be ""."""
-    Settings.set_setting("BACKEND", "cqc_file", value)
+    simulaqron_settings.set_setting("BACKEND", "cqc_file", value)
 
 
 @set.command()
 @click.argument('value', type=str)
 def vnode_file(value):
     """The path to the topology file to be used, can be ""."""
-    Settings.set_setting("BACKEND", "vnode_file", value)
+    simulaqron_settings.set_setting("BACKEND", "vnode_file", value)
 
 
 @set.command()
 @click.argument('value', type=str)
 def nodes_file(value):
     """The path to the topology file to be used, can be ""."""
-    Settings.set_setting("BACKEND", "nodes_file", value)
+    simulaqron_settings.set_setting("BACKEND", "nodes_file", value)
 
 
 @set.command()
@@ -240,16 +240,16 @@ def nodes_file(value):
 def noisy_qubits(value):
     """Whether qubits should be noisy (on/off)"""
     if value == "on":
-        Settings.set_setting("BACKEND", "noisy_qubits", 'True')
+        simulaqron_settings.set_setting("BACKEND", "noisy_qubits", 'True')
     else:
-        Settings.set_setting("BACKEND", "noisy_qubits", 'False')
+        simulaqron_settings.set_setting("BACKEND", "noisy_qubits", 'False')
 
 
 @set.command()
 @click.argument('value', type=float)
 def t1(value):
     """The effective T1 to be used for noisy qubits"""
-    Settings.set_setting("BACKEND", "t1", str(value))
+    simulaqron_settings.set_setting("BACKEND", "t1", str(value))
 
 ###############
 # get command #
@@ -265,80 +265,79 @@ def get():
 @get.command()
 def backend():
     """The backend to use (stabilizer, projectq, qutip)."""
-    print(Settings.CONF_BACKEND)
+    print(simulaqron_settings.backend)
 
 
 @get.command()
 def max_qubits():
     """Max virt-qubits per node and max sim-qubits per register."""
-    print(Settings.CONF_MAXQUBITS)
+    print(simulaqron_settings.max_qubits)
 
 
 @get.command()
 def max_registers():
     """How many registers a node can hold."""
-    print(Settings.CONF_MAXREGS)
+    print(simulaqron_settings.max_registers)
 
 
 @get.command()
 def conn_retry_time():
     """If setup fails, how long to wait until a retry."""
-    print(Settings.CONF_WAIT_TIME)
+    print(simulaqron_settings.conn_retry_time)
 
 
 @get.command()
 def recv_timeout():
     """When receiving a qubit or EPR pair, how long to wait until raising a timeout."""
-    print("RECV: {}, EPR RECV: {}".format(Settings.CONF_RECV_TIMEOUT,
-                                          Settings.CONF_RECV_EPR_TIMEOUT))
+    print(simulaqron_settings.recv_timeout)
 
 
 @get.command()
 def recv_retry_time():
     """When receiving a qubit or EPR pair, how long to wait between checks of whether a qubit is received."""
-    print(Settings.CONF_WAIT_TIME_RECV)
+    print(simulaqron_settings.recv_retry_time)
 
 
 @get.command()
 def log_level():
     """Log level for both backend and frontend."""
-    print("Backend: {}, Frontend: {}".format(Settings.CONF_LOGGING_LEVEL_BACKEND, Settings.CONF_LOGGING_LEVEL_FRONTEND))
+    print(simulaqron_settings.log_level)
 
 
 @get.command()
 def topology_file():
     """The path to the topology file to be used, can be ""."""
-    print(Settings.CONF_TOPOLOGY_FILE)
+    print(simulaqron_settings.topology_file)
 
 
 @get.command()
 def app_file():
     """The path to the app file to be used, can be ""."""
-    print(Settings.CONF_APP_FILE)
+    print(simulaqron_settings.app_file)
 
 
 @get.command()
 def cqc_file():
     """The path to the cqc file to be used, can be ""."""
-    print(Settings.CONF_CQC_FILE)
+    print(simulaqron_settings.cqc_file)
 
 
 @get.command()
 def vnode_file():
     """The path to the vnode file to be used, can be ""."""
-    print(Settings.CONF_VNODE_FILE)
+    print(simulaqron_settings.vnode_file)
 
 
 @get.command()
 def nodes_file():
     """The path to the nodes file to be used, can be ""."""
-    print(Settings.CONF_NODES_FILE)
+    print(simulaqron_settings.nodes_file)
 
 
 @get.command()
 def noisy_qubits():
     """Whether qubits should be noisy (on/off)"""
-    if Settings.CONF_NOISY_QUBITS == 'True':
+    if simulaqron_settings.noisy_qubits == 'True':
         print("on")
     else:
         print("off")
@@ -347,7 +346,7 @@ def noisy_qubits():
 @get.command()
 def t1():
     """The effective T1 to be used for noisy qubits"""
-    print(Settings.CONF_T1)
+    print(simulaqron_settings.t1)
 
 ###############
 # node command #
@@ -429,6 +428,6 @@ def get():
 if __name__ == "__main__":
     logging.basicConfig(
         format="%(asctime)s:%(levelname)s:%(message)s",
-        level=Settings.CONF_LOGGING_LEVEL_BACKEND,
+        level=simulaqron_settings.log_level,
     )
     cli()

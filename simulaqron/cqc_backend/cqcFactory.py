@@ -33,7 +33,7 @@ import os
 from twisted.internet.defer import DeferredLock
 from twisted.internet.protocol import Factory
 
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox import get_simulaqron_path
 
 from cqc.Protocol import CQCProtocol
@@ -71,7 +71,7 @@ class CQCFactory(Factory):
         # Read in topology, if specified. topology=None means fully connected
         # topology
         self.topology = None
-        self._setup_topology(Settings.CONF_TOPOLOGY_FILE)
+        self._setup_topology(simulaqron_settings.topology_file)
 
     def buildProtocol(self, addr):
         """

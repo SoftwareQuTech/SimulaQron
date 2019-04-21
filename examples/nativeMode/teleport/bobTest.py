@@ -35,7 +35,7 @@ import numpy as np
 from simulaqron.local.setup import setup_local, assemble_qubit
 from simulaqron.general.hostConfig import networkConfig
 from simulaqron.toolbox import get_simulaqron_path
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox.stabilizerStates import StabilizerState
 from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
@@ -113,18 +113,18 @@ class localNode(pb.Root):
             yield eprB.callRemote("apply_Z")
 
         # Just print the qubit we received
-        if Settings.CONF_BACKEND == "qutip":
+        if simulaqron_settings.backend == "qutip":
             print("here")
             (realRho, imagRho) = yield eprB.callRemote("get_qubit")
             state = np.array(assemble_qubit(realRho, imagRho), dtype=complex)
-        elif Settings.CONF_BACKEND == "projectq":
+        elif simulaqron_settings.backend == "projectq":
             realvec, imagvec = yield self.virtRoot.callRemote("get_register_RI", eprB)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
-        elif Settings.CONF_BACKEND == "stabilizer":
+        elif simulaqron_settings.backend == "stabilizer":
             array, _, = yield self.virtRoot.callRemote("get_register_RI", eprB)
             state = StabilizerState(array)
         else:
-            ValueError("Unknown backend {}".format(Settings.CONF_BACKEND))
+            ValueError("Unknown backend {}".format(simulaqron_settings.backend))
 
         print("Qubit is:\n{}".format(state))
 

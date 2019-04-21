@@ -9,7 +9,7 @@ from twisted.spread import pb
 from simulaqron.cqc_backend.cqcFactory import CQCFactory
 from simulaqron.cqc_backend.cqcMessageHandler import SimulaqronCQCHandler
 from simulaqron.general.hostConfig import networkConfig
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 
 
 def init_register(virtRoot, myName, node):
@@ -50,7 +50,7 @@ def handle_connection_error(reason, myName, cqc_factory, virtualNet):
     except ConnectionRefusedError:
         logging.debug("LOCAL %s: Could not connect, trying again...", myName)
         reactor.callLater(
-            Settings.CONF_WAIT_TIME,
+            simulaqron_settings.conn_retry_time,
             connect_to_virtNode,
             myName,
             cqc_factory,
@@ -100,14 +100,14 @@ def main(myName):
 
     logging.basicConfig(
         format="%(asctime)s:%(levelname)s:%(message)s",
-        level=Settings.CONF_LOGGING_LEVEL_BACKEND,
+        level=simulaqron_settings.log_level,
     )
 
     # This file defines the network of virtual quantum nodes
-    virtualFile = Settings.CONF_VNODE_FILE
+    virtualFile = simulaqron_settings.vnode_file
 
     # This file defines the network of CQC servers interfacing to virtual quantum nodes
-    cqcFile = Settings.CONF_CQC_FILE
+    cqcFile = simulaqron_settings.cqc_file
 
     # Read configuration files for the virtual quantum, as well as the classical network
     virtualNet = networkConfig(virtualFile)
