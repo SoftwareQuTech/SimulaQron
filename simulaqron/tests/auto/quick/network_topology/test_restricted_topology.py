@@ -13,7 +13,7 @@ class TestRestrictedTopology(unittest.TestCase):
         simulaqron_settings._read_user = False
         simulaqron_settings.log_level = logging.CRITICAL
         nodes = ["Alice", "Bob", "Charlie"]
-        cls.network = Network(nodes=nodes, topology="path")
+        cls.network = Network(nodes=nodes, topology="path", force=True)
         cls.network.start()
 
         cls.edges = [("Alice", "Bob"), ("Bob", "Charlie")]

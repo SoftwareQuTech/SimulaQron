@@ -130,6 +130,7 @@ def init_register(resList, myName, virtualNet, classicalNet, lNode, func, *args,
         if lNode is not None:
             lNode.set_virtual_node(virtRoot)
     else:
+        print(resList)
         logging.error("LOCAL %s: Connection to virtual server failed!", myName)
         reactor.stop()
 

@@ -199,7 +199,7 @@ class SingleQubitGateTest(unittest.TestCase):
         sys.stdout.write("Testing single qubit gates gates with {} iterations \r\n".format(cls.iterations))
 
         simulaqron_settings.default_settings()
-        cls.network = Network(nodes=["Alice"])
+        cls.network = Network(nodes=["Alice"], force=True)
         cls.network.start()
 
     @classmethod

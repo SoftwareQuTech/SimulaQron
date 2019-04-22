@@ -8,78 +8,71 @@ from simulaqron.toolbox import get_simulaqron_path
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 from simulaqron.settings import simulaqron_settings
 from simulaqron.network import Network
-from simulaqron.general.hostConfig import load_node_names
 
 
 class TestInitNetwork(unittest.TestCase):
     def setUp(self):
         self.network = None
+        self.default_nodes = ["Alice", "Bob", "Charlie", "David", "Eve"]
+        self.default_topology = None
 
-        # Set config files
-        simulaqron_path = get_simulaqron_path.main()
-        nodes_config_file = os.path.join(simulaqron_path, "config", "Nodes.cfg")
-        with open(nodes_config_file, 'w') as f:
-            self.nodes = ["Test1", "Test2", "Test3"]
-            f.writelines([node + "\n" for node in self.nodes])
-        topology_config_file = os.path.join(simulaqron_path, "config", "topology.json")
-        with open(topology_config_file, 'w') as f:
-            self.topology = {"Test1": ["Test2"], "Test2": ["Test3"], "Test3": []}
-            json.dump(self.topology, f)
-        simulaqron_settings.topology_file = os.path.join("config", "topology.json")
-        # Settings.set_setting("BACKEND", "topology_file", "config/topology.json")
+        # # Set config files
+        # simulaqron_path = get_simulaqron_path.main()
+        # nodes_config_file = os.path.join(simulaqron_path, "config", "Nodes.cfg")
+        # with open(nodes_config_file, 'w') as f:
+        #     self.nodes = ["Test1", "Test2", "Test3"]
+        #     f.writelines([node + "\n" for node in self.nodes])
+        # topology_config_file = os.path.join(simulaqron_path, "config", "topology.json")
+        # with open(topology_config_file, 'w') as f:
+        #     self.topology = {"Test1": ["Test2"], "Test2": ["Test3"], "Test3": []}
+        #     json.dump(self.topology, f)
+        # simulaqron_settings.topology_file = os.path.join("config", "topology.json")
+        # # Settings.set_setting("BACKEND", "topology_file", "config/topology.json")
 
     def tearDown(self):
-        self.check_nodes(self.network.nodes)
-        self.check_topology(self.network.topology)
+        self.check_nodes_and_topology(self.network)
 
     @classmethod
     def tearDownClass(cls):
-        # Set config files back to default
-        for file in ["Nodes.cfg", "topology.json"]:
-            simulaqron_path = get_simulaqron_path.main()
-            file_path = os.path.join(simulaqron_path, "config", file)
-            os.remove(file_path)
-
         default_network_config_file = simulaqron_settings._default_config["network_config_file"]
         network_config = NetworksConfigConstructor(default_network_config_file)
         network_config.reset()
         network_config.write_to_file()
         simulaqron_settings.default_settings()
 
-    def check_nodes(self, nodes):
+    def check_nodes_and_topology(self, network):
         simulaqron_path = get_simulaqron_path.main()
-        nodes_config_file = os.path.join(simulaqron_path, "config", "Nodes.cfg")
-        nodes_in_file = load_node_names(nodes_config_file)
-        self.assertEqual(nodes_in_file, nodes)
+        network_config_file = os.path.join(simulaqron_path, "config", "network.json")
+        with open(network_config_file, 'r') as f:
+            network_config = json.load(f)
+        nodes_in_file = list(network_config[network.name]["nodes"].keys())
+        self.assertEqual(nodes_in_file, network.nodes)
 
-    def check_topology(self, topology):
-        simulaqron_path = get_simulaqron_path.main()
-        topology_config_file = os.path.join(simulaqron_path, "config", "topology.json")
-        with open(topology_config_file, 'r') as f:
-            topology_in_file = json.load(f)
-        self.assertEqual(topology_in_file, topology)
+        topology_in_file = network_config[network.name]["topology"]
+        self.assertEqual(topology_in_file, network.topology)
 
     def test_init_no_argument(self):
-        self.network = Network()
-        self.assertEqual(self.network.nodes, self.nodes)
-        self.assertEqual(self.network.topology, self.topology)
+        self.network = Network(force=True)
+        self.assertEqual(self.network.nodes, self.default_nodes)
+        self.assertEqual(self.network.topology, self.default_topology)
 
     def test_init_node_argument(self):
         nodes = ["Test3", "Test4"]
-        self.network = Network(nodes=nodes)
+        self.network = Network(nodes=nodes, force=True)
         self.assertEqual(self.network.nodes, nodes)
-        self.assertEqual(self.network.topology, self.topology)
+        self.assertEqual(self.network.topology, self.default_topology)
 
     def test_init_topology_argument(self):
         topology = {"Test1": [], "Test2": [], "Test3": []}
-        self.network = Network(topology=topology)
-        self.assertEqual(self.network.nodes, self.nodes)
+        nodes = list(topology.keys())
+        self.network = Network(topology=topology, force=True)
+        self.assertEqual(self.network.nodes, nodes)
         self.assertEqual(self.network.topology, topology)
 
     def test_init_node_and_topology_argument(self):
         nodes = ["Test5", "Test6"]
         topology = {"Test5": ["Test6"], "Test6": ["Test5"]}
-        self.network = Network(nodes=nodes, topology=topology)
+        self.network = Network(nodes=nodes, topology=topology, force=True)
         self.assertEqual(self.network.nodes, nodes)
         self.assertEqual(self.network.topology, topology)
 
@@ -90,7 +83,7 @@ class TestStartStopNetwork(unittest.TestCase):
         cls.nodes = ["Test1", "Test2", "Test3"]
 
     def test_start(self):
-        network = Network(nodes=self.nodes)
+        network = Network(nodes=self.nodes, force=True)
         self.assertEqual(len(network.processes), 2 * len(self.nodes))
         for p in network.processes:
             self.assertFalse(p.is_alive())
@@ -100,13 +93,13 @@ class TestStartStopNetwork(unittest.TestCase):
             self.assertTrue(p.is_alive())
 
     def test_stop(self):
-        network = Network()
+        network = Network(force=True)
         network.stop()
         for p in network.processes:
             self.assertFalse(p.is_alive())
 
     def test_start_stop(self):
-        network = Network()
+        network = Network(force=True)
         network.start()
         for p in network.processes:
             self.assertTrue(p.is_alive())
@@ -115,7 +108,7 @@ class TestStartStopNetwork(unittest.TestCase):
             self.assertFalse(p.is_alive())
 
     def test_no_wait(self):
-        network = Network(nodes=self.nodes)
+        network = Network(nodes=self.nodes, force=True)
         network.start(wait_until_running=False)
         self.assertFalse(network.running)
 
@@ -131,7 +124,7 @@ class TestStartStopNetwork(unittest.TestCase):
         self.assertTrue(network.running)
 
     def test_del(self):
-        network = Network()
+        network = Network(force=True)
         network.start()
         del network
 

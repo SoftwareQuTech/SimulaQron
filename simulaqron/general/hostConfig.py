@@ -34,6 +34,8 @@ from ipaddress import IPv4Address
 
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 
+from cqc.hostConfig import host
+
 
 def cqc_node_id(fam, ip):
     if fam == socket.AF_INET:
@@ -84,6 +86,8 @@ class socketsConfig(pb.Referenceable):
             if filename.endswith(".json"):
                 if config_type not in ["vnode", "cqc", "app"]:
                     raise ValueError("Type needs to be either 'vnode', 'cqc' or 'app'")
+                if network_name is None:
+                    network_name = "default"
                 network_config = NetworksConfigConstructor(file_path=filename).networks[network_name]
                 nodes = network_config.nodes
                 for node_name, node_config in nodes.items():
@@ -109,31 +113,3 @@ class socketsConfig(pb.Referenceable):
         """
         host = self.hostDict[name]
         print("Host details of ", name, ": ", host.hostname, ":", host.port)
-
-
-class host(pb.Referenceable):
-    def __init__(self, name, hostname, port):
-        """
-        Initialize the details of the host. For now, we just keep the following:
-
-        name        informal name of the host (e.g. Alice)
-        hostname    name of the node on the network (e.g. localhost or yournode.qutech.nl)
-        port        port number on hostname
-        """
-
-        self.name = name
-        self.hostname = hostname
-        self.port = int(port)
-
-        # Lookup IP address
-        addrs = socket.getaddrinfo(hostname, port, proto=socket.IPPROTO_TCP, family=socket.AF_INET)
-        addr = addrs[0]
-        self.family = addr[0]
-        self.addr = addr
-
-        self.ip = cqc_node_id_from_addrinfo(addr)
-
-        # Connection identifiers used after connected
-        self.factory = 0
-        self.root = 0
-        self.defer = 0

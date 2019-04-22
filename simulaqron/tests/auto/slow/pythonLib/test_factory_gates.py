@@ -397,7 +397,7 @@ class FactoryGateTest(unittest.TestCase):
         sys.stdout.write("Testing factory gates with {} iterations \r\n".format(cls.iterations))
 
         simulaqron_settings.default_settings()
-        cls.network = Network()
+        cls.network = Network(force=True)
         cls.network.start()
 
     @classmethod

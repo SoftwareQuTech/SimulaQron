@@ -61,7 +61,7 @@ class TestOptionalNoise(unittest.TestCase):
         simulaqron_settings.noisy_qubits = True
         simulaqron_settings.t1 = 0.0001
 
-        cls.network = Network(nodes=["Alice"])
+        cls.network = Network(nodes=["Alice"], force=True)
         cls.network.start()
 
     @classmethod

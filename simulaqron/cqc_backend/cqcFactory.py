@@ -28,13 +28,11 @@
 
 import json
 import logging
-import os
 
 from twisted.internet.defer import DeferredLock
 from twisted.internet.protocol import Factory
 
 from simulaqron.settings import simulaqron_settings
-from simulaqron.toolbox import get_simulaqron_path
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 
 from cqc.Protocol import CQCProtocol

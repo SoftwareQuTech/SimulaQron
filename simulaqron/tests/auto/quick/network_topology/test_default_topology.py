@@ -13,7 +13,7 @@ class TestDefaultTopology(unittest.TestCase):
         simulaqron_settings._read_user = False
         simulaqron_settings.log_level = logging.CRITICAL
         cls.node_names = ["Alice", "Bob", "Charlie"]
-        cls.network = Network(nodes=cls.node_names)
+        cls.network = Network(nodes=cls.node_names, force=True)
         cls.network.start()
 
     @classmethod

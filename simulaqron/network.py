@@ -80,28 +80,41 @@ class Network:
         networks_config = NetworksConfigConstructor(file_path=self._network_config_file)
 
         if new:
-            self.nodes = ["Alice", "Bob", "Charlie", "David", "Eve"]
-            topology = construct_topology_config(topology, nodes)
+            if nodes is None:
+                if isinstance(topology, dict):
+                    self.nodes = list(topology.keys())
+                else:
+                    self.nodes = ["Alice", "Bob", "Charlie", "David", "Eve"]
+            else:
+                self.nodes = nodes
+            self.topology = construct_topology_config(topology, self.nodes)
             if not force:
                 answer = input("Do you want to add/replace the network {} in the file {}"
                                "with a network constisting of the nodes {}? (yes/no)"
                                .format(self.name, self._network_config_file, self.nodes))
                 if answer != "yes":
                     raise RuntimeError("User did not want to replace network in file")
-            networks_config.add_network(node_names=self.nodes, network_name=self.name, topology=topology)
+            networks_config.add_network(node_names=self.nodes, network_name=self.name, topology=self.topology)
             networks_config.write_to_file(self._network_config_file)
         else:
+            if topology is not None:
+                raise ValueError("If new is False a topology cannot be used.")
             if self.name in networks_config.networks:
                 node_names = networks_config.get_node_names(self.name)
+                self.topology = networks_config.networks[self.name].topology
+            else:
+                raise ValueError("Network {} is not in the file {}\n"
+                                 "If you wish to add this network to the file, use the"
+                                 "--new flag.".format(self.name, self._network_config_file))
+            if nodes is None:
+                self.nodes = node_names
+            else:
+                self.nodes = nodes
                 for node_name in self.nodes:
                     if node_name not in node_names:
                         raise ValueError("Node {} is not in the current network {} in the file {}\n"
                                          "If you wish to overwrite the current network in the file, use the"
                                          "--new flag.".format(node_name, self.name, self._network_config_file))
-            else:
-                raise ValueError("Network {} is not in the file {}\n"
-                                 "If you wish to add this network to the file, use the"
-                                 "--new flag.".format(self.name, self._network_config_file))
 
         self.processes = []
         self._setup_processes()
@@ -110,7 +123,7 @@ class Network:
     def running(self):
         for node in self.nodes:
             try:
-                cqc = CQCConnection(node, retry_connection=False, cqcFile=self._cqc_file, appFile=self._app_file)
+                cqc = CQCConnection(node, retry_connection=False, network_name=self.name)
             except ConnectionRefusedError:
                 self._running = False
                 break
@@ -167,7 +180,7 @@ class Network:
                     print(err)
 
 
-def construct_topology_config(topology, nodes, save_fig=True):
+def construct_topology_config(topology, nodes):
     """
     Constructs a json file at config/topology.json, used to define the topology of the network.
 
@@ -175,13 +188,11 @@ def construct_topology_config(topology, nodes, save_fig=True):
         Should be one of the following: None, 'complete', 'ring', 'random_tree'.
     :param nodes: list of str
         List of the names of the nodes.
-    :param save_fig: bool
-        Whether to save a picture of the network
     :return: None
     """
-    if topology is None:
+    if topology is not None:
         if isinstance(topology, dict):
-            adjacency_dct = {node: topology[node] for node in nodes}
+            return topology
         elif topology == "complete":
             adjacency_dct = {}
             for i, node in enumerate(nodes):

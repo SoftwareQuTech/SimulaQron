@@ -12,7 +12,7 @@ class TestContext(unittest.TestCase):
         simulaqron_settings.default_settings()
         simulaqron_settings._read_user = False
         simulaqron_settings.log_level = logging.CRITICAL
-        cls.network = Network(nodes=["Alice"])
+        cls.network = Network(nodes=["Alice"], force=True)
         cls.network.start()
 
     @classmethod

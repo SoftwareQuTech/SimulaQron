@@ -86,7 +86,7 @@ class Config:
         "nodes_file": None,
         "topology_file": None,
         "noisy_qubits": False,
-        "t1": 1
+        "t1": 1.0
     }
 
     class Decorator:

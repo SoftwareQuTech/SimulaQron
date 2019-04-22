@@ -5,9 +5,11 @@ import click
 import logging
 from daemons.prefab import run
 
+import simulaqron
 from simulaqron.network import Network
 from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
+from simulaqron.toolbox.reset import main as reset_simulaqron
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 PID_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".simulaqron_pids")
@@ -21,13 +23,12 @@ if not os.path.exists(default_network_config_file):
 
 
 class SimulaQronDaemon(run.RunDaemon):
-    def __init__(self, pidfile, name=None, nrnodes=None, nodes=None, topology=None, force=False, new=True):
+    def __init__(self, pidfile, name=None, nrnodes=None, nodes=None, topology=None, new=True):
         super().__init__(pidfile=pidfile)
         self.name = name
         self.nrnodes = nrnodes
         self.nodes = nodes
         self.topology = topology
-        self.force = force
         self.new = new
 
     def run(self):
@@ -44,7 +45,7 @@ class SimulaQronDaemon(run.RunDaemon):
         else:
             nodes = self.nodes
 
-        network = Network(name=self.name, nodes=nodes, topology=self.topology, force=self.force, new=self.new)
+        network = Network(name=self.name, nodes=nodes, topology=self.topology, new=self.new, force=True)
         network.start()
 
         while True:
@@ -56,10 +57,19 @@ def cli():
     """Command line interface for interacting with SimulaQron."""
     pass
 
+
+###########
+# version #
+###########
+
+@cli.command()
+def version():
+    print(simulaqron.__version__)
+
+
 #################
 # start command #
 #################
-
 
 @cli.command()
 @click.option(
@@ -93,26 +103,36 @@ def cli():
     "-f",
     "--force",
     help="Force re-write of network_config_file.\n"
-         "Only used if --new flag is used.",
+         "Note used if --keep flag is used.",
     is_flag=True,
 )
 @click.option(
-    "--new",
-    help="Whether to overwrite the network in the network_config_file.\n"
-         "Otherwise only the nodes specified in the current network are started.\n"
-         "If --force/-f is not set the user will be asked to confirm the change to the file.",
+    "--keep",
+    help="If set, the network_config_file won't be changed.\n"
+         "This is useful if you wish to start a subset of the nodes in the config "
+         "file without changing it.\n"
+         "If not set, simulaqron will ask if you really wan't to change the config-file.\n"
+         "If you want to supress this question, use the --force/-f flag.",
     is_flag=True,
 )
-def start(name, nrnodes, nodes, topology, force, new):
+def start(name, nrnodes, nodes, topology, force, keep):
     """Starts a network with the given parameters or from config files."""
+    new = not keep
     if name is None:
         name = "default"
     pidfile = os.path.join(PID_FOLDER, "simulaqron_network_{}.pid".format(name))
     if os.path.exists(pidfile):
         logging.warning("Network with name {} is already running".format(name))
         return
-    d = SimulaQronDaemon(pidfile=pidfile, name=name, nrnodes=nrnodes, nodes=nodes, topology=topology, force=force,
-                         new=new)
+    if new:
+        if not force:
+            answer = input("Do you want to add/replace the network '{}' in the file {} "
+                           "with a new network? (yes/no)"
+                           .format(name, simulaqron_settings.network_config_file))
+            if answer != "yes":
+                print("Aborted!")
+                return
+    d = SimulaQronDaemon(pidfile=pidfile, name=name, nrnodes=nrnodes, nodes=nodes, topology=topology, new=new)
     d.start()
 
 ###############
@@ -144,21 +164,38 @@ def stop(name):
 
 
 @cli.command()
-def reset():
+@click.option(
+    "-f",
+    "--force",
+    help="Don't ask for confirmation.",
+    is_flag=True,
+)
+def reset(force):
     """Resets simulaqron"""
-    for entry in os.listdir(PID_FOLDER):
-        if entry.endswith(".pid"):
-            pidfile = os.path.join(PID_FOLDER, entry)
-            d = SimulaQronDaemon(pidfile=pidfile)
-            d.stop()
-            if os.path.exists(pidfile):
-                os.remove(pidfile)
+    if not force:
+        answer = input("Are you sure you want to reset simulaqron?\nThis will revert settings and "
+                       "network config files to the default values.\nNote, this will not edit or remove "
+                       "the file at ~/.simulaqron.json if it exists, this you have to do manually if "
+                       "you wish to revert all settings.\n"
+                       "(yes/no)")
+    else:
+        answer = "yes"
+    if answer == "yes":
+        for entry in os.listdir(PID_FOLDER):
+            if entry.endswith(".pid"):
+                pidfile = os.path.join(PID_FOLDER, entry)
+                d = SimulaQronDaemon(pidfile=pidfile)
+                d.stop()
+                if os.path.exists(pidfile):
+                    os.remove(pidfile)
+        reset_simulaqron()
+    else:
+        print("Aborting!")
 
 
 ###############
 # set command #
 ###############
-
 
 @cli.group()
 def set():
@@ -337,7 +374,10 @@ def nodes():
 @click.option('--network-name', type=str,
               help="The name of the network")
 @click.option('--hostname', type=str,
-              help="The host name of the node, e.g. localhost (default) or 192.168.0.1")
+              help="The host name of the node, e.g. localhost (default) or 192.168.0.1\n"
+                   "If you wish to have different components on different hostname,"
+                   "for example the cqc nodes on one computer and the virtual nodes on another,"
+                   "you have to manually construct you config file.")
 @click.option('--app-port', type=int,
               help="Port number for the application.\n \
                     If not specified a random unused port between 8000 and 9000 will be used.")
@@ -357,7 +397,8 @@ def nodes():
     help="Force re-write of network_config_file.\n",
     is_flag=True,
 )
-def add(name, network_name=None, hostname=None, app_port=None, cqc_port=None, vnode_port=None, neighbors=None, force=False):
+def add(name, network_name=None, hostname=None, app_port=None, cqc_port=None, vnode_port=None, neighbors=None,
+        force=False):
     """
     Add a node to the network.
 
@@ -375,8 +416,10 @@ def add(name, network_name=None, hostname=None, app_port=None, cqc_port=None, vn
         neighbors = neighbors.split(',')
         neighbors = [neighbor.strip() for neighbor in neighbors]
     networks_config = NetworksConfigConstructor(simulaqron_settings.network_config_file)
-    networks_config.add_node(node_name=name, network_name=network_name, app_port=app_port, cqc_port=cqc_port,
-                             vnode_port=vnode_port, neighbors=neighbors)
+    networks_config.add_node(node_name=name, network_name=network_name,
+                             app_hostname=hostname, cqc_hostname=hostname, vnode_hostname=hostname,
+                             app_port=app_port, cqc_port=cqc_port, vnode_port=vnode_port,
+                             neighbors=neighbors)
     networks_config.write_to_file()
 
 

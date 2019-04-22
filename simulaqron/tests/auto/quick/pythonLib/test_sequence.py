@@ -45,7 +45,7 @@ class sequenceTest(unittest.TestCase):
         cls._bob = None
 
         simulaqron_settings.default_settings()
-        cls.network = Network(nodes=["Alice", "Bob"])
+        cls.network = Network(nodes=["Alice", "Bob"], force=True)
         cls.network.start()
 
     @classmethod

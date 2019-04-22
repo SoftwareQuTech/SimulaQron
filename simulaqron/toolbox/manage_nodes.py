@@ -69,7 +69,7 @@ class NetworksConfigConstructor:
         with the nodes Alice, Bob, Charlie, David and Eve
         :return:
         """
-        for network_name in self.networks:
+        for network_name in list(self.networks.keys()):
             self.remove_network(network_name=network_name)
         node_names = ["Alice", "Bob", "Charlie", "David", "Eve"]
         self.add_network(node_names=node_names)
@@ -148,7 +148,7 @@ class NetworksConfigConstructor:
                 cqc_hostname, cqc_port = node_dict["cqc_socket"]
                 vnode_hostname, vnode_port = node_dict["vnode_socket"]
                 for socket_address in [node_dict.values()]:
-                    if not socket_address in self.used_sockets:
+                    if socket_address not in self.used_sockets:
                         self.used_sockets.append(socket_address)
                 node = _NodeConfig(name=node_name, app_hostname=app_hostname, cqc_hostname=cqc_hostname,
                                    vnode_hostname=vnode_hostname, app_port=app_port, cqc_port=cqc_port,

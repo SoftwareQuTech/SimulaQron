@@ -44,7 +44,7 @@ class CQCFactoryTest(unittest.TestCase):
         cls.iterations = 8
 
         simulaqron_settings.default_settings()
-        cls.network = Network(nodes=["Alice", "Bob"])
+        cls.network = Network(nodes=["Alice", "Bob"], force=True)
         cls.network.start()
 
     @classmethod

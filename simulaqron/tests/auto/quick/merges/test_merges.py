@@ -13,7 +13,6 @@ from simulaqron.local.setup import setup_local, assemble_qubit
 from simulaqron.network import Network
 from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox.stabilizerStates import StabilizerState
-from simulaqron.toolbox import get_simulaqron_path
 
 
 class localNode(pb.Root):
@@ -149,8 +148,11 @@ class TestMerge(unittest.TestCase):
         cls.processes_to_wait_for = None
 
         simulaqron_settings.default_settings()
+        path_to_here = os.path.dirname(os.path.abspath(__file__))
+        network_config_file = os.path.join(path_to_here, "configs", "network.json")
+        simulaqron_settings.network_config_file = network_config_file
         nodes = ["Alice", "Bob", "Charlie"]
-        cls.network = Network(nodes=nodes)
+        cls.network = Network(nodes=nodes, force=True)
         cls.network.start()
 
     @classmethod
@@ -164,13 +166,8 @@ class TestMerge(unittest.TestCase):
 
     @staticmethod
     def setup_node(name, node_code, classical_net_file, send_end):
-        # In this example, we are Alice.
-
-        # Get path to simulaqron folder
-        simulaqron_path = get_simulaqron_path.main()
-
         # This file defines the network of virtual quantum nodes
-        virtualFile = os.path.join(simulaqron_path, "config", "virtualNodes.cfg")
+        virtualFile = os.path.join(os.path.dirname(__file__), "configs", "network.json")
 
         # This file defines the nodes acting as servers in the classical communication network
         classicalFile = os.path.join(os.path.dirname(__file__), "configs", classical_net_file)

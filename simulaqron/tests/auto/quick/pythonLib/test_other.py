@@ -39,7 +39,7 @@ class OthersTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         simulaqron_settings.default_settings()
-        cls.network = Network(nodes=["Alice"])
+        cls.network = Network(nodes=["Alice"], force=True)
         cls.network.start()
 
     @classmethod

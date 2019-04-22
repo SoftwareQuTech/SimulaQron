@@ -12,7 +12,7 @@ class TestMaxQubit(unittest.TestCase):
         simulaqron_settings.default_settings()
         simulaqron_settings._read_user = False
         simulaqron_settings.log_level = logging.CRITICAL
-        cls.network = Network(nodes=["Alice", "Bob"])
+        cls.network = Network(nodes=["Alice", "Bob"], force=True)
         cls.network.start()
 
         cls.alice = CQCConnection("Alice")

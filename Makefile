@@ -25,11 +25,18 @@ lint:
 python-deps:
 	@cat requirements.txt | xargs -n 1 -L 1 $(PIP) install
 
-tests:
+_reset:
+	@${PYTHON} ${TOOLBOX_DIR}/reset.py
+
+_tests:
 	@${PYTHON} ${SIMULAQRON_DIR}/tests_run.py --quick
 
-tests_all:
+tests: _tests _reset
+
+_tests_all:
 	@${PYTHON} ${SIMULAQRON_DIR}/tests_run.py --full
+
+tests_all: _tests_all _reset
 
 _verified:
 	@echo "SimulaQron is verified!"
@@ -47,7 +54,7 @@ _remove_egg_info:
 
 _clear_build: _remove_build _remove_dist _remove_egg_info
 
-clean: _delete_pyc _delete_pid _clear_build
+clean: _delete_pyc _delete_pid _clear_build _reset
 
 _build:
 	@${PYTHON} setup.py sdist bdist_wheel
