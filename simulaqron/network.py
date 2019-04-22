@@ -27,17 +27,15 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import os
-import json
 import time
+import random
 import logging
 import multiprocessing as mp
+import networkx as nx
 from timeit import default_timer as timer
 
-from simulaqron.toolbox import get_simulaqron_path
+from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 from simulaqron.settings import simulaqron_settings
-from simulaqron.general.hostConfig import load_node_names
-from simulaqron.configFiles import construct_node_configs, construct_topology_config
 from simulaqron.run.startNode import main as start_node
 from simulaqron.run.startCQC import main as start_cqc
 from cqc.pythonLib import CQCConnection
@@ -49,7 +47,24 @@ from cqc.pythonLib import CQCConnection
 
 
 class Network:
-    def __init__(self, name=None, nodes=None, topology=None, cqc_file=None, app_file=None):
+    def __init__(self, name=None, nodes=None, topology=None, network_config_file=None, force=False, new=True):
+        """
+        Used to spin up a simulated network.
+
+        If new=True then a fresh network with only the specified nodes
+        (or the default Alice, Bob, Charlie, David and Eve) are created and overwriting the current network with
+        the same name in the network config file. Otherwise only the specified nodes are started without changing
+        the config file. Note that if the nodes does not currently exists and new=False, an ValueError is raised.
+
+        If force=False an input to confirm the overwriting is issued.
+
+        :param name: None or str (defualts to "default")
+        :param nodes: None or list of str
+        :param topology: None or dict
+        :param network_config_file: None or str (defaults to simulaqron_settings.network_config_file
+        :param force: bool
+        :param new: bool
+        """
         self._running = False
 
         if name is None:
@@ -57,37 +72,36 @@ class Network:
         else:
             self.name = name
 
-        if cqc_file is None:
-            self._cqc_file = simulaqron_settings.cqc_file
+        if network_config_file is None:
+            self._network_config_file = simulaqron_settings.network_config_file
         else:
-            self._cqc_file = cqc_file
-        if app_file is None:
-            self._app_file = simulaqron_settings.app_file
+            self._network_config_file = network_config_file
+
+        networks_config = NetworksConfigConstructor(file_path=self._network_config_file)
+
+        if new:
+            self.nodes = ["Alice", "Bob", "Charlie", "David", "Eve"]
+            topology = construct_topology_config(topology, nodes)
+            if not force:
+                answer = input("Do you want to add/replace the network {} in the file {}"
+                               "with a network constisting of the nodes {}? (yes/no)"
+                               .format(self.name, self._network_config_file, self.nodes))
+                if answer != "yes":
+                    raise RuntimeError("User did not want to replace network in file")
+            networks_config.add_network(node_names=self.nodes, network_name=self.name, topology=topology)
+            networks_config.write_to_file(self._network_config_file)
         else:
-            self._app_file = app_file
-
-        simulaqron_path = get_simulaqron_path.main()
-
-        # Set the nodes
-        if nodes is None:
-            node_config_file = simulaqron_settings.nodes_file
-            self.nodes = load_node_names(node_config_file)
-        else:
-            self.nodes = nodes
-            construct_node_configs(nodes=nodes)
-
-        # Set the topology
-        if topology is None:
-            rel_topology_config_file = simulaqron_settings.topology_file
-            if rel_topology_config_file == '':
-                self.topology = None
+            if self.name in networks_config.networks:
+                node_names = networks_config.get_node_names(self.name)
+                for node_name in self.nodes:
+                    if node_name not in node_names:
+                        raise ValueError("Node {} is not in the current network {} in the file {}\n"
+                                         "If you wish to overwrite the current network in the file, use the"
+                                         "--new flag.".format(node_name, self.name, self._network_config_file))
             else:
-                abs_topology_config_file = os.path.join(simulaqron_path, rel_topology_config_file)
-                with open(abs_topology_config_file, 'r') as f:
-                    self.topology = json.load(f)
-        else:
-            self.topology = topology
-            construct_topology_config(topology=self.topology, nodes=self.nodes)
+                raise ValueError("Network {} is not in the file {}\n"
+                                 "If you wish to add this network to the file, use the"
+                                 "--new flag.".format(self.name, self._network_config_file))
 
         self.processes = []
         self._setup_processes()
@@ -114,10 +128,10 @@ class Network:
         mp.set_start_method("spawn", force=True)
         for node in self.nodes:
             process_virtual = mp.Process(
-                target=start_node, args=(node,), name="VirtNode {}".format(node)
+                target=start_node, args=(node, self.name), name="VirtNode {}".format(node)
             )
             process_cqc = mp.Process(
-                target=start_cqc, args=(node,), name="CQCNode {}".format(node)
+                target=start_cqc, args=(node, self.name), name="CQCNode {}".format(node)
             )
             self.processes += [process_virtual, process_cqc]
 
@@ -151,3 +165,123 @@ class Network:
                     p.terminate()
                 except Exception as err:
                     print(err)
+
+
+def construct_topology_config(topology, nodes, save_fig=True):
+    """
+    Constructs a json file at config/topology.json, used to define the topology of the network.
+
+    :param topology: str
+        Should be one of the following: None, 'complete', 'ring', 'random_tree'.
+    :param nodes: list of str
+        List of the names of the nodes.
+    :param save_fig: bool
+        Whether to save a picture of the network
+    :return: None
+    """
+    if topology is None:
+        if isinstance(topology, dict):
+            adjacency_dct = {node: topology[node] for node in nodes}
+        elif topology == "complete":
+            adjacency_dct = {}
+            for i, node in enumerate(nodes):
+                adjacency_dct[node] = nodes[:i] + nodes[i + 1 :]
+
+        elif topology == "ring":
+            adjacency_dct = {}
+            nn = len(nodes)
+            for i, node in enumerate(nodes):
+                adjacency_dct[node] = [nodes[(i - 1) % nn], nodes[(i + 1) % nn]]
+
+        elif topology == "path":
+            adjacency_dct = {}
+            nn = len(nodes)
+            for i, node in enumerate(nodes):
+                if i == 0:
+                    adjacency_dct[node] = [nodes[i + 1]]
+                elif i == (nn - 1):
+                    adjacency_dct[node] = [nodes[i - 1]]
+                else:
+                    adjacency_dct[node] = [nodes[(i - 1) % nn], nodes[(i + 1) % nn]]
+
+        elif topology == "random_tree":
+            adjacency_dct = get_random_tree(nodes)
+
+        elif topology[:16] == "random_connected":
+            try:
+                nr_edges = int(topology[17:])
+            except ValueError:
+                raise ValueError(
+                    "When specifying a random connected graph use the format 'random_connected_{nr_edges}',"
+                    "where 'nr_edges' is the number of edges of the graph."
+                )
+            except IndexError:
+                raise ValueError(
+                    "When specifying a random connected graph use the format 'random_connected_{nr_edges}',"
+                    "where 'nr_edges' is the number of edges of the graph."
+                )
+            adjacency_dct = get_random_connected(nodes, nr_edges)
+
+        else:
+            raise ValueError("Unknown topology name")
+        return adjacency_dct
+    else:
+        return None
+
+
+def get_random_tree(nodes):
+    """
+    Constructs a dictionary describing a random tree, with the name of the vertices are taken from the 'nodes'
+
+    :param nodes: list of str
+        Name of the nodes to be used
+    :return: dct
+        keys are the names of the nodes and values their neighbors
+    """
+    tree = nx.random_tree(len(nodes))
+
+    # Construct mapping to relabel nodes
+    mapping = {i: nodes[i] for i in range(len(nodes))}
+    nx.relabel_nodes(G=tree, mapping=mapping, copy=False)
+
+    # Get the dictionary from the graph
+    adjacency_dct = nx.to_dict_of_lists(tree)
+
+    return adjacency_dct
+
+
+def get_random_connected(nodes, nr_edges):
+    """
+    Constructs a dictionary describing a random connected graph with a specified number of edges,
+    with the name of the vertices are taken from the 'nodes'
+
+    :param nodes: list of str
+        Name of the nodes to be used
+    :param nr_edges: int
+        The number of edges that the graph should have.
+    :return: dct
+        keys are the names of the nodes and values their neighbors
+    """
+    nn = len(nodes)
+    min_edges = nn - 1
+    max_edges = nn * (nn - 1) / 2
+    if (nr_edges < min_edges) or (nr_edges > max_edges):
+        raise ValueError("Number of edges cannot be less than #vertices-1 or greater then #vertices * (#vertices-1)/2")
+
+    G = nx.random_tree(nn)
+
+    non_edges = list(nx.non_edges(G))
+
+    for _ in range(min_edges, nr_edges):
+        random_edge = random.choice(non_edges)
+        G.add_edge(random_edge[0], random_edge[1])
+        non_edges.remove(random_edge)
+
+    # Construct mapping to relabel nodes
+    mapping = {i: nodes[i] for i in range(len(nodes))}
+    nx.relabel_nodes(G=G, mapping=mapping, copy=False)
+
+    # Get the dictionary from the graph
+    adjacency_dct = nx.to_dict_of_lists(G)
+
+    return adjacency_dct

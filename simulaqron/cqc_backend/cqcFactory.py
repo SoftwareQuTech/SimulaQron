@@ -35,6 +35,7 @@ from twisted.internet.protocol import Factory
 
 from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox import get_simulaqron_path
+from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 
 from cqc.Protocol import CQCProtocol
 
@@ -48,7 +49,7 @@ from cqc.Protocol import CQCProtocol
 
 
 class CQCFactory(Factory):
-    def __init__(self, host, name, cqc_net, backend):
+    def __init__(self, host, name, cqc_net, backend, network_name="default"):
         """
         Initialize CQC Factory.
 
@@ -61,6 +62,7 @@ class CQCFactory(Factory):
         self.virtRoot = None
         self.qReg = None
         self.backend = backend(self)
+        self.network_name = network_name
 
         # Dictionary that keeps qubit dictorionaries for each application
         self.qubitList = {}
@@ -71,7 +73,12 @@ class CQCFactory(Factory):
         # Read in topology, if specified. topology=None means fully connected
         # topology
         self.topology = None
-        self._setup_topology(simulaqron_settings.topology_file)
+        if simulaqron_settings.topology_file is not None and simulaqron_settings.topology_file != "":
+            self._setup_topology(simulaqron_settings.topology_file)
+        else:
+            if simulaqron_settings.network_config_file is not None:
+                networks_config = NetworksConfigConstructor(file_path=simulaqron_settings.network_config_file)
+                self.topology = networks_config.networks[network_name].topology
 
     def buildProtocol(self, addr):
         """
@@ -84,12 +91,6 @@ class CQCFactory(Factory):
         Set the virtual root allowing connections to the SimulaQron backend.
         """
         self.virtRoot = virtRoot
-
-        # def set_virtual_reg(self, qReg):
-        # 	"""
-        # 	Set the default register to use on the SimulaQron backend.
-        # 	"""
-        # 	self.qReg = qReg
 
     def lookup(self, ip, port):
         """
@@ -115,24 +116,16 @@ class CQCFactory(Factory):
             be used.
         :return: None
         """
-        if topology_file == "":
-            return
-        else:
-            # Get path to SimulaQron folder
-            simulaqron_path = get_simulaqron_path.main()
-
-            # Get the absolute path to the file
-            abs_path = os.path.join(simulaqron_path, topology_file)
-            try:
-                with open(abs_path, "r") as top_file:
-                    try:
-                        self.topology = json.load(top_file)
-                    except json.JSONDecodeError:
-                        raise RuntimeError("Could not parse the json file: {}".format(abs_path))
-            except FileNotFoundError:
-                raise FileNotFoundError("Could not find the file specifying the topology:" " {}".format(abs_path))
-            except IsADirectoryError:
-                raise FileNotFoundError("Could not find the file specifying the topology: " "{}".format(abs_path))
+        try:
+            with open(topology_file, "r") as top_file:
+                try:
+                    self.topology = json.load(top_file)
+                except json.JSONDecodeError:
+                    raise RuntimeError("Could not parse the json file: {}".format(topology_file))
+        except FileNotFoundError:
+            raise FileNotFoundError("Could not find the file specifying the topology:" " {}".format(topology_file))
+        except IsADirectoryError:
+            raise FileNotFoundError("Could not find the file specifying the topology: " "{}".format(topology_file))
 
     def is_adjacent(self, remote_host_name):
         """

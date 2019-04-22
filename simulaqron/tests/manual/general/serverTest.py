@@ -32,7 +32,7 @@ from twisted.internet import reactor
 from twisted.spread import pb
 from twisted.internet.defer import inlineCallbacks
 
-from simulaqron.general.hostConfig import networkConfig
+from simulaqron.general.hostConfig import socketsConfig
 
 from qutip import Qobj
 
@@ -40,7 +40,7 @@ from qutip import Qobj
 def main():
 
     # Read config file
-    config = networkConfig("../../../config/virtualNodes.cfg")
+    config = socketsConfig("../../../config/virtualNodes.cfg")
 
     # We are Alice
     myName = "Alice"

@@ -41,7 +41,7 @@ from twisted.spread.pb import RemoteError
 
 from simulaqron.virtNode.basics import quantumError, noQubitError, virtNetError
 from simulaqron.virtNode.quantum import simulatedQubit
-from simulaqron.general.hostConfig import networkConfig
+from simulaqron.general.hostConfig import socketsConfig
 from simulaqron.settings import simulaqron_settings
 
 if simulaqron_settings.backend == "qutip":
@@ -60,7 +60,7 @@ else:
 # forming the quantum network
 #
 class backEnd(object):
-    def __init__(self, name, virtualFile):
+    def __init__(self, name, virtualFile, network_name="default"):
         """
         Initialize. This will read the configuration file and populate the name,hostname,port information with the
         information found in the configuration file for the given name.
@@ -68,7 +68,7 @@ class backEnd(object):
 
         # Read the configuration file
         try:
-            self.config = networkConfig(virtualFile)
+            self.config = socketsConfig(virtualFile, network_name=network_name, config_type="vnode")
             self.myID = self.config.hostDict[name]
         except KeyError as e:
             logging.error("LOCAL {}: No such name in the configuration file {}: {}".format(name, virtualFile, e))

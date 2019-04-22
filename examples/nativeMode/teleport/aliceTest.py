@@ -32,7 +32,7 @@ import os
 import numpy as np
 
 from simulaqron.local.setup import setup_local, assemble_qubit
-from simulaqron.general.hostConfig import networkConfig
+from simulaqron.general.hostConfig import socketsConfig
 from simulaqron.toolbox import get_simulaqron_path
 from simulaqron.toolbox.stabilizerStates import StabilizerState
 from simulaqron.settings import simulaqron_settings
@@ -157,8 +157,8 @@ def main():
     classicalFile = "classicalNet.cfg"
 
     # Read configuration files for the virtual quantum, as well as the classical network
-    virtualNet = networkConfig(virtualFile)
-    classicalNet = networkConfig(classicalFile)
+    virtualNet = socketsConfig(virtualFile)
+    classicalNet = socketsConfig(classicalFile)
 
     # Check if we should run a local classical server. If so, initialize the code
     # to handle remote connections on the classical communication network

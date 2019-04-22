@@ -5,8 +5,8 @@ import unittest
 from timeit import default_timer as timer
 
 from simulaqron.toolbox import get_simulaqron_path
+from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 from simulaqron.settings import simulaqron_settings
-from simulaqron.configFiles import construct_node_configs
 from simulaqron.network import Network
 from simulaqron.general.hostConfig import load_node_names
 
@@ -40,7 +40,10 @@ class TestInitNetwork(unittest.TestCase):
             file_path = os.path.join(simulaqron_path, "config", file)
             os.remove(file_path)
 
-        construct_node_configs()
+        default_network_config_file = simulaqron_settings._default_config["network_config_file"]
+        network_config = NetworksConfigConstructor(default_network_config_file)
+        network_config.reset()
+        network_config.write_to_file()
         simulaqron_settings.default_settings()
 
     def check_nodes(self, nodes):

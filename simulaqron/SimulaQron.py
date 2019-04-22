@@ -7,19 +7,28 @@ from daemons.prefab import run
 
 from simulaqron.network import Network
 from simulaqron.settings import simulaqron_settings
-from simulaqron.toolbox import manage_nodes
+from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 PID_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".simulaqron_pids")
 
+# Check that the default network_config_file exists
+default_network_config_file = simulaqron_settings._default_config["network_config_file"]
+if not os.path.exists(default_network_config_file):
+    networks_config = NetworksConfigConstructor()
+    networks_config.reset()
+    networks_config.write_to_file(default_network_config_file)
+
 
 class SimulaQronDaemon(run.RunDaemon):
-    def __init__(self, pidfile, name=None, nrnodes=None, nodes=None, topology=None):
+    def __init__(self, pidfile, name=None, nrnodes=None, nodes=None, topology=None, force=False, new=True):
         super().__init__(pidfile=pidfile)
         self.name = name
         self.nrnodes = nrnodes
         self.nodes = nodes
         self.topology = topology
+        self.force = force
+        self.new = new
 
     def run(self):
         """Starts all nodes defined in netsim's config directory."""
@@ -35,7 +44,7 @@ class SimulaQronDaemon(run.RunDaemon):
         else:
             nodes = self.nodes
 
-        network = Network(name=self.name, nodes=nodes, topology=self.topology)
+        network = Network(name=self.name, nodes=nodes, topology=self.topology, force=self.force, new=self.new)
         network.start()
 
         while True:
@@ -80,16 +89,30 @@ def cli():
     type=click.STRING,
     default=None,
 )
-def start(name, nrnodes, nodes, topology):
+@click.option(
+    "-f",
+    "--force",
+    help="Force re-write of network_config_file.\n"
+         "Only used if --new flag is used.",
+    is_flag=True,
+)
+@click.option(
+    "--new",
+    help="Whether to overwrite the network in the network_config_file.\n"
+         "Otherwise only the nodes specified in the current network are started.\n"
+         "If --force/-f is not set the user will be asked to confirm the change to the file.",
+    is_flag=True,
+)
+def start(name, nrnodes, nodes, topology, force, new):
     """Starts a network with the given parameters or from config files."""
-    manage_nodes.setup_cqc_files()
     if name is None:
         name = "default"
     pidfile = os.path.join(PID_FOLDER, "simulaqron_network_{}.pid".format(name))
     if os.path.exists(pidfile):
         logging.warning("Network with name {} is already running".format(name))
         return
-    d = SimulaQronDaemon(pidfile=pidfile, name=name, nrnodes=nrnodes, nodes=nodes, topology=topology)
+    d = SimulaQronDaemon(pidfile=pidfile, name=name, nrnodes=nrnodes, nodes=nodes, topology=topology, force=force,
+                         new=new)
     d.start()
 
 ###############
@@ -153,86 +176,56 @@ def default():
 @click.argument('value', type=click.Choice(["stabilizer", "projectq", "qutip"]))
 def backend(value):
     """The backend to use (stabilizer, projectq, qutip)."""
-    simulaqron_settings.set_setting("BACKEND", "backend", value)
+    simulaqron_settings.backend = value
 
 
 @set.command()
 @click.argument('value', type=int)
 def max_qubits(value):
     """Max virt-qubits per node and max sim-qubits per register."""
-    simulaqron_settings.set_setting("BACKEND", "maxqubits_per_node", str(value))
+    simulaqron_settings.max_qubits = value
 
 
 @set.command()
 @click.argument('value', type=int)
 def max_registers(value):
     """How many registers a node can hold."""
-    simulaqron_settings.set_setting("BACKEND", "maxregs_per_node", str(value))
+    simulaqron_settings.max_registers = value
 
 
 @set.command()
 @click.argument('value', type=float)
 def conn_retry_time(value):
     """If setup fails, how long to wait until a retry."""
-    simulaqron_settings.set_setting("BACKEND", "waittime", str(value))
+    simulaqron_settings.conn_retry_time = value
 
 
 @set.command()
 @click.argument('value', type=float)
 def recv_timeout(value):
     """When receiving a qubit or EPR pair, how long to wait until raising a timeout."""
-    simulaqron_settings.set_setting("BACKEND", "recvtimeout", str(value))
-    simulaqron_settings.set_setting("BACKEND", "recveprtimeout", str(value))
+    simulaqron_settings.recv_timeout = value
 
 
 @set.command()
 @click.argument('value', type=float)
 def recv_retry_time(value):
     """When receiving a qubit or EPR pair, how long to wait between checks of whether a qubit is received."""
-    simulaqron_settings.set_setting("BACKEND", "waittimerecv", str(value))
+    simulaqron_settings.recv_retry_time = value
 
 
 @set.command()
 @click.argument('value', type=click.Choice(["debug", "info", "warning", "error", "critical"]))
 def log_level(value):
     """Log level for both backend and frontend."""
-    simulaqron_settings.set_setting("BACKEND", "loglevel", value)
-    simulaqron_settings.set_setting("FRONTEND", "loglevel", value)
+    simulaqron_settings.log_level = value
 
 
 @set.command()
 @click.argument('value', type=str)
-def topology_file(value):
-    """The path to the topology file to be used, can be ""."""
-    simulaqron_settings.set_setting("BACKEND", "topology_file", value)
-
-
-@set.command()
-@click.argument('value', type=str)
-def app_file(value):
-    """The path to the topology file to be used, can be ""."""
-    simulaqron_settings.set_setting("BACKEND", "app_file", value)
-
-
-@set.command()
-@click.argument('value', type=str)
-def cqc_file(value):
-    """The path to the topology file to be used, can be ""."""
-    simulaqron_settings.set_setting("BACKEND", "cqc_file", value)
-
-
-@set.command()
-@click.argument('value', type=str)
-def vnode_file(value):
-    """The path to the topology file to be used, can be ""."""
-    simulaqron_settings.set_setting("BACKEND", "vnode_file", value)
-
-
-@set.command()
-@click.argument('value', type=str)
-def nodes_file(value):
-    """The path to the topology file to be used, can be ""."""
-    simulaqron_settings.set_setting("BACKEND", "nodes_file", value)
+def network_config_file(value):
+    """The path to the network_config_file to be used"""
+    simulaqron_settings.network_config_file = value
 
 
 @set.command()
@@ -240,16 +233,16 @@ def nodes_file(value):
 def noisy_qubits(value):
     """Whether qubits should be noisy (on/off)"""
     if value == "on":
-        simulaqron_settings.set_setting("BACKEND", "noisy_qubits", 'True')
+        simulaqron_settings.noisy_qubits = True
     else:
-        simulaqron_settings.set_setting("BACKEND", "noisy_qubits", 'False')
+        simulaqron_settings.noisy_qubits = False
 
 
 @set.command()
 @click.argument('value', type=float)
 def t1(value):
     """The effective T1 to be used for noisy qubits"""
-    simulaqron_settings.set_setting("BACKEND", "t1", str(value))
+    simulaqron_settings.t1 = value
 
 ###############
 # get command #
@@ -305,33 +298,9 @@ def log_level():
 
 
 @get.command()
-def topology_file():
-    """The path to the topology file to be used, can be ""."""
-    print(simulaqron_settings.topology_file)
-
-
-@get.command()
-def app_file():
-    """The path to the app file to be used, can be ""."""
-    print(simulaqron_settings.app_file)
-
-
-@get.command()
-def cqc_file():
-    """The path to the cqc file to be used, can be ""."""
-    print(simulaqron_settings.cqc_file)
-
-
-@get.command()
-def vnode_file():
-    """The path to the vnode file to be used, can be ""."""
-    print(simulaqron_settings.vnode_file)
-
-
-@get.command()
-def nodes_file():
-    """The path to the nodes file to be used, can be ""."""
-    print(simulaqron_settings.nodes_file)
+def network_config_file():
+    """The path to the network_config_file to be used"""
+    print(simulaqron_settings.network_config_file)
 
 
 @get.command()
@@ -365,6 +334,8 @@ def nodes():
 
 @nodes.command()
 @click.argument('name', type=str)
+@click.option('--network-name', type=str,
+              help="The name of the network")
 @click.option('--hostname', type=str,
               help="The host name of the node, e.g. localhost (default) or 192.168.0.1")
 @click.option('--app-port', type=int,
@@ -380,7 +351,13 @@ def nodes():
               help="The neighbors of the node in the network seperated by ',' (no space).\n \
                     For example '--neighbors Bob,Charlie,David'.\n \
                     If not specified all current nodes in the network will be neighbors.")
-def add(name, hostname=None, app_port=None, cqc_port=None, vnode_port=None, neighbors=None):
+@click.option(
+    "-f",
+    "--force",
+    help="Force re-write of network_config_file.\n",
+    is_flag=True,
+)
+def add(name, network_name=None, hostname=None, app_port=None, cqc_port=None, vnode_port=None, neighbors=None, force=False):
     """
     Add a node to the network.
 
@@ -388,41 +365,89 @@ def add(name, hostname=None, app_port=None, cqc_port=None, vnode_port=None, neig
 
     HOSTNAME: The host name of the node, e.g. localhost or 192.168.0.1
     """
+    if not force:
+        answer = input("Do you want to add the node {} to the network {} in the file {}? (yes/no)."
+                       .format(name, network_name, simulaqron_settings.network_config_file))
+        if answer != "yes":
+            print("Aborting!")
+            return
     if neighbors is not None:
         neighbors = neighbors.split(',')
         neighbors = [neighbor.strip() for neighbor in neighbors]
-    manage_nodes.add_node(name, hostname=hostname, app_port=app_port, cqc_port=cqc_port, vnode_port=vnode_port,
-                          neighbors=neighbors)
+    networks_config = NetworksConfigConstructor(simulaqron_settings.network_config_file)
+    networks_config.add_node(node_name=name, network_name=network_name, app_port=app_port, cqc_port=cqc_port,
+                             vnode_port=vnode_port, neighbors=neighbors)
+    networks_config.write_to_file()
 
 
 @nodes.command()
 @click.argument('name', type=str)
-def remove(name):
+@click.option('--network-name', type=str,
+              help="The name of the network")
+@click.option(
+    "-f",
+    "--force",
+    help="Force re-write of network_config_file.\n",
+    is_flag=True,
+)
+def remove(name, network_name=None, force=False):
     """
     Remove a node to the network.
 
     NAME: The name of the node, e.g. Alice
     """
-    manage_nodes.remove_node(name)
-    pass
+    if not force:
+        answer = input("Do you want to remove the node {} to the network {} in the file {}? (yes/no)."
+                       .format(name, network_name, simulaqron_settings.network_config_file))
+        if answer != "yes":
+            print("Aborting!")
+            return
+    networks_config = NetworksConfigConstructor(simulaqron_settings.network_config_file)
+    networks_config.remove_node(node_name=name, network_name=network_name)
+    networks_config.write_to_file()
 
 
 @nodes.command()
-def default():
+@click.option('--network-name', type=str,
+              help="The name of the network")
+@click.option(
+    "-f",
+    "--force",
+    help="Force re-write of network_config_file.\n",
+    is_flag=True,
+)
+def default(network_name=None, force=False):
     """
     Sets the default nodes of the network.
 
     The default network consists of the five nodes:
     Alice, Bob, Charlie, David, Eve
     """
-    manage_nodes.set_default_nodes()
+    if not force:
+        answer = input("Do you want to set the network {} in the file {} to default,"
+                       "i.e. with nodes Alice, Bob, Charlie, David and Eve? (yes/no)."
+                       .format(network_name, simulaqron_settings.network_config_file))
+        if answer != "yes":
+            print("Aborting!")
+            return
+    networks_config = NetworksConfigConstructor(simulaqron_settings.network_config_file)
+    node_names = ["Alice", "Bob", "Charlie", "David", "Eve"]
+    networks_config.add_network(node_names=node_names, network_name=network_name)
+    networks_config.write_to_file()
 
 
 @nodes.command()
-def get():
+@click.option('--network-name', type=str,
+              help="The name of the network")
+def get(network_name=None):
     """Get the current nodes of the network."""
-    nodes = manage_nodes.get_nodes()
-    print(("{} " * len(nodes))[:-1].format(*nodes))
+    networks_config = NetworksConfigConstructor(simulaqron_settings.network_config_file)
+    try:
+        nodes = networks_config.get_node_names(network_name=network_name)
+    except ValueError:
+        print("No network {}".format(network_name))
+    else:
+        print(("{} " * len(nodes))[:-1].format(*nodes))
 
 
 if __name__ == "__main__":

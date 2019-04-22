@@ -79,11 +79,12 @@ class Config:
         "recv_retry_time": 0.1,  # (seconds)
         "log_level": logging.WARNING,
         "backend": "stabilizer",
-        "app_file": os.path.join(config_folder, "appNodes.cfg"),
-        "cqc_file": os.path.join(config_folder, "cqcNodes.cfg"),
-        "vnode_file": os.path.join(config_folder, "virtualNodes.cfg"),
-        "nodes_file": os.path.join(config_folder, "Nodes.cfg"),
-        "topology_file": "",
+        "network_config_file": os.path.join(config_folder, "network.json"),
+        "app_file": None,
+        "cqc_file": None,
+        "vnode_file": None,
+        "nodes_file": None,
+        "topology_file": None,
         "noisy_qubits": False,
         "t1": 1
     }
@@ -229,6 +230,16 @@ class Config:
 
     @property
     @Decorator.get_setting
+    def network_config_file(self):
+        pass
+
+    @network_config_file.setter
+    @Decorator.set_setting
+    def network_config_file(self, app_file):
+        pass
+
+    @property
+    @Decorator.get_setting
     def topology_file(self):
         pass
 
@@ -299,196 +310,3 @@ class Config:
 
 
 simulaqron_settings = Config()
-
-# class Settings:
-#     # Get path to SimulaQron folder
-#     simulaqron_path = get_simulaqron_path.main()
-#
-#     _settings_file = os.path.join(simulaqron_path, "config/settings.ini")
-#     _config = ConfigParser()
-#
-#     # default settings for if file is not ready yet
-#     max_qubits = _DefaultSettings.CONF_MAXQUBITS
-#     max_registers = _DefaultSettings.CONF_MAXREGS
-#     conn_retry_time = _DefaultSettings.CONF_WAIT_TIME
-#     recv_timeout = _DefaultSettings.CONF_RECV_TIMEOUT
-#     recv_retry_time = _DefaultSettings.CONF_WAIT_TIME_RECV
-#     log_level = _DefaultSettings.CONF_LOGGING_LEVEL_BACKEND
-#     backend = _DefaultSettings.CONF_BACKEND
-#     topology_file = _DefaultSettings.CONF_TOPOLOGY_FILE
-#     app_file = _DefaultSettings.CONF_APP_FILE
-#     cqc_file = _DefaultSettings.CONF_CQC_FILE
-#     vnode_file = _DefaultSettings.CONF_VNODE_FILE
-#     nodes_file = _DefaultSettings.CONF_NODES_FILE
-#     noisy_qubits = _DefaultSettings.CONF_NOISY_QUBITS
-#     t1 = _DefaultSettings.CONF_T1
-#
-#     log_levels = {
-#         "info": logging.INFO,
-#         "debug": logging.DEBUG,
-#         "warning": logging.WARNING,
-#         "error": logging.ERROR,
-#         "critical": logging.CRITICAL
-#     }
-#
-#     @classmethod
-#     def init_settings(cls):
-#
-#         _config = cls._config
-#         _config.read(cls._settings_file)
-#
-#         config_changed = False
-#
-#         if "BACKEND" not in _config:
-#             _config['BACKEND'] = {}
-#         backend = _config['BACKEND']
-#
-#         if "MaxQubits_Per_Node" in backend:
-#             cls.max_qubits = int(backend['MaxQubits_Per_Node'])
-#         else:
-#             _config['BACKEND']['MaxQubits_Per_Node'] = str(cls.max_qubits)
-#             config_changed = True
-#
-#         if "MaxRegisters_Per_Node" in backend:
-#             cls.max_registers = int(backend['MaxRegisters_Per_Node'])
-#         else:
-#             _config['BACKEND']['MaxRegisters_Per_Node'] = str(cls.max_registers)
-#             config_changed = True
-#
-#         if "WaitTime" in backend:
-#             cls.conn_retry_time = float(backend['WaitTime'])
-#         else:
-#             backend['WaitTime'] = str(cls.conn_retry_time)
-#             config_changed = True
-#
-#         if "RecvTimeout" in backend:
-#             cls.recv_timeout = float(backend['RecvTimeout'])
-#         else:
-#             backend['RecvTimeout'] = str(cls.recv_timeout)
-#             config_changed = True
-#
-#         if "RecvEPRTimeout" in backend:
-#             cls.CONF_RECV_EPR_TIMEOUT = float(backend['RecvEPRTimeout'])
-#         else:
-#             backend['RecvEPRTimeout'] = str(cls.CONF_RECV_EPR_TIMEOUT)
-#             config_changed = True
-#
-#         if "WaitTimeRecv" in backend:
-#             cls.recv_retry_time = float(backend['WaitTimeRecv'])
-#         else:
-#             backend['WaitTimeRecv'] = str(cls.recv_retry_time)
-#             config_changed = True
-#
-#         if "LogLevel" in backend:
-#             _log_level = backend['LogLevel'].lower()
-#             if _log_level in cls.log_levels:
-#                 cls.log_level = cls.log_levels[_log_level]
-#             else:
-#                 backend['LogLevel'] = list(cls.log_levels.keys())[
-#                     list(cls.log_levels.values()).index(cls.log_level)]
-#
-#         else:
-#             backend['LogLevel'] = list(cls.log_levels.keys())[
-#                 list(cls.log_levels.values()).index(cls.log_level)]
-#             config_changed = True
-#
-#         if "Backend" in backend:
-#             cls.backend = backend["backend"]
-#         else:
-#             backend["backend"] = cls.backend
-#             config_changed = True
-#
-#         if "Topology_File" in backend:
-#             cls.topology_file = backend['Topology_File']
-#         else:
-#             backend['Topology_File'] = cls.topology_file
-#             config_changed = True
-#
-#         if "App_File" in backend:
-#             cls.app_file = backend['App_File']
-#         else:
-#             backend['App_File'] = cls.app_file
-#             config_changed = True
-#
-#         if "Cqc_File" in backend:
-#             cls.cqc_file = backend['Cqc_File']
-#         else:
-#             backend['Cqc_File'] = cls.cqc_file
-#             config_changed = True
-#
-#         if "Vnode_File" in backend:
-#             cls.vnode_file = backend['Vnode_File']
-#         else:
-#             backend['Vnode_File'] = cls.vnode_file
-#             config_changed = True
-#
-#         if "Nodes_File" in backend:
-#             cls.nodes_file = backend['Nodes_File']
-#         else:
-#             backend['Nodes_File'] = cls.nodes_file
-#             config_changed = True
-#
-#         if "noisy_qubits" in backend:
-#             cls.noisy_qubits = backend['noisy_qubits'] == 'True'
-#         else:
-#             backend['noisy_qubits'] = str(cls.noisy_qubits)
-#             config_changed = True
-#
-#         if "T1" in backend:
-#             cls.t1 = float(backend['T1'])
-#         else:
-#             backend['T1'] = str(cls.t1)
-#             config_changed = True
-#
-#         if "FRONTEND" not in _config:
-#             _config['FRONTEND'] = {}
-#         frontend = _config['FRONTEND']
-#
-#         if "LogLevel" in frontend:
-#             _log_level = frontend['LogLevel'].lower()
-#             if _log_level in cls.log_levels:
-#                 cls.CONF_LOGGING_LEVEL_FRONTEND = cls.log_levels[_log_level]
-#             else:
-#                 frontend['LogLevel'] = list(cls.log_levels.keys())[
-#                     list(cls.log_levels.values()).index(cls.CONF_LOGGING_LEVEL_FRONTEND)]
-#
-#         else:
-#             frontend['LogLevel'] = list(cls.log_levels.keys())[
-#                 list(cls.log_levels.values()).index(cls.CONF_LOGGING_LEVEL_FRONTEND)]
-#             config_changed = True
-#
-#         if config_changed:
-#             cls.save_settings()
-#
-#     @classmethod
-#     def save_settings(cls):
-#         with open(cls._settings_file, 'w') as file:
-#             cls._config.write(file)
-#
-#     @classmethod
-#     def set_setting(cls, section, key, value):
-#         cls._config[section][key] = value
-#         cls.save_settings()
-#
-#     @classmethod
-#     def default_settings(cls):
-#         cls.max_qubits = _DefaultSettings.CONF_MAXQUBITS
-#         cls.max_registers = _DefaultSettings.CONF_MAXREGS
-#         cls.conn_retry_time = _DefaultSettings.CONF_WAIT_TIME
-#         cls.log_level = _DefaultSettings.CONF_LOGGING_LEVEL_BACKEND
-#         cls.CONF_LOGGING_LEVEL_FRONTEND = _DefaultSettings.CONF_LOGGING_LEVEL_FRONTEND
-#         cls.backend = _DefaultSettings.CONF_BACKEND
-#         cls.topology_file = _DefaultSettings.CONF_TOPOLOGY_FILE
-#         cls.noisy_qubits = _DefaultSettings.CONF_NOISY_QUBITS
-#         cls.t1 = _DefaultSettings.CONF_T1
-#
-#         if os.path.exists(cls._settings_file):
-#             os.remove(cls._settings_file)
-#
-#         cls._config = ConfigParser()
-#         cls.init_settings()
-#         cls.save_settings()
-#
-#
-#
-# Settings.init_settings()

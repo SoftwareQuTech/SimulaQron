@@ -28,9 +28,9 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-from simulaqron.general.hostConfig import networkConfig
+from simulaqron.general.hostConfig import socketsConfig
 
-newNet = networkConfig("network.cfg")
+newNet = socketsConfig("network.cfg")
 
 newNet.print_details("Alice")
 newNet.print_details("Bob")

@@ -1,7 +1,6 @@
 import os
 import unittest
 from argparse import ArgumentParser
-from simulaqron.toolbox.manage_nodes import setup_cqc_files
 import logging
 
 
@@ -10,9 +9,6 @@ logger.setLevel(logging.CRITICAL)
 
 
 def main(test_type="quick"):
-
-    # First make sure CQC is set up
-    setup_cqc_files()
 
     path_to_here = os.path.dirname(os.path.abspath(__file__))
     if test_type == "quick":

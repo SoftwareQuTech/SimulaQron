@@ -8,7 +8,7 @@ from twisted.spread import pb
 
 from simulaqron.cqc_backend.cqcFactory import CQCFactory
 from simulaqron.cqc_backend.cqcMessageHandler import SimulaqronCQCHandler
-from simulaqron.general.hostConfig import networkConfig
+from simulaqron.general.hostConfig import socketsConfig
 from simulaqron.settings import simulaqron_settings
 
 
@@ -93,7 +93,7 @@ def sigterm_handler(_signo, _stack_frame):
     reactor.stop()
 
 
-def main(myName):
+def main(myName, network_name="default"):
     """Start the indicated backend CQC Server"""
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)
@@ -103,20 +103,25 @@ def main(myName):
         level=simulaqron_settings.log_level,
     )
 
-    # This file defines the network of virtual quantum nodes
-    virtualFile = simulaqron_settings.vnode_file
+    if simulaqron_settings.network_config_file is not None:
+        # Since version 3.0.0 a single config file is used
+        virtualFile = simulaqron_settings.network_config_file
+        cqcFile = simulaqron_settings.network_config_file
+    else:
+        # This file defines the network of virtual quantum nodes
+        virtualFile = simulaqron_settings.vnode_file
 
-    # This file defines the network of CQC servers interfacing to virtual quantum nodes
-    cqcFile = simulaqron_settings.cqc_file
+        # This file defines the network of CQC servers interfacing to virtual quantum nodes
+        cqcFile = simulaqron_settings.cqc_file
 
     # Read configuration files for the virtual quantum, as well as the classical network
-    virtualNet = networkConfig(virtualFile)
-    cqcNet = networkConfig(cqcFile)
+    virtualNet = socketsConfig(virtualFile, network_name=network_name, config_type="vnode")
+    cqcNet = socketsConfig(cqcFile, network_name=network_name, config_type="cqc")
 
     # Check if we are in the host-dictionary
     if myName in cqcNet.hostDict:
         myHost = cqcNet.hostDict[myName]
-        cqc_factory = CQCFactory(myHost, myName, cqcNet, SimulaqronCQCHandler)
+        cqc_factory = CQCFactory(myHost, myName, cqcNet, SimulaqronCQCHandler, network_name=network_name)
     else:
         logging.error("LOCAL %s: Cannot start classical communication servers.", myName)
         return
