@@ -252,9 +252,9 @@ def recv_retry_time(value):
 
 
 @set.command()
-@click.argument('value', type=click.Choice(["debug", "info", "warning", "error", "critical"]))
+@click.argument('value', type=int)
 def log_level(value):
-    """Log level for both backend and frontend."""
+    """Log level for both backend and frontend\n10=DEBUG, 20=INFO, 30=WARNING, 40=ERROR, 50=CRITICAL."""
     simulaqron_settings.log_level = value
 
 
