@@ -10,11 +10,13 @@ TESTS_DIR      = simulaqron/tests
 TOOLBOX_DIR    = simulaqron/toolbox
 VIRTNODE_DIR   = simulaqron/virtNode
 
+clean: _delete_pyc _delete_pid _clear_build _reset
+
 _delete_pyc:
 	@find . -name '*.pyc' -delete
 
 _delete_pid:
-	@find ${SIMULARON_DIR} -name '*.pid' -delete
+	@find ${SIMULAQRON_DIR} -name '*.pid' -delete
 
 format:
 	black -l 120 .
@@ -53,8 +55,6 @@ _remove_egg_info:
 	@rm -f -r simulaqron.egg-info
 
 _clear_build: _remove_build _remove_dist _remove_egg_info
-
-clean: _delete_pyc _delete_pid _clear_build _reset
 
 _build:
 	@${PYTHON} setup.py sdist bdist_wheel
