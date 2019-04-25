@@ -16,19 +16,6 @@ class TestInitNetwork(unittest.TestCase):
         self.default_nodes = ["Alice", "Bob", "Charlie", "David", "Eve"]
         self.default_topology = None
 
-        # # Set config files
-        # simulaqron_path = get_simulaqron_path.main()
-        # nodes_config_file = os.path.join(simulaqron_path, "config", "Nodes.cfg")
-        # with open(nodes_config_file, 'w') as f:
-        #     self.nodes = ["Test1", "Test2", "Test3"]
-        #     f.writelines([node + "\n" for node in self.nodes])
-        # topology_config_file = os.path.join(simulaqron_path, "config", "topology.json")
-        # with open(topology_config_file, 'w') as f:
-        #     self.topology = {"Test1": ["Test2"], "Test2": ["Test3"], "Test3": []}
-        #     json.dump(self.topology, f)
-        # simulaqron_settings.topology_file = os.path.join("config", "topology.json")
-        # # Settings.set_setting("BACKEND", "topology_file", "config/topology.json")
-
     def tearDown(self):
         self.check_nodes_and_topology(self.network)
 

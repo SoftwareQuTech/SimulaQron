@@ -52,6 +52,15 @@ class SimulaQronDaemon(run.RunDaemon):
             time.sleep(0.1)
 
 
+def _is_positive_answer(answer):
+    """
+    Used to check if an answer is positive from a user.
+    """
+    if answer in ["yes", "y"]:
+        return True
+    return False
+
+
 @click.group(context_settings=CONTEXT_SETTINGS)
 def cli():
     """Command line interface for interacting with SimulaQron."""
@@ -129,7 +138,7 @@ def start(name, nrnodes, nodes, topology, force, keep):
             answer = input("Do you want to add/replace the network '{}' in the file {} "
                            "with a new network? (yes/no)"
                            .format(name, simulaqron_settings.network_config_file))
-            if answer != "yes":
+            if not _is_positive_answer(answer):
                 print("Aborted!")
                 return
     d = SimulaQronDaemon(pidfile=pidfile, name=name, nrnodes=nrnodes, nodes=nodes, topology=topology, new=new)
@@ -180,7 +189,7 @@ def reset(force):
                        "(yes/no)")
     else:
         answer = "yes"
-    if answer == "yes":
+    if _is_positive_answer(answer):
         for entry in os.listdir(PID_FOLDER):
             if entry.endswith(".pid"):
                 pidfile = os.path.join(PID_FOLDER, entry)
@@ -409,7 +418,7 @@ def add(name, network_name=None, hostname=None, app_port=None, cqc_port=None, vn
     if not force:
         answer = input("Do you want to add the node {} to the network {} in the file {}? (yes/no)."
                        .format(name, network_name, simulaqron_settings.network_config_file))
-        if answer != "yes":
+        if not _is_positive_answer(answer):
             print("Aborting!")
             return
     if neighbors is not None:
@@ -442,7 +451,7 @@ def remove(name, network_name=None, force=False):
     if not force:
         answer = input("Do you want to remove the node {} to the network {} in the file {}? (yes/no)."
                        .format(name, network_name, simulaqron_settings.network_config_file))
-        if answer != "yes":
+        if not _is_positive_answer(answer):
             print("Aborting!")
             return
     networks_config = NetworksConfigConstructor(simulaqron_settings.network_config_file)
@@ -470,7 +479,7 @@ def default(network_name=None, force=False):
         answer = input("Do you want to set the network {} in the file {} to default,"
                        "i.e. with nodes Alice, Bob, Charlie, David and Eve? (yes/no)."
                        .format(network_name, simulaqron_settings.network_config_file))
-        if answer != "yes":
+        if not _is_positive_answer(answer):
             print("Aborting!")
             return
     networks_config = NetworksConfigConstructor(simulaqron_settings.network_config_file)

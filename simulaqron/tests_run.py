@@ -12,11 +12,11 @@ def main(test_type="quick"):
 
     path_to_here = os.path.dirname(os.path.abspath(__file__))
     if test_type == "quick":
-        directory = os.path.join(path_to_here, "tests", "auto", "quick")
+        directory = os.path.join(path_to_here, "tests", "unittests", "quick")
     elif test_type == "full":
-        directory = os.path.join(path_to_here, "tests", "auto")
+        directory = os.path.join(path_to_here, "tests", "unittests")
     elif test_type == "network":
-        directory = os.path.join(path_to_here, "tests", "auto", "quick", "network")
+        directory = os.path.join(path_to_here, "tests", "unittests", "quick", "network")
     else:
         raise ValueError("Unknown test type {}".format(test_type))
 

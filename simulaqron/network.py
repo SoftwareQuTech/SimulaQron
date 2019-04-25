@@ -92,7 +92,7 @@ class Network:
                 answer = input("Do you want to add/replace the network {} in the file {}"
                                "with a network constisting of the nodes {}? (yes/no)"
                                .format(self.name, self._network_config_file, self.nodes))
-                if answer != "yes":
+                if answer not in ["yes", "y"]:
                     raise RuntimeError("User did not want to replace network in file")
             networks_config.add_network(node_names=self.nodes, network_name=self.name, topology=self.topology)
             networks_config.write_to_file(self._network_config_file)
