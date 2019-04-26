@@ -121,6 +121,9 @@ class Network:
 
     @property
     def running(self):
+        """
+        Is the network up and running?
+        """
         for node in self.nodes:
             try:
                 cqc = CQCConnection(node, retry_connection=False, network_name=self.name)
@@ -138,6 +141,9 @@ class Network:
         self.stop()
 
     def _setup_processes(self):
+        """
+        Setup the processes forming the network, however they are not started yet.
+        """
         mp.set_start_method("spawn", force=True)
         for node in self.nodes:
             process_virtual = mp.Process(
@@ -149,6 +155,12 @@ class Network:
             self.processes += [process_virtual, process_cqc]
 
     def start(self, wait_until_running=True):
+        """
+        Starts the network.
+        The boolean flag 'wait_until_running' can be used whether the call to this method should
+        blog until the all processes are running and are connected or not.
+        :param wait_until_running: bool
+        """
         logging.info("Starting network with name {}".format(self.name))
         for p in self.processes:
             if not p.is_alive():
@@ -166,6 +178,9 @@ class Network:
                     time.sleep(0.1)
 
     def stop(self):
+        """
+        Stops the network.
+        """
         if not self._running:
             return
 
