@@ -16,6 +16,15 @@ default_topology_file = os.path.join(simulaqron_path, config_folder, "topology.j
 
 class NetworksConfigConstructor:
     def __init__(self, file_path=None):
+        """
+        Used to construct the config file of networks.abs
+        When all nodes and networks are added the content of this object can
+        be written to a file by calling the method 'write_to_file'.
+
+        :param file_path: None or str
+            Path to the network config_file. If None an empty networkconfig constructor is initalized.
+            Otherwise the content of the file is loaded.
+        """
         self.networks = {}
         self.used_sockets = []
         self.file_path = file_path
@@ -24,6 +33,32 @@ class NetworksConfigConstructor:
 
     def add_node(self, node_name, network_name="default", app_hostname=None, cqc_hostname=None, vnode_hostname=None,
                  app_port=None, cqc_port=None, vnode_port=None, neighbors=None):
+        """
+        Adds a node with the given name to a network (default: "default").
+        If hostnames are None they will default to 'localhost'.
+        If the port numbers None, unused ones will be chosen between 8000 and 9000.
+        If neighbors are specified a restricted topology can be constructed (default is fully connected).
+
+        :param node_name: str
+            Name of the node, e.g. Alice
+        :param network_name: str
+            Name of the network (default: "default")
+        :param app_hostname: str or None
+            Hostname, e.g. localhost (default) or 192.168.0.1
+        :param cqc_hostname: str or None
+            Hostname, e.g. localhost (default) or 192.168.0.1
+        :param vnode_hostname: str or None
+            Hostname, e.g. localhost (default) or 192.168.0.1
+        :param app_port: int or None
+            Port number for the application
+        :param cqc_port: int or None
+            Port number for the cqc server
+        :param vnode_port: int or None
+            Port number for the virtual node
+        :param neighbors: (list of str) or None
+            A list of neighbors, of this node, if None all current nodes in the network will be adjacent to the added node.
+        :return: None
+        """
         if network_name is None:
             network_name = "default"
         socket_addresses = [(app_hostname, app_port), (cqc_hostname, cqc_port), (vnode_hostname, vnode_port)]
@@ -57,6 +92,14 @@ class NetworksConfigConstructor:
             self.networks[network_name] = network
 
     def remove_node(self, node_name, network_name="default"):
+        """
+        Removes a node from the network.
+
+        :param node_name: str
+            Name of the node, e.g. Alice
+        :param network_name: str
+            Name of the network (default: "default")
+        """
         if network_name is None:
             network_name = "default"
         if network_name in self.networks:
@@ -65,8 +108,10 @@ class NetworksConfigConstructor:
 
     def reset(self):
         """
-        Resets the current config (simulaqron_settings.network_config_file) to a single network ("default")
-        with the nodes Alice, Bob, Charlie, David and Eve
+        Resets the current object to a single network ("default")
+        with the nodes Alice, Bob, Charlie, David and Eve.
+        Note that this does not overwrite any config file but can be done
+        by calling 'write_to_file'.
         :return:
         """
         for network_name in list(self.networks.keys()):
@@ -75,6 +120,16 @@ class NetworksConfigConstructor:
         self.add_network(node_names=node_names)
 
     def add_network(self, node_names, network_name="default", topology=None):
+        """
+        Adds a new network to the config, with some specified nodes.
+
+        :param node_names: list of str
+            Name of the nodes, e.g. [Alice, Bob]
+        :param network_name: str
+            Name of the network (default: "default")
+        :param topology: None or dict
+            The topology of the network (optional) (default is fully connected)
+        """
         if network_name is None:
             network_name = "default"
         self.remove_network(network_name=network_name)
@@ -86,11 +141,24 @@ class NetworksConfigConstructor:
             self.add_node(node_name, network_name=network_name, neighbors=neighbors)
 
     def remove_network(self, network_name="default"):
+        """
+        Removes a network from the config.
+
+        :param network_name: str
+            Name of the network (default: "default")
+        """
         if network_name is None:
             network_name = "default"
         self.networks.pop(network_name, None)
 
     def get_nodes(self, network_name="default"):
+        """
+        Returns the node-config objects (_NodeConfig) in a network.
+
+        :param network_name: str
+            Name of the network (default: "default")
+        :return: list of _NodeConfig
+        """
         if network_name is None:
             network_name = "default"
         if network_name in self.networks:
@@ -100,6 +168,13 @@ class NetworksConfigConstructor:
             raise ValueError("{} is not a network in this config".format(network_name))
 
     def get_node_names(self, network_name="default"):
+        """
+        Returns the names of the nodes in a network.
+
+        :param network_name: str
+            Name of the network (default: "default")
+        :return: list of str
+        """
         if network_name is None:
             network_name = "default"
         if network_name in self.networks:
@@ -111,11 +186,17 @@ class NetworksConfigConstructor:
     def to_dict(self):
         """
         Constructs a dictionary with all the content that can be written to a json file
-        :return:
+        :return: dict
         """
         return {network_name: network.to_dict() for network_name, network in self.networks.items()}
 
     def write_to_file(self, file_path=None):
+        """
+        Writes the content of this config to a file.
+        
+        :param file_path: None or str
+            If a file_path was specified upon __init__ this will be used if file_path is None.
+        """
         if file_path is None:
             file_path = self.file_path
         if file_path is None:
