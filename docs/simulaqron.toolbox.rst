@@ -1,5 +1,5 @@
-simulaqron.virtNode package
-===========================
+simulaqron.toolbox package
+==========================
 
 Submodules
 ----------
@@ -28,10 +28,10 @@ simulaqron.toolbox.manage_nodes module
     :undoc-members:
     :show-inheritance:
 
-simulaqron.toolbox.measurements module
---------------------------------------
+simulaqron.toolbox.reset module
+-------------------------------
 
-.. automodule:: simulaqron.toolbox.measurements
+.. automodule:: simulaqron.toolbox.reset
     :members:
     :undoc-members:
     :show-inheritance:
