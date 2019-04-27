@@ -29,7 +29,8 @@ class NetworksConfigConstructor:
         self.used_sockets = []
         self.file_path = file_path
         if self.file_path is not None:
-            self.read_from_file()
+            if os.path.exists(self.file_path):
+                self.read_from_file()
 
     def add_node(self, node_name, network_name="default", app_hostname=None, cqc_hostname=None, vnode_hostname=None,
                  app_port=None, cqc_port=None, vnode_port=None, neighbors=None):

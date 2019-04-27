@@ -32,6 +32,7 @@ import time
 from twisted.spread import pb
 from twisted.internet import reactor, error
 from twisted.internet.defer import DeferredList
+from twisted.internet.error import ReactorNotRunning
 
 from simulaqron.settings import simulaqron_settings
 
@@ -81,8 +82,8 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
             logging.error("LOCAL %s: Cannot start classical communication servers.", myName, e.strerror)
             return
 
-            # Give the server some time to start up
-    time.sleep(1)
+    # Give the server some time to start up
+    time.sleep(3)
 
     # Connect to the local virtual node simulating the "local" qubits
     logging.debug("LOCAL %s: Connecting to local virtual node.", myName)
@@ -169,7 +170,10 @@ def localError(reason):
     Error handling for the connection.
     """
     print("Critical error: ", reason)
-    reactor.stop()
+    try:
+        reactor.stop()
+    except ReactorNotRunning:
+        pass
 
 
 def assemble_qubit(realM, imagM):

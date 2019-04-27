@@ -10,6 +10,7 @@ with open(simulaqron_init, 'r') as f:
         if line.startswith("__version__"):
             version = line.split("__version__ = ")[1]
             version = version.split(' ')[0]
+            version = eval(version)
             break
     else:
         raise RuntimeError("Could not find the version!")
@@ -32,7 +33,7 @@ setuptools.setup(
     include_package_data=True,
     packages=setuptools.find_packages(include=("simulaqron*",)),
     package_data={
-        'simulaqron': ['config/*.cfg', '.simulaqron_pids/__keep__', 'tests/unittests/quick/merges/configs/*.cfg']
+        'simulaqron': ['config/.keep', '.simulaqron_pids/__keep__', 'tests/unittests/quick/merges/configs/*.cfg']
     },
     install_requires=install_requires,
     classifiers=[
