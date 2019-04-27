@@ -1,7 +1,7 @@
 import os
 import json
 from contextlib import closing
-from socket import AF_INET, SOCK_STREAM, socket
+import socket
 
 from simulaqron.toolbox import get_simulaqron_path
 from simulaqron.settings import simulaqron_settings
@@ -56,7 +56,8 @@ class NetworksConfigConstructor:
         :param vnode_port: int or None
             Port number for the virtual node
         :param neighbors: (list of str) or None
-            A list of neighbors, of this node, if None all current nodes in the network will be adjacent to the added node.
+            A list of neighbors, of this node.
+            If None all current nodes in the network will be adjacent to the added node.
         :return: None
         """
         if network_name is None:
@@ -193,7 +194,7 @@ class NetworksConfigConstructor:
     def write_to_file(self, file_path=None):
         """
         Writes the content of this config to a file.
-        
+
         :param file_path: None or str
             If a file_path was specified upon __init__ this will be used if file_path is None.
         """
@@ -207,6 +208,12 @@ class NetworksConfigConstructor:
             json.dump(dict, f, indent=4)
 
     def read_from_file(self, file_path=None):
+        """
+        Reads config from a file.
+
+        :param file_path: None or str
+            If a file_path was specified upon __init__ this will be used if file_path is None.
+        """
         if file_path is None:
             file_path = self.file_path
         if file_path is None:
@@ -228,7 +235,8 @@ class NetworksConfigConstructor:
                 app_hostname, app_port = node_dict["app_socket"]
                 cqc_hostname, cqc_port = node_dict["cqc_socket"]
                 vnode_hostname, vnode_port = node_dict["vnode_socket"]
-                for socket_address in [node_dict.values()]:
+                socket_addresses = [(app_hostname, app_port), (cqc_hostname, cqc_port), (vnode_hostname, vnode_port)]
+                for socket_address in socket_addresses:
                     if socket_address not in self.used_sockets:
                         self.used_sockets.append(socket_address)
                 node = _NodeConfig(name=node_name, app_hostname=app_hostname, cqc_hostname=cqc_hostname,
@@ -260,23 +268,59 @@ class NetworksConfigConstructor:
         if (hostname, port) in self.used_sockets:
             return False
 
-        return self._check_socket_is_free(hostname, port)
+        return self._check_socket_is_free(port)
 
     @staticmethod
-    def _check_socket_is_free(hostname, port):
-        with closing(socket(AF_INET, SOCK_STREAM)) as sock:
-            if sock.connect_ex((hostname, port)) == 0:
-                return False  # Open
-
-        return True  # Closed (available)
+    def _check_socket_is_free(port):
+        """
+        Checks if a given socket on localhost is in use.
+        This is done by trying to open the port and check if it succeeds.
+        :param port: int
+            The port number
+        """
+        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+            address = ('localhost', port)
+            try:
+                sock.bind(address)
+            except socket.error:
+                return False
+        return True
 
 
 class _NetworkConfig:
     def __init__(self):
+        """
+        Used by NetworksConfigConstructor to keep track of the config of a single network.
+        """
         self.topology = None
         self.nodes = {}
 
     def add_node(self, name, app_hostname, cqc_hostname, vnode_hostname, app_port, cqc_port, vnode_port, neighbors):
+        """
+        Adds a node with the given name to a network (default: "default").
+        If hostnames are None they will default to 'localhost'.
+        If the port numbers None, unused ones will be chosen between 8000 and 9000.
+        If neighbors are specified a restricted topology can be constructed (default is fully connected).
+
+        :param node_name: str
+            Name of the node, e.g. Alice
+        :param app_hostname: str or None
+            Hostname, e.g. localhost (default) or 192.168.0.1
+        :param cqc_hostname: str or None
+            Hostname, e.g. localhost (default) or 192.168.0.1
+        :param vnode_hostname: str or None
+            Hostname, e.g. localhost (default) or 192.168.0.1
+        :param app_port: int or None
+            Port number for the application
+        :param cqc_port: int or None
+            Port number for the cqc server
+        :param vnode_port: int or None
+            Port number for the virtual node
+        :param neighbors: (list of str) or None
+            A list of neighbors, of this node.
+            If None all current nodes in the network will be adjacent to the added node.
+        :return: None
+        """
         if neighbors is not None:
             if self.topology is None:
                 # Assume that whatever nodes were there before are fully connnected
@@ -292,12 +336,19 @@ class _NetworkConfig:
                                        vnode_port=vnode_port)
 
     def to_dict(self):
+        """
+        Constructs a dictionary with all the config of this network.
+        :return: dict
+        """
         nodes = {node_name: node.to_dict() for node_name, node in self.nodes.items()}
         return {"nodes": nodes, "topology": self.topology}
 
 
 class _NodeConfig:
     def __init__(self, name, app_hostname, cqc_hostname, vnode_hostname, app_port, cqc_port, vnode_port):
+        """
+        Used by _NetworkConfig to keep track of the config of a single node.
+        """
         self.name = name
         self.app_hostname = app_hostname
         self.cqc_hostname = cqc_hostname
@@ -307,6 +358,10 @@ class _NodeConfig:
         self.vnode_port = vnode_port
 
     def to_dict(self):
+        """
+        Constructs a dictionary with all the config of this node.
+        :return: dict
+        """
         return {
             "app_socket": [self.app_hostname, self.app_port],
             "cqc_socket": [self.cqc_hostname, self.cqc_port],

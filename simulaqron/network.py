@@ -192,7 +192,7 @@ class Network:
                 try:
                     p.terminate()
                 except Exception as err:
-                    print(err)
+                    print("Could not terminate one of the processes in the network due to error: {}".format(err))
 
 
 def construct_topology_config(topology, nodes):

@@ -73,6 +73,9 @@ def cli():
 
 @cli.command()
 def version():
+    """
+    Prints the version of simulqron.
+    """
     print(simulaqron.__version__)
 
 

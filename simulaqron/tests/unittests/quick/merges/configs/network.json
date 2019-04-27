@@ -4,43 +4,43 @@
             "Alice": {
                 "app_socket": [
                     "localhost",
-                    8000
+                    8002
                 ],
                 "cqc_socket": [
                     "localhost",
-                    8001
+                    8003
                 ],
                 "vnode_socket": [
                     "localhost",
-                    8002
+                    8008
                 ]
             },
             "Bob": {
                 "app_socket": [
                     "localhost",
-                    8003
+                    8018
                 ],
                 "cqc_socket": [
                     "localhost",
-                    8004
+                    8024
                 ],
                 "vnode_socket": [
                     "localhost",
-                    8005
+                    8025
                 ]
             },
             "Charlie": {
                 "app_socket": [
                     "localhost",
-                    8006
+                    8030
                 ],
                 "cqc_socket": [
                     "localhost",
-                    8007
+                    8031
                 ],
                 "vnode_socket": [
                     "localhost",
-                    8008
+                    8032
                 ]
             }
         },
