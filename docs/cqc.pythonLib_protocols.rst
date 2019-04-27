@@ -12,6 +12,14 @@ cqc.pythonLib_protocols.coinflip_leader module
     :undoc-members:
     :show-inheritance:
 
+cqc.pythonLib_protocols.measurements module
+-------------------------------------------
+
+.. automodule:: cqc.pythonLib_protocols.measurements
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 cqc.pythonLib_protocols.wstate module
 -------------------------------------
 

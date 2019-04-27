@@ -28,7 +28,7 @@ We will run everything locally (localhost) using two nodes, Alice, Bob and Charl
 
     ./cli/SimulaQron start --nodes Alice,Bob,Charlie
 
-The below example can then be executed when in the folder `examples/cqc/pythonLib/extendGHZ` typing::
+The below example can then be executed when in the folder `examples/pythonLib/extendGHZ <https://github.com/SoftwareQuTech/CQC-Python/tree/master/examples/pythonLib/extendGHZ>`_ in the repo `pythonLib <https://github.com/SoftwareQuTech/CQC-Python>`_  by typing::
 
     sh run.sh
 

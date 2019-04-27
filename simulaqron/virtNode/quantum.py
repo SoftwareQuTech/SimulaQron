@@ -70,8 +70,8 @@ class simulatedQubit(pb.Referenceable):
         self.active = True
 
         # Optional parameters for when the simulation is noise
-        self.noisy = settings.Settings.CONF_NOISY_QUBITS
-        self.T1 = settings.Settings.CONF_T1
+        self.noisy = settings.simulaqron_settings.noisy_qubits
+        self.T1 = settings.simulaqron_settings.t1
         self.last_accessed = time.time()
 
     def lock(self):
@@ -251,7 +251,7 @@ class simulatedQubit(pb.Referenceable):
         """
         Returns the state of the qubits in the list qList by tracing out the rest.
         """
-        backend = settings.Settings.CONF_BACKEND
+        backend = settings.simulaqron_settings.backend
         if backend != "qutip":
             raise RuntimeError("Cannot get reduced qubit state using backend {}".format(backend))
         logging.debug("VIRTUAL NODE %s: Returning qubit %d", self.node.name, self.num)

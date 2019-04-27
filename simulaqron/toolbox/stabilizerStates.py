@@ -138,8 +138,6 @@ class StabilizerState:
                 try:
                     self._group = np.array(data, dtype=bool)
                 except Exception as err:
-                    print(data)
-                    print(type(data))
                     raise ValueError(
                         "Could not create an array of the 'data' due to the following error: {}".format(err)
                     )
