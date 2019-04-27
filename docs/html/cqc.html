@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>cqc package &#8212; SimulaQron 2.2.0 documentation</title>
+    <title>cqc package &#8212; SimulaQron 3.0.0 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -17,7 +17,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="CQC C Library" href="CLib.html" />
-    <link rel="prev" title="simulaqron.run package" href="simulaqron.run.html" /> 
+    <link rel="prev" title="simulaqron.virtNode package" href="simulaqron.virtNode.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -32,9 +32,9 @@
           <a href="CLib.html" title="CQC C Library"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="simulaqron.run.html" title="simulaqron.run package"
+          <a href="simulaqron.virtNode.html" title="simulaqron.virtNode package"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 2.2.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.0 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -44,19 +44,21 @@
 <li><a class="reference internal" href="#">cqc package</a><ul>
 <li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-cqc.MessageHandler">cqc.MessageHandler module</a></li>
+<li><a class="reference internal" href="#module-cqc.Protocol">cqc.Protocol module</a></li>
 <li><a class="reference internal" href="#module-cqc.cqcHeader">cqc.cqcHeader module</a></li>
 <li><a class="reference internal" href="#module-cqc.entInfoHeader">cqc.entInfoHeader module</a></li>
 <li><a class="reference internal" href="#module-cqc.hostConfig">cqc.hostConfig module</a></li>
 <li><a class="reference internal" href="#module-cqc.pythonLib">cqc.pythonLib module</a></li>
-<li><a class="reference internal" href="#module-cqc.settings">cqc.settings module</a></li>
+<li><a class="reference internal" href="#cqc-settings-module">cqc.settings module</a></li>
 <li><a class="reference internal" href="#module-cqc">Module contents</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="simulaqron.run.html"
-                        title="previous chapter">simulaqron.run package</a></p>
+  <p class="topless"><a href="simulaqron.virtNode.html"
+                        title="previous chapter">simulaqron.virtNode package</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="CLib.html"
                         title="next chapter">CQC C Library</a></p>
@@ -101,6 +103,7 @@
 <li class="toctree-l1"><a class="reference internal" href="cqc.pythonLib_protocols.html">cqc.pythonLib_protocols package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="cqc.pythonLib_protocols.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cqc.pythonLib_protocols.html#module-cqc.pythonLib_protocols.coinflip_leader">cqc.pythonLib_protocols.coinflip_leader module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cqc.pythonLib_protocols.html#module-cqc.pythonLib_protocols.measurements">cqc.pythonLib_protocols.measurements module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cqc.pythonLib_protocols.html#module-cqc.pythonLib_protocols.wstate">cqc.pythonLib_protocols.wstate module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cqc.pythonLib_protocols.html#module-cqc.pythonLib_protocols">Module contents</a></li>
 </ul>
@@ -111,6 +114,228 @@
 </div>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-cqc.MessageHandler">
+<span id="cqc-messagehandler-module"></span><h2>cqc.MessageHandler module<a class="headerlink" href="#module-cqc.MessageHandler" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="cqc.MessageHandler.CQCMessageHandler">
+<em class="property">class </em><code class="descclassname">cqc.MessageHandler.</code><code class="descname">CQCMessageHandler</code><span class="sig-paren">(</span><em>factory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_allocate">
+<code class="descname">cmd_allocate</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_allocate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_allocate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_cnot">
+<code class="descname">cmd_cnot</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_cnot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_cnot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_cphase">
+<code class="descname">cmd_cphase</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_cphase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_cphase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_epr">
+<code class="descname">cmd_epr</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_epr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_epr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_epr_recv">
+<code class="descname">cmd_epr_recv</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_epr_recv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_epr_recv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_h">
+<code class="descname">cmd_h</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_h"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_h" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_i">
+<code class="descname">cmd_i</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_i"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_i" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_k">
+<code class="descname">cmd_k</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_k"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_k" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_measure">
+<code class="descname">cmd_measure</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_measure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_measure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_measure_inplace">
+<code class="descname">cmd_measure_inplace</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_measure_inplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_measure_inplace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_new">
+<code class="descname">cmd_new</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em>, <em>return_q_id=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_new"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_new" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_recv">
+<code class="descname">cmd_recv</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_recv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_recv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_release">
+<code class="descname">cmd_release</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_release"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_release" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_reset">
+<code class="descname">cmd_reset</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_reset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_rotx">
+<code class="descname">cmd_rotx</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_rotx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_rotx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_roty">
+<code class="descname">cmd_roty</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_roty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_roty" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_rotz">
+<code class="descname">cmd_rotz</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_rotz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_rotz" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_send">
+<code class="descname">cmd_send</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_send" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_t">
+<code class="descname">cmd_t</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_t"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_t" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_x">
+<code class="descname">cmd_x</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_x"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_y">
+<code class="descname">cmd_y</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.cmd_z">
+<code class="descname">cmd_z</code><span class="sig-paren">(</span><em>cqc_header</em>, <em>cmd</em>, <em>xtra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.cmd_z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.cmd_z" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="cqc.MessageHandler.CQCMessageHandler.create_extra_header">
+<em class="property">static </em><code class="descname">create_extra_header</code><span class="sig-paren">(</span><em>cmd</em>, <em>cmd_data</em>, <em>cqc_version=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.create_extra_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.create_extra_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the extra header (communication header, rotation header, etc) based on the command</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="cqc.MessageHandler.CQCMessageHandler.create_return_message">
+<em class="property">static </em><code class="descname">create_return_message</code><span class="sig-paren">(</span><em>app_id</em>, <em>msg_type</em>, <em>length=0</em>, <em>cqc_version=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.create_return_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.create_return_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a messaage that the protocol should send back
+:param app_id: the app_id to which the message should be send
+:param msg_type: the type of message to return
+:param length: the length of additional message
+:param cqc_version: The cqc version of the message
+:return: a new header message to be send back</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.handle_command">
+<code class="descname">handle_command</code><span class="sig-paren">(</span><em>header</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.handle_command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.handle_command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle incoming command requests.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.handle_cqc_message">
+<code class="descname">handle_cqc_message</code><span class="sig-paren">(</span><em>header</em>, <em>message</em>, <em>transport=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.handle_cqc_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.handle_cqc_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>This calls the correct method to handle the cqcmessage, based on the type specified in the header</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.handle_factory">
+<code class="descname">handle_factory</code><span class="sig-paren">(</span><em>header</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.handle_factory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.handle_factory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.handle_hello">
+<code class="descname">handle_hello</code><span class="sig-paren">(</span><em>header</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.handle_hello"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.handle_hello" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.handle_time">
+<code class="descname">handle_time</code><span class="sig-paren">(</span><em>header</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.handle_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.handle_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cqc.MessageHandler.CQCMessageHandler.retrieve_return_messages">
+<code class="descname">retrieve_return_messages</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#CQCMessageHandler.retrieve_return_messages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.CQCMessageHandler.retrieve_return_messages" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="cqc.MessageHandler.UnknownQubitError">
+<em class="property">exception </em><code class="descclassname">cqc.MessageHandler.</code><code class="descname">UnknownQubitError</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#UnknownQubitError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.UnknownQubitError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cqc.MessageHandler.has_extra">
+<code class="descclassname">cqc.MessageHandler.</code><code class="descname">has_extra</code><span class="sig-paren">(</span><em>cmd</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#has_extra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.has_extra" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether this command includes an extra header with additional information.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cqc.MessageHandler.print_error">
+<code class="descclassname">cqc.MessageHandler.</code><code class="descname">print_error</code><span class="sig-paren">(</span><em>error</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/MessageHandler.html#print_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.MessageHandler.print_error" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-cqc.Protocol">
+<span id="cqc-protocol-module"></span><h2>cqc.Protocol module<a class="headerlink" href="#module-cqc.Protocol" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="cqc.Protocol.CQCProtocol">
+<em class="property">class </em><code class="descclassname">cqc.Protocol.</code><code class="descname">CQCProtocol</code><span class="sig-paren">(</span><em>factory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/Protocol.html#CQCProtocol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.Protocol.CQCProtocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.internet.protocol.Protocol</span></code></p>
+<dl class="method">
+<dt id="cqc.Protocol.CQCProtocol.connectionLost">
+<code class="descname">connectionLost</code><span class="sig-paren">(</span><em>reason=&lt;twisted.python.failure.Failure twisted.internet.error.ConnectionDone: Connection was closed cleanly.&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/Protocol.html#CQCProtocol.connectionLost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.Protocol.CQCProtocol.connectionLost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the connection is shut down.</p>
+<p>Clear any circular references here, and any external references
+to this Protocol.  The connection has been closed.</p>
+<p>&#64;type reason: L{twisted.python.failure.Failure}</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cqc.Protocol.CQCProtocol.connectionMade">
+<code class="descname">connectionMade</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/Protocol.html#CQCProtocol.connectionMade"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.Protocol.CQCProtocol.connectionMade" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when a connection is made.</p>
+<p>This may be considered the initializer of the protocol, because
+it is called when the connection is completed.  For clients,
+this is called once the connection to the server has been
+established; for servers, this is called after an accept() call
+stops blocking and a socket has been received.  If you need to
+send any greeting or initial message, do it here.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cqc.Protocol.CQCProtocol.dataReceived">
+<code class="descname">dataReceived</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/Protocol.html#CQCProtocol.dataReceived"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.Protocol.CQCProtocol.dataReceived" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive data. We will always wait to receive enough data for the
+header, and then the entire packet first before commencing processing.</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-cqc.cqcHeader">
 <span id="cqc-cqcheader-module"></span><h2>cqc.cqcHeader module<a class="headerlink" href="#module-cqc.cqcHeader" title="Permalink to this headline">¶</a></h2>
@@ -512,32 +737,12 @@ Used to give correct message to both nodes.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.flavors.Referenceable</span></code></p>
 </dd></dl>
 
-<dl class="class">
-<dt id="cqc.hostConfig.networkConfig">
-<em class="property">class </em><code class="descclassname">cqc.hostConfig.</code><code class="descname">networkConfig</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/hostConfig.html#networkConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.hostConfig.networkConfig" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.flavors.Referenceable</span></code></p>
-<dl class="method">
-<dt id="cqc.hostConfig.networkConfig.print_details">
-<code class="descname">print_details</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/hostConfig.html#networkConfig.print_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.hostConfig.networkConfig.print_details" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prints the details of the specified node with name.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="cqc.hostConfig.networkConfig.read_config">
-<code class="descname">read_config</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/hostConfig.html#networkConfig.read_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.hostConfig.networkConfig.read_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads the configuration file in which each line has the form: node name, hostname, port number.
-For example:
-Alice, localhost, 8888</p>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <div class="section" id="module-cqc.pythonLib">
 <span id="cqc-pythonlib-module"></span><h2>cqc.pythonLib module<a class="headerlink" href="#module-cqc.pythonLib" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="cqc.pythonLib.CQCConnection">
-<em class="property">class </em><code class="descclassname">cqc.pythonLib.</code><code class="descname">CQCConnection</code><span class="sig-paren">(</span><em>name</em>, <em>socket_address=None</em>, <em>cqcFile=None</em>, <em>appFile=None</em>, <em>appID=None</em>, <em>pend_messages=False</em>, <em>retry_connection=True</em>, <em>conn_retry_time=0.1</em>, <em>log_level=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/pythonLib.html#CQCConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.pythonLib.CQCConnection" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">cqc.pythonLib.</code><code class="descname">CQCConnection</code><span class="sig-paren">(</span><em>name</em>, <em>socket_address=None</em>, <em>appID=None</em>, <em>pend_messages=False</em>, <em>retry_connection=True</em>, <em>conn_retry_time=0.1</em>, <em>log_level=None</em>, <em>backend=None</em>, <em>use_classical_communication=True</em>, <em>network_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/pythonLib.html#CQCConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.pythonLib.CQCConnection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="method">
 <dt id="cqc.pythonLib.CQCConnection.allocate_qubits">
@@ -1524,37 +1729,8 @@ If notify, the return message is received before the method finishes.</p>
 <dd></dd></dl>
 
 </div>
-<div class="section" id="module-cqc.settings">
-<span id="cqc-settings-module"></span><h2>cqc.settings module<a class="headerlink" href="#module-cqc.settings" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="cqc.settings.get_app_file">
-<code class="descclassname">cqc.settings.</code><code class="descname">get_app_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/settings.html#get_app_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.settings.get_app_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the path to the APP file used
-:return: str</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="cqc.settings.get_config">
-<code class="descclassname">cqc.settings.</code><code class="descname">get_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/settings.html#get_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.settings.get_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the config of cqc
-:return: :obj: configparser.ConfigParser</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="cqc.settings.get_cqc_file">
-<code class="descclassname">cqc.settings.</code><code class="descname">get_cqc_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/settings.html#get_cqc_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.settings.get_cqc_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the path to the CQC file used
-:return: str</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="cqc.settings.set_config">
-<code class="descclassname">cqc.settings.</code><code class="descname">set_config</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/settings.html#set_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.settings.set_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the config of cqc
-:param config: :obj: configparser.ConfigParser
-:return: None</p>
-</dd></dl>
-
+<div class="section" id="cqc-settings-module">
+<h2>cqc.settings module<a class="headerlink" href="#cqc-settings-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-cqc">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cqc" title="Permalink to this headline">¶</a></h2>
@@ -1580,9 +1756,9 @@ If notify, the return message is received before the method finishes.</p>
           <a href="CLib.html" title="CQC C Library"
              >next</a> |</li>
         <li class="right" >
-          <a href="simulaqron.run.html" title="simulaqron.run package"
+          <a href="simulaqron.virtNode.html" title="simulaqron.virtNode package"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 2.2.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

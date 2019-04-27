@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>simulaqron.local.setup &#8212; SimulaQron 2.2.0 documentation</title>
+    <title>simulaqron.local.setup &#8212; SimulaQron 3.0.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -26,7 +26,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 2.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 3.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -87,8 +87,9 @@
 <span class="kn">from</span> <span class="nn">twisted.spread</span> <span class="k">import</span> <span class="n">pb</span>
 <span class="kn">from</span> <span class="nn">twisted.internet</span> <span class="k">import</span> <span class="n">reactor</span><span class="p">,</span> <span class="n">error</span>
 <span class="kn">from</span> <span class="nn">twisted.internet.defer</span> <span class="k">import</span> <span class="n">DeferredList</span>
+<span class="kn">from</span> <span class="nn">twisted.internet.error</span> <span class="k">import</span> <span class="n">ReactorNotRunning</span>
 
-<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="k">import</span> <span class="n">Settings</span>
+<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="k">import</span> <span class="n">simulaqron_settings</span>
 
 
 <span class="c1"># logging.basicConfig(format=&#39;%(asctime)s:%(levelname)s:%(message)s&#39;, level=logging.DEBUG)</span>
@@ -118,7 +119,7 @@
 
     <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
         <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2">:</span><span class="si">%(levelname)s</span><span class="s2">:</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">level</span><span class="o">=</span><span class="n">Settings</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_BACKEND</span><span class="p">,</span>
+        <span class="n">level</span><span class="o">=</span><span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">log_level</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># Initialize Twisted callback framework</span>
@@ -136,8 +137,8 @@
             <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;LOCAL </span><span class="si">%s</span><span class="s2">: Cannot start classical communication servers.&quot;</span><span class="p">,</span> <span class="n">myName</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">strerror</span><span class="p">)</span>
             <span class="k">return</span>
 
-            <span class="c1"># Give the server some time to start up</span>
-    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># Give the server some time to start up</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
     <span class="c1"># Connect to the local virtual node simulating the &quot;local&quot; qubits</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;LOCAL </span><span class="si">%s</span><span class="s2">: Connecting to local virtual node.&quot;</span><span class="p">,</span> <span class="n">myName</span><span class="p">)</span>
@@ -185,6 +186,7 @@
         <span class="k">if</span> <span class="n">lNode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">lNode</span><span class="o">.</span><span class="n">set_virtual_node</span><span class="p">(</span><span class="n">virtRoot</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">resList</span><span class="p">)</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;LOCAL </span><span class="si">%s</span><span class="s2">: Connection to virtual server failed!&quot;</span><span class="p">,</span> <span class="n">myName</span><span class="p">)</span>
         <span class="n">reactor</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 
@@ -223,7 +225,10 @@
 <span class="sd">    Error handling for the connection.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Critical error: &quot;</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
-    <span class="n">reactor</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">reactor</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+    <span class="k">except</span> <span class="n">ReactorNotRunning</span><span class="p">:</span>
+        <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="assemble_qubit"><a class="viewcode-back" href="../../../simulaqron.local.html#simulaqron.local.setup.assemble_qubit">[docs]</a><span class="k">def</span> <span class="nf">assemble_qubit</span><span class="p">(</span><span class="n">realM</span><span class="p">,</span> <span class="n">imagM</span><span class="p">):</span>
@@ -253,7 +258,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 2.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 3.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

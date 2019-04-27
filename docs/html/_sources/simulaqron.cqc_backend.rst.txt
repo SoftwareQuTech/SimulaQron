@@ -4,6 +4,14 @@ simulaqron.cqc_backend package
 Submodules
 ----------
 
+simulaqron.cqc_backend.cqcFactory module
+----------------------------------------
+
+.. automodule:: simulaqron.cqc_backend.cqcFactory
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 simulaqron.cqc_backend.cqcMessageHandler module
 -----------------------------------------------
 
@@ -12,19 +20,10 @@ simulaqron.cqc_backend.cqcMessageHandler module
     :undoc-members:
     :show-inheritance:
 
-simulaqron.cqc_backend.cqcProtocol module
------------------------------------------
-
-.. automodule:: simulaqron.cqc_backend.cqcProtocol
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
 Module contents
 ---------------
 
-.. automodule:: simulaqron.cqc_backend
+.. automodule:: simulaqron.toolbox
     :members:
     :undoc-members:
     :show-inheritance:

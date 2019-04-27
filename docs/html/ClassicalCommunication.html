@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Classical Communication &#8212; SimulaQron 2.2.0 documentation</title>
+    <title>Classical Communication &#8212; SimulaQron 3.0.0 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="PythonLib.html" title="Using the Python library"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 2.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="PythonLib.html" accesskey="U">Using the Python library</a> &#187;</li> 
       </ul>
     </div>
@@ -99,7 +99,10 @@ The method <code class="code docutils literal notranslate"><span class="pre">sen
 Note that if this method is never called, a socket connection is never opened.
 The socket connection between Alice and Bob are closed after the message is sent.
 This classical communication is thus not built for efficiency but for easy of use for someone not familiar with client/server setup.</p>
-<p>The socket addresses used by the built-in classical communication are taken from the file specified by the path in the argument <code class="code docutils literal notranslate"><span class="pre">appFile</span></code> when instantiating the <code class="code docutils literal notranslate"><span class="pre">CQCConnection</span></code>. If this argument is not specified, the filepath set in the SimulaQron settings (see <a class="reference internal" href="ConfNodes.html#manualsetup"><span class="std std-ref">Manual setup</span></a>) is used (SimulaQron needs to be started for this to take effect).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">CQC and the python library does not require SimulaQron to function. However if you want to use the built-in classical communication you need SimulaQron installed.</p>
+</div>
 <a class="reference internal image-reference" href="_images/servers.png"><img alt="Programming SimulaQrons Interfaces" class="align-center" src="_images/servers.png" style="width: 600px;" /></a>
 </div>
 
@@ -124,7 +127,7 @@ This classical communication is thus not built for efficiency but for easy of us
         <li class="right" >
           <a href="PythonLib.html" title="Using the Python library"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 2.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="PythonLib.html" >Using the Python library</a> &#187;</li> 
       </ul>
     </div>

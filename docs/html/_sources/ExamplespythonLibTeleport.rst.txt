@@ -30,7 +30,7 @@ We will run everything locally (localhost) using two nodes, Alice and Bob. Start
 
     ./cli/SimulaQron start --nodes Alice,Bob
 
-The below example can then be executed when in the folder `examples/cqc/pythonLib/teleport` typing::
+The below example can then be executed when in the folder `examples/pythonLib/teleport <https://github.com/SoftwareQuTech/CQC-Python/tree/master/examples/pythonLib/teleport>`_ in the repo `pythonLib <https://github.com/SoftwareQuTech/CQC-Python>`_  by typing::
 
     sh run.sh
 

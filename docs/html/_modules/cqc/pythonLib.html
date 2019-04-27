@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>cqc.pythonLib &#8212; SimulaQron 2.2.0 documentation</title>
+    <title>cqc.pythonLib &#8212; SimulaQron 3.0.0 documentation</title>
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -26,7 +26,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 2.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 3.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -90,7 +90,6 @@
 <span class="kn">import</span> <span class="nn">socket</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">cqc.settings</span> <span class="k">import</span> <span class="n">get_cqc_file</span><span class="p">,</span> <span class="n">get_app_file</span>
 <span class="kn">from</span> <span class="nn">cqc.cqcHeader</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">Header</span><span class="p">,</span>
     <span class="n">CQCCmdHeader</span><span class="p">,</span>
@@ -145,7 +144,16 @@
     <span class="n">CQC_TP_EXPIRE</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">cqc.entInfoHeader</span> <span class="k">import</span> <span class="n">EntInfoHeader</span>
-<span class="kn">from</span> <span class="nn">cqc.hostConfig</span> <span class="k">import</span> <span class="n">cqc_node_id_from_addrinfo</span><span class="p">,</span> <span class="n">networkConfig</span>
+<span class="kn">from</span> <span class="nn">cqc.hostConfig</span> <span class="k">import</span> <span class="n">cqc_node_id_from_addrinfo</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">simulaqron</span>
+    <span class="kn">from</span> <span class="nn">simulaqron.general.hostConfig</span> <span class="k">import</span> <span class="n">socketsConfig</span>
+    <span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="k">import</span> <span class="n">simulaqron_settings</span>
+    <span class="n">_simulaqron_version</span> <span class="o">=</span> <span class="n">simulaqron</span><span class="o">.</span><span class="n">__version__</span>
+    <span class="n">_simulaqron_major</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_simulaqron_version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+<span class="k">except</span> <span class="n">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="n">_simulaqron_major</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
 
 <div class="viewcode-block" id="shouldReturn"><a class="viewcode-back" href="../../cqc.html#cqc.pythonLib.shouldReturn">[docs]</a><span class="k">def</span> <span class="nf">shouldReturn</span><span class="p">(</span><span class="n">command</span><span class="p">):</span>
@@ -226,16 +234,19 @@
 <div class="viewcode-block" id="CQCConnection"><a class="viewcode-back" href="../../cqc.html#cqc.pythonLib.CQCConnection">[docs]</a><span class="k">class</span> <span class="nc">CQCConnection</span><span class="p">:</span>
     <span class="n">_appIDs</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">socket_address</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cqcFile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">appFile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">appID</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pend_messages</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                 <span class="n">retry_connection</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">conn_retry_time</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">socket_address</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">appID</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pend_messages</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">retry_connection</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">conn_retry_time</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">use_classical_communication</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">network_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize a connection to the cqc server.</span>
+
+<span class="sd">        Since version 3.0.0: If socket_address is None or use_classical_communication is True, the CQC connection</span>
+<span class="sd">        needs some way of finding the correct socket addresses. If backend is None or &quot;simulaqron&quot; the connection</span>
+<span class="sd">        will try to make use of the network config file setup in simulaqron. If simulaqron is not installed</span>
 
 <span class="sd">        - **Arguments**</span>
 <span class="sd">            :param name:        Name of the host.</span>
 <span class="sd">            :param socket_address: tuple (str, int) of ip and port number.</span>
-<span class="sd">            :param cqcFile:    Path to cqcFile. If None, &#39;Setting.CONF_CQC_FILE&#39; is used, unless socket_address</span>
-<span class="sd">            :param appFile:    Path to appFile. If None, &#39;Setting.CONF_APP_FILE&#39; is used.</span>
 <span class="sd">            :param appID:        Application ID. If set to None, defaults to a nonused ID.</span>
 <span class="sd">            :param pend_messages: True if you want to wait with sending messages to the back end.</span>
 <span class="sd">                    Use flush() to send all pending messages in one go as a sequence to the server</span>
@@ -245,6 +256,14 @@
 <span class="sd">                How many seconds to wait between each connection retry</span>
 <span class="sd">            :param log_level: int or None</span>
 <span class="sd">                The log-level, for example logging.DEBUG (default: logging.WARNING)</span>
+<span class="sd">            :param backend: None or str</span>
+<span class="sd">                If socket_address is None or use_classical_communication is True, If None or &quot;simulaqron&quot; is used</span>
+<span class="sd">                the cqc library tries to use the network config file setup in simulaqron if network_config_file is None.</span>
+<span class="sd">                If network_config_file is None and simulaqron is not installed a ValueError is raised.</span>
+<span class="sd">            :param use_classical_communication: bool</span>
+<span class="sd">                Whether to use the built-in classical communication or not.</span>
+<span class="sd">            :param network_name: None or str</span>
+<span class="sd">                Used if simulaqron is used to load socket addresses for the backend</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_logging</span><span class="p">(</span><span class="n">log_level</span><span class="p">)</span>
 
@@ -288,19 +307,21 @@
         <span class="c1"># Classical connections in the application network</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_classicalConn</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">if</span> <span class="n">socket_address</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># This file defines the network of CQC servers interfacing to virtual quantum nodes</span>
-            <span class="k">if</span> <span class="n">cqcFile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">cqcFile</span> <span class="o">=</span> <span class="n">get_cqc_file</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">socket_address</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">use_classical_communication</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;simulaqron&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_simulaqron_major</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If (socket_address is None or use_classical_communication is True)&quot;</span>
+                                     <span class="s2">&quot;and (backend is None or &#39;simulaqron&#39;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                                     <span class="s2">&quot;you need simulaqron&gt;=3.0.0 installed.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">network_config_file</span> <span class="o">=</span> <span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">network_config_file</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span> <span class="o">=</span> <span class="n">socketsConfig</span><span class="p">(</span><span class="n">network_config_file</span><span class="p">,</span> <span class="n">network_name</span><span class="o">=</span><span class="n">network_name</span><span class="p">,</span> <span class="n">config_type</span><span class="o">=</span><span class="s2">&quot;cqc&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">use_classical_communication</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span> <span class="o">=</span> <span class="n">socketsConfig</span><span class="p">(</span><span class="n">network_config_file</span><span class="p">,</span> <span class="n">network_name</span><span class="o">=</span><span class="n">network_name</span><span class="p">,</span> <span class="n">config_type</span><span class="o">=</span><span class="s2">&quot;app&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">cqcFile</span> <span class="o">=</span> <span class="n">cqcFile</span>
-
-            <span class="c1"># Read configuration files for the cqc network</span>
-            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cqcFile</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span> <span class="o">=</span> <span class="n">networkConfig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cqcFile</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;There was no path specified for the cqc file containing addresses&quot;</span>
-                                 <span class="s2">&quot;and port numbers to the cqc nodes in the backend.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown backend&quot;</span><span class="p">)</span>
 
             <span class="c1"># Host data</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cqcNet</span><span class="o">.</span><span class="n">hostDict</span><span class="p">:</span>
@@ -310,7 +331,7 @@
 
                 <span class="c1"># Get IP and port number</span>
             <span class="n">addr</span> <span class="o">=</span> <span class="n">myHost</span><span class="o">.</span><span class="n">addr</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">socket_address</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">hostname</span><span class="p">,</span> <span class="n">port</span> <span class="o">=</span> <span class="n">socket_address</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -342,20 +363,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                 <span class="k">raise</span> <span class="n">err</span>
 
-                <span class="c1"># This file defines the application network</span>
-        <span class="k">if</span> <span class="n">appFile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">appFile</span> <span class="o">=</span> <span class="n">get_app_file</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">appFile</span> <span class="o">=</span> <span class="n">appFile</span>
-
-            <span class="c1"># Read configuration files for the application network</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">appFile</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span> <span class="o">=</span> <span class="n">networkConfig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">appFile</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Since there is no appFile was found the built-in classical commmunication cannot be used.&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span> <span class="o">=</span> <span class="kc">None</span>
-
-            <span class="c1"># List of pending messages waiting to be send to the back-end</span>
+        <span class="c1"># List of pending messages waiting to be send to the back-end</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pend_messages</span> <span class="o">=</span> <span class="n">pend_messages</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pending_messages</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -417,7 +425,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Since there is no appFile was found the built-in classical commmunication cannot be used.&quot;</span>
+                <span class="s2">&quot;Since use_classical_communication was set to False upon init, the built-in classical communication&quot;</span>
+                <span class="s2">&quot;cannot be used.&quot;</span>
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classicalServer</span><span class="p">:</span>
@@ -467,7 +476,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appNet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Since there is no appFile was found the built-in classical commmunication cannot be used.&quot;</span>
+                <span class="s2">&quot;Since use_classical_communication was set to False upon init, the built-in classical communication&quot;</span>
+                <span class="s2">&quot;cannot be used.&quot;</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classicalConn</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;App </span><span class="si">{}</span><span class="s2">: Opening classical channel to </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
@@ -2023,7 +2033,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 2.2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 3.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
