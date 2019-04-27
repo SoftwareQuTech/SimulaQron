@@ -1,7 +1,6 @@
 import os
 import unittest
 from argparse import ArgumentParser
-from simulaqron.toolbox.manage_nodes import setup_cqc_files
 import logging
 
 
@@ -11,16 +10,13 @@ logger.setLevel(logging.CRITICAL)
 
 def main(test_type="quick"):
 
-    # First make sure CQC is set up
-    setup_cqc_files()
-
     path_to_here = os.path.dirname(os.path.abspath(__file__))
     if test_type == "quick":
-        directory = os.path.join(path_to_here, "tests", "auto", "quick")
+        directory = os.path.join(path_to_here, "tests", "unittests", "quick")
     elif test_type == "full":
-        directory = os.path.join(path_to_here, "tests", "auto")
+        directory = os.path.join(path_to_here, "tests", "unittests")
     elif test_type == "network":
-        directory = os.path.join(path_to_here, "tests", "auto", "quick", "network")
+        directory = os.path.join(path_to_here, "tests", "unittests", "quick", "network")
     else:
         raise ValueError("Unknown test type {}".format(test_type))
 

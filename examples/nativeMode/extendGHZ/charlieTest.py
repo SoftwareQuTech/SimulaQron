@@ -31,7 +31,7 @@ import logging
 import os
 
 from simulaqron.local.setup import setup_local
-from simulaqron.general.hostConfig import networkConfig
+from simulaqron.general.hostConfig import socketsConfig
 from simulaqron.toolbox import get_simulaqron_path
 from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
@@ -121,8 +121,8 @@ def main():
     classicalFile = os.path.join(os.path.dirname(__file__), "classicalNet.cfg")
 
     # Read configuration files for the virtual quantum, as well as the classical network
-    virtualNet = networkConfig(virtualFile)
-    classicalNet = networkConfig(classicalFile)
+    virtualNet = socketsConfig(virtualFile)
+    classicalNet = socketsConfig(classicalFile)
 
     # Check if we should run a local classical server. If so, initialize the code
     # to handle remote connections on the classical communication network

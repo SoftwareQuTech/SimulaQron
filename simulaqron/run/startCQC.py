@@ -8,8 +8,8 @@ from twisted.spread import pb
 
 from simulaqron.cqc_backend.cqcFactory import CQCFactory
 from simulaqron.cqc_backend.cqcMessageHandler import SimulaqronCQCHandler
-from simulaqron.general.hostConfig import networkConfig
-from simulaqron.settings import Settings
+from simulaqron.general.hostConfig import socketsConfig
+from simulaqron.settings import simulaqron_settings
 
 
 def init_register(virtRoot, myName, node):
@@ -50,7 +50,7 @@ def handle_connection_error(reason, myName, cqc_factory, virtualNet):
     except ConnectionRefusedError:
         logging.debug("LOCAL %s: Could not connect, trying again...", myName)
         reactor.callLater(
-            Settings.CONF_WAIT_TIME,
+            simulaqron_settings.conn_retry_time,
             connect_to_virtNode,
             myName,
             cqc_factory,
@@ -93,30 +93,35 @@ def sigterm_handler(_signo, _stack_frame):
     reactor.stop()
 
 
-def main(myName):
+def main(myName, network_name="default"):
     """Start the indicated backend CQC Server"""
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)
 
     logging.basicConfig(
         format="%(asctime)s:%(levelname)s:%(message)s",
-        level=Settings.CONF_LOGGING_LEVEL_BACKEND,
+        level=simulaqron_settings.log_level,
     )
 
-    # This file defines the network of virtual quantum nodes
-    virtualFile = Settings.CONF_VNODE_FILE
+    if simulaqron_settings.network_config_file is not None:
+        # Since version 3.0.0 a single config file is used
+        virtualFile = simulaqron_settings.network_config_file
+        cqcFile = simulaqron_settings.network_config_file
+    else:
+        # This file defines the network of virtual quantum nodes
+        virtualFile = simulaqron_settings.vnode_file
 
-    # This file defines the network of CQC servers interfacing to virtual quantum nodes
-    cqcFile = Settings.CONF_CQC_FILE
+        # This file defines the network of CQC servers interfacing to virtual quantum nodes
+        cqcFile = simulaqron_settings.cqc_file
 
     # Read configuration files for the virtual quantum, as well as the classical network
-    virtualNet = networkConfig(virtualFile)
-    cqcNet = networkConfig(cqcFile)
+    virtualNet = socketsConfig(virtualFile, network_name=network_name, config_type="vnode")
+    cqcNet = socketsConfig(cqcFile, network_name=network_name, config_type="cqc")
 
     # Check if we are in the host-dictionary
     if myName in cqcNet.hostDict:
         myHost = cqcNet.hostDict[myName]
-        cqc_factory = CQCFactory(myHost, myName, cqcNet, SimulaqronCQCHandler)
+        cqc_factory = CQCFactory(myHost, myName, cqcNet, SimulaqronCQCHandler, network_name=network_name)
     else:
         logging.error("LOCAL %s: Cannot start classical communication servers.", myName)
         return

@@ -6,6 +6,74 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 Upcoming
 --------
 
+2019-04-27 (v3.0.0)
+-------------------
+ - The way settings and network configurations is handled from files is completely changes. Settings can still be set in the usual way through the CLI, for example as `simulaqron set backend projectq`. One can now also add a file in the users home folder (i.e. `~`) called `.simulaqron.json` where one can set settings or subsets of these. For example this file could look like
+ ```
+ {
+    "backend": "projectq",
+    "log_level": 10
+ }
+ ```
+ which would set the backend to be use ProjectQ and the log-level to be debug (10). Any setting in this file will override the settings set in the CLI.
+The old way of configuring networks (i.e. using the four .cfg files for socket addresses and one .json for topology) is still supported but the new one using a single .json file is now the recommended way. The new way uses a single .json file for all the processes for multiple networks, including the topology. An example of such a file can be seen below which contains two networks ("default" and "small_network") which the nodes "Alice", "Bob" and "Test" respectively.
+```
+{
+    "default": {
+        "nodes": {
+            "Alice": {
+                "app_socket": [
+                    "localhost",
+                    8000
+                ],
+                "cqc_socket": [
+                    "localhost",
+                    8001
+                ],
+                "vnode_socket": [
+                    "localhost",
+                    8004
+                ]
+            },
+            "Bob": {
+                "app_socket": [
+                    "localhost",
+                    8007
+                ],
+                "cqc_socket": [
+                    "localhost",
+                    8008
+                ],
+                "vnode_socket": [
+                    "localhost",
+                    8010
+                ]
+            }
+        },
+        "topology": null
+    }
+    "small_network": {
+        "nodes": {
+            "Test": {
+                "app_socket": [
+                    "localhost",
+                    8031
+                ],
+                "cqc_socket": [
+                    "localhost",
+                    8043
+                ],
+                "vnode_socket": [
+                    "localhost",
+                    8089
+                ]
+            }
+        },
+        "topology": null
+    }
+}
+```
+If you want simulaqron to use your custom network.json file simply set this in the settings by `simulaqron set network-config-file your/path/my_network.json` or add the following line to a file `~/.simulaqron.json`: `network_config_file: your/path/my_network.json`, where `your/path/my_network.json` is the path to your custom network config file.
 
 2019-04-08 (v2.2.0)
 -------------------

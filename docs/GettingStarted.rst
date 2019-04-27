@@ -21,6 +21,14 @@ You can then make use of SimulaQron using the command :code:`simulaqron` in the 
 
     simulaqron -h
 
+To make sure you have the version compatible with this documentation type::
+
+    simulaqron version
+
+If you want to make sure that everything has been installed properly you can start run the unittests. Open a interactive python console by typing `python3` and the::
+    import simulaqron
+    simulaqron.tests()
+
 ^^^^^^^^^^^^^^^^^^^^^^^^
 Installation from source
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -37,13 +45,14 @@ you use bash (e.g., standard on OSX or the GIT Bash install on Windows 10), othe
 
 where yourPath is the directory containing SimulaQron. You can add this to your ~/.bashrc or ~/.bash_profile file.
 
-.. note:: If you want to use SimulaQron in the same way as when installed using pip you can use an alias by for example::
+.. note::
+    If you want to use SimulaQron in the same way as when installed using pip you can use an alias by for example
 
     alias simulaqron=yourPath/SimulaQron/simulaqron/SimulaQron.py
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Verifying the installation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Verifying the installation (if installed from source)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To run SimulaQron you need to following Python packages:
 
@@ -82,7 +91,7 @@ Testing a simple example
 Before delving into how to write any program yourself, let's first simply run one of the existing examples when programming SimulaQron through the Python library (see :doc:`ExamplespythonLib`).
 Remember from the Overview that SimulaQron has two parts: the first are the virtual node servers that act simulate the hardware at each node as well as the quantum communication between them in a transparent manner.
 The second are the applications themselves which can be written in two ways, the direct way is to use the native mode using the Python Twisted framework connecting to the virtual node servers, see :doc:`ExamplesDirect`.
-Another way is the use the provided Python library that calls the virtual nodes by making use of the classical/quantum combiner interface.
+The recommended way however is the use the provided Python library that calls the virtual nodes by making use of the classical/quantum combiner interface.
 We will here illustrate how to use SimulaQron with the Python library.
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -104,7 +113,7 @@ If something went wrong (for example the process was killed before you stopped i
 
     simulaqron reset
 
-Note that this also kills any currently running network.
+Note that this also kills any currently running network and resets any settings or configurations.
 
 ^^^^^^^^^^^^^^^^^^^
 Running a protocol
@@ -118,9 +127,9 @@ Our objective will be to realize the following protocol which will generate 1 sh
 * Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`.
 
 The examples can be found in the repo `pythonLib <https://github.com/SoftwareQuTech/CQC-Python>`_.
-Before seeing how this example works, let us again simply run the code::
+Before seeing how this example works, let us simply run the code::
 
-	cd examples/cqc/pythonLib/corrRNG
+	cd examples/pythonLib/corrRNG
 	sh run.sh
 
 You should be seeing the following two lines::
@@ -186,7 +195,7 @@ For further examples, see the examples/ folder.
 Settings
 --------
 
-Settings are easily accessed through the command line interface. To see what settings can be set, type::
+Settings are easily accessed through the command line interface (CLI). To see what settings can be set, type::
 
     simulaqron set -h
 
@@ -194,27 +203,14 @@ To set a setting, for example to use the projectQ backend, type::
 
     simulaqron set backend projectq
 
+Alternatively, you can add a file ``.simulaqron.json`` in your home folder (i.e. ``~``).
+For example this file could look like::
+
+     {
+        "backend": "projectq",
+        "log_level": 10
+     }
+
+which would set the backend to be use ProjectQ and the log-level to be debug (10). Any setting in this file will override the settings set in the CLI.
+
 .. note:: Settings needs to be set before starting the SimulaQron backend. If the backend is already running, stop it, set the settings and start it again.
-
-.. In the file config/settings.ini you can set the following parameters for SimulaQron:
-
-.. * :code:`[BACKEND]`
-..     * :code:`maxqubits_per_node` (default 20): This is the maximum virtual qubits a node can store. Note that a node can still have more simulated qubits.
-..     * :code:`maxregisters_per_node` (default 1000): This is the maximum of qubit registers a virtual node can store.
-..     * :code:`waittime` (default 0.5): This is the amount of time that the virtual nodes will wait to try to set up connection between them (when running :code:`./cli/main.py network start-all`). If you're setting up SimulaQron between multiple computers, you may wish to increase this.
-..     * :code:`loglevel` (default `warning`): Determines which logging messages should be printed from the backend. Options are `critical`, `error`, `warning`, `info` and `debug`, with increasing amount of logging. Setting the log-level to `debug` will print a lot of messages.
-..     * :code:`backendhandler` (default `simulaqron`): This is to set different types of backends for parsing the CQC messages. Current options are `simulaqron` and `log` (simply log the CQC messages). Unless you know what you're doing don't change this!
-..     * :code:`backend` (default `projectq`): Current choices are: `qutip` (mixed states), `projectq` (pure states) and `stabilizer` (stabilizer states and only Clifford operations).
-..     * :code:`topology_file` (default `<empty_string>`): Set this to the relative path (seen from root of the repo) of a .json file describing the topology of the network to be used. For more details on how to configure a network with a specific topology, see :doc:`ConfNodes`.
-..     * :code:`noisy_qubits` (default `False`): Setting this to `True` will add probabilistic Pauli noise to the simulated qubits, with a rate specified with the :code:`T1` parameter below.
-..     * :code:`T1` (default 1): If :code:`noisy_qubits` above is `True` then for each qubit one of the Pauli operators :math:`X=\begin{pmatrix}0 & 1 \\ 1 & 0\end{pmatrix}`, :math:`Y=\begin{pmatrix}0 & -i \\ i & 0\end{pmatrix}` or :math:`Z=\begin{pmatrix}1 & 0 \\ 0 & -1\end{pmatrix}` will be applied with probability :math:`1-exp(-t/T1)`, where :math:`t` is the time the qubit spent at a node. NOTE, this is not an accurate model of noise in a quantum network but simply an option to be able run and explore protocols in a noisy setting. A major drawback with this noise model is that the amount of noise during a protocol depends on how fast your computer is, since the only time in SimulaQron is the runtime of your computer.
-.. * :code:`[FRONTEND]`
-..     * :code:`loglevel` (default `warning`): Determines which logging messages should be printed from the Python library. Options are `critical`, `error`, `warning`, `info` and `debug`, with increasing amount of logging. Setting the log-level to `debug` will print a lot of messages.
-
-.. There are also additional settings for CQC backend which can be set in the file cqc/backend/cqcConfig.py:
-
-.. * :code:`CQC_CONF_RECV_TIMEOUT` (default 10 s): The time a node will wait for receiving a qubit before sending back an error message using CQC.
-.. * :code:`CQC_CONF_RECV_EPR_TIMEOUT` (default 10 s): The time a node will wait for receiving a qubit part of an EPR pair before sending back an error message using CQC.
-.. * :code:`CQC_CONF_WAIT_TIME_RECV` (default 0.1 s): The time between every check if a qubit has been received.
-.. * :code:`CQC_CONF_LINK_WAIT_TIME` (default 0.5 s): The time between every try to connect to the CQC server.
-.. * :code:`CQC_CONF_COM_WAIT_TIME` (default 0.1 s): The time between every try to connect applications at other nodes for classical communication.

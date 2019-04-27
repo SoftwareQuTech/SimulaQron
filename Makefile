@@ -10,11 +10,13 @@ TESTS_DIR      = simulaqron/tests
 TOOLBOX_DIR    = simulaqron/toolbox
 VIRTNODE_DIR   = simulaqron/virtNode
 
+clean: _delete_pyc _delete_pid _clear_build _reset
+
 _delete_pyc:
 	@find . -name '*.pyc' -delete
 
 _delete_pid:
-	@find ${SIMULARON_DIR} -name '*.pid' -delete
+	@find ${SIMULAQRON_DIR} -name '*.pid' -delete
 
 format:
 	black -l 120 .
@@ -25,11 +27,18 @@ lint:
 python-deps:
 	@cat requirements.txt | xargs -n 1 -L 1 $(PIP) install
 
-tests:
+_reset:
+	@${PYTHON} ${TOOLBOX_DIR}/reset.py
+
+_tests:
 	@${PYTHON} ${SIMULAQRON_DIR}/tests_run.py --quick
 
-tests_all:
+tests: _tests _reset
+
+_tests_all:
 	@${PYTHON} ${SIMULAQRON_DIR}/tests_run.py --full
+
+tests_all: _tests_all _reset
 
 _verified:
 	@echo "SimulaQron is verified!"
@@ -46,8 +55,6 @@ _remove_egg_info:
 	@rm -f -r simulaqron.egg-info
 
 _clear_build: _remove_build _remove_dist _remove_egg_info
-
-clean: _delete_pyc _delete_pid _clear_build
 
 _build:
 	@${PYTHON} setup.py sdist bdist_wheel

@@ -62,7 +62,7 @@ from cqc.entInfoHeader import EntInfoHeader, ENT_INFO_LENGTH
 from cqc.MessageHandler import CQCMessageHandler, UnknownQubitError
 
 from simulaqron.virtNode.basics import quantumError, noQubitError
-from simulaqron.settings import Settings
+from simulaqron.settings import simulaqron_settings
 
 
 class SimulaqronCQCHandler(CQCMessageHandler):
@@ -568,9 +568,9 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         # This will block until a qubit is received.
         no_qubit = True
         virt_qubit = None
-        # CONF_RECV_TIMEOUT is in 100ms (for legacy reasons there are no plans to change it to seconds)
-        sleep_time = Settings.CONF_WAIT_TIME_RECV  # seconds
-        for _ in range(int(Settings.CONF_RECV_TIMEOUT * 0.1 / sleep_time)):
+        # recv_timeout is in 100ms (for legacy reasons there are no plans to change it to seconds)
+        sleep_time = simulaqron_settings.recv_retry_time  # seconds
+        for _ in range(int(simulaqron_settings.recv_timeout * 0.1 / sleep_time)):
             try:
                 virt_qubit = yield self.factory.virtRoot.callRemote("cqc_get_recv", cqc_header.app_id)
             except RemoteError as remote_err:
@@ -979,9 +979,9 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         no_qubit = True
         virt_qubit = None
         ent_info = None
-        # CONF_RECV_EPR_TIMEOUT is in 100ms (for legacy reasons there are no plans to change it to seconds)
-        sleep_time = Settings.CONF_WAIT_TIME_RECV
-        for _ in range(int(Settings.CONF_RECV_EPR_TIMEOUT * 0.1 / sleep_time)):
+        # recv_timeout is in 100ms (for legacy reasons there are no plans to change it to seconds)
+        sleep_time = simulaqron_settings.recv_retry_time
+        for _ in range(int(simulaqron_settings.recv_timeout * 0.1 / sleep_time)):
             try:
                 data = yield self.factory.virtRoot.callRemote("cqc_get_epr_recv", cqc_header.app_id)
             except RemoteError as remote_err:
