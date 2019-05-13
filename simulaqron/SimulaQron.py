@@ -145,7 +145,11 @@ def start(name, nrnodes, nodes, topology, force, keep):
                 print("Aborted!")
                 return
     d = SimulaQronDaemon(pidfile=pidfile, name=name, nrnodes=nrnodes, nodes=nodes, topology=topology, new=new)
-    d.start()
+    try:
+        d.start()
+    except SystemExit:
+        logging.debug("pidfile: {}".format(pidfile))
+        print("Failed to launch SimulaQron Daemon. Aborted!")
 
 ###############
 # stop command #
