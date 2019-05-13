@@ -4,6 +4,7 @@ import time
 import click
 import logging
 from daemons.prefab import run
+from daemons.interfaces import exit
 
 import simulaqron
 from simulaqron.network import Network
@@ -145,7 +146,14 @@ def start(name, nrnodes, nodes, topology, force, keep):
                 print("Aborted!")
                 return
     d = SimulaQronDaemon(pidfile=pidfile, name=name, nrnodes=nrnodes, nodes=nodes, topology=topology, new=new)
-    d.start()
+    try:
+        d.start()
+    except SystemExit as e:
+        if e.code == exit.PIDFILE_INACCESSIBLE or\
+           e.code == exit.DAEMONIZE_FAILED:
+            logging.debug("Failed to launch Simulaqron Daemon. "
+                          "Exit code reported by daemons: {}".format(e.code))
+            print("Failed to launch SimulaQron Daemon. Aborted!")
 
 ###############
 # stop command #
