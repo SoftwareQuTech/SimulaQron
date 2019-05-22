@@ -26,6 +26,7 @@ To make sure you have the version compatible with this documentation type::
     simulaqron version
 
 If you want to make sure that everything has been installed properly you can start run the unittests. Open a interactive python console by typing `python3` and the::
+
     import simulaqron
     simulaqron.tests()
 
