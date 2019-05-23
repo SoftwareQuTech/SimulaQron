@@ -355,7 +355,7 @@ def network_config_file():
 @get.command()
 def noisy_qubits():
     """Whether qubits should be noisy (on/off)"""
-    if simulaqron_settings.noisy_qubits == 'True':
+    if simulaqron_settings.noisy_qubits:
         print("on")
     else:
         print("off")
