@@ -5,6 +5,13 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 
 Upcoming
 --------
+2019-05-23 (v3.0.2)
+-------------------
+- Fixed bug with the command `simulaqron get noisy-qubits`
+
+2019-04-30 (v3.0.1)
+-------------------
+ - The packages Cython, service_identity, matplotlib and bitstring are no longer direct requirements of simulaqron.
 
 2019-04-27 (v3.0.0)
 -------------------
