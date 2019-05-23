@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>simulaqron.SimulaQron &#8212; SimulaQron 3.0.2 documentation</title>
+    <title>simulaqron.SimulaQron &#8212; SimulaQron 3.0.3 documentation</title>
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -26,7 +26,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 3.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 3.0.3 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -59,6 +59,7 @@
 <span class="kn">import</span> <span class="nn">click</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">daemons.prefab</span> <span class="k">import</span> <span class="n">run</span>
+<span class="kn">from</span> <span class="nn">daemons.interfaces</span> <span class="k">import</span> <span class="n">exit</span>
 
 <span class="kn">import</span> <span class="nn">simulaqron</span>
 <span class="kn">from</span> <span class="nn">simulaqron.network</span> <span class="k">import</span> <span class="n">Network</span>
@@ -200,7 +201,14 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Aborted!&quot;</span><span class="p">)</span>
                 <span class="k">return</span>
     <span class="n">d</span> <span class="o">=</span> <span class="n">SimulaQronDaemon</span><span class="p">(</span><span class="n">pidfile</span><span class="o">=</span><span class="n">pidfile</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">nrnodes</span><span class="o">=</span><span class="n">nrnodes</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">topology</span><span class="o">=</span><span class="n">topology</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="n">new</span><span class="p">)</span>
-    <span class="n">d</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">SystemExit</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">exit</span><span class="o">.</span><span class="n">PIDFILE_INACCESSIBLE</span> <span class="ow">or</span>\
+           <span class="n">e</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">exit</span><span class="o">.</span><span class="n">DAEMONIZE_FAILED</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Failed to launch Simulaqron Daemon. &quot;</span>
+                          <span class="s2">&quot;Exit code reported by daemons: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">code</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to launch SimulaQron Daemon. Aborted!&quot;</span><span class="p">)</span>
 
 <span class="c1">###############</span>
 <span class="c1"># stop command #</span>
@@ -582,7 +590,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 3.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 3.0.3 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
