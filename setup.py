@@ -33,7 +33,7 @@ setuptools.setup(
     include_package_data=True,
     packages=setuptools.find_packages(include=("simulaqron*",)),
     package_data={
-        'simulaqron': ['config/.keep', '.simulaqron_pids/__keep__', 'tests/unittests/slow/merges/configs/*.cfg']
+        'simulaqron': ['config/.keep', '.simulaqron_pids/.keep', 'tests/unittests/slow/merges/configs/*.cfg']
     },
     install_requires=install_requires,
     classifiers=[
