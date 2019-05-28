@@ -20,7 +20,6 @@ class TestSettings(unittest.TestCase):
             self.assertEqual(getattr(simulaqron_settings, key), value)
 
     def test_set_settings(self):
-        self.assertTrue(False)
         new_settings = {}
         for key in simulaqron_settings._default_config:
             value = random.randint(0, 100)
