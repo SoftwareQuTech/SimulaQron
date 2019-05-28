@@ -3,11 +3,24 @@ python:
     - "3.5"
     - "3.6"
     - "3.7"
+before_install:
+    - echo "Before install"
+    - ls
+    - pwd
+    - export PYTHONPATH=$PYTHONPATH:$(pwd)
 before_script:
+    - echo "Before script"
+    - ls
+    - pwd
     - export PYTHONPATH=$PYTHONPATH:$(pwd)
 install:
+    - echo "Install"
+    - echo $PYTHONPATH
+    - ls
+    - pwd
     - make clean
     - make python-deps
 script:
+    - echo "script"
     - make lint
     - make tests
