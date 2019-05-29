@@ -5,7 +5,7 @@ Getting started
 Setup
 -----
 
-SimulaQron requires `Python 3 <https://python.org/>`_  along with the packages *cqc*, *twisted*, *numpy*, *scipy*, *networkx*, *black*, *flake8*, *click* and *daemons*.
+SimulaQron requires `Python 3 <https://python.org/>`_  along with the packages *cqc*, *twisted*, *numpy*, *scipy*, *networkx*, *flake8*, *click* and *daemons*.
 
 ^^^^^^^^^^^^^^^^^^^^^^
 Installation using pip
@@ -60,7 +60,6 @@ To run SimulaQron you need to following Python packages:
 * scipy
 * twisted
 * networkx
-* black
 * flake8
 * click
 * daemons

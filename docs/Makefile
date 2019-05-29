@@ -56,6 +56,14 @@ html:
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
+.PHONY: docs
+docs:
+	@make clean
+	@rm -r html
+	@make html
+	@mkdir html
+	@cp -r _build/html/* html
+
 .PHONY: dirhtml
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
