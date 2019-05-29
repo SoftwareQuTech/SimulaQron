@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>simulaqron.run.startCQC &#8212; SimulaQron 2.1.1 documentation</title>
+    <title>simulaqron.run.startCQC &#8212; SimulaQron 3.0.3 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -26,7 +26,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 2.1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 3.0.3 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -61,10 +61,10 @@
 <span class="kn">from</span> <span class="nn">twisted.internet.error</span> <span class="k">import</span> <span class="ne">ConnectionRefusedError</span><span class="p">,</span> <span class="n">CannotListenError</span>
 <span class="kn">from</span> <span class="nn">twisted.spread</span> <span class="k">import</span> <span class="n">pb</span>
 
-<span class="kn">from</span> <span class="nn">simulaqron.cqc_backend.cqcProtocol</span> <span class="k">import</span> <span class="n">CQCFactory</span>
+<span class="kn">from</span> <span class="nn">simulaqron.cqc_backend.cqcFactory</span> <span class="k">import</span> <span class="n">CQCFactory</span>
 <span class="kn">from</span> <span class="nn">simulaqron.cqc_backend.cqcMessageHandler</span> <span class="k">import</span> <span class="n">SimulaqronCQCHandler</span>
-<span class="kn">from</span> <span class="nn">simulaqron.general.hostConfig</span> <span class="k">import</span> <span class="n">networkConfig</span>
-<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="k">import</span> <span class="n">Settings</span>
+<span class="kn">from</span> <span class="nn">simulaqron.general.hostConfig</span> <span class="k">import</span> <span class="n">socketsConfig</span>
+<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="k">import</span> <span class="n">simulaqron_settings</span>
 
 
 <div class="viewcode-block" id="init_register"><a class="viewcode-back" href="../../../simulaqron.run.html#simulaqron.run.startCQC.init_register">[docs]</a><span class="k">def</span> <span class="nf">init_register</span><span class="p">(</span><span class="n">virtRoot</span><span class="p">,</span> <span class="n">myName</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
@@ -105,7 +105,7 @@
     <span class="k">except</span> <span class="ne">ConnectionRefusedError</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;LOCAL </span><span class="si">%s</span><span class="s2">: Could not connect, trying again...&quot;</span><span class="p">,</span> <span class="n">myName</span><span class="p">)</span>
         <span class="n">reactor</span><span class="o">.</span><span class="n">callLater</span><span class="p">(</span>
-            <span class="n">Settings</span><span class="o">.</span><span class="n">CONF_WAIT_TIME</span><span class="p">,</span>
+            <span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">conn_retry_time</span><span class="p">,</span>
             <span class="n">connect_to_virtNode</span><span class="p">,</span>
             <span class="n">myName</span><span class="p">,</span>
             <span class="n">cqc_factory</span><span class="p">,</span>
@@ -148,30 +148,35 @@
     <span class="n">reactor</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../simulaqron.run.html#simulaqron.run.startCQC.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">myName</span><span class="p">):</span>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../simulaqron.run.html#simulaqron.run.startCQC.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">myName</span><span class="p">,</span> <span class="n">network_name</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Start the indicated backend CQC Server&quot;&quot;&quot;</span>
     <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">sigterm_handler</span><span class="p">)</span>
     <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">sigterm_handler</span><span class="p">)</span>
 
     <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
         <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2">:</span><span class="si">%(levelname)s</span><span class="s2">:</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">level</span><span class="o">=</span><span class="n">Settings</span><span class="o">.</span><span class="n">CONF_LOGGING_LEVEL_BACKEND</span><span class="p">,</span>
+        <span class="n">level</span><span class="o">=</span><span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">log_level</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="c1"># This file defines the network of virtual quantum nodes</span>
-    <span class="n">virtualFile</span> <span class="o">=</span> <span class="n">Settings</span><span class="o">.</span><span class="n">CONF_VNODE_FILE</span>
+    <span class="k">if</span> <span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">network_config_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Since version 3.0.0 a single config file is used</span>
+        <span class="n">virtualFile</span> <span class="o">=</span> <span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">network_config_file</span>
+        <span class="n">cqcFile</span> <span class="o">=</span> <span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">network_config_file</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># This file defines the network of virtual quantum nodes</span>
+        <span class="n">virtualFile</span> <span class="o">=</span> <span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">vnode_file</span>
 
-    <span class="c1"># This file defines the network of CQC servers interfacing to virtual quantum nodes</span>
-    <span class="n">cqcFile</span> <span class="o">=</span> <span class="n">Settings</span><span class="o">.</span><span class="n">CONF_CQC_FILE</span>
+        <span class="c1"># This file defines the network of CQC servers interfacing to virtual quantum nodes</span>
+        <span class="n">cqcFile</span> <span class="o">=</span> <span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">cqc_file</span>
 
     <span class="c1"># Read configuration files for the virtual quantum, as well as the classical network</span>
-    <span class="n">virtualNet</span> <span class="o">=</span> <span class="n">networkConfig</span><span class="p">(</span><span class="n">virtualFile</span><span class="p">)</span>
-    <span class="n">cqcNet</span> <span class="o">=</span> <span class="n">networkConfig</span><span class="p">(</span><span class="n">cqcFile</span><span class="p">)</span>
+    <span class="n">virtualNet</span> <span class="o">=</span> <span class="n">socketsConfig</span><span class="p">(</span><span class="n">virtualFile</span><span class="p">,</span> <span class="n">network_name</span><span class="o">=</span><span class="n">network_name</span><span class="p">,</span> <span class="n">config_type</span><span class="o">=</span><span class="s2">&quot;vnode&quot;</span><span class="p">)</span>
+    <span class="n">cqcNet</span> <span class="o">=</span> <span class="n">socketsConfig</span><span class="p">(</span><span class="n">cqcFile</span><span class="p">,</span> <span class="n">network_name</span><span class="o">=</span><span class="n">network_name</span><span class="p">,</span> <span class="n">config_type</span><span class="o">=</span><span class="s2">&quot;cqc&quot;</span><span class="p">)</span>
 
     <span class="c1"># Check if we are in the host-dictionary</span>
     <span class="k">if</span> <span class="n">myName</span> <span class="ow">in</span> <span class="n">cqcNet</span><span class="o">.</span><span class="n">hostDict</span><span class="p">:</span>
         <span class="n">myHost</span> <span class="o">=</span> <span class="n">cqcNet</span><span class="o">.</span><span class="n">hostDict</span><span class="p">[</span><span class="n">myName</span><span class="p">]</span>
-        <span class="n">cqc_factory</span> <span class="o">=</span> <span class="n">CQCFactory</span><span class="p">(</span><span class="n">myHost</span><span class="p">,</span> <span class="n">myName</span><span class="p">,</span> <span class="n">cqcNet</span><span class="p">,</span> <span class="n">SimulaqronCQCHandler</span><span class="p">)</span>
+        <span class="n">cqc_factory</span> <span class="o">=</span> <span class="n">CQCFactory</span><span class="p">(</span><span class="n">myHost</span><span class="p">,</span> <span class="n">myName</span><span class="p">,</span> <span class="n">cqcNet</span><span class="p">,</span> <span class="n">SimulaqronCQCHandler</span><span class="p">,</span> <span class="n">network_name</span><span class="o">=</span><span class="n">network_name</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;LOCAL </span><span class="si">%s</span><span class="s2">: Cannot start classical communication servers.&quot;</span><span class="p">,</span> <span class="n">myName</span><span class="p">)</span>
         <span class="k">return</span>
@@ -201,7 +206,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 2.1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 3.0.3 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

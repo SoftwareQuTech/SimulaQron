@@ -15,6 +15,22 @@ Subpackages
 Submodules
 ----------
 
+cqc.MessageHandler module
+-------------------------
+
+.. automodule:: cqc.MessageHandler
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+cqc.Protocol module
+-------------------
+
+.. automodule:: cqc.Protocol
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 cqc.cqcHeader module
 --------------------
 
@@ -49,11 +65,6 @@ cqc.pythonLib module
 
 cqc.settings module
 -------------------
-
-.. automodule:: cqc.settings
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 Module contents
 ---------------

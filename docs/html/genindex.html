@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Index &#8212; SimulaQron 2.1.1 documentation</title>
+    <title>Index &#8212; SimulaQron 3.0.3 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -27,7 +27,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 2.1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.3 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -77,6 +77,7 @@
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  | <a href="#X"><strong>X</strong></a>
  | <a href="#Y"><strong>Y</strong></a>
  | <a href="#Z"><strong>Z</strong></a>
@@ -117,7 +118,9 @@
         <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.add_fresh_qubit">(simulaqron.virtNode.stabilizerSimulator.stabilizerEngine method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.add_node">add_node() (in module simulaqron.toolbox.manage_nodes)</a>
+      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.add_network">add_network() (simulaqron.toolbox.manage_nodes.NetworksConfigConstructor method)</a>
+</li>
+      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.add_node">add_node() (simulaqron.toolbox.manage_nodes.NetworksConfigConstructor method)</a>
 </li>
       <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.stabilizerStates.StabilizerState.add_qubit">add_qubit() (simulaqron.toolbox.stabilizerStates.StabilizerState method)</a>
 
@@ -132,6 +135,8 @@
 </li>
       </ul></li>
       <li><a href="cqc.html#cqc.pythonLib.CQCConnection.allocate_qubits">allocate_qubits() (cqc.pythonLib.CQCConnection method)</a>
+</li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.app_file">app_file (simulaqron.settings.Config attribute)</a>
 </li>
       <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.stabilizerStates.StabilizerState.apply_CNOT">apply_CNOT() (simulaqron.toolbox.stabilizerStates.StabilizerState method)</a>
 
@@ -281,6 +286,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.virtual.backEnd">backEnd (class in simulaqron.virtNode.virtual)</a>
 </li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.backend">backend (simulaqron.settings.Config attribute)</a>
+</li>
       <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.stabilizerStates.StabilizerState.bool2Pauli">bool2Pauli (simulaqron.toolbox.stabilizerStates.StabilizerState attribute)</a>
 </li>
   </ul></td>
@@ -289,7 +296,7 @@
 </li>
       <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.stabilizerStates.StabilizerState.boolean_gaussian_elimination">boolean_gaussian_elimination() (simulaqron.toolbox.stabilizerStates.StabilizerState static method)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcProtocol.CQCFactory.buildProtocol">buildProtocol() (simulaqron.cqc_backend.cqcProtocol.CQCFactory method)</a>
+      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcFactory.CQCFactory.buildProtocol">buildProtocol() (simulaqron.cqc_backend.cqcFactory.CQCFactory method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -313,157 +320,163 @@
 </li>
       <li><a href="cqc.html#cqc.pythonLib.CQCConnection.closeClassicalServer">closeClassicalServer() (cqc.pythonLib.CQCConnection method)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_allocate">cmd_allocate() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_allocate">cmd_allocate() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_allocate">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_cnot">cmd_cnot() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_cnot">cmd_cnot() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_cnot">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_cphase">cmd_cphase() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_cphase">cmd_cphase() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_cphase">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_epr">cmd_epr() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_epr">cmd_epr() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_epr">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_epr_recv">cmd_epr_recv() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_epr_recv">cmd_epr_recv() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_epr_recv">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_h">cmd_h() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_h">cmd_h() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_h">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_i">cmd_i() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_i">cmd_i() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_i">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_k">cmd_k() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_k">cmd_k() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_k">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_measure">cmd_measure() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_measure">cmd_measure() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_measure">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_measure_inplace">cmd_measure_inplace() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_measure_inplace">cmd_measure_inplace() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_measure_inplace">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_new">cmd_new() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_new">cmd_new() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_new">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_recv">cmd_recv() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_recv">cmd_recv() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_recv">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_release">cmd_release() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_release">cmd_release() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_release">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_reset">cmd_reset() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_reset">cmd_reset() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_reset">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_rotx">cmd_rotx() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_rotx">cmd_rotx() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_rotx">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_roty">cmd_roty() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_roty">cmd_roty() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_roty">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_rotz">cmd_rotz() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_rotz">cmd_rotz() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_rotz">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_send">cmd_send() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_send">cmd_send() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_send">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_t">cmd_t() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_t">cmd_t() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_t">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_x">cmd_x() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_x">cmd_x() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_x">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_y">cmd_y() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_y">cmd_y() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_y">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.cmd_z">cmd_z() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.cmd_z">cmd_z() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.cmd_z">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cqc.html#cqc.pythonLib.qubit.cnot">cnot() (cqc.pythonLib.qubit method)</a>
 </li>
       <li><a href="cqc.pythonLib_protocols.html#cqc.pythonLib_protocols.coinflip_leader.CoinflipConsensus">CoinflipConsensus (class in cqc.pythonLib_protocols.coinflip_leader)</a>
+</li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config">Config (class in simulaqron.settings)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.Decorator">Config.Decorator (class in simulaqron.settings)</a>
+</li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.config_folder">config_folder (simulaqron.settings.Config attribute)</a>
+</li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.conn_retry_time">conn_retry_time (simulaqron.settings.Config attribute)</a>
 </li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.virtual.virtualNode.connect_to_node">connect_to_node() (simulaqron.virtNode.virtual.virtualNode method)</a>
 </li>
       <li><a href="simulaqron.run.html#simulaqron.run.startCQC.connect_to_virtNode">connect_to_virtNode() (in module simulaqron.run.startCQC)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcProtocol.CQCProtocol.connectionLost">connectionLost() (simulaqron.cqc_backend.cqcProtocol.CQCProtocol method)</a>
+      <li><a href="cqc.html#cqc.Protocol.CQCProtocol.connectionLost">connectionLost() (cqc.Protocol.CQCProtocol method)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcProtocol.CQCProtocol.connectionMade">connectionMade() (simulaqron.cqc_backend.cqcProtocol.CQCProtocol method)</a>
+      <li><a href="cqc.html#cqc.Protocol.CQCProtocol.connectionMade">connectionMade() (cqc.Protocol.CQCProtocol method)</a>
 </li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.virtual.virtualNode.connectNet">connectNet() (simulaqron.virtNode.virtual.virtualNode method)</a>
 </li>
-      <li><a href="simulaqron.html#simulaqron.configFiles.construct_node_configs">construct_node_configs() (in module simulaqron.configFiles)</a>
-</li>
-      <li><a href="simulaqron.html#simulaqron.configFiles.construct_topology_config">construct_topology_config() (in module simulaqron.configFiles)</a>
+      <li><a href="simulaqron.html#simulaqron.network.construct_topology_config">construct_topology_config() (in module simulaqron.network)</a>
 </li>
       <li><a href="cqc.pythonLib_protocols.html#cqc.pythonLib_protocols.wstate.ControlledG">ControlledG() (in module cqc.pythonLib_protocols.wstate)</a>
 </li>
@@ -477,15 +490,21 @@
 </li>
       <li><a href="cqc.html#module-cqc.hostConfig">cqc.hostConfig (module)</a>
 </li>
+      <li><a href="cqc.html#module-cqc.MessageHandler">cqc.MessageHandler (module)</a>
+</li>
+      <li><a href="cqc.html#module-cqc.Protocol">cqc.Protocol (module)</a>
+</li>
       <li><a href="cqc.html#module-cqc.pythonLib">cqc.pythonLib (module)</a>
 </li>
       <li><a href="cqc.pythonLib_protocols.html#module-cqc.pythonLib_protocols">cqc.pythonLib_protocols (module)</a>
 </li>
       <li><a href="cqc.pythonLib_protocols.html#module-cqc.pythonLib_protocols.coinflip_leader">cqc.pythonLib_protocols.coinflip_leader (module)</a>
 </li>
+      <li><a href="cqc.pythonLib_protocols.html#module-cqc.pythonLib_protocols.measurements">cqc.pythonLib_protocols.measurements (module)</a>
+</li>
       <li><a href="cqc.pythonLib_protocols.html#module-cqc.pythonLib_protocols.wstate">cqc.pythonLib_protocols.wstate (module)</a>
 </li>
-      <li><a href="cqc.html#module-cqc.settings">cqc.settings (module)</a>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.cqc_file">cqc_file (simulaqron.settings.Config attribute)</a>
 </li>
       <li><a href="cqc.html#cqc.hostConfig.cqc_node_id">cqc_node_id() (in module cqc.hostConfig)</a>
 
@@ -507,7 +526,7 @@
 </li>
       <li><a href="cqc.html#cqc.cqcHeader.CQCEPRRequestHeader">CQCEPRRequestHeader (class in cqc.cqcHeader)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcProtocol.CQCFactory">CQCFactory (class in simulaqron.cqc_backend.cqcProtocol)</a>
+      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcFactory.CQCFactory">CQCFactory (class in simulaqron.cqc_backend.cqcFactory)</a>
 </li>
       <li><a href="cqc.html#cqc.cqcHeader.CQCFactoryHeader">CQCFactoryHeader (class in cqc.cqcHeader)</a>
 </li>
@@ -519,13 +538,13 @@
 </li>
       <li><a href="cqc.html#cqc.cqcHeader.CQCMeasOutHeader">CQCMeasOutHeader (class in cqc.cqcHeader)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler">CQCMessageHandler (class in simulaqron.cqc_backend.cqcMessageHandler)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler">CQCMessageHandler (class in cqc.MessageHandler)</a>
 </li>
       <li><a href="cqc.html#cqc.pythonLib.CQCNoQubitError">CQCNoQubitError</a>
 </li>
       <li><a href="cqc.html#cqc.cqcHeader.CQCNotifyHeader">CQCNotifyHeader (class in cqc.cqcHeader)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcProtocol.CQCProtocol">CQCProtocol (class in simulaqron.cqc_backend.cqcProtocol)</a>
+      <li><a href="cqc.html#cqc.Protocol.CQCProtocol">CQCProtocol (class in cqc.Protocol)</a>
 </li>
       <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCQubit">CQCQubit (class in simulaqron.cqc_backend.cqcMessageHandler)</a>
 </li>
@@ -545,11 +564,11 @@
 </li>
       <li><a href="cqc.html#cqc.cqcHeader.CQCXtraQubitHeader">CQCXtraQubitHeader (class in cqc.cqcHeader)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.create_extra_header">create_extra_header() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler static method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.create_extra_header">create_extra_header() (cqc.MessageHandler.CQCMessageHandler static method)</a>
 </li>
       <li><a href="cqc.pythonLib_protocols.html#cqc.pythonLib_protocols.wstate.create_Nqubit_Wstate">create_Nqubit_Wstate() (in module cqc.pythonLib_protocols.wstate)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.create_return_message">create_return_message() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler static method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.create_return_message">create_return_message() (cqc.MessageHandler.CQCMessageHandler static method)</a>
 </li>
       <li><a href="cqc.html#cqc.pythonLib.CQCConnection.createEPR">createEPR() (cqc.pythonLib.CQCConnection method)</a>
 </li>
@@ -561,7 +580,11 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcProtocol.CQCProtocol.dataReceived">dataReceived() (simulaqron.cqc_backend.cqcProtocol.CQCProtocol method)</a>
+      <li><a href="cqc.html#cqc.Protocol.CQCProtocol.dataReceived">dataReceived() (cqc.Protocol.CQCProtocol method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.default_settings">default_settings() (simulaqron.settings.Config method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -599,34 +622,30 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cqc.html#cqc.settings.get_app_file">get_app_file() (in module cqc.settings)</a>
-</li>
       <li><a href="cqc.html#cqc.pythonLib.CQCConnection.get_appID">get_appID() (cqc.pythonLib.CQCConnection method)</a>
-</li>
-      <li><a href="cqc.html#cqc.settings.get_config">get_config() (in module cqc.settings)</a>
 </li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.virtual.virtualNode.get_connection">get_connection() (simulaqron.virtNode.virtual.virtualNode method)</a>
 </li>
-      <li><a href="cqc.html#cqc.settings.get_cqc_file">get_cqc_file() (in module cqc.settings)</a>
-</li>
       <li><a href="cqc.html#cqc.pythonLib.qubit.get_entInfo">get_entInfo() (cqc.pythonLib.qubit method)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.get_error_class">get_error_class() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.get_error_class">get_error_class() (simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler static method)</a>
 </li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.virtual.virtualNode.get_new_reg_num">get_new_reg_num() (simulaqron.virtNode.virtual.virtualNode method)</a>
 </li>
-      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.get_nodes">get_nodes() (in module simulaqron.toolbox.manage_nodes)</a>
+      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.get_node_names">get_node_names() (simulaqron.toolbox.manage_nodes.NetworksConfigConstructor method)</a>
+</li>
+      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.get_nodes">get_nodes() (simulaqron.toolbox.manage_nodes.NetworksConfigConstructor method)</a>
 </li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.qutipSimulator.qutipEngine.get_qubits">get_qubits() (simulaqron.virtNode.qutipSimulator.qutipEngine method)</a>
 </li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.qutipSimulator.qutipEngine.get_qubits_RI">get_qubits_RI() (simulaqron.virtNode.qutipSimulator.qutipEngine method)</a>
 </li>
-      <li><a href="simulaqron.html#simulaqron.configFiles.get_random_connected">get_random_connected() (in module simulaqron.configFiles)</a>
+      <li><a href="simulaqron.html#simulaqron.network.get_random_connected">get_random_connected() (in module simulaqron.network)</a>
+</li>
+      <li><a href="simulaqron.html#simulaqron.network.get_random_tree">get_random_tree() (in module simulaqron.network)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="simulaqron.html#simulaqron.configFiles.get_random_tree">get_random_tree() (in module simulaqron.configFiles)</a>
-</li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.get_register_RI">get_register_RI() (simulaqron.virtNode.basics.quantumEngine method)</a>
 
       <ul>
@@ -640,6 +659,8 @@
       <li><a href="cqc.html#cqc.pythonLib.qubit.get_remote_entNode">get_remote_entNode() (cqc.pythonLib.qubit method)</a>
 </li>
       <li><a href="cqc.html#cqc.pythonLib.get_remote_from_directory_or_address">get_remote_from_directory_or_address() (in module cqc.pythonLib)</a>
+</li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.Decorator.get_setting">get_setting() (simulaqron.settings.Config.Decorator class method)</a>
 </li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.virtual.virtualNode.get_sim_id">get_sim_id() (simulaqron.virtNode.virtual.virtualNode method)</a>
 </li>
@@ -659,7 +680,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cqc.html#cqc.pythonLib.qubit.H">H() (cqc.pythonLib.qubit method)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.handle_command">handle_command() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.handle_command">handle_command() (cqc.MessageHandler.CQCMessageHandler method)</a>
 </li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.virtual.virtualNode.handle_connection">handle_connection() (simulaqron.virtNode.virtual.virtualNode method)</a>
 </li>
@@ -669,23 +690,23 @@
         <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.virtual.virtualNode.handle_connection_error">(simulaqron.virtNode.virtual.virtualNode method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.handle_cqc_message">handle_cqc_message() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.handle_cqc_message">handle_cqc_message() (cqc.MessageHandler.CQCMessageHandler method)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.handle_factory">handle_factory() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.handle_factory">handle_factory() (cqc.MessageHandler.CQCMessageHandler method)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.handle_hello">handle_hello() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.handle_hello">handle_hello() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.handle_hello">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.handle_time">handle_time() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.handle_time">handle_time() (cqc.MessageHandler.CQCMessageHandler method)</a>
 
       <ul>
         <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.handle_time">(simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler method)</a>
 </li>
       </ul></li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.has_extra">has_extra() (in module simulaqron.cqc_backend.cqcMessageHandler)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.has_extra">has_extra() (in module cqc.MessageHandler)</a>
 </li>
       <li><a href="cqc.html#cqc.pythonLib.hasXtraHeader">hasXtraHeader() (in module cqc.pythonLib)</a>
 </li>
@@ -728,11 +749,7 @@
       <li><a href="cqc.html#cqc.cqcHeader.Header">Header (class in cqc.cqcHeader)</a>
 </li>
       <li><a href="cqc.html#cqc.hostConfig.host">host (class in cqc.hostConfig)</a>
-
-      <ul>
-        <li><a href="simulaqron.general.html#simulaqron.general.hostConfig.host">(class in simulaqron.general.hostConfig)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -753,7 +770,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cqc.pythonLib_protocols.html#cqc.pythonLib_protocols.wstate.initialize_Qubit_register">initialize_Qubit_register() (in module cqc.pythonLib_protocols.wstate)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcProtocol.CQCFactory.is_adjacent">is_adjacent() (simulaqron.cqc_backend.cqcProtocol.CQCFactory method)</a>
+      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcFactory.CQCFactory.is_adjacent">is_adjacent() (simulaqron.cqc_backend.cqcFactory.CQCFactory method)</a>
 </li>
       <li><a href="cqc.html#cqc.pythonLib.qubit.is_entangled">is_entangled() (cqc.pythonLib.qubit method)</a>
 </li>
@@ -785,7 +802,9 @@
 </li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.quantum.simulatedQubit.lock">lock() (simulaqron.virtNode.quantum.simulatedQubit method)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcProtocol.CQCFactory.lookup">lookup() (simulaqron.cqc_backend.cqcProtocol.CQCFactory method)</a>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.log_level">log_level (simulaqron.settings.Config attribute)</a>
+</li>
+      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcFactory.CQCFactory.lookup">lookup() (simulaqron.cqc_backend.cqcFactory.CQCFactory method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -798,21 +817,29 @@
       <ul>
         <li><a href="simulaqron.run.html#simulaqron.run.startNode.main">(in module simulaqron.run.startNode)</a>
 </li>
+        <li><a href="simulaqron.html#simulaqron.tests_run.main">(in module simulaqron.tests_run)</a>
+</li>
         <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.get_simulaqron_path.main">(in module simulaqron.toolbox.get_simulaqron_path)</a>
 </li>
         <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.has_module.main">(in module simulaqron.toolbox.has_module)</a>
 </li>
+        <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.reset.main">(in module simulaqron.toolbox.reset)</a>
+</li>
       </ul></li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.quantum.simulatedQubit.make_fresh">make_fresh() (simulaqron.virtNode.quantum.simulatedQubit method)</a>
 </li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.max_qubits">max_qubits (simulaqron.settings.Config attribute)</a>
+</li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.max_registers">max_registers (simulaqron.settings.Config attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cqc.html#cqc.pythonLib.qubit.measure">measure() (cqc.pythonLib.qubit method)</a>
 
       <ul>
         <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.stabilizerStates.StabilizerState.measure">(simulaqron.toolbox.stabilizerStates.StabilizerState method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.measure_qubit">measure_qubit() (simulaqron.virtNode.basics.quantumEngine method)</a>
 
       <ul>
@@ -841,26 +868,20 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="simulaqron.html#simulaqron.network.Network">Network (class in simulaqron.network)</a>
 </li>
-      <li><a href="cqc.html#cqc.hostConfig.networkConfig">networkConfig (class in cqc.hostConfig)</a>
-
-      <ul>
-        <li><a href="simulaqron.general.html#simulaqron.general.hostConfig.networkConfig">(class in simulaqron.general.hostConfig)</a>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.network_config_file">network_config_file (simulaqron.settings.Config attribute)</a>
 </li>
-      </ul></li>
+      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor">NetworksConfigConstructor (class in simulaqron.toolbox.manage_nodes)</a>
+</li>
       <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.new_ent_id">new_ent_id() (simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler static method)</a>
-
-      <ul>
-        <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcProtocol.CQCProtocol.new_ent_id">(simulaqron.cqc_backend.cqcProtocol.CQCProtocol method)</a>
 </li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler.new_qubit_id">new_qubit_id() (simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler static method)</a>
-
-      <ul>
-        <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcProtocol.CQCProtocol.new_qubit_id">(simulaqron.cqc_backend.cqcProtocol.CQCProtocol method)</a>
 </li>
-      </ul></li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.nodes_file">nodes_file (simulaqron.settings.Config attribute)</a>
+</li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.noisy_qubits">noisy_qubits (simulaqron.settings.Config attribute)</a>
+</li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.basics.noQubitError">noQubitError</a>
 </li>
       <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.stabilizerStates.StabilizerState.num_qubits">num_qubits (simulaqron.toolbox.stabilizerStates.StabilizerState attribute)</a>
@@ -921,11 +942,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cqc.html#cqc.cqcHeader.CQCCommunicationHeader.packaging_format_v1">packaging_format_v1 (cqc.cqcHeader.CQCCommunicationHeader attribute)</a>
 </li>
-      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.measurements.parity_meas">parity_meas() (in module simulaqron.toolbox.measurements)</a>
+      <li><a href="cqc.pythonLib_protocols.html#cqc.pythonLib_protocols.measurements.parity_meas">parity_meas() (in module cqc.pythonLib_protocols.measurements)</a>
+</li>
+      <li><a href="simulaqron.html#simulaqron.tests_run.parse_args">parse_args() (in module simulaqron.tests_run)</a>
 </li>
       <li><a href="cqc.html#cqc.pythonLib.CQCConnection.parse_CQC_msg">parse_CQC_msg() (cqc.pythonLib.CQCConnection method)</a>
-</li>
-      <li><a href="simulaqron.html#simulaqron.configFiles.parse_input">parse_input() (in module simulaqron.configFiles)</a>
 </li>
       <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.stabilizerStates.StabilizerState.Pauli2bool">Pauli2bool (simulaqron.toolbox.stabilizerStates.StabilizerState attribute)</a>
 </li>
@@ -935,15 +956,11 @@
 </li>
       <li><a href="cqc.html#cqc.pythonLib.CQCConnection.print_CQC_msg">print_CQC_msg() (cqc.pythonLib.CQCConnection method)</a>
 </li>
-      <li><a href="cqc.html#cqc.hostConfig.networkConfig.print_details">print_details() (cqc.hostConfig.networkConfig method)</a>
-
-      <ul>
-        <li><a href="simulaqron.general.html#simulaqron.general.hostConfig.networkConfig.print_details">(simulaqron.general.hostConfig.networkConfig method)</a>
+      <li><a href="simulaqron.general.html#simulaqron.general.hostConfig.socketsConfig.print_details">print_details() (simulaqron.general.hostConfig.socketsConfig method)</a>
 </li>
-      </ul></li>
       <li><a href="cqc.html#cqc.pythonLib.qubit.print_entInfo">print_entInfo() (cqc.pythonLib.qubit method)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.print_error">print_error() (in module simulaqron.cqc_backend.cqcMessageHandler)</a>
+      <li><a href="cqc.html#cqc.MessageHandler.print_error">print_error() (in module cqc.MessageHandler)</a>
 </li>
       <li><a href="cqc.html#cqc.cqcHeader.Header.printable">printable() (cqc.cqcHeader.Header method)</a>
 </li>
@@ -979,13 +996,15 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cqc.html#cqc.hostConfig.networkConfig.read_config">read_config() (cqc.hostConfig.networkConfig method)</a>
-
-      <ul>
-        <li><a href="simulaqron.general.html#simulaqron.general.hostConfig.networkConfig.read_config">(simulaqron.general.hostConfig.networkConfig method)</a>
+      <li><a href="simulaqron.general.html#simulaqron.general.hostConfig.socketsConfig.read_config">read_config() (simulaqron.general.hostConfig.socketsConfig method)</a>
 </li>
-      </ul></li>
+      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.read_from_file">read_from_file() (simulaqron.toolbox.manage_nodes.NetworksConfigConstructor method)</a>
+</li>
       <li><a href="cqc.html#cqc.pythonLib.CQCConnection.readMessage">readMessage() (cqc.pythonLib.CQCConnection method)</a>
+</li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.recv_retry_time">recv_retry_time (simulaqron.settings.Config attribute)</a>
+</li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.recv_timeout">recv_timeout (simulaqron.settings.Config attribute)</a>
 </li>
       <li><a href="cqc.html#cqc.pythonLib.CQCConnection.recvClassical">recvClassical() (cqc.pythonLib.CQCConnection method)</a>
 </li>
@@ -1167,7 +1186,9 @@
 </li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.virtual.virtualNode.remote_update_virtual_merge">remote_update_virtual_merge() (simulaqron.virtNode.virtual.virtualNode method)</a>
 </li>
-      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.remove_node">remove_node() (in module simulaqron.toolbox.manage_nodes)</a>
+      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.remove_network">remove_network() (simulaqron.toolbox.manage_nodes.NetworksConfigConstructor method)</a>
+</li>
+      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.remove_node">remove_node() (simulaqron.toolbox.manage_nodes.NetworksConfigConstructor method)</a>
 </li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.basics.quantumEngine.remove_qubit">remove_qubit() (simulaqron.virtNode.basics.quantumEngine method)</a>
 
@@ -1194,14 +1215,20 @@
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.virtual.virtualNode.reraise_remote_error">reraise_remote_error() (simulaqron.virtNode.virtual.virtualNode method)</a>
 </li>
       <li><a href="cqc.html#cqc.pythonLib.qubit.reset">reset() (cqc.pythonLib.qubit method)</a>
+
+      <ul>
+        <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.reset">(simulaqron.toolbox.manage_nodes.NetworksConfigConstructor method)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler.retrieve_return_messages">retrieve_return_messages() (simulaqron.cqc_backend.cqcMessageHandler.CQCMessageHandler method)</a>
+      </ul></li>
+      <li><a href="cqc.html#cqc.MessageHandler.CQCMessageHandler.retrieve_return_messages">retrieve_return_messages() (cqc.MessageHandler.CQCMessageHandler method)</a>
 </li>
       <li><a href="cqc.html#cqc.pythonLib.qubit.rot_X">rot_X() (cqc.pythonLib.qubit method)</a>
 </li>
       <li><a href="cqc.html#cqc.pythonLib.qubit.rot_Y">rot_Y() (cqc.pythonLib.qubit method)</a>
 </li>
       <li><a href="cqc.html#cqc.pythonLib.qubit.rot_Z">rot_Z() (cqc.pythonLib.qubit method)</a>
+</li>
+      <li><a href="simulaqron.html#simulaqron.SimulaQron.SimulaQronDaemon.run">run() (simulaqron.SimulaQron.SimulaQronDaemon method)</a>
 </li>
       <li><a href="simulaqron.html#simulaqron.network.Network.running">running (simulaqron.network.Network attribute)</a>
 </li>
@@ -1227,19 +1254,13 @@
 </li>
       <li><a href="cqc.html#cqc.pythonLib.CQCConnection.sendSimple">sendSimple() (cqc.pythonLib.CQCConnection method)</a>
 </li>
-      <li><a href="cqc.html#cqc.settings.set_config">set_config() (in module cqc.settings)</a>
-</li>
-      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.set_default_nodes">set_default_nodes() (in module simulaqron.toolbox.manage_nodes)</a>
-</li>
       <li><a href="cqc.html#cqc.pythonLib.qubit.set_entInfo">set_entInfo() (cqc.pythonLib.qubit method)</a>
 </li>
       <li><a href="cqc.html#cqc.pythonLib.CQCConnection.set_pending">set_pending() (cqc.pythonLib.CQCConnection method)</a>
 </li>
-      <li><a href="simulaqron.html#simulaqron.configFiles.set_settings">set_settings() (in module simulaqron.configFiles)</a>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.Decorator.set_setting">set_setting() (simulaqron.settings.Config.Decorator class method)</a>
 </li>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcProtocol.CQCFactory.set_virtual_node">set_virtual_node() (simulaqron.cqc_backend.cqcProtocol.CQCFactory method)</a>
-</li>
-      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.setup_cqc_files">setup_cqc_files() (in module simulaqron.toolbox.manage_nodes)</a>
+      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcFactory.CQCFactory.set_virtual_node">set_virtual_node() (simulaqron.cqc_backend.cqcFactory.CQCFactory method)</a>
 </li>
       <li><a href="simulaqron.run.html#simulaqron.run.startCQC.setup_CQC_server">setup_CQC_server() (in module simulaqron.run.startCQC)</a>
 </li>
@@ -1257,13 +1278,9 @@
       </ul></li>
       <li><a href="simulaqron.html#module-simulaqron">simulaqron (module)</a>
 </li>
-      <li><a href="simulaqron.html#module-simulaqron.configFiles">simulaqron.configFiles (module)</a>
-</li>
-      <li><a href="simulaqron.cqc_backend.html#module-simulaqron.cqc_backend">simulaqron.cqc_backend (module)</a>
+      <li><a href="simulaqron.cqc_backend.html#module-simulaqron.cqc_backend.cqcFactory">simulaqron.cqc_backend.cqcFactory (module)</a>
 </li>
       <li><a href="simulaqron.cqc_backend.html#module-simulaqron.cqc_backend.cqcMessageHandler">simulaqron.cqc_backend.cqcMessageHandler (module)</a>
-</li>
-      <li><a href="simulaqron.cqc_backend.html#module-simulaqron.cqc_backend.cqcProtocol">simulaqron.cqc_backend.cqcProtocol (module)</a>
 </li>
       <li><a href="simulaqron.general.html#module-simulaqron.general">simulaqron.general (module)</a>
 </li>
@@ -1271,8 +1288,6 @@
 </li>
       <li><a href="simulaqron.local.html#module-simulaqron.local">simulaqron.local (module)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="simulaqron.local.html#module-simulaqron.local.setup">simulaqron.local.setup (module)</a>
 </li>
       <li><a href="simulaqron.html#module-simulaqron.network">simulaqron.network (module)</a>
@@ -1283,7 +1298,15 @@
 </li>
       <li><a href="simulaqron.run.html#module-simulaqron.run.startNode">simulaqron.run.startNode (module)</a>
 </li>
-      <li><a href="simulaqron.toolbox.html#module-simulaqron.toolbox">simulaqron.toolbox (module)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="simulaqron.html#module-simulaqron.settings">simulaqron.settings (module)</a>
+</li>
+      <li><a href="simulaqron.html#module-simulaqron.SimulaQron">simulaqron.SimulaQron (module)</a>
+</li>
+      <li><a href="simulaqron.html#module-simulaqron.tests_run">simulaqron.tests_run (module)</a>
+</li>
+      <li><a href="simulaqron.cqc_backend.html#module-simulaqron.toolbox">simulaqron.toolbox (module)</a>, <a href="simulaqron.toolbox.html#module-simulaqron.toolbox">[1]</a>
 </li>
       <li><a href="simulaqron.toolbox.html#module-simulaqron.toolbox.get_simulaqron_path">simulaqron.toolbox.get_simulaqron_path (module)</a>
 </li>
@@ -1291,7 +1314,7 @@
 </li>
       <li><a href="simulaqron.toolbox.html#module-simulaqron.toolbox.manage_nodes">simulaqron.toolbox.manage_nodes (module)</a>
 </li>
-      <li><a href="simulaqron.toolbox.html#module-simulaqron.toolbox.measurements">simulaqron.toolbox.measurements (module)</a>
+      <li><a href="simulaqron.toolbox.html#module-simulaqron.toolbox.reset">simulaqron.toolbox.reset (module)</a>
 </li>
       <li><a href="simulaqron.toolbox.html#module-simulaqron.toolbox.stabilizerStates">simulaqron.toolbox.stabilizerStates (module)</a>
 </li>
@@ -1309,9 +1332,15 @@
 </li>
       <li><a href="simulaqron.virtNode.html#module-simulaqron.virtNode.virtual">simulaqron.virtNode.virtual (module)</a>
 </li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.simulaqron_path">simulaqron_path (simulaqron.settings.Config attribute)</a>
+</li>
       <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler">SimulaqronCQCHandler (class in simulaqron.cqc_backend.cqcMessageHandler)</a>
 </li>
+      <li><a href="simulaqron.html#simulaqron.SimulaQron.SimulaQronDaemon">SimulaQronDaemon (class in simulaqron.SimulaQron)</a>
+</li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.quantum.simulatedQubit">simulatedQubit (class in simulaqron.virtNode.quantum)</a>
+</li>
+      <li><a href="simulaqron.general.html#simulaqron.general.hostConfig.socketsConfig">socketsConfig (class in simulaqron.general.hostConfig)</a>
 </li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine">stabilizerEngine (class in simulaqron.virtNode.stabilizerSimulator)</a>
 </li>
@@ -1343,6 +1372,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cqc.html#cqc.pythonLib.qubit.T">T() (cqc.pythonLib.qubit method)</a>
 </li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.t1">t1 (simulaqron.settings.Config attribute)</a>
+</li>
       <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.stabilizerStates.StabilizerState.tensor_product">tensor_product() (simulaqron.toolbox.stabilizerStates.StabilizerState method)</a>
 </li>
       <li><a href="cqc.html#cqc.pythonLib.CQCConnection.test_preparation">test_preparation() (cqc.pythonLib.CQCConnection method)</a>
@@ -1353,7 +1384,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.stabilizerStates.StabilizerState.to_array">to_array() (simulaqron.toolbox.stabilizerStates.StabilizerState method)</a>
 </li>
+      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.to_dict">to_dict() (simulaqron.toolbox.manage_nodes.NetworksConfigConstructor method)</a>
+</li>
       <li><a href="cqc.html#cqc.pythonLib.CQCConnection.tomography">tomography() (cqc.pythonLib.CQCConnection method)</a>
+</li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.topology_file">topology_file (simulaqron.settings.Config attribute)</a>
 </li>
       <li><a href="cqc.html#cqc.entInfoHeader.EntInfoCreateKeepHeader.type">type (cqc.entInfoHeader.EntInfoCreateKeepHeader attribute)</a>
 
@@ -1367,7 +1402,7 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.UnknownQubitError">UnknownQubitError</a>
+      <li><a href="cqc.html#cqc.MessageHandler.UnknownQubitError">UnknownQubitError</a>
 </li>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.quantum.simulatedQubit.unlock">unlock() (simulaqron.virtNode.quantum.simulatedQubit method)</a>
 </li>
@@ -1377,6 +1412,8 @@
 </li>
       <li><a href="cqc.html#cqc.pythonLib.ProgressBar.update">update() (cqc.pythonLib.ProgressBar method)</a>
 </li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.update_settings">update_settings() (simulaqron.settings.Config method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -1385,11 +1422,21 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.basics.virtNetError">virtNetError</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.virtual.virtualNode">virtualNode (class in simulaqron.virtNode.virtual)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="simulaqron.virtNode.html#simulaqron.virtNode.virtual.virtualQubit">virtualQubit (class in simulaqron.virtNode.virtual)</a>
+</li>
+      <li><a href="simulaqron.html#simulaqron.settings.Config.vnode_file">vnode_file (simulaqron.settings.Config attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.write_to_file">write_to_file() (simulaqron.toolbox.manage_nodes.NetworksConfigConstructor method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1434,7 +1481,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 2.1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.3 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

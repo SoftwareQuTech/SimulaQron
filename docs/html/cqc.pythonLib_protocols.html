@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>cqc.pythonLib_protocols package &#8212; SimulaQron 2.1.1 documentation</title>
+    <title>cqc.pythonLib_protocols package &#8212; SimulaQron 3.0.3 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="CLib.html" title="CQC C Library"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 2.1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.3 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="cqc.html" accesskey="U">cqc package</a> &#187;</li> 
       </ul>
     </div>
@@ -45,6 +45,7 @@
 <li><a class="reference internal" href="#">cqc.pythonLib_protocols package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-cqc.pythonLib_protocols.coinflip_leader">cqc.pythonLib_protocols.coinflip_leader module</a></li>
+<li><a class="reference internal" href="#module-cqc.pythonLib_protocols.measurements">cqc.pythonLib_protocols.measurements module</a></li>
 <li><a class="reference internal" href="#module-cqc.pythonLib_protocols.wstate">cqc.pythonLib_protocols.wstate module</a></li>
 <li><a class="reference internal" href="#module-cqc.pythonLib_protocols">Module contents</a></li>
 </ul>
@@ -102,6 +103,36 @@
 :return: the selected leader id.</p>
 </dd></dl>
 
+</dd></dl>
+
+</div>
+<div class="section" id="module-cqc.pythonLib_protocols.measurements">
+<span id="cqc-pythonlib-protocols-measurements-module"></span><h2>cqc.pythonLib_protocols.measurements module<a class="headerlink" href="#module-cqc.pythonLib_protocols.measurements" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="cqc.pythonLib_protocols.measurements.parity_meas">
+<code class="descclassname">cqc.pythonLib_protocols.measurements.</code><code class="descname">parity_meas</code><span class="sig-paren">(</span><em>qubits</em>, <em>bases</em>, <em>node</em>, <em>negative=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cqc/pythonLib_protocols/measurements.html#parity_meas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cqc.pythonLib_protocols.measurements.parity_meas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a parity measurement on the provided qubits in the Pauli bases specified by ‘bases’.
+‘bases’ should be a string with letters in “IXYZ” and have the same length as the number of qubits provided.
+If ‘negative’ is true the measurement outcome is flipped.
+If more than one letter of ‘bases’ is not identity, then an ancilla qubit will be used, which is created using the
+provided ‘node’.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>qubits</strong> (list of :obj: <cite>cqc.pythonLib.qubit</cite>) – List of qubits to be measured.</li>
+<li><strong>bases</strong> (<em>str</em>) – String specifying the Pauli-bases of the measurement. Example bases=”IXY” for three qubits.</li>
+<li><strong>node</strong> – The node storing the qubits. Used for creating an ancilla qubit.</li>
+<li><strong>negative</strong> (<em>bool</em>) – If the measurement outcome should be flipped or not.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The measurement outcome 0 or 1, where 0 correspond to the +1 eigenvalue of the measurement operator.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -191,7 +222,7 @@ Returns an array of initialized qubits.</p>
         <li class="right" >
           <a href="CLib.html" title="CQC C Library"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 2.1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.3 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="cqc.html" >cqc package</a> &#187;</li> 
       </ul>
     </div>

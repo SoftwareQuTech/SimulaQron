@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Getting started &#8212; SimulaQron 2.1.1 documentation</title>
+    <title>Getting started &#8212; SimulaQron 3.0.3 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="Overview.html" title="Overview"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 2.1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.3 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -45,7 +45,7 @@
 <li><a class="reference internal" href="#setup">Setup</a><ul>
 <li><a class="reference internal" href="#installation-using-pip">Installation using pip</a></li>
 <li><a class="reference internal" href="#installation-from-source">Installation from source</a></li>
-<li><a class="reference internal" href="#verifying-the-installation">Verifying the installation</a></li>
+<li><a class="reference internal" href="#verifying-the-installation-if-installed-from-source">Verifying the installation (if installed from source)</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#testing-a-simple-example">Testing a simple example</a><ul>
@@ -95,11 +95,7 @@
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="setup">
 <h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
-<p>SimulaQron requires <a class="reference external" href="https://python.org/">Python 3</a>  along with the packages <em>twisted</em>, <em>numpy</em>, <em>scipy</em>, <em>Cython</em>, <em>service_identity</em>, <em>matplotlib</em>, <em>networkx</em>, <em>bitstring</em>, <em>black</em>, <em>flake8</em>, <em>click</em> and <em>daemons</em>.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">matplotlib also requires tkinter which on Linux can be installed by the command <code class="code docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">python3-tk</span></code>.</p>
-</div>
+<p>SimulaQron requires <a class="reference external" href="https://python.org/">Python 3</a>  along with the packages <em>cqc</em>, <em>twisted</em>, <em>numpy</em>, <em>scipy</em>, <em>networkx</em>, <em>black</em>, <em>flake8</em>, <em>click</em> and <em>daemons</em>.</p>
 <div class="section" id="installation-using-pip">
 <h3>Installation using pip<a class="headerlink" href="#installation-using-pip" title="Permalink to this headline">¶</a></h3>
 <p>The easiest way to install SimulaQron is using pip (requires MacOS or Linux). Simply type</p>
@@ -108,6 +104,15 @@
 </div>
 <p>You can then make use of SimulaQron using the command <code class="code docutils literal notranslate"><span class="pre">simulaqron</span></code> in the terminal. For more information on how to use this command see below or type:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">simulaqron</span> <span class="o">-</span><span class="n">h</span>
+</pre></div>
+</div>
+<p>To make sure you have the version compatible with this documentation type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">simulaqron</span> <span class="n">version</span>
+</pre></div>
+</div>
+<p>If you want to make sure that everything has been installed properly you can start run the unittests. Open a interactive python console by typing <cite>python3</cite> and the:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">simulaqron</span>
+<span class="n">simulaqron</span><span class="o">.</span><span class="n">tests</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -126,22 +131,19 @@ you use bash (e.g., standard on OSX or the GIT Bash install on Windows 10), othe
 <p>where yourPath is the directory containing SimulaQron. You can add this to your ~/.bashrc or ~/.bash_profile file.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p>If you want to use SimulaQron in the same way as when installed using pip you can use an alias by for example:</p>
+<p>If you want to use SimulaQron in the same way as when installed using pip you can use an alias by for example</p>
 <p class="last">alias simulaqron=yourPath/SimulaQron/simulaqron/SimulaQron.py</p>
 </div>
 </div>
-<div class="section" id="verifying-the-installation">
-<h3>Verifying the installation<a class="headerlink" href="#verifying-the-installation" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="verifying-the-installation-if-installed-from-source">
+<h3>Verifying the installation (if installed from source)<a class="headerlink" href="#verifying-the-installation-if-installed-from-source" title="Permalink to this headline">¶</a></h3>
 <p>To run SimulaQron you need to following Python packages:</p>
 <ul class="simple">
+<li>cqc</li>
 <li>numpy</li>
 <li>scipy</li>
-<li>Cython</li>
-<li>service_identity</li>
 <li>twisted</li>
-<li>matplotlib</li>
 <li>networkx</li>
-<li>bitstring</li>
 <li>black</li>
 <li>flake8</li>
 <li>click</li>
@@ -166,7 +168,7 @@ By default the <em>stabilizer</em> engine will be used.</p>
 <p>Before delving into how to write any program yourself, let’s first simply run one of the existing examples when programming SimulaQron through the Python library (see <a class="reference internal" href="ExamplespythonLib.html"><span class="doc">Examples using the python library</span></a>).
 Remember from the Overview that SimulaQron has two parts: the first are the virtual node servers that act simulate the hardware at each node as well as the quantum communication between them in a transparent manner.
 The second are the applications themselves which can be written in two ways, the direct way is to use the native mode using the Python Twisted framework connecting to the virtual node servers, see <a class="reference internal" href="ExamplesDirect.html"><span class="doc">Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)</span></a>.
-Another way is the use the provided Python library that calls the virtual nodes by making use of the classical/quantum combiner interface.
+The recommended way however is the use the provided Python library that calls the virtual nodes by making use of the classical/quantum combiner interface.
 We will here illustrate how to use SimulaQron with the Python library.</p>
 <div class="section" id="starting-the-simulaqron-backend">
 <h3>Starting the SimulaQron backend<a class="headerlink" href="#starting-the-simulaqron-backend" title="Permalink to this headline">¶</a></h3>
@@ -187,7 +189,7 @@ We will here illustrate how to use SimulaQron with the Python library.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">simulaqron</span> <span class="n">reset</span>
 </pre></div>
 </div>
-<p>Note that this also kills any currently running network.</p>
+<p>Note that this also kills any currently running network and resets any settings or configurations.</p>
 </div>
 <div class="section" id="running-a-protocol">
 <h3>Running a protocol<a class="headerlink" href="#running-a-protocol" title="Permalink to this headline">¶</a></h3>
@@ -198,8 +200,8 @@ Our objective will be to realize the following protocol which will generate 1 sh
 <li>Both Alice and Bob measure their respective qubits to obtain a classical random number <span class="math notranslate nohighlight">\(x \in \{0,1\}\)</span>.</li>
 </ul>
 <p>The examples can be found in the repo <a class="reference external" href="https://github.com/SoftwareQuTech/CQC-Python">pythonLib</a>.
-Before seeing how this example works, let us again simply run the code:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">examples</span><span class="o">/</span><span class="n">cqc</span><span class="o">/</span><span class="n">pythonLib</span><span class="o">/</span><span class="n">corrRNG</span>
+Before seeing how this example works, let us simply run the code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">examples</span><span class="o">/</span><span class="n">pythonLib</span><span class="o">/</span><span class="n">corrRNG</span>
 <span class="n">sh</span> <span class="n">run</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
@@ -262,7 +264,7 @@ The full code in aliceTest.py is:</p>
 </div>
 <div class="section" id="settings">
 <h2>Settings<a class="headerlink" href="#settings" title="Permalink to this headline">¶</a></h2>
-<p>Settings are easily accessed through the command line interface. To see what settings can be set, type:</p>
+<p>Settings are easily accessed through the command line interface (CLI). To see what settings can be set, type:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">simulaqron</span> <span class="nb">set</span> <span class="o">-</span><span class="n">h</span>
 </pre></div>
 </div>
@@ -270,6 +272,15 @@ The full code in aliceTest.py is:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">simulaqron</span> <span class="nb">set</span> <span class="n">backend</span> <span class="n">projectq</span>
 </pre></div>
 </div>
+<p>Alternatively, you can add a file <code class="docutils literal notranslate"><span class="pre">.simulaqron.json</span></code> in your home folder (i.e. <code class="docutils literal notranslate"><span class="pre">~</span></code>).
+For example this file could look like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+   <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="s2">&quot;projectq&quot;</span><span class="p">,</span>
+   <span class="s2">&quot;log_level&quot;</span><span class="p">:</span> <span class="mi">10</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>which would set the backend to be use ProjectQ and the log-level to be debug (10). Any setting in this file will override the settings set in the CLI.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Settings needs to be set before starting the SimulaQron backend. If the backend is already running, stop it, set the settings and start it again.</p>
@@ -298,7 +309,7 @@ The full code in aliceTest.py is:</p>
         <li class="right" >
           <a href="Overview.html" title="Overview"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 2.1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.3 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

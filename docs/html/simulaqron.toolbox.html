@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>simulaqron.virtNode package &#8212; SimulaQron 2.1.1 documentation</title>
+    <title>simulaqron.toolbox package &#8212; SimulaQron 3.0.3 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -16,8 +16,8 @@
     <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="simulaqron.run package" href="simulaqron.run.html" />
-    <link rel="prev" title="simulaqron.virtNode package" href="simulaqron.virtNode.html" /> 
+    <link rel="next" title="simulaqron.virtNode package" href="simulaqron.virtNode.html" />
+    <link rel="prev" title="simulaqron.run package" href="simulaqron.run.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -29,12 +29,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="simulaqron.run.html" title="simulaqron.run package"
+          <a href="simulaqron.virtNode.html" title="simulaqron.virtNode package"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="simulaqron.virtNode.html" title="simulaqron.virtNode package"
+          <a href="simulaqron.run.html" title="simulaqron.run package"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 2.1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.3 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="simulaqron.html" accesskey="U">simulaqron package</a> &#187;</li> 
       </ul>
     </div>
@@ -42,12 +42,12 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">simulaqron.virtNode package</a><ul>
+<li><a class="reference internal" href="#">simulaqron.toolbox package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-simulaqron.toolbox.get_simulaqron_path">simulaqron.toolbox.get_simulaqron_path module</a></li>
 <li><a class="reference internal" href="#module-simulaqron.toolbox.has_module">simulaqron.toolbox.has_module module</a></li>
 <li><a class="reference internal" href="#module-simulaqron.toolbox.manage_nodes">simulaqron.toolbox.manage_nodes module</a></li>
-<li><a class="reference internal" href="#module-simulaqron.toolbox.measurements">simulaqron.toolbox.measurements module</a></li>
+<li><a class="reference internal" href="#module-simulaqron.toolbox.reset">simulaqron.toolbox.reset module</a></li>
 <li><a class="reference internal" href="#module-simulaqron.toolbox.stabilizerStates">simulaqron.toolbox.stabilizerStates module</a></li>
 <li><a class="reference internal" href="#module-simulaqron.toolbox">Module contents</a></li>
 </ul>
@@ -55,11 +55,11 @@
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="simulaqron.virtNode.html"
-                        title="previous chapter">simulaqron.virtNode package</a></p>
-  <h4>Next topic</h4>
   <p class="topless"><a href="simulaqron.run.html"
-                        title="next chapter">simulaqron.run package</a></p>
+                        title="previous chapter">simulaqron.run package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="simulaqron.virtNode.html"
+                        title="next chapter">simulaqron.virtNode package</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -87,8 +87,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="simulaqron-virtnode-package">
-<h1>simulaqron.virtNode package<a class="headerlink" href="#simulaqron-virtnode-package" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="simulaqron-toolbox-package">
+<h1>simulaqron.toolbox package<a class="headerlink" href="#simulaqron-toolbox-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -110,19 +110,53 @@
 </div>
 <div class="section" id="module-simulaqron.toolbox.manage_nodes">
 <span id="simulaqron-toolbox-manage-nodes-module"></span><h2>simulaqron.toolbox.manage_nodes module<a class="headerlink" href="#module-simulaqron.toolbox.manage_nodes" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="simulaqron.toolbox.manage_nodes.add_node">
-<code class="descclassname">simulaqron.toolbox.manage_nodes.</code><code class="descname">add_node</code><span class="sig-paren">(</span><em>name</em>, <em>hostname=None</em>, <em>app_port=None</em>, <em>cqc_port=None</em>, <em>vnode_port=None</em>, <em>neighbors=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#add_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.add_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a node with the given name from the config files.
-If the port numbers a not specified, unused ones will be chosen between 8000 and 9000.</p>
+<dl class="class">
+<dt id="simulaqron.toolbox.manage_nodes.NetworksConfigConstructor">
+<em class="property">class </em><code class="descclassname">simulaqron.toolbox.manage_nodes.</code><code class="descname">NetworksConfigConstructor</code><span class="sig-paren">(</span><em>file_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#NetworksConfigConstructor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.add_network">
+<code class="descname">add_network</code><span class="sig-paren">(</span><em>node_names</em>, <em>network_name='default'</em>, <em>topology=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#NetworksConfigConstructor.add_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.add_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a new network to the config, with some specified nodes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>node_names</strong> – list of str
+Name of the nodes, e.g. [Alice, Bob]</li>
+<li><strong>network_name</strong> – str
+Name of the network (default: “default”)</li>
+<li><strong>topology</strong> – None or dict
+The topology of the network (optional) (default is fully connected)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.add_node">
+<code class="descname">add_node</code><span class="sig-paren">(</span><em>node_name</em>, <em>network_name='default'</em>, <em>app_hostname=None</em>, <em>cqc_hostname=None</em>, <em>vnode_hostname=None</em>, <em>app_port=None</em>, <em>cqc_port=None</em>, <em>vnode_port=None</em>, <em>neighbors=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#NetworksConfigConstructor.add_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.add_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a node with the given name to a network (default: “default”).
+If hostnames are None they will default to ‘localhost’.
+If the port numbers None, unused ones will be chosen between 8000 and 9000.
+If neighbors are specified a restricted topology can be constructed (default is fully connected).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>name</strong> – str
+<li><strong>node_name</strong> – str
 Name of the node, e.g. Alice</li>
-<li><strong>hostname</strong> – str or None
+<li><strong>network_name</strong> – str
+Name of the network (default: “default”)</li>
+<li><strong>app_hostname</strong> – str or None
+Hostname, e.g. localhost (default) or 192.168.0.1</li>
+<li><strong>cqc_hostname</strong> – str or None
+Hostname, e.g. localhost (default) or 192.168.0.1</li>
+<li><strong>vnode_hostname</strong> – str or None
 Hostname, e.g. localhost (default) or 192.168.0.1</li>
 <li><strong>app_port</strong> – int or None
 Port number for the application</li>
@@ -131,7 +165,8 @@ Port number for the cqc server</li>
 <li><strong>vnode_port</strong> – int or None
 Port number for the virtual node</li>
 <li><strong>neighbors</strong> – (list of str) or None
-A list of neighbors, of this node, if None all current nodes in the network will be adjacent to the added node.</li>
+A list of neighbors, of this node.
+If None all current nodes in the network will be adjacent to the added node.</li>
 </ul>
 </td>
 </tr>
@@ -142,63 +177,131 @@ A list of neighbors, of this node, if None all current nodes in the network will
 </table>
 </dd></dl>
 
-<dl class="function">
-<dt id="simulaqron.toolbox.manage_nodes.get_nodes">
-<code class="descclassname">simulaqron.toolbox.manage_nodes.</code><code class="descname">get_nodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#get_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.get_nodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of the current nodes set in the config files.
-:return: list of str</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="simulaqron.toolbox.manage_nodes.remove_node">
-<code class="descclassname">simulaqron.toolbox.manage_nodes.</code><code class="descname">remove_node</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#remove_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.remove_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes the node with the given name from the config files.
-:param name: str
-:return: None</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="simulaqron.toolbox.manage_nodes.set_default_nodes">
-<code class="descclassname">simulaqron.toolbox.manage_nodes.</code><code class="descname">set_default_nodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#set_default_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.set_default_nodes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="simulaqron.toolbox.manage_nodes.setup_cqc_files">
-<code class="descclassname">simulaqron.toolbox.manage_nodes.</code><code class="descname">setup_cqc_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#setup_cqc_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.setup_cqc_files" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets up the settings of the cqc packages such that the python-library can find the paths to the files
-specifying the addresses and ports of the cqc nodes running.
-:return: None</p>
-</dd></dl>
-
-</div>
-<div class="section" id="module-simulaqron.toolbox.measurements">
-<span id="simulaqron-toolbox-measurements-module"></span><h2>simulaqron.toolbox.measurements module<a class="headerlink" href="#module-simulaqron.toolbox.measurements" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="simulaqron.toolbox.measurements.parity_meas">
-<code class="descclassname">simulaqron.toolbox.measurements.</code><code class="descname">parity_meas</code><span class="sig-paren">(</span><em>qubits</em>, <em>bases</em>, <em>node</em>, <em>negative=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/measurements.html#parity_meas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.measurements.parity_meas" title="Permalink to this definition">¶</a></dt>
-<dd><p>Performs a parity measurement on the provided qubits in the Pauli bases specified by ‘bases’.
-‘bases’ should be a string with letters in “IXYZ” and have the same length as the number of qubits provided.
-If ‘negative’ is true the measurement outcome is flipped.
-If more than one letter of ‘bases’ is not identity, then an ancilla qubit will be used, which is created using the
-provided ‘node’.</p>
+<dl class="method">
+<dt id="simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.get_node_names">
+<code class="descname">get_node_names</code><span class="sig-paren">(</span><em>network_name='default'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#NetworksConfigConstructor.get_node_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.get_node_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the names of the nodes in a network.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>qubits</strong> (list of :obj: <cite>cqc.pythonLib.qubit</cite>) – List of qubits to be measured.</li>
-<li><strong>bases</strong> (<em>str</em>) – String specifying the Pauli-bases of the measurement. Example bases=”IXY” for three qubits.</li>
-<li><strong>node</strong> – The node storing the qubits. Used for creating an ancilla qubit.</li>
-<li><strong>negative</strong> (<em>bool</em>) – If the measurement outcome should be flipped or not.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>network_name</strong> – str
+Name of the network (default: “default”)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The measurement outcome 0 or 1, where 0 correspond to the +1 eigenvalue of the measurement operator.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.get_nodes">
+<code class="descname">get_nodes</code><span class="sig-paren">(</span><em>network_name='default'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#NetworksConfigConstructor.get_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.get_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the node-config objects (_NodeConfig) in a network.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>network_name</strong> – str
+Name of the network (default: “default”)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of _NodeConfig</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.read_from_file">
+<code class="descname">read_from_file</code><span class="sig-paren">(</span><em>file_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#NetworksConfigConstructor.read_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.read_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads config from a file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file_path</strong> – None or str
+If a file_path was specified upon __init__ this will be used if file_path is None.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.remove_network">
+<code class="descname">remove_network</code><span class="sig-paren">(</span><em>network_name='default'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#NetworksConfigConstructor.remove_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.remove_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a network from the config.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>network_name</strong> – str
+Name of the network (default: “default”)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.remove_node">
+<code class="descname">remove_node</code><span class="sig-paren">(</span><em>node_name</em>, <em>network_name='default'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#NetworksConfigConstructor.remove_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.remove_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a node from the network.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>node_name</strong> – str
+Name of the node, e.g. Alice</li>
+<li><strong>network_name</strong> – str
+Name of the network (default: “default”)</li>
+</ul>
 </td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#NetworksConfigConstructor.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets the current object to a single network (“default”)
+with the nodes Alice, Bob, Charlie, David and Eve.
+Note that this does not overwrite any config file but can be done
+by calling ‘write_to_file’.
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.to_dict">
+<code class="descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#NetworksConfigConstructor.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a dictionary with all the content that can be written to a json file
+:return: dict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.write_to_file">
+<code class="descname">write_to_file</code><span class="sig-paren">(</span><em>file_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/manage_nodes.html#NetworksConfigConstructor.write_to_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor.write_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the content of this config to a file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file_path</strong> – None or str
+If a file_path was specified upon __init__ this will be used if file_path is None.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-simulaqron.toolbox.reset">
+<span id="simulaqron-toolbox-reset-module"></span><h2>simulaqron.toolbox.reset module<a class="headerlink" href="#module-simulaqron.toolbox.reset" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="simulaqron.toolbox.reset.main">
+<code class="descclassname">simulaqron.toolbox.reset.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/toolbox/reset.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.toolbox.reset.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-simulaqron.toolbox.stabilizerStates">
@@ -462,12 +565,12 @@ Since, the __init__ takes an array as input, given a StabilizerState ‘s1’ on
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="simulaqron.run.html" title="simulaqron.run package"
+          <a href="simulaqron.virtNode.html" title="simulaqron.virtNode package"
              >next</a> |</li>
         <li class="right" >
-          <a href="simulaqron.virtNode.html" title="simulaqron.virtNode package"
+          <a href="simulaqron.run.html" title="simulaqron.run package"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 2.1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.3 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="simulaqron.html" >simulaqron package</a> &#187;</li> 
       </ul>
     </div>
