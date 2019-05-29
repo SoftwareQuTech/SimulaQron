@@ -61,7 +61,7 @@ class OthersTest(unittest.TestCase):
         with CQCConnection("Alice", appID=1) as cqc:
             # Test Get time
             q1 = qubit(cqc)
-            time.sleep(3.2)
+            time.sleep(3)
             q2 = qubit(cqc)
             t1 = q1.getTime()
             t2 = q2.getTime()
