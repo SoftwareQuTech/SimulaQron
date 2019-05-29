@@ -1,11 +1,12 @@
+dist: xenial
 language: python
 python:
-    - "3.5"
     - "3.6"
     - "3.7"
+before_install:
+    - make build
 install:
-    - make clean
-    - make python-deps
+    - pip3 install dist/*.whl
 script:
     - make lint
     - make tests

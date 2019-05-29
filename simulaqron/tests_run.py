@@ -43,4 +43,5 @@ def parse_args():
 
 if __name__ == '__main__':
     test_type = parse_args()
-    main(test_type=test_type)
+    success = main(test_type=test_type)
+    exit(not success)
