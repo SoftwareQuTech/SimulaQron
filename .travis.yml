@@ -1,10 +1,29 @@
-dist: xenial
 language: python
+matrix:
+    include:
+        - name: "Python 3.5 on Linux"
+        python: 3.5
+        - name: "Python 3.6 on Linux"
+        python: 3.6
+        - name: "Python 3.7 on Xenial Linux"
+        python: 3.7
+        dist: xenial
+        - name: "Python 3.7 on macOS"
+        os: osx
+        osx_image: xcode10.2
+        language: shell
 python:
     - "3.5"
     - "3.6"
     - "3.7"
 before_install:
+    ## Build and install the latest cqc version
+    - git clone https://github.com/SoftwareQuTech/CQC-Python
+    - cd CQC-Python
+    - make build
+    - pip3 install dist/*.whl
+    - cd ..
+
     - make build
 install:
     - pip3 install dist/*.whl
