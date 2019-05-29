@@ -18,9 +18,6 @@ _delete_pyc:
 _delete_pid:
 	@find ${SIMULAQRON_DIR} -name '*.pid' -delete
 
-format:
-	black -l 120 .
-
 lint:
 	@${PYTHON} -m flake8 ${SIMULAQRON_DIR} ${CQC_DIR} ${EXAMPLES_DIR} ${GENERAL_DIR} ${LOCAL_DIR} ${RUN_DIR} ${TESTS_DIR} ${TOOLBOX_DIR} ${VIRTNODE_DIR}
 
@@ -61,4 +58,4 @@ _build:
 
 build: _clear_build _build
 
-.PHONY: clean format lint python-deps tests full_tests verify build
+.PHONY: clean lint python-deps tests full_tests verify build
