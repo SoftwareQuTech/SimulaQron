@@ -17,7 +17,7 @@ class TestInitNetwork(unittest.TestCase):
         self.default_topology = None
 
     def tearDown(self):
-        self.check_nodes_and_topology(self.network)
+        self.check_nodes_and_topology_in_file(self.network)
 
     @classmethod
     def tearDownClass(cls):
@@ -31,8 +31,11 @@ class TestInitNetwork(unittest.TestCase):
         self.assertSetEqual(set(nodes1), set(nodes2))
 
     def assert_topology(self, topology1, topology2):
+        if topology1 is None:
+            self.assertIs(topology2, None)
+            return
         self.assertEqual(len(topology1), len(topology2))
-        for key, neigh1 in topology1:
+        for key, neigh1 in topology1.items():
             self.assertIn(key, topology2)
             neigh2 = topology2[key]
             self.assert_nodes(neigh1, neigh2)
