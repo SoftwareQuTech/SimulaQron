@@ -6,6 +6,10 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 Upcoming
 --------
 
+2019-05-29 (v3.0.4)
+-------------------
+- Removed dependency for black, now supporting python >=3.5.
+
 2019-05-23 (v3.0.3)
 -------------------
 - Fixed bug with keeping the folder `.simulaqron_pids` when installing from wheel.

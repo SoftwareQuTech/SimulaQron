@@ -5,7 +5,7 @@ Getting started
 Setup
 -----
 
-SimulaQron requires `Python 3 <https://python.org/>`_  along with the packages *twisted*, *numpy*, *scipy*, *Cython*, *service_identity*, *matplotlib*, *networkx*, *bitstring*, *black*, *flake8*, *click* and *daemons*.
+SimulaQron requires `Python 3 <https://python.org/>`_  along with the packages *twisted*, *numpy*, *scipy*, *Cython*, *service_identity*, *matplotlib*, *networkx*, *bitstring*, *flake8*, *click* and *daemons*.
 
 .. note:: matplotlib also requires tkinter which on Linux can be installed by the command :code:`sudo apt install python3-tk`.
 
@@ -65,7 +65,6 @@ To run SimulaQron you need to following Python packages:
 * matplotlib
 * networkx
 * bitstring
-* black
 * flake8
 * click
 * daemons

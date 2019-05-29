@@ -1,8 +1,12 @@
 dist: xenial
 language: python
 python:
+    - "3.5"
     - "3.6"
     - "3.7"
+only:
+    - master
+    - Develop
 before_install:
     - make build
 install:

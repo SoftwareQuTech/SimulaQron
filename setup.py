@@ -36,8 +36,9 @@ setuptools.setup(
         'simulaqron': ['config/.keep', '.simulaqron_pids/.keep', 'tests/unittests/slow/merges/configs/*.cfg']
     },
     install_requires=install_requires,
-    python_requires='>=3.6',
+    python_requires='>=3.5',
     classifiers=[
+        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
