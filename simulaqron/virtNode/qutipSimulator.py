@@ -34,7 +34,7 @@ import logging
 
 try:
     import qutip as qp
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     raise RuntimeError("If you want to use the qutip backend you need to install the python package 'qutip'")
 
 from simulaqron.virtNode.basics import quantumEngine, quantumError, noQubitError
