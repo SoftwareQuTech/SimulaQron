@@ -36,8 +36,12 @@ setuptools.setup(
         'simulaqron': ['config/.keep', '.simulaqron_pids/.keep', 'tests/unittests/slow/merges/configs/*.cfg']
     },
     install_requires=install_requires,
+    python_requires='>=3.5',
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",
         "Operating System :: Unix",
         "Operating System :: MacOS"

@@ -7,7 +7,7 @@ def main(module_name):
     try:
         __import__(module_name)
         return True
-    except ModuleNotFoundError:
+    except ImportError:
         return False
 
 

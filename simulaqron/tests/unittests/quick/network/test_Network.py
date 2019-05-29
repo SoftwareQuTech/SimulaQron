@@ -17,7 +17,7 @@ class TestInitNetwork(unittest.TestCase):
         self.default_topology = None
 
     def tearDown(self):
-        self.check_nodes_and_topology(self.network)
+        self.check_nodes_and_topology_in_file(self.network)
 
     @classmethod
     def tearDownClass(cls):
@@ -27,41 +27,54 @@ class TestInitNetwork(unittest.TestCase):
         network_config.write_to_file()
         simulaqron_settings.default_settings()
 
-    def check_nodes_and_topology(self, network):
+    def assert_nodes(self, nodes1, nodes2):
+        self.assertSetEqual(set(nodes1), set(nodes2))
+
+    def assert_topology(self, topology1, topology2):
+        if topology1 is None:
+            self.assertIs(topology2, None)
+            return
+        self.assertEqual(len(topology1), len(topology2))
+        for key, neigh1 in topology1.items():
+            self.assertIn(key, topology2)
+            neigh2 = topology2[key]
+            self.assert_nodes(neigh1, neigh2)
+
+    def check_nodes_and_topology_in_file(self, network):
         simulaqron_path = get_simulaqron_path.main()
         network_config_file = os.path.join(simulaqron_path, "config", "network.json")
         with open(network_config_file, 'r') as f:
             network_config = json.load(f)
         nodes_in_file = list(network_config[network.name]["nodes"].keys())
-        self.assertEqual(nodes_in_file, network.nodes)
+        self.assert_nodes(nodes_in_file, network.nodes)
 
         topology_in_file = network_config[network.name]["topology"]
-        self.assertEqual(topology_in_file, network.topology)
+        self.assert_topology(topology_in_file, network.topology)
 
     def test_init_no_argument(self):
         self.network = Network(force=True)
-        self.assertEqual(self.network.nodes, self.default_nodes)
-        self.assertEqual(self.network.topology, self.default_topology)
+        self.assert_nodes(self.network.nodes, self.default_nodes)
+        self.assert_topology(self.network.topology, self.default_topology)
 
     def test_init_node_argument(self):
         nodes = ["Test3", "Test4"]
         self.network = Network(nodes=nodes, force=True)
-        self.assertEqual(self.network.nodes, nodes)
-        self.assertEqual(self.network.topology, self.default_topology)
+        self.assert_nodes(self.network.nodes, nodes)
+        self.assert_topology(self.network.topology, self.default_topology)
 
     def test_init_topology_argument(self):
         topology = {"Test1": [], "Test2": [], "Test3": []}
         nodes = list(topology.keys())
         self.network = Network(topology=topology, force=True)
-        self.assertEqual(self.network.nodes, nodes)
-        self.assertEqual(self.network.topology, topology)
+        self.assert_nodes(self.network.nodes, nodes)
+        self.assert_topology(self.network.topology, topology)
 
     def test_init_node_and_topology_argument(self):
         nodes = ["Test5", "Test6"]
         topology = {"Test5": ["Test6"], "Test6": ["Test5"]}
         self.network = Network(nodes=nodes, topology=topology, force=True)
-        self.assertEqual(self.network.nodes, nodes)
-        self.assertEqual(self.network.topology, topology)
+        self.assert_nodes(self.network.nodes, nodes)
+        self.assert_topology(self.network.topology, topology)
 
 
 class TestStartStopNetwork(unittest.TestCase):
