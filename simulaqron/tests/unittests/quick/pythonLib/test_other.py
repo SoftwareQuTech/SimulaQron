@@ -65,7 +65,7 @@ class OthersTest(unittest.TestCase):
             q2 = qubit(cqc)
             t1 = q1.getTime()
             t2 = q2.getTime()
-            self.assertEqual(t2 - t1, 3)
+            self.assertGreaterEqual(t2 - t1, 3)
             q1.measure()
             q2.measure()
 
