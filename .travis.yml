@@ -26,12 +26,6 @@ before_install:
   - cd ..
   - make build
 install:
-  # Check that .tar.gz is working
-  - pip3 install --user dist/*.tar.gz
-  - simulaqron start
-  - simulaqron stop
-  - pip3 uninstall simulaqron
-  # Install from wheel
   - pip3 install dist/*.whl
 script:
   - make lint
@@ -44,3 +38,4 @@ deploy:
   on:
     tags: true
     condition: $BUILD = True
+    distributions: "sdist bdist_wheel"
