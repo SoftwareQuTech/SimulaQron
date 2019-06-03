@@ -35,7 +35,7 @@ deploy:
   user: adahlberg
   password:
     secure: DwhFEJlCg5477emRHek2sgoz6l51fJoH6Uf1MGV1v9OYwS0KJu9CZGzfxWf+4+S5HotK6lyQP16YxTnBUf5MUW3m7vn1q4QOPS02Ga3ETZ50ndxvnob0nxgZAkvHYpG2nSwx73g/yU2cHTqekBhtM2WUg7SzXGt8cwJblGKcckA4mZrbxOYOOmE6G4VpjtgTab107eJt5lgwnRan7UUV6bg/+FuR3nsrDtIuUm66jzhhdPCqpIRm2e7npkejpGm3zl3s8dpD7b1wN/q/3YCnMJvy6JcO9PfyFmB/nmVPhk9a+fuRGK8/uj/b5Vmk9t2NTpaqlaUvTp/S/agojiPl3+UxIfhpsaycWbtDNBhNPtbSkDcgyJDdnl0EsQZEnfIHci/7L7GdeYt0M+N7m8orApHuyhfORUind5hDLu/0UMDI7K/UhRFXTOMLrCKFtbk/02KxapBL51+SE/G2kgaXE6HCO+8knGob+LAdJY+1xL3WKhfB+5+DyIYoigJuJv0ObElYNuJJe5a0uy+0kKyjcEEozhr59ad4qoQr8u9piF8DoF3lVLBuadivtUME0mvlFHdm7ShNYE74HYjDzIkDGWtl5ONakpXH4dWOflGuJfG/tzJeN5sgGJMG6rkXNbN5OtU11CwUupII+/mtVrBv/mn4mEU2/3GW4qsmbpV2+k0=
+  distributions: "sdist bdist_wheel"
   on:
     tags: true
     condition: $BUILD = True
-    distributions: "sdist bdist_wheel"
