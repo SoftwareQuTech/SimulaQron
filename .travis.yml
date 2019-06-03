@@ -26,7 +26,9 @@ before_install:
   - cd ..
   - make build
 install:
+  - cd dist
   - pip3 install dist/*.whl
+  - cd ..
 script:
   - make lint
   - make tests
