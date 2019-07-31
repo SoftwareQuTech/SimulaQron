@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/SoftwareQuTech/SimulaQron.svg?branch=Develop)](https://travis-ci.org/SoftwareQuTech/SimulaQron)
+[![Build Status](https://travis-ci.com/SoftwareQuTech/SimulaQron.svg?branch=Develop)](https://travis-ci.com/SoftwareQuTech/SimulaQron)
 
 SimulaQron - simple quantum network simulator
 =============================================
