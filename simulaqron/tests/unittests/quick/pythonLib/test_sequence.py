@@ -58,8 +58,8 @@ class sequenceTest(unittest.TestCase):
             with CQCConnection("Bob", appID=1, pend_messages=True) as bob:
                 res = alice.flush()
                 self.assertEqual(res, [])
-                self.assertEqual(alice.pending_messages, [])
-                self.assertEqual(bob.pending_messages, [])
+                self.assertEqual(alice._pending_headers, [])
+                self.assertEqual(bob._pending_headers, [])
                 alice.flush()
                 bob.flush()
 
@@ -70,8 +70,7 @@ class sequenceTest(unittest.TestCase):
                 q.X()
                 q.measure(inplace=True)
                 r = alice.flush()
-                self.assertEqual(len(r), 2)
-                self.assertEqual(r[1], 1)
+                self.assertEqual(r[0], 1)
                 q.reset()
                 q.Y()
                 q.measure(inplace=True)
@@ -88,8 +87,8 @@ class sequenceTest(unittest.TestCase):
                 q.measure()
                 r = alice.flush()
                 self.assertEqual(r, [0])
-                self.assertEqual(alice.pending_messages, [])
-                self.assertEqual(bob.pending_messages, [])
+                self.assertEqual(alice._pending_headers, [])
+                self.assertEqual(bob._pending_headers, [])
                 alice.flush()
                 bob.flush()
 
@@ -101,82 +100,69 @@ class sequenceTest(unittest.TestCase):
                 q.Z()
                 q.H()
                 q.measure()
-                r = alice.flush()[1]
+                r = alice.flush()[0]
                 self.assertEqual(r, 1)
-                self.assertEqual(alice.pending_messages, [])
-                self.assertEqual(bob.pending_messages, [])
+                self.assertEqual(alice._pending_headers, [])
+                self.assertEqual(bob._pending_headers, [])
                 alice.flush()
                 bob.flush()
 
     def testMultipleNewQubits(self):
         with CQCConnection("Alice", pend_messages=True) as alice:
             with CQCConnection("Bob", appID=1, pend_messages=True) as bob:
-                qA = qubit(alice)
-                qs = alice.flush_factory(10)
+                qs = alice.create_qubits(10)
                 self.assertEqual(len(qs), 10)
-                self.assertIsNone(qA._qID)
-                self.assertFalse(qA.check_active())
                 for i in range(1, 10):
                     self.assertEqual(qs[i]._qID, qs[i - 1]._qID + 1)
                 alice.set_pending(False)
                 for q in qs:
-                    self.assertNotEqual(qA, q)
                     self.assertEqual(q.measure(), 0)
                 alice.set_pending(True)
-                self.assertEqual(alice.pending_messages, [])
-                self.assertEqual(bob.pending_messages, [])
+                self.assertEqual(alice._pending_headers, [])
+                self.assertEqual(bob._pending_headers, [])
                 alice.flush()
                 bob.flush()
 
     def testMeasuringMultipleQubits(self):
         with CQCConnection("Alice", pend_messages=True) as alice:
             with CQCConnection("Bob", appID=1, pend_messages=True) as bob:
-                qA = qubit(alice)
-                qs = alice.flush_factory(10)
-                self.assertIsNone(qA._qID)
-                self.assertFalse(qA.check_active())
+                qs = alice.create_qubits(10)
                 for q in qs:
                     q.measure()
                 ms = alice.flush()
                 self.assertEqual(ms, [0] * 10)
-                self.assertEqual(alice.pending_messages, [])
-                self.assertEqual(bob.pending_messages, [])
+                self.assertEqual(alice._pending_headers, [])
+                self.assertEqual(bob._pending_headers, [])
                 alice.flush()
                 bob.flush()
 
     def testCNOT(self):
         with CQCConnection("Alice", pend_messages=True) as alice:
             with CQCConnection("Bob", appID=1, pend_messages=True) as bob:
-                qA = qubit(alice)
-                qs = alice.flush_factory(10)
-                self.assertIsNone(qA._qID)
-                self.assertFalse(qA.check_active())
+                qs = alice.create_qubits(10)
                 qs[0].X()
                 for i in range(1, 10):
                     qs[i - 1].cnot(qs[i])
                 [q.measure() for q in qs]
                 ms = alice.flush()
                 self.assertEqual(ms, [1] * 10)  # all outcomes should be one
-                self.assertEqual(alice.pending_messages, [])
-                self.assertEqual(bob.pending_messages, [])
+                self.assertEqual(alice._pending_headers, [])
+                self.assertEqual(bob._pending_headers, [])
                 alice.flush()
                 bob.flush()
 
     def testCreatingGHZ(self):
         with CQCConnection("Alice", pend_messages=True) as alice:
             with CQCConnection("Bob", appID=1, pend_messages=True) as bob:
-                qA = qubit(alice)
-                qs = alice.flush_factory(10)
-                self.assertIsNone(qA._qID)
-                self.assertFalse(qA.check_active())
+                qs = alice.create_qubits(10)
                 qs[0].H()
                 for i in range(1, 10):
                     qs[i - 1].cnot(qs[i])
                 [q.measure() for q in qs]
                 ms = alice.flush()
                 self.assertEqual(len(set(ms)), 1)  # all outcomes should be the same
-                self.assertEqual(alice.pending_messages, [])
-                self.assertEqual(bob.pending_messages, [])
+                self.assertEqual(alice._pending_headers, [])
+                self.assertEqual(bob._pending_headers, [])
                 alice.flush()
                 bob.flush()
 
@@ -191,8 +177,8 @@ class sequenceTest(unittest.TestCase):
                 q.measure()
                 alice.flush()
                 self.assertEqual(res, [1, 0] * 5)
-                self.assertEqual(alice.pending_messages, [])
-                self.assertEqual(bob.pending_messages, [])
+                self.assertEqual(alice._pending_headers, [])
+                self.assertEqual(bob._pending_headers, [])
                 alice.flush()
                 bob.flush()
 
@@ -202,20 +188,15 @@ class sequenceTest(unittest.TestCase):
                 q = qubit(alice)
                 alice.flush()
                 q.X()
-                qubit(alice)
                 q.measure(inplace=True)
                 res = alice.flush_factory(8)
                 alice.set_pending(False)
                 q.measure()
-                ms = res[1::2]
-                qs = res[::2]
-                for qu in qs:
-                    self.assertEqual(qu.measure(), 0)
-                self.assertEqual(len(res), 16)
-                self.assertEqual(ms, [1, 0] * 4)
+                self.assertEqual(len(res), 8)
+                self.assertEqual(res, [1, 0] * 4)
                 alice.set_pending(True)
-                self.assertEqual(alice.pending_messages, [])
-                self.assertEqual(bob.pending_messages, [])
+                self.assertEqual(alice._pending_headers, [])
+                self.assertEqual(bob._pending_headers, [])
                 alice.flush()
                 bob.flush()
 
@@ -232,32 +213,24 @@ class sequenceTest(unittest.TestCase):
                     self.assertEqual(qAs[i].measure(), qBs[i].measure())
                 alice.set_pending(True)
                 bob.set_pending(True)
-                self.assertEqual(alice.pending_messages, [])
-                self.assertEqual(bob.pending_messages, [])
+                self.assertEqual(alice._pending_headers, [])
+                self.assertEqual(bob._pending_headers, [])
                 alice.flush()
                 bob.flush()
 
     def testSend(self):
         with CQCConnection("Alice", pend_messages=True) as alice:
             with CQCConnection("Bob", appID=1, pend_messages=True) as bob:
-                qA = qubit(alice)
-                qAs = alice.flush_factory(10)
-                self.assertIsNone(qA._qID)
-                self.assertFalse(qA.check_active())
+                qAs = alice.create_qubits(10)
 
                 for q in qAs:
                     self.assertTrue(q._active)
                     alice.sendQubit(q, name="Bob", remote_appID=1)
-                    self.assertTrue(q._active)
+                    self.assertFalse(q._active)
 
                 alice.flush()
-                qB = bob.recvQubit()
+                bob.recvQubit()
                 qBs = bob.flush_factory(10)
-                self.assertIsNone(qB._qID)
-                self.assertFalse(qB.check_active())
-
-                for q in qAs:
-                    self.assertFalse(q._active)
 
                 for i in range(1, 10):
                     self.assertEqual(qBs[i - 1]._qID + 1, qBs[i]._qID)
@@ -265,8 +238,8 @@ class sequenceTest(unittest.TestCase):
                 for q in qBs:
                     self.assertEqual(q.measure(), 0)
                 bob.set_pending(True)
-                self.assertEqual(alice.pending_messages, [])
-                self.assertEqual(bob.pending_messages, [])
+                self.assertEqual(alice._pending_headers, [])
+                self.assertEqual(bob._pending_headers, [])
                 alice.flush()
                 bob.flush()
 
