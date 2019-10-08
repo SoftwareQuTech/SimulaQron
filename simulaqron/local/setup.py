@@ -79,7 +79,7 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
             nb.factory = pb.PBServerFactory(nb.root)
             reactor.listenTCP(nb.port, nb.factory)
         except Exception as e:
-            logging.error("LOCAL %s: Cannot start classical communication servers.", myName, e.strerror)
+            logging.error("LOCAL {}: Cannot start classical communication servers: {}".format(myName, e))
             return
 
     # Give the server some time to start up
