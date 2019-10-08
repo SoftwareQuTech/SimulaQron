@@ -1,0 +1,4 @@
+include requirements.txt
+include simulaqron/config/.keep
+include simulaqron/.simulaqron_pids/.keep
+recursive-include simulaqron/tests/unittests/slow/merges/configs *.cfg

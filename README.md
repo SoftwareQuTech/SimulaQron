@@ -1,6 +1,7 @@
+[![Build Status](https://travis-ci.com/SoftwareQuTech/SimulaQron.svg?branch=Develop)](https://travis-ci.com/SoftwareQuTech/SimulaQron)
 
-SimulaQron - simple quantum network simulator
-=============================================
+SimulaQron - simple quantum network simulator (3.0.5)
+=====================================================
 
 The purpose of this simulator of quantum network nodes is to allow you to develop new applications for
 a future quantum internet, while of course right now we do not yet have real quantum network nodes available for testing. 
