@@ -118,23 +118,15 @@ class StabilizerState:
                 if isinstance(data[0], str):
                     # We should pre-process this entry since it contains strings and not booleans
                     n = len(data)
-                    if all(map(lambda gen_str: len(gen_str) == n, data)):
-                        X_part = list(map(lambda gen_str: list(map(lambda P_str: P_str in ("X", "Y"), gen_str)), data))
-                        Z_part = list(map(lambda gen_str: list(map(lambda P_str: P_str in ("Y", "Z"), gen_str)), data))
-                        data = np.concatenate((X_part, Z_part), 1)
-                    elif all(map(lambda gen_str: len(gen_str) == (n + 2), data)):
-                        X_part = list(
-                            map(lambda gen_str: list(map(lambda P_str: P_str in ("X", "Y"), gen_str[2:])), data)
-                        )
-                        Z_part = list(
-                            map(lambda gen_str: list(map(lambda P_str: P_str in ("Y", "Z"), gen_str[2:])), data)
-                        )
-                        phases = list(map(lambda gen_str: [self.phase2bool[gen_str[:2]]], data))
-                        data = np.concatenate((X_part, Z_part, phases), 1)
-                    else:
-                        raise ValueError(
-                            "If data is a length-'n' list or stings, then each string needs be of length 'n' or 'n+2'"
-                        )
+                    rows = []
+                    for op_str in data:
+                        row = self._str_to_operator(op_str)
+                        if row is None:
+                            raise ValueError("If data is a length-'n' list or stings, "
+                                             "then each string needs be of length 'n' or 'n+2'")
+                        rows.append(row)
+                    data = np.array(rows)
+
                 try:
                     self._group = np.array(data, dtype=bool)
                 except Exception as err:
@@ -166,6 +158,42 @@ class StabilizerState:
                     if (commute % 2).any():
                         raise ValueError("All stabilizer of the group constructed from the input does not commute.")
 
+    @staticmethod
+    def _str_to_operator(op_str):
+        """
+        Formats a str representing an operator to a binary representation of the operator.
+
+        Returns ``None`` if the string is not formatted properly.
+        """
+        if op_str.startswith("+1") or op_str.startswith("-1"):
+            phase = op_str[:2]
+            paulis = op_str[2:]
+        else:
+            phase = "+1"
+            paulis = op_str
+        if not StabilizerState._is_paulis(paulis):
+            return None
+        if not StabilizerState._is_phase(phase):
+            return None
+        x_part = [pauli in ["X", "Y"] for pauli in paulis]
+        z_part = [pauli in ["Y", "Z"] for pauli in paulis]
+        phase_part = [phase == "-1"]
+        return x_part + z_part + phase_part
+
+    @staticmethod
+    def _is_paulis(paulis):
+        """
+        Checks that ``paulis`` is a list of strings representing Paulis.
+        """
+        return all(pauli in "IXYZ" for pauli in paulis)
+
+    @staticmethod
+    def _is_phase(phase):
+        """
+        Checks that ``phase`` is a valid string representing a phase
+        """
+        return phase in ["+1", "-1"]
+
     @property
     def num_qubits(self):
         return self._nr_rows
@@ -190,16 +218,22 @@ class StabilizerState:
 
     def __str__(self):
         to_return = "Stabilizer state on {} with the following stabilizer generators:\n".format(self.num_qubits)
+        for row_str in self.to_string().split('\n'):
+            to_return += "\t{}\n".format(row_str)
+        return to_return[:-1]
+
+    def __len__(self):
+        return self.num_qubits
+
+    def to_string(self):
+        to_return = ""
         for row in self._group:
-            to_return += "    {} ".format(self.bool2phase[row[-1]])
+            to_return += "{} ".format(self.bool2phase[row[-1]])
             n = self.num_qubits
             for i in range(n):
                 to_return += self.bool2Pauli[(row[i], row[i + n])]
             to_return += "\n"
-        return to_return
-
-    def __len__(self):
-        return self.num_qubits
+        return to_return[:-1]
 
     @staticmethod
     def Pauli_phase_tracking(old_pauli, applied_pauli):
@@ -242,6 +276,7 @@ class StabilizerState:
         h = 0
         k = 0
         pivot_columns = []
+        num_paulis = int((n - 1) / 2)
         while (h < m) and (k < n):
             non_zero_ind = new_matrix[:, k].nonzero()[0]
             non_zero_ind_under_h = non_zero_ind[non_zero_ind >= h]
@@ -258,11 +293,13 @@ class StabilizerState:
 
                 for i_loop in non_zero_except_i_max:
                     extra_phase = 0  # we count i's here, so 2 -> (-i)^2=-1, 4->1, 6-> -1
-                    for j in range(m):
+                    for j in range(num_paulis):
                         extra_phase += StabilizerState.Pauli_phase_tracking(
-                            [new_matrix[i_loop, j], new_matrix[i_loop, j + m]], [new_matrix[h, j], new_matrix[h, j + m]]
+                            [new_matrix[i_loop, j], new_matrix[i_loop, j + num_paulis]], [new_matrix[h, j], new_matrix[h, j + num_paulis]]
                         )
                     new_matrix[i_loop, :] = np.logical_xor(new_matrix[i_loop, :], new_matrix[h, :])
+                    # NOTE we are assuming that -I is not in the group and therefore that no stabilizer element
+                    # has a phase of +/- i, and therefore that extra_phase is a multiple of two
                     if (extra_phase / 2) % 2:
                         new_matrix[i_loop, -1] = np.logical_not(new_matrix[i_loop, -1])
                 h += 1
@@ -273,11 +310,19 @@ class StabilizerState:
             return new_matrix
 
     def check_symplectic(self):
-        n = self._nr_rows
+        return self._is_symplectic(self._group)
+
+    @staticmethod
+    def _is_symplectic(matrix):
+        """
+        Checks if a given matrix is symplectic, i.e. if all the corresponding stabilizers commute.
+        It is assumed that matrix is a ``2 * n + 1`` matrix.
+        """
+        n = int((matrix.shape[1] - 1) / 2)  # num paulis
         zeros = np.zeros(shape=(n, n), dtype=int)
         identity = np.identity(n, dtype=int)
         P = np.block([[zeros, identity], [identity, zeros]])
-        M = np.array(self._group[:, :-1], dtype=int)
+        M = np.array(matrix[:, :-1], dtype=int)
 
         commute = M @ P @ M.transpose()
         if (commute % 2).any():
@@ -286,8 +331,71 @@ class StabilizerState:
         else:
             return True
 
-    def add_qubit(self):
+    def contains(self, stabilizer):
         """
+        Checks if a given stabilizer is in the stabilizer group.
+
+        Args:
+            stabilizer (str or list): The stabilizer to check if it's in the group.
+
+            Should either be a str of the form "XXX" or "+1XXX" or a boolean list
+            of length ``2*n`` or ``2*n + 1`` in the same way as the input to the ``__init__``
+            of the class.
+        """
+        return self._contains(self._group, stabilizer)
+
+    @staticmethod
+    def _contains(matrix, stabilizer):
+        """
+        Checks if a given stabilizer is in the stabilizer group represented by the given matrix.
+
+        Args:
+            matrix (array): Boolean array of the form n x (2 * n + 1).
+            stabilizer (str or list): The stabilizer to check if it's in the group.
+                Should either be a str of the form "XXX" or "+1XXX" or a boolean list
+                of length ``2*n`` or ``2*n + 1`` in the same way as the input to the ``__init__``
+                of the class.
+        """
+        if isinstance(stabilizer, str):
+            stab = StabilizerState._str_to_operator(stabilizer)
+            if stab is None:
+                raise ValueError("Cannot parse {} as a stabilizer.".format(stabilizer))
+        else:
+            stab = list(stabilizer)
+        num_cols = matrix.shape[1]
+        if len(stab) == matrix.shape[1] - 1:
+            stab.append(False)
+        StabilizerState._assert_valid_stabilizer(stab, num_cols)
+
+        # Construct a new matrix with the stabilizer as the last row
+        extended_matrix = np.concatenate((matrix, [stab]), axis=0)
+        # First check if the stabilizer commutes with all the ones in the stabilizer group
+        # NOTE this is since the method for boolean gaussian elimination currently
+        # assume that all stabilizers commute
+        if not StabilizerState._is_symplectic(extended_matrix):
+            return False
+        # Do boolean reduction to find the rank of the new matrix
+        extended_matrix = StabilizerState.boolean_gaussian_elimination(extended_matrix)
+        return StabilizerState._num_zero_rows(extended_matrix) == 1
+
+    @staticmethod
+    def _num_zero_rows(matrix):
+        """Counts the number of rows with 0/False entries"""
+        return len([row for row in matrix if not any(row)])
+
+    @staticmethod
+    def _assert_valid_stabilizer(stabilizer, num_cols):
+        """
+        Checks that ``stabilizer`` is a valid list of bools of the correct length.
+        """
+        for entry in stabilizer:
+            if not isinstance(entry, bool):
+                raise ValueError("All entries in a stabilizer should be of type `bool`.")
+        if len(stabilizer) != num_cols:
+            raise ValueError("Stabilizer must be of length {}, not {}".format(num_cols, len(stabilizer)))
+
+    def add_qubit(self):
+        r"""
         Appends a qubit in the state \|0\> to the current state
         :return: None
         """
@@ -583,7 +691,7 @@ class StabilizerState:
         else:
             # Thus means that all stabilizer elements commute with the observable
             # and therefore that the qubit is already in |0> or |1>
-            if not tmp_matrix[0, -1]:
+            if self._is_first_qubit_in_zero(tmp_matrix):
                 # Qubit is in |0>
                 outcome = 0
             else:
@@ -601,6 +709,18 @@ class StabilizerState:
                 self._group = tmp_matrix[:, np.argsort(perm)]
                 pass
         return outcome
+
+    @staticmethod
+    def _is_first_qubit_in_zero(matrix):
+        """
+        Helper function used in measure to decide if the first qubit is in the state |0> or |1>.
+
+        ``matrix`` should be a matrix representing the stabilizer group of a state where the first qubit is
+        either in the state |0> or |1>.
+        """
+        n = int((matrix.shape[1] - 1) / 2)
+        stabilizer = 'Z' + 'I' * (n - 1)
+        return StabilizerState._contains(matrix, stabilizer)
 
     def find_SQC_equiv_graph_state(self, return_operations=False):
         """
