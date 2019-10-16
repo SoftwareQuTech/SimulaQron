@@ -6,9 +6,21 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 Upcoming
 --------
 
+2019-10-16 (v3.0.8)
+-------------------
+- Now requiring cqc 3.0.4 after bug-fix.
+
+2019-10-09 (v3.0.7)
+-------------------
+- Now requiring twisted 19.7 due to security vulnerabilities with earlier versions.
+
+2019-10-09 (v3.0.6)
+-------------------
+- Now requiring cqc 3.0.3 after bug-fix.
+
 2019-10-08 (v3.0.5)
 -------------------
-- Fixed bug that mixes up return messages for different application IDs
+- Fixed bug that mixes up return messages for different application IDs.
 
 2019-05-29 (v3.0.4)
 -------------------
