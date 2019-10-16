@@ -294,8 +294,13 @@ class StabilizerState:
                 for i_loop in non_zero_except_i_max:
                     extra_phase = 0  # we count i's here, so 2 -> (-i)^2=-1, 4->1, 6-> -1
                     for j in range(num_paulis):
-                        extra_phase += StabilizerState.Pauli_phase_tracking(
-                            [new_matrix[i_loop, j], new_matrix[i_loop, j + num_paulis]], [new_matrix[h, j], new_matrix[h, j + num_paulis]]
+                        extra_phase += StabilizerState.Pauli_phase_tracking([
+                            new_matrix[i_loop, j],
+                            new_matrix[i_loop, j + num_paulis]
+                        ], [
+                            new_matrix[h, j],
+                            new_matrix[h, j + num_paulis]
+                        ]
                         )
                     new_matrix[i_loop, :] = np.logical_xor(new_matrix[i_loop, :], new_matrix[h, :])
                     # NOTE we are assuming that -I is not in the group and therefore that no stabilizer element
