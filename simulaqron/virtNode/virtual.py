@@ -951,7 +951,7 @@ class virtualNode(pb.Root):
             self.simQubits.remove(delQubit)
 
         except Exception as e:
-            logging.error("VIRTUAL NODE %s: Cannot remove sim qubit - %s", self.myID.name, e.strerror)
+            logging.error("VIRTUAL NODE {}: Cannot remove sim qubit - {}".format(self.myID.name, e))
         finally:
             # Release all relevant qubits again
             for q in self.simQubits:
