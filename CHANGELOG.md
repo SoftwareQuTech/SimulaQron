@@ -6,6 +6,10 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 Upcoming
 --------
 
+2019-10-24 (v3.0.9)
+-------------------
+- Fixed bug in the stabilizer formalism which can occur when measuring a qubit in an eigenstate of Z.
+
 2019-10-16 (v3.0.8)
 -------------------
 - Now requiring cqc 3.0.4 after bug-fix.
