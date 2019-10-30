@@ -77,7 +77,7 @@ class TestStabilizerStates(unittest.TestCase):
         self.assertTrue(s1 == phim)
 
         # Test faulty input
-        data = ["XX", "-1ZZ"]
+        data = ["XX", "-2ZZ"]
         with self.assertRaises(ValueError):
             StabilizerState(data)
 
@@ -368,6 +368,39 @@ class TestStabilizerStates(unittest.TestCase):
         GHZ_graph, operations = GHZ.find_SQC_equiv_graph_state(return_operations=True)
         self.assertTrue(GHZ_graph, nx.star_graph(n - 1))
         self.assertTrue(operations == [("H", i) for i in range(1, n)])
+
+    def test_contains(self):
+        tests = [  # stabilizer, expected
+            ("XX", True),
+            ("+1XX", True),
+            ("-1XX", False),
+            ("+1YY", False),
+            ("-1YY", True),
+            ("+1YI", False),
+            ("IY", False),
+        ]
+
+        for stabilizer, expected in tests:
+            with self.subTest(stabilizer=stabilizer, expected=expected):
+                s = StabilizerState(["XX", "ZZ"])
+                output = s.contains(stabilizer)
+                self.assertEqual(output, expected)
+
+    def test_measure_eigenstate(self):
+        tests = [  # stabilizers, qubit, expected
+            (["ZI", "IZ"], 0, 0),
+            (["-1ZI", "IZ"], 0, 1),
+            (["ZI", "ZZ"], 0, 0),
+            (["IZ", "-1ZZ"], 0, 1),
+            (["IZ", "-1ZI"], 0, 1),
+            (["+1XIIII", "+1IXIII", "+1IIXII", "-1IIIZI", "+1IIIZZ"], 4, 1),
+        ]
+
+        for stabilizers, qubit, expected in tests:
+            with self.subTest(stabilizers=stabilizers, qubit=qubit, expected=expected):
+                s = StabilizerState(stabilizers)
+                output = s.measure(qubit)
+                self.assertEqual(output, expected)
 
 
 if __name__ == "__main__":
