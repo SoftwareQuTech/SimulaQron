@@ -54,43 +54,40 @@ class CQCFactoryTest(unittest.TestCase):
 
     def testNew(self):
         with CQCConnection("Alice", appID=0, pend_messages=True) as cqc:
-            qubit(cqc)
-            qubits = cqc.flush_factory(self.iterations)
+            qubits = cqc.create_qubits(self.iterations)
             self.assertEqual(len(qubits), self.iterations)
             for q in qubits:
                 q.X()
                 q.measure()
             results = cqc.flush()
             self.assertEqual(results, [1] * self.iterations)
-            self.assertEqual(len(cqc.pending_messages), 0)
+            self.assertEqual(len(cqc._pending_headers), 0)
 
     def testMeasure(self):
         with CQCConnection("Alice", appID=0, pend_messages=True) as cqc:
             q = qubit(cqc)
             q.X()  # Let's do an X so all measurement outcomes should be 1
             # (to show no reinitialisation)
-            q2 = cqc.flush()
-            self.assertEqual([q], q2)
+            cqc.flush()
             q.measure()
             with self.assertRaises(CQCNoQubitError):
                 cqc.flush_factory(self.iterations)
             self.assertFalse(q._active)
-            self.assertEqual(len(cqc.pending_messages), 0)
+            self.assertEqual(len(cqc._pending_headers), 0)
 
     def testMeasureInplace(self):
         with CQCConnection("Alice", appID=0, pend_messages=True) as cqc:
             q = qubit(cqc)
             q.X()  # Let's do an X so all measurement outcomes should be 1
             # (to show no reinitialisation)
-            q2 = cqc.flush()
-            self.assertEqual([q], q2)
+            cqc.flush()
             q.measure(inplace=True)
             m = cqc.flush_factory(self.iterations)
             self.assertEqual(len(m), self.iterations)
             self.assertTrue(x == 1 for x in m)
             q.measure()
             cqc.flush()
-            self.assertEqual(len(cqc.pending_messages), 0)
+            self.assertEqual(len(cqc._pending_headers), 0)
 
     def testReset(self):
         with CQCConnection("Alice", appID=0, pend_messages=True) as cqc:
@@ -102,7 +99,7 @@ class CQCFactoryTest(unittest.TestCase):
             q1.measure()
             m = cqc.flush()
             self.assertEqual(m, [0])
-            self.assertEqual(len(cqc.pending_messages), 0)
+            self.assertEqual(len(cqc._pending_headers), 0)
 
     def testSend(self):
         with CQCConnection("Alice", appID=0, pend_messages=True) as cqc:
@@ -117,7 +114,7 @@ class CQCFactoryTest(unittest.TestCase):
                 qB = bob.recvQubit()
                 self.assertTrue(qB.measure(), 1)
                 self.assertFalse(q._active)
-            self.assertEqual(len(cqc.pending_messages), 0)
+            self.assertEqual(len(cqc._pending_headers), 0)
 
     def testRecv(self):
         with CQCConnection("Alice", appID=0, pend_messages=True) as cqc:
@@ -136,7 +133,7 @@ class CQCFactoryTest(unittest.TestCase):
                     q.measure()
                 f = cqc.flush(self.iterations)
                 self.assertEqual([0] * self.iterations, f)
-            self.assertEqual(len(cqc.pending_messages), 0)
+            self.assertEqual(len(cqc._pending_headers), 0)
 
     def testEPR(self):
         with CQCConnection("Alice", appID=0, pend_messages=True) as cqc:
@@ -159,7 +156,7 @@ class CQCFactoryTest(unittest.TestCase):
                 mBob = bob.flush()
                 self.assertEqual(len(mAlice), it)
                 self.assertEqual(mAlice, mBob)
-            self.assertEqual(len(cqc.pending_messages), 0)
+            self.assertEqual(len(cqc._pending_headers), 0)
 
 
 if __name__ == "__main__":

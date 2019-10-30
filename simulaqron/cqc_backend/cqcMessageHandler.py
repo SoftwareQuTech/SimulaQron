@@ -399,6 +399,10 @@ class SimulaqronCQCHandler(CQCMessageHandler):
             return False
 
         logging.debug("CQC %s: Measured outcome %d", self.name, outcome)
+
+        # Store the outcome in self.references under the reference specified in the CQCAssignHeader
+        self.references[cqc_header.app_id][xtra.ref_id] = outcome
+
         # Send the outcome back as MEASOUT
         if cqc_header.version < 2:
             length = CQC_NOTIFY_LENGTH
