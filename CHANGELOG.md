@@ -6,6 +6,10 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 Upcoming
 --------
 
+2019-10-30 (v3.0.10)
+-------------------
+- SimulaQron compatible with `cqc` version 3.1.0.
+
 2019-10-24 (v3.0.9)
 -------------------
 - Fixed bug in the stabilizer formalism which can occur when measuring a qubit in an eigenstate of Z.
