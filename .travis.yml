@@ -30,6 +30,10 @@ install:
 script:
 - make lint
 - make tests
+before_deploy:
+- cd docs
+- make build
+- cd ..
 deploy:
 - provider: pypi
   user: adahlberg
