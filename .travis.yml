@@ -1,58 +1,58 @@
 language: python
 branches:
   only:
-  - master
-  - Develop
+    - master
+    - Develop
 matrix:
   include:
-  - name: Python 3.5 on Linux
-    python: 3.5
-  - name: Python 3.6 on Linux
-    python: 3.6
-    env:
-    - BUILD=True
-  - name: Python 3.7 on Xenial Linux
-    python: 3.7
-    dist: xenial
-  - name: Python 3.7 on macOS
-    os: osx
-    osx_image: xcode10.2
-    language: shell
+    - name: Python 3.5 on Linux
+      python: 3.5
+    - name: Python 3.6 on Linux
+      python: 3.6
+      env:
+      - BUILD=True
+    - name: Python 3.7 on Xenial Linux
+      python: 3.7
+      dist: xenial
+    - name: Python 3.7 on macOS
+      os: osx
+      osx_image: xcode10.2
+      language: shell
 before_install:
-- git clone --branch Develop https://github.com/SoftwareQuTech/CQC-Python
-- cd CQC-Python
-- make build
-- pip3 install dist/*.whl
-- cd ..
-- make build
+  - git clone --branch Develop https://github.com/SoftwareQuTech/CQC-Python
+  - cd CQC-Python
+  - make build
+  - pip3 install dist/*.whl
+  - cd ..
+  - make build
 install:
-- pip3 install dist/*.whl
+  - pip3 install dist/*.whl
 script:
-- make lint
-- make tests
+  - make lint
+  - make tests
 before_deploy:
-- cd docs
-- make build
-- cd ..
+  - cd docs
+  - make build
+  - cd ..
 deploy:
-- provider: pypi
-  user: adahlberg
-  password:
-    secure: DwhFEJlCg5477emRHek2sgoz6l51fJoH6Uf1MGV1v9OYwS0KJu9CZGzfxWf+4+S5HotK6lyQP16YxTnBUf5MUW3m7vn1q4QOPS02Ga3ETZ50ndxvnob0nxgZAkvHYpG2nSwx73g/yU2cHTqekBhtM2WUg7SzXGt8cwJblGKcckA4mZrbxOYOOmE6G4VpjtgTab107eJt5lgwnRan7UUV6bg/+FuR3nsrDtIuUm66jzhhdPCqpIRm2e7npkejpGm3zl3s8dpD7b1wN/q/3YCnMJvy6JcO9PfyFmB/nmVPhk9a+fuRGK8/uj/b5Vmk9t2NTpaqlaUvTp/S/agojiPl3+UxIfhpsaycWbtDNBhNPtbSkDcgyJDdnl0EsQZEnfIHci/7L7GdeYt0M+N7m8orApHuyhfORUind5hDLu/0UMDI7K/UhRFXTOMLrCKFtbk/02KxapBL51+SE/G2kgaXE6HCO+8knGob+LAdJY+1xL3WKhfB+5+DyIYoigJuJv0ObElYNuJJe5a0uy+0kKyjcEEozhr59ad4qoQr8u9piF8DoF3lVLBuadivtUME0mvlFHdm7ShNYE74HYjDzIkDGWtl5ONakpXH4dWOflGuJfG/tzJeN5sgGJMG6rkXNbN5OtU11CwUupII+/mtVrBv/mn4mEU2/3GW4qsmbpV2+k0=
-  distributions: sdist bdist_wheel
-  skip_existing: true
-  on: 
-  branch: master
-  condition: "$BUILD = True"
-- provider: pages
-  skip_cleanup: true
-  github_token: "$GITHUB_TOKEN"
-  keep_history: true
-  committer_from_gh: true
-  local_dir: docs/build
-  on:
-    branch: master
-    condition: "$BUILD = True"
+  - provider: pypi
+    user: adahlberg
+    password:
+      secure: DwhFEJlCg5477emRHek2sgoz6l51fJoH6Uf1MGV1v9OYwS0KJu9CZGzfxWf+4+S5HotK6lyQP16YxTnBUf5MUW3m7vn1q4QOPS02Ga3ETZ50ndxvnob0nxgZAkvHYpG2nSwx73g/yU2cHTqekBhtM2WUg7SzXGt8cwJblGKcckA4mZrbxOYOOmE6G4VpjtgTab107eJt5lgwnRan7UUV6bg/+FuR3nsrDtIuUm66jzhhdPCqpIRm2e7npkejpGm3zl3s8dpD7b1wN/q/3YCnMJvy6JcO9PfyFmB/nmVPhk9a+fuRGK8/uj/b5Vmk9t2NTpaqlaUvTp/S/agojiPl3+UxIfhpsaycWbtDNBhNPtbSkDcgyJDdnl0EsQZEnfIHci/7L7GdeYt0M+N7m8orApHuyhfORUind5hDLu/0UMDI7K/UhRFXTOMLrCKFtbk/02KxapBL51+SE/G2kgaXE6HCO+8knGob+LAdJY+1xL3WKhfB+5+DyIYoigJuJv0ObElYNuJJe5a0uy+0kKyjcEEozhr59ad4qoQr8u9piF8DoF3lVLBuadivtUME0mvlFHdm7ShNYE74HYjDzIkDGWtl5ONakpXH4dWOflGuJfG/tzJeN5sgGJMG6rkXNbN5OtU11CwUupII+/mtVrBv/mn4mEU2/3GW4qsmbpV2+k0=
+    distributions: sdist bdist_wheel
+    skip_existing: true
+    on: 
+      branch: master
+      condition: "$BUILD = True"
+  - provider: pages
+    skip_cleanup: true
+    github_token: "$GITHUB_TOKEN"
+    keep_history: true
+    committer_from_gh: true
+    local_dir: docs/build
+    on:
+      branch: master
+      condition: "$BUILD = True"
 env:
   global:
     secure: Unrc3zfCtNizkXNK2MC2evMLngnwrWwbUiWvze4fFeac5yo9M8cDohRB5XedjSEf8QbET9JbmrF80LWuSGM1TVHXcU4EnFfrqX8rRXXpz2xvV/HryuhNmeHS9w8csBIVCuAa3O99IPinfarDcbwkHD54DbgveIWIsUVerIZPAaTlR9lLcxB9QDWQrm3NYcSi3UN5tWrgx9lvAONDkQ0KZlesCfNLnGjQrMbS6hbNb4SJNyZ4nBMY7HgG9uuImZwEtOfMi5R3j8SalUNVw1xxMB0qVqGsC559PBxhF5e1pLXQU8D2vHZseKfnoqJQaQIJrX+SQZXDYBria0j689+SeUi5ipCjI9/Oo9WRVuIrAgGizf9rxbpTugbD16y3YkiZIPWrEDrkm89LsI0ydKWCc7TEQsXgOFg+DazBDtXC6W+GpxgexddsVRvPeCIjLa6AdnbuHyo/K403LVDVW6YBg1dK41eR9QMUS9q+PnqhPorkOLyLRv+s11wIXqft/QzIQ+vekV1cEhx106HeWWxnd0B7tW4KbZc8xOuTeyKrHIf1PNKoyUMWUeKQ06Xi6oypE8m2cs2DYWPnAEKOfm7+f3bM8fbkaYKH4dgtibIGO3y/45YBK3imQOW9wsQKneHD66HJRIfuw1F/zfkeK5v+QoyjCCOKuq29RdbDO8FfNPw=
