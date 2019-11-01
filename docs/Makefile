@@ -5,7 +5,7 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
-BUILDDIR      = _build
+BUILDDIR      = build
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_elements.papersize=a4
@@ -247,3 +247,16 @@ dummy:
 	$(SPHINXBUILD) -b dummy $(ALLSPHINXOPTS) $(BUILDDIR)/dummy
 	@echo
 	@echo "Build finished. Dummy builder generates no files."
+
+python-deps:
+	@cat requirements.txt | xargs -n 1 -L 1 pip3 install
+
+build: python-deps html
+
+open:
+	@echo "test"
+	open ${BUILDDIR}/html/index.html
+
+see: html open
+
+.PHONY: python-deps build open see
