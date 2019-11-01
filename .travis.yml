@@ -45,7 +45,7 @@ deploy:
     github_token: "$GITHUB_TOKEN"
     keep_history: true
     committer_from_gh: true
-    local_dir: docs/build/html
+    local_dir: docs/build
     on:
       branch: master
       condition: "$BUILD = True"
