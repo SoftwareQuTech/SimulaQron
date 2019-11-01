@@ -1,0 +1,422 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>simulaqron.virtNode.projectQSimulator &#8212; SimulaQron 3.0.4 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 3.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for simulaqron.virtNode.projectQSimulator</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2017, Stephanie Wehner and Axel Dahlberg</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c1"># modification, are permitted provided that the following conditions are met:</span>
+<span class="c1"># 1. Redistributions of source code must retain the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer.</span>
+<span class="c1"># 2. Redistributions in binary form must reproduce the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer in the</span>
+<span class="c1">#    documentation and/or other materials provided with the distribution.</span>
+<span class="c1"># 3. All advertising materials mentioning features or use of this software</span>
+<span class="c1">#    must display the following acknowledgement:</span>
+<span class="c1">#    This product includes software developed by Stephanie Wehner, QuTech.</span>
+<span class="c1"># 4. Neither the name of the QuTech organization nor the</span>
+<span class="c1">#    names of its contributors may be used to endorse or promote products</span>
+<span class="c1">#    derived from this software without specific prior written permission.</span>
+<span class="c1">#</span>
+<span class="c1"># THIS SOFTWARE IS PROVIDED BY &lt;COPYRIGHT HOLDER&gt; &#39;&#39;AS IS&#39;&#39; AND ANY</span>
+<span class="c1"># EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED</span>
+<span class="c1"># WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE</span>
+<span class="c1"># DISCLAIMED. IN NO EVENT SHALL &lt;COPYRIGHT HOLDER&gt; BE LIABLE FOR ANY</span>
+<span class="c1"># DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES</span>
+<span class="c1"># (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;</span>
+<span class="c1"># LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND</span>
+<span class="c1"># ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<span class="c1"># (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS</span>
+<span class="c1"># SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">projectq</span> <span class="k">as</span> <span class="nn">pQ</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;If you want to use the projectq backend you need to install the python package &#39;projectq&#39;&quot;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">simulaqron.virtNode.basics</span> <span class="k">import</span> <span class="n">quantumEngine</span><span class="p">,</span> <span class="n">quantumError</span><span class="p">,</span> <span class="n">noQubitError</span>
+
+
+<div class="viewcode-block" id="projectQEngine"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine">[docs]</a><span class="k">class</span> <span class="nc">projectQEngine</span><span class="p">(</span><span class="n">quantumEngine</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Basic quantum engine which uses ProjectQ.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        maxQubits:	maximum number of qubits this engine will support.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">maxQubits</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="n">node</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">num</span><span class="p">,</span> <span class="n">maxQubits</span><span class="o">=</span><span class="n">maxQubits</span><span class="p">)</span>
+
+        <span class="c1"># We start with no active qubits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">eng</span> <span class="o">=</span> <span class="n">pQ</span><span class="o">.</span><span class="n">MainEngine</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qubitReg</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Measures out all the current qubits, needed for projectQs garbage collectorself.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check first that project Q garbage collector not already removed qubits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eng</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eng</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">cheat</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">measure_qubit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="projectQEngine.add_fresh_qubit"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.add_fresh_qubit">[docs]</a>    <span class="k">def</span> <span class="nf">add_fresh_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a new qubit initialized in the \|0\&gt; state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check if we are still allowed to add qubits</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxQubits</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">noQubitError</span><span class="p">(</span><span class="s2">&quot;No more qubits available in register.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Prepare a clean qubit state in |0&gt;</span>
+        <span class="n">qubit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eng</span><span class="o">.</span><span class="n">allocate_qubit</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">qubitReg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>
+
+        <span class="n">num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">num</span></div>
+
+<div class="viewcode-block" id="projectQEngine.add_qubit"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.add_qubit">[docs]</a>    <span class="k">def</span> <span class="nf">add_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newQubit</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add new qubit in the state described by the vector newQubit ([a, b])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">newQubit</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">newQubit</span><span class="p">)</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">norm</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;State </span><span class="si">{}</span><span class="s2"> is not normalized.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">newQubit</span><span class="p">))</span>
+
+        <span class="c1"># Create a fresh qubit</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_fresh_qubit</span><span class="p">()</span>
+
+        <span class="c1"># Transform the new qubit into the correct state</span>
+        <span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">StatePreparation</span><span class="p">(</span><span class="n">newQubit</span><span class="p">)</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">qubitReg</span><span class="p">[</span><span class="n">num</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">num</span></div>
+
+<div class="viewcode-block" id="projectQEngine.remove_qubit"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.remove_qubit">[docs]</a>    <span class="k">def</span> <span class="nf">remove_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes the qubit with the desired number qubitNum</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">qubitNum</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;No such qubit to remove&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">measure_qubit</span><span class="p">(</span><span class="n">qubitNum</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="projectQEngine.get_register_RI"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.get_register_RI">[docs]</a>    <span class="k">def</span> <span class="nf">get_register_RI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves the entire register in real and imaginary parts and returns the result as a</span>
+<span class="sd">        list. Twisted only likes to send real valued lists, not complex ones.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eng</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eng</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">cheat</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">Re</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">real</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">state</span><span class="p">)</span>
+        <span class="n">Im</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">imag</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">state</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Re</span><span class="p">,</span> <span class="n">Im</span></div>
+
+<div class="viewcode-block" id="projectQEngine.apply_H"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_H">[docs]</a>    <span class="k">def</span> <span class="nf">apply_H</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a Hadamard gate to the qubits with number qubitNum.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_onequbit_gate</span><span class="p">(</span><span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="projectQEngine.apply_K"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_K">[docs]</a>    <span class="k">def</span> <span class="nf">apply_K</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a K gate to the qubits with number qubitNum. Maps computational basis to Y eigenbasis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_onequbit_gate</span><span class="p">(</span><span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_onequbit_gate</span><span class="p">(</span><span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_onequbit_gate</span><span class="p">(</span><span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_onequbit_gate</span><span class="p">(</span><span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="projectQEngine.apply_X"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_X">[docs]</a>    <span class="k">def</span> <span class="nf">apply_X</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a X gate to the qubits with number qubitNum.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_onequbit_gate</span><span class="p">(</span><span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="projectQEngine.apply_Z"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_Z">[docs]</a>    <span class="k">def</span> <span class="nf">apply_Z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a Z gate to the qubits with number qubitNum.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_onequbit_gate</span><span class="p">(</span><span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="projectQEngine.apply_Y"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_Y">[docs]</a>    <span class="k">def</span> <span class="nf">apply_Y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a Y gate to the qubits with number qubitNum.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_onequbit_gate</span><span class="p">(</span><span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">Y</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="projectQEngine.apply_T"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_T">[docs]</a>    <span class="k">def</span> <span class="nf">apply_T</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a T gate to the qubits with number qubitNum.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_onequbit_gate</span><span class="p">(</span><span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="projectQEngine.apply_rotation"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_rotation">[docs]</a>    <span class="k">def</span> <span class="nf">apply_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError</span>
+<span class="sd">        is raised.</span>
+
+<span class="sd">        :param qubitNum: int</span>
+<span class="sd">            Qubit number</span>
+<span class="sd">        :param n: tuple of floats</span>
+<span class="sd">            A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)</span>
+<span class="sd">        :param a: float</span>
+<span class="sd">            The rotation angle in radians.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_onequbit_gate</span><span class="p">(</span><span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">qubitNum</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_onequbit_gate</span><span class="p">(</span><span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">Ry</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">qubitNum</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_onequbit_gate</span><span class="p">(</span><span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">qubitNum</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Can only do rotations around X, Y, or Z axis right now&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="projectQEngine.apply_CNOT"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_CNOT">[docs]</a>    <span class="k">def</span> <span class="nf">apply_CNOT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum1</span><span class="p">,</span> <span class="n">qubitNum2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies the CNOT to the qubit with the numbers qubitNum1 and qubitNum2.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_twoqubit_gate</span><span class="p">(</span><span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">CNOT</span><span class="p">,</span> <span class="n">qubitNum1</span><span class="p">,</span> <span class="n">qubitNum2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="projectQEngine.apply_CPHASE"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_CPHASE">[docs]</a>    <span class="k">def</span> <span class="nf">apply_CPHASE</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum1</span><span class="p">,</span> <span class="n">qubitNum2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies the CPHASE to the qubit with the numbers qubitNum1 and qubitNum2.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_twoqubit_gate</span><span class="p">(</span><span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">CZ</span><span class="p">,</span> <span class="n">qubitNum1</span><span class="p">,</span> <span class="n">qubitNum2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="projectQEngine.apply_onequbit_gate"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_onequbit_gate">[docs]</a>    <span class="k">def</span> <span class="nf">apply_onequbit_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gate</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a unitary gate to the specified qubit.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        gate       The project Q gate to be applied</span>
+<span class="sd">        qubitNum 	the number of the qubit this gate is applied to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">qubitNum</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;No such qubit to apply a single qubit gate to&quot;</span><span class="p">)</span>
+
+        <span class="n">gate</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">qubitReg</span><span class="p">[</span><span class="n">qubitNum</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="projectQEngine.apply_twoqubit_gate"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_twoqubit_gate">[docs]</a>    <span class="k">def</span> <span class="nf">apply_twoqubit_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gate</span><span class="p">,</span> <span class="n">qubit1</span><span class="p">,</span> <span class="n">qubit2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a unitary gate to the two specified qubits.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        gate       The project Q gate to be applied</span>
+<span class="sd">        qubit1 		the first qubit</span>
+<span class="sd">        qubit2		the second qubit</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">qubit1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;No such qubit to act as a control qubit&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">qubit2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;No such qubit to act as a target qubit&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">qubit1</span> <span class="o">==</span> <span class="n">qubit2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;Control and target are equal&quot;</span><span class="p">)</span>
+
+        <span class="n">gate</span> <span class="o">|</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qubitReg</span><span class="p">[</span><span class="n">qubit1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">qubitReg</span><span class="p">[</span><span class="n">qubit2</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="projectQEngine.measure_qubit_inplace"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.measure_qubit_inplace">[docs]</a>    <span class="k">def</span> <span class="nf">measure_qubit_inplace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Measures the desired qubit in the standard basis. This returns the classical outcome. The quantum register</span>
+<span class="sd">        is in the post-measurment state corresponding to the obtained outcome.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        qubitNum	qubit to be measured</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check we have such a qubit...</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">qubitNum</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;No such qubit to be measured.&quot;</span><span class="p">)</span>
+
+        <span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">Measure</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">qubitReg</span><span class="p">[</span><span class="n">qubitNum</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">eng</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="n">outcome</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qubitReg</span><span class="p">[</span><span class="n">qubitNum</span><span class="p">])</span>
+
+        <span class="c1"># return measurement outcome</span>
+        <span class="k">return</span> <span class="n">outcome</span></div>
+
+<div class="viewcode-block" id="projectQEngine.measure_qubit"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.measure_qubit">[docs]</a>    <span class="k">def</span> <span class="nf">measure_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Measures the desired qubit in the standard basis. This returns the classical outcome and deletes the qubit.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        qubitNum	qubit to be measured</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_qubit_inplace</span><span class="p">(</span><span class="n">qubitNum</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">qubitReg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">qubitNum</span><span class="p">)</span>
+
+        <span class="c1"># Update the number of qubits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">outcome</span></div>
+
+<div class="viewcode-block" id="projectQEngine.replace_qubit"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.replace_qubit">[docs]</a>    <span class="k">def</span> <span class="nf">replace_qubit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubitNum</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replaces the qubit at position qubitNum with the one given by state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Currently you cannot replace a qubit using project Q as backend&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="projectQEngine.absorb"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.absorb">[docs]</a>    <span class="k">def</span> <span class="nf">absorb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Absorb the qubits from the other engine into this one. This is done by tensoring the state at the end.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check whether there is space</span>
+        <span class="n">newNum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">activeQubits</span>
+        <span class="k">if</span> <span class="n">newNum</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxQubits</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;Cannot merge: qubits exceed the maximum available.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check whether there are in fact qubits to tensor up....</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eng</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">eng</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qubitReg</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">qubitReg</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">other</span><span class="o">.</span><span class="n">activeQubits</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Get the current state of the other engine</span>
+            <span class="n">other</span><span class="o">.</span><span class="n">eng</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="n">other_state</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">eng</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">cheat</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># Allocate qubits in this engine for the new qubits from the other engine</span>
+            <span class="n">qreg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eng</span><span class="o">.</span><span class="n">allocate_qureg</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">activeQubits</span><span class="p">)</span>
+
+            <span class="c1"># Put the new qubits in the correct state</span>
+            <span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">StatePreparation</span><span class="p">(</span><span class="n">other_state</span><span class="p">)</span> <span class="o">|</span> <span class="n">qreg</span>
+
+            <span class="c1"># Add the qubits to the list of qubits</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qubitReg</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">qreg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span> <span class="o">=</span> <span class="n">newNum</span></div>
+
+<div class="viewcode-block" id="projectQEngine.absorb_parts"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.projectQSimulator.projectQEngine.absorb_parts">[docs]</a>    <span class="k">def</span> <span class="nf">absorb_parts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">activeQ</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Absorb the qubits, given in pieces</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        R		real part of the qubit state as a list</span>
+<span class="sd">        I		imaginary part as a list</span>
+<span class="sd">        activeQ		active number of qubits</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check whether there is space</span>
+        <span class="n">newNum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span> <span class="o">+</span> <span class="n">activeQ</span>
+        <span class="k">if</span> <span class="n">newNum</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxQubits</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;Cannot merge: qubits exceed the maximum available.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">activeQ</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+            <span class="c1"># Convert the real and imaginary parts to a state</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="p">[</span><span class="n">re</span> <span class="o">+</span> <span class="n">im</span> <span class="o">*</span> <span class="mi">1</span><span class="n">j</span> <span class="k">for</span> <span class="n">re</span><span class="p">,</span> <span class="n">im</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">I</span><span class="p">)]</span>
+
+            <span class="c1"># Allocate qubits in this engine for the new qubits from the other engine</span>
+            <span class="n">qreg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eng</span><span class="o">.</span><span class="n">allocate_qureg</span><span class="p">(</span><span class="n">activeQ</span><span class="p">)</span>
+
+            <span class="c1"># Put the new qubits in the correct state</span>
+            <span class="n">pQ</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">StatePreparation</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="o">|</span> <span class="n">qreg</span>
+
+            <span class="c1"># Add the qubits to the list of qubits</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qubitReg</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">qreg</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">activeQubits</span> <span class="o">=</span> <span class="n">newNum</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 3.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+    </div>
+  </body>
+</html>

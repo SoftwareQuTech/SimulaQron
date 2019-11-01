@@ -1,0 +1,108 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>CQC Rust Library &#8212; SimulaQron 3.0.4 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="cqc.pythonLib_protocols package" href="cqc.pythonLib_protocols.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cqc.pythonLib_protocols.html" title="cqc.pythonLib_protocols package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="cqc.html" accesskey="U">cqc package</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="cqc.pythonLib_protocols.html"
+                        title="previous chapter">cqc.pythonLib_protocols package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/RustLib.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="cqc-rust-library">
+<h1>CQC Rust Library<a class="headerlink" href="#cqc-rust-library" title="Permalink to this headline">¶</a></h1>
+<p>The Rust library is different from the C and Python libraries in that it is not part of the main SimulaQron repository. Instead it is hosted as a <a class="reference external" href="https://crates.io/crates/cqc">Rust crate on crates.io</a> in order to leverage the benefits of the Rust ecosystem. This includes automatically generated documentation and easy inclusion in Rust projects from a <cite>Cargo.toml</cite> file.</p>
+<p>The CQC Rust crate is also different from the other libraries in that it is sans-io, that is, it does not handle the sending or receiving of packets. It only provides functionality for building, manipulating, encoding, and decoding packets. You can read more about the advantages of this design <a class="reference external" href="https://sans-io.readthedocs.io/">here</a>. Whilst it was written with the Python ecosystem in mind the principles are more general.</p>
+<p>You can find out more about the Rust crate at its
+- <a class="reference external" href="https://crates.io/crates/cqc">crates.io page</a>
+- <a class="reference external" href="https://github.com/Wojtek242/cqc">GitHub repository</a>
+- <a class="reference external" href="https://docs.rs/cqc">Documentation with examples</a></p>
+<p>The <a class="reference external" href="https://docs.rs/cqc">crate’s own documentation page</a> will always have the most up-to-date documentation about the library so please use that as a reference when integrating with your Rust code.</p>
+<p>There is a sample integration of the CQC crate provided in <cite>cqc/rustLib</cite> which implements a simple, synchronous mechanism for sending and receiving CQC packets. However, there is a risk that <cite>cqc/rustLib</cite> may be out of sync compared to the CQC crate itself. Please check <cite>cqc/rustLib/Cargo.toml</cite> which version it was based on. For the most up-to-date documentation, please refer to the <a class="reference external" href="https://docs.rs/cqc">crate docs</a>.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cqc.pythonLib_protocols.html" title="cqc.pythonLib_protocols package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="cqc.html" >cqc package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+    </div>
+  </body>
+</html>

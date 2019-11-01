@@ -1,0 +1,531 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>cqc.entInfoHeader &#8212; SimulaQron 3.0.4 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 3.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cqc.entInfoHeader</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2017, Stephanie Wehner and Axel Dahlberg</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c1"># modification, are permitted provided that the following conditions are met:</span>
+<span class="c1"># 1. Redistributions of source code must retain the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer.</span>
+<span class="c1"># 2. Redistributions in binary form must reproduce the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer in the</span>
+<span class="c1">#    documentation and/or other materials provided with the distribution.</span>
+<span class="c1"># 3. All advertising materials mentioning features or use of this software</span>
+<span class="c1">#    must display the following acknowledgement:</span>
+<span class="c1">#    This product includes software developed by Stephanie Wehner, QuTech.</span>
+<span class="c1"># 4. Neither the name of the QuTech organization nor the</span>
+<span class="c1">#    names of its contributors may be used to endorse or promote products</span>
+<span class="c1">#    derived from this software without specific prior written permission.</span>
+<span class="c1">#</span>
+<span class="c1"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER &#39;&#39;AS IS&#39;&#39; AND ANY</span>
+<span class="c1"># EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED</span>
+<span class="c1"># WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE</span>
+<span class="c1"># DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY</span>
+<span class="c1"># DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES</span>
+<span class="c1"># (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES</span>
+<span class="c1"># LOSS OF USE, DATA, OR PROFITS OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND</span>
+<span class="c1"># ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<span class="c1"># (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS</span>
+<span class="c1"># SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">import</span> <span class="nn">bitstring</span>
+
+<span class="kn">from</span> <span class="nn">cqc.cqcHeader</span> <span class="k">import</span> <span class="n">Header</span>
+
+<span class="c1"># Lengths of the headers in bytes</span>
+<span class="n">ENT_INFO_LENGTH</span> <span class="o">=</span> <span class="mi">40</span>  <span class="c1"># Length of a entanglement information header</span>
+<span class="n">ENT_INFO_CREATE_KEEP_LENGTH</span> <span class="o">=</span> <span class="mi">32</span>  <span class="c1"># Length of a entanglement information header (for create and keep)</span>
+<span class="n">ENT_INFO_MEAS_DIRECT_LENGTH</span> <span class="o">=</span> <span class="mi">28</span>  <span class="c1"># Length of a entanglement information header (for measure directly)</span>
+
+<span class="n">ENT_INFO_TP_CREATE_KEEP</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Type of message when entanglement is kept</span>
+<span class="n">ENT_INFO_TP_MEAS_DIRECT</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Type of message when entanglement is measured directly (for classical correlations)</span>
+
+
+<div class="viewcode-block" id="EntInfoHeader"><a class="viewcode-back" href="../../cqc.html#cqc.entInfoHeader.EntInfoHeader">[docs]</a><span class="k">class</span> <span class="nc">EntInfoHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Header for a entanglement information packet. Fo</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">ENT_INFO_LENGTH</span>
+    <span class="n">packaging_format</span> <span class="o">=</span> <span class="s2">&quot;!LHHLHHLQQHBB&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize using values received from a packet, if available.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">headerBytes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">node_A</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">app_id_A</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">node_B</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">app_id_B</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">id_AB</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ToG</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">goodness</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_A</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">port_A</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">app_id_A</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">node_B</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">port_B</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">app_id_B</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">id_AB</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ToG</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">goodness</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">DF</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set using given values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_A</span> <span class="o">=</span> <span class="n">node_A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span> <span class="o">=</span> <span class="n">port_A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">app_id_A</span> <span class="o">=</span> <span class="n">app_id_A</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_B</span> <span class="o">=</span> <span class="n">node_B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span> <span class="o">=</span> <span class="n">port_B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">app_id_B</span> <span class="o">=</span> <span class="n">app_id_B</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">id_AB</span> <span class="o">=</span> <span class="n">id_AB</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ToG</span> <span class="o">=</span> <span class="n">ToG</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goodness</span> <span class="o">=</span> <span class="n">goodness</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="n">DF</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pack data into packet format. For defnitions see cLib/cgc.h</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ent_info</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">node_A</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">app_id_A</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">node_B</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">app_id_B</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id_AB</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ToG</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">goodness</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DF</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ent_info</span>
+
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unpack packet data. For definitions see cLib/cqc.h</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ent_info</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packaging_format</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_A</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">app_id_A</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_B</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">app_id_B</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">id_AB</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ToG</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goodness</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Produce a printable string for information purposes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">toPrint</span> <span class="o">=</span> <span class="s2">&quot;A: (</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">app_id_A</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;B: (</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">app_id_B</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Entanglement ID: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_AB</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Timestamp: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Time of Goodness: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ToG</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Goodness: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">goodness</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Directionality Flag: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DF</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">toPrint</span>
+
+<div class="viewcode-block" id="EntInfoHeader.switch_nodes"><a class="viewcode-back" href="../../cqc.html#cqc.entInfoHeader.EntInfoHeader.switch_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">switch_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Switches the ip and port of the nodes and flips the directionality flag.</span>
+<span class="sd">        Used to give correct message to both nodes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get current info</span>
+        <span class="n">node_A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_A</span>
+        <span class="n">port_A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span>
+        <span class="n">app_id_A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">app_id_A</span>
+        <span class="n">node_B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_B</span>
+        <span class="n">port_B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span>
+        <span class="n">app_id_B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">app_id_B</span>
+        <span class="n">DF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DF</span>
+
+        <span class="c1"># Update</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_A</span> <span class="o">=</span> <span class="n">node_B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span> <span class="o">=</span> <span class="n">port_B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">app_id_A</span> <span class="o">=</span> <span class="n">app_id_B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_B</span> <span class="o">=</span> <span class="n">node_A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span> <span class="o">=</span> <span class="n">port_A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">app_id_B</span> <span class="o">=</span> <span class="n">app_id_A</span>
+        <span class="k">if</span> <span class="n">DF</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">DF</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="n">DF</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unknown directionality flag&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="n">DF</span></div></div>
+
+
+<div class="viewcode-block" id="EntInfoCreateKeepHeader"><a class="viewcode-back" href="../../cqc.html#cqc.entInfoHeader.EntInfoCreateKeepHeader">[docs]</a><span class="k">class</span> <span class="nc">EntInfoCreateKeepHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Header for a entanglement information packet, where entanglement is kept after generation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">ENT_INFO_TP_CREATE_KEEP</span>
+    <span class="n">package_format</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;uint:4=type, &quot;</span>
+        <span class="s2">&quot;uint:16=mhp_seq, &quot;</span>
+        <span class="s2">&quot;uint:1=DF, &quot;</span>
+        <span class="s2">&quot;uint:11=0, &quot;</span>
+        <span class="s2">&quot;uint:32=ip_A, &quot;</span>
+        <span class="s2">&quot;uint:32=ip_B, &quot;</span>
+        <span class="s2">&quot;uint:16=port_A, &quot;</span>
+        <span class="s2">&quot;uint:16=port_B, &quot;</span>
+        <span class="s2">&quot;float:32=t_create, &quot;</span>
+        <span class="s2">&quot;float:32=t_goodness, &quot;</span>
+        <span class="s2">&quot;float:32=goodness, &quot;</span>
+        <span class="s2">&quot;uint:32=create_id&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">ENT_INFO_CREATE_KEEP_LENGTH</span>
+
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ip_A</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">port_A</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ip_B</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">port_B</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mhp_seq</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">t_create</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">t_goodness</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">goodness</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">DF</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">create_id</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set using given values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip_A</span> <span class="o">=</span> <span class="n">ip_A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span> <span class="o">=</span> <span class="n">port_A</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip_B</span> <span class="o">=</span> <span class="n">ip_B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span> <span class="o">=</span> <span class="n">port_B</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mhp_seq</span> <span class="o">=</span> <span class="n">mhp_seq</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_create</span> <span class="o">=</span> <span class="n">t_create</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_goodness</span> <span class="o">=</span> <span class="n">t_goodness</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goodness</span> <span class="o">=</span> <span class="n">goodness</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="n">DF</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_id</span> <span class="o">=</span> <span class="n">create_id</span>
+
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pack data into packet format. For defnitions see cLib/cgc.h</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">to_pack</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s2">&quot;ip_A&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_A</span><span class="p">,</span>
+            <span class="s2">&quot;port_A&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span><span class="p">,</span>
+            <span class="s2">&quot;ip_B&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_B</span><span class="p">,</span>
+            <span class="s2">&quot;port_B&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span><span class="p">,</span>
+            <span class="s2">&quot;mhp_seq&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mhp_seq</span><span class="p">,</span>
+            <span class="s2">&quot;t_create&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_create</span><span class="p">,</span>
+            <span class="s2">&quot;t_goodness&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_goodness</span><span class="p">,</span>
+            <span class="s2">&quot;goodness&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">goodness</span><span class="p">,</span>
+            <span class="s2">&quot;DF&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">DF</span><span class="p">,</span>
+            <span class="s2">&quot;create_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_id</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">ent_info_Bitstring</span> <span class="o">=</span> <span class="n">bitstring</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">package_format</span><span class="p">,</span> <span class="o">**</span><span class="n">to_pack</span><span class="p">)</span>
+        <span class="n">ent_info</span> <span class="o">=</span> <span class="n">ent_info_Bitstring</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ent_info</span>
+
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unpack packet data. For definitions see cLib/cqc.h</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ent_info_Bitstring</span> <span class="o">=</span> <span class="n">bitstring</span><span class="o">.</span><span class="n">BitString</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
+        <span class="nb">type</span> <span class="o">=</span> <span class="n">ent_info_Bitstring</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;uint:4&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not an OK of type create-keep&quot;</span><span class="p">)</span>
+
+        <span class="n">ent_info</span> <span class="o">=</span> <span class="n">ent_info_Bitstring</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">package_format</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mhp_seq</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip_A</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip_B</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_create</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_goodness</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goodness</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_id</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Produce a printable string for information purposes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">toPrint</span> <span class="o">=</span> <span class="s2">&quot;Create and Keep OK with createID=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">create_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;A: (</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ip_A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;B: (</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ip_B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;MHP seq.: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mhp_seq</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Time of creation: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t_create</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Time of Goodness: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t_goodness</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Goodness: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">goodness</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Directionality Flag: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DF</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">toPrint</span>
+
+<div class="viewcode-block" id="EntInfoCreateKeepHeader.switch_nodes"><a class="viewcode-back" href="../../cqc.html#cqc.entInfoHeader.EntInfoCreateKeepHeader.switch_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">switch_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Switches the ip and port of the nodes and flips the directionality flag.</span>
+<span class="sd">        Used to give correct message to both nodes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get current info</span>
+        <span class="n">ip_A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_A</span>
+        <span class="n">port_A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span>
+        <span class="n">ip_B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_B</span>
+        <span class="n">port_B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span>
+        <span class="n">DF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DF</span>
+
+        <span class="c1"># Update</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip_A</span> <span class="o">=</span> <span class="n">ip_B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span> <span class="o">=</span> <span class="n">port_B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip_B</span> <span class="o">=</span> <span class="n">ip_A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span> <span class="o">=</span> <span class="n">port_A</span>
+        <span class="k">if</span> <span class="n">DF</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">DF</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="n">DF</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unknown directionality flag&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="n">DF</span></div></div>
+
+
+<div class="viewcode-block" id="EntInfoMeasDirectHeader"><a class="viewcode-back" href="../../cqc.html#cqc.entInfoHeader.EntInfoMeasDirectHeader">[docs]</a><span class="k">class</span> <span class="nc">EntInfoMeasDirectHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Header for a entanglement information packet, where communication qubit is measured directly after emission.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">ENT_INFO_TP_MEAS_DIRECT</span>
+    <span class="n">package_format</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;uint:4=type, &quot;</span>
+        <span class="s2">&quot;uint:16=mhp_seq, &quot;</span>
+        <span class="s2">&quot;uint:1=DF, &quot;</span>
+        <span class="s2">&quot;uint:1=meas_out, &quot;</span>
+        <span class="s2">&quot;uint:2=basis, &quot;</span>
+        <span class="s2">&quot;uint:8=0, &quot;</span>
+        <span class="s2">&quot;uint:32=ip_A, &quot;</span>
+        <span class="s2">&quot;uint:32=ip_B, &quot;</span>
+        <span class="s2">&quot;uint:16=port_A, &quot;</span>
+        <span class="s2">&quot;uint:16=port_B, &quot;</span>
+        <span class="s2">&quot;float:32=t_create, &quot;</span>
+        <span class="s2">&quot;float:32=goodness, &quot;</span>
+        <span class="s2">&quot;uint:32=create_id&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">HDR_LENGTH</span> <span class="o">=</span> <span class="n">ENT_INFO_MEAS_DIRECT_LENGTH</span>
+
+    <span class="k">def</span> <span class="nf">_setVals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ip_A</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">port_A</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ip_B</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">port_B</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mhp_seq</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">meas_out</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">t_create</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">goodness</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                 <span class="n">DF</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">create_id</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set using given values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip_A</span> <span class="o">=</span> <span class="n">ip_A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span> <span class="o">=</span> <span class="n">port_A</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip_B</span> <span class="o">=</span> <span class="n">ip_B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span> <span class="o">=</span> <span class="n">port_B</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mhp_seq</span> <span class="o">=</span> <span class="n">mhp_seq</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">meas_out</span> <span class="o">=</span> <span class="n">meas_out</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="n">basis</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_create</span> <span class="o">=</span> <span class="n">t_create</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goodness</span> <span class="o">=</span> <span class="n">goodness</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="n">DF</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_id</span> <span class="o">=</span> <span class="n">create_id</span>
+
+    <span class="k">def</span> <span class="nf">_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pack data into packet format. For defnitions see cLib/cgc.h</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">to_pack</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s2">&quot;ip_A&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_A</span><span class="p">,</span>
+            <span class="s2">&quot;port_A&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span><span class="p">,</span>
+            <span class="s2">&quot;ip_B&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_B</span><span class="p">,</span>
+            <span class="s2">&quot;port_B&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span><span class="p">,</span>
+            <span class="s2">&quot;mhp_seq&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mhp_seq</span><span class="p">,</span>
+            <span class="s2">&quot;meas_out&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">meas_out</span><span class="p">,</span>
+            <span class="s2">&quot;basis&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span>
+            <span class="s2">&quot;t_create&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_create</span><span class="p">,</span>
+            <span class="s2">&quot;goodness&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">goodness</span><span class="p">,</span>
+            <span class="s2">&quot;DF&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">DF</span><span class="p">,</span>
+            <span class="s2">&quot;create_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_id</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">ent_info_Bitstring</span> <span class="o">=</span> <span class="n">bitstring</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">package_format</span><span class="p">,</span> <span class="o">**</span><span class="n">to_pack</span><span class="p">)</span>
+        <span class="n">ent_info</span> <span class="o">=</span> <span class="n">ent_info_Bitstring</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ent_info</span>
+
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headerBytes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unpack packet data. For definitions see cLib/cqc.h</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ent_info_Bitstring</span> <span class="o">=</span> <span class="n">bitstring</span><span class="o">.</span><span class="n">BitString</span><span class="p">(</span><span class="n">headerBytes</span><span class="p">)</span>
+        <span class="nb">type</span> <span class="o">=</span> <span class="n">ent_info_Bitstring</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;uint:4&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not an OK of type measure-directly&quot;</span><span class="p">)</span>
+
+        <span class="n">ent_info</span> <span class="o">=</span> <span class="n">ent_info_Bitstring</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">package_format</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mhp_seq</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meas_out</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip_A</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip_B</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_create</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goodness</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_id</span> <span class="o">=</span> <span class="n">ent_info</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_printable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Produce a printable string for information purposes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">toPrint</span> <span class="o">=</span> <span class="s2">&quot;Measure Direclty OK with createID=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">create_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;A: (</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ip_A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;B: (</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ip_B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;MHP seq.: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mhp_seq</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Measurement outcome: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meas_out</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Measurement basis: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Time of creation: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t_create</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Goodness: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">goodness</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">toPrint</span> <span class="o">+=</span> <span class="s2">&quot;Directionality Flag: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DF</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">toPrint</span>
+
+<div class="viewcode-block" id="EntInfoMeasDirectHeader.switch_nodes"><a class="viewcode-back" href="../../cqc.html#cqc.entInfoHeader.EntInfoMeasDirectHeader.switch_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">switch_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Switches the ip and port of the nodes and flips the directionality flag.</span>
+<span class="sd">        Used to give correct message to both nodes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get current info</span>
+        <span class="n">ip_A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_A</span>
+        <span class="n">port_A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span>
+        <span class="n">ip_B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_B</span>
+        <span class="n">port_B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span>
+        <span class="n">DF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DF</span>
+
+        <span class="c1"># Update</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip_A</span> <span class="o">=</span> <span class="n">ip_B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_A</span> <span class="o">=</span> <span class="n">port_B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip_B</span> <span class="o">=</span> <span class="n">ip_A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_B</span> <span class="o">=</span> <span class="n">port_A</span>
+        <span class="k">if</span> <span class="n">DF</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">DF</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="n">DF</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unknown directionality flag&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DF</span> <span class="o">=</span> <span class="n">DF</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 3.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+    </div>
+  </body>
+</html>
