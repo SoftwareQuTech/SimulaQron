@@ -1,0 +1,1487 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>simulaqron.virtNode package &#8212; SimulaQron 3.0.10 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="simulaqron.toolbox package" href="simulaqron.toolbox.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="simulaqron.toolbox.html" title="simulaqron.toolbox package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.10 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="simulaqron.html" accesskey="U">simulaqron package</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">simulaqron.virtNode package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-simulaqron.virtNode.basics">simulaqron.virtNode.basics module</a></li>
+<li><a class="reference internal" href="#module-simulaqron.virtNode.projectQSimulator">simulaqron.virtNode.projectQSimulator module</a></li>
+<li><a class="reference internal" href="#module-simulaqron.virtNode.quantum">simulaqron.virtNode.quantum module</a></li>
+<li><a class="reference internal" href="#module-simulaqron.virtNode.qutipSimulator">simulaqron.virtNode.qutipSimulator module</a></li>
+<li><a class="reference internal" href="#module-simulaqron.virtNode.stabilizerSimulator">simulaqron.virtNode.stabilizerSimulator module</a></li>
+<li><a class="reference internal" href="#module-simulaqron.virtNode.virtual">simulaqron.virtNode.virtual module</a></li>
+<li><a class="reference internal" href="#module-simulaqron.virtNode">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="simulaqron.toolbox.html"
+                        title="previous chapter">simulaqron.toolbox package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/simulaqron.virtNode.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="simulaqron-virtnode-package">
+<h1>simulaqron.virtNode package<a class="headerlink" href="#simulaqron-virtnode-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-simulaqron.virtNode.basics">
+<span id="simulaqron-virtnode-basics-module"></span><h2>simulaqron.virtNode.basics module<a class="headerlink" href="#module-simulaqron.virtNode.basics" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="simulaqron.virtNode.basics.noQubitError">
+<em class="property">exception </em><code class="sig-prename descclassname">simulaqron.virtNode.basics.</code><code class="sig-name descname">noQubitError</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#noQubitError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.noQubitError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#simulaqron.virtNode.basics.quantumError" title="simulaqron.virtNode.basics.quantumError"><code class="xref py py-class docutils literal notranslate"><span class="pre">simulaqron.virtNode.basics.quantumError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="simulaqron.virtNode.basics.quantumEngine">
+<em class="property">class </em><code class="sig-prename descclassname">simulaqron.virtNode.basics.</code><code class="sig-name descname">quantumEngine</code><span class="sig-paren">(</span><em class="sig-param">node</em>, <em class="sig-param">num</em>, <em class="sig-param">maxQubits=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.flavors.Referenceable</span></code></p>
+<p>Basic quantum engine. Abstract class meant to be subclassed to implement different simulation backends.</p>
+<dl class="simple">
+<dt>Attributes:</dt><dd><p>Arguments
+node            node this register is started from
+num             number of this register
+maxQubits       maximum number of qubits this register supports</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.absorb">
+<em class="property">abstract </em><code class="sig-name descname">absorb</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.absorb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.absorb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Absorb the qubits from the other engine into this one. This is done by tensoring the state at the end.
+:rtype: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.absorb_parts">
+<em class="property">abstract </em><code class="sig-name descname">absorb_parts</code><span class="sig-paren">(</span><em class="sig-param">R</em>, <em class="sig-param">I</em>, <em class="sig-param">activeQ</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.absorb_parts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.absorb_parts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Absorb the qubits, given in pieces</p>
+<p>Arguments:
+R               real part of the qubit state as a list
+I               imaginary part as a list
+activeQ         active number of qubits
+:rtype: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.add_fresh_qubit">
+<em class="property">abstract </em><code class="sig-name descname">add_fresh_qubit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.add_fresh_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.add_fresh_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new qubit initialized in the |0&gt; state.
+:return: The qubit number
+:rtype: int</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.add_qubit">
+<em class="property">abstract </em><code class="sig-name descname">add_qubit</code><span class="sig-paren">(</span><em class="sig-param">newQubit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.add_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.add_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add new qubit in the state described by the density matrix newQubit
+:return: The qubit number
+:rtype: int</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.apply_CNOT">
+<em class="property">abstract </em><code class="sig-name descname">apply_CNOT</code><span class="sig-paren">(</span><em class="sig-param">qubitNum1</em>, <em class="sig-param">qubitNum2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.apply_CNOT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.apply_CNOT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the CNOT to the qubit with the numbers qubitNum1 and qubitNum2.
+:rtype: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.apply_CPHASE">
+<em class="property">abstract </em><code class="sig-name descname">apply_CPHASE</code><span class="sig-paren">(</span><em class="sig-param">qubitNum1</em>, <em class="sig-param">qubitNum2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.apply_CPHASE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.apply_CPHASE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the CPHASE to the qubit with the numbers qubitNum1 and qubitNum2.
+:rtype: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.apply_H">
+<em class="property">abstract </em><code class="sig-name descname">apply_H</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.apply_H"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.apply_H" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a Hadamard gate to the qubits with number qubitNum.
+:rtype: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.apply_K">
+<em class="property">abstract </em><code class="sig-name descname">apply_K</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.apply_K"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.apply_K" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a K gate to the qubits with number qubitNum. Maps computational basis to Y eigenbasis.
+:rtype: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.apply_T">
+<em class="property">abstract </em><code class="sig-name descname">apply_T</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.apply_T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.apply_T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a T gate to the qubits with number qubitNum.
+:rtype: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.apply_X">
+<em class="property">abstract </em><code class="sig-name descname">apply_X</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.apply_X"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.apply_X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a X gate to the qubits with number qubitNum.
+:rtype: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.apply_Y">
+<em class="property">abstract </em><code class="sig-name descname">apply_Y</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.apply_Y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.apply_Y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a Y gate to the qubits with number qubitNum.
+:rtype: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.apply_Z">
+<em class="property">abstract </em><code class="sig-name descname">apply_Z</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.apply_Z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.apply_Z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a Z gate to the qubits with number qubitNum.
+:rtype: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.apply_onequbit_gate">
+<em class="property">abstract </em><code class="sig-name descname">apply_onequbit_gate</code><span class="sig-paren">(</span><em class="sig-param">gateU</em>, <em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.apply_onequbit_gate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.apply_onequbit_gate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a unitary gate to the specified qubit.</p>
+<p>Arguments:
+gateU           unitary to apply as Qobj
+qubitNum        the number of the qubit this gate is applied to
+:rtype: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.apply_rotation">
+<em class="property">abstract </em><code class="sig-name descname">apply_rotation</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em>, <em class="sig-param">n</em>, <em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.apply_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.apply_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError
+is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qubitNum</strong> – int
+Qubit number</p></li>
+<li><p><strong>n</strong> – tuple
+A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)</p></li>
+<li><p><strong>a</strong> – float
+The rotation angle in radians.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.apply_twoqubit_gate">
+<em class="property">abstract </em><code class="sig-name descname">apply_twoqubit_gate</code><span class="sig-paren">(</span><em class="sig-param">gateU</em>, <em class="sig-param">qubit1</em>, <em class="sig-param">qubit2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.apply_twoqubit_gate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.apply_twoqubit_gate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a unitary gate to the two specified qubits.</p>
+<p>Arguments:
+gateU           unitary to apply as Qobj
+qubit1          the first qubit
+qubit2          the second qubit
+:rtype: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.get_register_RI">
+<em class="property">abstract </em><code class="sig-name descname">get_register_RI</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.get_register_RI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.get_register_RI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the entire register in real and imaginary parts and returns the result as a
+list. Twisted only likes to send real valued lists, not complex ones.
+:return: The real and imaginary parts of a qubit state
+:rtype: tuple</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.measure_qubit">
+<em class="property">abstract </em><code class="sig-name descname">measure_qubit</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.measure_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.measure_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measures the desired qubit in the standard basis. This returns the classical outcome and deletes the qubit.</p>
+<p>Arguments:
+qubitNum        qubit to be measured
+:return: The meaurement outcome
+:rtype: int</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.measure_qubit_inplace">
+<em class="property">abstract </em><code class="sig-name descname">measure_qubit_inplace</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.measure_qubit_inplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.measure_qubit_inplace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measures the desired qubit in the standard basis. This returns the classical outcome. The quantum register
+is in the post-measurment state corresponding to the obtained outcome.</p>
+<p>Arguments:
+qubitNum        qubit to be measured
+:return: The meaurement outcome
+:rtype: int</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.remove_qubit">
+<em class="property">abstract </em><code class="sig-name descname">remove_qubit</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.remove_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.remove_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the qubit with the desired number qubitNum
+:rtype: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.basics.quantumEngine.replace_qubit">
+<em class="property">abstract </em><code class="sig-name descname">replace_qubit</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em>, <em class="sig-param">state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumEngine.replace_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumEngine.replace_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces the qubit at position qubitNum with the one given by state.
+:rtype: None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="simulaqron.virtNode.basics.quantumError">
+<em class="property">exception </em><code class="sig-prename descclassname">simulaqron.virtNode.basics.</code><code class="sig-name descname">quantumError</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#quantumError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.quantumError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.pb.Error</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="simulaqron.virtNode.basics.virtNetError">
+<em class="property">exception </em><code class="sig-prename descclassname">simulaqron.virtNode.basics.</code><code class="sig-name descname">virtNetError</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/basics.html#virtNetError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.basics.virtNetError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-simulaqron.virtNode.projectQSimulator">
+<span id="simulaqron-virtnode-projectqsimulator-module"></span><h2>simulaqron.virtNode.projectQSimulator module<a class="headerlink" href="#module-simulaqron.virtNode.projectQSimulator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine">
+<em class="property">class </em><code class="sig-prename descclassname">simulaqron.virtNode.projectQSimulator.</code><code class="sig-name descname">projectQEngine</code><span class="sig-paren">(</span><em class="sig-param">node</em>, <em class="sig-param">num</em>, <em class="sig-param">maxQubits=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#simulaqron.virtNode.basics.quantumEngine" title="simulaqron.virtNode.basics.quantumEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">simulaqron.virtNode.basics.quantumEngine</span></code></a></p>
+<p>Basic quantum engine which uses ProjectQ.</p>
+<dl class="simple">
+<dt>Attributes:</dt><dd><p>maxQubits:      maximum number of qubits this engine will support.</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.absorb">
+<code class="sig-name descname">absorb</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.absorb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.absorb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Absorb the qubits from the other engine into this one. This is done by tensoring the state at the end.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.absorb_parts">
+<code class="sig-name descname">absorb_parts</code><span class="sig-paren">(</span><em class="sig-param">R</em>, <em class="sig-param">I</em>, <em class="sig-param">activeQ</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.absorb_parts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.absorb_parts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Absorb the qubits, given in pieces</p>
+<p>Arguments:
+R               real part of the qubit state as a list
+I               imaginary part as a list
+activeQ         active number of qubits</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.add_fresh_qubit">
+<code class="sig-name descname">add_fresh_qubit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.add_fresh_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.add_fresh_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new qubit initialized in the |0&gt; state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.add_qubit">
+<code class="sig-name descname">add_qubit</code><span class="sig-paren">(</span><em class="sig-param">newQubit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.add_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.add_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add new qubit in the state described by the vector newQubit ([a, b])</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.apply_CNOT">
+<code class="sig-name descname">apply_CNOT</code><span class="sig-paren">(</span><em class="sig-param">qubitNum1</em>, <em class="sig-param">qubitNum2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.apply_CNOT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_CNOT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the CNOT to the qubit with the numbers qubitNum1 and qubitNum2.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.apply_CPHASE">
+<code class="sig-name descname">apply_CPHASE</code><span class="sig-paren">(</span><em class="sig-param">qubitNum1</em>, <em class="sig-param">qubitNum2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.apply_CPHASE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_CPHASE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the CPHASE to the qubit with the numbers qubitNum1 and qubitNum2.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.apply_H">
+<code class="sig-name descname">apply_H</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.apply_H"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_H" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a Hadamard gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.apply_K">
+<code class="sig-name descname">apply_K</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.apply_K"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_K" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a K gate to the qubits with number qubitNum. Maps computational basis to Y eigenbasis.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.apply_T">
+<code class="sig-name descname">apply_T</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.apply_T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a T gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.apply_X">
+<code class="sig-name descname">apply_X</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.apply_X"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a X gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.apply_Y">
+<code class="sig-name descname">apply_Y</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.apply_Y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_Y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a Y gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.apply_Z">
+<code class="sig-name descname">apply_Z</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.apply_Z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_Z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a Z gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.apply_onequbit_gate">
+<code class="sig-name descname">apply_onequbit_gate</code><span class="sig-paren">(</span><em class="sig-param">gate</em>, <em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.apply_onequbit_gate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_onequbit_gate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a unitary gate to the specified qubit.</p>
+<p>Arguments:
+gate       The project Q gate to be applied
+qubitNum        the number of the qubit this gate is applied to</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.apply_rotation">
+<code class="sig-name descname">apply_rotation</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em>, <em class="sig-param">n</em>, <em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.apply_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError
+is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qubitNum</strong> – int
+Qubit number</p></li>
+<li><p><strong>n</strong> – tuple of floats
+A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)</p></li>
+<li><p><strong>a</strong> – float
+The rotation angle in radians.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.apply_twoqubit_gate">
+<code class="sig-name descname">apply_twoqubit_gate</code><span class="sig-paren">(</span><em class="sig-param">gate</em>, <em class="sig-param">qubit1</em>, <em class="sig-param">qubit2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.apply_twoqubit_gate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.apply_twoqubit_gate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a unitary gate to the two specified qubits.</p>
+<p>Arguments:
+gate       The project Q gate to be applied
+qubit1          the first qubit
+qubit2          the second qubit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.get_register_RI">
+<code class="sig-name descname">get_register_RI</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.get_register_RI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.get_register_RI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the entire register in real and imaginary parts and returns the result as a
+list. Twisted only likes to send real valued lists, not complex ones.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.measure_qubit">
+<code class="sig-name descname">measure_qubit</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.measure_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.measure_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measures the desired qubit in the standard basis. This returns the classical outcome and deletes the qubit.</p>
+<p>Arguments:
+qubitNum        qubit to be measured</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.measure_qubit_inplace">
+<code class="sig-name descname">measure_qubit_inplace</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.measure_qubit_inplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.measure_qubit_inplace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measures the desired qubit in the standard basis. This returns the classical outcome. The quantum register
+is in the post-measurment state corresponding to the obtained outcome.</p>
+<p>Arguments:
+qubitNum        qubit to be measured</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.remove_qubit">
+<code class="sig-name descname">remove_qubit</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.remove_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.remove_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the qubit with the desired number qubitNum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.projectQSimulator.projectQEngine.replace_qubit">
+<code class="sig-name descname">replace_qubit</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em>, <em class="sig-param">state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/projectQSimulator.html#projectQEngine.replace_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.projectQSimulator.projectQEngine.replace_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces the qubit at position qubitNum with the one given by state.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-simulaqron.virtNode.quantum">
+<span id="simulaqron-virtnode-quantum-module"></span><h2>simulaqron.virtNode.quantum module<a class="headerlink" href="#module-simulaqron.virtNode.quantum" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit">
+<em class="property">class </em><code class="sig-prename descclassname">simulaqron.virtNode.quantum.</code><code class="sig-name descname">simulatedQubit</code><span class="sig-paren">(</span><em class="sig-param">node</em>, <em class="sig-param">register</em>, <em class="sig-param">simNum</em>, <em class="sig-param">num=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.flavors.Referenceable</span></code></p>
+<p>Simulated qubit object in the specified local simulation engine.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>Arguments</strong></dt><dd><dl class="field-list simple">
+<dt class="field-odd">node</dt>
+<dd class="field-odd"><p>network node that this qubit lives at</p>
+</dd>
+<dt class="field-even">register</dt>
+<dd class="field-even"><p>register on that node that the qubit is in</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Qubit objects are local to each node that is simulating a particular quantum register.
+A qubit object provides the backing for a virtual qubit, which may be at another node.</p>
+</div>
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.isLocked">
+<code class="sig-name descname">isLocked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.isLocked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.isLocked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.lock">
+<code class="sig-name descname">lock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.lock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.lock" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.make_fresh">
+<code class="sig-name descname">make_fresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.make_fresh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.make_fresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make this a fresh qubit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_apply_H">
+<code class="sig-name descname">remote_apply_H</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_apply_H"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_apply_H" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply H gate.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_apply_K">
+<code class="sig-name descname">remote_apply_K</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_apply_K"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_apply_K" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply K gate to itself by passing it onto the underlying register. Maps computational to Y eigenbasis.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_apply_T">
+<code class="sig-name descname">remote_apply_T</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_apply_T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_apply_T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply T gate.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_apply_X">
+<code class="sig-name descname">remote_apply_X</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_apply_X"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_apply_X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply X gate to itself by passing it onto the underlying register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_apply_Y">
+<code class="sig-name descname">remote_apply_Y</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_apply_Y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_apply_Y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply Y gate.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_apply_Z">
+<code class="sig-name descname">remote_apply_Z</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_apply_Z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_apply_Z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply Z gate.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_apply_rotation">
+<code class="sig-name descname">remote_apply_rotation</code><span class="sig-paren">(</span><em class="sig-param">*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_apply_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_apply_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply rotation around axis n with angle a.
+Arguments:
+n    A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+a    The rotation angle in radians.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_cnot_onto">
+<code class="sig-name descname">remote_cnot_onto</code><span class="sig-paren">(</span><em class="sig-param">targetNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_cnot_onto"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_cnot_onto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a CNOT operation with this qubit as control, and the other qubit as target.</p>
+<p>Arguments
+targetNum    the qubit to use as the target of the CNOT</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_cphase_onto">
+<code class="sig-name descname">remote_cphase_onto</code><span class="sig-paren">(</span><em class="sig-param">targetNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_cphase_onto"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_cphase_onto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a CPHASE operation with this qubit as control, and the other qubit as target.</p>
+<p>Arguments
+targetNum    the qubit to use as the target of the CPHASE</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_get_details">
+<code class="sig-name descname">remote_get_details</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_get_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_get_details" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns out simulation number as well as the details of this simulating node.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_get_number">
+<code class="sig-name descname">remote_get_number</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_get_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_get_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the local number of this qubit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_get_numbers">
+<code class="sig-name descname">remote_get_numbers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_get_numbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_get_numbers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of the simulating register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_get_qubit">
+<code class="sig-name descname">remote_get_qubit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_get_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_get_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the state of the qubits in the list qList by tracing out the rest.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_get_register">
+<code class="sig-name descname">remote_get_register</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_get_register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_get_register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the register where this qubit is simulated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_get_register_RI">
+<code class="sig-name descname">remote_get_register_RI</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_get_register_RI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_get_register_RI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the register where this qubit is simulated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_get_sim_number">
+<code class="sig-name descname">remote_get_sim_number</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_get_sim_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_get_sim_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the simulation number of this qubit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_isActive">
+<code class="sig-name descname">remote_isActive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_isActive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_isActive" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_isLocked">
+<code class="sig-name descname">remote_isLocked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_isLocked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_isLocked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_lock">
+<code class="sig-name descname">remote_lock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_lock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_lock" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_measure">
+<code class="sig-name descname">remote_measure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_measure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_measure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measure the qubit in the standard basis. This does delete the qubit.</p>
+<p>Returns the measurement outcome.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_measure_inplace">
+<code class="sig-name descname">remote_measure_inplace</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_measure_inplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_measure_inplace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measure the qubit in the standard basis. This does NOT delete the qubit, but replace the relevant
+qubit with the measurement outcome.</p>
+<p>Returns the measurement outcome.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.remote_unlock">
+<code class="sig-name descname">remote_unlock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.remote_unlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.remote_unlock" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.quantum.simulatedQubit.unlock">
+<code class="sig-name descname">unlock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/quantum.html#simulatedQubit.unlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.quantum.simulatedQubit.unlock" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-simulaqron.virtNode.qutipSimulator">
+<span id="simulaqron-virtnode-qutipsimulator-module"></span><h2>simulaqron.virtNode.qutipSimulator module<a class="headerlink" href="#module-simulaqron.virtNode.qutipSimulator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine">
+<em class="property">class </em><code class="sig-prename descclassname">simulaqron.virtNode.qutipSimulator.</code><code class="sig-name descname">qutipEngine</code><span class="sig-paren">(</span><em class="sig-param">node</em>, <em class="sig-param">num</em>, <em class="sig-param">maxQubits=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#simulaqron.virtNode.basics.quantumEngine" title="simulaqron.virtNode.basics.quantumEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">simulaqron.virtNode.basics.quantumEngine</span></code></a></p>
+<p>Basic quantum engine which uses QuTip. Works with density matrices and in principle allows full quantum
+dynamics via QuTip. Subsequently, this is quite slow.</p>
+<dl class="simple">
+<dt>Attributes:</dt><dd><p>maxQubits:      maximum number of qubits this engine will support.</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.absorb">
+<code class="sig-name descname">absorb</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.absorb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.absorb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Absorb the qubits from the other engine into this one. This is done by tensoring the state at the end.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.absorb_parts">
+<code class="sig-name descname">absorb_parts</code><span class="sig-paren">(</span><em class="sig-param">R</em>, <em class="sig-param">I</em>, <em class="sig-param">activeQ</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.absorb_parts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.absorb_parts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Absorb the qubits, given in pieces</p>
+<p>Arguments:
+R               real part of the qubit state as a list
+I               imaginary part as a list
+activeQ         active number of qubits</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.add_fresh_qubit">
+<code class="sig-name descname">add_fresh_qubit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.add_fresh_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.add_fresh_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new qubit initialized in the |0&gt; state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.add_qubit">
+<code class="sig-name descname">add_qubit</code><span class="sig-paren">(</span><em class="sig-param">newQubit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.add_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.add_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add new qubit in the state described by the density matrix newQubit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.apply_CNOT">
+<code class="sig-name descname">apply_CNOT</code><span class="sig-paren">(</span><em class="sig-param">qubitNum1</em>, <em class="sig-param">qubitNum2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.apply_CNOT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.apply_CNOT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the CNOT to the qubit with the numbers qubitNum1 and qubitNum2.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.apply_CPHASE">
+<code class="sig-name descname">apply_CPHASE</code><span class="sig-paren">(</span><em class="sig-param">qubitNum1</em>, <em class="sig-param">qubitNum2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.apply_CPHASE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.apply_CPHASE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the CPHASE to the qubit with the numbers qubitNum1 and qubitNum2.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.apply_H">
+<code class="sig-name descname">apply_H</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.apply_H"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.apply_H" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a Hadamard gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.apply_K">
+<code class="sig-name descname">apply_K</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.apply_K"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.apply_K" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a K gate to the qubits with number qubitNum. Maps computational basis to Y eigenbasis.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.apply_T">
+<code class="sig-name descname">apply_T</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.apply_T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.apply_T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a T gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.apply_X">
+<code class="sig-name descname">apply_X</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.apply_X"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.apply_X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a X gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.apply_Y">
+<code class="sig-name descname">apply_Y</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.apply_Y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.apply_Y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a Y gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.apply_Z">
+<code class="sig-name descname">apply_Z</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.apply_Z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.apply_Z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a Z gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.apply_onequbit_gate">
+<code class="sig-name descname">apply_onequbit_gate</code><span class="sig-paren">(</span><em class="sig-param">gateU</em>, <em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.apply_onequbit_gate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.apply_onequbit_gate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a unitary gate to the specified qubit.</p>
+<p>Arguments:
+gateU           unitary to apply as Qobj
+qubitNum        the number of the qubit this gate is applied to</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.apply_rotation">
+<code class="sig-name descname">apply_rotation</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em>, <em class="sig-param">n</em>, <em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.apply_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.apply_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError
+is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qubitNum</strong> – int
+Qubit number</p></li>
+<li><p><strong>n</strong> – tuple
+A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)</p></li>
+<li><p><strong>a</strong> – float
+The rotation angle in radians.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.apply_twoqubit_gate">
+<code class="sig-name descname">apply_twoqubit_gate</code><span class="sig-paren">(</span><em class="sig-param">gateU</em>, <em class="sig-param">qubit1</em>, <em class="sig-param">qubit2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.apply_twoqubit_gate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.apply_twoqubit_gate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a unitary gate to the two specified qubits.</p>
+<p>Arguments:
+gateU           unitary to apply as Qobj
+qubit1          the first qubit
+qubit2          the second qubit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.get_qubits">
+<code class="sig-name descname">get_qubits</code><span class="sig-paren">(</span><em class="sig-param">list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.get_qubits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.get_qubits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the qubits with numbers in list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.get_qubits_RI">
+<code class="sig-name descname">get_qubits_RI</code><span class="sig-paren">(</span><em class="sig-param">qList</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.get_qubits_RI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.get_qubits_RI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the qubits in the list and returns the result as a list divided into
+a real and imaginary part. Twisted only likes to send real values lists,
+not complex ones.</p>
+<p>Arguments
+qList           list of qubits to retrieve, e.g. [1, 4]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.get_register_RI">
+<code class="sig-name descname">get_register_RI</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.get_register_RI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.get_register_RI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the entire register in real and imaginary parts and returns the result as a
+list. Twisted only likes to send real valued lists, not complex ones.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.measure_qubit">
+<code class="sig-name descname">measure_qubit</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.measure_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.measure_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measures the desired qubit in the standard basis. This returns the classical outcome and deletes the qubit.</p>
+<p>Arguments:
+qubitNum        qubit to be measured</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.measure_qubit_inplace">
+<code class="sig-name descname">measure_qubit_inplace</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.measure_qubit_inplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.measure_qubit_inplace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measures the desired qubit in the standard basis. This returns the classical outcome. The quantum register
+is in the post-measurment state corresponding to the obtained outcome.</p>
+<p>Arguments:
+qubitNum        qubit to be measured</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.remove_qubit">
+<code class="sig-name descname">remove_qubit</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.remove_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.remove_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the qubit with the desired number qubitNum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.qutipSimulator.qutipEngine.replace_qubit">
+<code class="sig-name descname">replace_qubit</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em>, <em class="sig-param">state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/qutipSimulator.html#qutipEngine.replace_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.qutipSimulator.qutipEngine.replace_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces the qubit at position qubitNum with the one given by state.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-simulaqron.virtNode.stabilizerSimulator">
+<span id="simulaqron-virtnode-stabilizersimulator-module"></span><h2>simulaqron.virtNode.stabilizerSimulator module<a class="headerlink" href="#module-simulaqron.virtNode.stabilizerSimulator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine">
+<em class="property">class </em><code class="sig-prename descclassname">simulaqron.virtNode.stabilizerSimulator.</code><code class="sig-name descname">stabilizerEngine</code><span class="sig-paren">(</span><em class="sig-param">node</em>, <em class="sig-param">num</em>, <em class="sig-param">maxQubits=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#simulaqron.virtNode.basics.quantumEngine" title="simulaqron.virtNode.basics.quantumEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">simulaqron.virtNode.basics.quantumEngine</span></code></a></p>
+<p>Basic quantum engine which uses stabilizer formalism. Thus only Clifford operations can be performed</p>
+<dl class="simple">
+<dt>Attributes:</dt><dd><p>maxQubits:      maximum number of qubits this engine will support.</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.absorb">
+<code class="sig-name descname">absorb</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.absorb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.absorb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Absorb the qubits from the other engine into this one. This is done by tensoring the state at the end.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.absorb_parts">
+<code class="sig-name descname">absorb_parts</code><span class="sig-paren">(</span><em class="sig-param">R</em>, <em class="sig-param">I</em>, <em class="sig-param">activeQ</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.absorb_parts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.absorb_parts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Absorb the qubits, given in pieces</p>
+<p>Arguments:
+R               The array describing the stabilizer state (from StabilizerState.to_array)
+I               Unused
+activeQ         active number of qubits</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.activeQubits">
+<em class="property">property </em><code class="sig-name descname">activeQubits</code><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.activeQubits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.add_fresh_qubit">
+<code class="sig-name descname">add_fresh_qubit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.add_fresh_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.add_fresh_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new qubit initialized in the |0&gt; state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.add_qubit">
+<code class="sig-name descname">add_qubit</code><span class="sig-paren">(</span><em class="sig-param">newQubit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.add_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.add_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add new qubit in the state described by the array containing the generators of the stabilizer group.
+This should be in the form required by the StabilizerState class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_CNOT">
+<code class="sig-name descname">apply_CNOT</code><span class="sig-paren">(</span><em class="sig-param">qubitNum1</em>, <em class="sig-param">qubitNum2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.apply_CNOT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_CNOT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the CNOT to the qubit with the numbers qubitNum1 and qubitNum2.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_CPHASE">
+<code class="sig-name descname">apply_CPHASE</code><span class="sig-paren">(</span><em class="sig-param">qubitNum1</em>, <em class="sig-param">qubitNum2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.apply_CPHASE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_CPHASE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the CPHASE to the qubit with the numbers qubitNum1 and qubitNum2.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_H">
+<code class="sig-name descname">apply_H</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.apply_H"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_H" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a Hadamard gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_K">
+<code class="sig-name descname">apply_K</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.apply_K"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_K" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a K gate to the qubits with number qubitNum. Maps computational basis to Y eigenbasis.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_T">
+<code class="sig-name descname">apply_T</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.apply_T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a T gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_X">
+<code class="sig-name descname">apply_X</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.apply_X"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a X gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_Y">
+<code class="sig-name descname">apply_Y</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.apply_Y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_Y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a Y gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_Z">
+<code class="sig-name descname">apply_Z</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.apply_Z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_Z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a Z gate to the qubits with number qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_onequbit_gate">
+<code class="sig-name descname">apply_onequbit_gate</code><span class="sig-paren">(</span><em class="sig-param">gate</em>, <em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.apply_onequbit_gate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_onequbit_gate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a unitary gate to the specified qubit.</p>
+<p>Arguments:
+gate       The project Q gate to be applied
+qubitNum        the number of the qubit this gate is applied to</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_rotation">
+<code class="sig-name descname">apply_rotation</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em>, <em class="sig-param">n</em>, <em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.apply_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError
+is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qubitNum</strong> – int
+Qubit number</p></li>
+<li><p><strong>n</strong> – tuple of floats
+A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)</p></li>
+<li><p><strong>a</strong> – float
+The rotation angle in radians.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_twoqubit_gate">
+<code class="sig-name descname">apply_twoqubit_gate</code><span class="sig-paren">(</span><em class="sig-param">gate</em>, <em class="sig-param">qubit1</em>, <em class="sig-param">qubit2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.apply_twoqubit_gate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.apply_twoqubit_gate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a unitary gate to the two specified qubits.</p>
+<p>Arguments:
+gate       The project Q gate to be applied
+qubit1          the first qubit
+qubit2          the second qubit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.get_register_RI">
+<code class="sig-name descname">get_register_RI</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.get_register_RI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.get_register_RI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the entire register in real and imaginary part. Twisted only likes to send real valued lists,
+not complex ones.
+Since this is in stabilizer formalism the real part will be the boolean matrix describing the generators
+and the imaginary part will be None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.measure_qubit">
+<code class="sig-name descname">measure_qubit</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.measure_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.measure_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measures the desired qubit in the standard basis. This returns the classical outcome and deletes the qubit.</p>
+<p>Arguments:
+qubitNum        qubit to be measured</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.measure_qubit_inplace">
+<code class="sig-name descname">measure_qubit_inplace</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.measure_qubit_inplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.measure_qubit_inplace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measures the desired qubit in the standard basis. This returns the classical outcome. The quantum register
+is in the post-measurment state corresponding to the obtained outcome.</p>
+<p>Arguments:
+qubitNum        qubit to be measured</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.remove_qubit">
+<code class="sig-name descname">remove_qubit</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.remove_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.remove_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the qubit with the desired number qubitNum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.replace_qubit">
+<code class="sig-name descname">replace_qubit</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em>, <em class="sig-param">state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/stabilizerSimulator.html#stabilizerEngine.replace_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.stabilizerSimulator.stabilizerEngine.replace_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces the qubit at position qubitNum with the one given by state.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-simulaqron.virtNode.virtual">
+<span id="simulaqron-virtnode-virtual-module"></span><h2>simulaqron.virtNode.virtual module<a class="headerlink" href="#module-simulaqron.virtNode.virtual" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="simulaqron.virtNode.virtual.QubitCQC">
+<em class="property">class </em><code class="sig-prename descclassname">simulaqron.virtNode.virtual.</code><code class="sig-name descname">QubitCQC</code><span class="sig-paren">(</span><em class="sig-param">fromName</em>, <em class="sig-param">toName</em>, <em class="sig-param">from_app_id</em>, <em class="sig-param">to_app_id</em>, <em class="sig-param">new_virt_num</em>, <em class="sig-param">rawEntInfo=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#QubitCQC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.QubitCQC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="simulaqron.virtNode.virtual.backEnd">
+<em class="property">class </em><code class="sig-prename descclassname">simulaqron.virtNode.virtual.</code><code class="sig-name descname">backEnd</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">virtualFile</em>, <em class="sig-param">network_name='default'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#backEnd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.backEnd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.backEnd.start">
+<code class="sig-name descname">start</code><span class="sig-paren">(</span><em class="sig-param">maxQubits=20</em>, <em class="sig-param">maxRegisters=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#backEnd.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.backEnd.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start listening to requests from other nodes.</p>
+<p>Arguments
+maxQubits       maximum qubits in the default register</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="simulaqron.virtNode.virtual.virtualNode">
+<em class="property">class </em><code class="sig-prename descclassname">simulaqron.virtNode.virtual.</code><code class="sig-name descname">virtualNode</code><span class="sig-paren">(</span><em class="sig-param">ID</em>, <em class="sig-param">config</em>, <em class="sig-param">maxQubits=20</em>, <em class="sig-param">maxRegisters=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.flavors.Root</span></code></p>
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.connectNet">
+<code class="sig-name descname">connectNet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.connectNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.connectNet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the connections to the other virtual nodes in the network according to the available
+configuration.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.connect_to_node">
+<code class="sig-name descname">connect_to_node</code><span class="sig-paren">(</span><em class="sig-param">node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.connect_to_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.connect_to_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects to other node. If node not up yet, waits for CONF_WAIT_TIME seconds.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.get_connection">
+<code class="sig-name descname">get_connection</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.get_connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.get_connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the connection specified by ‘name’. If no such connection is
+up yet but name is in the configuration file, wait and try again.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.get_new_reg_num">
+<code class="sig-name descname">get_new_reg_num</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.get_new_reg_num"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.get_new_reg_num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an unused register number.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.get_sim_id">
+<code class="sig-name descname">get_sim_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.get_sim_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.get_sim_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Similarly, this is a crude and horrible cludge to generate unique IDs for simulated qubits.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.get_virtual_id">
+<code class="sig-name descname">get_virtual_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.get_virtual_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.get_virtual_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a crude and horrible cludge to generate unique IDs for virtual qubits.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.handle_connection">
+<code class="sig-name descname">handle_connection</code><span class="sig-paren">(</span><em class="sig-param">obj</em>, <em class="sig-param">node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.handle_connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.handle_connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback obtaining twisted root object when connection to the node given by the node details ‘node’.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.handle_connection_error">
+<code class="sig-name descname">handle_connection_error</code><span class="sig-paren">(</span><em class="sig-param">reason</em>, <em class="sig-param">node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.handle_connection_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.handle_connection_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles errors from trying to connect to other node.
+If a ConnectionRefusedError is raised another try will be made after CONF_WAIT_TIME seconds.
+CONF_WAIT_TIME is set in ‘settings.py’.
+Any other error is raised again.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.local_merge_regs">
+<code class="sig-name descname">local_merge_regs</code><span class="sig-paren">(</span><em class="sig-param">qubit1</em>, <em class="sig-param">qubit2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.local_merge_regs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.local_merge_regs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges the two local quantum registers. Note that these register may simulate virtual qubits across different
+network nodes. This will ignore maxQubits and simply create one large register allowing twice maxQubits qubits.</p>
+<p>Arguments
+qubit1          qubit1 in reg1, called from remote having access to only qubits
+qubit2          qubit2 in reg2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_add_qubit">
+<code class="sig-name descname">remote_add_qubit</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">simQubit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_add_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_add_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a qubit to the local virtual node.</p>
+<p>Arguments
+name            name of the node simulating this qubit
+simQubit        simulated qubit reference in the backend we’re adding</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_add_register">
+<code class="sig-name descname">remote_add_register</code><span class="sig-paren">(</span><em class="sig-param">maxQubits=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_add_register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_add_register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a new register to the node..</p>
+<p>Arguments:
+maxQubits       maximum number of qubits to use in the default engine</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_check_connections">
+<code class="sig-name descname">remote_check_connections</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_check_connections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_check_connections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if all connections are up. (Just checks if the number of
+connections equal the number of nodes in config-file)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_cqc_add_epr_list">
+<code class="sig-name descname">remote_cqc_add_epr_list</code><span class="sig-paren">(</span><em class="sig-param">fromName</em>, <em class="sig-param">from_app_id</em>, <em class="sig-param">to_app_id</em>, <em class="sig-param">new_virt_num</em>, <em class="sig-param">rawEntInfo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_cqc_add_epr_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_cqc_add_epr_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an item to the epr list for use in CQC.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_cqc_add_recv_list">
+<code class="sig-name descname">remote_cqc_add_recv_list</code><span class="sig-paren">(</span><em class="sig-param">fromName</em>, <em class="sig-param">from_app_id</em>, <em class="sig-param">to_app_id</em>, <em class="sig-param">new_virt_num</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_cqc_add_recv_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_cqc_add_recv_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an item to the received list for use in CQC.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_cqc_get_epr_recv">
+<code class="sig-name descname">remote_cqc_get_epr_recv</code><span class="sig-paren">(</span><em class="sig-param">to_app_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_cqc_get_epr_recv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_cqc_get_epr_recv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the next qubit (half of an EPR-pair) with the given app ID from the received list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_cqc_get_recv">
+<code class="sig-name descname">remote_cqc_get_recv</code><span class="sig-paren">(</span><em class="sig-param">to_app_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_cqc_get_recv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_cqc_get_recv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the next qubit with the given app ID form the received list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_cqc_send_epr_half">
+<code class="sig-name descname">remote_cqc_send_epr_half</code><span class="sig-paren">(</span><em class="sig-param">num</em>, <em class="sig-param">targetName</em>, <em class="sig-param">app_id</em>, <em class="sig-param">remote_app_id</em>, <em class="sig-param">rawEntInfo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_cqc_send_epr_half"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_cqc_send_epr_half" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send interface for CQC to add the qubit to the remote nodes received list for an application.</p>
+<p>Arguments:
+num             number of virtual qubit to send
+targetName      name of the node to send to
+app_id          application asking to have this qubit delivered
+remote_app_id   application ID to deliver the qubit to
+entInfo         entanglement information</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_cqc_send_qubit">
+<code class="sig-name descname">remote_cqc_send_qubit</code><span class="sig-paren">(</span><em class="sig-param">num</em>, <em class="sig-param">targetName</em>, <em class="sig-param">app_id</em>, <em class="sig-param">remote_app_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_cqc_send_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_cqc_send_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send interface for CQC to add the qubit to the remote nodes received list for an application.</p>
+<p>Arguments:
+num             number of virtual qubit to send
+targetName      name of the node to send to
+app_id          application asking to have this qubit delivered
+remote_app_id   application ID to deliver the qubit to</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_delete_register">
+<code class="sig-name descname">remote_delete_register</code><span class="sig-paren">(</span><em class="sig-param">reg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_delete_register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_delete_register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the register from the node.
+Happens if the last qubit in the register is measured out.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_get_global_lock">
+<code class="sig-name descname">remote_get_global_lock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_get_global_lock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_get_global_lock" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_get_multiple_qubits">
+<code class="sig-name descname">remote_get_multiple_qubits</code><span class="sig-paren">(</span><em class="sig-param">qList</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_get_multiple_qubits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_get_multiple_qubits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the state of multiple qubits virtually located at this node. This will fail if the qubits
+are not in the same register or thus also simulating node.</p>
+<p>Arguments
+qList           list of virtual qubits of which to retrieve the state</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_get_register">
+<code class="sig-name descname">remote_get_register</code><span class="sig-paren">(</span><em class="sig-param">qubit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_get_register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_get_register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value of of a locally simulated register which contains this virtual qubit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_get_register_RI">
+<code class="sig-name descname">remote_get_register_RI</code><span class="sig-paren">(</span><em class="sig-param">qubit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_get_register_RI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_get_register_RI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the real and imaginary part of the (possibly remote) simulated register which
+contains this virtual qubit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_get_register_del">
+<code class="sig-name descname">remote_get_register_del</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_get_register_del"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_get_register_del" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value of of a locally simulated register, and remove the simulated qubits from this node.</p>
+<p>Caution: virtual qubits not updated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_get_state">
+<code class="sig-name descname">remote_get_state</code><span class="sig-paren">(</span><em class="sig-param">simNumList</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_get_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_get_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the state of multiple qubits corresponding to the IDs in simNumList.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_get_virtual_ref">
+<code class="sig-name descname">remote_get_virtual_ref</code><span class="sig-paren">(</span><em class="sig-param">num</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_get_virtual_ref"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_get_virtual_ref" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a virual qubit object for the given number.</p>
+<p>Arguments
+num             number of the virtual qubit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_isLocked">
+<code class="sig-name descname">remote_isLocked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_isLocked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_isLocked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_lock_reg_qubits">
+<code class="sig-name descname">remote_lock_reg_qubits</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_lock_reg_qubits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_lock_reg_qubits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acquire the lock on all qubits in the same register as qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_merge_from">
+<code class="sig-name descname">remote_merge_from</code><span class="sig-paren">(</span><em class="sig-param">simNodeName</em>, <em class="sig-param">simQubitNum</em>, <em class="sig-param">localReg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_merge_from"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_merge_from" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bring a remote register to this node.</p>
+<p>Arguments
+simNodeName     name of the node who simulates right now
+simQubitNum     simulation number of qubit whose register we will merge
+localReg        local register to merge with</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_merge_regs">
+<code class="sig-name descname">remote_merge_regs</code><span class="sig-paren">(</span><em class="sig-param">num1</em>, <em class="sig-param">num2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_merge_regs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_merge_regs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges the two local quantum registers. Note that these register may simulate virtual qubits across different
+network nodes. This will ignore maxQubits and simply create one large register allowing twice maxQubits qubits.</p>
+<p>Arguments
+num1            number of the first qubit
+num2            number of the second qubit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_new_qubit">
+<code class="sig-name descname">remote_new_qubit</code><span class="sig-paren">(</span><em class="sig-param">ignore_max_qubits=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_new_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_new_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new qubit in the default local register.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ignore_max_qubits</strong> – bool
+Used to ignore the check if max virtual qubits is reached. This is used when creating EPR pairs
+to be able to temporarily create a qubit.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_new_qubit_inreg">
+<code class="sig-name descname">remote_new_qubit_inreg</code><span class="sig-paren">(</span><em class="sig-param">reg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_new_qubit_inreg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_new_qubit_inreg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new qubit in the specified register reg.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_new_register">
+<code class="sig-name descname">remote_new_register</code><span class="sig-paren">(</span><em class="sig-param">maxQubits=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_new_register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_new_register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize a local register. Right now, this simple creates a register according to the simple engine backend
+using qubit.</p>
+<p>Arguments:
+maxQubits       maximum number of qubits to use in the default engine (default 10)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_release_global_lock">
+<code class="sig-name descname">remote_release_global_lock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_release_global_lock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_release_global_lock" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_remove_sim_qubit_num">
+<code class="sig-name descname">remote_remove_sim_qubit_num</code><span class="sig-paren">(</span><em class="sig-param">delNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_remove_sim_qubit_num"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_remove_sim_qubit_num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the simulated qubit delQubit from the node and also from the underlying engine. Relies on this qubit
+having been locked.</p>
+<p>Arguments
+delNum          simID of the simulated qubit to delete</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_send_qubit">
+<code class="sig-name descname">remote_send_qubit</code><span class="sig-paren">(</span><em class="sig-param">qubit</em>, <em class="sig-param">targetName</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_send_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_send_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends the qubit to the specified target node. This creates a new virtual qubit object at the remote node
+with the right qubit and backend details.</p>
+<p>Arguments
+qubit           virtual qubit to be sent
+targetName      target ndoe to place qubit at (host object)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_transfer_qubit">
+<code class="sig-name descname">remote_transfer_qubit</code><span class="sig-paren">(</span><em class="sig-param">simQubitNum</em>, <em class="sig-param">targetName</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_transfer_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_transfer_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transfer the qubit to the destination node if we are the simulating node. The reason why we cannot
+do this directly is that Twisted PB does not allow objects to be passed between connecting nodes.
+Only between the creator of the object and its immediate connections.</p>
+<p>Arguments
+simQubitNum     simulated qubit number to be sent
+targetName      target node to place qubit at (host object)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_unlock_reg_qubits">
+<code class="sig-name descname">remote_unlock_reg_qubits</code><span class="sig-paren">(</span><em class="sig-param">qubitNum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_unlock_reg_qubits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_unlock_reg_qubits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Release the lock on all qubits in the same register as qubitNum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.remote_update_virtual_merge">
+<code class="sig-name descname">remote_update_virtual_merge</code><span class="sig-paren">(</span><em class="sig-param">newSimNodeName</em>, <em class="sig-param">oldSimNodeName</em>, <em class="sig-param">oldRegNum</em>, <em class="sig-param">newD</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.remote_update_virtual_merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.remote_update_virtual_merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the virtual qubits to the new simulating node, if applicable. This is extremely
+inefficient due to not keeping register information in virtualQubit.</p>
+<p>Arguments
+newSimNodeName  new node simulating this qubit
+oldSimNodeName  old node simulating the qubit
+oldReg          old register
+newD            dictionary mapping qubit numbers to qubit objects at the new simulating node</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualNode.reraise_remote_error">
+<code class="sig-name descname">reraise_remote_error</code><span class="sig-paren">(</span><em class="sig-param">remote_err</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualNode.reraise_remote_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualNode.reraise_remote_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a function re-raises the error thrown remotely
+:param remote_err: <code class="xref py py-obj docutils literal notranslate"><span class="pre">twisted.spread.pb.RemoteError</span></code>
+:return: class</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="simulaqron.virtNode.virtual.virtualQubit">
+<em class="property">class </em><code class="sig-prename descclassname">simulaqron.virtNode.virtual.</code><code class="sig-name descname">virtualQubit</code><span class="sig-paren">(</span><em class="sig-param">virtNode</em>, <em class="sig-param">simNode</em>, <em class="sig-param">simQubit</em>, <em class="sig-param">num</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">twisted.spread.flavors.Referenceable</span></code></p>
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_apply_H">
+<code class="sig-name descname">remote_apply_H</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_apply_H"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_apply_H" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply H gate.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_apply_K">
+<code class="sig-name descname">remote_apply_K</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_apply_K"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_apply_K" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply K gate - taking computational basis to Y eigenbasis.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_apply_T">
+<code class="sig-name descname">remote_apply_T</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_apply_T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_apply_T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply T gate.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_apply_X">
+<code class="sig-name descname">remote_apply_X</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_apply_X"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_apply_X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply X gate to itself by passing it onto the underlying register.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_apply_Y">
+<code class="sig-name descname">remote_apply_Y</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_apply_Y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_apply_Y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply Y gate.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_apply_Z">
+<code class="sig-name descname">remote_apply_Z</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_apply_Z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_apply_Z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply Z gate.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_apply_rotation">
+<code class="sig-name descname">remote_apply_rotation</code><span class="sig-paren">(</span><em class="sig-param">n</em>, <em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_apply_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_apply_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply rotation around axis n with angle a.
+Arguments:
+n       A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+a       The rotation angle in radians.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_cnot_onto">
+<code class="sig-name descname">remote_cnot_onto</code><span class="sig-paren">(</span><em class="sig-param">target</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_cnot_onto"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_cnot_onto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a CNOT operation with this qubit as control, and the other qubit as target.</p>
+<p>Arguments
+target          the virtual qubit to use as the target of the CNOT</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_cphase_onto">
+<code class="sig-name descname">remote_cphase_onto</code><span class="sig-paren">(</span><em class="sig-param">target</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_cphase_onto"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_cphase_onto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a CPHASE operation with this qubit as control, and the other qubit as target.</p>
+<p>Arguments
+target          the virtual qubit to use as the target of the CPHASE</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_get_number">
+<code class="sig-name descname">remote_get_number</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_get_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_get_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of this qubit in whatever local register it is in. Not useful for the client,
+but convenient for debugging.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_get_qubit">
+<code class="sig-name descname">remote_get_qubit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_get_qubit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_get_qubit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the state of this qubit in real and imaginary parts separated. This is required
+single Twisted cannot natively transfer complex valued objects.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_get_register_RI">
+<code class="sig-name descname">remote_get_register_RI</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_get_register_RI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_get_register_RI" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_get_simNode">
+<code class="sig-name descname">remote_get_simNode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_get_simNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_get_simNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the simNode of this virtual qubit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_get_virtNode">
+<code class="sig-name descname">remote_get_virtNode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_get_virtNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_get_virtNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the virtNode of this virtual qubit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_get_virt_num">
+<code class="sig-name descname">remote_get_virt_num</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_get_virt_num"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_get_virt_num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of the virtual qubit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.virtNode.virtual.virtualQubit.remote_measure">
+<code class="sig-name descname">remote_measure</code><span class="sig-paren">(</span><em class="sig-param">inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/virtNode/virtual.html#virtualQubit.remote_measure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.virtNode.virtual.virtualQubit.remote_measure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measure the qubit in the standard basis. If inplace=False, this does delete the qubit from the simulation.</p>
+<p>Returns the measurement outcome.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-simulaqron.virtNode">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-simulaqron.virtNode" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="simulaqron.toolbox.html" title="simulaqron.toolbox package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.10 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="simulaqron.html" >simulaqron package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.1.
+    </div>
+  </body>
+</html>

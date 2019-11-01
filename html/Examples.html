@@ -1,0 +1,147 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron) &#8212; SimulaQron 3.0.10 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Generate correlated randomness" href="NativeModeCorrRng.html" />
+    <link rel="prev" title="The CQC interface" href="CQC.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="NativeModeCorrRng.html" title="Generate correlated randomness"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="CQC.html" title="The CQC interface"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.10 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="CQC.html"
+                        title="previous chapter">The CQC interface</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="NativeModeCorrRng.html"
+                        title="next chapter">Generate correlated randomness</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/Examples.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="programming-via-simulaqron-s-native-python-twisted-interface-specific-to-simulaqron">
+<h1>Programming via SimulaQron’s native Python Twisted Interface (specific to SimulaQron)<a class="headerlink" href="#programming-via-simulaqron-s-native-python-twisted-interface-specific-to-simulaqron" title="Permalink to this headline">¶</a></h1>
+<p>One way to program SimulaQron is directly via its ‘native interface’ using Twisted.
+This means writing a client program connecting directly to the local virtual quantum node, and issuing instructions
+to such simulated quantum hardware. Programming SimulaQron in its native interface is evidently Python specific, and
+meant primarily as an internal interface allowing one to explore higher level abstractions built on top of it.
+One such abstraction is the classical-quantum combiner (CQC) interface, which we aim to make available on the 2020 quantum
+internet demonstrator. For programming in a universal, i.e., not Python specific interface see <a class="reference internal" href="CQC.html"><span class="doc">The CQC interface</span></a>.</p>
+<p>The examples below assume that you have already made your way through <a class="reference internal" href="GettingStarted.html"><span class="doc">Getting started</span></a>: you have the virtual node servers
+up and running, and ran the simple example of generating correlated randomness. Further examples can also be found in examples/nativeMode.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The ‘native’ mode is not the recommended way to program applications for SimulaQron, instead use either the <a class="reference external" href="https://softwarequtech.github.io/CQC-Python/index.html">Python</a> (recommended if you are gettings started), <a class="reference external" href="https://softwarequtech.github.io/CQC-C/index.html">C</a>, or the <a class="reference external" href="https://docs.rs/cqc">Rust</a> Library.</p>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Native mode examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="NativeModeCorrRng.html">Generate correlated randomness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NativeModeTemplate.html">Template for programming in native mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeTemplate.html#programming-a-client">Programming a client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeTemplate.html#programming-a-server">Programming a server</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="NativeModeTeleport.html">Teleporting a Qubit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeTeleport.html#the-protocol">The protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeTeleport.html#setting-up">Setting up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeTeleport.html#programming-alice">Programming Alice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeTeleport.html#programming-bob">Programming Bob</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeTeleport.html#starting">Starting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="NativeModeGraphState.html">Distributing a graph state</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeGraphState.html#an-overview">An overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeGraphState.html#the-protocol">The protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeGraphState.html#setting-up">Setting up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeGraphState.html#programming-alice">Programming Alice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeGraphState.html#programming-bob">Programming Bob</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeGraphState.html#programming-charlie">Programming Charlie</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeGraphState.html#programming-david">Programming David</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NativeModeGraphState.html#starting">Starting</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="NativeModeCorrRng.html" title="Generate correlated randomness"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="CQC.html" title="The CQC interface"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.10 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.1.
+    </div>
+  </body>
+</html>

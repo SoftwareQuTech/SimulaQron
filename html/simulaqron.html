@@ -1,0 +1,418 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>simulaqron package &#8212; SimulaQron 3.0.10 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="simulaqron.cqc_backend package" href="simulaqron.cqc_backend.html" />
+    <link rel="prev" title="Distributing a graph state" href="NativeModeGraphState.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="simulaqron.cqc_backend.html" title="simulaqron.cqc_backend package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="NativeModeGraphState.html" title="Distributing a graph state"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.10 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">simulaqron package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-simulaqron.SimulaQron">simulaqron.SimulaQron module</a></li>
+<li><a class="reference internal" href="#module-simulaqron.network">simulaqron.network module</a></li>
+<li><a class="reference internal" href="#module-simulaqron.settings">simulaqron.settings module</a></li>
+<li><a class="reference internal" href="#module-simulaqron.tests_run">simulaqron.tests_run module</a></li>
+<li><a class="reference internal" href="#module-simulaqron">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="NativeModeGraphState.html"
+                        title="previous chapter">Distributing a graph state</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="simulaqron.cqc_backend.html"
+                        title="next chapter">simulaqron.cqc_backend package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/simulaqron.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="simulaqron-package">
+<h1>simulaqron package<a class="headerlink" href="#simulaqron-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="simulaqron.cqc_backend.html">simulaqron.cqc_backend package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.cqc_backend.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.cqc_backend.html#module-simulaqron.cqc_backend.cqcFactory">simulaqron.cqc_backend.cqcFactory module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.cqc_backend.html#module-simulaqron.cqc_backend.cqcMessageHandler">simulaqron.cqc_backend.cqcMessageHandler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.cqc_backend.html#module-simulaqron.toolbox">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="simulaqron.general.html">simulaqron.general package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.general.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.general.html#module-simulaqron.general.hostConfig">simulaqron.general.hostConfig module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.general.html#module-simulaqron.general">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="simulaqron.local.html">simulaqron.local package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.local.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.local.html#module-simulaqron.local.setup">simulaqron.local.setup module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.local.html#module-simulaqron.local">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="simulaqron.run.html">simulaqron.run package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.run.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.run.html#module-simulaqron.run.startCQC">simulaqron.run.startCQC module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.run.html#module-simulaqron.run.startNode">simulaqron.run.startNode module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.run.html#module-simulaqron.run">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="simulaqron.toolbox.html">simulaqron.toolbox package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.toolbox.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.toolbox.html#module-simulaqron.toolbox.get_simulaqron_path">simulaqron.toolbox.get_simulaqron_path module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.toolbox.html#module-simulaqron.toolbox.has_module">simulaqron.toolbox.has_module module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.toolbox.html#module-simulaqron.toolbox.manage_nodes">simulaqron.toolbox.manage_nodes module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.toolbox.html#module-simulaqron.toolbox.reset">simulaqron.toolbox.reset module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.toolbox.html#module-simulaqron.toolbox.stabilizerStates">simulaqron.toolbox.stabilizerStates module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.toolbox.html#module-simulaqron.toolbox">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="simulaqron.virtNode.html">simulaqron.virtNode package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.virtNode.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.virtNode.html#module-simulaqron.virtNode.basics">simulaqron.virtNode.basics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.virtNode.html#module-simulaqron.virtNode.projectQSimulator">simulaqron.virtNode.projectQSimulator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.virtNode.html#module-simulaqron.virtNode.quantum">simulaqron.virtNode.quantum module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.virtNode.html#module-simulaqron.virtNode.qutipSimulator">simulaqron.virtNode.qutipSimulator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.virtNode.html#module-simulaqron.virtNode.stabilizerSimulator">simulaqron.virtNode.stabilizerSimulator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.virtNode.html#module-simulaqron.virtNode.virtual">simulaqron.virtNode.virtual module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulaqron.virtNode.html#module-simulaqron.virtNode">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-simulaqron.SimulaQron">
+<span id="simulaqron-simulaqron-module"></span><h2>simulaqron.SimulaQron module<a class="headerlink" href="#module-simulaqron.SimulaQron" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="simulaqron.SimulaQron.SimulaQronDaemon">
+<em class="property">class </em><code class="sig-prename descclassname">simulaqron.SimulaQron.</code><code class="sig-name descname">SimulaQronDaemon</code><span class="sig-paren">(</span><em class="sig-param">pidfile</em>, <em class="sig-param">name=None</em>, <em class="sig-param">nrnodes=None</em>, <em class="sig-param">nodes=None</em>, <em class="sig-param">topology=None</em>, <em class="sig-param">new=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/SimulaQron.html#SimulaQronDaemon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.SimulaQron.SimulaQronDaemon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">daemons.prefab.run.RunDaemon</span></code></p>
+<dl class="method">
+<dt id="simulaqron.SimulaQron.SimulaQronDaemon.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/SimulaQron.html#SimulaQronDaemon.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.SimulaQron.SimulaQronDaemon.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts all nodes defined in netsim’s config directory.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-simulaqron.network">
+<span id="simulaqron-network-module"></span><h2>simulaqron.network module<a class="headerlink" href="#module-simulaqron.network" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="simulaqron.network.Network">
+<em class="property">class </em><code class="sig-prename descclassname">simulaqron.network.</code><code class="sig-name descname">Network</code><span class="sig-paren">(</span><em class="sig-param">name=None</em>, <em class="sig-param">nodes=None</em>, <em class="sig-param">topology=None</em>, <em class="sig-param">network_config_file=None</em>, <em class="sig-param">force=False</em>, <em class="sig-param">new=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/network.html#Network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.network.Network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="simulaqron.network.Network.running">
+<em class="property">property </em><code class="sig-name descname">running</code><a class="headerlink" href="#simulaqron.network.Network.running" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is the network up and running?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.network.Network.start">
+<code class="sig-name descname">start</code><span class="sig-paren">(</span><em class="sig-param">wait_until_running=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/network.html#Network.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.network.Network.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts the network.
+The boolean flag ‘wait_until_running’ can be used whether the call to this method should
+blog until the all processes are running and are connected or not.
+:param wait_until_running: bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.network.Network.stop">
+<code class="sig-name descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/network.html#Network.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.network.Network.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stops the network.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="simulaqron.network.construct_topology_config">
+<code class="sig-prename descclassname">simulaqron.network.</code><code class="sig-name descname">construct_topology_config</code><span class="sig-paren">(</span><em class="sig-param">topology</em>, <em class="sig-param">nodes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/network.html#construct_topology_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.network.construct_topology_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a json file at config/topology.json, used to define the topology of the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topology</strong> – str
+Should be one of the following: None, ‘complete’, ‘ring’, ‘random_tree’.</p></li>
+<li><p><strong>nodes</strong> – list of str
+List of the names of the nodes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="simulaqron.network.get_random_connected">
+<code class="sig-prename descclassname">simulaqron.network.</code><code class="sig-name descname">get_random_connected</code><span class="sig-paren">(</span><em class="sig-param">nodes</em>, <em class="sig-param">nr_edges</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/network.html#get_random_connected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.network.get_random_connected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a dictionary describing a random connected graph with a specified number of edges,
+with the name of the vertices are taken from the ‘nodes’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> – list of str
+Name of the nodes to be used</p></li>
+<li><p><strong>nr_edges</strong> – int
+The number of edges that the graph should have.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dct
+keys are the names of the nodes and values their neighbors</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="simulaqron.network.get_random_tree">
+<code class="sig-prename descclassname">simulaqron.network.</code><code class="sig-name descname">get_random_tree</code><span class="sig-paren">(</span><em class="sig-param">nodes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/network.html#get_random_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.network.get_random_tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a dictionary describing a random tree, with the name of the vertices are taken from the ‘nodes’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>nodes</strong> – list of str
+Name of the nodes to be used</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dct
+keys are the names of the nodes and values their neighbors</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-simulaqron.settings">
+<span id="simulaqron-settings-module"></span><h2>simulaqron.settings module<a class="headerlink" href="#module-simulaqron.settings" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="simulaqron.settings.Config">
+<em class="property">class </em><code class="sig-prename descclassname">simulaqron.settings.</code><code class="sig-name descname">Config</code><a class="reference internal" href="_modules/simulaqron/settings.html#Config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.settings.Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="class">
+<dt id="simulaqron.settings.Config.Decorator">
+<em class="property">class </em><code class="sig-name descname">Decorator</code><a class="reference internal" href="_modules/simulaqron/settings.html#Config.Decorator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.settings.Config.Decorator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="simulaqron.settings.Config.Decorator.get_setting">
+<em class="property">classmethod </em><code class="sig-name descname">get_setting</code><span class="sig-paren">(</span><em class="sig-param">method</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/settings.html#Config.Decorator.get_setting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.settings.Config.Decorator.get_setting" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.Decorator.set_setting">
+<em class="property">classmethod </em><code class="sig-name descname">set_setting</code><span class="sig-paren">(</span><em class="sig-param">method</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/settings.html#Config.Decorator.set_setting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.settings.Config.Decorator.set_setting" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.app_file">
+<em class="property">property </em><code class="sig-name descname">app_file</code><a class="headerlink" href="#simulaqron.settings.Config.app_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.backend">
+<em class="property">property </em><code class="sig-name descname">backend</code><a class="headerlink" href="#simulaqron.settings.Config.backend" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="simulaqron.settings.Config.config_folder">
+<code class="sig-name descname">config_folder</code><em class="property"> = '/home/travis/virtualenv/python3.6.7/lib/python3.6/site-packages/simulaqron/config'</em><a class="headerlink" href="#simulaqron.settings.Config.config_folder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.conn_retry_time">
+<em class="property">property </em><code class="sig-name descname">conn_retry_time</code><a class="headerlink" href="#simulaqron.settings.Config.conn_retry_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.cqc_file">
+<em class="property">property </em><code class="sig-name descname">cqc_file</code><a class="headerlink" href="#simulaqron.settings.Config.cqc_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.default_settings">
+<code class="sig-name descname">default_settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/settings.html#Config.default_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.settings.Config.default_settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.log_level">
+<em class="property">property </em><code class="sig-name descname">log_level</code><a class="headerlink" href="#simulaqron.settings.Config.log_level" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.max_qubits">
+<em class="property">property </em><code class="sig-name descname">max_qubits</code><a class="headerlink" href="#simulaqron.settings.Config.max_qubits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.max_registers">
+<em class="property">property </em><code class="sig-name descname">max_registers</code><a class="headerlink" href="#simulaqron.settings.Config.max_registers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.network_config_file">
+<em class="property">property </em><code class="sig-name descname">network_config_file</code><a class="headerlink" href="#simulaqron.settings.Config.network_config_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.nodes_file">
+<em class="property">property </em><code class="sig-name descname">nodes_file</code><a class="headerlink" href="#simulaqron.settings.Config.nodes_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.noisy_qubits">
+<em class="property">property </em><code class="sig-name descname">noisy_qubits</code><a class="headerlink" href="#simulaqron.settings.Config.noisy_qubits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.recv_retry_time">
+<em class="property">property </em><code class="sig-name descname">recv_retry_time</code><a class="headerlink" href="#simulaqron.settings.Config.recv_retry_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.recv_timeout">
+<em class="property">property </em><code class="sig-name descname">recv_timeout</code><a class="headerlink" href="#simulaqron.settings.Config.recv_timeout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="simulaqron.settings.Config.simulaqron_path">
+<code class="sig-name descname">simulaqron_path</code><em class="property"> = '/home/travis/virtualenv/python3.6.7/lib/python3.6/site-packages/simulaqron'</em><a class="headerlink" href="#simulaqron.settings.Config.simulaqron_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.t1">
+<em class="property">property </em><code class="sig-name descname">t1</code><a class="headerlink" href="#simulaqron.settings.Config.t1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.topology_file">
+<em class="property">property </em><code class="sig-name descname">topology_file</code><a class="headerlink" href="#simulaqron.settings.Config.topology_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.update_settings">
+<code class="sig-name descname">update_settings</code><span class="sig-paren">(</span><em class="sig-param">default=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/settings.html#Config.update_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.settings.Config.update_settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simulaqron.settings.Config.vnode_file">
+<em class="property">property </em><code class="sig-name descname">vnode_file</code><a class="headerlink" href="#simulaqron.settings.Config.vnode_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-simulaqron.tests_run">
+<span id="simulaqron-tests-run-module"></span><h2>simulaqron.tests_run module<a class="headerlink" href="#module-simulaqron.tests_run" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="simulaqron.tests_run.main">
+<code class="sig-prename descclassname">simulaqron.tests_run.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><em class="sig-param">test_type='quick'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/tests_run.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.tests_run.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simulaqron.tests_run.parse_args">
+<code class="sig-prename descclassname">simulaqron.tests_run.</code><code class="sig-name descname">parse_args</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulaqron/tests_run.html#parse_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulaqron.tests_run.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-simulaqron">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-simulaqron" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="simulaqron.tests">
+<code class="sig-prename descclassname">simulaqron.</code><code class="sig-name descname">tests</code><span class="sig-paren">(</span><em class="sig-param">test_type='quick'</em><span class="sig-paren">)</span><a class="headerlink" href="#simulaqron.tests" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="simulaqron.cqc_backend.html" title="simulaqron.cqc_backend package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="NativeModeGraphState.html" title="Distributing a graph state"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SimulaQron 3.0.10 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.1.
+    </div>
+  </body>
+</html>
