@@ -1,7 +1,7 @@
 *.pyc
 .*.sw?
 *.DS_Store
-/docs/_build/*
+/docs/build/*
 /build/*
 /dist/*
 /simulaqron.egg-info/*

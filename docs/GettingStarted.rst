@@ -83,9 +83,9 @@ By default the *stabilizer* engine will be used.
 Testing a simple example
 ------------------------
 
-Before delving into how to write any program yourself, let's first simply run one of the existing examples when programming SimulaQron through the Python library (see :doc:`ExamplespythonLib`).
+Before delving into how to write any program yourself, let's first simply run one of the existing examples when programming SimulaQron through the Python library (see https://softwarequtech.github.io/CQC-Python/examples.html).
 Remember from the Overview that SimulaQron has two parts: the first are the virtual node servers that act simulate the hardware at each node as well as the quantum communication between them in a transparent manner.
-The second are the applications themselves which can be written in two ways, the direct way is to use the native mode using the Python Twisted framework connecting to the virtual node servers, see :doc:`ExamplesDirect`.
+The second are the applications themselves which can be written in two ways, the direct way is to use the native mode using the Python Twisted framework connecting to the virtual node servers, see :doc:`Examples`.
 The recommended way however is the use the provided Python library that calls the virtual nodes by making use of the classical/quantum combiner interface.
 We will here illustrate how to use SimulaQron with the Python library.
 
@@ -184,7 +184,7 @@ Similarly the code in bobTest.py read::
         print("| "+to_print+" |")
         print("|"+"-"*(len(to_print)+2)+"|")
 
-For further examples, see the examples/ folder.
+For further examples, see the examples/ folder and for the docs of the Python library see https://softwarequtech.github.io/CQC-Python/index.html.
 
 --------
 Settings
