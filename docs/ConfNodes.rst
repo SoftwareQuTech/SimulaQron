@@ -196,15 +196,23 @@ Starting a network from Python
 
 You can also start a network within a Python script (this is in fact what simulaqron does), by using the class :code:`simulaqron.network.Network`. To setup a network by name "test" with the nodes Alice, Bob and Charlie, where Bob is connected with Alice and Charlie but Alice and Charlie are not connected use the following code code::
 
-    from simulaqron.network import Network
+   from simulaqron.network import Network
 
-    # Setup the network
-    nodes = ["Alice", "Bob", "Charlie"]
-    topology = {"Alice": ["Bob"], "Bob": ["Alice", "Charlie"], "Charlie": ["Bob"]}
-    network = Network(name="test", nodes=nodes, topology=topology)
 
-    # Start the network
-    network.start()
+   def main():
+       # Setup the network
+       nodes = ["Alice", "Bob", "Charlie"]
+       topology = {"Alice": ["Bob"], "Bob": ["Alice", "Charlie"], "Charlie": ["Bob"]}
+       network = Network(name="test", nodes=nodes, topology=topology)
+
+       # Start the network
+       network.start()
+
+       input("To stop the network, press enter...")
+
+
+   if __name__ == '__main__':
+       main()
 
 By default the method :code:`simulaqron.network.Network.start`, only returns when the network is running, i.e. all the connections are established. To avoid this use the argument :code:`wait_until_running=False`.
 
