@@ -266,13 +266,21 @@ This could for example be:</p>
 <p>You can also start a network within a Python script (this is in fact what simulaqron does), by using the class <code class="code docutils literal notranslate"><span class="pre">simulaqron.network.Network</span></code>. To setup a network by name “test” with the nodes Alice, Bob and Charlie, where Bob is connected with Alice and Charlie but Alice and Charlie are not connected use the following code code:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">simulaqron.network</span> <span class="k">import</span> <span class="n">Network</span>
 
-<span class="c1"># Setup the network</span>
-<span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;Charlie&quot;</span><span class="p">]</span>
-<span class="n">topology</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Alice&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Bob&quot;</span><span class="p">],</span> <span class="s2">&quot;Bob&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;Charlie&quot;</span><span class="p">],</span> <span class="s2">&quot;Charlie&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Bob&quot;</span><span class="p">]}</span>
-<span class="n">network</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">topology</span><span class="o">=</span><span class="n">topology</span><span class="p">)</span>
 
-<span class="c1"># Start the network</span>
-<span class="n">network</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># Setup the network</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;Charlie&quot;</span><span class="p">]</span>
+    <span class="n">topology</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Alice&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Bob&quot;</span><span class="p">],</span> <span class="s2">&quot;Bob&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;Charlie&quot;</span><span class="p">],</span> <span class="s2">&quot;Charlie&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Bob&quot;</span><span class="p">]}</span>
+    <span class="n">network</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">topology</span><span class="o">=</span><span class="n">topology</span><span class="p">)</span>
+
+    <span class="c1"># Start the network</span>
+    <span class="n">network</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;To stop the network, press enter...&quot;</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>By default the method <code class="code docutils literal notranslate"><span class="pre">simulaqron.network.Network.start</span></code>, only returns when the network is running, i.e. all the connections are established. To avoid this use the argument <code class="code docutils literal notranslate"><span class="pre">wait_until_running=False</span></code>.</p>
