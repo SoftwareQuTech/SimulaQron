@@ -19,11 +19,6 @@ matrix:
       osx_image: xcode10.2
       language: shell
 before_install:
-  - git clone --branch Develop https://github.com/SoftwareQuTech/CQC-Python
-  - cd CQC-Python
-  - make build
-  - pip3 install dist/*.whl
-  - cd ..
   - make build
 install:
   - pip3 install dist/*.whl
