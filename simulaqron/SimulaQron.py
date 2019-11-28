@@ -136,6 +136,7 @@ def start(name, nrnodes, nodes, topology, force, keep):
     pidfile = os.path.join(PID_FOLDER, "simulaqron_network_{}.pid".format(name))
     if os.path.exists(pidfile):
         logging.warning("Network with name {} is already running".format(name))
+        logging.warning("The pidfile for this network is located at {}".format(pidfile))
         return
     if new:
         if not force:
