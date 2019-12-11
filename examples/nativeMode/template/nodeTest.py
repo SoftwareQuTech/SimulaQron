@@ -29,11 +29,10 @@
 
 
 import logging
-import os
 
 from simulaqron.local.setup import setup_local
 from simulaqron.general.hostConfig import socketsConfig
-from simulaqron.toolbox import get_simulaqron_path
+from simulaqron.settings import simulaqron_settings
 from twisted.spread import pb
 from twisted.internet import reactor
 
@@ -132,14 +131,13 @@ def main():
     myName = "YOURNAME"
 
     # This file defines the network of virtual quantum nodes
-    simulaqron_path = get_simulaqron_path.main()
-    virtualFile = os.path.join(simulaqron_path, "config/virtualNodes.cfg")
+    network_file = simulaqron_settings.network_config_file
 
     # This file defines the nodes acting as servers in the classical communication network
     classicalFile = "./classicalNet.cfg"
 
     # Read configuration files for the virtual quantum, as well as the classical network
-    virtualNet = socketsConfig(virtualFile)
+    virtualNet = socketsConfig(network_file)
     classicalNet = socketsConfig(classicalFile)
 
     # Check if we should run a local classical server. If so, initialize the code
