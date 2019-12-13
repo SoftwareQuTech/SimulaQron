@@ -21,7 +21,7 @@ matrix:
 before_install:
   - make build
 install:
-  - pip3 install dist/*.whl
+  - pip3 install dist/*.whl --user
 script:
   - make lint
   - make tests
