@@ -18,10 +18,12 @@ matrix:
       os: osx
       osx_image: xcode10.2
       language: shell
+      env:
+      - PIPFLAG="--user"
 before_install:
   - make build
 install:
-  - pip3 install dist/*.whl
+  - pip3 install dist/*.whl $PIPFLAG
 script:
   - make lint
   - make tests
