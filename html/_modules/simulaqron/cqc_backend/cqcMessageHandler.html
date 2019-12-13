@@ -78,15 +78,15 @@
 <span class="c1"># (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS</span>
 <span class="c1"># SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
 
-<span class="kn">from</span> <span class="nn">heapq</span> <span class="k">import</span> <span class="n">heappush</span><span class="p">,</span> <span class="n">heappop</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">heapq</span> <span class="kn">import</span> <span class="n">heappush</span><span class="p">,</span> <span class="n">heappop</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">twisted.internet.defer</span> <span class="k">import</span> <span class="n">inlineCallbacks</span>
-<span class="kn">from</span> <span class="nn">twisted.spread.pb</span> <span class="k">import</span> <span class="n">RemoteError</span>
+<span class="kn">from</span> <span class="nn">twisted.internet.defer</span> <span class="kn">import</span> <span class="n">inlineCallbacks</span>
+<span class="kn">from</span> <span class="nn">twisted.spread.pb</span> <span class="kn">import</span> <span class="n">RemoteError</span>
 
-<span class="kn">from</span> <span class="nn">cqc.cqcHeader</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">cqc.cqcHeader</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">CQCCmdHeader</span><span class="p">,</span>
     <span class="n">CQC_TP_HELLO</span><span class="p">,</span>
     <span class="n">CQC_CMD_H</span><span class="p">,</span>
@@ -110,11 +110,11 @@
     <span class="n">CQC_TP_EPR_OK</span><span class="p">,</span>
     <span class="n">CQC_TP_NEW_OK</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">cqc.entInfoHeader</span> <span class="k">import</span> <span class="n">EntInfoHeader</span><span class="p">,</span> <span class="n">ENT_INFO_LENGTH</span>
-<span class="kn">from</span> <span class="nn">cqc.MessageHandler</span> <span class="k">import</span> <span class="n">CQCMessageHandler</span><span class="p">,</span> <span class="n">UnknownQubitError</span>
+<span class="kn">from</span> <span class="nn">cqc.entInfoHeader</span> <span class="kn">import</span> <span class="n">EntInfoHeader</span><span class="p">,</span> <span class="n">ENT_INFO_LENGTH</span>
+<span class="kn">from</span> <span class="nn">cqc.MessageHandler</span> <span class="kn">import</span> <span class="n">CQCMessageHandler</span><span class="p">,</span> <span class="n">UnknownQubitError</span>
 
-<span class="kn">from</span> <span class="nn">simulaqron.virtNode.basics</span> <span class="k">import</span> <span class="n">quantumError</span><span class="p">,</span> <span class="n">noQubitError</span>
-<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="k">import</span> <span class="n">simulaqron_settings</span>
+<span class="kn">from</span> <span class="nn">simulaqron.virtNode.basics</span> <span class="kn">import</span> <span class="n">quantumError</span><span class="p">,</span> <span class="n">noQubitError</span>
+<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="kn">import</span> <span class="n">simulaqron_settings</span>
 
 
 <div class="viewcode-block" id="SimulaqronCQCHandler"><a class="viewcode-back" href="../../../simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.SimulaqronCQCHandler">[docs]</a><span class="k">class</span> <span class="nc">SimulaqronCQCHandler</span><span class="p">(</span><span class="n">CQCMessageHandler</span><span class="p">):</span>
@@ -124,7 +124,7 @@
     <span class="c1"># Dictionary storing the next unique entanglement id for each used (host_app_id,remote_node,remote_app_id)</span>
     <span class="n">_next_ent_id</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">factory</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="n">factory</span>
 
@@ -1421,7 +1421,7 @@
 
 
 <div class="viewcode-block" id="CQCQubit"><a class="viewcode-back" href="../../../simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcMessageHandler.CQCQubit">[docs]</a><span class="k">class</span> <span class="nc">CQCQubit</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">virt</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qubit_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">virt</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qubit_id</span> <span class="o">=</span> <span class="n">qubit_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">virt</span> <span class="o">=</span> <span class="n">virt</span></div>
@@ -1447,7 +1447,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
     </div>
   </body>
 </html>

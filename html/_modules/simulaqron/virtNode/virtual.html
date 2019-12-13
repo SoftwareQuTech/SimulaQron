@@ -82,26 +82,26 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">random</span>
 
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">deque</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
 
-<span class="kn">from</span> <span class="nn">twisted.spread</span> <span class="k">import</span> <span class="n">pb</span>
-<span class="kn">from</span> <span class="nn">twisted.internet</span> <span class="k">import</span> <span class="n">reactor</span>
-<span class="kn">from</span> <span class="nn">twisted.internet.defer</span> <span class="k">import</span> <span class="n">inlineCallbacks</span><span class="p">,</span> <span class="n">DeferredLock</span><span class="p">,</span> <span class="n">Deferred</span><span class="p">,</span> <span class="n">DeferredList</span>
-<span class="kn">from</span> <span class="nn">twisted.internet.task</span> <span class="k">import</span> <span class="n">deferLater</span>
-<span class="kn">from</span> <span class="nn">twisted.internet.error</span> <span class="k">import</span> <span class="ne">ConnectionRefusedError</span><span class="p">,</span> <span class="n">CannotListenError</span>
-<span class="kn">from</span> <span class="nn">twisted.spread.pb</span> <span class="k">import</span> <span class="n">RemoteError</span>
+<span class="kn">from</span> <span class="nn">twisted.spread</span> <span class="kn">import</span> <span class="n">pb</span>
+<span class="kn">from</span> <span class="nn">twisted.internet</span> <span class="kn">import</span> <span class="n">reactor</span>
+<span class="kn">from</span> <span class="nn">twisted.internet.defer</span> <span class="kn">import</span> <span class="n">inlineCallbacks</span><span class="p">,</span> <span class="n">DeferredLock</span><span class="p">,</span> <span class="n">Deferred</span><span class="p">,</span> <span class="n">DeferredList</span>
+<span class="kn">from</span> <span class="nn">twisted.internet.task</span> <span class="kn">import</span> <span class="n">deferLater</span>
+<span class="kn">from</span> <span class="nn">twisted.internet.error</span> <span class="kn">import</span> <span class="ne">ConnectionRefusedError</span><span class="p">,</span> <span class="n">CannotListenError</span>
+<span class="kn">from</span> <span class="nn">twisted.spread.pb</span> <span class="kn">import</span> <span class="n">RemoteError</span>
 
-<span class="kn">from</span> <span class="nn">simulaqron.virtNode.basics</span> <span class="k">import</span> <span class="n">quantumError</span><span class="p">,</span> <span class="n">noQubitError</span><span class="p">,</span> <span class="n">virtNetError</span>
-<span class="kn">from</span> <span class="nn">simulaqron.virtNode.quantum</span> <span class="k">import</span> <span class="n">simulatedQubit</span>
-<span class="kn">from</span> <span class="nn">simulaqron.general.hostConfig</span> <span class="k">import</span> <span class="n">socketsConfig</span>
-<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="k">import</span> <span class="n">simulaqron_settings</span>
+<span class="kn">from</span> <span class="nn">simulaqron.virtNode.basics</span> <span class="kn">import</span> <span class="n">quantumError</span><span class="p">,</span> <span class="n">noQubitError</span><span class="p">,</span> <span class="n">virtNetError</span>
+<span class="kn">from</span> <span class="nn">simulaqron.virtNode.quantum</span> <span class="kn">import</span> <span class="n">simulatedQubit</span>
+<span class="kn">from</span> <span class="nn">simulaqron.general.hostConfig</span> <span class="kn">import</span> <span class="n">socketsConfig</span>
+<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="kn">import</span> <span class="n">simulaqron_settings</span>
 
 <span class="k">if</span> <span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;qutip&quot;</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">simulaqron.virtNode.qutipSimulator</span> <span class="k">import</span> <span class="n">qutipEngine</span>
+    <span class="kn">from</span> <span class="nn">simulaqron.virtNode.qutipSimulator</span> <span class="kn">import</span> <span class="n">qutipEngine</span>
 <span class="k">elif</span> <span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;projectq&quot;</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">simulaqron.virtNode.projectQSimulator</span> <span class="k">import</span> <span class="n">projectQEngine</span>
+    <span class="kn">from</span> <span class="nn">simulaqron.virtNode.projectQSimulator</span> <span class="kn">import</span> <span class="n">projectQEngine</span>
 <span class="k">elif</span> <span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;stabilizer&quot;</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">simulaqron.virtNode.stabilizerSimulator</span> <span class="k">import</span> <span class="n">stabilizerEngine</span>
+    <span class="kn">from</span> <span class="nn">simulaqron.virtNode.stabilizerSimulator</span> <span class="kn">import</span> <span class="n">stabilizerEngine</span>
 <span class="k">else</span><span class="p">:</span>
     <span class="k">raise</span> <span class="n">quantumError</span><span class="p">(</span><span class="s2">&quot;Unknown backend </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">backend</span><span class="p">))</span>
 
@@ -112,7 +112,7 @@
 <span class="c1"># forming the quantum network</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="backEnd"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.virtual.backEnd">[docs]</a><span class="k">class</span> <span class="nc">backEnd</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">virtualFile</span><span class="p">,</span> <span class="n">network_name</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">virtualFile</span><span class="p">,</span> <span class="n">network_name</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize. This will read the configuration file and populate the name,hostname,port information with the</span>
 <span class="sd">        information found in the configuration file for the given name.</span>
@@ -162,7 +162,7 @@
 
 
 <div class="viewcode-block" id="virtualNode"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.virtual.virtualNode">[docs]</a><span class="k">class</span> <span class="nc">virtualNode</span><span class="p">(</span><span class="n">pb</span><span class="o">.</span><span class="n">Root</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ID</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">maxQubits</span><span class="o">=</span><span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">max_qubits</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ID</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">maxQubits</span><span class="o">=</span><span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">max_qubits</span><span class="p">,</span>
                  <span class="n">maxRegisters</span><span class="o">=</span><span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">max_registers</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize storing also our own name, hostname and port.</span>
@@ -1391,7 +1391,7 @@
 
 
 <div class="viewcode-block" id="virtualQubit"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.virtual.virtualQubit">[docs]</a><span class="k">class</span> <span class="nc">virtualQubit</span><span class="p">(</span><span class="n">pb</span><span class="o">.</span><span class="n">Referenceable</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">virtNode</span><span class="p">,</span> <span class="n">simNode</span><span class="p">,</span> <span class="n">simQubit</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">virtNode</span><span class="p">,</span> <span class="n">simNode</span><span class="p">,</span> <span class="n">simQubit</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a virtual qubit object simulated in the specified simulation register backend</span>
 
@@ -2124,7 +2124,7 @@
 
 
 <div class="viewcode-block" id="QubitCQC"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.virtual.QubitCQC">[docs]</a><span class="k">class</span> <span class="nc">QubitCQC</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fromName</span><span class="p">,</span> <span class="n">toName</span><span class="p">,</span> <span class="n">from_app_id</span><span class="p">,</span> <span class="n">to_app_id</span><span class="p">,</span> <span class="n">new_virt_num</span><span class="p">,</span> <span class="n">rawEntInfo</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fromName</span><span class="p">,</span> <span class="n">toName</span><span class="p">,</span> <span class="n">from_app_id</span><span class="p">,</span> <span class="n">to_app_id</span><span class="p">,</span> <span class="n">new_virt_num</span><span class="p">,</span> <span class="n">rawEntInfo</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fromName</span> <span class="o">=</span> <span class="n">fromName</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toName</span> <span class="o">=</span> <span class="n">toName</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">from_app_id</span> <span class="o">=</span> <span class="n">from_app_id</span>
@@ -2153,7 +2153,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
     </div>
   </body>
 </html>

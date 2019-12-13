@@ -81,13 +81,13 @@
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
-<span class="kn">from</span> <span class="nn">twisted.internet.defer</span> <span class="k">import</span> <span class="n">DeferredLock</span>
-<span class="kn">from</span> <span class="nn">twisted.internet.protocol</span> <span class="k">import</span> <span class="n">Factory</span>
+<span class="kn">from</span> <span class="nn">twisted.internet.defer</span> <span class="kn">import</span> <span class="n">DeferredLock</span>
+<span class="kn">from</span> <span class="nn">twisted.internet.protocol</span> <span class="kn">import</span> <span class="n">Factory</span>
 
-<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="k">import</span> <span class="n">simulaqron_settings</span>
-<span class="kn">from</span> <span class="nn">simulaqron.toolbox.manage_nodes</span> <span class="k">import</span> <span class="n">NetworksConfigConstructor</span>
+<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="kn">import</span> <span class="n">simulaqron_settings</span>
+<span class="kn">from</span> <span class="nn">simulaqron.toolbox.manage_nodes</span> <span class="kn">import</span> <span class="n">NetworksConfigConstructor</span>
 
-<span class="kn">from</span> <span class="nn">cqc.Protocol</span> <span class="k">import</span> <span class="n">CQCProtocol</span>
+<span class="kn">from</span> <span class="nn">cqc.Protocol</span> <span class="kn">import</span> <span class="n">CQCProtocol</span>
 
 
 <span class="c1">###############################################################################</span>
@@ -99,7 +99,7 @@
 
 
 <div class="viewcode-block" id="CQCFactory"><a class="viewcode-back" href="../../../simulaqron.cqc_backend.html#simulaqron.cqc_backend.cqcFactory.CQCFactory">[docs]</a><span class="k">class</span> <span class="nc">CQCFactory</span><span class="p">(</span><span class="n">Factory</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cqc_net</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">network_name</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cqc_net</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">network_name</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize CQC Factory.</span>
 
@@ -223,7 +223,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
     </div>
   </body>
 </html>

@@ -52,11 +52,11 @@
   <h1>Source code for simulaqron.toolbox.manage_nodes</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">from</span> <span class="nn">contextlib</span> <span class="k">import</span> <span class="n">closing</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">closing</span>
 <span class="kn">import</span> <span class="nn">socket</span>
 
-<span class="kn">from</span> <span class="nn">simulaqron.toolbox</span> <span class="k">import</span> <span class="n">get_simulaqron_path</span>
-<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="k">import</span> <span class="n">simulaqron_settings</span>
+<span class="kn">from</span> <span class="nn">simulaqron.toolbox</span> <span class="kn">import</span> <span class="n">get_simulaqron_path</span>
+<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="kn">import</span> <span class="n">simulaqron_settings</span>
 
 
 <span class="n">config_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">app_file</span><span class="p">,</span> <span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">cqc_file</span><span class="p">,</span> <span class="n">simulaqron_settings</span><span class="o">.</span><span class="n">vnode_file</span><span class="p">]</span>
@@ -67,7 +67,7 @@
 
 
 <div class="viewcode-block" id="NetworksConfigConstructor"><a class="viewcode-back" href="../../../simulaqron.toolbox.html#simulaqron.toolbox.manage_nodes.NetworksConfigConstructor">[docs]</a><span class="k">class</span> <span class="nc">NetworksConfigConstructor</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Used to construct the config file of networks.abs</span>
 <span class="sd">        When all nodes and networks are added the content of this object can</span>
@@ -341,7 +341,7 @@
 
 
 <span class="k">class</span> <span class="nc">_NetworkConfig</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Used by NetworksConfigConstructor to keep track of the config of a single network.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -398,7 +398,7 @@
 
 
 <span class="k">class</span> <span class="nc">_NodeConfig</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">app_hostname</span><span class="p">,</span> <span class="n">cqc_hostname</span><span class="p">,</span> <span class="n">vnode_hostname</span><span class="p">,</span> <span class="n">app_port</span><span class="p">,</span> <span class="n">cqc_port</span><span class="p">,</span> <span class="n">vnode_port</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">app_hostname</span><span class="p">,</span> <span class="n">cqc_hostname</span><span class="p">,</span> <span class="n">vnode_hostname</span><span class="p">,</span> <span class="n">app_port</span><span class="p">,</span> <span class="n">cqc_port</span><span class="p">,</span> <span class="n">vnode_port</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Used by _NetworkConfig to keep track of the config of a single node.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -442,7 +442,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
     </div>
   </body>
 </html>

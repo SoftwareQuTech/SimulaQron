@@ -84,13 +84,13 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
-<span class="kn">from</span> <span class="nn">timeit</span> <span class="k">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
+<span class="kn">from</span> <span class="nn">timeit</span> <span class="kn">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
 
-<span class="kn">from</span> <span class="nn">simulaqron.toolbox.manage_nodes</span> <span class="k">import</span> <span class="n">NetworksConfigConstructor</span>
-<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="k">import</span> <span class="n">simulaqron_settings</span>
-<span class="kn">from</span> <span class="nn">simulaqron.run.startNode</span> <span class="k">import</span> <span class="n">main</span> <span class="k">as</span> <span class="n">start_node</span>
-<span class="kn">from</span> <span class="nn">simulaqron.run.startCQC</span> <span class="k">import</span> <span class="n">main</span> <span class="k">as</span> <span class="n">start_cqc</span>
-<span class="kn">from</span> <span class="nn">cqc.pythonLib</span> <span class="k">import</span> <span class="n">CQCConnection</span>
+<span class="kn">from</span> <span class="nn">simulaqron.toolbox.manage_nodes</span> <span class="kn">import</span> <span class="n">NetworksConfigConstructor</span>
+<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="kn">import</span> <span class="n">simulaqron_settings</span>
+<span class="kn">from</span> <span class="nn">simulaqron.run.startNode</span> <span class="kn">import</span> <span class="n">main</span> <span class="k">as</span> <span class="n">start_node</span>
+<span class="kn">from</span> <span class="nn">simulaqron.run.startCQC</span> <span class="kn">import</span> <span class="n">main</span> <span class="k">as</span> <span class="n">start_cqc</span>
+<span class="kn">from</span> <span class="nn">cqc.pythonLib</span> <span class="kn">import</span> <span class="n">CQCConnection</span>
 
 <span class="c1">#########################################################################################</span>
 <span class="c1"># Network class, sets up (part of) a simulated network.                                 #</span>
@@ -99,7 +99,7 @@
 
 
 <div class="viewcode-block" id="Network"><a class="viewcode-back" href="../../simulaqron.html#simulaqron.network.Network">[docs]</a><span class="k">class</span> <span class="nc">Network</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">topology</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">network_config_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">topology</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">network_config_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Used to spin up a simulated network.</span>
 
@@ -189,7 +189,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running</span>
 
-    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_setup_processes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -385,7 +385,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
     </div>
   </body>
 </html>

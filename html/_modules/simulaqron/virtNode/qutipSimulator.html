@@ -89,7 +89,7 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;If you want to use the qutip backend you need to install the python package &#39;qutip&#39;&quot;</span><span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">simulaqron.virtNode.basics</span> <span class="k">import</span> <span class="n">quantumEngine</span><span class="p">,</span> <span class="n">quantumError</span><span class="p">,</span> <span class="n">noQubitError</span>
+<span class="kn">from</span> <span class="nn">simulaqron.virtNode.basics</span> <span class="kn">import</span> <span class="n">quantumEngine</span><span class="p">,</span> <span class="n">quantumError</span><span class="p">,</span> <span class="n">noQubitError</span>
 
 
 <div class="viewcode-block" id="qutipEngine"><a class="viewcode-back" href="../../../simulaqron.virtNode.html#simulaqron.virtNode.qutipSimulator.qutipEngine">[docs]</a><span class="k">class</span> <span class="nc">qutipEngine</span><span class="p">(</span><span class="n">quantumEngine</span><span class="p">):</span>
@@ -101,7 +101,7 @@
 <span class="sd">        maxQubits:	maximum number of qubits this engine will support.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">maxQubits</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">maxQubits</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -505,7 +505,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
     </div>
   </body>
 </html>

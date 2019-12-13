@@ -55,14 +55,14 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">click</span>
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">daemons.prefab</span> <span class="k">import</span> <span class="n">run</span>
-<span class="kn">from</span> <span class="nn">daemons.interfaces</span> <span class="k">import</span> <span class="n">exit</span>
+<span class="kn">from</span> <span class="nn">daemons.prefab</span> <span class="kn">import</span> <span class="n">run</span>
+<span class="kn">from</span> <span class="nn">daemons.interfaces</span> <span class="kn">import</span> <span class="n">exit</span>
 
 <span class="kn">import</span> <span class="nn">simulaqron</span>
-<span class="kn">from</span> <span class="nn">simulaqron.network</span> <span class="k">import</span> <span class="n">Network</span>
-<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="k">import</span> <span class="n">simulaqron_settings</span>
-<span class="kn">from</span> <span class="nn">simulaqron.toolbox.manage_nodes</span> <span class="k">import</span> <span class="n">NetworksConfigConstructor</span>
-<span class="kn">from</span> <span class="nn">simulaqron.toolbox.reset</span> <span class="k">import</span> <span class="n">main</span> <span class="k">as</span> <span class="n">reset_simulaqron</span>
+<span class="kn">from</span> <span class="nn">simulaqron.network</span> <span class="kn">import</span> <span class="n">Network</span>
+<span class="kn">from</span> <span class="nn">simulaqron.settings</span> <span class="kn">import</span> <span class="n">simulaqron_settings</span>
+<span class="kn">from</span> <span class="nn">simulaqron.toolbox.manage_nodes</span> <span class="kn">import</span> <span class="n">NetworksConfigConstructor</span>
+<span class="kn">from</span> <span class="nn">simulaqron.toolbox.reset</span> <span class="kn">import</span> <span class="n">main</span> <span class="k">as</span> <span class="n">reset_simulaqron</span>
 
 <span class="n">CONTEXT_SETTINGS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">help_option_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-h&quot;</span><span class="p">,</span> <span class="s2">&quot;--help&quot;</span><span class="p">])</span>
 <span class="n">PID_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s2">&quot;.simulaqron_pids&quot;</span><span class="p">)</span>
@@ -76,7 +76,7 @@
 
 
 <div class="viewcode-block" id="SimulaQronDaemon"><a class="viewcode-back" href="../../simulaqron.html#simulaqron.SimulaQron.SimulaQronDaemon">[docs]</a><span class="k">class</span> <span class="nc">SimulaQronDaemon</span><span class="p">(</span><span class="n">run</span><span class="o">.</span><span class="n">RunDaemon</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pidfile</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nrnodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">topology</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pidfile</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nrnodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">topology</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pidfile</span><span class="o">=</span><span class="n">pidfile</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nrnodes</span> <span class="o">=</span> <span class="n">nrnodes</span>
@@ -593,7 +593,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Stephanie Wehner and Axel Dahlberg.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.2.
     </div>
   </body>
 </html>
