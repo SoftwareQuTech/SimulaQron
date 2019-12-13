@@ -23,7 +23,7 @@ matrix:
 before_install:
   - make build
 install:
-  - pip3 install dist/*.whl "$PIPFLAG"
+  - pip3 install dist/*.whl $PIPFLAG
 script:
   - make lint
   - make tests
