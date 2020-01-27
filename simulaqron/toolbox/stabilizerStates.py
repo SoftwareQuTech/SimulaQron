@@ -276,7 +276,6 @@ class StabilizerState:
         h = 0
         k = 0
         pivot_columns = []
-        num_paulis = int((n - 1) / 2)
         while (h < m) and (k < n):
             non_zero_ind = new_matrix[:, k].nonzero()[0]
             non_zero_ind_under_h = non_zero_ind[non_zero_ind >= h]
@@ -291,22 +290,13 @@ class StabilizerState:
                 pivot_columns.append(k)
                 non_zero_except_i_max = non_zero_ind[non_zero_ind != i_max]
 
-                for i_loop in non_zero_except_i_max:
-                    extra_phase = 0  # we count i's here, so 2 -> (-i)^2=-1, 4->1, 6-> -1
-                    for j in range(num_paulis):
-                        extra_phase += StabilizerState.Pauli_phase_tracking([
-                            new_matrix[i_loop, j],
-                            new_matrix[i_loop, j + num_paulis]
-                        ], [
-                            new_matrix[h, j],
-                            new_matrix[h, j + num_paulis]
-                        ]
-                        )
-                    new_matrix[i_loop, :] = np.logical_xor(new_matrix[i_loop, :], new_matrix[h, :])
-                    # NOTE we are assuming that -I is not in the group and therefore that no stabilizer element
-                    # has a phase of +/- i, and therefore that extra_phase is a multiple of two
-                    if (extra_phase / 2) % 2:
-                        new_matrix[i_loop, -1] = np.logical_not(new_matrix[i_loop, -1])
+                if len(non_zero_except_i_max) > 0:
+                    new_matrix[non_zero_except_i_max, :] = np.apply_along_axis(
+                        lambda row: StabilizerState._multiply_stabilizers(row, new_matrix[i_max]),
+                        1,
+                        new_matrix[non_zero_except_i_max, :],
+                    )
+
                 h += 1
                 k += 1
         if return_pivot_columns:
@@ -316,6 +306,48 @@ class StabilizerState:
 
     def check_symplectic(self):
         return self._is_symplectic(self._group)
+
+    @staticmethod
+    def _multiply_stabilizers(s1, s2):
+        """
+        Multiplies two stabilizers together to a third one.
+
+        See https://www.cs.umd.edu/~amchilds/teaching/w10/project-sample.pdf
+        """
+        def g(vals):
+            """
+            Helper function, see https://www.cs.umd.edu/~amchilds/teaching/w10/project-sample.pdf
+            """
+            x1, z1, x2, z2 = map(int, vals)
+            if x1 == 0:
+                if z1 == 0:
+                    return 0
+                else:
+                    return x2 * (1 - 2 * z2)
+            else:
+                if z1 == 0:
+                    return z2 * (2 * x2 - 1)
+                else:
+                    return z2 - x2
+
+        assert len(s1) == len(s2)
+        assert (len(s1) - 1) % 2 == 0
+        num_paulis = int((len(s1) - 1) / 2)
+
+        # Update the x and z stabilizers
+        new_s = np.logical_xor(s1, s2)
+
+        # Update the phase
+        m = sum(map(g, zip(
+            s2[:num_paulis],
+            s2[num_paulis:-1],
+            new_s[:num_paulis],
+            new_s[num_paulis:-1],
+        )))
+        m %= 4
+
+        new_s[-1] ^= bool(m / 2)
+        return new_s
 
     @staticmethod
     def _is_symplectic(matrix):
