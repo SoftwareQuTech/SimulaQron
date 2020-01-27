@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>simulaqron.toolbox.stabilizerStates &#8212; SimulaQron 3.0.11 documentation</title>
+    <title>simulaqron.toolbox.stabilizerStates &#8212; SimulaQron 3.0.12 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -25,7 +25,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 3.0.11 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 3.0.12 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -363,43 +363,60 @@
     <span class="k">def</span> <span class="nf">_multiply_stabilizers</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Multiplies two stabilizers together to a third one.</span>
-
-<span class="sd">        See https://www.cs.umd.edu/~amchilds/teaching/w10/project-sample.pdf</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">def</span> <span class="nf">g</span><span class="p">(</span><span class="n">vals</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Helper function, see https://www.cs.umd.edu/~amchilds/teaching/w10/project-sample.pdf</span>
-<span class="sd">            &quot;&quot;&quot;</span>
-            <span class="n">x1</span><span class="p">,</span> <span class="n">z1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">z2</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">vals</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">x1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">z1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="mi">0</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">x2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">z2</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">z1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">z2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">x2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">z2</span> <span class="o">-</span> <span class="n">x2</span>
-
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span>
         <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span>
-        <span class="n">num_paulis</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="c1"># Update the x and z stabilizers</span>
-        <span class="n">new_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">)</span>
+        <span class="n">new_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">s1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">s2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
         <span class="c1"># Update the phase</span>
-        <span class="n">m</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span>
-            <span class="n">s2</span><span class="p">[:</span><span class="n">num_paulis</span><span class="p">],</span>
-            <span class="n">s2</span><span class="p">[</span><span class="n">num_paulis</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
-            <span class="n">new_s</span><span class="p">[:</span><span class="n">num_paulis</span><span class="p">],</span>
-            <span class="n">new_s</span><span class="p">[</span><span class="n">num_paulis</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
-        <span class="p">)))</span>
-        <span class="n">m</span> <span class="o">%=</span> <span class="mi">4</span>
+        <span class="n">new_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_s</span><span class="p">,</span> <span class="n">StabilizerState</span><span class="o">.</span><span class="n">_multiply_compute_phase</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">))</span>
 
-        <span class="n">new_s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">^=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">m</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_s</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_pauli_mask</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a mask for which positions where the Pauli of the first stabilier is `p1`</span>
+<span class="sd">        and the Pauli of the second stabilizer is `p2`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">num_paulis</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">p1_bool</span> <span class="o">=</span> <span class="n">StabilizerState</span><span class="o">.</span><span class="n">Pauli2bool</span><span class="p">[</span><span class="n">p1</span><span class="p">]</span>
+        <span class="n">p2_bool</span> <span class="o">=</span> <span class="n">StabilizerState</span><span class="o">.</span><span class="n">Pauli2bool</span><span class="p">[</span><span class="n">p2</span><span class="p">]</span>
+        <span class="n">is_p1</span> <span class="o">=</span> <span class="p">(</span><span class="n">s1</span><span class="p">[:</span><span class="n">num_paulis</span><span class="p">]</span> <span class="o">==</span> <span class="n">p1_bool</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">s1</span><span class="p">[</span><span class="n">num_paulis</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">p1_bool</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">is_p2</span> <span class="o">=</span> <span class="p">(</span><span class="n">s2</span><span class="p">[:</span><span class="n">num_paulis</span><span class="p">]</span> <span class="o">==</span> <span class="n">p2_bool</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">s2</span><span class="p">[</span><span class="n">num_paulis</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">p2_bool</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">is_p1</span> <span class="o">&amp;</span> <span class="n">is_p2</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_i_mask</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a mask for which positions where the Paulis of the two stabilizers gives</span>
+<span class="sd">        a `i`-phase.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">has_i</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">paulis</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;XY&quot;</span><span class="p">,</span> <span class="s2">&quot;YZ&quot;</span><span class="p">,</span> <span class="s2">&quot;ZX&quot;</span><span class="p">]:</span>
+            <span class="n">has_i</span> <span class="o">|=</span> <span class="n">StabilizerState</span><span class="o">.</span><span class="n">_get_pauli_mask</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="o">*</span><span class="n">paulis</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">has_i</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_minus_i_mask</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a mask for which positions where the Paulis of the two stabilizers gives</span>
+<span class="sd">        a `-i`-phase.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">has_minus_i</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">paulis</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;YX&quot;</span><span class="p">,</span> <span class="s2">&quot;ZY&quot;</span><span class="p">,</span> <span class="s2">&quot;XZ&quot;</span><span class="p">]:</span>
+            <span class="n">has_minus_i</span> <span class="o">|=</span> <span class="n">StabilizerState</span><span class="o">.</span><span class="n">_get_pauli_mask</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="o">*</span><span class="n">paulis</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">has_minus_i</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_multiply_compute_phase</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes the new phase of when multiplying two stabilizers&quot;&quot;&quot;</span>
+        <span class="c1"># Compute the number of i and -i phases</span>
+        <span class="n">has_minus_i</span> <span class="o">=</span> <span class="n">StabilizerState</span><span class="o">.</span><span class="n">_get_minus_i_mask</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">)</span>
+        <span class="n">has_i</span> <span class="o">=</span> <span class="n">StabilizerState</span><span class="o">.</span><span class="n">_get_i_mask</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">)</span>
+        <span class="n">num_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">has_i</span><span class="p">)</span>
+        <span class="n">num_minus_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">has_minus_i</span><span class="p">)</span>
+        <span class="n">has_minus_phase</span> <span class="o">=</span> <span class="p">((</span><span class="n">num_i</span> <span class="o">-</span> <span class="n">num_minus_i</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">s1</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">s2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">has_minus_phase</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_is_symplectic</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
@@ -894,7 +911,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 3.0.11 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SimulaQron 3.0.12 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
