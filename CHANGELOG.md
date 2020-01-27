@@ -6,6 +6,10 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 Upcoming
 --------
 
+2020-01-27 (v3.0.12)
+-------------------
+- Boolean Gaussian elimination in stabilizer formalism is now even faster.
+
 2020-01-27 (v3.0.11)
 -------------------
 - Boolean Gaussian elimination in stabilizer formalism is now faster.

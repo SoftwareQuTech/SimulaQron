@@ -311,43 +311,60 @@ class StabilizerState:
     def _multiply_stabilizers(s1, s2):
         """
         Multiplies two stabilizers together to a third one.
-
-        See https://www.cs.umd.edu/~amchilds/teaching/w10/project-sample.pdf
         """
-        def g(vals):
-            """
-            Helper function, see https://www.cs.umd.edu/~amchilds/teaching/w10/project-sample.pdf
-            """
-            x1, z1, x2, z2 = map(int, vals)
-            if x1 == 0:
-                if z1 == 0:
-                    return 0
-                else:
-                    return x2 * (1 - 2 * z2)
-            else:
-                if z1 == 0:
-                    return z2 * (2 * x2 - 1)
-                else:
-                    return z2 - x2
-
         assert len(s1) == len(s2)
         assert (len(s1) - 1) % 2 == 0
-        num_paulis = int((len(s1) - 1) / 2)
 
         # Update the x and z stabilizers
-        new_s = np.logical_xor(s1, s2)
+        new_s = np.logical_xor(s1[:-1], s2[:-1])
 
         # Update the phase
-        m = sum(map(g, zip(
-            s2[:num_paulis],
-            s2[num_paulis:-1],
-            new_s[:num_paulis],
-            new_s[num_paulis:-1],
-        )))
-        m %= 4
+        new_s = np.append(new_s, StabilizerState._multiply_compute_phase(s1, s2))
 
-        new_s[-1] ^= bool(m / 2)
         return new_s
+
+    @staticmethod
+    def _get_pauli_mask(s1, s2, p1, p2):
+        """Returns a mask for which positions where the Pauli of the first stabilier is `p1`
+        and the Pauli of the second stabilizer is `p2`.
+        """
+        num_paulis = int((len(s1) - 1) / 2)
+        p1_bool = StabilizerState.Pauli2bool[p1]
+        p2_bool = StabilizerState.Pauli2bool[p2]
+        is_p1 = (s1[:num_paulis] == p1_bool[0]) & (s1[num_paulis:-1] == p1_bool[1])
+        is_p2 = (s2[:num_paulis] == p2_bool[0]) & (s2[num_paulis:-1] == p2_bool[1])
+        return is_p1 & is_p2
+
+    @staticmethod
+    def _get_i_mask(s1, s2):
+        """Returns a mask for which positions where the Paulis of the two stabilizers gives
+        a `i`-phase.
+        """
+        has_i = False
+        for paulis in ["XY", "YZ", "ZX"]:
+            has_i |= StabilizerState._get_pauli_mask(s1, s2, *paulis)
+        return has_i
+
+    @staticmethod
+    def _get_minus_i_mask(s1, s2):
+        """Returns a mask for which positions where the Paulis of the two stabilizers gives
+        a `-i`-phase.
+        """
+        has_minus_i = False
+        for paulis in ["YX", "ZY", "XZ"]:
+            has_minus_i |= StabilizerState._get_pauli_mask(s1, s2, *paulis)
+        return has_minus_i
+
+    @staticmethod
+    def _multiply_compute_phase(s1, s2):
+        """Computes the new phase of when multiplying two stabilizers"""
+        # Compute the number of i and -i phases
+        has_minus_i = StabilizerState._get_minus_i_mask(s1, s2)
+        has_i = StabilizerState._get_i_mask(s1, s2)
+        num_i = np.count_nonzero(has_i)
+        num_minus_i = np.count_nonzero(has_minus_i)
+        has_minus_phase = ((num_i - num_minus_i) % 4) / 2
+        return np.logical_xor(np.logical_xor(s1[-1], s2[-1]), has_minus_phase)
 
     @staticmethod
     def _is_symplectic(matrix):
