@@ -6,6 +6,10 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 Upcoming
 --------
 
+2020-01-27 (v3.0.11)
+-------------------
+- Boolean Gaussian elimination in stabilizer formalism is now faster.
+
 2019-10-30 (v3.0.10)
 -------------------
 - SimulaQron compatible with `cqc` version 3.1.0.
