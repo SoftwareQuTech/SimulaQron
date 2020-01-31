@@ -251,7 +251,10 @@ dummy:
 python-deps:
 	@cat requirements.txt | xargs -n 1 -L 1 pip3 install
 
-build: python-deps html
+_add_jekyll:
+	touch build/.nojekyll
+
+build: python-deps html _add_jekyll
 
 open:
 	@echo "test"
