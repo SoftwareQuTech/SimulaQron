@@ -402,6 +402,81 @@ class TestStabilizerStates(unittest.TestCase):
                 output = s.measure(qubit)
                 self.assertEqual(output, expected)
 
+    def test_correlations(self):
+        tests = [  # stabilizers
+            ["ZI", "IZ"],
+            ["ZZ", "XX"],
+            ["ZX", "XZ"],
+            ["XXX", "ZZI", "IZZ"],
+            ["XIII", "IXII", "IIXI", "IIIX"],
+            ["XZII", "ZXZI", "IZXZ", "IIZX"],  # line graph
+            ["XZIZ", "ZXZI", "IZXZ", "ZIZX"],  # cycle graph
+            ["XZZZ", "ZXZZ", "ZZXZ", "ZZZX"],  # complete graph
+            ["XZZZ", "ZXII", "ZIXI", "ZIIX"],  # star graph
+        ]
+
+        for stabilizers in tests:
+            for stabilizer in stabilizers:
+                for _ in range(10):
+                    with self.subTest(stabilizers=stabilizers, stabilizer=stabilizer):
+                        s = StabilizerState(stabilizers)
+                        outcomes = []
+                        qubit = 0
+                        for pauli in stabilizer:
+                            if pauli == 'X':
+                                s.apply_H(qubit)
+                            elif pauli == 'Y':
+                                s.apply_K(qubit)
+                            elif pauli == 'Z':
+                                pass
+                            else:
+                                qubit += 1
+                                continue
+                            outcomes.append(s.measure(qubit))
+                        self.assertEqual(sum(outcomes) % 2, 0)
+
+    def test_standard_form(self):
+        tests = [  # stabilizers
+            ["ZI", "IZ"],
+            ["ZZ", "XX"],
+            ["ZX", "XZ"],
+            ["XXX", "ZZI", "IZZ"],
+            ["XIII", "IXII", "IIXI", "IIIX"],
+            ["XZII", "ZXZI", "IZXZ", "IIZX"],  # line graph
+            ["XZIZ", "ZXZI", "IZXZ", "ZIZX"],  # cycle graph
+            ["XZZZ", "ZXZZ", "ZZXZ", "ZZZX"],  # complete graph
+            ["XZZZ", "ZXII", "ZIXI", "ZIIX"],  # star graph
+        ]
+
+        for stabilizers in tests:
+            with self.subTest(stabilizers=stabilizers):
+                state = StabilizerState(stabilizers)
+                state.put_in_standard_form()
+                # Check that there are no X or Y in the first column except the first row
+                for row in state._group[1:, :]:
+                    self.assertFalse(row[0])
+
+    def test_reduce_when_measuring(self):
+        tests = [  # stabilizers
+            ["ZI", "IZ"],
+            ["ZZ", "XX"],
+            ["ZX", "XZ"],
+            ["XXX", "ZZI", "IZZ"],
+            ["XIII", "IXII", "IIXI", "IIIX"],
+            ["XZII", "ZXZI", "IZXZ", "IIZX"],  # line graph
+            ["XZIZ", "ZXZI", "IZXZ", "ZIZX"],  # cycle graph
+            ["XZZZ", "ZXZZ", "ZZXZ", "ZZZX"],  # complete graph
+            ["XZZZ", "ZXII", "ZIXI", "ZIIX"],  # star graph
+        ]
+
+        for stabilizers in tests:
+            with self.subTest(stabilizers=stabilizers):
+                state = StabilizerState(stabilizers)
+                n = len(state)
+                for i in range(n):
+                    state.measure(0)
+                    self.assertEqual(len(state), n - i - 1)
+        
 
 if __name__ == "__main__":
     unittest.main()

@@ -225,13 +225,19 @@ class StabilizerState:
     def __len__(self):
         return self.num_qubits
 
+    @staticmethod
+    def _row_to_string(row):
+        assert (len(row) - 1) % 2 == 0
+        n = int((len(row) - 1) / 2)
+        to_return = "{} ".format(StabilizerState.bool2phase[row[-1]])
+        for i in range(n):
+            to_return += StabilizerState.bool2Pauli[(row[i], row[i + n])]
+        return to_return
+
     def to_string(self):
         to_return = ""
         for row in self._group:
-            to_return += "{} ".format(self.bool2phase[row[-1]])
-            n = self.num_qubits
-            for i in range(n):
-                to_return += self.bool2Pauli[(row[i], row[i + n])]
+            to_return += self._row_to_string(row)
             to_return += "\n"
         return to_return[:-1]
 
@@ -285,6 +291,7 @@ class StabilizerState:
             else:
                 i_max = non_zero_ind_under_h[0]
                 if i_max != h:
+                    # Move the row i_max to the h row
                     new_matrix[[h, i_max]] = new_matrix[[i_max, h]]
                 # Add pivot row to the rest
                 pivot_columns.append(k)
@@ -292,7 +299,7 @@ class StabilizerState:
 
                 if len(non_zero_except_i_max) > 0:
                     new_matrix[non_zero_except_i_max, :] = np.apply_along_axis(
-                        lambda row: StabilizerState._multiply_stabilizers(row, new_matrix[i_max]),
+                        lambda row: StabilizerState._multiply_stabilizers(row, new_matrix[h]),
                         1,
                         new_matrix[non_zero_except_i_max, :],
                     )
@@ -707,7 +714,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
+            raise ValueError("position = {} if not a valid qubit position (not in [0, {}))".format(position, n))
 
         tmp_matrix = self._group
         # Create a new matrix where the X and Z columns of the corresponding qubit are the first.
