@@ -27,7 +27,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import sys
 import unittest
 import numpy as np
 from scipy.linalg import expm
@@ -394,7 +393,7 @@ class FactoryGateTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.iterations = 100
-        sys.stdout.write("Testing factory gates with {} iterations \r\n".format(cls.iterations))
+        print("Testing factory gates with {} iterations \r\n".format(cls.iterations))
 
         simulaqron_settings.default_settings()
         cls.network = Network(force=True)
@@ -408,63 +407,56 @@ class FactoryGateTest(unittest.TestCase):
     def testIFactory(self):
         with CQCConnection("Alice", appID=1) as cqc:
             # Test I factory
-            sys.stdout.write("Testing I factory:")
+            print("Testing I factory:")
             exp_values = calc_exp_values_single(prep_I_state())
             ans = cqc.test_preparation(prep_I_CQC_FACTORY, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
     def testXFactory(self):
         with CQCConnection("Alice", appID=1) as cqc:
-            sys.stdout.write("Testing X factory (odd):")
+            print("Testing X factory (odd):")
             exp_values = calc_exp_values_single(prep_X_state())
             ans = cqc.test_preparation(prep_X_CQC_FACTORY_ODD, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
             # Test X factory even
-            sys.stdout.write("Testing X factory (even):")
+            print("Testing X factory (even):")
             exp_values = calc_exp_values_single(prep_I_state())
             ans = cqc.test_preparation(prep_X_CQC_FACTORY_EVEN, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
     def testYFactory(self):
         with CQCConnection("Alice", appID=1) as cqc:
             # Test Y factory odd
-            sys.stdout.write("Testing Y factory (odd):")
+            print("Testing Y factory (odd):")
             exp_values = calc_exp_values_single(prep_Y_state())
             ans = cqc.test_preparation(prep_Y_CQC_FACTORY_ODD, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
             # Test Y factory even
-            sys.stdout.write("Testing Y factory (even):")
+            print("Testing Y factory (even):")
             exp_values = calc_exp_values_single(prep_I_state())
             ans = cqc.test_preparation(prep_Y_CQC_FACTORY_EVEN, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
     def testZFactory(self):
         with CQCConnection("Alice", appID=1) as cqc:
             # Test Z factory odd
-            sys.stdout.write("Testing Z factory (odd):")
+            print("Testing Z factory (odd):")
             exp_values = calc_exp_values_single(prep_Z_state())
             ans = cqc.test_preparation(prep_Z_CQC_FACTORY_ODD, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
             # Test Z factory even
-            sys.stdout.write("Testing Z factory (even):")
+            print("Testing Z factory (even):")
             exp_values = calc_exp_values_single(prep_I_state())
             ans = cqc.test_preparation(prep_Z_CQC_FACTORY_EVEN, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
     def testTFactory(self):
         with CQCConnection("Alice", appID=1) as cqc:
             # Test T factory quarter
-            sys.stdout.write("Testing T factory (quarter):")
+            print("Testing T factory (quarter):")
             exp_values = calc_exp_values_single(prep_T_state(1))
             if simulaqron_settings.backend == "stabilizer":
                 with self.assertRaises(CQCUnsuppError):
@@ -473,11 +465,10 @@ class FactoryGateTest(unittest.TestCase):
                     )
             else:
                 ans = cqc.test_preparation(prep_T_CQC_FACTORY_QUARTER, exp_values, iterations=self.iterations)
-                sys.stdout.write("\r")
                 self.assertTrue(ans)
 
             # Test T factory half
-            sys.stdout.write("Testing T factory (half):")
+            print("Testing T factory (half):")
             exp_values = calc_exp_values_single(prep_T_state(2))
             if simulaqron_settings.backend == "stabilizer":
                 with self.assertRaises(CQCUnsuppError):
@@ -486,11 +477,10 @@ class FactoryGateTest(unittest.TestCase):
                     )
             else:
                 ans = cqc.test_preparation(prep_T_CQC_FACTORY_HALF, exp_values, iterations=self.iterations)
-                sys.stdout.write("\r")
                 self.assertTrue(ans)
 
             # Test T factory half
-            sys.stdout.write("Testing T factory (three quarters):")
+            print("Testing T factory (three quarters):")
             exp_values = calc_exp_values_single(prep_T_state(3))
             if simulaqron_settings.backend == "stabilizer":
                 with self.assertRaises(CQCUnsuppError):
@@ -499,11 +489,10 @@ class FactoryGateTest(unittest.TestCase):
                     )
             else:
                 ans = cqc.test_preparation(prep_T_CQC_FACTORY_THREE_QUARTER, exp_values, iterations=self.iterations)
-                sys.stdout.write("\r")
                 self.assertTrue(ans)
 
             # Test T factory half
-            sys.stdout.write("Testing T factory (full):")
+            print("Testing T factory (full):")
             exp_values = calc_exp_values_single(prep_I_state())
             if simulaqron_settings.backend == "stabilizer":
                 with self.assertRaises(CQCUnsuppError):
@@ -512,39 +501,34 @@ class FactoryGateTest(unittest.TestCase):
                     )
             else:
                 ans = cqc.test_preparation(prep_T_CQC_FACTORY_FULL, exp_values, iterations=self.iterations)
-                sys.stdout.write("\r")
                 self.assertTrue(ans)
 
     def testHFactory(self):
         with CQCConnection("Alice", appID=1) as cqc:
             # Test H factory odd
-            sys.stdout.write("Testing H factory (odd):")
+            print("Testing H factory (odd):")
             exp_values = calc_exp_values_single(prep_H_state())
             ans = cqc.test_preparation(prep_H_CQC_FACTORY_ODD, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
             # Test H factory even
-            sys.stdout.write("Testing H factory (even):")
+            print("Testing H factory (even):")
             exp_values = calc_exp_values_single(prep_I_state())
             ans = cqc.test_preparation(prep_H_CQC_FACTORY_EVEN, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
     def testKFactory(self):
         with CQCConnection("Alice", appID=1) as cqc:
             # Test K factory odd
-            sys.stdout.write("Testing K factory (odd):")
+            print("Testing K factory (odd):")
             exp_values = calc_exp_values_single(prep_K_state())
             ans = cqc.test_preparation(prep_K_CQC_FACTORY_ODD, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
             # Test K factory even
-            sys.stdout.write("Testing K factory (even):")
+            print("Testing K factory (even):")
             exp_values = calc_exp_values_single(prep_I_state())
             ans = cqc.test_preparation(prep_K_CQC_FACTORY_EVEN, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
     def testRot_X_Factory(self):
@@ -553,74 +537,65 @@ class FactoryGateTest(unittest.TestCase):
             # TODO, add these tests when decided that we make it possible to do this
             # (As of writing at 2018/03/27 the angle of rotation is (up to a factor 2pi/256)
             # To the amount of times this rotation is done
-            sys.stdout.write("Testing CNOT rotation of 4 times 1/32:")
+            print("Testing CNOT rotation of 4 times 1/32:")
             exp_values = calc_exp_values_single(prep_ROT_X_state())
             if simulaqron_settings.backend == "stabilizer":
                 with self.assertRaises(CQCUnsuppError):
                     cqc.test_preparation(prep_ROT_X, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = cqc.test_preparation(prep_ROT_X, exp_values, iterations=self.iterations)
-                sys.stdout.write("\r")
                 self.assertTrue(ans)
 
     def testCNOTFactory(self):
         with CQCConnection("Alice", appID=1) as cqc:
             # Test CNOT Factory Control even
-            sys.stdout.write("Testing CNOT factory control even:")
+            print("Testing CNOT factory control even:")
             exp_values = calc_exp_values_single(prep_H_state())
             ans = cqc.test_preparation(prep_CNOT_control_CQC_FACTORY_even, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
             # Test CNOT Factory Control odd
-            sys.stdout.write("Testing CNOT factory control odd:")
+            print("Testing CNOT factory control odd:")
             exp_values = calc_exp_values_two(prep_mixed_state())
             ans = cqc.test_preparation(prep_CNOT_control_CQC_FACTORY_odd, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
             # Test CNOT Factory target even
-            sys.stdout.write("Testing CNOT factory target even:")
+            print("Testing CNOT factory target even:")
             exp_values = calc_exp_values_single(prep_I_state())
             ans = cqc.test_preparation(prep_CNOT_target_CQC_FACTORY_even, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
             # Test CNOT Factory target odd
-            sys.stdout.write("Testing CNOT factory target odd:")
+            print("Testing CNOT factory target odd:")
             exp_values = calc_exp_values_two(prep_mixed_state())
             ans = cqc.test_preparation(prep_CNOT_target_CQC_FACTORY_odd, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
     def testCPhaseFactory(self):
         with CQCConnection("Alice", appID=1) as cqc:
             # Test CPHASE Factory Control even
-            sys.stdout.write("Testing CPHASE factory control even:")
+            print("Testing CPHASE factory control even:")
             exp_values = calc_exp_values_single(prep_H_state())
             ans = cqc.test_preparation(prep_CPHASE_control_CQC_FACTORY_even, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
             # Test CPHASE Factory Control odd
-            sys.stdout.write("Testing CPHASE factory control odd:")
+            print("Testing CPHASE factory control odd:")
             exp_values = calc_exp_values_two(prep_mixed_state())
             ans = cqc.test_preparation(prep_CPHASE_control_CQC_FACTORY_odd, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
             # Test CPHASE Factory target even
-            sys.stdout.write("Testing CPHASE factory target even:")
+            print("Testing CPHASE factory target even:")
             exp_values = calc_exp_values_single(prep_I_state())
             ans = cqc.test_preparation(prep_CPHASE_target_CQC_FACTORY_even, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
             # Test CPHASE Factory target odd
-            sys.stdout.write("Testing CPHASE factory target odd:")
+            print("Testing CPHASE factory target odd:")
             exp_values = calc_exp_values_two(prep_mixed_state())
             ans = cqc.test_preparation(prep_CPHASE_target_CQC_FACTORY_odd, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
             self.assertTrue(ans)
 
 

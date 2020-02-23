@@ -124,12 +124,17 @@ class Network:
         """
         Is the network up and running?
         """
+        if self._running:
+            return True
         for node in self.nodes:
             try:
                 cqc = CQCConnection(node, retry_connection=False, network_name=self.name)
             except ConnectionRefusedError:
                 self._running = False
                 break
+            except Exception as err:
+                logging.exception("Got unexpected exception when trying to connect: {}".format(err))
+                raise err
             else:
                 cqc.close()
         else:

@@ -422,7 +422,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         msg = hdr.pack()
         self.return_messages[cqc_header.app_id].append(msg)
         # self.protocol.transport.write(msg)
-        logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
+        logging.debug("CQC %s: Notify %s", self.name, hdr)
 
         if not inplace:
             # Remove from active mapped qubits
@@ -482,7 +482,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         # Lookup the name of the remote node used within SimulaQron
         target_name = self.factory.lookup(xtra.remote_node, xtra.remote_port)
         if target_name is None:
-            logging.warning("CQC %s: Remote node not found %s", self.name, xtra.printable())
+            logging.warning("CQC %s: Remote node not found %s", self.name, xtra)
             err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP, cqc_version=cqc_header.version)
             self.return_messages[cqc_header.app_id].append(err_msg)
             return False
@@ -654,7 +654,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
             hdr.setVals(qubit_id=q_id)
         msg = hdr.pack()
         # self.protocol.transport.write(msg)
-        logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
+        logging.debug("CQC %s: Notify %s", self.name, hdr)
         self.return_messages[cqc_header.app_id].append(msg)
         return True
 
@@ -677,7 +677,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         # Lookup the name of the remote node used within SimulaQron
         target_name = self.factory.lookup(remote_node, remote_port)
         if target_name is None:
-            logging.warning("CQC %s: Remote node not found %s", self.name, xtra.printable())
+            logging.warning("CQC %s: Remote node not found %s", self.name, xtra)
             err_msg = self.create_return_message(cqc_header.app_id, CQC_ERR_UNSUPP, cqc_version=cqc_header.version)
             self.return_messages[cqc_header.app_id].append(err_msg)
             return False
@@ -914,12 +914,12 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         msg = hdr.pack()
         self.return_messages[cqc_header.app_id].append(msg)
 
-        logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
+        logging.debug("CQC %s: Notify %s", self.name, hdr)
 
         # Send entanglement info
         msg_ent_info = ent_info.pack()
         self.return_messages[cqc_header.app_id].append(msg_ent_info)
-        logging.debug("CQC %s: Entanglement information %s", self.name, ent_info.printable())
+        logging.debug("CQC %s: Entanglement information %s", self.name, ent_info)
 
         logging.debug("CQC %s: EPR Pair ID %d qubit id %d", self.name, cqc_header.app_id, cmd.qubit_id)
         return True
@@ -941,7 +941,7 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         # Lookup the name of the remote node used within SimulaQron
         target_name = self.factory.lookup(xtra.remote_node, xtra.remote_port)
         if target_name is None:
-            logging.debug("CQC %s: Remote node not found %s", self.name, xtra.printable())
+            logging.debug("CQC %s: Remote node not found %s", self.name, xtra)
             return False
 
         # Prepare update raw entanglement information header
@@ -1064,18 +1064,18 @@ class SimulaqronCQCHandler(CQCMessageHandler):
         if cqc_header.version < 2:
             hdr = CQCNotifyHeader()
             hdr.setVals(q_id, 0, 0, 0, 0, 0)
-            logging.debug("CQC %s: Notify %s", self.name, hdr.printable())
+            logging.debug("CQC %s: Notify %s", self.name, hdr)
         else:
             hdr = CQCXtraQubitHeader()
             hdr.setVals(qubit_id=q_id)
-            logging.debug("CQC %s: %s", self.name, hdr.printable())
+            logging.debug("CQC %s: %s", self.name, hdr)
         msg = hdr.pack()
         self.return_messages[cqc_header.app_id].append(msg)
 
         # Send entanglement info
         ent_info_msg = ent_info.pack()
         self.return_messages[cqc_header.app_id].append(ent_info_msg)
-        logging.debug("CQC %s: Entanglement information %s", self.name, ent_info.printable())
+        logging.debug("CQC %s: Entanglement information %s", self.name, ent_info)
 
         logging.debug("CQC %s: EPR Pair ID %d qubit id %d", self.name, cqc_header.app_id, cmd.qubit_id)
         return True
@@ -1149,11 +1149,11 @@ class SimulaqronCQCHandler(CQCMessageHandler):
                     if cqc_header.version < 2:
                         hdr = CQCNotifyHeader()
                         hdr.setVals(q_id, 0, 0, 0, 0, 0)
-                        logging.info("CQC %s: Notify %s", self.name, hdr.printable())
+                        logging.info("CQC %s: Notify %s", self.name, hdr)
                     else:
                         hdr = CQCXtraQubitHeader()
                         hdr.setVals(qubit_id=q_id)
-                        logging.info("CQC %s: %s", self.name, hdr.printable())
+                        logging.info("CQC %s: %s", self.name, hdr)
                     msg = hdr.pack()
                     self.return_messages[cqc_header.app_id].append(msg)
         finally:
