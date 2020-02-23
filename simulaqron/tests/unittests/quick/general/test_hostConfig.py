@@ -3,6 +3,8 @@ import os
 
 from simulaqron.general.hostConfig import NetworksConfigConstructor, socketsConfig
 
+PATH_TO_HERE = os.path.abspath(os.path.dirname(__file__))
+
 
 class TestNetworkConfig(unittest.TestCase):
     def test_read_write(self):
@@ -13,7 +15,7 @@ class TestNetworkConfig(unittest.TestCase):
         network_config.add_node("Charlie", network_name="test")
 
         dct1 = network_config.to_dict()
-        file_path = os.path.join("resources", "test.json")
+        file_path = os.path.join(PATH_TO_HERE, "resources", "test.json")
         network_config.write_to_file(file_path)
 
         network_config2 = NetworksConfigConstructor(file_path=file_path)
@@ -27,10 +29,10 @@ class TestNetworkConfig(unittest.TestCase):
 
 class TestSocketsConfig(unittest.TestCase):
     def test_load_file(self):
-        file_path1 = os.path.join("resources", "sockets.cfg")
+        file_path1 = os.path.join(PATH_TO_HERE, "resources", "sockets.cfg")
         conf1 = socketsConfig(file_path1)
 
-        file_path2 = os.path.join("resources", "network.json")
+        file_path2 = os.path.join(PATH_TO_HERE, "resources", "network.json")
         conf2 = socketsConfig(file_path2, config_type="cqc")
 
         for node_name, host in conf1.hostDict.items():

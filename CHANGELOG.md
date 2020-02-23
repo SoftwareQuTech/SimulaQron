@@ -6,6 +6,10 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 Upcoming
 --------
 
+2020-02-23 (v3.0.14)
+-------------------
+- Fixed some old tests and improved how a network checks if it's running or not.
+
 2020-02-23 (v3.0.13)
 -------------------
 - Fixed bug in the Boolean Gaussian elimination in stabilizer formalism.

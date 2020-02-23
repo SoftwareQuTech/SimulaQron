@@ -8,39 +8,39 @@
                 ],
                 "cqc_socket": [
                     "localhost",
-                    8005
+                    8003
                 ],
                 "vnode_socket": [
                     "localhost",
-                    8006
+                    8004
                 ]
             },
             "Bob": {
                 "app_socket": [
                     "localhost",
-                    8011
+                    8008
                 ],
                 "cqc_socket": [
                     "localhost",
-                    8012
+                    8014
                 ],
                 "vnode_socket": [
                     "localhost",
-                    8015
+                    8017
                 ]
             },
             "Charlie": {
                 "app_socket": [
                     "localhost",
-                    8036
+                    8026
                 ],
                 "cqc_socket": [
                     "localhost",
-                    8044
+                    8029
                 ],
                 "vnode_socket": [
                     "localhost",
-                    8045
+                    8036
                 ]
             }
         },
