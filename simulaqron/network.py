@@ -133,7 +133,7 @@ class Network:
                 self._running = False
                 break
             except Exception as err:
-                logging.exception(f"Got unexpected exception when trying to connect: {err}")
+                logging.exception("Got unexpected exception when trying to connect: {}".format(err))
                 raise err
             else:
                 cqc.close()
