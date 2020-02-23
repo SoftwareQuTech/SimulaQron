@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>simulaqron.network &#8212; SimulaQron 3.0.13 documentation</title>
+    <title>simulaqron.network &#8212; SimulaQron 3.0.14 documentation</title>
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -25,7 +25,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 3.0.13 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 3.0.14 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -176,12 +176,17 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Is the network up and running?</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">cqc</span> <span class="o">=</span> <span class="n">CQCConnection</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">retry_connection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">network_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ConnectionRefusedError</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_running</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">break</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Got unexpected exception when trying to connect: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="n">err</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">cqc</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -379,7 +384,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 3.0.13 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SimulaQron 3.0.14 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
