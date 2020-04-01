@@ -6,6 +6,10 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 Upcoming
 --------
 
+2020-04-01 (v3.0.15)
+-------------------
+- Security patch: require twisted 20.3 or higher
+
 2020-02-23 (v3.0.14)
 -------------------
 - Fixed some old tests and improved how a network checks if it's running or not.
