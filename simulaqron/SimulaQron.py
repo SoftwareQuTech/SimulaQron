@@ -287,7 +287,7 @@ def network_config_file(value):
 
 
 @set.command()
-@click.argument('value', type=click.Choice("on", "off"))
+@click.argument('value', type=click.Choice(["on", "off"]))
 def noisy_qubits(value):
     """Whether qubits should be noisy (on/off)"""
     if value == "on":
