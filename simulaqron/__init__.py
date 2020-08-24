@@ -1,4 +1,4 @@
 from simulaqron.tests_run import main as tests
 
 __all__ = ['tests']
-__version__ = '3.0.14'
+__version__ = '3.0.15'
