@@ -6,6 +6,10 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 Upcoming
 --------
 
+2020-08-24 (v3.0.16)
+-------------------
+- Fixed bug with setting `noisy-qubit` option from cli.
+
 2020-04-01 (v3.0.15)
 -------------------
 - Security patch: require twisted 20.3 or higher
