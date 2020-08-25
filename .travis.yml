@@ -1,44 +1,44 @@
 language: python
 branches:
   only:
-    - master
-    - Develop
+  - master
+  - Develop
 matrix:
   include:
-    - name: Python 3.5 on Linux
-      python: 3.5
-    - name: Python 3.6 on Linux
-      python: 3.6
-      env:
-      - BUILD=True
-    - name: Python 3.7 on Xenial Linux
-      python: 3.7
-      dist: xenial
-    - name: Python 3.7 on macOS
-      os: osx
-      osx_image: xcode10.2
-      language: shell
-      env:
-      - PIPFLAG="--user"
+  - name: Python 3.5 on Linux
+    python: 3.5
+  - name: Python 3.6 on Linux
+    python: 3.6
+    env:
+    - BUILD=True
+  - name: Python 3.7 on Xenial Linux
+    python: 3.7
+    dist: xenial
+  - name: Python 3.7 on macOS
+    os: osx
+    osx_image: xcode10.2
+    language: shell
+    env:
+    - PIPFLAG="--user"
 before_install:
-  - make build
+- make build
 install:
-  - pip3 install dist/*.whl $PIPFLAG
+- pip3 install dist/*.whl $PIPFLAG
 script:
-  - make lint
-  - make tests
+- make lint
+- make tests
 before_deploy:
-  - cd docs
-  - make build
-  - cd ..
+- cd docs
+- make build
+- cd ..
 deploy:
   - provider: pypi
     user: adahlberg
     password:
-      secure: DwhFEJlCg5477emRHek2sgoz6l51fJoH6Uf1MGV1v9OYwS0KJu9CZGzfxWf+4+S5HotK6lyQP16YxTnBUf5MUW3m7vn1q4QOPS02Ga3ETZ50ndxvnob0nxgZAkvHYpG2nSwx73g/yU2cHTqekBhtM2WUg7SzXGt8cwJblGKcckA4mZrbxOYOOmE6G4VpjtgTab107eJt5lgwnRan7UUV6bg/+FuR3nsrDtIuUm66jzhhdPCqpIRm2e7npkejpGm3zl3s8dpD7b1wN/q/3YCnMJvy6JcO9PfyFmB/nmVPhk9a+fuRGK8/uj/b5Vmk9t2NTpaqlaUvTp/S/agojiPl3+UxIfhpsaycWbtDNBhNPtbSkDcgyJDdnl0EsQZEnfIHci/7L7GdeYt0M+N7m8orApHuyhfORUind5hDLu/0UMDI7K/UhRFXTOMLrCKFtbk/02KxapBL51+SE/G2kgaXE6HCO+8knGob+LAdJY+1xL3WKhfB+5+DyIYoigJuJv0ObElYNuJJe5a0uy+0kKyjcEEozhr59ad4qoQr8u9piF8DoF3lVLBuadivtUME0mvlFHdm7ShNYE74HYjDzIkDGWtl5ONakpXH4dWOflGuJfG/tzJeN5sgGJMG6rkXNbN5OtU11CwUupII+/mtVrBv/mn4mEU2/3GW4qsmbpV2+k0=
+      secure: HS1N/sC4eBKH/SQWLNxxO1wS1/P2lp5aV69plaw0sU3aj97uz1RkLDPI8YUG1y3yEIR053JB+MGSnZ1DxXEqu0lH6XXI+pBtej47asRB+mbjFUZpCSPtq2KzcVkGF5bxpyA1k6l6Q3NauyJw2gAJrP+YYX6lO1Fd+WDdzEFw4sPnyM+r77krfOPMozEr1vBls2H5kVxA61yxb+uaydefL4tNqaZy8oCTOGEDUT/OzgiX+pWGtmOYP1MIs7ZBboODY3KzwgkVfPtEPsqR0AAic8KHzrZxjd32a3FqmVAV8+Gv0f7HaL6eRP9hJcxwOHRpv7v66BFBRe9zS16CV9CyaSEQ61ZDKdnEIvjSUiXwQeHnLahMNpX7qdRKmjbvM1Odij1qd44KHg10H0hywf2brqQJEUDh3iquas5A9cB/5aAqalHBJ5+pThkOhG23PoE/OfuXAjBjKIrAkHgugekG0aPC3KskdX1EHxiyobvuyvJFqchT7xpYY1NDFVrawdYpLWNPU6Mw2cobCKIg7WvkJa0oN7ndOE40YUNeuzfP+/0QYuAf/CKE344Rk7+1j2mg6vRxshm7N58hZ2d1wAPTa0ucX8PwhT2RPmylZQm2TBfXgRAuM7ggSpeYGOvbVryqfV76s9mdm5AwRtEyPvWt8KMkL2FGaSnFlx2juRkpk7Q=
     distributions: sdist bdist_wheel
     skip_existing: true
-    on: 
+    on:
       branch: master
       condition: "$BUILD = True"
   - provider: pages
