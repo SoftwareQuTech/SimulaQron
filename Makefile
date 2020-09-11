@@ -2,13 +2,7 @@ PYTHON         = python3
 PIP            = pip3
 EXAMPLES_DIR   = examples
 SIMULAQRON_DIR = simulaqron
-GENERAL_DIR    = simulaqron/cqc_backend
-GENERAL_DIR    = simulaqron/general
-LOCAL_DIR      = simulaqron/local
-RUN_DIR        = simulaqron/run
-TESTS_DIR      = simulaqron/tests
-TOOLBOX_DIR    = simulaqron/toolbox
-VIRTNODE_DIR   = simulaqron/virtNode
+RESET_FILE     = ${SIMULAQRON_DIR}/toolbox/reset.py
 
 clean: _delete_pyc _delete_pid _clear_build _reset
 
@@ -19,13 +13,16 @@ _delete_pid:
 	@find ${SIMULAQRON_DIR} -name '*.pid' -delete
 
 lint:
-	@${PYTHON} -m flake8 ${SIMULAQRON_DIR} ${CQC_DIR} ${EXAMPLES_DIR} ${GENERAL_DIR} ${LOCAL_DIR} ${RUN_DIR} ${TESTS_DIR} ${TOOLBOX_DIR} ${VIRTNODE_DIR}
+	@${PYTHON} -m flake8 ${SIMULAQRON_DIR} ${EXAMPLES_DIR}
 
-python-deps:
+test-deps:
+	@${PYTHON} -m pip install -r test_requirements.txt
+
+requirements python-deps:
 	@cat requirements.txt | xargs -n 1 -L 1 $(PIP) install
 
 _reset:
-	@${PYTHON} ${TOOLBOX_DIR}/reset.py
+	@${PYTHON} ${RESET_FILE}
 
 _tests:
 	@${PYTHON} ${SIMULAQRON_DIR}/tests_run.py --quick
@@ -36,6 +33,9 @@ _tests_all:
 	@${PYTHON} ${SIMULAQRON_DIR}/tests_run.py --full
 
 tests_all: _tests_all _reset
+
+install: test-deps
+	@$(PYTHON) -m pip install -e . ${PIP_FLAGS}
 
 _verified:
 	@echo "SimulaQron is verified!"
