@@ -1,0 +1,26 @@
+image: adahlberg/nlblueprintci:19.04
+
+.only_mr: &only_mr
+    only:
+        - master
+        - merge_requests
+
+.install: &install
+    before_script:
+        - make install
+
+stages:
+    - lint
+    - tests
+
+lint:
+    <<: *install
+    stage: lint
+    script: make lint
+    <<: *only_mr
+
+test:
+    <<: *install
+    stage: tests
+    script: make tests
+    <<: *only_mr
