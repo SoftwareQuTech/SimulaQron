@@ -15,7 +15,10 @@ _delete_pid:
 lint:
 	@${PYTHON} -m flake8 ${SIMULAQRON_DIR} ${EXAMPLES_DIR}
 
-python-deps:
+test-deps:
+	@${PYTHON} -m pip install -r test_requirements.txt
+
+requirements python-deps:
 	@cat requirements.txt | xargs -n 1 -L 1 $(PIP) install
 
 _reset:
