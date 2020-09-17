@@ -48,6 +48,6 @@ setuptools.setup(
     ],
     entry_points='''
         [console_scripts]
-        simulaqron=simulaqron.SimulaQron:cli
+        simulaqron=simulaqron.simulaqron:cli
     '''
 )

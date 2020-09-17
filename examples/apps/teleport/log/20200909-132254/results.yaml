@@ -1,0 +1,10 @@
+app_alice:
+  m1: 1
+  m2: 0
+app_bob:
+  qubit_state:
+  - - !!python/complex 0.5353686076665483
+    - !!python/complex -0.4987474928174875+2.465190328815662e-32j
+  - - !!python/complex -0.4987474928174875-2.465190328815662e-32j
+    - !!python/complex 0.46463139233345163
+backend: null

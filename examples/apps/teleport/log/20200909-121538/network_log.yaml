@@ -1,0 +1,33 @@
+- INS: epr_EntanglementStage.START
+  LOG: start entanglement creation between alice and bob
+  NOD:
+  - alice
+  - bob
+  QGR:
+    8749164447900:
+      is_entangled: false
+      qubits:
+      - - alice
+        - 0
+  QID:
+  - null
+  - null
+  QST:
+  - null
+  - null
+  SIT: 3050.0
+  WCT: '2020-09-09 12:15:39.084742'
+- INS: epr_EntanglementStage.FINISH
+  LOG: entanglement created between alice and bob
+  NOD:
+  - alice
+  - bob
+  QGR: {}
+  QID:
+  - 1
+  - 0
+  QST:
+  - null
+  - null
+  SIT: 3050.00001
+  WCT: '2020-09-09 12:15:39.151266'

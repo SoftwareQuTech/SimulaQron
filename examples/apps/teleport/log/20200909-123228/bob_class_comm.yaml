@@ -1,0 +1,18 @@
+- HFL: /home/axel/Dev/netqasm/squidasm/examples/apps/teleport/app_bob.py
+  HLN: 29
+  INS: WAIT_RECV
+  LOG: Waiting for a classical message from alice...
+  MSG: null
+  REC: bob
+  SEN: alice
+  SOD: 0
+  WCT: '2020-09-09 12:32:29.221933'
+- HFL: /home/axel/Dev/netqasm/squidasm/examples/apps/teleport/app_bob.py
+  HLN: 29
+  INS: RECV
+  LOG: 'Message received from alice: (1, 0)'
+  MSG: (1, 0)
+  REC: bob
+  SEN: alice
+  SOD: 0
+  WCT: '2020-09-09 12:32:29.349535'

@@ -1,0 +1,23 @@
+- HFL: /home/axel/Dev/netqasm/squidasm/examples/apps/teleport/app_bob.py
+  HLN: 25
+  INS: recv_epr
+  LOG: Doing instruction recv_epr with operands ['R0=0', 'R1=0', 'R2=1', 'R3=0']
+  OPR:
+  - R0=0
+  - R1=0
+  - R2=1
+  - R3=0
+  OPV:
+  - 0
+  - 0
+  - 1
+  - 0
+  OUT: null
+  PRC: 11
+  QGR: null
+  QID:
+  - 0
+  QST: null
+  SID: 0
+  SIT: 3968.0
+  WCT: '2020-09-09 13:22:57.547650'

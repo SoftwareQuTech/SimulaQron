@@ -29,16 +29,18 @@
 
 import time
 import random
-import logging
 import multiprocessing as mp
 import networkx as nx
 from timeit import default_timer as timer
 
+from netqasm.logging import get_netqasm_logger
+
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 from simulaqron.settings import simulaqron_settings
-from simulaqron.run.startNode import main as start_node
-from simulaqron.run.startCQC import main as start_cqc
-from cqc.pythonLib import CQCConnection
+from simulaqron.run.start_vnode import main as start_vnode
+from simulaqron.run.start_qnodeos import main as start_qnodeos
+# from cqc.pythonLib import CQCConnection
+from simulaqron.sdk import SimulaQronConnection
 
 #########################################################################################
 # Network class, sets up (part of) a simulated network.                                 #
@@ -116,6 +118,7 @@ class Network:
                                          "If you wish to overwrite the current network in the file, use the"
                                          "--new flag.".format(node_name, self.name, self._network_config_file))
 
+        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
         self.processes = []
         self._setup_processes()
 
@@ -128,16 +131,18 @@ class Network:
             return True
         for node in self.nodes:
             try:
-                cqc = CQCConnection(node, retry_connection=False, network_name=self.name)
+                SimulaQronConnection.try_connection(
+                    name=node,
+                    network_name=self.name,
+                )
             except ConnectionRefusedError:
                 self._running = False
                 break
             except Exception as err:
-                logging.exception("Got unexpected exception when trying to connect: {}".format(err))
+                self._logger.exception("Got unexpected exception when trying to connect: {}".format(err))
                 raise err
-            else:
-                cqc.close()
         else:
+            self._logger.debug(f"Network {self.name} is now running")
             self._running = True
 
         return self._running
@@ -152,12 +157,12 @@ class Network:
         mp.set_start_method("spawn", force=True)
         for node in self.nodes:
             process_virtual = mp.Process(
-                target=start_node, args=(node, self.name), name="VirtNode {}".format(node)
+                target=start_vnode, args=(node, self.name), name="VirtNode {}".format(node)
             )
-            process_cqc = mp.Process(
-                target=start_cqc, args=(node, self.name), name="CQCNode {}".format(node)
+            process_qnodeos = mp.Process(
+                target=start_qnodeos, args=(node, self.name), name="CQCNode {}".format(node)
             )
-            self.processes += [process_virtual, process_cqc]
+            self.processes += [process_virtual, process_qnodeos]
 
     def start(self, wait_until_running=True):
         """
@@ -166,10 +171,10 @@ class Network:
         blog until the all processes are running and are connected or not.
         :param wait_until_running: bool
         """
-        logging.info("Starting network with name {}".format(self.name))
+        self._logger.info("Starting network with name {}".format(self.name))
         for p in self.processes:
             if not p.is_alive():
-                logging.debug("Starting process {}".format(p.name))
+                self._logger.debug("Starting process {}".format(p.name))
                 p.deamon = True
                 p.start()
 
@@ -190,7 +195,7 @@ class Network:
             return
 
         self._running = False
-        logging.info("Stopping network with name {}".format(self.name))
+        self._logger.info("Stopping network with name {}".format(self.name))
         for p in self.processes:
             while p.is_alive():
                 time.sleep(0.1)

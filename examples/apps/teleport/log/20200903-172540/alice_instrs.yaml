@@ -1,0 +1,105 @@
+- ENT: null
+  HFL: /home/axel/Dev/netqasm/squidasm/examples/apps/teleport/app_alice.py
+  HLN: 29
+  INS: create_epr
+  LOG: Doing instruction create_epr with operands ['R0', 'R1', 'R2', 'R3', 'R4']
+  OPR:
+  - R0
+  - R1
+  - R2
+  - R3
+  - R4
+  OPV:
+  - 1
+  - 0
+  - 1
+  - 2
+  - 0
+  OUT: null
+  PRC: 33
+  QST: null
+  SID: 0
+  SIT: 2612.0
+  WCT: '2020-09-03 17:25:40.615346'
+- ENT: true
+  HFL: /home/axel/Dev/netqasm/squidasm/examples/apps/teleport/app_alice.py
+  HLN: 32
+  INS: cnot
+  LOG: Doing instruction cnot with operands ['Q0', 'Q1']
+  OPR:
+  - Q0
+  - Q1
+  OPV:
+  - 0
+  - 1
+  OUT: null
+  PRC: 39
+  QST:
+  - - !!python/complex 0.5353686076665483
+    - !!python/complex 0.0
+  - - !!python/complex 0.0
+    - !!python/complex 0.46463139233345135
+  SID: 0
+  SIT: 2618.0
+  WCT: '2020-09-03 17:25:40.650740'
+- ENT: true
+  HFL: /home/axel/Dev/netqasm/squidasm/examples/apps/teleport/app_alice.py
+  HLN: 33
+  INS: h
+  LOG: Doing instruction h with operands ['Q0']
+  OPR:
+  - Q0
+  OPV:
+  - 0
+  OUT: null
+  PRC: 41
+  QST:
+  - - !!python/complex 0.4999999999999997
+    - !!python/complex 0.0353686076665484
+  - - !!python/complex 0.0353686076665484
+    - !!python/complex 0.4999999999999997
+  SID: 0
+  SIT: 2621.0
+  WCT: '2020-09-03 17:25:40.663473'
+- ENT: false
+  HFL: /home/axel/Dev/netqasm/squidasm/examples/apps/teleport/app_alice.py
+  HLN: 34
+  INS: meas
+  LOG: Doing instruction meas with operands ['Q0', 'M0']
+  OPR:
+  - Q0
+  - M0
+  OPV:
+  - 0
+  - 0
+  OUT: 0
+  PRC: 43
+  QST:
+  - - !!python/complex 1.0
+    - !!python/complex 0.0
+  - - !!python/complex 0.0
+    - !!python/complex 0.0
+  SID: 0
+  SIT: 2621.0
+  WCT: '2020-09-03 17:25:40.664757'
+- ENT: false
+  HFL: /home/axel/Dev/netqasm/squidasm/examples/apps/teleport/app_alice.py
+  HLN: 35
+  INS: meas
+  LOG: Doing instruction meas with operands ['Q0', 'M0']
+  OPR:
+  - Q0
+  - M0
+  OPV:
+  - 1
+  - 1
+  OUT: 1
+  PRC: 48
+  QST:
+  - - !!python/complex 0.0
+    - !!python/complex 0.0
+  - - !!python/complex 0.0
+    - !!python/complex 1.0
+  SID: 0
+  SIT: 2621.0
+  WCT: '2020-09-03 17:25:40.665973'
