@@ -14,7 +14,7 @@ def main(log_config=None, phi=0., theta=0.):
     )
     with alice:
         q = Qubit(alice)
-        # set_qubit_state(q, phi, theta)
+        set_qubit_state(q, phi, theta)
 
         # q2 = Qubit(alice)
         # q.cnot(q2)

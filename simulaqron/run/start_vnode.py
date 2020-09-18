@@ -30,6 +30,7 @@
 
 import sys
 import signal
+from functools import partial
 from twisted.internet import reactor
 
 from netqasm.logging import get_netqasm_logger
@@ -39,14 +40,14 @@ from simulaqron.settings import simulaqron_settings
 logger = get_netqasm_logger("start_vnode")
 
 
-def sigterm_handler(_signo, _stack_frame):
-    print("Shutting down Node")
+def sigterm_handler(name, _signo, _stack_frame):
+    logger.info("Shutting down Node")
     reactor.stop()
 
 
 def main(name, network_name="default"):
-    signal.signal(signal.SIGTERM, sigterm_handler)
-    signal.signal(signal.SIGINT, sigterm_handler)
+    signal.signal(signal.SIGTERM, partial(sigterm_handler, name))
+    signal.signal(signal.SIGINT, partial(sigterm_handler, name))
 
     logger.debug("Starting VIRTUAL NODE %s", name)
     if simulaqron_settings.network_config_file is not None:
@@ -55,6 +56,7 @@ def main(name, network_name="default"):
         virtualFile = simulaqron_settings.vnode_file
     be = Backend(name, virtualFile, network_name=network_name)
     be.start(maxQubits=simulaqron_settings.max_qubits, maxRegisters=simulaqron_settings.max_registers)
+    logger.debug("Ending VIRTUAL NODE %s", name)
 
 
 if __name__ == "__main__":

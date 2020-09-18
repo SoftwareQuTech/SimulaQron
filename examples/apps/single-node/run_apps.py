@@ -16,5 +16,6 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         log_level = sys.argv[1]
     else:
-        log_level = None
+        log_level = "WARNING"
     main(log_level=log_level)
+    print("main finished")

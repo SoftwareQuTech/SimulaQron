@@ -134,6 +134,12 @@ class VanillaSimulaQronExecutioner(Executioner):
             simulaqron_gate = self._get_simulaqron_gate(instr=instr)
             yield self.apply_single_qubit_gate(subroutine_id=subroutine_id, gate=simulaqron_gate, qubit_id=position)
 
+    def _do_single_qubit_rotation(self, instr, subroutine_id, address, angle):
+        raise NotImplementedError
+
+    def _do_two_qubit_instr(self, instr, subroutine_id, address1, address2):
+        raise NotImplementedError
+
     @classmethod
     def _get_simulaqron_gate(cls, instr):
         simulaqron_gate = cls.SIMULAQRON_OPS.get(type(instr))
@@ -249,6 +255,9 @@ class VanillaSimulaQronExecutioner(Executioner):
                 return False
         return True
 
+    def _do_wait(self):
+        raise NotImplementedError
+
     def _update_shared_memory(self, app_id, entry, value):
         print(app_id, entry, value)
         if isinstance(entry, instructions.operand.Register):
@@ -266,6 +275,18 @@ class VanillaSimulaQronExecutioner(Executioner):
             ))
         else:
             raise TypeError(f"Cannot update shared memory with entry specified as {entry}")
+
+    def _wait_to_handle_epr_responses(self):
+        # TODO check if used
+        raise NotImplementedError
+
+    def _reserve_physical_qubit(self, physical_address):
+        # TODO check if used
+        raise NotImplementedError
+
+    def _clear_phys_qubit_in_memory(self, physical_address):
+        # TODO check if used
+        raise NotImplementedError
 
 
 class VirtualQubitRef:

@@ -26,13 +26,15 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import sys
 import json
-import logging
 
+from twisted.internet import reactor
 from twisted.internet.defer import DeferredLock, inlineCallbacks
 from twisted.internet.protocol import Factory, Protocol, connectionDone
 
 from netqasm.messages import deserialize as deserialize_message
+from netqasm.logging import get_netqasm_logger
 
 from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
@@ -79,7 +81,8 @@ class NetQASMProtocol(Protocol):
         # Convenience
         self.name = self.factory.name
 
-        logging.debug("CQC %s: Initialized Protocol", self.name)
+        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
+        self._logger.debug("CQC %s: Initialized Protocol", self.name)
 
     def connectionMade(self):
         pass
@@ -107,10 +110,21 @@ class NetQASMProtocol(Protocol):
         print(f"{self.name} recv msg_id: {msg_id}")
         print(f"{self.name} recv msg: {msg}")
         tmp = self.messageHandler.handle_netqasm_message(msg_id=msg_id, msg=msg)
+        # TODO
+        # tmp.addCallback
+        # tmp.addErrback
         print(f"tmp in dataReceived: {tmp}")
-        # raise NotImplementedError
 
-        # self._parseData()
+    def log_handled_message(self, result):
+        self._logger.info(f"Finished handling message with result = {result}")
+
+    def ebPrintError(self, failure):
+        self._logger.error(f"Handling message failed with failure = {failure}")
+        sys.stderr.write(str(failure))
+        self.stop()
+
+    def stop(self):
+        self.factory.stop()
 
     def _parse_message(self):
         try:
@@ -170,7 +184,7 @@ class NetQASMProtocol(Protocol):
         """
         print(f"{self.name} return msg {msg} to host")
         output = self.transport.write(msg)
-        print(f"message returned {self.transport} {self.transport.__dict__}")
+        print(f"message returned (output = {output})")
 
 
 ###############################################################################
@@ -203,6 +217,8 @@ class NetQASMFactory(Factory):
         # Lock governing access to the qubitList
         self._lock = DeferredLock()
 
+        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({name})")
+
         # Read in topology, if specified. topology=None means fully connected
         # topology
         self.topology = None
@@ -212,6 +228,11 @@ class NetQASMFactory(Factory):
             if simulaqron_settings.network_config_file is not None:
                 networks_config = NetworksConfigConstructor(file_path=simulaqron_settings.network_config_file)
                 self.topology = networks_config.networks[network_name].topology
+
+    def stop(self):
+        print("STOPPING FACTORY")
+        reactor.stop()
+        print("FACTORY STOPPED")
 
     def buildProtocol(self, addr):
         """
@@ -235,7 +256,7 @@ class NetQASMFactory(Factory):
             if (node.ip == ip) and (node.port == port):
                 return node.name
 
-        logging.debug("CQC %s: No such node", self.name)
+        self._logger.debug("CQC %s: No such node", self.name)
         return None
 
     def _setup_topology(self, topology_file):
@@ -279,7 +300,7 @@ class NetQASMFactory(Factory):
             else:
                 return False
         else:
-            logging.warning(
+            self._logger.warning(
                 "Node {} is not in the specified topology and is therefore "
                 "assumed to have no neighbors".format(self.name)
             )

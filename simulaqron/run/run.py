@@ -56,13 +56,14 @@ def reset(save_loggers=False):
 
 def run_backend(node_names):
     logger.debug(f"Starting simulaqron backend process with nodes {node_names}")
-    # network = Network(name="default", nodes=node_names, force=True, new=True)
-    network = Network(name="default", nodes=node_names, force=True, new=False)
+    network = Network(name="default", nodes=node_names, force=True, new=True)
+    # network = Network(name="default", nodes=node_names, force=True, new=False)
     network.start(wait_until_running=False)
     # while network.running:
-    while True:
-        sleep(0.1)
-    logger.debug("End backend process")
+    # while True:
+    #     sleep(0.1)
+    # logger.debug("End backend process")
+    return network
 
 
 def run_applications(
@@ -87,8 +88,10 @@ def run_applications(
     with Pool(len(node_names) + 1) as executor:
         # Start the backend process
         # backend_future = executor.apply_async(run_backend, (node_names,))
-        backend_future = executor.submit(run_backend, node_names)
+        # backend_future = executor.submit(run_backend, node_names)
         # backend_future = executor.amap(run_backend, [node_names])
+
+        network = run_backend(node_names)
 
         # Start the application processes
         app_futures = []
@@ -104,13 +107,20 @@ def run_applications(
             app_futures.append(future)
 
         # Join the application processes and the backend
-        names = ['backend'] + [f'app_{node_name}' for node_name in node_names]
+        # names = ['backend'] + [f'app_{node_name}' for node_name in node_names]
+        names = [f'app_{node_name}' for node_name in node_names]
         results = {}
-        for future, name in as_completed([backend_future] + app_futures, names=names):
+        # for future, name in as_completed([backend_future] + app_futures, names=names):
+        for future, name in as_completed(app_futures, names=names):
             # results[name] = future.get()
+            print(f"name {name} completed")
             results[name] = future.result()
         if results_file is not None:
             save_results(results=results, results_file=results_file)
+
+        print("CALLING network stop")
+        network.stop()
+        print("CALLED network stop")
 
     reset(save_loggers=True)
     return results

@@ -105,6 +105,8 @@ class SubroutineHandler:
         # Keep track of finished messages
         self._finished_messages = []
 
+        self._finished = False
+
         self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
 
     @classmethod
@@ -115,6 +117,10 @@ class SubroutineHandler:
     @abc.abstractmethod
     def stop(self):
         pass
+
+    @property
+    def finished(self):
+        return self._finished
 
     @inlineCallbacks
     def handle_netqasm_message(self, msg_id, msg):
@@ -129,6 +135,8 @@ class SubroutineHandler:
         if isinstance(output, GeneratorType):
             yield from output
         self._mark_message_finished(msg_id=msg_id, msg=msg)
+        if self.finished:
+            self.stop()
 
     @property
     def has_active_apps(self):
@@ -294,8 +302,9 @@ class SubroutineHandler:
         signal = Signal(msg.signal)
         self._logger.debug(f"SubroutineHandler at node {self.name} handles the signal {signal}")
         if signal == Signal.STOP:
-            self._logger.debug(f"SubroutineHandler at node {self.name} stops")
-            self.stop()
+            self._logger.debug(f"SubroutineHandler at node {self.name} will stop")
+            # Just mark that it will stop, to first send back the reply
+            self._finished = True
         else:
             raise ValueError(f"Unkown signal {signal}")
 
@@ -337,8 +346,8 @@ class SimulaQronSubroutineHandler(SubroutineHandler):
         self._return_msg(msg=ret_msg)
 
     def stop(self):
-        # TODO
-        pass
+        print("STOPPING HANDLER")
+        self.factory.stop()
 
     def _return_msg(self, msg):
         """Return a message to the host"""

@@ -191,9 +191,6 @@ class Network:
         """
         Stops the network.
         """
-        if not self._running:
-            return
-
         self._running = False
         self._logger.info("Stopping network with name {}".format(self.name))
         for p in self.processes:

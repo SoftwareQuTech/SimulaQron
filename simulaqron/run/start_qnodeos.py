@@ -93,6 +93,7 @@ def setup_netqasm_server(myName, netqasm_factory):
 
 
 def sigterm_handler(_signo, _stack_frame):
+    print("Shutting down QNodeOS")
     reactor.stop()
 
 
@@ -130,6 +131,7 @@ def main(myName, network_name="default"):
 
     # Run reactor
     reactor.run()
+    logger.debug(f"Ending QNodeOS at {myName}")
 
 
 if __name__ == '__main__':
