@@ -257,7 +257,7 @@ class SingleQubitGateTest(unittest.TestCase):
             # Test T
             sys.stdout.write("Testing T gate:")
             exp_values = calc_exp_values(prep_T_state())
-            if simulaqron_settings.backend == "stabilizer":
+            if simulaqron_settings.backend == SimBackend.STABILIZER:
                 with self.assertRaises(CQCUnsuppError):
                     cqc.test_preparation(prep_T_CQC, exp_values, iterations=self.iterations, progress=False)
             else:
@@ -279,7 +279,7 @@ class SingleQubitGateTest(unittest.TestCase):
             # Test ROT_X pi/8
             sys.stdout.write("Testing rotation (X,pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([1, 0, 0], np.pi / 8))
-            if simulaqron_settings.backend == "stabilizer":
+            if simulaqron_settings.backend == SimBackend.STABILIZER:
                 with self.assertRaises(CQCUnsuppError):
                     cqc.test_preparation(prep_rotx1_CQC, exp_values, iterations=self.iterations, progress=False)
             else:
@@ -292,7 +292,7 @@ class SingleQubitGateTest(unittest.TestCase):
             # Test ROT_X 5*pi/8
             sys.stdout.write("Testing rotation (X,5*pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([1, 0, 0], 5 * np.pi / 8))
-            if simulaqron_settings.backend == "stabilizer":
+            if simulaqron_settings.backend == SimBackend.STABILIZER:
                 with self.assertRaises(CQCUnsuppError):
                     cqc.test_preparation(prep_rotx2_CQC, exp_values, iterations=self.iterations, progress=False)
             else:
@@ -305,7 +305,7 @@ class SingleQubitGateTest(unittest.TestCase):
             # Test ROT_Y pi/8
             sys.stdout.write("Testing rotation (Y,pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([0, 1, 0], np.pi / 8))
-            if simulaqron_settings.backend == "stabilizer":
+            if simulaqron_settings.backend == SimBackend.STABILIZER:
                 with self.assertRaises(CQCUnsuppError):
                     cqc.test_preparation(prep_roty1_CQC, exp_values, iterations=self.iterations, progress=False)
             else:
@@ -318,7 +318,7 @@ class SingleQubitGateTest(unittest.TestCase):
             # Test ROT_Y 5*pi/8
             sys.stdout.write("Testing rotation (Y,5*pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([0, 1, 0], 5 * np.pi / 8))
-            if simulaqron_settings.backend == "stabilizer":
+            if simulaqron_settings.backend == SimBackend.STABILIZER:
                 with self.assertRaises(CQCUnsuppError):
                     cqc.test_preparation(prep_roty2_CQC, exp_values, iterations=self.iterations, progress=False)
             else:
@@ -331,7 +331,7 @@ class SingleQubitGateTest(unittest.TestCase):
             # Test ROT_Z pi/8
             sys.stdout.write("Testing rotation (Z,pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([0, 0, 1], np.pi / 8))
-            if simulaqron_settings.backend == "stabilizer":
+            if simulaqron_settings.backend == SimBackend.STABILIZER:
                 with self.assertRaises(CQCUnsuppError):
                     cqc.test_preparation(prep_rotz1_CQC, exp_values, iterations=self.iterations, progress=False)
             else:
@@ -344,7 +344,7 @@ class SingleQubitGateTest(unittest.TestCase):
             # Test ROT_Z 5*pi/8
             sys.stdout.write("Testing rotation (Z,5*pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([0, 0, 1], 5 * np.pi / 8))
-            if simulaqron_settings.backend == "stabilizer":
+            if simulaqron_settings.backend == SimBackend.STABILIZER:
                 with self.assertRaises(CQCUnsuppError):
                     cqc.test_preparation(prep_rotz2_CQC, exp_values, iterations=self.iterations, progress=False)
             else:

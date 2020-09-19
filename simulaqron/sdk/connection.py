@@ -7,7 +7,7 @@ from netqasm.instructions.operand import Register, Address
 from simulaqron.settings import simulaqron_settings
 from simulaqron.general.host_config import SocketsConfig
 # from simulaqron.sdk.messages import MessageID, MessageLength
-from simulaqron.sdk.messages import MessageHeader, MsgDoneMessage, ReturnRegMessage, ReturnArrayMessage
+from simulaqron.sdk.messages import MessageHeader, MsgDoneMessage, ReturnRegMessage, ReturnArrayMessage, ErrorMessage
 from simulaqron.sdk.messages import deserialize as deserialize_return_message
 
 
@@ -129,7 +129,6 @@ class SimulaQronConnection(NetQASMConnection):
             except ConnectionRefusedError as err:
                 if retry_time is None or retry_time == 0:
                     raise err
-                print(err)
                 logger.debug("App {} : Could not connect to  NetQASM server, trying again...".format(name))
                 time.sleep(retry_time)
                 qnodeos_socket.close()
@@ -198,6 +197,8 @@ class SimulaQronConnection(NetQASMConnection):
                     entry=Address(address=ret_msg.address),
                     value=ret_msg.values,
                 )
+            elif isinstance(ret_msg, ErrorMessage):
+                raise RuntimeError(f"Received error message from backend: {ret_msg}")
             else:
                 raise NotImplementedError(f"Unknown return message of type {type(ret_msg)}")
 

@@ -24,16 +24,17 @@ def main(log_config=None, phi=0., theta=0.):
     )
     with alice:
         # Create a qubit to teleport
-        q = Qubit(alice)
-        set_qubit_state(q, phi, theta)
+        # q = Qubit(alice)
+        # set_qubit_state(q, phi, theta)
 
         # Create EPR pairs
         epr = epr_socket.create()[0]
 
         # Teleport
-        q.cnot(epr)
-        q.H()
-        m1 = q.measure()
+        # q.cnot(epr)
+        # q.H()
+        # m1 = q.measure()
+        m1 = 0
         m2 = epr.measure()
 
     # Send the correction information

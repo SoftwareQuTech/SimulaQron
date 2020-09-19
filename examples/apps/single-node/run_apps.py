@@ -2,6 +2,7 @@ import os
 import sys
 
 from simulaqron.run.simulate import simulate_apps
+from simulaqron.settings import SimBackend
 
 
 def main(log_level):
@@ -9,6 +10,7 @@ def main(log_level):
     simulate_apps(
         app_dir=app_dir,
         log_level=log_level,
+        backend=SimBackend.QUTIP,
     )
 
 

@@ -37,7 +37,7 @@ try:
 except ImportError:
     raise RuntimeError("If you want to use the qutip backend you need to install the python package 'qutip'")
 
-from simulaqron.virtNode.basics import quantumEngine, quantumError, noQubitError
+from simulaqron.virtual_node.basics import quantumEngine, quantumError, noQubitError
 
 
 class qutipEngine(quantumEngine):

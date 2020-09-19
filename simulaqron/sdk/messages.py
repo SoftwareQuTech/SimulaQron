@@ -60,7 +60,7 @@ class ErrorMessage(ReturnMessage):
 
     def __init__(self, err_code):
         super().__init__(self.TYPE.value)
-        self.err_code = err_code
+        self.err_code = err_code.value
 
 
 class ReturnArrayMessageHeader(ctypes.Structure):

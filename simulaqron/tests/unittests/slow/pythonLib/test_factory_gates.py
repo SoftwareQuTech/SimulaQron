@@ -32,7 +32,7 @@ import numpy as np
 from scipy.linalg import expm
 
 from cqc.pythonLib import CQCConnection, qubit, CQCUnsuppError
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, SimBackend
 from simulaqron.network import Network
 
 
@@ -458,7 +458,7 @@ class FactoryGateTest(unittest.TestCase):
             # Test T factory quarter
             print("Testing T factory (quarter):")
             exp_values = calc_exp_values_single(prep_T_state(1))
-            if simulaqron_settings.backend == "stabilizer":
+            if simulaqron_settings.backend == SimBackend.STABILIZER:
                 with self.assertRaises(CQCUnsuppError):
                     cqc.test_preparation(
                         prep_T_CQC_FACTORY_QUARTER, exp_values, iterations=self.iterations, progress=False
@@ -470,7 +470,7 @@ class FactoryGateTest(unittest.TestCase):
             # Test T factory half
             print("Testing T factory (half):")
             exp_values = calc_exp_values_single(prep_T_state(2))
-            if simulaqron_settings.backend == "stabilizer":
+            if simulaqron_settings.backend == SimBackend.STABILIZER:
                 with self.assertRaises(CQCUnsuppError):
                     cqc.test_preparation(
                         prep_T_CQC_FACTORY_HALF, exp_values, iterations=self.iterations, progress=False
@@ -482,7 +482,7 @@ class FactoryGateTest(unittest.TestCase):
             # Test T factory half
             print("Testing T factory (three quarters):")
             exp_values = calc_exp_values_single(prep_T_state(3))
-            if simulaqron_settings.backend == "stabilizer":
+            if simulaqron_settings.backend == SimBackend.STABILIZER:
                 with self.assertRaises(CQCUnsuppError):
                     cqc.test_preparation(
                         prep_T_CQC_FACTORY_THREE_QUARTER, exp_values, iterations=self.iterations, progress=False
@@ -494,7 +494,7 @@ class FactoryGateTest(unittest.TestCase):
             # Test T factory half
             print("Testing T factory (full):")
             exp_values = calc_exp_values_single(prep_I_state())
-            if simulaqron_settings.backend == "stabilizer":
+            if simulaqron_settings.backend == SimBackend.STABILIZER:
                 with self.assertRaises(CQCUnsuppError):
                     cqc.test_preparation(
                         prep_T_CQC_FACTORY_FULL, exp_values, iterations=self.iterations, progress=False
@@ -539,7 +539,7 @@ class FactoryGateTest(unittest.TestCase):
             # To the amount of times this rotation is done
             print("Testing CNOT rotation of 4 times 1/32:")
             exp_values = calc_exp_values_single(prep_ROT_X_state())
-            if simulaqron_settings.backend == "stabilizer":
+            if simulaqron_settings.backend == SimBackend.STABILIZER:
                 with self.assertRaises(CQCUnsuppError):
                     cqc.test_preparation(prep_ROT_X, exp_values, iterations=self.iterations, progress=False)
             else:

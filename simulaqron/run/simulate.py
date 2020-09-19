@@ -17,6 +17,7 @@ from netqasm.output import InstrField
 from .run import run_applications
 from netqasm.sdk.config import LogConfig
 from netqasm.instructions.flavour import NVFlavour, VanillaFlavour
+from simulaqron.settings import SimBackend
 
 # from netsquid_netconf.builder import ComponentBuilder
 # from netsquid_netconf.netconf import netconf_generator
@@ -162,7 +163,8 @@ def simulate_apps(
     post_function_file=None,
     results_file=None,
     # formalism="KET", TODO
-    flavour=None
+    flavour=None,
+    backend=SimBackend.STABILIZER,
 ):
 
     set_log_level(log_level)
@@ -247,7 +249,8 @@ def simulate_apps(
         # post_function=post_function,
         results_file=results_file,
         # q_formalism=q_formalism,
-        flavour=flavour
+        flavour=flavour,
+        backend=backend,
     )
 
     process_log(log_dir=timed_log_dir)

@@ -28,17 +28,19 @@
 
 import sys
 import json
+import time
 
 from twisted.internet import reactor
 from twisted.internet.defer import DeferredLock, inlineCallbacks
 from twisted.internet.protocol import Factory, Protocol, connectionDone
+from twisted.internet.task import deferLater
 
 from netqasm.messages import deserialize as deserialize_message
 from netqasm.logging import get_netqasm_logger
 
 from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
-from simulaqron.sdk.messages import MessageHeader
+from simulaqron.sdk.messages import MessageHeader, ErrorMessage, ErrorCode
 
 
 class IncompleteMessageError(ValueError):
@@ -109,19 +111,21 @@ class NetQASMProtocol(Protocol):
 
         print(f"{self.name} recv msg_id: {msg_id}")
         print(f"{self.name} recv msg: {msg}")
-        tmp = self.messageHandler.handle_netqasm_message(msg_id=msg_id, msg=msg)
-        # TODO
-        # tmp.addCallback
-        # tmp.addErrback
-        print(f"tmp in dataReceived: {tmp}")
+        d = self.messageHandler.handle_netqasm_message(msg_id=msg_id, msg=msg)
+        d.addCallback(self.log_handled_message)
+        d.addErrback(self.log_error)
 
     def log_handled_message(self, result):
         self._logger.info(f"Finished handling message with result = {result}")
 
-    def ebPrintError(self, failure):
+    @inlineCallbacks
+    def log_error(self, failure):
         self._logger.error(f"Handling message failed with failure = {failure}")
         sys.stderr.write(str(failure))
-        self.stop()
+        self._return_msg(msg=ErrorMessage(err_code=ErrorCode.GENERAL))
+        yield deferLater(reactor, 0.1, self.stop)
+        # time.sleep(1)
+        # self.stop()
 
     def stop(self):
         self.factory.stop()

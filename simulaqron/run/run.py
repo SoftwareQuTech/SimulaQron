@@ -18,6 +18,8 @@ from netqasm.sdk.classical_communication import reset_socket_hub
 # from squidasm.queues import reset_queues
 
 from simulaqron.network import Network
+from simulaqron.settings import simulaqron_settings, SimBackend
+from simulaqron.toolbox import has_module
 
 logger = get_netqasm_logger()
 
@@ -54,8 +56,15 @@ def reset(save_loggers=False):
     reload(logging)
 
 
-def run_backend(node_names):
+def check_backend(backend):
+    if backend in [SimBackend.PROJECTQ, SimBackend.QUTIP]:
+        assert has_module.main(backend), f"To use {backend} as backend you need to install the package"
+
+
+def run_backend(node_names, backend=SimBackend.STABILIZER):
     logger.debug(f"Starting simulaqron backend process with nodes {node_names}")
+    check_backend(backend=backend)
+    simulaqron_settings.backend = backend
     network = Network(name="default", nodes=node_names, force=True, new=True)
     # network = Network(name="default", nodes=node_names, force=True, new=False)
     network.start(wait_until_running=False)
@@ -73,6 +82,7 @@ def run_applications(
     results_file=None,
     # q_formalism=ns.QFormalism.KET, TODO
     flavour=None,
+    backend=SimBackend.STABILIZER
 ):
     """Executes functions containing application scripts,
 
@@ -91,7 +101,7 @@ def run_applications(
         # backend_future = executor.submit(run_backend, node_names)
         # backend_future = executor.amap(run_backend, [node_names])
 
-        network = run_backend(node_names)
+        network = run_backend(node_names, backend=backend)
 
         # Start the application processes
         app_futures = []

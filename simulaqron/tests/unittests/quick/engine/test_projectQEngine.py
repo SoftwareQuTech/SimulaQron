@@ -2,8 +2,9 @@ import unittest
 import numpy as np
 
 from simulaqron.toolbox import has_module
+from simulaqron.settings import SimBackend
 
-if has_module.main("projectq"):
+if has_module.main(SimBackend.PROJECTQ):
 
     from simulaqron.virtNode.projectQSimulator import projectQEngine
     from simulaqron.virtNode.basics import noQubitError, quantumError

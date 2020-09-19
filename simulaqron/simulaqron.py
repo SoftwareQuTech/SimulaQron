@@ -8,7 +8,7 @@ from daemons.interfaces import exit
 
 import simulaqron
 from simulaqron.network import Network
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, SimBackend
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 from simulaqron.toolbox.reset import main as reset_simulaqron
 
@@ -231,7 +231,7 @@ def default():
 
 
 @set.command()
-@click.argument('value', type=click.Choice(["stabilizer", "projectq", "qutip"]))
+@click.argument('value', type=click.Choice([b.value for b in SimBackend]))
 def backend(value):
     """The backend to use (stabilizer, projectq, qutip)."""
     simulaqron_settings.backend = value
