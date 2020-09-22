@@ -47,8 +47,6 @@ class IncompleteMessageError(ValueError):
     pass
 
 
-# from cqc.Protocol import NetQASMProtocol
-# NOTE TODO TEMP
 class NetQASMProtocol(Protocol):
     # Dictionary storing the next unique qubit id for each used app_id
     _next_q_id = {}
@@ -71,7 +69,7 @@ class NetQASMProtocol(Protocol):
         self.messageHandler = factory.backend
         self.messageHandler.protocol = self
 
-        # Flag to determine whether we already received _all_ of the CQC header
+        # Flag to determine whether we already received _all_ of the NetQASM header
         self.got_netqasm_header = False
 
         # Header for which we are currently processing a packet
@@ -84,7 +82,7 @@ class NetQASMProtocol(Protocol):
         self.name = self.factory.name
 
         self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
-        self._logger.debug("CQC %s: Initialized Protocol", self.name)
+        self._logger.debug("Initialized Protocol")
 
     def connectionMade(self):
         pass
@@ -168,7 +166,7 @@ class NetQASMProtocol(Protocol):
     @inlineCallbacks
     def _parseData(self, header, data):
         try:
-            yield self.messageHandler.handle_cqc_message(self.buf)
+            yield from self.messageHandler.handle_cqc_message(self.buf)
             # messages = self.messageHandler.retrieve_return_messages(header.app_id)
         except Exception as e:
             raise e
@@ -193,16 +191,16 @@ class NetQASMProtocol(Protocol):
 
 ###############################################################################
 #
-# CQC Factory
+# NetQASM Factory
 #
-# Twisted factory for the CQC protocol
+# Twisted factory for the NetQASM protocol
 #
 
 
 class NetQASMFactory(Factory):
     def __init__(self, host, name, cqc_net, backend, network_name="default"):
         """
-        Initialize CQC Factory.
+        Initialize NetQASM Factory.
 
         lhost	details of the local host (class host)
         """
@@ -260,7 +258,7 @@ class NetQASMFactory(Factory):
             if (node.ip == ip) and (node.port == port):
                 return node.name
 
-        self._logger.debug("CQC %s: No such node", self.name)
+        self._logger.debug("No such node")
         return None
 
     def _setup_topology(self, topology_file):

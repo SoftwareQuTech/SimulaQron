@@ -49,7 +49,7 @@ class localNode(pb.Root):
             return True
         else:
             self.q2 = yield self.virtRoot.callRemote("get_virtual_ref", virtualNum)
-            correct = yield self.got_both()
+            correct = yield from self.got_both()
             return correct
 
     @inlineCallbacks

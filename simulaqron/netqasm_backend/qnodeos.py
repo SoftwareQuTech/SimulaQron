@@ -130,7 +130,7 @@ class SubroutineHandler:
     def _handle_message(self, msg_id, msg):
         # Generator
         self._logger.info(f'Handle message {msg}')
-        # yield self._message_handlers[msg.TYPE](msg)
+        # yield from self._message_handlers[msg.TYPE](msg)
         output = self._message_handlers[msg.TYPE](msg)
         if isinstance(output, GeneratorType):
             yield from output
@@ -164,21 +164,6 @@ class SubroutineHandler:
 
     def add_network_stack(self, network_stack):
         self._executioner.network_stack = network_stack
-
-    # def run(self):
-    #     while self.is_running:
-    #         # Check if there is a new message
-    #         self._logger.debug('Checking for next message')
-    #         msg = self._next_message()
-    #         if msg is not None:
-    #             self._handle_message(msg=msg)
-    #         ev = self._get_next_task_event()
-    #         if ev is None:
-    #             # No tasks so wait a bit before checking next msg
-    #             self._logger.debug('No more events so wait for next message')
-    #             yield self._sleeper.sleep()
-    #         else:
-    #             yield ev
 
     # def _handle_message(self, msg):
     #     # Generator

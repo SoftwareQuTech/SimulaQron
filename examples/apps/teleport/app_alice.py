@@ -2,7 +2,7 @@ from netqasm.sdk import Qubit, EPRSocket
 # from netqasm.sdk import ThreadSocket as Socket
 from netqasm.sdk.toolbox import set_qubit_state
 from netqasm.output import get_new_app_logger
-from simulaqron.sdk import SimulaQronConnection
+from simulaqron.sdk import SimulaQronConnection, Socket
 
 
 def main(log_config=None, phi=0., theta=0.):
@@ -10,8 +10,7 @@ def main(log_config=None, phi=0., theta=0.):
     app_logger = get_new_app_logger(node_name="alice", log_config=log_config)
 
     # Create a socket to send classical information
-    # TODO
-    # socket = Socket("alice", "bob", log_config=log_config)
+    socket = Socket("alice", "bob", log_config=log_config)
 
     # Create a EPR socket for entanglement generation
     epr_socket = EPRSocket("bob")
@@ -24,17 +23,16 @@ def main(log_config=None, phi=0., theta=0.):
     )
     with alice:
         # Create a qubit to teleport
-        # q = Qubit(alice)
-        # set_qubit_state(q, phi, theta)
+        q = Qubit(alice)
+        set_qubit_state(q, phi, theta)
 
         # Create EPR pairs
         epr = epr_socket.create()[0]
 
         # Teleport
-        # q.cnot(epr)
-        # q.H()
-        # m1 = q.measure()
-        m1 = 0
+        q.cnot(epr)
+        q.H()
+        m1 = q.measure()
         m2 = epr.measure()
 
     # Send the correction information
@@ -42,11 +40,10 @@ def main(log_config=None, phi=0., theta=0.):
 
     app_logger.log(f"m1 = {m1}")
     app_logger.log(f"m2 = {m2}")
+    print(f"m1 = {m1}, m2 = {m2}")
 
     msg = str((m1, m2))
-    print(msg)
-    # TODO
-    # socket.send(msg)
+    socket.send(msg)
 
     return {'m1': m1, 'm2': m2}
 

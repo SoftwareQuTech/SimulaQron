@@ -5,7 +5,7 @@ from netqasm.logging import get_netqasm_logger
 from netqasm.sdk.connection import NetQASMConnection
 from netqasm.instructions.operand import Register, Address
 from simulaqron.settings import simulaqron_settings
-from simulaqron.general.host_config import SocketsConfig
+from simulaqron.general.host_config import SocketsConfig, get_node_id_from_net_config
 # from simulaqron.sdk.messages import MessageID, MessageLength
 from simulaqron.sdk.messages import MessageHeader, MsgDoneMessage, ReturnRegMessage, ReturnArrayMessage, ErrorMessage
 from simulaqron.sdk.messages import deserialize as deserialize_return_message
@@ -224,9 +224,7 @@ class SimulaQronConnection(NetQASMConnection):
 
     def _get_node_id(self, node_name):
         """Returns the node id for the node with the given name"""
-        host = self._qnodeos_net.hostDict[node_name]
-        # NOTE now only return IP (also port?)
-        return host.ip
+        return get_node_id_from_net_config(self._qnodeos_net, node_name)
 
     def _get_node_name(self, node_id):
         """Returns the node name for the node with the given ID"""

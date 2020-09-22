@@ -2,7 +2,7 @@ import abc
 import enum
 import ctypes
 
-from netqasm.encoding import Address, Register, INTEGER
+from netqasm.encoding import Address, Register, INTEGER, OptionalInt
 from netqasm.messages import Message, MESSAGE_TYPE, MESSAGE_TYPE_BYTES
 
 MESSAGE_ID = ctypes.c_uint32
@@ -99,8 +99,10 @@ class ReturnArrayMessage:
         print("init array")
 
     def __bytes__(self):
-        array_type = INTEGER * len(self.values)
-        payload = array_type(*self.values)
+        array_type = OptionalInt * len(self.values)
+        print(type(self.values[0]))
+        print(OptionalInt(self.values[0]))
+        payload = array_type(*(OptionalInt(v) for v in self.values))
         hdr = ReturnArrayMessageHeader(
             address=Address(self.address),
             length=len(self.values),
@@ -117,9 +119,9 @@ class ReturnArrayMessage:
     def deserialize_from(cls, raw: bytes):
         raw = raw[MESSAGE_TYPE_BYTES:]
         hdr = ReturnArrayMessageHeader.from_buffer_copy(raw)
-        array_type = INTEGER * hdr.length
+        array_type = OptionalInt * hdr.length
         raw = raw[ReturnArrayMessageHeader.len():]
-        values = list(array_type.from_buffer_copy(raw))
+        values = list(v.value for v in array_type.from_buffer_copy(raw))
         return cls(address=hdr.address.address, values=values)
 
 

@@ -1,7 +1,7 @@
 from netqasm.logging import get_netqasm_logger
 from netqasm.sdk import EPRSocket
 # from netqasm.sdk import ThreadSocket as Socket
-from simulaqron.sdk import SimulaQronConnection
+from simulaqron.sdk import SimulaQronConnection, Socket
 
 logger = get_netqasm_logger()
 
@@ -9,8 +9,7 @@ logger = get_netqasm_logger()
 def main(log_config=None):
 
     # Create a socket to recv classical information
-    # TODO
-    # socket = Socket("bob", "alice", log_config=log_config)
+    socket = Socket("bob", "alice", log_config=log_config)
 
     # Create a EPR socket for entanglement generation
     epr_socket = EPRSocket("alice")
@@ -26,9 +25,7 @@ def main(log_config=None):
         bob.flush()
 
         # Get the corrections
-        # msg = socket.recv()
-        # TODO
-        msg = str((0, 0))
+        msg = socket.recv()
         logger.info(f"bob got corrections: {msg}")
         m1, m2 = eval(msg)
         if m2 == 1:

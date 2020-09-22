@@ -1,14 +1,12 @@
 import os
 
 from simulaqron.run.simulate import simulate_apps
-from simulaqron.settings import SimBackend
 
 
 def main():
     app_dir = os.path.dirname(os.path.abspath(__file__))
     simulate_apps(
         app_dir=app_dir,
-        backend=SimBackend.QUTIP,
         log_level="DEBUG",
     )
 
