@@ -6,7 +6,6 @@ from netqasm.sdk.connection import NetQASMConnection
 from netqasm.instructions.operand import Register, Address
 from simulaqron.settings import simulaqron_settings
 from simulaqron.general.host_config import SocketsConfig, get_node_id_from_net_config
-# from simulaqron.sdk.messages import MessageID, MessageLength
 from simulaqron.sdk.messages import MessageHeader, MsgDoneMessage, ReturnRegMessage, ReturnArrayMessage, ErrorMessage
 from simulaqron.sdk.messages import deserialize as deserialize_return_message
 
@@ -121,7 +120,7 @@ class SimulaQronConnection(NetQASMConnection):
         qnodeos_socket = None
         while True:
             try:
-                logger.debug(f"App {name} : Trying to connect to NetQASM server ({addr})")
+                logger.debug(f"App {name} : Trying to connect to NetQASM server (at {addr[-1]})")
 
                 qnodeos_socket = socket.socket(addr[0], addr[1], addr[2])
                 qnodeos_socket.connect(addr[4])
@@ -146,27 +145,18 @@ class SimulaQronConnection(NetQASMConnection):
         msg_id = self._get_new_msg_id()
         length = MessageHeader.len() + len(raw_msg)
         msg_hdr = MessageHeader(id=msg_id, length=length)
-        print(f"{self.name} msg_hdr: {msg_hdr}")
-        # length = MessageLength(MessageID.len() + MessageLength.len() + len(raw_msg))
-        print(f"{self.name} msg_id: {msg_id}")
-        print(f"{self.name} length: {length}")
-        # self._socket.send(bytes(msg_id) + bytes(length) + raw_msg)
         self._socket.send(bytes(msg_hdr) + raw_msg)
         if callback is not None:
             raise NotImplementedError("Callback not yet implemented")
-        print(f"{self.name} block = {block}")
         if block:
             self._wait_for_done(msg_id=msg_id)
 
     def _wait_for_done(self, msg_id):
-        print(f'{self.name} waiting for msg ID {msg_id}')
         while not self._is_done(msg_id=msg_id):
             self._handle_reply()
             time.sleep(0.1)
-        print(f'{self.name} finished waiting for msg ID {msg_id} ({self._done_msg_ids})')
 
     def _handle_reply(self):
-        print("connection receiving")
         data = self._socket.recv(1024)
         if self.buf:
             self.buf += data
@@ -203,7 +193,6 @@ class SimulaQronConnection(NetQASMConnection):
                 raise NotImplementedError(f"Unknown return message of type {type(ret_msg)}")
 
     def _update_shared_memory(self, entry, value):
-        print(f"updating entry {entry} ({type(entry)}) to be {value} ({type(value)})")
         shared_memory = self.shared_memory
         if isinstance(entry, Register):
             shared_memory.set_register(entry, value)

@@ -3,10 +3,7 @@ import sys
 import shutil
 import pickle
 import importlib
-# from runpy import run_path
 from datetime import datetime
-
-# import netsquid as ns
 
 from netqasm.logging import (
     set_log_level,
@@ -18,11 +15,6 @@ from .run import run_applications
 from netqasm.sdk.config import LogConfig
 from netqasm.instructions.flavour import NVFlavour, VanillaFlavour
 from simulaqron.settings import SimBackend
-
-# from netsquid_netconf.builder import ComponentBuilder
-# from netsquid_netconf.netconf import netconf_generator
-
-# from squidasm.network import QDevice, NodeLinkConfig
 
 logger = get_netqasm_logger()
 
@@ -44,16 +36,6 @@ def get_network_config_path(app_dir):
     ext = '.yaml'
     file_path = os.path.join(app_dir, f'network{ext}')
     return file_path
-
-
-# def load_network_config(network_config_file):
-#     if os.path.exists(network_config_file):
-#         ComponentBuilder.add_type("qdevice", QDevice)
-#         ComponentBuilder.add_type("link", NodeLinkConfig)
-#         generator = netconf_generator(network_config_file)
-#         return next(generator)
-#     else:
-#         return None
 
 
 def load_app_files(app_dir):
@@ -142,12 +124,6 @@ def get_post_function_path(app_dir):
     return os.path.join(app_dir, 'post_function.py')
 
 
-# def load_post_function(post_function_file):
-#     if not os.path.exists(post_function_file):
-#         return None
-#     return run_path(post_function_file)['main']
-
-
 def get_results_path(timed_log_dir):
     return os.path.join(timed_log_dir, 'results.yaml')
 
@@ -162,9 +138,8 @@ def simulate_apps(
     log_level="WARNING",
     post_function_file=None,
     results_file=None,
-    # formalism="KET", TODO
     flavour=None,
-    backend=SimBackend.STABILIZER,
+    formalism="STAB",
 ):
 
     set_log_level(log_level)
@@ -214,23 +189,19 @@ def simulate_apps(
     sys.path.append(app_dir)
     for node_name, app_file in app_files.items():
         app_module = importlib.import_module(app_file[:-len('.py')])
-        # app_main = run_path(os.path.join(app_dir, app_file))['main']
         app_main = getattr(app_module, "main")
         app_config = load_app_config(app_config_dir, node_name)
         app_config["log_config"] = log_config
         applications[node_name] = app_main, app_config
 
-    # network_config = load_network_config(network_config_file)
-
-    # Load post function if exists
-    # post_function = load_post_function(post_function_file) TODO
-
-    # if formalism == "KET": TODO
-    #     q_formalism = ns.QFormalism.KET
-    # elif formalism == "DM":
-    #     q_formalism = ns.QFormalism.DM
-    # else:
-    #     raise TypeError(f"Unknown formalism {formalism}")
+    if formalism == "STAB":
+        backend = SimBackend.STABILIZER
+    elif formalism == "KET":
+        backend = SimBackend.PROJECTQ
+    elif formalism == "DM":
+        backend = SimBackend.QUTIP
+    else:
+        raise TypeError(f"Unknown formalism {formalism}")
 
     if flavour is None:
         flavour = "vanilla"
@@ -244,11 +215,8 @@ def simulate_apps(
 
     run_applications(
         applications=applications,
-        # network_config=network_config,
         instr_log_dir=timed_log_dir,
-        # post_function=post_function,
         results_file=results_file,
-        # q_formalism=q_formalism,
         flavour=flavour,
         backend=backend,
     )

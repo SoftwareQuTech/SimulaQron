@@ -27,8 +27,6 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
-import json
-import time
 
 from twisted.internet import reactor
 from twisted.internet.defer import DeferredLock, inlineCallbacks
@@ -96,7 +94,6 @@ class NetQASMProtocol(Protocol):
         header, and then the entire packet first before commencing processing.
         """
         # Read whatever we received into a buffer
-        print(f"DATA receive {data}")
         if self.buf:
             self.buf = self.buf + data
         else:
@@ -107,8 +104,6 @@ class NetQASMProtocol(Protocol):
         except IncompleteMessageError:
             return
 
-        print(f"{self.name} recv msg_id: {msg_id}")
-        print(f"{self.name} recv msg: {msg}")
         d = self.messageHandler.handle_netqasm_message(msg_id=msg_id, msg=msg)
         d.addCallback(self.log_handled_message)
         d.addErrback(self.log_error)
@@ -135,22 +130,10 @@ class NetQASMProtocol(Protocol):
             raise IncompleteMessageError
         if len(self.buf) < msg_hdr.length:
             raise IncompleteMessageError
-        # self.buf = self.buf[MessageHeader.len():]
-        print(f"{self.name} full msg: {self.buf}")
-        print(f"{self.name} recv raw_msg: {self.buf[MessageHeader.len():]}")
         msg = deserialize_message(self.buf[MessageHeader.len():])
         self.buf = self.buf[msg_hdr.length:]
-        print(f"{self.name} new buf: {self.buf}")
 
         return msg_hdr.id, msg
-        # if len(self.buf) < MessageID.len():
-        #     raise IncompleteMessageError
-        # msg_id = MessageID(data[:MessageID.len()])
-        # if len(self.buf) < MessageID.len() + MessageLength.len():
-        #     raise IncompleteMessageError
-        # length = MessageLength(data[MessageID.len():MessageID.len() + MessageLength.len()])
-        # if len(self.buf) < length.value:
-        #     raise IncompleteMessageError
 
     def _handle_init_new_app(self, msg):
         app_id = msg.app_id
@@ -167,9 +150,7 @@ class NetQASMProtocol(Protocol):
         """
         Return a msg to the host.
         """
-        print(f"{self.name} return msg {msg} to host")
         output = self.transport.write(msg)
-        print(f"message returned (output = {output})")
 
 
 ###############################################################################
@@ -207,17 +188,12 @@ class NetQASMFactory(Factory):
         # Read in topology, if specified. topology=None means fully connected
         # topology
         self.topology = None
-        if simulaqron_settings.topology_file is not None and simulaqron_settings.topology_file != "":
-            self._setup_topology(simulaqron_settings.topology_file)
-        else:
-            if simulaqron_settings.network_config_file is not None:
-                networks_config = NetworksConfigConstructor(file_path=simulaqron_settings.network_config_file)
-                self.topology = networks_config.networks[network_name].topology
+        if simulaqron_settings.network_config_file is not None:
+            networks_config = NetworksConfigConstructor(file_path=simulaqron_settings.network_config_file)
+            self.topology = networks_config.networks[network_name].topology
 
     def stop(self):
-        print("STOPPING FACTORY")
         reactor.stop()
-        print("FACTORY STOPPED")
 
     def buildProtocol(self, addr):
         """
@@ -243,28 +219,6 @@ class NetQASMFactory(Factory):
 
         self._logger.debug("No such node")
         return None
-
-    def _setup_topology(self, topology_file):
-        """
-        Sets up the topology, if specified.
-        :param topology_file: str
-            The relative path to the json-file defining the topology. It will
-            be assumed that the absolute path to the file is
-            $simulaqron_path/topology_file.
-            If topology is an empty string then a fully connected topology will
-            be used.
-        :return: None
-        """
-        try:
-            with open(topology_file, "r") as top_file:
-                try:
-                    self.topology = json.load(top_file)
-                except json.JSONDecodeError:
-                    raise RuntimeError("Could not parse the json file: {}".format(topology_file))
-        except FileNotFoundError:
-            raise FileNotFoundError("Could not find the file specifying the topology:" " {}".format(topology_file))
-        except IsADirectoryError:
-            raise FileNotFoundError("Could not find the file specifying the topology: " "{}".format(topology_file))
 
     def is_adjacent(self, remote_host_name):
         """

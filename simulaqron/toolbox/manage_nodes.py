@@ -4,10 +4,8 @@ from contextlib import closing
 import socket
 
 from simulaqron.toolbox import get_simulaqron_path
-from simulaqron.settings import simulaqron_settings
 
 
-node_config_file = simulaqron_settings.nodes_file
 simulaqron_path = get_simulaqron_path.main()
 config_folder = "config"
 default_topology_file = os.path.join(simulaqron_path, config_folder, "topology.json")
@@ -82,9 +80,16 @@ class NetworksConfigConstructor:
         qnodeos_hostname, qnodeos_port = socket_addresses[1]
         vnode_hostname, vnode_port = socket_addresses[2]
         if network_name in self.networks:
-            self.networks[network_name].add_node(name=node_name, app_hostname=app_hostname, qnodeos_hostname=qnodeos_hostname,
-                                                 vnode_hostname=vnode_hostname, app_port=app_port, qnodeos_port=qnodeos_port,
-                                                 vnode_port=vnode_port, neighbors=neighbors)
+            self.networks[network_name].add_node(
+                name=node_name,
+                app_hostname=app_hostname,
+                qnodeos_hostname=qnodeos_hostname,
+                vnode_hostname=vnode_hostname,
+                app_port=app_port,
+                qnodeos_port=qnodeos_port,
+                vnode_port=vnode_port,
+                neighbors=neighbors,
+            )
         else:
             network = _NetworkConfig()
             network.add_node(name=node_name, app_hostname=app_hostname, qnodeos_hostname=qnodeos_hostname,
@@ -235,7 +240,11 @@ class NetworksConfigConstructor:
                 app_hostname, app_port = node_dict["app_socket"]
                 qnodeos_hostname, qnodeos_port = node_dict["qnodeos_socket"]
                 vnode_hostname, vnode_port = node_dict["vnode_socket"]
-                socket_addresses = [(app_hostname, app_port), (qnodeos_hostname, qnodeos_port), (vnode_hostname, vnode_port)]
+                socket_addresses = [
+                    (app_hostname, app_port),
+                    (qnodeos_hostname, qnodeos_port),
+                    (vnode_hostname, vnode_port),
+                ]
                 for socket_address in socket_addresses:
                     if socket_address not in self.used_sockets:
                         self.used_sockets.append(socket_address)
@@ -295,7 +304,17 @@ class _NetworkConfig:
         self.topology = None
         self.nodes = {}
 
-    def add_node(self, name, app_hostname, qnodeos_hostname, vnode_hostname, app_port, qnodeos_port, vnode_port, neighbors):
+    def add_node(
+        self,
+        name,
+        app_hostname,
+        qnodeos_hostname,
+        vnode_hostname,
+        app_port,
+        qnodeos_port,
+        vnode_port,
+        neighbors,
+    ):
         """
         Adds a node with the given name to a network (default: "default").
         If hostnames are None they will default to 'localhost'.
@@ -331,9 +350,15 @@ class _NetworkConfig:
 
             self.topology[name] = neighbors
 
-        self.nodes[name] = _NodeConfig(name=name, app_hostname=app_hostname, qnodeos_hostname=qnodeos_hostname,
-                                       vnode_hostname=vnode_hostname, app_port=app_port, qnodeos_port=qnodeos_port,
-                                       vnode_port=vnode_port)
+        self.nodes[name] = _NodeConfig(
+            name=name,
+            app_hostname=app_hostname,
+            qnodeos_hostname=qnodeos_hostname,
+            vnode_hostname=vnode_hostname,
+            app_port=app_port,
+            qnodeos_port=qnodeos_port,
+            vnode_port=vnode_port,
+        )
 
     def to_dict(self):
         """

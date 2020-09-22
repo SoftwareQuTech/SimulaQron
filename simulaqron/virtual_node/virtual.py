@@ -27,7 +27,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import logging
 import random
 
 from collections import deque
@@ -498,7 +497,6 @@ class virtualNode(pb.Root):
                 # Create a new register
                 newReg = self.remote_add_register()
 
-                # simQubit = simulatedQubit(self.myID, self.defaultReg, simNum)
                 simQubit = simulatedQubit(self.myID, newReg, simNum)
                 try:
                     simQubit.make_fresh()
@@ -659,7 +657,6 @@ class virtualNode(pb.Root):
 
         # Ask to add to list
         try:
-            print(f"in netqasm_send_epr_half rawEntInfo = {rawEntInfo}")
             yield remoteNode.root.callRemote(
                 "netqasm_add_epr_list", self.myID.name, app_id, remote_app_id, newVirtNum, rawEntInfo
             )
@@ -709,7 +706,6 @@ class virtualNode(pb.Root):
                 return None
 
             self._logger.debug("Returning qubit on EPR socket ID %d from epr list", to_epr_socket_id)
-            print(f"qc.rawEntInfo = {qc.rawEntInfo}")
             return self.remote_get_virtual_ref(qc.virt_num), qc.rawEntInfo
 
         except Exception as e:
@@ -1920,7 +1916,11 @@ class virtualQubit(pb.Referenceable):
                         raise quantumError("Inconsistent simulation.")
 
                     # Pull the remote registers to this node
-                    self.simQubit = yield from self.virtNode.root.remote_merge_from(self.simNode.name, fNum, newLocalReg)
+                    self.simQubit = yield from self.virtNode.root.remote_merge_from(
+                        self.simNode.name,
+                        fNum,
+                        newLocalReg,
+                    )
                     target.simQubit = yield from target.virtNode.root.remote_merge_from(
                         target.simNode.name, tNum, newLocalReg
                     )

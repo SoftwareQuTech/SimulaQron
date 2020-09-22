@@ -2,8 +2,6 @@ from simulaqron.sdk import Socket
 
 
 def main(log_config=None):
-    print("RUNNING APP BOB")
-
     # Create a socket to send classical information
     socket = Socket("bob", "alice", log_config=log_config)
 
@@ -13,8 +11,6 @@ def main(log_config=None):
     msg = f"Thanks for saying '{msg}'"
     print(f"Bob saying '{msg}'")
     socket.send(msg)
-
-    print("BOB FINISHED")
 
 
 if __name__ == "__main__":

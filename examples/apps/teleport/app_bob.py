@@ -1,6 +1,5 @@
 from netqasm.logging import get_netqasm_logger
 from netqasm.sdk import EPRSocket
-# from netqasm.sdk import ThreadSocket as Socket
 from simulaqron.sdk import SimulaQronConnection, Socket
 
 logger = get_netqasm_logger()

@@ -1,4 +1,4 @@
 app_alice:
   m1: 1
-  m2: 0
+  m2: 1
 app_bob: null

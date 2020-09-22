@@ -1,12 +1,10 @@
 from netqasm.sdk import Qubit, EPRSocket
-# from netqasm.sdk import ThreadSocket as Socket
 from netqasm.sdk.toolbox import set_qubit_state
 from netqasm.output import get_new_app_logger
 from simulaqron.sdk import SimulaQronConnection, Socket
 
 
 def main(log_config=None, phi=0., theta=0.):
-    print("RUNNING APP ALICE")
     app_logger = get_new_app_logger(node_name="alice", log_config=log_config)
 
     # Create a socket to send classical information

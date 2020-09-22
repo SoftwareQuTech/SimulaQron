@@ -8,6 +8,7 @@ from netqasm.messages import Message, MESSAGE_TYPE, MESSAGE_TYPE_BYTES
 MESSAGE_ID = ctypes.c_uint32
 
 
+# TODO move to netqasm
 class MessageHeader(ctypes.Structure):
     _fields_ = [
         ('id', MESSAGE_ID),
@@ -92,16 +93,12 @@ class ReturnArrayMessage:
             | ADDRESS | LENGTH | VALUES ... |
 
         """
-        print("init array")
         self.type = self.TYPE.value
         self.address = address
         self.values = values
-        print("init array")
 
     def __bytes__(self):
         array_type = OptionalInt * len(self.values)
-        print(type(self.values[0]))
-        print(OptionalInt(self.values[0]))
         payload = array_type(*(OptionalInt(v) for v in self.values))
         hdr = ReturnArrayMessageHeader(
             address=Address(self.address),
@@ -134,7 +131,6 @@ class ReturnRegMessage(ReturnMessage):
     TYPE = ReturnMessageType.RET_REG
 
     def __init__(self, register, value):
-        print("init reg")
         super().__init__(self.TYPE.value)
         self.register = register
         self.value = value

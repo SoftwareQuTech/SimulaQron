@@ -1,11 +1,9 @@
 from netqasm.sdk import Qubit
-# from netqasm.sdk import ThreadSocket as Socket
 from netqasm.sdk.toolbox import set_qubit_state
 from simulaqron.sdk import SimulaQronConnection
 
 
 def main(log_config=None, phi=0., theta=0.):
-    print(f"Starting Alice, phi = {phi}, theta = {theta}")
     # Initialize the connection to the backend
     alice = SimulaQronConnection(
         name="alice",
@@ -25,7 +23,6 @@ def main(log_config=None, phi=0., theta=0.):
     m1, m2 = int(m1), int(m2)
     print(f"m1 = {m1}, m2 = {m2}")
 
-    print("Ending Alice")
     return {'m1': m1, 'm2': m2}
 
 
