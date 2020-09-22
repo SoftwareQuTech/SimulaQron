@@ -1,8 +1,0 @@
-- HFL: /home/axel/Dev/netqasm/squidasm/examples/apps/teleport/app_alice.py
-  HLN: 40
-  LOG: m1 = 1
-  WCT: '2020-09-09 12:32:29.339336'
-- HFL: /home/axel/Dev/netqasm/squidasm/examples/apps/teleport/app_alice.py
-  HLN: 41
-  LOG: m2 = 0
-  WCT: '2020-09-09 12:32:29.339372'

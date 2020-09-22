@@ -1,9 +1,0 @@
-- HFL: /home/axel/Dev/netqasm/squidasm/examples/apps/teleport/app_alice.py
-  HLN: 44
-  INS: SEND
-  LOG: 'Send classical message to bob: (1, 0)'
-  MSG: (1, 0)
-  REC: bob
-  SEN: alice
-  SOD: 0
-  WCT: '2020-09-09 12:32:29.339406'

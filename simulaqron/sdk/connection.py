@@ -210,6 +210,17 @@ class SimulaQronConnection(NetQASMConnection):
             raise TypeError(
                 f"Cannot update shared memory with entry specified as {entry}")
 
+    def add_single_qubit_rotation_commands(self, instruction, virtual_qubit_id, n=0, d=0, angle=None):
+        if simulaqron_settings.backend == "stabilizer":
+            raise RuntimeError("Cannot perform rotations when using stabilizer formalism")
+        super().add_single_qubit_rotation_commands(
+            instruction=instruction,
+            virtual_qubit_id=virtual_qubit_id,
+            n=n,
+            d=d,
+            angle=angle,
+        )
+
     def _is_done(self, msg_id):
         return msg_id in self._done_msg_ids
 
