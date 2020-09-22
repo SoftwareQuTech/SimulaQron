@@ -33,12 +33,11 @@ from twisted.internet.defer import DeferredLock, inlineCallbacks
 from twisted.internet.protocol import Factory, Protocol, connectionDone
 from twisted.internet.task import deferLater
 
-from netqasm.messages import deserialize as deserialize_message
 from netqasm.logging import get_netqasm_logger
+from netqasm.messages import MessageHeader, ErrorMessage, ErrorCode, deserialize_host_msg
 
 from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
-from simulaqron.sdk.messages import MessageHeader, ErrorMessage, ErrorCode
 
 
 class IncompleteMessageError(ValueError):
@@ -117,8 +116,6 @@ class NetQASMProtocol(Protocol):
         sys.stderr.write(str(failure))
         self._return_msg(msg=ErrorMessage(err_code=ErrorCode.GENERAL))
         yield deferLater(reactor, 0.1, self.stop)
-        # time.sleep(1)
-        # self.stop()
 
     def stop(self):
         self.factory.stop()
@@ -130,7 +127,7 @@ class NetQASMProtocol(Protocol):
             raise IncompleteMessageError
         if len(self.buf) < msg_hdr.length:
             raise IncompleteMessageError
-        msg = deserialize_message(self.buf[MessageHeader.len():])
+        msg = deserialize_host_msg(self.buf[MessageHeader.len():])
         self.buf = self.buf[msg_hdr.length:]
 
         return msg_hdr.id, msg

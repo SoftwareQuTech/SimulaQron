@@ -8,7 +8,7 @@ from twisted.spread import pb
 from netqasm.logging import get_netqasm_logger
 
 from simulaqron.netqasm_backend.factory import NetQASMFactory
-from simulaqron.netqasm_backend.qnodeos import SimulaQronSubroutineHandler
+from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
 from simulaqron.general.host_config import SocketsConfig
 from simulaqron.settings import simulaqron_settings
 
@@ -117,7 +117,7 @@ def main(myName, network_name="default"):
             myHost,
             myName,
             qnodeos_network,
-            SimulaQronSubroutineHandler,
+            SubroutineHandler,
             network_name=network_name,
         )
     else:

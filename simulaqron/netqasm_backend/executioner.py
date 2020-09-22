@@ -7,6 +7,7 @@ from twisted.internet.defer import inlineCallbacks
 from netqasm.executioner import Executioner, EprCmdData
 from netqasm import instructions
 from netqasm.network_stack import BaseNetworkStack
+from netqasm.messages import ErrorMessage, ErrorCode, ReturnRegMessage, ReturnArrayMessage
 
 from qlink_interface import (
     LinkLayerOKTypeK,
@@ -17,7 +18,6 @@ from qlink_interface import (
     ReturnType,
 )
 
-from simulaqron.sdk.messages import ErrorMessage, ErrorCode, ReturnRegMessage, ReturnArrayMessage
 from simulaqron.settings import simulaqron_settings
 from simulaqron.general.host_config import get_node_id_from_net_config
 

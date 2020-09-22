@@ -4,10 +4,17 @@ import socket
 from netqasm.logging import get_netqasm_logger
 from netqasm.sdk.connection import NetQASMConnection
 from netqasm.instructions.operand import Register, Address
+from netqasm.messages import (
+    MessageHeader,
+    MsgDoneMessage,
+    ReturnRegMessage,
+    ReturnArrayMessage,
+    ErrorMessage,
+    deserialize_return_msg,
+)
+
 from simulaqron.settings import simulaqron_settings
 from simulaqron.general.host_config import SocketsConfig, get_node_id_from_net_config
-from simulaqron.sdk.messages import MessageHeader, MsgDoneMessage, ReturnRegMessage, ReturnArrayMessage, ErrorMessage
-from simulaqron.sdk.messages import deserialize as deserialize_return_message
 
 
 logger = get_netqasm_logger("SimulaQronConnection")
@@ -166,7 +173,7 @@ class SimulaQronConnection(NetQASMConnection):
        
         while True:
             try:
-                ret_msg = deserialize_return_message(self.buf)
+                ret_msg = deserialize_return_msg(self.buf)
             except ValueError:
                 logger.debug("Incomplete message")
                 # Incomplete message
