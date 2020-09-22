@@ -163,23 +163,6 @@ class NetQASMProtocol(Protocol):
             max_qubits=max_qubits,
         )
 
-    @inlineCallbacks
-    def _parseData(self, header, data):
-        try:
-            yield from self.messageHandler.handle_cqc_message(self.buf)
-            # messages = self.messageHandler.retrieve_return_messages(header.app_id)
-        except Exception as e:
-            raise e
-
-        # if messages:
-        #     # self.factory._lock.acquire()
-        #     for msg in messages:
-        #         self.transport.write(msg)
-        #         # self.factory._lock.release()
-
-        # Handle returns
-        raise NotImplementedError
-
     def _return_msg(self, msg):
         """
         Return a msg to the host.
@@ -198,7 +181,7 @@ class NetQASMProtocol(Protocol):
 
 
 class NetQASMFactory(Factory):
-    def __init__(self, host, name, cqc_net, backend, network_name="default"):
+    def __init__(self, host, name, qnodeos_net, backend, network_name="default"):
         """
         Initialize NetQASM Factory.
 
@@ -207,7 +190,7 @@ class NetQASMFactory(Factory):
 
         self.host = host
         self.name = name
-        self.cqcNet = cqc_net
+        self.qnodeos_net = qnodeos_net
         self.virtRoot = None
         self.qReg = None
         self.backend = backend(self)
@@ -253,8 +236,8 @@ class NetQASMFactory(Factory):
         Lookup name of remote host used within SimulaQron given ip and
         portnumber.
         """
-        for entry in self.cqcNet.hostDict:
-            node = self.cqcNet.hostDict[entry]
+        for entry in self.qnodeos_net.hostDict:
+            node = self.qnodeos_net.hostDict[entry]
             if (node.ip == ip) and (node.port == port):
                 return node.name
 

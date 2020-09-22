@@ -397,13 +397,13 @@ def nodes():
 @click.option('--hostname', type=str,
               help="The host name of the node, e.g. localhost (default) or 192.168.0.1\n"
                    "If you wish to have different components on different hostname,"
-                   "for example the cqc nodes on one computer and the virtual nodes on another,"
+                   "for example the qnodeos nodes on one computer and the virtual nodes on another,"
                    "you have to manually construct you config file.")
 @click.option('--app-port', type=int,
               help="Port number for the application.\n \
                     If not specified a random unused port between 8000 and 9000 will be used.")
-@click.option('--cqc-port', type=int,
-              help="Port number for the cqc server.\n \
+@click.option('--qnodeos-port', type=int,
+              help="Port number for the qnodeos server.\n \
                     If not specified a random unused port between 8000 and 9000 will be used.")
 @click.option('--vnode-port', type=int,
               help="Port number for the virtual node.\n \
@@ -418,7 +418,7 @@ def nodes():
     help="Force re-write of network_config_file.\n",
     is_flag=True,
 )
-def add(name, network_name=None, hostname=None, app_port=None, cqc_port=None, vnode_port=None, neighbors=None,
+def add(name, network_name=None, hostname=None, app_port=None, qnodeos_port=None, vnode_port=None, neighbors=None,
         force=False):
     """
     Add a node to the network.
@@ -438,8 +438,8 @@ def add(name, network_name=None, hostname=None, app_port=None, cqc_port=None, vn
         neighbors = [neighbor.strip() for neighbor in neighbors]
     networks_config = NetworksConfigConstructor(simulaqron_settings.network_config_file)
     networks_config.add_node(node_name=name, network_name=network_name,
-                             app_hostname=hostname, cqc_hostname=hostname, vnode_hostname=hostname,
-                             app_port=app_port, cqc_port=cqc_port, vnode_port=vnode_port,
+                             app_hostname=hostname, qnodeos_hostname=hostname, vnode_hostname=hostname,
+                             app_port=app_port, qnodeos_port=qnodeos_port, vnode_port=vnode_port,
                              neighbors=neighbors)
     networks_config.write_to_file()
 

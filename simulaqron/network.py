@@ -39,7 +39,6 @@ from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 from simulaqron.settings import simulaqron_settings
 from simulaqron.run.start_vnode import main as start_vnode
 from simulaqron.run.start_qnodeos import main as start_qnodeos
-# from cqc.pythonLib import CQCConnection
 from simulaqron.sdk import SimulaQronConnection
 
 #########################################################################################
@@ -160,7 +159,7 @@ class Network:
                 target=start_vnode, args=(node, self.name), name="VirtNode {}".format(node)
             )
             process_qnodeos = mp.Process(
-                target=start_qnodeos, args=(node, self.name), name="CQCNode {}".format(node)
+                target=start_qnodeos, args=(node, self.name), name="QnodeOSNode {}".format(node)
             )
             self.processes += [process_virtual, process_qnodeos]
 

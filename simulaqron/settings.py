@@ -67,11 +67,6 @@ class Config:
         "log_level": logging.WARNING,
         "backend": SimBackend.STABILIZER,
         "network_config_file": os.path.join(config_folder, "network.json"),
-        "app_file": None,
-        "cqc_file": None,
-        "vnode_file": None,
-        "nodes_file": None,
-        "topology_file": None,
         "noisy_qubits": False,
         "t1": 1.0
     }
@@ -223,56 +218,6 @@ class Config:
     @network_config_file.setter
     @Decorator.set_setting
     def network_config_file(self, app_file):
-        pass
-
-    @property
-    @Decorator.get_setting
-    def topology_file(self):
-        pass
-
-    @topology_file.setter
-    @Decorator.set_setting
-    def topology_file(self, topology_file):
-        pass
-
-    @property
-    @Decorator.get_setting
-    def app_file(self):
-        pass
-
-    @app_file.setter
-    @Decorator.set_setting
-    def app_file(self, app_file):
-        pass
-
-    @property
-    @Decorator.get_setting
-    def cqc_file(self):
-        pass
-
-    @cqc_file.setter
-    @Decorator.set_setting
-    def cqc_file(self, cqc_file):
-        pass
-
-    @property
-    @Decorator.get_setting
-    def vnode_file(self):
-        pass
-
-    @vnode_file.setter
-    @Decorator.set_setting
-    def vnode_file(self, vnode_file):
-        pass
-
-    @property
-    @Decorator.get_setting
-    def nodes_file(self):
-        pass
-
-    @nodes_file.setter
-    @Decorator.set_setting
-    def nodes_file(self, nodes_file):
         pass
 
     @property
