@@ -315,7 +315,7 @@ class VanillaSimulaQronExecutioner(Executioner):
 
         create_id = self._get_new_create_id(remote_node_id=remote_node_id)
 
-        self._epr_create_requests[create_request.purpose_id].append(EprCmdData(
+        self._epr_create_requests[remote_node_id, create_request.purpose_id].append(EprCmdData(
             subroutine_id=subroutine_id,
             ent_info_array_address=ent_info_array_address,
             q_array_address=q_array_address,
@@ -351,7 +351,7 @@ class VanillaSimulaQronExecutioner(Executioner):
             raise NotImplementedError("Currently only one pair per request is implemented")
 
         purpose_id = self._get_purpose_id(remote_node_id=remote_node_id, epr_socket_id=epr_socket_id)
-        self._epr_recv_requests[purpose_id].append(EprCmdData(
+        self._epr_recv_requests[remote_node_id, purpose_id].append(EprCmdData(
             subroutine_id=subroutine_id,
             ent_info_array_address=ent_info_array_address,
             q_array_address=q_array_address,
