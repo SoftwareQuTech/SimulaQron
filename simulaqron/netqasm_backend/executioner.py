@@ -315,7 +315,7 @@ class VanillaSimulaQronExecutioner(Executioner):
 
         create_id = self._get_new_create_id(remote_node_id=remote_node_id)
 
-        self._epr_create_requests[epr_socket_id].append(EprCmdData(
+        self._epr_create_requests[create_request.purpose_id].append(EprCmdData(
             subroutine_id=subroutine_id,
             ent_info_array_address=ent_info_array_address,
             q_array_address=q_array_address,
@@ -350,7 +350,8 @@ class VanillaSimulaQronExecutioner(Executioner):
         if num_pairs > 1:
             raise NotImplementedError("Currently only one pair per request is implemented")
 
-        self._epr_recv_requests[epr_socket_id].append(EprCmdData(
+        purpose_id = self._get_purpose_id(remote_node_id=remote_node_id, epr_socket_id=epr_socket_id)
+        self._epr_recv_requests[purpose_id].append(EprCmdData(
             subroutine_id=subroutine_id,
             ent_info_array_address=ent_info_array_address,
             q_array_address=q_array_address,
@@ -605,12 +606,6 @@ class VanillaSimulaQronExecutioner(Executioner):
             except Exception as err:
                 self._logger.warning("Failed to destroy qubits")
                 self._logger.error(err)
-
-    def _get_epr_socket_id(self, response):
-        # NOTE we for now just use the purpose ID
-        # This will in fact always be the EPR socket ID for the local node
-        # See cmd_epr and send_epr_half
-        return response.purpose_id
 
     def _get_purpose_id(self, remote_node_id, epr_socket_id):
         # NOTE this is for now since we communicate directly to link layer
