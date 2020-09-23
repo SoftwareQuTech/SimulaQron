@@ -32,7 +32,7 @@ from scipy.linalg import expm
 import sys
 
 from cqc.pythonLib import CQCConnection, qubit, CQCUnsuppError
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, SimBackend
 from simulaqron.network import Network
 
 

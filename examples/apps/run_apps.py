@@ -1,4 +1,3 @@
-import os
 import sys
 
 from simulaqron.run.simulate import simulate_apps

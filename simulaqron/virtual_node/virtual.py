@@ -601,7 +601,15 @@ class virtualNode(pb.Root):
         if not (to_epr_socket_id in self.qubit_recv):
             self.qubit_recv[to_epr_socket_id] = deque([])
 
-        self.qubit_recv[to_epr_socket_id].append(QubitNetQASM(fromName, self.myID.name, from_epr_socket_id, to_epr_socket_id, new_virt_num))
+        self.qubit_recv[to_epr_socket_id].append(
+            QubitNetQASM(
+                fromName,
+                self.myID.name,
+                from_epr_socket_id,
+                to_epr_socket_id,
+                new_virt_num,
+            )
+        )
         self._logger.debug("Added a qubit on EPR socket ID %d to recv list", to_epr_socket_id)
 
     def remote_netqasm_get_recv(self, to_epr_socket_id):

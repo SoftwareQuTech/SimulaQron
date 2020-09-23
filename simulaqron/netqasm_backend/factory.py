@@ -147,7 +147,7 @@ class NetQASMProtocol(Protocol):
         """
         Return a msg to the host.
         """
-        output = self.transport.write(msg)
+        self.transport.write(msg)
 
 
 ###############################################################################
