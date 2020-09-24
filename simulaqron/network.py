@@ -73,6 +73,9 @@ class Network:
         else:
             self.name = name
 
+        self.processes = []
+        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
+
         if network_config_file is None:
             self._network_config_file = simulaqron_settings.network_config_file
         else:
@@ -117,8 +120,6 @@ class Network:
                                          "If you wish to overwrite the current network in the file, use the"
                                          "--new flag.".format(node_name, self.name, self._network_config_file))
 
-        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
-        self.processes = []
         self._setup_processes()
 
     @property

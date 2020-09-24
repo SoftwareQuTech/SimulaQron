@@ -4,10 +4,10 @@ import numpy as np
 from simulaqron.toolbox import has_module
 from simulaqron.settings import SimBackend
 
-if has_module.main(SimBackend.PROJECTQ):
+if has_module.main(SimBackend.PROJECTQ.value):
 
-    from simulaqron.virtNode.projectQSimulator import projectQEngine
-    from simulaqron.virtNode.basics import noQubitError, quantumError
+    from simulaqron.virtual_node.project_q_simulator import projectQEngine
+    from simulaqron.virtual_node.basics import noQubitError, quantumError
 
     from projectq.types._qubit import Qureg
 

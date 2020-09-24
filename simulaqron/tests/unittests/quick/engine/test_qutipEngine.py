@@ -32,9 +32,9 @@ import unittest
 from simulaqron.toolbox import has_module
 from simulaqron.settings import SimBackend
 
-if has_module.main(SimBackend.QUTIP):
+if has_module.main(SimBackend.QUTIP.value):
 
-    from simulaqron.virtNode.qutipSimulator import qutipEngine
+    from simulaqron.virtual_node.qutip_simulator import qutipEngine
 
     _has_module = True
 

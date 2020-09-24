@@ -157,6 +157,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 )
                 qnodeos_socket.close()
                 raise err
+        logger.debug("App {} : Could not connect to  NetQASM server, trying again...".format(name))
         return qnodeos_socket
 
     def _commit_serialized_message(self, raw_msg, block=True, callback=None):
@@ -181,21 +182,22 @@ class SimulaQronConnection(BaseNetQASMConnection):
             self.buf += data
         else:
             self.buf = data
-        logger.debug(f"Buffer is now {self.buf}")
+        self._logger.debug(f"Buffer is now {self.buf}")
        
         while True:
             try:
                 ret_msg = deserialize_return_msg(self.buf)
             except ValueError:
-                logger.debug("Incomplete message")
                 # Incomplete message
-                return
+                self._logger.debug("Incomplete message")
+                self._handle_reply()
 
             self.buf = self.buf[len(ret_msg):]
 
-            logger.debug(f"Got message {ret_msg}")
+            self._logger.debug(f"Got message {ret_msg}")
             if isinstance(ret_msg, MsgDoneMessage):
                 self._done_msg_ids.add(ret_msg.msg_id)
+                return
             elif isinstance(ret_msg, ReturnRegMessage):
                 self._update_shared_memory(
                     entry=Register.from_raw(raw=ret_msg.register),

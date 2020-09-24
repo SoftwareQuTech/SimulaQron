@@ -31,9 +31,11 @@ import numpy as np
 from scipy.linalg import expm
 import sys
 
-from cqc.pythonLib import CQCConnection, qubit, CQCUnsuppError
+from netqasm.sdk.qubit impot Qubit
+
 from simulaqron.settings import simulaqron_settings, SimBackend
 from simulaqron.network import Network
+from simulaqron.sdk.connection import SimulaQronConnection
 
 
 def calc_exp_values(q):
@@ -62,13 +64,13 @@ def calc_exp_values(q):
 
 
 def prep_I_CQC(cqc):
-    q = qubit(cqc)
+    q = Qubit(cqc)
     q.I()
     return q
 
 
 def prep_X_CQC(cqc):
-    q = qubit(cqc)
+    q = Qubit(cqc)
     q.X()
     return q
 
@@ -79,7 +81,7 @@ def prep_X_state():
 
 
 def prep_Y_CQC(cqc):
-    q = qubit(cqc)
+    q = Qubit(cqc)
     q.Y()
     return q
 
@@ -90,7 +92,7 @@ def prep_Y_state():
 
 
 def prep_Z_CQC(cqc):
-    q = qubit(cqc)
+    q = Qubit(cqc)
     q.Z()
     return q
 
@@ -101,7 +103,7 @@ def prep_Z_state():
 
 
 def prep_H_CQC(cqc):
-    q = qubit(cqc)
+    q = Qubit(cqc)
     q.H()
     return q
 
@@ -112,7 +114,7 @@ def prep_H_state():
 
 
 def prep_T_CQC(cqc):
-    q = qubit(cqc)
+    q = Qubit(cqc)
     q.T()
     return q
 
@@ -123,7 +125,7 @@ def prep_T_state():
 
 
 def prep_K_CQC(cqc):
-    q = qubit(cqc)
+    q = Qubit(cqc)
     q.K()
     return q
 
@@ -134,37 +136,37 @@ def prep_K_state():
 
 
 def prep_rotx1_CQC(cqc):  # pi/8
-    q = qubit(cqc)
+    q = Qubit(cqc)
     q.rot_X(16)
     return q
 
 
 def prep_rotx2_CQC(cqc):  # 5*pi/8
-    q = qubit(cqc)
+    q = Qubit(cqc)
     q.rot_X(80)
     return q
 
 
 def prep_roty1_CQC(cqc):  # pi/8
-    q = qubit(cqc)
+    q = Qubit(cqc)
     q.rot_Y(16)
     return q
 
 
 def prep_roty2_CQC(cqc):  # 5*pi/8
-    q = qubit(cqc)
+    q = Qubit(cqc)
     q.rot_Y(80)
     return q
 
 
 def prep_rotz1_CQC(cqc):  # pi/8
-    q = qubit(cqc)
+    q = Qubit(cqc)
     q.rot_Z(16)
     return q
 
 
 def prep_rotz2_CQC(cqc):  # 5*pi/8
-    q = qubit(cqc)
+    q = Qubit(cqc)
     q.rot_Z(80)
     return q
 
@@ -180,7 +182,7 @@ def prep_rot_state(n, a):
 
 
 def prep_reset_CQC(cqc):
-    q = qubit(cqc)
+    q = Qubit(cqc)
     q.H()
     q.reset()
     return q
@@ -208,7 +210,7 @@ class SingleQubitGateTest(unittest.TestCase):
         simulaqron_settings.default_settings()
 
     def testIGate(self):
-        with CQCConnection("Alice", appID=0) as cqc:
+        with SimulaQronConnection("Alice", appID=0) as cqc:
             # Test I
             sys.stdout.write("Testing I gate:")
             exp_values = calc_exp_values(prep_I_state())
@@ -217,7 +219,7 @@ class SingleQubitGateTest(unittest.TestCase):
             self.assertTrue(ans)
 
     def testXGate(self):
-        with CQCConnection("Alice", appID=0) as cqc:
+        with SimulaQronConnection("Alice", appID=0) as cqc:
             # Test X
             sys.stdout.write("Testing X gate:")
             exp_values = calc_exp_values(prep_X_state())
@@ -226,7 +228,7 @@ class SingleQubitGateTest(unittest.TestCase):
             self.assertTrue(ans)
 
     def testYGate(self):
-        with CQCConnection("Alice", appID=0) as cqc:
+        with SimulaQronConnection("Alice", appID=0) as cqc:
             # Test Y
             sys.stdout.write("Testing Y gate:")
             exp_values = calc_exp_values(prep_Y_state())
@@ -235,7 +237,7 @@ class SingleQubitGateTest(unittest.TestCase):
             self.assertTrue(ans)
 
     def testZGate(self):
-        with CQCConnection("Alice", appID=0) as cqc:
+        with SimulaQronConnection("Alice", appID=0) as cqc:
             # Test Z
             sys.stdout.write("Testing Z gate:")
             exp_values = calc_exp_values(prep_Z_state())
@@ -244,7 +246,7 @@ class SingleQubitGateTest(unittest.TestCase):
             self.assertTrue(ans)
 
     def testHGate(self):
-        with CQCConnection("Alice", appID=0) as cqc:
+        with SimulaQronConnection("Alice", appID=0) as cqc:
             # Test H
             sys.stdout.write("Testing H gate:")
             exp_values = calc_exp_values(prep_H_state())
@@ -253,7 +255,7 @@ class SingleQubitGateTest(unittest.TestCase):
             self.assertTrue(ans)
 
     def testTGate(self):
-        with CQCConnection("Alice", appID=0) as cqc:
+        with SimulaQronConnection("Alice", appID=0) as cqc:
             # Test T
             sys.stdout.write("Testing T gate:")
             exp_values = calc_exp_values(prep_T_state())
@@ -266,7 +268,7 @@ class SingleQubitGateTest(unittest.TestCase):
                 self.assertTrue(ans)
 
     def testKGate(self):
-        with CQCConnection("Alice", appID=0) as cqc:
+        with SimulaQronConnection("Alice", appID=0) as cqc:
             # Test K
             sys.stdout.write("Testing K gate:")
             exp_values = calc_exp_values(prep_K_state())
@@ -275,7 +277,7 @@ class SingleQubitGateTest(unittest.TestCase):
             self.assertTrue(ans)
 
     def testXpi8Rot(self):
-        with CQCConnection("Alice", appID=0) as cqc:
+        with SimulaQronConnection("Alice", appID=0) as cqc:
             # Test ROT_X pi/8
             sys.stdout.write("Testing rotation (X,pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([1, 0, 0], np.pi / 8))
@@ -288,7 +290,7 @@ class SingleQubitGateTest(unittest.TestCase):
                 self.assertTrue(ans)
 
     def testX5pi8Rot(self):
-        with CQCConnection("Alice", appID=0) as cqc:
+        with SimulaQronConnection("Alice", appID=0) as cqc:
             # Test ROT_X 5*pi/8
             sys.stdout.write("Testing rotation (X,5*pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([1, 0, 0], 5 * np.pi / 8))
@@ -301,7 +303,7 @@ class SingleQubitGateTest(unittest.TestCase):
                 self.assertTrue(ans)
 
     def testYpi8Rot(self):
-        with CQCConnection("Alice", appID=0) as cqc:
+        with SimulaQronConnection("Alice", appID=0) as cqc:
             # Test ROT_Y pi/8
             sys.stdout.write("Testing rotation (Y,pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([0, 1, 0], np.pi / 8))
@@ -314,7 +316,7 @@ class SingleQubitGateTest(unittest.TestCase):
                 self.assertTrue(ans)
 
     def testY5pi8Rot(self):
-        with CQCConnection("Alice", appID=0) as cqc:
+        with SimulaQronConnection("Alice", appID=0) as cqc:
             # Test ROT_Y 5*pi/8
             sys.stdout.write("Testing rotation (Y,5*pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([0, 1, 0], 5 * np.pi / 8))
@@ -327,7 +329,7 @@ class SingleQubitGateTest(unittest.TestCase):
                 self.assertTrue(ans)
 
     def testZpi8Rot(self):
-        with CQCConnection("Alice", appID=0) as cqc:
+        with SimulaQronConnection("Alice", appID=0) as cqc:
             # Test ROT_Z pi/8
             sys.stdout.write("Testing rotation (Z,pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([0, 0, 1], np.pi / 8))
@@ -340,7 +342,7 @@ class SingleQubitGateTest(unittest.TestCase):
                 self.assertTrue(ans)
 
     def testZ5pi8Rot(self):
-        with CQCConnection("Alice", appID=0) as cqc:
+        with SimulaQronConnection("Alice", appID=0) as cqc:
             # Test ROT_Z 5*pi/8
             sys.stdout.write("Testing rotation (Z,5*pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([0, 0, 1], 5 * np.pi / 8))
@@ -353,7 +355,7 @@ class SingleQubitGateTest(unittest.TestCase):
                 self.assertTrue(ans)
 
     def testReset(self):
-        with CQCConnection("Alice", appID=0) as cqc:
+        with SimulaQronConnection("Alice", appID=0) as cqc:
             # Test RESET
             sys.stdout.write("Testing RESET:")
             exp_values = calc_exp_values(prep_I_state())

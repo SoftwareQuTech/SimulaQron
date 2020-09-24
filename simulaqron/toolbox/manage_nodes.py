@@ -3,13 +3,6 @@ import json
 from contextlib import closing
 import socket
 
-from simulaqron.toolbox import get_simulaqron_path
-
-
-simulaqron_path = get_simulaqron_path.main()
-config_folder = "config"
-default_topology_file = os.path.join(simulaqron_path, config_folder, "topology.json")
-
 
 class NetworksConfigConstructor:
     def __init__(self, file_path=None):

@@ -56,15 +56,15 @@ def reset(save_loggers=False):
     reload(logging)
 
 
-def check_backend(backend):
-    if backend in [SimBackend.PROJECTQ, SimBackend.QUTIP]:
-        assert has_module.main(backend), f"To use {backend} as backend you need to install the package"
+def check_sim_backend(sim_backend):
+    if sim_backend in [SimBackend.PROJECTQ, SimBackend.QUTIP]:
+        assert has_module.main(sim_backend), f"To use {sim_backend} as backend you need to install the package"
 
 
-def run_backend(node_names, backend):
-    logger.debug(f"Starting simulaqron backend process with nodes {node_names}")
-    check_backend(backend=backend)
-    simulaqron_settings.backend = backend
+def run_sim_backend(node_names, sim_backend):
+    logger.debug(f"Starting simulaqron sim_backend process with nodes {node_names}")
+    check_sim_backend(sim_backend=sim_backend)
+    simulaqron_settings.sim_backend = sim_backend
     network = Network(name="default", nodes=node_names, force=True, new=True)
     network.start(wait_until_running=False)
     return network
@@ -89,11 +89,11 @@ def run_applications(
         Values should be the functions
     """
     app_names = [app_cfg.app_name for app_cfg in app_cfgs]
-    backend = _SIMULAQRON_BACKENDS[formalism]
+    sim_backend = _SIMULAQRON_BACKENDS[formalism]
 
     with Pool(len(app_names)) as executor:
         # Start the backend process
-        network = run_backend(app_names, backend=backend)
+        network = run_sim_backend(app_names, sim_backend=sim_backend)
 
         # Start the application processes
         app_futures = []

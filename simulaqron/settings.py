@@ -65,7 +65,7 @@ class Config:
         "recv_timeout": 100,  # (x 100 ms)
         "recv_retry_time": 0.1,  # (seconds)
         "log_level": logging.WARNING,
-        "backend": SimBackend.STABILIZER,
+        "sim_backend": SimBackend.STABILIZER,
         "network_config_file": os.path.join(config_folder, "network.json"),
         "noisy_qubits": False,
         "t1": 1.0
@@ -142,12 +142,12 @@ class Config:
 
     @property
     @Decorator.get_setting
-    def backend(self):
+    def sim_backend(self):
         pass
 
-    @backend.setter
+    @sim_backend.setter
     @Decorator.set_setting
-    def backend(self, backend):
+    def sim_backend(self, sim_backend):
         pass
 
     @property
