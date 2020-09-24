@@ -2,7 +2,7 @@ import time
 import socket
 
 from netqasm.logging import get_netqasm_logger
-from netqasm.sdk.connection import NetQASMConnection
+from netqasm.sdk.connection import BaseNetQASMConnection
 from netqasm.instructions.operand import Register, Address
 from netqasm.messages import (
     MessageHeader,
@@ -20,17 +20,29 @@ from simulaqron.general.host_config import SocketsConfig, get_node_id_from_net_c
 logger = get_netqasm_logger("SimulaQronConnection")
 
 
-class SimulaQronConnection(NetQASMConnection):
+class SimulaQronConnection(BaseNetQASMConnection):
     def __init__(
         self,
-        name,
+        node_name,
+        app_id=None,
+        max_qubits=5,
+        log_config=None,
+        epr_sockets=None,
+        compiler=None,
         socket_address=None,
         conn_retry_time=0.1,
         network_name=None,
-        epr_sockets=None,
-        **kwargs,
     ):
-        super().__init__(name=name, _init_app=False, _setup_epr_sockets=False, **kwargs)
+        super().__init__(
+            name=node_name,
+            app_id=app_id,
+            max_qubits=max_qubits,
+            log_config=log_config,
+            epr_sockets=epr_sockets,
+            compiler=compiler,
+            _init_app=False,
+            _setup_epr_sockets=False,
+        )
 
         self._qnodeos_net, self._socket = self._create_socket(
             name=self.name,
