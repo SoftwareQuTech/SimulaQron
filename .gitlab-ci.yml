@@ -30,6 +30,7 @@ image: adahlberg/nlblueprintci:19.04
 stages:
     - lint
     - tests
+    - examples
 
 lint:
     <<: *install
@@ -41,4 +42,16 @@ test:
     <<: *install
     stage: tests
     script: make tests
+    <<: *only_mr
+
+sdk-tests:
+    <<: *install
+    stage: tests
+    script: make -C netqasm external-tests
+    <<: *only_mr
+
+sdk-examples:
+    <<: *install
+    stage: examples
+    script: make -C netqasm external-examples
     <<: *only_mr
