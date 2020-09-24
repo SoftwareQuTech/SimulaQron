@@ -14,7 +14,7 @@ from netqasm.output import InstrField
 from .run import run_applications
 from netqasm.sdk.config import LogConfig
 from netqasm.instructions.flavour import NVFlavour, VanillaFlavour
-from simulaqron.settings import SimBackend
+from simulaqron.settings import Formalism
 
 logger = get_netqasm_logger()
 
@@ -139,7 +139,7 @@ def simulate_apps(
     post_function_file=None,
     results_file=None,
     flavour=None,
-    formalism="STAB",
+    formalism=Formalism.KET,
 ):
 
     set_log_level(log_level)
@@ -194,15 +194,6 @@ def simulate_apps(
         app_config["log_config"] = log_config
         applications[node_name] = app_main, app_config
 
-    if formalism == "STAB":
-        backend = SimBackend.STABILIZER
-    elif formalism == "KET":
-        backend = SimBackend.PROJECTQ
-    elif formalism == "DM":
-        backend = SimBackend.QUTIP
-    else:
-        raise TypeError(f"Unknown formalism {formalism}")
-
     if flavour is None:
         flavour = "vanilla"
 
@@ -218,7 +209,7 @@ def simulate_apps(
         instr_log_dir=timed_log_dir,
         results_file=results_file,
         flavour=flavour,
-        backend=backend,
+        q_formalism=formalism,
     )
 
     process_log(log_dir=timed_log_dir)

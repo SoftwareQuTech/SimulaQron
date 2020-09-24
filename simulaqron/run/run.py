@@ -1,5 +1,6 @@
 import logging
 from time import sleep
+from typing import List
 from importlib import reload
 from concurrent.futures import ProcessPoolExecutor as Pool
 
@@ -8,12 +9,16 @@ from netqasm.logging import get_netqasm_logger
 from netqasm.yaml_util import dump_yaml
 from netqasm.output import save_all_struct_loggers, reset_struct_loggers
 from netqasm.sdk.classical_communication import reset_socket_hub
+from netqasm.settings import Formalism
+from netqasm.sdk.app_config import AppConfig
 
 from simulaqron.network import Network
 from simulaqron.settings import simulaqron_settings, SimBackend
 from simulaqron.toolbox import has_module
 
 logger = get_netqasm_logger()
+
+# TODO similar code to squidasm.run.run, make base-class and subclasses?
 
 
 def as_completed(futures, names=None, sleep_time=0):
@@ -44,8 +49,20 @@ def reset(save_loggers=False):
     reload(logging)
 
 
+def get_backend(formalism):
+    if formalism == "STAB":
+        backend = SimBackend.STABILIZER
+    elif formalism == "KET":
+        backend = SimBackend.PROJECTQ
+    elif formalism == "DM":
+        backend = SimBackend.QUTIP
+    else:
+        raise TypeError(f"Unknown formalism {formalism}")
+    return backend
+
+
 def check_backend(backend):
-    if backend in [SimBackend.PROJECTQ, SimBackend.QUTIP]:
+    if backend in [SimBackend.PROJECTQ.value, SimBackend.QUTIP.value]:
         assert has_module.main(backend), f"To use {backend} as backend you need to install the package"
 
 
@@ -59,11 +76,14 @@ def run_backend(node_names, backend):
 
 
 def run_applications(
-    applications,
+    app_cfgs: List[AppConfig],
+    post_function=None,
     instr_log_dir=None,
+    network_config=None,
     results_file=None,
+    q_formalism=Formalism.KET,
     flavour=None,
-    backend=SimBackend.STABILIZER
+    use_app_config=True,  # whether to give app_config as argument to app's main()
 ):
     """Executes functions containing application scripts,
 
@@ -73,25 +93,24 @@ def run_applications(
         Keys should be names of nodes
         Values should be the functions
     """
-    node_names = list(applications.keys())
-    apps = [applications[node_name] for node_name in node_names]
+    app_names = [app_cfg.app_name for app_cfg in app_cfgs]
+    backend = get_backend(formalism=q_formalism)
 
-    with Pool(len(node_names) + 1) as executor:
+    with Pool(len(app_names)) as executor:
         # Start the backend process
-        network = run_backend(node_names, backend=backend)
+        network = run_backend(app_names, backend=backend)
 
         # Start the application processes
         app_futures = []
-        for app in apps:
-            if isinstance(app, tuple):
-                app_func, kwargs = app
-                future = executor.submit(app_func, **kwargs)
-            else:
-                future = executor.submit(app)
+        for app_cfg in app_cfgs:
+            inputs = app_cfgs.inputs
+            if use_app_config:
+                inputs['app_config'] = app_cfg
+            future = executor.submit(app_cfg.main_func, **inputs)
             app_futures.append(future)
 
         # Join the application processes and the backend
-        names = [f'app_{node_name}' for node_name in node_names]
+        names = [f'app_{app_name}' for app_name in app_names]
         results = {}
         for future, name in as_completed(app_futures, names=names):
             results[name] = future.result()
