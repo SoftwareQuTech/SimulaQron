@@ -46,12 +46,16 @@ test:
 
 sdk-tests:
     <<: *install
+    variables:
+        NETQASM_SIMULATOR: simulaqron
     stage: tests
     script: make -C netqasm external-tests
     <<: *only_mr
 
 sdk-examples:
     <<: *install
+    variables:
+        NETQASM_SIMULATOR: simulaqron
     stage: examples
     script: make -C netqasm external-examples
     <<: *only_mr
