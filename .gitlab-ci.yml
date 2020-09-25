@@ -41,7 +41,7 @@ lint:
 test:
     <<: *install
     stage: tests
-    script: make tests
+    script: make tests_all
     <<: *only_mr
 
 sdk-tests:

@@ -45,14 +45,14 @@ from simulaqron.virtual_node.quantum import simulatedQubit
 from simulaqron.general.host_config import SocketsConfig
 from simulaqron.settings import simulaqron_settings, SimBackend
 
-if simulaqron_settings.backend == SimBackend.QUTIP.value:
+if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
     from simulaqron.virtual_node.qutip_simulator import qutipEngine
-elif simulaqron_settings.backend == SimBackend.PROJECTQ.value:
+elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ.value:
     from simulaqron.virtual_node.project_q_simulator import projectQEngine
-elif simulaqron_settings.backend == SimBackend.STABILIZER.value:
+elif simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
     from simulaqron.virtual_node.stabilizer_simulator import stabilizerEngine
 else:
-    raise quantumError(f"Unknown backend {simulaqron_settings.backend}")
+    raise quantumError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
 
 ######
@@ -437,14 +437,14 @@ class virtualNode(pb.Root):
 
             self.numRegs = self.numRegs + 1
             regNum = self.get_new_reg_num()
-            if simulaqron_settings.backend == SimBackend.QUTIP.value:
+            if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
                 newReg = qutipEngine(self.myID, regNum, maxQubits)
-            elif simulaqron_settings.backend == SimBackend.PROJECTQ.value:
+            elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ.value:
                 newReg = projectQEngine(self.myID, regNum, maxQubits)
-            elif simulaqron_settings.backend == SimBackend.STABILIZER.value:
+            elif simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
                 newReg = stabilizerEngine(self.myID, regNum, maxQubits)
             else:
-                raise quantumError(f"Unknown backend {simulaqron_settings.backend}")
+                raise quantumError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
             self.registers[regNum] = newReg
 

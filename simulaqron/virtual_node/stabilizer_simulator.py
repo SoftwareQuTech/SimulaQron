@@ -28,6 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from simulaqron.virtual_node.basics import quantumEngine, quantumError, noQubitError
 from simulaqron.toolbox.stabilizer_states import StabilizerState
+from simulaqron.general import SimUnsupportedError
 
 
 class stabilizerEngine(quantumEngine):
@@ -143,7 +144,7 @@ class stabilizerEngine(quantumEngine):
         """
         Applies a T gate to the qubits with number qubitNum.
         """
-        raise AttributeError("Cannot apply T gate in stabilizer formalism")
+        raise SimUnsupportedError("Cannot apply T gate in stabilizer formalism")
 
     def apply_rotation(self, qubitNum, n, a):
         """
@@ -157,7 +158,7 @@ class stabilizerEngine(quantumEngine):
         :param a: float
             The rotation angle in radians.
         """
-        raise AttributeError("Cannot apply arbitrary rotation gate in stabilizer formalism")
+        raise SimUnsupportedError("Cannot apply arbitrary rotation gate in stabilizer formalism")
 
     def apply_CNOT(self, qubitNum1, qubitNum2):
         """
@@ -181,7 +182,7 @@ class stabilizerEngine(quantumEngine):
         qubitNum 	the number of the qubit this gate is applied to
         """
 
-        raise AttributeError("Cannot apply arbitrary one qubit gate in stabilizer formalism")
+        raise SimUnsupportedError("Cannot apply arbitrary one qubit gate in stabilizer formalism")
 
     def apply_twoqubit_gate(self, gate, qubit1, qubit2):
         """
@@ -192,7 +193,7 @@ class stabilizerEngine(quantumEngine):
         qubit1 		the first qubit
         qubit2		the second qubit
         """
-        raise AttributeError("Cannot apply arbitrary two qubit gate in stabilizer formalism")
+        raise SimUnsupportedError("Cannot apply arbitrary two qubit gate in stabilizer formalism")
 
     def measure_qubit_inplace(self, qubitNum):
         """

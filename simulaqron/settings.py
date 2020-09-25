@@ -30,10 +30,10 @@
 #########################
 # SETTINGS FOR SIMULAQRON
 #########################
-import logging
-import json
-
 import os
+import json
+import logging
+from enum import Enum
 
 from simulaqron.toolbox import get_simulaqron_path
 
@@ -41,7 +41,7 @@ simulaqron_path = get_simulaqron_path.main()
 config_folder = os.path.join(simulaqron_path, "config")
 
 
-class SimBackend:
+class SimBackend(Enum):
     STABILIZER = "stabilizer"
     PROJECTQ = "projectq"
     QUTIP = "qutip"
@@ -65,7 +65,7 @@ class Config:
         "recv_timeout": 100,  # (x 100 ms)
         "recv_retry_time": 0.1,  # (seconds)
         "log_level": logging.WARNING,
-        "sim_backend": SimBackend.STABILIZER,
+        "sim_backend": SimBackend.STABILIZER.value,
         "network_config_file": os.path.join(config_folder, "network.json"),
         "noisy_qubits": False,
         "t1": 1.0

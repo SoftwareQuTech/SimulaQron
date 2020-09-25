@@ -231,10 +231,10 @@ def default():
 
 
 @set.command()
-@click.argument('value', type=click.Choice([b.value for b in SimBackend]))
-def backend(value):
+@click.argument('value', type=click.Choice([b.value for b in SimBackend.value]))
+def sim_backend(value):
     """The backend to use (stabilizer, projectq, qutip)."""
-    simulaqron_settings.backend = value
+    simulaqron_settings.sim_backend = value
 
 
 @set.command()
@@ -314,9 +314,9 @@ def get():
 
 
 @get.command()
-def backend():
+def sim_backend():
     """The backend to use (stabilizer, projectq, qutip)."""
-    print(simulaqron_settings.backend)
+    print(simulaqron_settings.sim_backend)
 
 
 @get.command()

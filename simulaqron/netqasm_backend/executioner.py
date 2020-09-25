@@ -391,8 +391,8 @@ class VanillaSimulaQronExecutioner(Executioner):
 
         # Get ip and port of remote host
         for remote_node_name, remote_host in self.factory.qnodeos_net.hostDict.items():
-            remote_node_id = get_node_id_from_net_config(self.factory.qnodeos_net, remote_host.name)
-            if remote_node_id == remote_node_id:
+            node_id = get_node_id_from_net_config(self.factory.qnodeos_net, remote_host.name)
+            if node_id == remote_node_id:
                 break
         else:
             raise ValueError(f"Unknown node with ID {remote_node_id}")

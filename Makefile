@@ -2,6 +2,7 @@ PYTHON         = python3
 PIP            = pip3
 EXAMPLES_DIR   = examples
 SIMULAQRON_DIR = simulaqron
+TEST_DIR       = tests
 RESET_FILE     = ${SIMULAQRON_DIR}/toolbox/reset.py
 
 clean: _delete_pyc _delete_pid _clear_build _reset
@@ -13,7 +14,7 @@ _delete_pid:
 	@find ${SIMULAQRON_DIR} -name '*.pid' -delete
 
 lint:
-	@${PYTHON} -m flake8 ${SIMULAQRON_DIR} ${EXAMPLES_DIR}
+	@${PYTHON} -m flake8 ${SIMULAQRON_DIR} ${EXAMPLES_DIR} ${TEST_DIR}
 
 test-deps:
 	@${PYTHON} -m pip install -r test_requirements.txt
@@ -28,12 +29,12 @@ _reset:
 	@${PYTHON} ${RESET_FILE}
 
 _tests:
-	@${PYTHON} ${SIMULAQRON_DIR}/tests_run.py --quick
+	@${PYTHON} -m pytest ${TEST_DIR}/quick
 
 tests: _tests _reset
 
 _tests_all:
-	@${PYTHON} ${SIMULAQRON_DIR}/tests_run.py --full
+	@${PYTHON} -m pytest ${TEST_DIR}
 
 tests_all: _tests_all _reset
 

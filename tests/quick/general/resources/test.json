@@ -1,0 +1,54 @@
+{
+    "default": {
+        "nodes": {
+            "Alice": {
+                "app_socket": [
+                    "localhost",
+                    8000
+                ],
+                "qnodeos_socket": [
+                    "localhost",
+                    8001
+                ],
+                "vnode_socket": [
+                    "localhost",
+                    8003
+                ]
+            },
+            "Bob": {
+                "app_socket": [
+                    "localhost",
+                    8004
+                ],
+                "qnodeos_socket": [
+                    "localhost",
+                    8007
+                ],
+                "vnode_socket": [
+                    "localhost",
+                    8010
+                ]
+            }
+        },
+        "topology": null
+    },
+    "test": {
+        "nodes": {
+            "Charlie": {
+                "app_socket": [
+                    "localhost",
+                    8012
+                ],
+                "qnodeos_socket": [
+                    "localhost",
+                    8015
+                ],
+                "vnode_socket": [
+                    "localhost",
+                    8018
+                ]
+            }
+        },
+        "topology": null
+    }
+}

@@ -4,6 +4,7 @@ import socket
 from netqasm.logging import get_netqasm_logger
 from netqasm.sdk.connection import BaseNetQASMConnection
 from netqasm.instructions.operand import Register, Address
+from netqasm.instructions.instr_enum import Instruction
 from netqasm.messages import (
     MessageHeader,
     MsgDoneMessage,
@@ -13,14 +14,20 @@ from netqasm.messages import (
     deserialize_return_msg,
 )
 
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, SimBackend
 from simulaqron.general.host_config import SocketsConfig, get_node_id_from_net_config
+from simulaqron.general import SimUnsupportedError
 
 
 logger = get_netqasm_logger("SimulaQronConnection")
 
 
 class SimulaQronConnection(BaseNetQASMConnection):
+
+    NON_STABILIZER_INSTR = [
+        Instruction.T
+    ]
+
     def __init__(
         self,
         node_name,
@@ -53,6 +60,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
 
         # Next message ID
         self._next_msg_id = 0
+
+        # Messages IDs we're waiting to be done
+        self._waiting_msg_ids = set()
 
         # Keep track of finished msg IDs
         self._done_msg_ids = set()
@@ -163,6 +173,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
     def _commit_serialized_message(self, raw_msg, block=True, callback=None):
         """Commit a message to the backend/qnodeos"""
         msg_id = self._get_new_msg_id()
+        self._waiting_msg_ids.add(msg_id)
         length = MessageHeader.len() + len(raw_msg)
         msg_hdr = MessageHeader(id=msg_id, length=length)
         self._socket.send(bytes(msg_hdr) + raw_msg)
@@ -171,12 +182,33 @@ class SimulaQronConnection(BaseNetQASMConnection):
         if block:
             self._wait_for_done(msg_id=msg_id)
 
-    def _wait_for_done(self, msg_id):
-        while not self._is_done(msg_id=msg_id):
-            self._handle_reply()
+    def _wait_for_done(self, msg_id=None):
+        """Waits for a message to be declared done by qnodeos.
+        If `msg_id` is None (default), then we wait once for any message to be done.
+        The ID of this message is then returned.
+        """
+        if msg_id is None:
+            self._logger.debug("Waiting for any msg to be done")
+        else:
+            self._logger.debug(f"Waiting for msg ID {msg_id}")
+        while True:
+            done_msg_id = self._handle_reply()
+            if done_msg_id is not None:  # Check if some msg is done
+                if msg_id is None:
+                    # Finished waiting for any message
+                    break
+                elif msg_id == done_msg_id:
+                    # Finished waiting for specified message
+                    break
+                else:
+                    # Other message done, not the one we're waiting for
+                    continue
+            # Wait a bit to check again
             time.sleep(0.1)
+        self._logger.debug(f"Received done for msg ID {done_msg_id}")
 
     def _handle_reply(self):
+        """Returns msg ID if received a done messages, otherwise None"""
         data = self._socket.recv(1024)
         if self.buf:
             self.buf += data
@@ -184,34 +216,42 @@ class SimulaQronConnection(BaseNetQASMConnection):
             self.buf = data
         self._logger.debug(f"Buffer is now {self.buf}")
        
-        while True:
-            try:
-                ret_msg = deserialize_return_msg(self.buf)
-            except ValueError:
-                # Incomplete message
-                self._logger.debug("Incomplete message")
-                self._handle_reply()
+        try:
+            ret_msg = deserialize_return_msg(self.buf)
+        except ValueError:
+            # Incomplete message
+            self._logger.debug("Incomplete message")
+            time.sleep(0.1)
+            self._handle_reply()
 
-            self.buf = self.buf[len(ret_msg):]
+        self.buf = self.buf[len(ret_msg):]
 
-            self._logger.debug(f"Got message {ret_msg}")
-            if isinstance(ret_msg, MsgDoneMessage):
-                self._done_msg_ids.add(ret_msg.msg_id)
-                return
-            elif isinstance(ret_msg, ReturnRegMessage):
-                self._update_shared_memory(
-                    entry=Register.from_raw(raw=ret_msg.register),
-                    value=ret_msg.value,
-                )
-            elif isinstance(ret_msg, ReturnArrayMessage):
-                self._update_shared_memory(
-                    entry=Address(address=ret_msg.address),
-                    value=ret_msg.values,
-                )
-            elif isinstance(ret_msg, ErrorMessage):
-                raise RuntimeError(f"Received error message from backend: {ret_msg}")
-            else:
-                raise NotImplementedError(f"Unknown return message of type {type(ret_msg)}")
+        self._logger.debug(f"Got message {ret_msg}")
+        if isinstance(ret_msg, MsgDoneMessage):
+            self._waiting_msg_ids.remove(ret_msg.msg_id)
+            self._done_msg_ids.add(ret_msg.msg_id)
+            return ret_msg.msg_id
+        elif isinstance(ret_msg, ReturnRegMessage):
+            self._update_shared_memory(
+                entry=Register.from_raw(raw=ret_msg.register),
+                value=ret_msg.value,
+            )
+        elif isinstance(ret_msg, ReturnArrayMessage):
+            self._update_shared_memory(
+                entry=Address(address=ret_msg.address),
+                value=ret_msg.values,
+            )
+        elif isinstance(ret_msg, ErrorMessage):
+            raise RuntimeError(f"Received error message from backend: {ret_msg}")
+        else:
+            raise NotImplementedError(f"Unknown return message of type {type(ret_msg)}")
+
+    def block(self):
+        while len(self._waiting_msg_ids) > 0:
+            self._logger.debug(f"Blocking and waiting for msg IDs {self._waiting_msg_ids}")
+            # Wait for any msg to be done
+            self._wait_for_done()
+        self._logger.debug("All messages done, finished blocking")
 
     def _update_shared_memory(self, entry, value):
         shared_memory = self.shared_memory
@@ -224,9 +264,17 @@ class SimulaQronConnection(BaseNetQASMConnection):
             raise TypeError(
                 f"Cannot update shared memory with entry specified as {entry}")
 
+    def add_single_qubit_commands(self, instr, qubit_id):
+        # NOTE override to check that formalism supports operation
+        if instr in self.NON_STABILIZER_INSTR:
+            if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+                raise SimUnsupportedError(f"Cannot perform instr {instr} when using stabilizer formalism")
+        super().add_single_qubit_commands(instr=instr, qubit_id=qubit_id)
+
     def add_single_qubit_rotation_commands(self, instruction, virtual_qubit_id, n=0, d=0, angle=None):
-        if simulaqron_settings.backend == "stabilizer":
-            raise RuntimeError("Cannot perform rotations when using stabilizer formalism")
+        # NOTE override to check that formalism supports operation
+        if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+            raise SimUnsupportedError("Cannot perform rotations when using stabilizer formalism")
         super().add_single_qubit_rotation_commands(
             instruction=instruction,
             virtual_qubit_id=virtual_qubit_id,

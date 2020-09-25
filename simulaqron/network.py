@@ -37,8 +37,7 @@ from netqasm.logging import get_netqasm_logger
 
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 from simulaqron.settings import simulaqron_settings
-from simulaqron.run.start_vnode import main as start_vnode
-from simulaqron.run.start_qnodeos import main as start_qnodeos
+from simulaqron.start import start_vnode, start_qnodeos
 from simulaqron.sdk import SimulaQronConnection
 
 #########################################################################################
@@ -164,7 +163,7 @@ class Network:
             )
             self.processes += [process_virtual, process_qnodeos]
 
-    def start(self, wait_until_running=True):
+    def start(self, wait_until_running=False):
         """
         Starts the network.
         The boolean flag 'wait_until_running' can be used whether the call to this method should
