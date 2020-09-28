@@ -217,7 +217,7 @@ class VanillaSimulaQronExecutioner(Executioner):
         If you need to pass a qubit reference back to the Twisted PB on a _different_ connection,
         then use get_virt_qubit_indep below.
         """
-        if not qubit_id in self.factory.qubitList:
+        if qubit_id not in self.factory.qubitList:
             raise UnknownQubitError(f"{self.name}: Qubit {qubit_id} not found")
         qubit = self.factory.qubitList[qubit_id]
         return qubit.virt
@@ -561,7 +561,10 @@ class VanillaSimulaQronExecutioner(Executioner):
         if no_qubit:
             raise TimeoutError("TIMEOUT, no qubit received.")
 
-        self._logger.debug("Qubit received for EPR socket ID {epr_socket_id}", epr_socket_id)
+        self._logger.debug(
+            f"Qubit received for EPR socket ID {epr_socket_id}, "
+            f"will use {qubit_id} as physical qubit ID"
+        )
 
         # Once we have the qubit, add it to the local list and send a reply we received it. Note that we will
         # recheck whether it exists: it could have been added by another connection in the mean time
@@ -579,6 +582,7 @@ class VanillaSimulaQronExecutioner(Executioner):
         self._handle_epr_response(response=ent_info)
 
     def remove_qubit_id(self, qubit_id):
+        self._logger.debug(f"Removing physical qubit with ID {qubit_id} from handles to simulated qubits")
         self.factory.qubitList.pop(qubit_id)
 
     def _get_purpose_id(self, remote_node_id, epr_socket_id):
@@ -597,6 +601,7 @@ class VanillaSimulaQronExecutioner(Executioner):
 
     def _clear_phys_qubit_in_memory(self, physical_address):
         yield from self.cmd_measure(qubit_id=physical_address, inplace=False)
+        self.remove_qubit_id(qubit_id=physical_address)
 
 
 class VirtualQubitRef:

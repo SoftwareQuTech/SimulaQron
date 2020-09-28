@@ -248,7 +248,7 @@ class virtualNode(pb.Root):
         Callback obtaining twisted root object when connection to the node given by the node details 'node'.
         """
         try:
-            self._logger.debug("New connection to %s.", node.name)
+            self._logger.debug(f"New connection to {node.name}.")
             # Retrieve the root object: virtualNode on the remote
             node.root = obj
 
@@ -269,7 +269,7 @@ class virtualNode(pb.Root):
         try:
             reason.raiseException()
         except ConnectionRefusedError:
-            self._logger.debug("Could not connect to {}, trying again...", node.name)
+            self._logger.debug(f"Could not connect to {node.name}, trying again...")
             reactor.callLater(simulaqron_settings.conn_retry_time, self.connect_to_node, node)
         except Exception as e:
             self._logger.error(e)
@@ -407,7 +407,7 @@ class virtualNode(pb.Root):
         Arguments:
         maxQubits	maximum number of qubits to use in the default engine
         """
-        # TODO We have to methods that do the same thing, should deprecate one of them
+        # TODO We have two methods that do the same thing, should deprecate one of them
         return self.remote_new_register(maxQubits=maxQubits)
 
     def get_new_reg_num(self):
@@ -566,7 +566,7 @@ class virtualNode(pb.Root):
         app_id		application asking to have this qubit delivered
         remote_app_id	application ID to deliver the qubit to
         """
-        self._logger.debug("request to send qubit %d to %s", num, targetName)
+        self._logger.debug(f"request to send qubit {num} to {targetName}")
 
         virtQubit = self.remote_get_virtual_ref(num)
 
@@ -610,7 +610,7 @@ class virtualNode(pb.Root):
                 new_virt_num,
             )
         )
-        self._logger.debug("Added a qubit on EPR socket ID %d to recv list", to_epr_socket_id)
+        self._logger.debug(f"Added a qubit on EPR socket ID {to_epr_socket_id} to recv list")
 
     def remote_netqasm_get_recv(self, to_epr_socket_id):
         """
@@ -631,7 +631,7 @@ class virtualNode(pb.Root):
         if not qc:
             return None
 
-        self._logger.debug("Returning qubit on EPR socket ID %d from recv list", to_epr_socket_id)
+        self._logger.debug(f"Returning qubit on EPR socket ID {to_epr_socket_id} from recv list")
         return self.remote_get_virtual_ref(qc.virt_num)
 
     @inlineCallbacks
@@ -679,6 +679,7 @@ class virtualNode(pb.Root):
         """
 
         if not (to_epr_socket_id in self.qubit_recv_epr):
+            self._logger.debug(f"Creating epr list for EPR socket ID {to_epr_socket_id}")
             self.qubit_recv_epr[to_epr_socket_id] = deque([])
 
         self.qubit_recv_epr[to_epr_socket_id].append(
@@ -691,7 +692,7 @@ class virtualNode(pb.Root):
                 rawEntInfo=rawEntInfo,
             )
         )
-        self._logger.debug("Added a qubit on EPR socket ID %d to epr list", to_epr_socket_id)
+        self._logger.debug(f"Added a qubit on EPR socket ID {to_epr_socket_id} to epr list")
 
     def remote_netqasm_get_epr_recv(self, to_epr_socket_id):
         """
@@ -702,18 +703,21 @@ class virtualNode(pb.Root):
             self._logger.debug(f"Trying to retrieve qubit on EPR socket ID {to_epr_socket_id} from epr list")
             # Get the list corresponding to the specified application ID
             if not (to_epr_socket_id in self.qubit_recv_epr):
+                self._logger.debug(f"No epr list for EPR socket ID {to_epr_socket_id}")
                 return None
 
             qQueue = self.qubit_recv_epr[to_epr_socket_id]
             if not qQueue:
+                self._logger.debug(f"Nothing in epr list for EPR socket ID {to_epr_socket_id}")
                 return None
 
             # Retrieve the first element on that list (first in, first out)
             qc = qQueue.popleft()
             if not qc:
+                self._logger.debug(f"First element in epr list is empty for EPR socket ID {to_epr_socket_id}")
                 return None
 
-            self._logger.debug("Returning qubit on EPR socket ID %d from epr list", to_epr_socket_id)
+            self._logger.debug(f"Returning qubit on EPR socket ID {to_epr_socket_id} from epr list")
             return self.remote_get_virtual_ref(qc.virt_num), qc.rawEntInfo
 
         except Exception as e:
@@ -729,7 +733,7 @@ class virtualNode(pb.Root):
         qubit		virtual qubit to be sent
         targetName	target ndoe to place qubit at (host object)
         """
-        self._logger.debug("Request to send qubit sim Num %d to %s.", qubit.num, targetName)
+        self._logger.debug(f"Request to send qubit sim Num {qubit.num} to {targetName}.")
         if qubit.active != 1:
             self._logger.debug("Attempt to manipulate qubit no longer at this node.")
             return
@@ -801,7 +805,7 @@ class virtualNode(pb.Root):
         simQubitNum	simulated qubit number to be sent
         targetName	target node to place qubit at (host object)
         """
-        self._logger.debug("Request to transfer qubit to %s.", targetName)
+        self._logger.debug(f"Request to transfer qubit to {targetName}.")
 
         # Convert the number into the right local object
         simQubit = self._q_num_to_obj(simQubitNum)
@@ -842,7 +846,7 @@ class virtualNode(pb.Root):
         simQubit 	simulated qubit reference in the backend we're adding
         """
 
-        self._logger.debug("Request to add qubit from %s.", name)
+        self._logger.debug(f"Request to add qubit from {name}.")
 
         # Get the details of the remote node
         try:
@@ -1020,7 +1024,7 @@ class virtualNode(pb.Root):
         # Update the simulated qubit numbering and register
         for q in self.simQubits:
             if q.register == reg2:
-                self._logger.debug("Updating register %d to %d.", q.num, q.num + offset)
+                self._logger.debug(f"Updating register {q.num} to {q.num + offset}.")
                 q.register = reg1
                 q.num = q.num + offset
 
@@ -1038,12 +1042,12 @@ class virtualNode(pb.Root):
         localReg	local register to merge with
         """
 
-        self._logger.debug("Merging from %s", simNodeName)
+        self._logger.debug(f"Merging from {simNodeName}")
 
         # This should only be called if lock is acquired
         assert self._lock.locked
 
-        self._logger.debug("Merging from %s LOCKS PRESENT", simNodeName)
+        self._logger.debug(f"Merging from {simNodeName} LOCKS PRESENT")
 
         # Lookup the local connection for this simulating node
         try:
@@ -1207,7 +1211,7 @@ class virtualNode(pb.Root):
 
         # If nothing is found, return
         if gotQ is None:
-            self._logger.debug("No simulated qubit with ID %d.", qubitNum)
+            self._logger.debug(f"No simulated qubit with ID {qubitNum}.")
             return ([], [], 0, 0, 0)
 
         (realM, imagM) = gotQ.register.get_register_RI()
@@ -1257,7 +1261,7 @@ class virtualNode(pb.Root):
             nums = []
             for q in qList:
                 nums.append(q.simQubit.simNum)
-            self._logger.debug("Looking for simulated qubits. %s", nums)
+            self._logger.debug(f"Looking for simulated qubits. {nums}")
             (R, I) = self.remote_get_state(nums)
         else:
             # Qubits are located elsewhere.
@@ -1361,7 +1365,7 @@ class virtualQubit(pb.Referenceable):
         """
 
         if self.active != 1:
-            self._logger.error("Attempt to manipulate qubits no longer at this node.", self.virtNode.name)
+            self._logger.error("Attempt to manipulate qubits no longer at this node.")
             return False
 
         # Construct the name of the method to call if the qubit is locally simulated
@@ -1411,7 +1415,7 @@ class virtualQubit(pb.Referenceable):
                             waiting = False
                             outcome = True
                     except Exception as e:
-                        self._logger.error("Cannot apply %s - %s", name, e)
+                        self._logger.error(f"Cannot apply {name} - {e}")
                         waiting = False
                     finally:
                         yield self.simQubit.callRemote("unlock")
@@ -1514,7 +1518,7 @@ class virtualQubit(pb.Referenceable):
         """
 
         if self.active != 1:
-            self._logger.error("Attempt to manipulate qubits no longer at this node.", self.virtNode.name)
+            self._logger.error("Attempt to manipulate qubits no longer at this node.")
             return
 
         # Check whether the qubit is local or remote. Due to remote register merges, this may change
@@ -1736,7 +1740,7 @@ class virtualQubit(pb.Referenceable):
         """
 
         if self.active != 1 or target.active != 1:
-            self._logger.error("Attempt to manipulate qubits no longer at this node.", self.virtNode.name)
+            self._logger.error("Attempt to manipulate qubits no longer at this node.")
             return
 
         localName = "".join(["remote_", name])
@@ -1791,7 +1795,7 @@ class virtualQubit(pb.Referenceable):
                         return
                     else:
                         if timeoutD.called:
-                            self._logger.debug("Timing out getting locks.", self.virtNode.name)
+                            self._logger.debug("Timing out getting locks.")
                             lockD.cancel()
                             yield from self._unlock_nodes(self.simNode, self.virtNode, target.simNode, target.virtNode)
                             attempts = attempts + 1
@@ -1832,7 +1836,7 @@ class virtualQubit(pb.Referenceable):
                         # They are even in the same register, just do the gate
                         getattr(self.simQubit, localName)(target.simQubit.num)
                     else:
-                        self._logger.debug("2qubit command demands register merge.", self.virtNode.name)
+                        self._logger.debug("2qubit command demands register merge.")
                         # Both are local but not in the same register
                         self.simNode.root.local_merge_regs(self.simQubit, target.simQubit)
 
@@ -1840,7 +1844,7 @@ class virtualQubit(pb.Referenceable):
                         getattr(self.simQubit, localName)(target.simQubit.num)
                 else:
                     # Both are remotely simulated
-                    self._logger.debug("2qubit command demands remote register merge.", self.virtNode.name)
+                    self._logger.debug("2qubit command demands remote register merge.")
 
                     # Fetch the details of the two simulated qubits from remote
                     (fNum, fNode) = yield self.simQubit.callRemote("get_details")
@@ -1963,7 +1967,7 @@ class virtualQubit(pb.Referenceable):
         """
 
         if self.active != 1:
-            self._logger.error("Attempt to manipulate qubits no longer at this node.", self.virtNode.name)
+            self._logger.error("Attempt to manipulate qubits no longer at this node.")
 
         if self.virtNode == self.simNode:
             num = self.simQubit.num
@@ -2002,7 +2006,7 @@ class virtualQubit(pb.Referenceable):
         """
 
         if self.active != 1:
-            self._logger.error("Attempt to manipulate qubits no longer at this node.", self.virtNode.name)
+            self._logger.error("Attempt to manipulate qubits no longer at this node.")
 
         if self.virtNode == self.simNode:
             (R, I) = self.simQubit.remote_get_qubit()

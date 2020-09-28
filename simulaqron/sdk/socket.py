@@ -3,6 +3,7 @@ import socket
 
 from netqasm.logging import get_netqasm_logger
 from netqasm.sdk.classical_communication.socket import Socket as _Socket
+
 from simulaqron.settings import simulaqron_settings
 from simulaqron.general.host_config import SocketsConfig
 
@@ -44,6 +45,8 @@ class Socket(_Socket):
         self._logger.debug("Receiving msg")
         self._app_socket.setblocking(block)
         raw_msg = self._app_socket.recv(maxsize)
+        if not block and not raw_msg:
+            raise RuntimeError("No message to receive (not blocking)")
         msg = self._deserialize_msg(raw_msg=raw_msg)
         self._logger.debug(f"Msg '{msg}' received")
         return msg
