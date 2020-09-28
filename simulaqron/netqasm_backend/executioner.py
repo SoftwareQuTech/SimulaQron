@@ -16,6 +16,7 @@ from qlink_interface import (
     LinkLayerErr,
     BellState,
     ReturnType,
+    RequestType,
 )
 
 from simulaqron.settings import simulaqron_settings
@@ -120,11 +121,10 @@ class VanillaSimulaQronExecutioner(Executioner):
             subroutine_id=subroutine_id,
             instr=instr,
         )
-        app_id = self._get_app_id(subroutine_id=subroutine_id)
-        yield from self.cmd_new(app_id=app_id, physical_address=physical_address)
+        yield from self.cmd_new(physical_address=physical_address)
 
     @inlineCallbacks
-    def cmd_new(self, app_id, physical_address):
+    def cmd_new(self, physical_address):
         """
         Request a new qubit. Since we don't need it, this python NetQASM just provides very crude timing information.
         (return_q_id is used internally)
@@ -136,8 +136,8 @@ class VanillaSimulaQronExecutioner(Executioner):
             virt = yield self.factory.virtRoot.callRemote("new_qubit")
             q_id = physical_address
             q = VirtualQubitRef(q_id, int(time.time()), virt)
-            self.factory.qubitList[(app_id, q_id)] = q
-            self._logger.info(f"Requested new qubit ({app_id}, {q_id})")
+            self.factory.qubitList[q_id] = q
+            self._logger.info(f"Requested new physical qubit {q_id})")
 
         finally:
             self.factory._lock.release()
@@ -145,11 +145,10 @@ class VanillaSimulaQronExecutioner(Executioner):
     def _do_single_qubit_instr(self, instr, subroutine_id, address):
         position = self._get_position(subroutine_id=subroutine_id, address=address)
         if isinstance(instr, instructions.core.InitInstruction):
-            yield from self.cmd_reset(subroutine_id=subroutine_id, qubit_id=position)
+            yield from self.cmd_reset(qubit_id=position)
         else:
             simulaqron_gate = self._get_simulaqron_gate(instr=instr)
             yield from self.apply_single_qubit_gate(
-                subroutine_id=subroutine_id,
                 gate=simulaqron_gate,
                 qubit_id=position,
             )
@@ -158,7 +157,6 @@ class VanillaSimulaQronExecutioner(Executioner):
         position = self._get_position(subroutine_id=subroutine_id, address=address)
         axis = self._get_axis(instr=instr)
         yield from self.apply_rotation(
-            subroutine_id=subroutine_id,
             axis=axis,
             angle=angle,
             qubit_id=position,
@@ -172,32 +170,29 @@ class VanillaSimulaQronExecutioner(Executioner):
         return axis
 
     @inlineCallbacks
-    def apply_rotation(self, subroutine_id, axis, angle, qubit_id):
+    def apply_rotation(self, axis, angle, qubit_id):
         """
         Apply a rotation of the qubit specified in cmd with an angle specified in xtra
         around the axis
         """
-        app_id = self._get_app_id(subroutine_id=subroutine_id)
-        self._logger.debug(f"Applying a rotation around {axis} to App ID {app_id} qubit id {qubit_id}")
-        virt_qubit = self.get_virt_qubit(app_id=app_id, qubit_id=qubit_id)
+        self._logger.debug(f"Applying a rotation around {axis} to physical qubit id {qubit_id}")
+        virt_qubit = self.get_virt_qubit(qubit_id=qubit_id)
         yield virt_qubit.callRemote("apply_rotation", axis, angle)
 
     def _do_two_qubit_instr(self, instr, subroutine_id, address1, address2):
         positions = self._get_positions(subroutine_id=subroutine_id, addresses=[address1, address2])
         simulaqron_gate = self._get_simulaqron_gate(instr=instr)
         yield from self.apply_two_qubit_gate(
-            subroutine_id=subroutine_id,
             gate=simulaqron_gate,
             qubit_id1=positions[0],
             qubit_id2=positions[1],
         )
 
     @inlineCallbacks
-    def apply_two_qubit_gate(self, subroutine_id, gate, qubit_id1, qubit_id2):
-        app_id = self._get_app_id(subroutine_id=subroutine_id)
-        self._logger.debug(f"Applying {gate} to App ID {app_id} qubit id {qubit_id1} target {qubit_id2}")
-        control = self.get_virt_qubit(app_id=app_id, qubit_id=qubit_id1)
-        target = self.get_virt_qubit(app_id=app_id, qubit_id=qubit_id2)
+    def apply_two_qubit_gate(self, gate, qubit_id1, qubit_id2):
+        self._logger.debug(f"Applying {gate} to physical qubit id {qubit_id1} target {qubit_id2}")
+        control = self.get_virt_qubit(qubit_id=qubit_id1)
+        target = self.get_virt_qubit(qubit_id=qubit_id2)
         if control == target:
             raise ValueError("target and control in two-qubit gate cannot be equal")
         yield control.callRemote(gate, target)
@@ -210,12 +205,11 @@ class VanillaSimulaQronExecutioner(Executioner):
         return simulaqron_gate
 
     @inlineCallbacks
-    def apply_single_qubit_gate(self, subroutine_id, gate, qubit_id):
-        app_id = self._get_app_id(subroutine_id=subroutine_id)
-        virt_qubit = self.get_virt_qubit(app_id=app_id, qubit_id=qubit_id)
+    def apply_single_qubit_gate(self, gate, qubit_id):
+        virt_qubit = self.get_virt_qubit(qubit_id=qubit_id)
         yield virt_qubit.callRemote(gate)
 
-    def get_virt_qubit(self, app_id, qubit_id):
+    def get_virt_qubit(self, qubit_id):
         """
         Get reference to the virtual qubit reference in SimulaQron given app and qubit id, if it exists.
         If not found, send back no qubit error.
@@ -223,36 +217,34 @@ class VanillaSimulaQronExecutioner(Executioner):
         If you need to pass a qubit reference back to the Twisted PB on a _different_ connection,
         then use get_virt_qubit_indep below.
         """
-        if not (app_id, qubit_id) in self.factory.qubitList:
+        if not qubit_id in self.factory.qubitList:
             raise UnknownQubitError(f"{self.name}: Qubit {qubit_id} not found")
-        qubit = self.factory.qubitList[(app_id, qubit_id)]
+        qubit = self.factory.qubitList[qubit_id]
         return qubit.virt
 
     @inlineCallbacks
-    def get_virt_qubit_num(self, app_id, qubit_id):
+    def get_virt_qubit_num(self, qubit_id):
         """
         Get NUMBER (not reference!) to virtual qubit in SimulaQron specific to this connection.
         If not found, send back no qubit error.
         """
         # First let's get the general virtual qubit reference, if any
-        virt = self.get_virt_qubit(app_id=app_id, qubit_id=qubit_id)
+        virt = self.get_virt_qubit(qubit_id=qubit_id)
         num = yield virt.callRemote("get_virt_num")
         return num
 
     def _do_meas(self, subroutine_id, q_address):
         position = self._get_position(subroutine_id=subroutine_id, address=q_address)
-        outcome = yield from self.cmd_measure(subroutine_id=subroutine_id, qubit_id=position)
+        outcome = yield from self.cmd_measure(qubit_id=position, inplace=True)
         return outcome
 
     @inlineCallbacks
-    def cmd_measure(self, subroutine_id, qubit_id):
+    def cmd_measure(self, qubit_id, inplace=True):
         """
         Measure
         """
-        app_id = self._get_app_id(subroutine_id=subroutine_id)
-        self._logger.debug(f"Measuring App ID {app_id} qubit id {qubit_id}")
-        virt_qubit = self.get_virt_qubit(app_id=app_id, qubit_id=qubit_id)
-        inplace = False
+        self._logger.debug(f"Measuring physical qubit id {qubit_id}")
+        virt_qubit = self.get_virt_qubit(qubit_id=qubit_id)
         outcome = yield virt_qubit.callRemote("measure", inplace)
         if outcome is None:
             raise RuntimeError("Measurement failed")
@@ -260,13 +252,12 @@ class VanillaSimulaQronExecutioner(Executioner):
         return outcome
 
     @inlineCallbacks
-    def cmd_reset(self, subroutine_id, qubit_id, correct=True):
-        """
+    def cmd_reset(self, qubit_id, correct=True):
+        r"""
         Reset Qubit to \|0\>
         """
-        app_id = self._get_app_id(subroutine_id=subroutine_id)
-        self._logger.debug(f"Reset App ID {app_id} qubit id {qubit_id}")
-        virt_qubit = self.get_virt_qubit(app_id=app_id, qubit_id=qubit_id)
+        self._logger.debug(f"Reset physical qubit id {qubit_id}")
+        virt_qubit = self.get_virt_qubit(qubit_id=qubit_id)
         outcome = yield virt_qubit.callRemote("measure", inplace=True)
 
         # If state is |1> do correction
@@ -278,11 +269,13 @@ class VanillaSimulaQronExecutioner(Executioner):
 
     def _update_shared_memory(self, app_id, entry, value):
         if isinstance(entry, instructions.operand.Register):
+            self._logger.debug(f"Updating host about register {entry} with value {value}")
             self._return_msg(msg=ReturnRegMessage(
                 register=entry.cstruct,
                 value=value,
             ))
         elif isinstance(entry, instructions.operand.Address):
+            self._logger.debug(f"Updating host about array {entry} with value {value}")
             address = entry.address
             self._return_msg(msg=ReturnArrayMessage(
                 address=address,
@@ -306,6 +299,8 @@ class VanillaSimulaQronExecutioner(Executioner):
             epr_socket_id=epr_socket_id,
             arg_array_address=arg_array_address,
         )
+        if create_request.type != RequestType.K:
+            raise NotImplementedError(f"Currently only type K request are implemented, not {create_request.type}")
         if create_request.number > 1:
             raise NotImplementedError("Currently only one pair per request is implemented")
 
@@ -325,7 +320,6 @@ class VanillaSimulaQronExecutioner(Executioner):
         ))
 
         yield from self.cmd_epr(
-            subroutine_id=subroutine_id,
             create_id=create_id,
             remote_node_id=remote_node_id,
             epr_socket_id=epr_socket_id,
@@ -361,7 +355,6 @@ class VanillaSimulaQronExecutioner(Executioner):
         ))
 
         yield from self.cmd_epr_recv(
-            subroutine_id=subroutine_id,
             epr_socket_id=epr_socket_id,
             qubit_id=qubit_id,
         )
@@ -375,7 +368,6 @@ class VanillaSimulaQronExecutioner(Executioner):
     @inlineCallbacks
     def cmd_epr(
         self,
-        subroutine_id,
         create_id,
         remote_node_id,
         epr_socket_id,
@@ -386,9 +378,6 @@ class VanillaSimulaQronExecutioner(Executioner):
         Create EPR pair with another node.
         Depending on the ips and ports this will either create an EPR-pair and send one part, or just receive.
         """
-        # Get ip and port of this host
-        app_id = self._get_app_id(subroutine_id=subroutine_id)
-
         # Get ip and port of remote host
         for remote_node_name, remote_host in self.factory.qnodeos_net.hostDict.items():
             node_id = get_node_id_from_net_config(self.factory.qnodeos_net, remote_host.name)
@@ -413,20 +402,17 @@ class VanillaSimulaQronExecutioner(Executioner):
         second_qubit_id = -(1 + qubit_id)
         for q_id in [qubit_id, second_qubit_id]:
             yield from self.cmd_new(
-                app_id=app_id,
                 physical_address=q_id,
             )
 
         # Produce EPR-pair
         h_gate = self._get_simulaqron_gate(instr=instructions.vanilla.GateHInstruction())
         yield from self.apply_single_qubit_gate(
-            subroutine_id=subroutine_id,
             gate=h_gate,
             qubit_id=qubit_id,
         )
         cnot_gate = self._get_simulaqron_gate(instr=instructions.vanilla.CnotInstruction())
         yield from self.apply_two_qubit_gate(
-            subroutine_id=subroutine_id,
             gate=cnot_gate,
             qubit_id1=qubit_id,
             qubit_id2=second_qubit_id,
@@ -456,7 +442,6 @@ class VanillaSimulaQronExecutioner(Executioner):
 
         # Send second qubit
         yield from self.send_epr_half(
-            subroutine_id=subroutine_id,
             qubit_id=second_qubit_id,
             epr_socket_id=epr_socket_id,
             remote_node_name=remote_node_name,
@@ -486,7 +471,6 @@ class VanillaSimulaQronExecutioner(Executioner):
     @inlineCallbacks
     def send_epr_half(
         self,
-        subroutine_id,
         qubit_id,
         epr_socket_id,
         remote_node_name,
@@ -496,9 +480,8 @@ class VanillaSimulaQronExecutioner(Executioner):
         """
         Send qubit to another node.
         """
-        app_id = self._get_app_id(subroutine_id=subroutine_id)
         # Lookup the virtual qubit from identifier
-        virt_num = yield from self.get_virt_qubit_num(app_id=app_id, qubit_id=qubit_id)
+        virt_num = yield from self.get_virt_qubit_num(qubit_id=qubit_id)
 
         # Prepare update raw entanglement information header
         remote_ent_info = LinkLayerOKTypeK(
@@ -529,7 +512,7 @@ class VanillaSimulaQronExecutioner(Executioner):
 
         self._logger.debug(f"Sent half a EPR pair as qubit id {qubit_id} to {remote_node_name}")
         # Remove from active mapped qubits
-        self.remove_qubit_id(app_id=app_id, qubit_id=qubit_id)
+        self.remove_qubit_id(qubit_id=qubit_id)
 
     @staticmethod
     def _unpack_ent_info(raw_ent_info):
@@ -553,7 +536,7 @@ class VanillaSimulaQronExecutioner(Executioner):
         return ent_info.__class__(**dct)
 
     @inlineCallbacks
-    def cmd_epr_recv(self, subroutine_id, epr_socket_id, qubit_id):
+    def cmd_epr_recv(self, epr_socket_id, qubit_id):
         """
         Receive half of epr from another node. Block until qubit is received.
         """
@@ -582,30 +565,21 @@ class VanillaSimulaQronExecutioner(Executioner):
 
         # Once we have the qubit, add it to the local list and send a reply we received it. Note that we will
         # recheck whether it exists: it could have been added by another connection in the mean time
-        app_id = self._get_app_id(subroutine_id=subroutine_id)
         try:
             self.factory._lock.acquire()
 
-            if (app_id, qubit_id) in self.factory.qubitList:
+            if qubit_id in self.factory.qubitList:
                 raise RuntimeError(f"Qubit with ID {qubit_id} already in use")
 
             q = VirtualQubitRef(qubit_id, int(time.time()), virt_qubit)
-            self.factory.qubitList[(app_id, qubit_id)] = q
+            self.factory.qubitList[qubit_id] = q
         finally:
             self.factory._lock.release()
 
         self._handle_epr_response(response=ent_info)
 
-    def remove_qubit_id(self, app_id, qubit_id):
-        self.factory.qubitList.pop((app_id, qubit_id))
-
-    def _release_qubits(self, subroutine_id, qubit_ids):
-        for qubit_id in qubit_ids:
-            try:
-                yield from self.cmd_reset(subroutine_id=subroutine_id, qubit_id=qubit_id, correct=False)
-            except Exception as err:
-                self._logger.warning("Failed to destroy qubits")
-                self._logger.error(err)
+    def remove_qubit_id(self, qubit_id):
+        self.factory.qubitList.pop(qubit_id)
 
     def _get_purpose_id(self, remote_node_id, epr_socket_id):
         # NOTE this is for now since we communicate directly to link layer
@@ -620,6 +594,9 @@ class VanillaSimulaQronExecutioner(Executioner):
     def _reserve_physical_qubit(self, physical_address):
         # NOTE does not do anything, done by cmd_new instead
         pass
+
+    def _clear_phys_qubit_in_memory(self, physical_address):
+        yield from self.cmd_measure(qubit_id=physical_address, inplace=False)
 
 
 class VirtualQubitRef:

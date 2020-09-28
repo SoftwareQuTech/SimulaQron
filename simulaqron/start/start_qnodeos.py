@@ -5,7 +5,7 @@ from twisted.internet import reactor
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
 from twisted.spread import pb
 
-from netqasm.logging import get_netqasm_logger
+from netqasm.logging import get_netqasm_logger, set_log_level
 
 from simulaqron.netqasm_backend.factory import NetQASMFactory
 from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
@@ -96,8 +96,9 @@ def sigterm_handler(_signo, _stack_frame):
     reactor.stop()
 
 
-def main(myName, network_name="default"):
+def main(myName, network_name="default", log_level="WARNING"):
     """Start the indicated backend NetQASM Server"""
+    set_log_level(log_level)
     logger.debug(f"Starting QNodeOS at {myName}")
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)

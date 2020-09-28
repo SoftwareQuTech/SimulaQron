@@ -33,7 +33,7 @@ import signal
 from functools import partial
 from twisted.internet import reactor
 
-from netqasm.logging import get_netqasm_logger
+from netqasm.logging import get_netqasm_logger, set_log_level
 from simulaqron.virtual_node.virtual import Backend
 from simulaqron.settings import simulaqron_settings
 
@@ -45,7 +45,8 @@ def sigterm_handler(name, _signo, _stack_frame):
     reactor.stop()
 
 
-def main(name, network_name="default"):
+def main(name, network_name="default", log_level="WARNING"):
+    set_log_level(log_level)
     signal.signal(signal.SIGTERM, partial(sigterm_handler, name))
     signal.signal(signal.SIGINT, partial(sigterm_handler, name))
 

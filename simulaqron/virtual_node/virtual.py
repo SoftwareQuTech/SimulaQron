@@ -945,6 +945,9 @@ class virtualNode(pb.Root):
             # Remove the qubit form the list of simulated qubits
             self.simQubits.remove(delQubit)
 
+            # Also unlock it just in case
+            delQubit.unlock()
+
         except Exception as e:
             self._logger.error(f"Cannot remove sim qubit - {e}")
         finally:
@@ -1325,7 +1328,7 @@ class virtualQubit(pb.Referenceable):
         simQubit	reference to the underlying qubit object (may be remote)
         num		number ID among the virtual qubits
         """
-        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({virtNode}, {num})")
+        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({virtNode.name}, {num})")
 
         # Node where this qubit is virtually located
         self.virtNode = virtNode
@@ -1525,7 +1528,7 @@ class virtualQubit(pb.Referenceable):
                     try:
                         yield self.simQubit.lock()
                         if self.simQubit.active:
-                            self._logger.debug("Measuring local qubit", self.virtNode.name)
+                            self._logger.debug("Measuring local qubit")
                             outcome = self.simQubit.remote_measure_inplace()
                             if not inplace:
                                 self.virtNode.root._remove_sim_qubit(self.simQubit)

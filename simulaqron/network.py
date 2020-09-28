@@ -33,7 +33,7 @@ import multiprocessing as mp
 import networkx as nx
 from timeit import default_timer as timer
 
-from netqasm.logging import get_netqasm_logger
+from netqasm.logging import get_netqasm_logger, get_log_level
 
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 from simulaqron.settings import simulaqron_settings
@@ -156,10 +156,10 @@ class Network:
         mp.set_start_method("spawn", force=True)
         for node in self.nodes:
             process_virtual = mp.Process(
-                target=start_vnode, args=(node, self.name), name="VirtNode {}".format(node)
+                target=start_vnode, args=(node, self.name, get_log_level()), name="VirtNode {}".format(node)
             )
             process_qnodeos = mp.Process(
-                target=start_qnodeos, args=(node, self.name), name="QnodeOSNode {}".format(node)
+                target=start_qnodeos, args=(node, self.name, get_log_level()), name="QnodeOSNode {}".format(node)
             )
             self.processes += [process_virtual, process_qnodeos]
 

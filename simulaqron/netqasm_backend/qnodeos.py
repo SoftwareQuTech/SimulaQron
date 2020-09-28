@@ -46,4 +46,5 @@ class SubroutineHandler(BaseSubroutineHandler):
     def _return_msg(self, msg):
         """Return a message to the host"""
         assert self._protocol is not None, "Seems protocol of handler has not yet been set"
+        self._logger.debug(f"sending message {msg} to host")
         self.protocol._return_msg(msg=bytes(msg))

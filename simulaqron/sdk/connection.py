@@ -68,7 +68,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
         self._done_msg_ids = set()
 
         # Buffer for returned messages
-        self.buf = None
+        self.buf = b''
      
         self._init_new_app(max_qubits=self._max_qubits)
 
@@ -193,37 +193,42 @@ class SimulaQronConnection(BaseNetQASMConnection):
             self._logger.debug(f"Waiting for msg ID {msg_id}")
         while True:
             done_msg_id = self._handle_reply()
-            if done_msg_id is not None:  # Check if some msg is done
-                if msg_id is None:
-                    # Finished waiting for any message
-                    break
-                elif msg_id == done_msg_id:
-                    # Finished waiting for specified message
-                    break
-                else:
-                    # Other message done, not the one we're waiting for
-                    continue
-            # Wait a bit to check again
-            time.sleep(0.1)
+            if msg_id is None:
+                # Finished waiting for any message
+                break
+            elif msg_id == done_msg_id:
+                # Finished waiting for specified message
+                break
+            else:
+                # Other message done, not the one we're waiting for
+                # Wait for another don
+                continue
         self._logger.debug(f"Received done for msg ID {done_msg_id}")
 
-    def _handle_reply(self):
-        """Returns msg ID if received a done messages, otherwise None"""
+    def _read_more_data(self):
+        """Reads in some more data on the socket to qnodeos"""
         data = self._socket.recv(1024)
         if self.buf:
             self.buf += data
         else:
             self.buf = data
-        self._logger.debug(f"Buffer is now {self.buf}")
-       
+        self._logger.debug(f"Got new data {data} on socket to qnodeos")
+
+    def _handle_reply(self):
+        """Handle all next replies until a done message and return the msg ID for the done"""
+        # Try to read next message from the buffer otherwise read some more and try again
         try:
+            # if not self.buf:
+            #     raise ValueError("Buffer is empty")
             ret_msg = deserialize_return_msg(self.buf)
         except ValueError:
             # Incomplete message
             self._logger.debug("Incomplete message")
             time.sleep(0.1)
-            self._handle_reply()
+            self._read_more_data()
+            return self._handle_reply()
 
+        # Remove the data of this message from the buffer
         self.buf = self.buf[len(ret_msg):]
 
         self._logger.debug(f"Got message {ret_msg}")
@@ -245,6 +250,8 @@ class SimulaQronConnection(BaseNetQASMConnection):
             raise RuntimeError(f"Received error message from backend: {ret_msg}")
         else:
             raise NotImplementedError(f"Unknown return message of type {type(ret_msg)}")
+        # Continue handling replies until a done
+        return self._handle_reply()
 
     def block(self):
         while len(self._waiting_msg_ids) > 0:
