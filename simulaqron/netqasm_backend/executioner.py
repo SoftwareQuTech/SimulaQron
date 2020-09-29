@@ -1,8 +1,11 @@
 import time
+import traceback
 from enum import Enum
+from functools import partial
 from collections import defaultdict
 
 from twisted.internet.defer import inlineCallbacks
+from twisted.internet import reactor, task
 
 from netqasm.executioner import Executioner, EprCmdData
 from netqasm import instructions
@@ -265,7 +268,8 @@ class VanillaSimulaQronExecutioner(Executioner):
             yield virt_qubit.callRemote("apply_X")
 
     def _do_wait(self):
-        raise NotImplementedError("_do_wait")
+        d = task.deferLater(reactor, 0.1, lambda: self._logger.debug("Wait finished"))
+        yield d
 
     def _update_shared_memory(self, app_id, entry, value):
         if isinstance(entry, instructions.operand.Register):
@@ -593,9 +597,12 @@ class VanillaSimulaQronExecutioner(Executioner):
         return epr_socket_id
 
     def _wait_to_handle_epr_responses(self):
-        # NOTE in simulaqron we will never need to wait since epr is handled after information is added
-        # but raise an error in case this happens due to bug
-        raise NotImplementedError("_wait_to_handle_epr_responses")
+        d = task.deferLater(reactor, 0.1, self._handle_pending_epr_responses)
+        d.addErrback(partial(self._print_error, "_handle_pending_epr_responses"))
+
+    def _print_error(self, scope, failure):
+        traceback_str = ''.join(traceback.format_tb(failure.__traceback__))
+        self._logger.error(f"{scope} failed with error failure {failure}\n traceback: {traceback_str}")
 
     def _reserve_physical_qubit(self, physical_address):
         # NOTE does not do anything, done by cmd_new instead
