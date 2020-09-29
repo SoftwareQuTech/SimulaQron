@@ -1,8 +1,11 @@
 import time
+import traceback
 from enum import Enum
+from functools import partial
 from collections import defaultdict
 
 from twisted.internet.defer import inlineCallbacks
+from twisted.internet import reactor, task
 
 from netqasm.executioner import Executioner, EprCmdData
 from netqasm import instructions
@@ -265,7 +268,8 @@ class VanillaSimulaQronExecutioner(Executioner):
             yield virt_qubit.callRemote("apply_X")
 
     def _do_wait(self):
-        raise NotImplementedError("_do_wait")
+        d = task.deferLater(reactor, 0.1, lambda: self._logger.debug("Wait finished"))
+        yield d
 
     def _update_shared_memory(self, app_id, entry, value):
         if isinstance(entry, instructions.operand.Register):
@@ -301,14 +305,15 @@ class VanillaSimulaQronExecutioner(Executioner):
         )
         if create_request.type != RequestType.K:
             raise NotImplementedError(f"Currently only type K request are implemented, not {create_request.type}")
-        if create_request.number > 1:
-            raise NotImplementedError("Currently only one pair per request is implemented")
-
-        qubit_id_host = self._get_unused_physical_qubit()
-
-        remote_epr_socket_id = self._get_remote_epr_socket_id(epr_socket_id=epr_socket_id)
 
         create_id = self._get_new_create_id(remote_node_id=remote_node_id)
+        remote_epr_socket_id = self._get_remote_epr_socket_id(epr_socket_id=epr_socket_id)
+
+        # Check that we have the right amount of virtual qubit addresses to be used
+        app_id = self._get_app_id(subroutine_id=subroutine_id)
+        if create_request.type == RequestType.K:
+            num_qubits = len(self._app_arrays[app_id][q_array_address, :])
+            assert num_qubits == create_request.number, "Not enough qubit addresses"
 
         self._epr_create_requests[remote_node_id, create_request.purpose_id].append(EprCmdData(
             subroutine_id=subroutine_id,
@@ -318,14 +323,16 @@ class VanillaSimulaQronExecutioner(Executioner):
             tot_pairs=create_request.number,
             pairs_left=create_request.number,
         ))
+        for _ in range(create_request.number):
+            qubit_id_host = self._get_unused_physical_qubit()
 
-        yield from self.cmd_epr(
-            create_id=create_id,
-            remote_node_id=remote_node_id,
-            epr_socket_id=epr_socket_id,
-            remote_epr_socket_id=remote_epr_socket_id,
-            qubit_id=qubit_id_host,
-        )
+            yield from self.cmd_epr(
+                create_id=create_id,
+                remote_node_id=remote_node_id,
+                epr_socket_id=epr_socket_id,
+                remote_epr_socket_id=remote_epr_socket_id,
+                qubit_id=qubit_id_host,
+            )
 
     def _do_recv_epr(
         self,
@@ -336,13 +343,10 @@ class VanillaSimulaQronExecutioner(Executioner):
         ent_info_array_address,
     ):
         app_id = self._get_app_id(subroutine_id=subroutine_id)
-        qubit_id = self._get_unused_physical_qubit()
         num_pairs = self._get_num_pairs_from_array(
             app_id=app_id,
             ent_info_array_address=ent_info_array_address,
         )
-        if num_pairs > 1:
-            raise NotImplementedError("Currently only one pair per request is implemented")
 
         purpose_id = self._get_purpose_id(remote_node_id=remote_node_id, epr_socket_id=epr_socket_id)
         self._epr_recv_requests[remote_node_id, purpose_id].append(EprCmdData(
@@ -354,10 +358,12 @@ class VanillaSimulaQronExecutioner(Executioner):
             pairs_left=num_pairs,
         ))
 
-        yield from self.cmd_epr_recv(
-            epr_socket_id=epr_socket_id,
-            qubit_id=qubit_id,
-        )
+        for _ in range(num_pairs):
+            qubit_id = self._get_unused_physical_qubit()
+            yield from self.cmd_epr_recv(
+                epr_socket_id=epr_socket_id,
+                qubit_id=qubit_id,
+            )
 
     def _get_remote_epr_socket_id(self, epr_socket_id):
         remote_entry = self.network_stack._sockets.get(epr_socket_id)
@@ -591,9 +597,12 @@ class VanillaSimulaQronExecutioner(Executioner):
         return epr_socket_id
 
     def _wait_to_handle_epr_responses(self):
-        # NOTE in simulaqron we will never need to wait since epr is handled after information is added
-        # but raise an error in case this happens due to bug
-        raise NotImplementedError("_wait_to_handle_epr_responses")
+        d = task.deferLater(reactor, 0.1, self._handle_pending_epr_responses)
+        d.addErrback(partial(self._print_error, "_handle_pending_epr_responses"))
+
+    def _print_error(self, scope, failure):
+        traceback_str = ''.join(traceback.format_tb(failure.__traceback__))
+        self._logger.error(f"{scope} failed with error failure {failure}\n traceback: {traceback_str}")
 
     def _reserve_physical_qubit(self, physical_address):
         # NOTE does not do anything, done by cmd_new instead
