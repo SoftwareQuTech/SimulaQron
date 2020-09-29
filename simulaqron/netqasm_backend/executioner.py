@@ -1,4 +1,5 @@
 import time
+import random
 import traceback
 from enum import Enum
 from functools import partial
@@ -20,6 +21,8 @@ from qlink_interface import (
     BellState,
     ReturnType,
     RequestType,
+    RandomBasis,
+    Basis,
 )
 
 from simulaqron.settings import simulaqron_settings
@@ -74,6 +77,10 @@ class VanillaSimulaQronExecutioner(Executioner):
 
     # Next create id
     _next_create_id = defaultdict(int)
+
+    # TODO this should live somewhere else and not hardcoded here
+    # also the case for the magic link layer in netsquid-magic
+    _num_bits_prob = 8
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -303,9 +310,6 @@ class VanillaSimulaQronExecutioner(Executioner):
             epr_socket_id=epr_socket_id,
             arg_array_address=arg_array_address,
         )
-        if create_request.type != RequestType.K:
-            raise NotImplementedError(f"Currently only type K request are implemented, not {create_request.type}")
-
         create_id = self._get_new_create_id(remote_node_id=remote_node_id)
         remote_epr_socket_id = self._get_remote_epr_socket_id(epr_socket_id=epr_socket_id)
 
@@ -332,6 +336,7 @@ class VanillaSimulaQronExecutioner(Executioner):
                 epr_socket_id=epr_socket_id,
                 remote_epr_socket_id=remote_epr_socket_id,
                 qubit_id=qubit_id_host,
+                create_request=create_request,
             )
 
     def _do_recv_epr(
@@ -379,6 +384,7 @@ class VanillaSimulaQronExecutioner(Executioner):
         epr_socket_id,
         remote_epr_socket_id,
         qubit_id,
+        create_request,
     ):
         """
         Create EPR pair with another node.
@@ -403,7 +409,7 @@ class VanillaSimulaQronExecutioner(Executioner):
             raise ValueError(f"Node {self.name} is not adjacent to {remote_node_name} in the specified topology.")
 
         # Create the qubits
-        # NOTE we don't actually allocate it since it will be sent to the other node
+        # NOTE we don't actually allocate it since it will be sent to the other node (or measured)
         # NOTE we will use negative address to not mix up with normal qubits
         second_qubit_id = -(1 + qubit_id)
         for q_id in [qubit_id, second_qubit_id]:
@@ -431,31 +437,171 @@ class VanillaSimulaQronExecutioner(Executioner):
             remote_node_id=remote_node_id,
             remote_epr_socket_id=remote_epr_socket_id,
         )
-        # Prepare ent_info header with entanglement information
-        ent_info = LinkLayerOKTypeK(
-            type=ReturnType.OK_K,
-            create_id=create_id,
-            logical_qubit_id=qubit_id,
-            directionality_flag=0,
-            sequence_number=ent_id,
-            # NOTE We use EPR socket ID
-            purpose_id=epr_socket_id,
-            remote_node_id=remote_node_id,
-            goodness=1,
-            goodness_time=int(time.time()),
-            bell_state=BellState.PHI_PLUS,
-        )
+        if create_request.type == RequestType.K:
+            # Prepare ent_info header with entanglement information
+            ent_info = LinkLayerOKTypeK(
+                type=ReturnType.OK_K,
+                create_id=create_id,
+                logical_qubit_id=qubit_id,
+                directionality_flag=0,
+                sequence_number=ent_id,
+                # NOTE We use EPR socket ID
+                purpose_id=epr_socket_id,
+                remote_node_id=remote_node_id,
+                goodness=1,
+                goodness_time=int(time.time()),
+                bell_state=BellState.PHI_PLUS,
+            )
 
-        # Send second qubit
-        yield from self.send_epr_half(
-            qubit_id=second_qubit_id,
-            epr_socket_id=epr_socket_id,
-            remote_node_name=remote_node_name,
-            remote_epr_socket_id=remote_epr_socket_id,
-            ent_info=ent_info,
-        )
+            # Send second qubit (and epr info)
+            yield from self.send_epr_half(
+                qubit_id=second_qubit_id,
+                epr_socket_id=epr_socket_id,
+                remote_node_name=remote_node_name,
+                remote_epr_socket_id=remote_epr_socket_id,
+                ent_info=ent_info,
+            )
+        elif create_request.type == RequestType.M:
+            local_outcome, local_basis = yield from self._measure_epr_qubit(
+                qubit_id=qubit_id,
+                request=create_request,
+                remote=False,
+            )
+            remote_outcome, remote_basis = yield from self._measure_epr_qubit(
+                qubit_id=second_qubit_id,
+                request=create_request,
+                remote=True,
+            )
+            # Prepare ent_info header with entanglement information
+            ent_info = LinkLayerOKTypeM(
+                type=ReturnType.OK_M,
+                create_id=create_id,
+                measurement_outcome=local_outcome,
+                measurement_basis=local_basis,
+                directionality_flag=0,
+                sequence_number=ent_id,
+                # NOTE We use EPR socket ID
+                purpose_id=epr_socket_id,
+                remote_node_id=remote_node_id,
+                goodness=1,
+                bell_state=BellState.PHI_PLUS,
+            )
+
+            # Send the outcome (and epr info)
+            yield from self.send_epr_outcome_half(
+                epr_socket_id=epr_socket_id,
+                remote_node_name=remote_node_name,
+                remote_epr_socket_id=remote_epr_socket_id,
+                ent_info=ent_info,
+                remote_outcome=remote_outcome,
+                remote_basis=remote_basis,
+            )
+        else:
+            raise NotImplementedError(f"EPR requests of type {create_request.type} are not yet supported in simulaqron")
 
         self._handle_epr_response(response=ent_info)
+
+    def _measure_epr_qubit(self, qubit_id, request, remote: bool):
+        # Check the arguments depending on if this is the local or remote qubit
+        if remote:
+            assert request.rotation_X_remote1 == 0, "Measure directly with rotations not yet supported"
+            assert request.rotation_Y_remote == 0, "Measure directly with rotations not yet supported"
+            assert request.rotation_X_remote2 == 0, "Measure directly with rotations not yet supported"
+            random_basis = request.random_basis_remote
+            probability_dist1 = request.probability_dist_remote1
+            probability_dist2 = request.probability_dist_remote2
+
+        else:
+            assert request.rotation_X_local1 == 0, "Measure directly with rotations not yet supported"
+            assert request.rotation_Y_local == 0, "Measure directly with rotations not yet supported"
+            assert request.rotation_X_local2 == 0, "Measure directly with rotations not yet supported"
+            random_basis = request.random_basis_local
+            probability_dist1 = request.probability_dist_local1
+            probability_dist2 = request.probability_dist_local2
+
+        # Sample the basis to use
+        probability_dist_spec = [probability_dist1, probability_dist2]
+        basis = self._sample_basis_choice(random_basis_set=random_basis, probability_dist_spec=probability_dist_spec)
+        if basis == Basis.Z:
+            pass
+        elif basis == Basis.X:
+            h_gate = self._get_simulaqron_gate(instr=instructions.vanilla.GateHInstruction())
+            yield from self.apply_single_qubit_gate(
+                gate=h_gate,
+                qubit_id=qubit_id,
+            )
+        elif basis == Basis.Y:
+            k_gate = self._get_simulaqron_gate(instr=instructions.vanilla.GateKInstruction())
+            yield from self.apply_single_qubit_gate(
+                gate=k_gate,
+                qubit_id=qubit_id,
+            )
+        else:
+            raise NotImplementedError(f"Cannot yet measure in basis {basis}")
+        
+        # Measure the qubit
+        outcome = yield from self.cmd_measure(qubit_id=qubit_id, inplace=False)
+        self.remove_qubit_id(qubit_id=qubit_id)
+        return outcome, basis
+
+    # NOTE this method is copied from netsquid magic
+    def _get_probability_weights(self, probability_dist_spec, num_choices):
+        """
+        Used internally by `_sample_basis_choice` to convert specified probability distribution to correct form
+
+        :param probability_dist_spec: list of ints
+        :param num_choices: int
+        :return: list of ints
+        """
+        num_values = 2 ** self._num_bits_prob
+        if num_choices == 2:
+            p = probability_dist_spec[0]
+            weights = [p, num_values - p]
+        elif num_choices == 3:
+            p1, p2 = probability_dist_spec[:2]
+            weights = [p1, p2, num_values - (p1 + p2)]
+        else:
+            raise ValueError("Unknown number of choices for basis")
+
+        return weights
+
+    # NOTE this method is copied from netsquid magic
+    def _sample_basis_choice(self, random_basis_set, probability_dist_spec):
+        """
+        Samples the random basis, given the specified bases set and probability distribution
+
+        :param random_basis_set: int
+        :param probability_dist_spec: list of ints
+        :return: list of ints
+        """
+        # Convert to a integer represented by 8 bits
+        num_values = 2 ** self._num_bits_prob
+        try:
+            probability_dist_spec = [int(p) % num_values for p in probability_dist_spec]
+        except (ValueError, TypeError):
+            raise TypeError("Could not convert probability dist ({}, {}, {}) to integers.", *probability_dist_spec)
+        # Possibly chose a random operator to perform before the measurement
+        if not isinstance(random_basis_set, RandomBasis):
+            random_basis_set = RandomBasis(random_basis_set)
+        if random_basis_set == RandomBasis.NONE:
+            # Measure in Z
+            basis = Basis.Z
+        elif random_basis_set == RandomBasis.XZ:
+            # Measure in X or Z
+            weights = self._get_probability_weights(probability_dist_spec, num_choices=2)
+            basis = random.choices([Basis.X, Basis.Z], weights)[0]
+        elif random_basis_set == RandomBasis.XYZ:
+            # Measure in X, Y or Z
+            weights = self._get_probability_weights(probability_dist_spec, num_choices=3)
+            basis = random.choices([Basis.X, Basis.Y, Basis.Z], weights)[0]
+        elif random_basis_set == RandomBasis.CHSH:
+            # Measure in (Z + X)/2 or (Z - X)/2
+            weights = self._get_probability_weights(probability_dist_spec, num_choices=2)
+            basis = random.choices([Basis.ZPLUSX, Basis.ZMINUSX], weights)[0]
+        else:
+            raise ValueError("Unsupported random basis choice {}".format(random_basis_set))
+
+        return basis
 
     @classmethod
     def new_ent_id(cls, epr_socket_id, remote_node_id, remote_epr_socket_id):
@@ -489,7 +635,7 @@ class VanillaSimulaQronExecutioner(Executioner):
         # Lookup the virtual qubit from identifier
         virt_num = yield from self.get_virt_qubit_num(qubit_id=qubit_id)
 
-        # Prepare update raw entanglement information header
+        # Update raw entanglement information for remote node
         remote_ent_info = LinkLayerOKTypeK(
             type=ent_info.type,
             create_id=ent_info.create_id,
@@ -506,7 +652,6 @@ class VanillaSimulaQronExecutioner(Executioner):
 
         # Send instruction to transfer the qubit
         remote_ent_info = tuple(v.value if isinstance(v, Enum) else v for v in remote_ent_info)
-        # remote_ent_info = tuple(remote_ent_info)
         yield self.factory.virtRoot.callRemote(
             "netqasm_send_epr_half",
             virt_num,
@@ -519,6 +664,48 @@ class VanillaSimulaQronExecutioner(Executioner):
         self._logger.debug(f"Sent half a EPR pair as qubit id {qubit_id} to {remote_node_name}")
         # Remove from active mapped qubits
         self.remove_qubit_id(qubit_id=qubit_id)
+
+    @inlineCallbacks
+    def send_epr_outcome_half(
+        self,
+        epr_socket_id,
+        remote_node_name,
+        remote_epr_socket_id,
+        ent_info,
+        remote_outcome,
+        remote_basis
+    ):
+        """
+        Send outcome from measure directly to another node.
+        """
+
+        # Update raw entanglement information for remote node
+        remote_ent_info = LinkLayerOKTypeM(
+            type=ent_info.type,
+            create_id=ent_info.create_id,
+            measurement_outcome=remote_outcome,
+            measurement_basis=remote_basis,
+            directionality_flag=1,
+            sequence_number=ent_info.sequence_number,
+            # NOTE We use EPR socket ID
+            purpose_id=remote_epr_socket_id,
+            remote_node_id=self.node_id,
+            goodness=ent_info.goodness,
+            bell_state=ent_info.bell_state,
+        )
+
+        # Transfer info to remote node
+        remote_ent_info = tuple(v.value if isinstance(v, Enum) else v for v in remote_ent_info)
+        yield self.factory.virtRoot.callRemote(
+            "netqasm_send_epr_half",
+            None,
+            remote_node_name,
+            epr_socket_id,
+            remote_epr_socket_id,
+            remote_ent_info,
+        )
+
+        self._logger.debug(f"Sent half a measure direclty EPR pair to {remote_node_name}")
 
     @staticmethod
     def _unpack_ent_info(raw_ent_info):
@@ -542,14 +729,14 @@ class VanillaSimulaQronExecutioner(Executioner):
         return ent_info.__class__(**dct)
 
     @inlineCallbacks
-    def cmd_epr_recv(self, epr_socket_id, qubit_id):
+    def cmd_epr_recv(self, epr_socket_id, qubit_id=None):
         """
         Receive half of epr from another node. Block until qubit is received.
         """
         self._logger.debug(f"Asking to receive for EPR socket ID {epr_socket_id}")
 
         # This will block until a qubit is received.
-        no_qubit = True
+        no_gen = True
         virt_qubit = None
         ent_info = None
         # recv_timeout is in 100ms (for legacy reasons there are no plans to change it to seconds)
@@ -557,33 +744,39 @@ class VanillaSimulaQronExecutioner(Executioner):
         for _ in range(int(simulaqron_settings.recv_timeout * 0.1 / sleep_time)):
             data = yield self.factory.virtRoot.callRemote("netqasm_get_epr_recv", epr_socket_id)
             if data:
-                no_qubit = False
+                no_gen = False
                 (virt_qubit, raw_ent_info) = data
                 ent_info = self._unpack_ent_info(raw_ent_info=raw_ent_info)
-                ent_info = self._update_qubit_id(ent_info=ent_info, qubit_id=qubit_id)
+                if isinstance(ent_info, LinkLayerOKTypeK):
+                    ent_info = self._update_qubit_id(ent_info=ent_info, qubit_id=qubit_id)
                 break
             else:
                 time.sleep(sleep_time)
-        if no_qubit:
-            raise TimeoutError("TIMEOUT, no qubit received.")
+        if no_gen:
+            raise TimeoutError("TIMEOUT, no EPR generation received.")
 
-        self._logger.debug(
-            f"Qubit received for EPR socket ID {epr_socket_id}, "
-            f"will use {qubit_id} as physical qubit ID"
-        )
+        if isinstance(ent_info, LinkLayerOKTypeK):
+            self._logger.debug(
+                f"Qubit received for EPR socket ID {epr_socket_id}, "
+                f"will use {qubit_id} as physical qubit ID"
+            )
 
-        # Once we have the qubit, add it to the local list and send a reply we received it. Note that we will
-        # recheck whether it exists: it could have been added by another connection in the mean time
-        try:
-            self.factory._lock.acquire()
+            # Once we have the qubit, add it to the local list and send a reply we received it. Note that we will
+            # recheck whether it exists: it could have been added by another connection in the mean time
+            try:
+                self.factory._lock.acquire()
 
-            if qubit_id in self.factory.qubitList:
-                raise RuntimeError(f"Qubit with ID {qubit_id} already in use")
+                if qubit_id in self.factory.qubitList:
+                    raise RuntimeError(f"Qubit with ID {qubit_id} already in use")
 
-            q = VirtualQubitRef(qubit_id, int(time.time()), virt_qubit)
-            self.factory.qubitList[qubit_id] = q
-        finally:
-            self.factory._lock.release()
+                q = VirtualQubitRef(qubit_id, int(time.time()), virt_qubit)
+                self.factory.qubitList[qubit_id] = q
+            finally:
+                self.factory._lock.release()
+        elif isinstance(ent_info, LinkLayerOKTypeM):
+            self._logger.debug(
+                f"Measure directly EPR request received for EPR socket ID {epr_socket_id}."
+            )
 
         self._handle_epr_response(response=ent_info)
 

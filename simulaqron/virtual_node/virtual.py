@@ -593,7 +593,7 @@ class virtualNode(pb.Root):
         except Exception as err:
             raise err
 
-    def remote_netqasm_add_recv_list(self, fromName, from_epr_socket_id, to_epr_socket_id, new_virt_num):
+    def remote_netqasm_add_recv_list(self, fromName, from_epr_socket_id, to_epr_socket_id, new_virt_num=None):
         """
         Add an item to the received list for use in NetQASM.
         """
@@ -646,12 +646,16 @@ class virtualNode(pb.Root):
         remote_app_id	application ID to deliver the qubit to
         entInfo		entanglement information
         """
-        qubit = self.remote_get_virtual_ref(num)
+        if num is None:
+            # Only an outcome from measure directly so no qubit
+            newVirtNum = None
+        else:
+            qubit = self.remote_get_virtual_ref(num)
 
-        try:
-            newVirtNum = yield from self.remote_send_qubit(qubit, targetName)
-        except Exception as err:
-            raise err
+            try:
+                newVirtNum = yield from self.remote_send_qubit(qubit, targetName)
+            except Exception as err:
+                raise err
 
         # Lookup host ID of node
         try:
@@ -2034,11 +2038,11 @@ class virtualQubit(pb.Referenceable):
 
 ############################################
 #
-# Keeping track of received qubits for NetQASM
+# Keeping track of received qubits and outcomes for NetQASM
 
 
 class QubitNetQASM:
-    def __init__(self, fromName, toName, from_epr_socket_id, to_epr_socket_id, new_virt_num, rawEntInfo=None):
+    def __init__(self, fromName, toName, from_epr_socket_id, to_epr_socket_id, new_virt_num=None, rawEntInfo=None):
         self.fromName = fromName
         self.toName = toName
         self.from_epr_socket_id = from_epr_socket_id
