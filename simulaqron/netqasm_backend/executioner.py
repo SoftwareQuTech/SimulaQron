@@ -301,14 +301,15 @@ class VanillaSimulaQronExecutioner(Executioner):
         )
         if create_request.type != RequestType.K:
             raise NotImplementedError(f"Currently only type K request are implemented, not {create_request.type}")
-        if create_request.number > 1:
-            raise NotImplementedError("Currently only one pair per request is implemented")
-
-        qubit_id_host = self._get_unused_physical_qubit()
-
-        remote_epr_socket_id = self._get_remote_epr_socket_id(epr_socket_id=epr_socket_id)
 
         create_id = self._get_new_create_id(remote_node_id=remote_node_id)
+        remote_epr_socket_id = self._get_remote_epr_socket_id(epr_socket_id=epr_socket_id)
+
+        # Check that we have the right amount of virtual qubit addresses to be used
+        app_id = self._get_app_id(subroutine_id=subroutine_id)
+        if create_request.type == RequestType.K:
+            num_qubits = len(self._app_arrays[app_id][q_array_address, :])
+            assert num_qubits == create_request.number, "Not enough qubit addresses"
 
         self._epr_create_requests[remote_node_id, create_request.purpose_id].append(EprCmdData(
             subroutine_id=subroutine_id,
@@ -318,14 +319,16 @@ class VanillaSimulaQronExecutioner(Executioner):
             tot_pairs=create_request.number,
             pairs_left=create_request.number,
         ))
+        for _ in range(create_request.number):
+            qubit_id_host = self._get_unused_physical_qubit()
 
-        yield from self.cmd_epr(
-            create_id=create_id,
-            remote_node_id=remote_node_id,
-            epr_socket_id=epr_socket_id,
-            remote_epr_socket_id=remote_epr_socket_id,
-            qubit_id=qubit_id_host,
-        )
+            yield from self.cmd_epr(
+                create_id=create_id,
+                remote_node_id=remote_node_id,
+                epr_socket_id=epr_socket_id,
+                remote_epr_socket_id=remote_epr_socket_id,
+                qubit_id=qubit_id_host,
+            )
 
     def _do_recv_epr(
         self,
@@ -336,13 +339,10 @@ class VanillaSimulaQronExecutioner(Executioner):
         ent_info_array_address,
     ):
         app_id = self._get_app_id(subroutine_id=subroutine_id)
-        qubit_id = self._get_unused_physical_qubit()
         num_pairs = self._get_num_pairs_from_array(
             app_id=app_id,
             ent_info_array_address=ent_info_array_address,
         )
-        if num_pairs > 1:
-            raise NotImplementedError("Currently only one pair per request is implemented")
 
         purpose_id = self._get_purpose_id(remote_node_id=remote_node_id, epr_socket_id=epr_socket_id)
         self._epr_recv_requests[remote_node_id, purpose_id].append(EprCmdData(
@@ -354,10 +354,12 @@ class VanillaSimulaQronExecutioner(Executioner):
             pairs_left=num_pairs,
         ))
 
-        yield from self.cmd_epr_recv(
-            epr_socket_id=epr_socket_id,
-            qubit_id=qubit_id,
-        )
+        for _ in range(num_pairs):
+            qubit_id = self._get_unused_physical_qubit()
+            yield from self.cmd_epr_recv(
+                epr_socket_id=epr_socket_id,
+                qubit_id=qubit_id,
+            )
 
     def _get_remote_epr_socket_id(self, epr_socket_id):
         remote_entry = self.network_stack._sockets.get(epr_socket_id)
