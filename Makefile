@@ -22,7 +22,7 @@ test-deps:
 requirements python-deps:
 	@cat requirements.txt | xargs -n 1 -L 1 $(PIP) install
 
-install-optional:
+install-optional: install
 	@cat optional-requirements.txt | xargs -n 1 -L 1 $(PIP) install
 
 _reset:

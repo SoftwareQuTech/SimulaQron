@@ -25,7 +25,7 @@ image: adahlberg/nlblueprintci:19.04
         - cd netqasm
         - pip install .
         - cd ..
-        - make install
+        - make install-optional
 
 stages:
     - lint
