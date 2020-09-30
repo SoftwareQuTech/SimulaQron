@@ -25,7 +25,9 @@ image: adahlberg/nlblueprintci:19.04
         - cd netqasm
         - pip install .
         - cd ..
-        - make install-optional
+        - make install
+        # Needed to run in KET formalism
+        - pip install projectq
 
 stages:
     - lint
