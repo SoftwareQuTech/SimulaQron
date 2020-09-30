@@ -274,8 +274,8 @@ class VanillaSimulaQronExecutioner(Executioner):
         if correct and outcome:
             yield virt_qubit.callRemote("apply_X")
 
-    def _do_wait(self):
-        d = task.deferLater(reactor, 0.1, lambda: self._logger.debug("Wait finished"))
+    def _do_wait(self, delay=0.1):
+        d = task.deferLater(reactor, delay, lambda: self._logger.debug("Wait finished"))
         yield d
 
     def _update_shared_memory(self, app_id, entry, value):
@@ -751,7 +751,7 @@ class VanillaSimulaQronExecutioner(Executioner):
                     ent_info = self._update_qubit_id(ent_info=ent_info, qubit_id=qubit_id)
                 break
             else:
-                time.sleep(sleep_time)
+                yield from self._do_wait(delay=sleep_time)
         if no_gen:
             raise TimeoutError("TIMEOUT, no EPR generation received.")
 

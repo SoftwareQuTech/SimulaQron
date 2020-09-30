@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import sys
+import time
 import signal
+from timeit import default_timer as timer
+
 from twisted.internet import reactor
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
 from twisted.spread import pb
@@ -13,6 +16,9 @@ from simulaqron.general.host_config import SocketsConfig
 from simulaqron.settings import simulaqron_settings
 
 logger = get_netqasm_logger("start_qnodeos")
+
+_RETRY_TIME = 0.1
+_TIMEOUT = 10
 
 
 def init_register(virtRoot, myName, node):
@@ -70,25 +76,30 @@ def handle_connection_error(reason, myName, netqasm_factory, virtual_network):
 
 def setup_netqasm_server(myName, netqasm_factory):
     """Setup NetQASM server to handle remote on the classical communication network."""
-    try:
-        logger.debug(
-            "LOCAL %s: Starting local classical communication server.", myName
-        )
-        myHost = netqasm_factory.host
-        myHost.root = netqasm_factory
-        myHost.factory = netqasm_factory
-        reactor.listenTCP(myHost.port, myHost.factory)
-    except CannotListenError:
-        logger.error(
-            "LOCAL {}: NetQASM server address ({}) is already in use.".format(
-                myName, myHost.port
+    t_start = timer()
+    while timer() - t_start < _TIMEOUT:
+        try:
+            logger.debug(
+                "LOCAL %s: Starting local classical communication server.", myName
             )
-        )
-        reactor.stop()
-    except Exception as e:
-        logger.error(
-            "LOCAL {}: Critical error when starting NetQASM server: {}".format(myName, e)
-        )
+            myHost = netqasm_factory.host
+            myHost.root = netqasm_factory
+            myHost.factory = netqasm_factory
+            reactor.listenTCP(myHost.port, myHost.factory)
+            break
+        except CannotListenError:
+            logger.error(
+                "LOCAL {}: NetQASM server address ({}) is already in use, trying again.".format(
+                    myName, myHost.port
+                )
+            )
+            time.sleep(_RETRY_TIME)
+        except Exception as e:
+            logger.error(
+                "LOCAL {}: Critical error when starting NetQASM server: {}".format(myName, e)
+            )
+            reactor.stop()
+    else:
         reactor.stop()
 
 

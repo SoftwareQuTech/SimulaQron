@@ -34,6 +34,9 @@ class Socket(_Socket):
 
         self._connect()
 
+    def __del__(self):
+        self._app_socket.close()
+
     def send(self, msg):
         """Sends a message to the remote node."""
         self._logger.debug(f"Sending msg '{msg}'")
@@ -75,7 +78,15 @@ class Socket(_Socket):
         if self.is_server:
             self._logger.debug("Trying to open application socket as server")
             app_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            app_socket.bind(addr[4])
+            while True:
+                try:
+                    app_socket.bind(addr[4])
+                except OSError as err:
+                    self._logger.debug(f"Could not bind socket since: {err}\n"
+                                       f"Trying again in {self.RETRY_TIME}s...")
+                    time.sleep(self.RETRY_TIME)
+                else:
+                    break
             app_socket.listen(1)
             conn, _ = app_socket.accept()
             self._app_socket = conn
@@ -87,7 +98,7 @@ class Socket(_Socket):
                 except ConnectionRefusedError:
                     self._logger.debug(
                         f"Could not open application socket, "
-                        f"trying again in {self.RETRY_TIME}..."
+                        f"trying again in {self.RETRY_TIME}s..."
                     )
                     time.sleep(self.RETRY_TIME)
                 else:
@@ -105,5 +116,5 @@ class Socket(_Socket):
 
     def _get_app_net_config(self):
         network_config_file = simulaqron_settings.network_config_file
-        app_net = SocketsConfig(network_config_file, network_name=self._network_name, config_type="qnodeos")
+        app_net = SocketsConfig(network_config_file, network_name=self._network_name, config_type="app")
         return app_net

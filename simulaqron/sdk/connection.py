@@ -30,7 +30,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
 
     def __init__(
         self,
-        node_name,
+        app_name,
         app_id=None,
         max_qubits=5,
         log_config=None,
@@ -41,7 +41,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
         network_name=None,
     ):
         super().__init__(
-            name=node_name,
+            name=app_name,
             app_id=app_id,
             max_qubits=max_qubits,
             log_config=log_config,

@@ -81,10 +81,13 @@ class simulatedQubit(pb.Referenceable):
         self._lock.acquire()
 
     def unlock(self):
-        self._lock.release()
+        try:
+            self._lock.release()
+        except AssertionError:
+            pass
 
     def remote_unlock(self):
-        self._lock.release()
+        self.unlock()
 
     def isLocked(self):
         return self._lock.locked
