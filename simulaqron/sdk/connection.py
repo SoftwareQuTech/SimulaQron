@@ -56,7 +56,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
         )
 
         self._qnodeos_net, self._socket = self._create_socket(
-            name=self.name,
+            name=self.node_name,
             socket_address=socket_address,
             network_name=network_name,
             retry_time=conn_retry_time,
