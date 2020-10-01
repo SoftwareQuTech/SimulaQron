@@ -218,8 +218,6 @@ class SimulaQronConnection(BaseNetQASMConnection):
         """Handle all next replies until a done message and return the msg ID for the done"""
         # Try to read next message from the buffer otherwise read some more and try again
         try:
-            # if not self.buf:
-            #     raise ValueError("Buffer is empty")
             ret_msg = deserialize_return_msg(self.buf)
         except ValueError:
             # Incomplete message
@@ -306,20 +304,20 @@ def _get_qnodeos_net_config(network_name):
     return qnodeos_net
 
 
-# TODO always use network name "default"?
-_QNODEOS_NET = _get_qnodeos_net_config(network_name="default")
-
-
 class SimulaQronNetworkInfo(NetworkInfo):
     @classmethod
     def _get_node_id(cls, node_name):
         """Returns the node id for the node with the given name"""
-        return get_node_id_from_net_config(_QNODEOS_NET, node_name)
+        # TODO always use network name "default"?
+        _qnodeos_net = _get_qnodeos_net_config(network_name="default")
+        return get_node_id_from_net_config(_qnodeos_net, node_name)
 
     @classmethod
     def _get_node_name(cls, node_id):
         """Returns the node name for the node with the given ID"""
-        for node_name, host in _QNODEOS_NET.hostDict.items():
+        # TODO always use network name "default"?
+        _qnodeos_net = _get_qnodeos_net_config(network_name="default")
+        for node_name, host in _qnodeos_net.hostDict.items():
             if node_id == host.ip:
                 return node_name
         raise KeyError("Unknown node ID {node_id}")

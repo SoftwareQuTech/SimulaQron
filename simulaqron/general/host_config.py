@@ -54,7 +54,7 @@ def get_node_id_from_net_config(net_config, node_name):
     NOTE node ID is the index of the node name of a sorted list of all the node names in the network.
     """
     if node_name not in net_config.hostDict:
-        raise ValueError(f"node name {node_name} not in host_dict")
+        raise ValueError(f"node name {node_name} not in host_dict ({net_config.hostDict.keys()})")
     return list(sorted(net_config.hostDict.keys())).index(node_name)
 
 
