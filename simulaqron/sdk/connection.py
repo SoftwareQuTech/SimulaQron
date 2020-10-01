@@ -1,10 +1,12 @@
 import time
 import socket
+from typing import Type
 
 from netqasm.logging import get_netqasm_logger
 from netqasm.sdk.connection import BaseNetQASMConnection
 from netqasm.instructions.operand import Register, Address
 from netqasm.instructions.instr_enum import Instruction
+from netqasm.sdk.network import NetworkInfo
 from netqasm.messages import (
     MessageHeader,
     MsgDoneMessage,
@@ -41,7 +43,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
         network_name=None,
     ):
         super().__init__(
-            name=app_name,
+            app_name=app_name,
+            # NOTE currently node_name and app_name are the same in simulaqron
+            node_name=app_name,
             app_id=app_id,
             max_qubits=max_qubits,
             log_config=log_config,
@@ -117,7 +121,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
         addr = None
         qnodeos_net = None
         if socket_address is None:
-            qnodeos_net = SimulaQronConnection._get_qnodeos_net_config(network_name=network_name)
+            qnodeos_net = _get_qnodeos_net_config(network_name=network_name)
 
             # Host data
             if name in qnodeos_net.hostDict:
@@ -136,13 +140,6 @@ class SimulaQronConnection(BaseNetQASMConnection):
             addr = addrs[0]
 
         return addr, qnodeos_net
-
-    @staticmethod
-    def _get_qnodeos_net_config(network_name):
-        network_config_file = simulaqron_settings.network_config_file
-        qnodeos_net = SocketsConfig(network_config_file, network_name=network_name, config_type="qnodeos")
-
-        return qnodeos_net
 
     @staticmethod
     def _setup_socket(name, addr, retry_time=0.1):
@@ -169,6 +166,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 raise err
         logger.debug("App {} : Could not connect to  NetQASM server, trying again...".format(name))
         return qnodeos_socket
+
+    def _get_network_info(self) -> Type[NetworkInfo]:
+        return SimulaQronNetworkInfo
 
     def _commit_serialized_message(self, raw_msg, block=True, callback=None):
         """Commit a message to the backend/qnodeos"""
@@ -298,13 +298,40 @@ class SimulaQronConnection(BaseNetQASMConnection):
         self._next_msg_id += 1
         return msg_id
 
-    def _get_node_id(self, node_name):
-        """Returns the node id for the node with the given name"""
-        return get_node_id_from_net_config(self._qnodeos_net, node_name)
 
-    def _get_node_name(self, node_id):
+def _get_qnodeos_net_config(network_name):
+    network_config_file = simulaqron_settings.network_config_file
+    qnodeos_net = SocketsConfig(network_config_file, network_name=network_name, config_type="qnodeos")
+
+    return qnodeos_net
+
+
+# TODO always use network name "default"?
+_QNODEOS_NET = _get_qnodeos_net_config(network_name="default")
+
+
+class SimulaQronNetworkInfo(NetworkInfo):
+    @classmethod
+    def _get_node_id(cls, node_name):
+        """Returns the node id for the node with the given name"""
+        return get_node_id_from_net_config(_QNODEOS_NET, node_name)
+
+    @classmethod
+    def _get_node_name(cls, node_id):
         """Returns the node name for the node with the given ID"""
-        for node_name, host in self._qnodeos_net.hostDict.items():
+        for node_name, host in _QNODEOS_NET.hostDict.items():
             if node_id == host.ip:
                 return node_name
         raise KeyError("Unknown node ID {node_id}")
+
+    @classmethod
+    def get_node_id_for_app(cls, app_name):
+        """Returns the node id for the app with the given name"""
+        # NOTE app_name and node_name are for now the same in simulaqron
+        return cls._get_node_id(node_name=app_name)
+
+    @classmethod
+    def get_node_name_for_app(cls, app_name):
+        """Returns the node name for the app with the given name"""
+        # NOTE app_name and node_name are for now the same in simulaqron
+        return app_name
