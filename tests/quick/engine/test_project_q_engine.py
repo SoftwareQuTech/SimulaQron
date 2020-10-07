@@ -9,7 +9,7 @@ if has_module.main(SimBackend.PROJECTQ.value):
     from simulaqron.virtual_node.project_q_simulator import projectQEngine
     from simulaqron.virtual_node.basics import noQubitError, quantumError
 
-    from projectq.types._qubit import Qureg
+    from projectq.types._qubit import Qubit
 
     _has_module = True
 
@@ -57,7 +57,7 @@ class TestProjectQEngine(unittest.TestCase):
         self.assertEqual(num, 0)
         self.assertEqual(self.eng.activeQubits, 1)
         self.assertEqual(len(self.eng.qubitReg), 1)
-        self.assertTrue(isinstance(self.eng.qubitReg[num], Qureg))
+        self.assertTrue(isinstance(self.eng.qubitReg[num], Qubit))
 
     @if_has_module
     def test_add_to_many_fresh_qubits(self):
@@ -73,7 +73,7 @@ class TestProjectQEngine(unittest.TestCase):
         self.assertEqual(num, 0)
         self.assertEqual(self.eng.activeQubits, 1)
         self.assertEqual(len(self.eng.qubitReg), 1)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         self.assertAlmostEqual(self.abs_inner_product(state, new_state), 1)
 
     @if_has_module
@@ -83,7 +83,7 @@ class TestProjectQEngine(unittest.TestCase):
         self.assertEqual(num, 0)
         self.assertEqual(self.eng.activeQubits, 1)
         self.assertEqual(len(self.eng.qubitReg), 1)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         self.assertAlmostEqual(self.abs_inner_product(state, new_state), 1)
 
     @if_has_module
@@ -105,28 +105,28 @@ class TestProjectQEngine(unittest.TestCase):
     def test_get_register_RI(self):
         self.eng.add_fresh_qubit()
         self.eng.add_fresh_qubit()
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         self.assertAlmostEqual(self.abs_inner_product(state, [1, 0, 0, 0]), 1)
 
     @if_has_module
     def test_H(self):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_H(num)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         self.assertAlmostEqual(self.abs_inner_product(state, [1 / np.sqrt(2), 1 / np.sqrt(2)]), 1)
 
     @if_has_module
     def test_K(self):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_K(num)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         self.assertAlmostEqual(self.abs_inner_product(state, [1 / np.sqrt(2), 1j / np.sqrt(2)]), 1)
 
     @if_has_module
     def test_X(self):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_X(num)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         self.assertAlmostEqual(self.abs_inner_product(state, [0, 1]), 1)
 
     @if_has_module
@@ -134,7 +134,7 @@ class TestProjectQEngine(unittest.TestCase):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_H(num)
         self.eng.apply_Y(num)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         ref = [-1j / np.sqrt(2), 1j / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
@@ -143,7 +143,7 @@ class TestProjectQEngine(unittest.TestCase):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_H(num)
         self.eng.apply_Z(num)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         ref = [1 / np.sqrt(2), -1 / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
@@ -151,7 +151,7 @@ class TestProjectQEngine(unittest.TestCase):
     def test_Rx(self):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_rotation(num, (1, 0, 0), np.pi / 2)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         ref = [1 / np.sqrt(2), -1j / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
@@ -159,7 +159,7 @@ class TestProjectQEngine(unittest.TestCase):
     def test_Ry(self):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_rotation(num, (0, 1, 0), np.pi / 2)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         ref = [1 / np.sqrt(2), 1 / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
@@ -168,7 +168,7 @@ class TestProjectQEngine(unittest.TestCase):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_H(num)
         self.eng.apply_rotation(num, (0, 0, 1), np.pi / 2)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         ref = [1 / np.sqrt(2), 1j / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
@@ -185,7 +185,7 @@ class TestProjectQEngine(unittest.TestCase):
         num2 = self.eng.add_fresh_qubit()
         self.eng.apply_H(num1)
         self.eng.apply_CNOT(num1, num2)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         ref = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
@@ -196,7 +196,7 @@ class TestProjectQEngine(unittest.TestCase):
         self.eng.apply_H(num1)
         self.eng.apply_H(num2)
         self.eng.apply_CPHASE(num1, num2)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         ref = [1 / 2, 1 / 2, 1 / 2, -1 / 2]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
@@ -237,7 +237,7 @@ class TestProjectQEngine(unittest.TestCase):
         self.eng.absorb(eng2)
         self.assertEqual(self.eng.activeQubits, 1)
         self.assertEqual(len(self.eng.qubitReg), 1)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         ref = [1 / np.sqrt(2), 1 / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
@@ -249,7 +249,7 @@ class TestProjectQEngine(unittest.TestCase):
         self.eng.absorb(eng2)
         self.assertEqual(self.eng.activeQubits, 1)
         self.assertEqual(len(self.eng.qubitReg), 1)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         ref = [1 / np.sqrt(2), 1 / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
@@ -263,7 +263,7 @@ class TestProjectQEngine(unittest.TestCase):
         self.eng.absorb(eng2)
         self.assertEqual(self.eng.activeQubits, 2)
         self.assertEqual(len(self.eng.qubitReg), 2)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         ref = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
@@ -278,7 +278,7 @@ class TestProjectQEngine(unittest.TestCase):
         self.eng.absorb(eng2)
         self.assertEqual(self.eng.activeQubits, n)
         self.assertEqual(len(self.eng.qubitReg), n)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         ref = [1 / np.sqrt(2)] + [0] * (2 ** n - 2) + [1 / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
@@ -327,7 +327,7 @@ class TestProjectQEngine(unittest.TestCase):
         self.eng.absorb_parts(*eng2.get_register_RI(), eng2.activeQubits)
         self.assertEqual(self.eng.activeQubits, 2)
         self.assertEqual(len(self.eng.qubitReg), 2)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         ref = [1, 0, 0, 0]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
@@ -341,7 +341,7 @@ class TestProjectQEngine(unittest.TestCase):
         self.eng.absorb_parts(*eng2.get_register_RI(), eng2.activeQubits)
         self.assertEqual(self.eng.activeQubits, 2)
         self.assertEqual(len(self.eng.qubitReg), 2)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         ref = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 
@@ -353,7 +353,7 @@ class TestProjectQEngine(unittest.TestCase):
         self.eng.absorb_parts(*eng2.get_register_RI(), eng2.activeQubits)
         self.assertEqual(self.eng.activeQubits, 1)
         self.assertEqual(len(self.eng.qubitReg), 1)
-        state = self.eng.get_register_RI()
+        state = self.eng.get_register_RI()[1]
         ref = [1 / np.sqrt(2), 1 / np.sqrt(2)]
         self.assertAlmostEqual(self.abs_inner_product(state, ref), 1)
 

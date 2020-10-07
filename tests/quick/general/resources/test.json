@@ -12,21 +12,21 @@
                 ],
                 "vnode_socket": [
                     "localhost",
-                    8003
+                    8002
                 ]
             },
             "Bob": {
                 "app_socket": [
                     "localhost",
-                    8004
+                    8003
                 ],
                 "qnodeos_socket": [
                     "localhost",
-                    8007
+                    8004
                 ],
                 "vnode_socket": [
                     "localhost",
-                    8010
+                    8005
                 ]
             }
         },
@@ -37,15 +37,15 @@
             "Charlie": {
                 "app_socket": [
                     "localhost",
-                    8012
+                    8006
                 ],
                 "qnodeos_socket": [
                     "localhost",
-                    8015
+                    8007
                 ],
                 "vnode_socket": [
                     "localhost",
-                    8018
+                    8008
                 ]
             }
         },

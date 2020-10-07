@@ -30,11 +30,15 @@ import random
 import time
 
 import numpy as np
-from simulaqron import settings
 from twisted.spread import pb
 from twisted.internet.defer import DeferredLock
+from twisted.internet import reactor
+from twisted.internet.task import deferLater
+from twisted.internet.defer import inlineCallbacks
 
-import logging
+from netqasm.logging import get_netqasm_logger
+
+from simulaqron import settings
 
 
 class simulatedQubit(pb.Referenceable):
@@ -69,22 +73,36 @@ class simulatedQubit(pb.Referenceable):
         # Mark this qubit as active (still connected to a register)
         self.active = True
 
+        # Time until retry
+        self._delay = 1
+
         # Optional parameters for when the simulation is noise
         self.noisy = settings.simulaqron_settings.noisy_qubits
         self.T1 = settings.simulaqron_settings.t1
         self.last_accessed = time.time()
 
-    def lock(self):
-        self._lock.acquire()
+        self._logger = get_netqasm_logger(
+            f"{self.__class__.__name__}(node={node.name}, sim_num={simNum})"
+        )
 
+    @inlineCallbacks
+    def lock(self):
+        self._logger.debug(f"locking sim qubit in register with num {self.register.num}")
+        while self.isLocked():
+            yield deferLater(reactor, self._delay, lambda: None)
+        yield self._lock.acquire()
+        self._logger.debug(f"got lock for sim qubit in register with num {self.register.num}")
+
+    @inlineCallbacks
     def remote_lock(self):
-        self._lock.acquire()
+        yield self.lock()
 
     def unlock(self):
         try:
+            self._logger.debug(f"unlocking sim qubit in register with num {self.register.num}")
             self._lock.release()
-        except AssertionError:
-            pass
+        except AssertionError as exc:
+            self._logger.error(f"AssertionError {exc}")
 
     def remote_unlock(self):
         self.unlock()
@@ -106,13 +124,13 @@ class simulatedQubit(pb.Referenceable):
         num = self.register.add_fresh_qubit()
         self.num = num
 
-        logging.info("QUANTUM %s: Adding qubit number %d to register %d", self.node.name, num, self.register.num)
+        self._logger.info("QUANTUM %s: Adding qubit number %d to register %d", self.node.name, num, self.register.num)
 
     def remote_apply_X(self):
         """
         Apply X gate to itself by passing it onto the underlying register.
         """
-        logging.debug("VIRTUAL NODE %s: applying X to number %d", self.node.name, self.num)
+        self._logger.debug("VIRTUAL NODE %s: applying X to number %d", self.node.name, self.num)
         self._apply_random_pauli_noise()
         self.register.apply_X(self.num)
 
@@ -120,7 +138,7 @@ class simulatedQubit(pb.Referenceable):
         """
         Apply K gate to itself by passing it onto the underlying register. Maps computational to Y eigenbasis.
         """
-        logging.debug("VIRTUAL NODE %s: applying K to number %d", self.node.name, self.num)
+        self._logger.debug("VIRTUAL NODE %s: applying K to number %d", self.node.name, self.num)
         self._apply_random_pauli_noise()
         self.register.apply_K(self.num)
 
@@ -128,7 +146,7 @@ class simulatedQubit(pb.Referenceable):
         """
         Apply Y gate.
         """
-        logging.debug("VIRTUAL NODE %s: applying Y to number %d", self.node.name, self.num)
+        self._logger.debug("VIRTUAL NODE %s: applying Y to number %d", self.node.name, self.num)
         self._apply_random_pauli_noise()
         self.register.apply_Y(self.num)
 
@@ -136,7 +154,7 @@ class simulatedQubit(pb.Referenceable):
         """
         Apply Z gate.
         """
-        logging.debug("VIRTUAL NODE %s: applying Z to number %d", self.node.name, self.num)
+        self._logger.debug("VIRTUAL NODE %s: applying Z to number %d", self.node.name, self.num)
         self._apply_random_pauli_noise()
         self.register.apply_Z(self.num)
 
@@ -144,7 +162,7 @@ class simulatedQubit(pb.Referenceable):
         """
         Apply H gate.
         """
-        logging.debug("VIRTUAL NODE %s: applying H to number %d", self.node.name, self.num)
+        self._logger.debug("VIRTUAL NODE %s: applying H to number %d", self.node.name, self.num)
         self._apply_random_pauli_noise()
         self.register.apply_H(self.num)
 
@@ -152,7 +170,7 @@ class simulatedQubit(pb.Referenceable):
         """
         Apply T gate.
         """
-        logging.debug("VIRTUAL NODE %s: applying T to number %d", self.node.name, self.num)
+        self._logger.debug("VIRTUAL NODE %s: applying T to number %d", self.node.name, self.num)
         self._apply_random_pauli_noise()
         self.register.apply_T(self.num)
 
@@ -165,7 +183,7 @@ class simulatedQubit(pb.Referenceable):
         """
         n = args[0]
         a = args[1]
-        logging.debug(
+        self._logger.debug(
             "VIRTUAL NODE %s: applying rotation to number %d. Axis=%s,angle=%s",
             self.node.name,
             self.num,
@@ -206,7 +224,7 @@ class simulatedQubit(pb.Referenceable):
         targetNum    the qubit to use as the target of the CNOT
         """
 
-        logging.debug("VIRTUAL NODE %s: CNOT from %d to %d", self.node.name, self.num, targetNum)
+        self._logger.debug("VIRTUAL NODE %s: CNOT from %d to %d", self.node.name, self.num, targetNum)
         self._apply_random_pauli_noise()
         self.register.apply_CNOT(self.num, targetNum)
 
@@ -257,7 +275,7 @@ class simulatedQubit(pb.Referenceable):
         backend = settings.simulaqron_settings.sim_backend
         if backend != settings.SimBackend.QUTIP.value:
             raise RuntimeError("Cannot get reduced qubit state using backend {}".format(backend))
-        logging.debug("VIRTUAL NODE %s: Returning qubit %d", self.node.name, self.num)
+        self._logger.debug("VIRTUAL NODE %s: Returning qubit %d", self.node.name, self.num)
         return self.register.get_qubits_RI([self.num])
 
     def remote_get_details(self):
@@ -278,11 +296,11 @@ class simulatedQubit(pb.Referenceable):
         p = (1 - np.exp(-t / self.T1)) / 4
         x = random.random()
         if x < p:
-            logging.debug("VIRTUAL NODE %s: random pauli X applied on %d", self.node.name, self.num)
+            self._logger.debug("VIRTUAL NODE %s: random pauli X applied on %d", self.node.name, self.num)
             self.register.apply_X(self.num)
         elif x < 2 * p:
-            logging.debug("VIRTUAL NODE %s: random pauli Y applied on %d", self.node.name, self.num)
+            self._logger.debug("VIRTUAL NODE %s: random pauli Y applied on %d", self.node.name, self.num)
             self.register.apply_Y(self.num)
         elif x < 3 * p:
-            logging.debug("VIRTUAL NODE %s: random pauli Z applied on %d", self.node.name, self.num)
+            self._logger.debug("VIRTUAL NODE %s: random pauli Z applied on %d", self.node.name, self.num)
             self.register.apply_Z(self.num)
