@@ -1212,6 +1212,14 @@ class virtualNode(pb.Root):
 
         return (realM, imagM)
 
+    def remote_sim_qubit_num_in_same_reg(self, sim_qubit_num1, sim_qubit_num2):
+        """Checks if two qubits are in the same register"""
+        sim_qubit1 = self._q_num_to_obj(sim_qubit_num1)
+        sim_qubit2 = self._q_num_to_obj(sim_qubit_num2)
+        assert sim_qubit1 is not None, "Sim num {sim_qubit_num1} not in this node"
+        assert sim_qubit2 is not None, "Sim num {sim_qubit_num2} not in this node"
+        return sim_qubit1.register == sim_qubit2.register
+
 
 #######
 #
@@ -1265,7 +1273,7 @@ class virtualQubit(pb.Referenceable):
         name		name of the method corresponding to the name. For example: name = apply_X
         param		parameters for gates such as rotations (axis,angle)
         """
-        self._logger.debug(f"applying gate {name} to virtual qubit {self.virtQubit.num}")
+        self._logger.debug(f"applying gate {name} to virtual qubit {self.num}")
         if self.active != 1:
             self._logger.error("Attempt to manipulate qubits no longer at this node.")
             return False
@@ -1345,7 +1353,7 @@ class virtualQubit(pb.Referenceable):
             self._logger.error("Attempt to manipulate qubits no longer at this node.")
             return
 
-        self._logger.debug("measuring virtual qubit {self.virtQubit.num}")
+        self._logger.debug("measuring virtual qubit {self.num}")
         locked_node = yield self._lock_simulating_node()
         yield call_method(self.simQubit, "lock")
 
@@ -1501,8 +1509,11 @@ class virtualQubit(pb.Referenceable):
 
         # We have now acquired the relevant global node locks. If more than one qubit is locked, all code
         # will first acquire the global lock, so this should be safe from deadlocks now, so we will not timeout
+        # Lock the control qubits register
+        # If the target is in the same register we don't want to lock again so first check
+        # what case we are in
         yield self._lock_inreg(self)
-        yield self._lock_inreg(target)
+        # if self.simQubit.register != target.simQubit.register:
 
         # Todo a 2 qubit gate, both qubits must be in the same simulated register. We will merge
         # registers if this is not already the case.
@@ -1519,6 +1530,7 @@ class virtualQubit(pb.Referenceable):
                         # They are even in the same register, just do the gate
                         getattr(self.simQubit, localName)(target.simQubit.num)
                     else:
+                        yield self._lock_inreg(target)
                         self._logger.debug("2qubit command demands register merge.")
                         # Both are local but not in the same register
                         yield self.simNode.root.local_merge_regs(self.simQubit, target.simQubit)
@@ -1532,6 +1544,11 @@ class virtualQubit(pb.Referenceable):
                     # Fetch the details of the two simulated qubits from remote
                     (fNum, fNode) = yield call_method(self.simQubit, "get_details")
                     (tNum, tNode) = yield call_method(target.simQubit, "get_details")
+
+                    same_reg = yield call_method(self.simNode.root, "sim_qubit_num_in_same_reg", fNum, tNum)
+                    if not same_reg:
+                        # Not same register so also lock target register
+                        yield self._lock_inreg(target)
 
                     # Sanity check: we really have the right simulating node
                     if fNode != self.simNode.name or tNode != target.simNode.name:
