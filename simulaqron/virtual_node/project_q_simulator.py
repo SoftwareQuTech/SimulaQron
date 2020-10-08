@@ -76,7 +76,7 @@ class projectQEngine(quantumEngine):
             raise noQubitError("No more qubits available in register.")
 
         # Prepare a clean qubit state in |0>
-        qubit = self.eng.allocate_qubit()
+        qubit = self.eng.allocate_qubit()[0]
 
         self.qubitReg.append(qubit)
 
@@ -118,12 +118,20 @@ class projectQEngine(quantumEngine):
         list. Twisted only likes to send real valued lists, not complex ones.
         """
         self.eng.flush()
-        state = self.eng.backend.cheat()[1]
+        order, state = self.eng.backend.cheat()
+        # Update the order based on the positions in the qubitReg
+        # and not of the qubit IDs
+        q_reg_order = {}
+        for i, q in enumerate(self.qubitReg):
+            q_reg_order[i] = order[q.id]
 
+        # Note previously the format of real and imaginary numbers were
+        # expected, use the same even though Re will be the qubit mapping
+        # and Im the state
         Re = tuple(n.real for n in state)
         Im = tuple(n.imag for n in state)
 
-        return Re, Im
+        return q_reg_order, (Re, Im)
 
     def apply_H(self, qubitNum):
         """
@@ -284,7 +292,6 @@ class projectQEngine(quantumEngine):
         """
         Absorb the qubits from the other engine into this one. This is done by tensoring the state at the end.
         """
-
         # Check whether there is space
         newNum = self.activeQubits + other.activeQubits
         if newNum > self.maxQubits:
@@ -294,21 +301,10 @@ class projectQEngine(quantumEngine):
         if self.activeQubits == 0:
             self.eng = other.eng
             self.qubitReg = list(other.qubitReg)
+            self.activeQubits = other.activeQubits
         elif other.activeQubits > 0:
-            # Get the current state of the other engine
-            other.eng.flush()
-            other_state = other.eng.backend.cheat()[1]
-
-            # Allocate qubits in this engine for the new qubits from the other engine
-            qreg = self.eng.allocate_qureg(other.activeQubits)
-
-            # Put the new qubits in the correct state
-            pQ.ops.StatePreparation(other_state) | qreg
-
-            # Add the qubits to the list of qubits
-            self.qubitReg += list(qreg)
-
-        self.activeQubits = newNum
+            data = other.get_register_RI()
+            self.absorb_parts(*data, other.activeQubits)
 
     def absorb_parts(self, R, I, activeQ):
         """
@@ -325,6 +321,8 @@ class projectQEngine(quantumEngine):
             raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
 
         if activeQ > 0:
+            # Unpack the ordering of qubits and the real and imaginary part
+            order, (R, I) = R, I
 
             # Convert the real and imaginary parts to a state
             state = [re + im * 1j for re, im in zip(R, I)]
@@ -335,7 +333,15 @@ class projectQEngine(quantumEngine):
             # Put the new qubits in the correct state
             pQ.ops.StatePreparation(state) | qreg
 
+            # Put the qubits in the correct order
+            # The `order` is a mapping from the previous qubit IDs
+            # to the bit position in the state. The qubits in the `qreg`
+            # are therefore in the old bit positions which needs to be updated.
+            new_qubits = [None] * len(qreg)
+            for old_q_id, old_bit_pos in order.items():
+                new_qubits[old_q_id] = qreg[old_bit_pos]
+
             # Add the qubits to the list of qubits
-            self.qubitReg += list(qreg)
+            self.qubitReg += new_qubits
 
             self.activeQubits = newNum
