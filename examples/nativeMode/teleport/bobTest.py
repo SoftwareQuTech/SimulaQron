@@ -111,18 +111,18 @@ class localNode(pb.Root):
             yield eprB.callRemote("apply_Z")
 
         # Just print the qubit we received
-        if simulaqron_settings.backend == "qutip":
+        if simulaqron_settings.sim_backend == "qutip":
             print("here")
             (realRho, imagRho) = yield eprB.callRemote("get_qubit")
             state = np.array(assemble_qubit(realRho, imagRho), dtype=complex)
-        elif simulaqron_settings.backend == "projectq":
+        elif simulaqron_settings.sim_backend == "projectq":
             realvec, imagvec = yield self.virtRoot.callRemote("get_register_RI", eprB)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
-        elif simulaqron_settings.backend == "stabilizer":
+        elif simulaqron_settings.sim_backend == "stabilizer":
             array, _, = yield self.virtRoot.callRemote("get_register_RI", eprB)
             state = StabilizerState(array)
         else:
-            ValueError("Unknown backend {}".format(simulaqron_settings.backend))
+            ValueError("Unknown backend {}".format(simulaqron_settings.sim_backend))
 
         print("Qubit is:\n{}".format(state))
 
