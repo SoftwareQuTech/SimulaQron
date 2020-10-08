@@ -275,7 +275,6 @@ class VanillaSimulaQronExecutioner(Executioner):
         if correct and outcome:
             yield call_method(virt_qubit, "apply_X")
 
-    @inlineCallbacks
     def _do_wait(self, delay=0.1):
         d = task.deferLater(reactor, delay, lambda: self._logger.debug("Wait finished"))
         self._logger.debug("waiting a bit")
@@ -758,7 +757,7 @@ class VanillaSimulaQronExecutioner(Executioner):
                     ent_info = self._update_qubit_id(ent_info=ent_info, qubit_id=qubit_id)
                 break
             else:
-                yield self._do_wait(delay=sleep_time)
+                yield from self._do_wait(delay=sleep_time)
         if no_gen:
             raise TimeoutError("TIMEOUT, no EPR generation received.")
 
