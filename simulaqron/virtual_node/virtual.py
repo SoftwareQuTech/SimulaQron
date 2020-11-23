@@ -39,7 +39,7 @@ from twisted.internet.task import deferLater
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
 from twisted.spread.pb import RemoteError, RemoteReference
 
-from netqasm.logging import get_netqasm_logger
+from netqasm.logging.glob import get_netqasm_logger
 
 from simulaqron.virtual_node.basics import quantumError, noQubitError, virtNetError
 from simulaqron.virtual_node.quantum import simulatedQubit

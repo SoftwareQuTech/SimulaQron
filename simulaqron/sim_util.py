@@ -1,4 +1,4 @@
-from netqasm.logging import get_netqasm_logger
+from netqasm.logging.glob import get_netqasm_logger
 
 logger = get_netqasm_logger("sim_util")
 

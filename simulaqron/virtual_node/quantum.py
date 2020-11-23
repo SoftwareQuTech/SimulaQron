@@ -36,7 +36,7 @@ from twisted.internet import reactor
 from twisted.internet.task import deferLater
 from twisted.internet.defer import inlineCallbacks
 
-from netqasm.logging import get_netqasm_logger
+from netqasm.logging.glob import get_netqasm_logger
 
 from simulaqron import settings
 

@@ -2,9 +2,9 @@ import unittest
 import logging
 from functools import partial
 
-from netqasm.logging import set_log_level
+from netqasm.logging.glob import set_log_level
 from netqasm.sdk import EPRSocket
-from netqasm.run.app_config import default_app_config
+from netqasm.runtime.app_config import default_app_config
 
 from simulaqron.network import Network
 from simulaqron.settings import simulaqron_settings

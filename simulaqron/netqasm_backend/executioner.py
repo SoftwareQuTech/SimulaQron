@@ -8,10 +8,10 @@ from collections import defaultdict
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet import reactor, task
 
-from netqasm.executioner import Executioner, EprCmdData
-from netqasm import instructions
-from netqasm.network_stack import BaseNetworkStack
-from netqasm.messages import ErrorMessage, ErrorCode, ReturnRegMessage, ReturnArrayMessage
+from netqasm.backend.executioner import Executioner, EprCmdData
+from netqasm.lang import instr as instructions
+from netqasm.backend.network_stack import BaseNetworkStack
+from netqasm.backend.messages import ErrorMessage, ErrorCode, ReturnRegMessage, ReturnArrayMessage
 
 from qlink_interface import (
     LinkLayerOKTypeK,
