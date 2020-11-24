@@ -8,7 +8,7 @@ from twisted.internet import reactor
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
 from twisted.spread import pb
 
-from netqasm.logging import get_netqasm_logger, set_log_level
+from netqasm.logging.glob import get_netqasm_logger, set_log_level
 
 from simulaqron.netqasm_backend.factory import NetQASMFactory
 from simulaqron.netqasm_backend.qnodeos import SubroutineHandler

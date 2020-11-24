@@ -1,7 +1,7 @@
 import time
 import socket
 
-from netqasm.logging import get_netqasm_logger
+from netqasm.logging.glob import get_netqasm_logger
 from netqasm.sdk.classical_communication.socket import Socket as _Socket
 
 from simulaqron.settings import simulaqron_settings

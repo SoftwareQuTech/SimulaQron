@@ -2,12 +2,12 @@ import time
 import socket
 from typing import Type
 
-from netqasm.logging import get_netqasm_logger
+from netqasm.logging.glob import get_netqasm_logger
 from netqasm.sdk.connection import BaseNetQASMConnection
-from netqasm.instructions.operand import Register, Address
-from netqasm.instructions.instr_enum import Instruction
+from netqasm.lang.instr.operand import Register, Address
+from netqasm.lang.instr.instr_enum import Instruction
 from netqasm.sdk.network import NetworkInfo
-from netqasm.messages import (
+from netqasm.backend.messages import (
     MessageHeader,
     MsgDoneMessage,
     ReturnRegMessage,

@@ -33,8 +33,8 @@ from twisted.internet.defer import DeferredLock, inlineCallbacks
 from twisted.internet.protocol import Factory, Protocol, connectionDone
 from twisted.internet.task import deferLater
 
-from netqasm.logging import get_netqasm_logger
-from netqasm.messages import MessageHeader, ErrorMessage, ErrorCode, deserialize_host_msg
+from netqasm.logging.glob import get_netqasm_logger
+from netqasm.backend.messages import MessageHeader, ErrorMessage, ErrorCode, deserialize_host_msg
 
 from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor

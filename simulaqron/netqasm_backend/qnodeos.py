@@ -1,6 +1,6 @@
 from twisted.internet.defer import inlineCallbacks
-from netqasm.messages import MsgDoneMessage
-from netqasm.qnodeos import BaseSubroutineHandler
+from netqasm.backend.messages import MsgDoneMessage
+from netqasm.backend.qnodeos import BaseSubroutineHandler
 
 from simulaqron.netqasm_backend.executioner import VanillaSimulaQronExecutioner
 

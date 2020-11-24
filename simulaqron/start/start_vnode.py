@@ -33,7 +33,7 @@ import signal
 from functools import partial
 from twisted.internet import reactor
 
-from netqasm.logging import get_netqasm_logger, set_log_level
+from netqasm.logging.glob import get_netqasm_logger, set_log_level
 from simulaqron.virtual_node.virtual import Backend
 from simulaqron.settings import simulaqron_settings
 

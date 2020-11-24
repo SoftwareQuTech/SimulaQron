@@ -33,7 +33,7 @@ import multiprocessing as mp
 import networkx as nx
 from timeit import default_timer as timer
 
-from netqasm.logging import get_netqasm_logger, get_log_level
+from netqasm.logging.glob import get_netqasm_logger, get_log_level
 
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 from simulaqron.settings import simulaqron_settings
