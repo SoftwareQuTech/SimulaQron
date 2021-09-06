@@ -48,6 +48,8 @@ if simulaqron_settings.backend == "qutip":
     from simulaqron.virtNode.qutipSimulator import qutipEngine
 elif simulaqron_settings.backend == "projectq":
     from simulaqron.virtNode.projectQSimulator import projectQEngine
+elif simulaqron_settings.backend == "pyqrack":
+    from simulaqron.virtNode.pyqrackSimulator import pyqrackEngine
 elif simulaqron_settings.backend == "stabilizer":
     from simulaqron.virtNode.stabilizerSimulator import stabilizerEngine
 else:
@@ -446,6 +448,8 @@ class virtualNode(pb.Root):
                 newReg = qutipEngine(self.myID, regNum, maxQubits)
             elif simulaqron_settings.backend == "projectq":
                 newReg = projectQEngine(self.myID, regNum, maxQubits)
+            elif simulaqron_settings.backend == "pyqrack":
+                newReg = pyqrackEngine(self.myID, regNum, maxQubits)
             elif simulaqron_settings.backend == "stabilizer":
                 newReg = stabilizerEngine(self.myID, regNum, maxQubits)
             else:
