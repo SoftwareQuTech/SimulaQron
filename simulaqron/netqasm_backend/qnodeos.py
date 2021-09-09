@@ -1,21 +1,21 @@
 from twisted.internet.defer import inlineCallbacks
 from netqasm.backend.messages import MsgDoneMessage
-from netqasm.backend.qnodeos import BaseSubroutineHandler
+from netqasm.backend.qnodeos import QNodeController
 
 from simulaqron.netqasm_backend.executioner import VanillaSimulaQronExecutioner
 
 
-class SubroutineHandler(BaseSubroutineHandler):
+class SubroutineHandler(QNodeController):
     def __init__(self, factory, instr_log_dir=None, flavour=None):
         super().__init__(factory.name, instr_log_dir=instr_log_dir, flavour=flavour)
 
         self.factory = factory
 
         # Give a way for the executioner to return messages
-        self._executioner.add_return_msg_func(self._return_msg)
+        self._executor.add_return_msg_func(self._return_msg)
 
         # Give the executioner a handle to the factory
-        self._executioner.add_factory(self.factory)
+        self._executor.add_factory(self.factory)
 
     @property
     def protocol(self):
@@ -33,7 +33,7 @@ class SubroutineHandler(BaseSubroutineHandler):
         )
 
     @classmethod
-    def _get_executioner_class(cls, flavour=None):
+    def _get_executor_class(cls, flavour=None):
         return VanillaSimulaQronExecutioner
 
     def _mark_message_finished(self, msg_id, msg):

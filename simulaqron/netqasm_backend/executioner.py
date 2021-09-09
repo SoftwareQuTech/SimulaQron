@@ -1,33 +1,25 @@
-import time
 import random
+import time
 import traceback
+from collections import defaultdict
 from enum import Enum
 from functools import partial
-from collections import defaultdict
 
-from twisted.internet.defer import inlineCallbacks
-from twisted.internet import reactor, task
-
-from netqasm.backend.executioner import Executioner, EprCmdData
-from netqasm.lang import instr as instructions
+from netqasm.backend.executor import EprCmdData, Executor
+from netqasm.backend.messages import (ErrorCode, ErrorMessage,
+                                      ReturnArrayMessage, ReturnRegMessage)
 from netqasm.backend.network_stack import BaseNetworkStack
-from netqasm.backend.messages import ErrorMessage, ErrorCode, ReturnRegMessage, ReturnArrayMessage
-
-from qlink_interface import (
-    LinkLayerOKTypeK,
-    LinkLayerOKTypeM,
-    LinkLayerOKTypeR,
-    LinkLayerErr,
-    BellState,
-    ReturnType,
-    RequestType,
-    RandomBasis,
-    Basis,
-)
-
-from simulaqron.settings import simulaqron_settings
+from netqasm.lang import instr as instructions
+from netqasm.lang import operand
+from netqasm.qlink_compat import (Basis, BellState, LinkLayerErr,
+                                  LinkLayerOKTypeK, LinkLayerOKTypeM,
+                                  LinkLayerOKTypeR, RandomBasis, RequestType,
+                                  ReturnType)
 from simulaqron.general.host_config import get_node_id_from_net_config
+from simulaqron.settings import simulaqron_settings
 from simulaqron.virtual_node.virtual import call_method
+from twisted.internet import reactor, task
+from twisted.internet.defer import inlineCallbacks
 
 
 class UnknownQubitError(RuntimeError):
@@ -52,8 +44,11 @@ class NetworkStack(BaseNetworkStack):
         # NOTE this just records the information but does not actually set up the socket
         self._sockets[epr_socket_id] = (remote_node_id, remote_epr_socket_id)
 
+    def get_purpose_id(self, remote_node_id: int, epr_socket_id: int) -> int:
+        pass
 
-class VanillaSimulaQronExecutioner(Executioner):
+
+class VanillaSimulaQronExecutioner(Executor):
 
     SIMULAQRON_OPS = {
         instructions.vanilla.GateXInstruction: "apply_X",
@@ -281,13 +276,13 @@ class VanillaSimulaQronExecutioner(Executioner):
         yield d
 
     def _update_shared_memory(self, app_id, entry, value):
-        if isinstance(entry, instructions.operand.Register):
+        if isinstance(entry, operand.Register):
             self._logger.debug(f"Updating host about register {entry} with value {value}")
             self._return_msg(msg=ReturnRegMessage(
                 register=entry.cstruct,
                 value=value,
             ))
-        elif isinstance(entry, instructions.operand.Address):
+        elif isinstance(entry, operand.Address):
             self._logger.debug(f"Updating host about array {entry} with value {value}")
             address = entry.address
             self._return_msg(msg=ReturnArrayMessage(
@@ -304,7 +299,7 @@ class VanillaSimulaQronExecutioner(Executioner):
         epr_socket_id,
         q_array_address,
         arg_array_address,
-        ent_info_array_address,
+        ent_results_array_address,
     ):
         create_request = self._get_create_request(
             subroutine_id=subroutine_id,
@@ -323,7 +318,7 @@ class VanillaSimulaQronExecutioner(Executioner):
 
         self._epr_create_requests[remote_node_id, create_request.purpose_id].append(EprCmdData(
             subroutine_id=subroutine_id,
-            ent_info_array_address=ent_info_array_address,
+            ent_results_array_address=ent_results_array_address,
             q_array_address=q_array_address,
             request=create_request,
             tot_pairs=create_request.number,
@@ -347,18 +342,18 @@ class VanillaSimulaQronExecutioner(Executioner):
         remote_node_id,
         epr_socket_id,
         q_array_address,
-        ent_info_array_address,
+        ent_results_array_address
     ):
         app_id = self._get_app_id(subroutine_id=subroutine_id)
         num_pairs = self._get_num_pairs_from_array(
             app_id=app_id,
-            ent_info_array_address=ent_info_array_address,
+            ent_results_array_address=ent_results_array_address,
         )
 
         purpose_id = self._get_purpose_id(remote_node_id=remote_node_id, epr_socket_id=epr_socket_id)
         self._epr_recv_requests[remote_node_id, purpose_id].append(EprCmdData(
             subroutine_id=subroutine_id,
-            ent_info_array_address=ent_info_array_address,
+            ent_results_array_address=ent_results_array_address,
             q_array_address=q_array_address,
             request=None,
             tot_pairs=num_pairs,
@@ -542,7 +537,7 @@ class VanillaSimulaQronExecutioner(Executioner):
             )
         else:
             raise NotImplementedError(f"Cannot yet measure in basis {basis}")
-        
+
         # Measure the qubit
         outcome = yield self.cmd_measure(qubit_id=qubit_id, inplace=False)
         self.remove_qubit_id(qubit_id=qubit_id)
