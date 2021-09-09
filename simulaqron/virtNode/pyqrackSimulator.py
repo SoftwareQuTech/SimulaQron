@@ -101,13 +101,9 @@ class pyqrackEngine(quantumEngine):
             phase1 = complex(newQubit[1]) / sqrt1MinProb
 
         cMtrx = [sqrt1MinProb * phase0, sqrtProb * phase0, sqrtProb * phase1, -sqrt1MinProb * phase1]
-        dMtrx = [
-            cMtrx[0].real, cMtrx[0].imag, cMtrx[1].real, cMtrx[1].imag,
-            cMtrx[2].real, cMtrx[2].imag, cMtrx[3].real, cMtrx[3].imag
-        ]
 
         # Transform the new qubit into the correct state
-        self.engine.mtrx(dMtrx, qid)
+        self.engine.mtrx(cMtrx, qid)
 
         return qid
 
@@ -238,7 +234,7 @@ class pyqrackEngine(quantumEngine):
         Applies a unitary gate to the specified qubit.
 
         Arguments:
-        gate       The project Q gate to be applied
+        gate       The pyqrack gate to be applied
         qubitNum 	the number of the qubit this gate is applied to
         """
         self.validate_qid(qubitNum)
@@ -250,7 +246,7 @@ class pyqrackEngine(quantumEngine):
         Applies a unitary gate to the two specified qubits.
 
         Arguments:
-        gate       The project Q gate to be applied
+        gate       The pyqrack gate to be applied
         qubit1 		the first qubit
         qubit2		the second qubit
         """
