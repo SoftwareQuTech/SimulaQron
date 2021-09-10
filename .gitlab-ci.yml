@@ -27,7 +27,7 @@ image: adahlberg/nlblueprintci:19.04
         - cd ..
         - make install
         # Needed to run in KET formalism
-        - pip install projectq
+        - pip install -Iv projectq==0.5.1
 
 stages:
     - lint
