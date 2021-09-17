@@ -23,7 +23,7 @@ image: adahlberg/nlblueprintci:19.04
         - echo $BRANCH
         - git clone git@gitlab.tudelft.nl:qinc-wehner/netqasm/netqasm.git -b $BRANCH
         - cd netqasm
-        - pip install .
+        - make install
         - cd ..
         - make install
         # Needed to run in KET formalism
