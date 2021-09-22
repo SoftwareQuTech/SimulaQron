@@ -78,6 +78,8 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
     elif simulaqron_settings.backend == "stabilizer":
         array, _ = yield virtRoot.callRemote("get_register_RI", q1)
         state = StabilizerState(array)
+    elif simulaqron_settings.backend == "pyqrack":
+        state = '(Not directly queryable with PyQrack)'
     else:
         ValueError("Unknown backend {}".format(simulaqron_settings.backend))
 

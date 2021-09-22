@@ -121,6 +121,8 @@ class localNode(pb.Root):
         elif simulaqron_settings.backend == "stabilizer":
             array, _, = yield self.virtRoot.callRemote("get_register_RI", eprB)
             state = StabilizerState(array)
+        elif simulaqron_settings.backend == "pyqrack":
+            state = '(Not directly queryable with PyQrack)'
         else:
             ValueError("Unknown backend {}".format(simulaqron_settings.backend))
 
