@@ -8,5 +8,7 @@
 /simulaqron/config/*
 
 .idea/*
+.vscode/*
 
 cqc/backend/logFile*
+examples/**/log/*

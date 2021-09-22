@@ -1,0 +1,2 @@
+class SimUnsupportedError(RuntimeError):
+    pass

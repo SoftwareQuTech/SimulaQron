@@ -7,11 +7,32 @@ image: adahlberg/nlblueprintci:19.04
 
 .install: &install
     before_script:
+        ## Add private key to server access
+        - eval $(ssh-agent -s)
+        - mkdir -p ~/.ssh
+        - chmod 700 ~/.ssh
+        - echo "$SSH_PRIVATE_KEY" | ssh-add -
+        - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+        - chmod 644 ~/.ssh/known_hosts
+        ## Install netqasm
+        - echo $CI_COMMIT_REF_NAME
+        - echo $CI_COMMIT_BRANCH
+        # Use master if merging to master otherwise develop
+        # if not merging then use master if on master otherwise develop
+        - BRANCH="$(if [ "$CI_COMMIT_BRANCH" == "" ]; then if [ "$CI_COMMIT_REF_NAME" == "Develop" ]; then echo "master"; else echo "develop"; fi; else if [ "$CI_COMMIT_REF_NAME" == "Develop" ]; then echo "master"; else echo "develop"; fi; fi)"
+        - echo $BRANCH
+        - git clone git@gitlab.tudelft.nl:qinc-wehner/netqasm/netqasm.git -b $BRANCH
+        - cd netqasm
         - make install
+        - cd ..
+        - make install
+        # Needed to run in KET formalism
+        - pip install -Iv projectq==0.5.1
 
 stages:
     - lint
     - tests
+    - examples
 
 lint:
     <<: *install
@@ -22,5 +43,21 @@ lint:
 test:
     <<: *install
     stage: tests
-    script: make tests
+    script: make tests_all
+    <<: *only_mr
+
+sdk-tests:
+    <<: *install
+    variables:
+        NETQASM_SIMULATOR: simulaqron
+    stage: tests
+    script: make -C netqasm external-tests
+    <<: *only_mr
+
+sdk-examples:
+    <<: *install
+    variables:
+        NETQASM_SIMULATOR: simulaqron
+    stage: examples
+    script: make -C netqasm external-examples
     <<: *only_mr

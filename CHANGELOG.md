@@ -6,6 +6,13 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 Upcoming
 --------
 
+2020-11-24 (v4.0.0)
+-------------------
+- Major breaking change! Using `cqc` is now deprecated and replaced with `netqasm`.
+  `netqasm` improves on `cqc` on many levels, for more details, see TODO add link.
+  As with `cqc`, `netqasm` also has a SDK in python for writing applications, which is very similar to the SDK for `cqc`.
+  However, there are some difference, for details see TODO add link and the documentation for `netqasm` TODO add link.
+
 2020-08-24 (v3.0.16)
 -------------------
 - Fixed bug with setting `noisy-qubit` option from cli.
