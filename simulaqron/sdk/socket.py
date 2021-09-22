@@ -1,11 +1,11 @@
-import time
+import pickle
 import socket
+import time
 
 from netqasm.logging.glob import get_netqasm_logger
 from netqasm.sdk.classical_communication.socket import Socket as _Socket
-
-from simulaqron.settings import simulaqron_settings
 from simulaqron.general.host_config import SocketsConfig
+from simulaqron.settings import simulaqron_settings
 
 
 class Socket(_Socket):
@@ -14,8 +14,8 @@ class Socket(_Socket):
 
     def __init__(
         self,
-        node_name,
-        remote_node_name,
+        app_name,
+        remote_app_name,
         socket_id=0,
         timeout=None,
         use_callbacks=False,
@@ -25,23 +25,33 @@ class Socket(_Socket):
         assert socket_id == 0, (
             "SimulaQron socket does not support setting socket ID, this is instead done in the config file"
         )
-        self._node_name = node_name
-        self._remote_node_name = remote_node_name
+        self._node_name = app_name
+        self._remote_node_name = remote_app_name
         self._use_callbacks = use_callbacks
         self._network_name = network_name
 
-        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({node_name} <-> {remote_node_name})")
+        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({app_name} <-> {remote_app_name})")
+        self._app_socket = None
 
         self._connect()
 
     def __del__(self):
-        self._app_socket.close()
+        if self._app_socket:
+            self._app_socket.close()
 
     def send(self, msg):
         """Sends a message to the remote node."""
         self._logger.debug(f"Sending msg '{msg}'")
         raw_msg = self._serialize_msg(msg=msg)
         self._app_socket.send(raw_msg)
+
+    def send_structured(self, msg):
+        self._logger.debug(f"Sending structured msg '{msg}'")
+        raw_msg = self._serialize_structured_msg(msg=msg)
+        self._app_socket.send(raw_msg)
+
+    def send_silent(self, msg):
+        self.send(msg)
 
     def recv(self, block=True, maxsize=1024):
         """Receive a message from the remote node."""
@@ -54,6 +64,19 @@ class Socket(_Socket):
         self._logger.debug(f"Msg '{msg}' received")
         return msg
 
+    def recv_structured(self, block=True, maxsize=1024):
+        self._logger.debug("Receiving structured msg")
+        self._app_socket.setblocking(block)
+        raw_msg = self._app_socket.recv(maxsize)
+        if not block and not raw_msg:
+            raise RuntimeError("No message to receive (not blocking)")
+        msg = self._deserialize_structured_msg(raw_msg=raw_msg)
+        self._logger.debug(f"Msg '{msg}' received")
+        return msg
+
+    def recv_silent(self):
+        return self.recv()
+
     @staticmethod
     def _serialize_msg(msg):
         return msg.encode('utf-8')
@@ -62,7 +85,15 @@ class Socket(_Socket):
     def _deserialize_msg(raw_msg):
         return raw_msg.decode('utf-8')
 
-    @property
+    @staticmethod
+    def _serialize_structured_msg(msg):
+        return pickle.dumps(msg)
+
+    @ staticmethod
+    def _deserialize_structured_msg(raw_msg):
+        return pickle.loads(raw_msg)
+
+    @ property
     def is_server(self):
         # Server will always be the "first"
         return self._node_name < self._remote_node_name
