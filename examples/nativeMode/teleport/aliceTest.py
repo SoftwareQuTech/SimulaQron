@@ -31,8 +31,8 @@ import logging
 import numpy as np
 
 from simulaqron.local.setup import setup_local, assemble_qubit
-from simulaqron.general.hostConfig import socketsConfig
-from simulaqron.toolbox.stabilizerStates import StabilizerState
+from simulaqron.general.host_config import socketsConfig
+from simulaqron.toolbox.stabilizer_states import StabilizerState
 from simulaqron.settings import simulaqron_settings
 from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
@@ -69,17 +69,17 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
     yield q1.callRemote("apply_H")
 
     # For information purposes, let's print the state of that qubit
-    if simulaqron_settings.backend == "qutip":
+    if simulaqron_settings.sim_backend == "qutip":
         realRho, imagRho = yield q1.callRemote("get_qubit")
         state = np.array(assemble_qubit(realRho, imagRho), dtype=complex)
-    elif simulaqron_settings.backend == "projectq":
+    elif simulaqron_settings.sim_backend == "projectq":
         realvec, imagvec = yield virtRoot.callRemote("get_register_RI", q1)
         state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
-    elif simulaqron_settings.backend == "stabilizer":
+    elif simulaqron_settings.sim_backend == "stabilizer":
         array, _ = yield virtRoot.callRemote("get_register_RI", q1)
         state = StabilizerState(array)
     else:
-        ValueError("Unknown backend {}".format(simulaqron_settings.backend))
+        ValueError("Unknown backend {}".format(simulaqron_settings.sim_backend))
 
     print("Qubit to be teleported is:\n{}".format(state))
 
