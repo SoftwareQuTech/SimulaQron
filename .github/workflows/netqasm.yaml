@@ -1,0 +1,27 @@
+name: NetQASM backend tests
+
+on: push
+
+jobs:
+  examples:
+    name: Run examples
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
+      with:
+        python-version: 3.8
+    - name: Clone and install netqasm
+      run: |
+        git clone https://github.com/QuTech-Delft/netqasm.git
+        cd netqasm
+        make install
+        cd ..
+    - name: Install simulaqron
+      run: make install
+    - name: Install projectq
+      run: pip install -Iv projectq==0.5.1
+    - name: Run examples
+      env:
+          NETQASM_SIMULATOR: simulaqron
+      run: make -C netqasm external-examples
