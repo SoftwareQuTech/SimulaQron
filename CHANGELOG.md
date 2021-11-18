@@ -11,7 +11,7 @@ Upcoming
 - Major breaking change! Using `cqc` is now deprecated and replaced with `netqasm`.
   `netqasm` improves on `cqc` on many levels, for more details.
   As with `cqc`, `netqasm` also has a SDK in python for writing applications, which is very similar to the SDK for `cqc`.
-  However, there are some difference, for details see [the netqasm repo](https://github.com/QuTech-Delft/netqasm) and [its documentation](https://netqasm.readthedocs.io/en/latest/).
+  However, there are some differences, for details see [the netqasm repo](https://github.com/QuTech-Delft/netqasm) and [its documentation](https://netqasm.readthedocs.io/en/latest/).
 
 2020-08-24 (v3.0.16)
 -------------------
