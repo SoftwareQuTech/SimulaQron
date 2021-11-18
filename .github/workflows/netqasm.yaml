@@ -19,6 +19,8 @@ jobs:
         cd ..
     - name: Install simulaqron
       run: make install
+    - name: Install projectq
+      run: pip install -Iv projectq==0.5.1
     - name: Run examples
       env:
           NETQASM_SIMULATOR: simulaqron
