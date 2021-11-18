@@ -6,7 +6,7 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 Upcoming
 --------
 
-2020-11-24 (v4.0.0)
+2021-11-18 (v4.0.0)
 -------------------
 - Major breaking change! Using `cqc` is now deprecated and replaced with `netqasm`.
   `netqasm` improves on `cqc` on many levels, for more details.
