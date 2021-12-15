@@ -37,7 +37,6 @@ from twisted.internet.error import ReactorNotRunning
 from simulaqron.settings import simulaqron_settings
 
 
-# logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.DEBUG)
 #####################################################################################################
 #
 # setup_local
@@ -131,11 +130,10 @@ def init_register(resList, myName, virtualNet, classicalNet, lNode, func, *args,
         if lNode is not None:
             lNode.set_virtual_node(virtRoot)
     else:
-        print(resList)
         logging.error("LOCAL %s: Connection to virtual server failed!", myName)
         reactor.stop()
 
-        # Retrieve connections to the classical nodes
+    # Retrieve connections to the classical nodes
     for node in classicalNet.hostDict:
         nb = classicalNet.hostDict[node]
         if nb.name != myName:
@@ -147,7 +145,7 @@ def init_register(resList, myName, virtualNet, classicalNet, lNode, func, *args,
                 logging.error("LOCAL %s: Connection to %s failed!", myName, nb.name)
                 reactor.stop()
 
-                # On the local virtual node, we still want to initialize a qubit register
+    # On the local virtual node, we still want to initialize a qubit register
     defer = virtRoot.callRemote("add_register")
     defer.addCallback(fill_register, myName, lNode, virtRoot, classicalNet, func, *args, **kwargs)
     defer.addErrback(localError)
@@ -161,7 +159,7 @@ def fill_register(obj, myName, lNode, virtRoot, classicalNet, func, *args, **kwa
     if lNode is not None:
         lNode.set_virtual_reg(qReg)
 
-        # Run client side function
+    # Run client side function
     func(qReg, virtRoot, myName, classicalNet, *args, **kwargs)
 
 
@@ -169,7 +167,7 @@ def localError(reason):
     """
     Error handling for the connection.
     """
-    print("Critical error: ", reason)
+    logging.error("Critical error: ", reason)
     try:
         reactor.stop()
     except ReactorNotRunning:

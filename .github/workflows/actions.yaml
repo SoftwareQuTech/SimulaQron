@@ -1,0 +1,40 @@
+name: General check
+
+on: push
+
+jobs:
+  lint:
+    name: Run linter  
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
+      with:
+        python-version: 3.8
+    - run: |
+        make install
+        make lint
+
+  tests:
+    name: Run tests  
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
+      with:
+        python-version: 3.8
+    - run: |
+        make install
+        make tests
+
+  examples:
+    name: Run examples
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
+      with:
+        python-version: 3.8
+    - run: |
+        make install
+        make examples

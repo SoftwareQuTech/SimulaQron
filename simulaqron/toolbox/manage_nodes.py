@@ -3,16 +3,6 @@ import json
 from contextlib import closing
 import socket
 
-from simulaqron.toolbox import get_simulaqron_path
-from simulaqron.settings import simulaqron_settings
-
-
-config_files = [simulaqron_settings.app_file, simulaqron_settings.cqc_file, simulaqron_settings.vnode_file]
-node_config_file = simulaqron_settings.nodes_file
-simulaqron_path = get_simulaqron_path.main()
-config_folder = "config"
-default_topology_file = os.path.join(simulaqron_path, config_folder, "topology.json")
-
 
 class NetworksConfigConstructor:
     def __init__(self, file_path=None):
@@ -32,8 +22,8 @@ class NetworksConfigConstructor:
             if os.path.exists(self.file_path):
                 self.read_from_file()
 
-    def add_node(self, node_name, network_name="default", app_hostname=None, cqc_hostname=None, vnode_hostname=None,
-                 app_port=None, cqc_port=None, vnode_port=None, neighbors=None):
+    def add_node(self, node_name, network_name="default", app_hostname=None, qnodeos_hostname=None, vnode_hostname=None,
+                 app_port=None, qnodeos_port=None, vnode_port=None, neighbors=None):
         """
         Adds a node with the given name to a network (default: "default").
         If hostnames are None they will default to 'localhost'.
@@ -46,14 +36,14 @@ class NetworksConfigConstructor:
             Name of the network (default: "default")
         :param app_hostname: str or None
             Hostname, e.g. localhost (default) or 192.168.0.1
-        :param cqc_hostname: str or None
+        :param qnodeos_hostname: str or None
             Hostname, e.g. localhost (default) or 192.168.0.1
         :param vnode_hostname: str or None
             Hostname, e.g. localhost (default) or 192.168.0.1
         :param app_port: int or None
             Port number for the application
-        :param cqc_port: int or None
-            Port number for the cqc server
+        :param qnodeos_port: int or None
+            Port number for the qnodeos server
         :param vnode_port: int or None
             Port number for the virtual node
         :param neighbors: (list of str) or None
@@ -63,7 +53,7 @@ class NetworksConfigConstructor:
         """
         if network_name is None:
             network_name = "default"
-        socket_addresses = [(app_hostname, app_port), (cqc_hostname, cqc_port), (vnode_hostname, vnode_port)]
+        socket_addresses = [(app_hostname, app_port), (qnodeos_hostname, qnodeos_port), (vnode_hostname, vnode_port)]
         for i, socket_address in enumerate(socket_addresses):
             hostname, port = socket_address
             if hostname is None:
@@ -80,16 +70,23 @@ class NetworksConfigConstructor:
             socket_addresses[i] = socket_address
 
         app_hostname, app_port = socket_addresses[0]
-        cqc_hostname, cqc_port = socket_addresses[1]
+        qnodeos_hostname, qnodeos_port = socket_addresses[1]
         vnode_hostname, vnode_port = socket_addresses[2]
         if network_name in self.networks:
-            self.networks[network_name].add_node(name=node_name, app_hostname=app_hostname, cqc_hostname=cqc_hostname,
-                                                 vnode_hostname=vnode_hostname, app_port=app_port, cqc_port=cqc_port,
-                                                 vnode_port=vnode_port, neighbors=neighbors)
+            self.networks[network_name].add_node(
+                name=node_name,
+                app_hostname=app_hostname,
+                qnodeos_hostname=qnodeos_hostname,
+                vnode_hostname=vnode_hostname,
+                app_port=app_port,
+                qnodeos_port=qnodeos_port,
+                vnode_port=vnode_port,
+                neighbors=neighbors,
+            )
         else:
             network = _NetworkConfig()
-            network.add_node(name=node_name, app_hostname=app_hostname, cqc_hostname=cqc_hostname,
-                             vnode_hostname=vnode_hostname, app_port=app_port, cqc_port=cqc_port,
+            network.add_node(name=node_name, app_hostname=app_hostname, qnodeos_hostname=qnodeos_hostname,
+                             vnode_hostname=vnode_hostname, app_port=app_port, qnodeos_port=qnodeos_port,
                              vnode_port=vnode_port, neighbors=neighbors)
             self.networks[network_name] = network
 
@@ -234,14 +231,18 @@ class NetworksConfigConstructor:
 
             for node_name, node_dict in nodes_dict.items():
                 app_hostname, app_port = node_dict["app_socket"]
-                cqc_hostname, cqc_port = node_dict["cqc_socket"]
+                qnodeos_hostname, qnodeos_port = node_dict["qnodeos_socket"]
                 vnode_hostname, vnode_port = node_dict["vnode_socket"]
-                socket_addresses = [(app_hostname, app_port), (cqc_hostname, cqc_port), (vnode_hostname, vnode_port)]
+                socket_addresses = [
+                    (app_hostname, app_port),
+                    (qnodeos_hostname, qnodeos_port),
+                    (vnode_hostname, vnode_port),
+                ]
                 for socket_address in socket_addresses:
                     if socket_address not in self.used_sockets:
                         self.used_sockets.append(socket_address)
-                node = _NodeConfig(name=node_name, app_hostname=app_hostname, cqc_hostname=cqc_hostname,
-                                   vnode_hostname=vnode_hostname, app_port=app_port, cqc_port=cqc_port,
+                node = _NodeConfig(name=node_name, app_hostname=app_hostname, qnodeos_hostname=qnodeos_hostname,
+                                   vnode_hostname=vnode_hostname, app_port=app_port, qnodeos_port=qnodeos_port,
                                    vnode_port=vnode_port)
                 network.nodes[node_name] = node
             self.networks[network_name] = network
@@ -296,7 +297,17 @@ class _NetworkConfig:
         self.topology = None
         self.nodes = {}
 
-    def add_node(self, name, app_hostname, cqc_hostname, vnode_hostname, app_port, cqc_port, vnode_port, neighbors):
+    def add_node(
+        self,
+        name,
+        app_hostname,
+        qnodeos_hostname,
+        vnode_hostname,
+        app_port,
+        qnodeos_port,
+        vnode_port,
+        neighbors,
+    ):
         """
         Adds a node with the given name to a network (default: "default").
         If hostnames are None they will default to 'localhost'.
@@ -307,14 +318,14 @@ class _NetworkConfig:
             Name of the node, e.g. Alice
         :param app_hostname: str or None
             Hostname, e.g. localhost (default) or 192.168.0.1
-        :param cqc_hostname: str or None
+        :param qnodeos_hostname: str or None
             Hostname, e.g. localhost (default) or 192.168.0.1
         :param vnode_hostname: str or None
             Hostname, e.g. localhost (default) or 192.168.0.1
         :param app_port: int or None
             Port number for the application
-        :param cqc_port: int or None
-            Port number for the cqc server
+        :param qnodeos_port: int or None
+            Port number for the qnodeos server
         :param vnode_port: int or None
             Port number for the virtual node
         :param neighbors: (list of str) or None
@@ -332,9 +343,15 @@ class _NetworkConfig:
 
             self.topology[name] = neighbors
 
-        self.nodes[name] = _NodeConfig(name=name, app_hostname=app_hostname, cqc_hostname=cqc_hostname,
-                                       vnode_hostname=vnode_hostname, app_port=app_port, cqc_port=cqc_port,
-                                       vnode_port=vnode_port)
+        self.nodes[name] = _NodeConfig(
+            name=name,
+            app_hostname=app_hostname,
+            qnodeos_hostname=qnodeos_hostname,
+            vnode_hostname=vnode_hostname,
+            app_port=app_port,
+            qnodeos_port=qnodeos_port,
+            vnode_port=vnode_port,
+        )
 
     def to_dict(self):
         """
@@ -346,16 +363,16 @@ class _NetworkConfig:
 
 
 class _NodeConfig:
-    def __init__(self, name, app_hostname, cqc_hostname, vnode_hostname, app_port, cqc_port, vnode_port):
+    def __init__(self, name, app_hostname, qnodeos_hostname, vnode_hostname, app_port, qnodeos_port, vnode_port):
         """
         Used by _NetworkConfig to keep track of the config of a single node.
         """
         self.name = name
         self.app_hostname = app_hostname
-        self.cqc_hostname = cqc_hostname
+        self.qnodeos_hostname = qnodeos_hostname
         self.vnode_hostname = vnode_hostname
         self.app_port = app_port
-        self.cqc_port = cqc_port
+        self.qnodeos_port = qnodeos_port
         self.vnode_port = vnode_port
 
     def to_dict(self):
@@ -365,6 +382,6 @@ class _NodeConfig:
         """
         return {
             "app_socket": [self.app_hostname, self.app_port],
-            "cqc_socket": [self.cqc_hostname, self.cqc_port],
+            "qnodeos_socket": [self.qnodeos_hostname, self.qnodeos_port],
             "vnode_socket": [self.vnode_hostname, self.vnode_port]
         }

@@ -30,10 +30,10 @@
 #########################
 # SETTINGS FOR SIMULAQRON
 #########################
-import logging
-import json
-
 import os
+import json
+import logging
+from enum import Enum
 
 from simulaqron.toolbox import get_simulaqron_path
 
@@ -41,23 +41,11 @@ simulaqron_path = get_simulaqron_path.main()
 config_folder = os.path.join(simulaqron_path, "config")
 
 
-# class _DefaultSettings:
-#     CONF_MAXQUBITS = 20
-#     CONF_MAXREGS = 1000
-#     CONF_WAIT_TIME = 0.5
-#     CONF_RECV_TIMEOUT = 100  # (x 100 ms)
-#     CONF_RECV_EPR_TIMEOUT = 100  # (x 100 ms)
-#     CONF_WAIT_TIME_RECV = 0.1  # (seconds)
-#     CONF_LOGGING_LEVEL_BACKEND = logging.WARNING
-#     CONF_LOGGING_LEVEL_FRONTEND = logging.WARNING
-#     CONF_BACKEND = "stabilizer"
-#     CONF_APP_FILE = os.path.join(config_folder, "appNodes.cfg")
-#     CONF_CQC_FILE = os.path.join(config_folder, "cqcNodes.cfg")
-#     CONF_VNODE_FILE = os.path.join(config_folder, "virtualNodes.cfg")
-#     CONF_NODES_FILE = os.path.join(config_folder, "Nodes.cfg")
-#     CONF_TOPOLOGY_FILE = ""
-#     CONF_NOISY_QUBITS = False
-#     CONF_T1 = 1
+class SimBackend(Enum):
+    STABILIZER = "stabilizer"
+    PROJECTQ = "projectq"
+    PYQRACK = "pyqrack"
+    QUTIP = "qutip"
 
 
 class Config:
@@ -78,13 +66,8 @@ class Config:
         "recv_timeout": 100,  # (x 100 ms)
         "recv_retry_time": 0.1,  # (seconds)
         "log_level": logging.WARNING,
-        "backend": "stabilizer",
+        "sim_backend": SimBackend.STABILIZER.value,
         "network_config_file": os.path.join(config_folder, "network.json"),
-        "app_file": None,
-        "cqc_file": None,
-        "vnode_file": None,
-        "nodes_file": None,
-        "topology_file": None,
         "noisy_qubits": False,
         "t1": 1.0
     }
@@ -160,12 +143,12 @@ class Config:
 
     @property
     @Decorator.get_setting
-    def backend(self):
+    def sim_backend(self):
         pass
 
-    @backend.setter
+    @sim_backend.setter
     @Decorator.set_setting
-    def backend(self, backend):
+    def sim_backend(self, sim_backend):
         pass
 
     @property
@@ -236,56 +219,6 @@ class Config:
     @network_config_file.setter
     @Decorator.set_setting
     def network_config_file(self, app_file):
-        pass
-
-    @property
-    @Decorator.get_setting
-    def topology_file(self):
-        pass
-
-    @topology_file.setter
-    @Decorator.set_setting
-    def topology_file(self, topology_file):
-        pass
-
-    @property
-    @Decorator.get_setting
-    def app_file(self):
-        pass
-
-    @app_file.setter
-    @Decorator.set_setting
-    def app_file(self, app_file):
-        pass
-
-    @property
-    @Decorator.get_setting
-    def cqc_file(self):
-        pass
-
-    @cqc_file.setter
-    @Decorator.set_setting
-    def cqc_file(self, cqc_file):
-        pass
-
-    @property
-    @Decorator.get_setting
-    def vnode_file(self):
-        pass
-
-    @vnode_file.setter
-    @Decorator.set_setting
-    def vnode_file(self, vnode_file):
-        pass
-
-    @property
-    @Decorator.get_setting
-    def nodes_file(self):
-        pass
-
-    @nodes_file.setter
-    @Decorator.set_setting
-    def nodes_file(self, nodes_file):
         pass
 
     @property
