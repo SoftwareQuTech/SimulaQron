@@ -706,7 +706,7 @@ class virtualNode(pb.Root):
             else:
                 self._logger.debug(f"Sending qubit simulated remotely at {qubit.simNode.name}")
                 # Also lock the virtual node of the simulating node unless it is the remoteNode or this node
-                locked_node = yield self._lock_simulating_node(exclude=[self.virtNode, remoteNode])
+                locked_node = yield qubit._lock_simulating_node(exclude=[self, remoteNode])
                 try:
                     # We are only the virtual node, not the simulating one. In this case, we need to ask
                     # the actual simulating node to do the transfer for us. Due to the pecularities of Twisted PB
