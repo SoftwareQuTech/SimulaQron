@@ -10,7 +10,7 @@ jobs:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master
       with:
-        python-version: 3.8
+        python-version: "3.12"
     - name: Clone and install netqasm
       run: |
         git clone https://github.com/QuTech-Delft/netqasm.git
