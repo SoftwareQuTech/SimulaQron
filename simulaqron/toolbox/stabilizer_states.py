@@ -844,7 +844,7 @@ class StabilizerState:
         # Spp is now in the form of (I,Gamma) where Gamma is the adj mat of the Graph
         # SQC equivalent to the stabilizer state.
         adj_mat = Spp.to_array()[:, n : 2 * n]
-        G = nx.from_numpy_matrix(adj_mat)
+        G = nx.from_numpy_array(adj_mat)
 
         if return_operations:
             return G, operations
