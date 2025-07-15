@@ -19,8 +19,10 @@ jobs:
         cd ..
     - name: Install simulaqron
       run: make install
+    - name: Install pybind
+      run: pip install pybind11
     - name: Install projectq
-      run: pip install -Iv projectq==0.5.1
+      run: pip install -Iv projectq==0.8.0
     - name: Run examples
       env:
           NETQASM_SIMULATOR: simulaqron
