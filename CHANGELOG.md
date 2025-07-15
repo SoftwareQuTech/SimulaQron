@@ -5,6 +5,10 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 
 Upcoming
 --------
+2025-07-15 (v4.0.1)
+-------------------
+- Migrated project specification to use modern TOML approach.
+- Tested working with Python versions 3.10, 3.11 and 3.12.
 
 2021-11-18 (v4.0.0)
 -------------------
