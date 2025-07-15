@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools >= 77.0.3", "wheel", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version" # exclude "+<hash>" from version name so we can upload to Test PyPI
+
+[project]
+name = "simulaqron"
+dynamic = ["version"]
+dependencies = [
+    "numpy>=1.14.0,<2.0.0",
+    "scipy>=1.1.0,<2.0.0",
+    "twisted>=24.0.0",
+    "networkx>=3.0,<4.0",
+    "click>=8.0,<9.0",
+    "daemons>=1.3.0,<2.0.0",
+    "netqasm>=1.0.0,<2.0.0"
+]
+requires-python = ">=3.8,<3.13"
+authors = [
+  {name = "Axel Dahlberg", email = "e.a.dahlberg@tudelft.nl"}
+]
+maintainers = [
+  {name = "Diego Rivera", email = "d.a.g.a.rivera@tudelft.nl"}
+]
+description = "A simulator for developing Quantum Internet software"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENCE"]
+keywords = ["egg", "bacon", "sausage", "tomatoes", "Lobster Thermidor"]
+classifiers = [
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Operating System :: Unix",
+        "Operating System :: MacOS"
+]
+
+[project.optional-dependencies]
+test = [
+    "flake8>=5.0.0,<6.0.0",
+    "pytest >=7.1, <8.0"
+]
+opt = [
+    "projectq<=0.8.0",
+    "qutip"
+]
+dev = [
+    "sphinx>=7.2.6, <8.0",
+    "sphinx-rtd-theme",
+    "build",
+    "twine",
+    "pylint",
+    "pyink",
+    "pytest",
+    "mypy",
+]
+
+[tool.setuptools.packages.find]
+exclude = ["tests", "docs", "examples"]
+
+[project.scripts]
+simulaqron = "simulaqron.simulaqron:cli"
+
+[project.urls]
+Homepage = "https://github.com/SoftwareQuTech/SimulaQron"

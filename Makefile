@@ -17,13 +17,13 @@ lint:
 	@${PYTHON} -m flake8 ${SIMULAQRON_DIR} ${EXAMPLES_DIR} ${TEST_DIR}
 
 test-deps:
-	@${PYTHON} -m pip install -r test_requirements.txt
+	@${PYTHON} -m pip install .\[test\]
 
 requirements python-deps:
-	@cat requirements.txt | xargs -n 1 -L 1 $(PIP) install
+	@${PYTHON} -m pip install .
 
 install-optional: install
-	@cat optional-requirements.txt | xargs -n 1 -L 1 $(PIP) install
+	@${PYTHON} -m pip install .\[opt\]
 
 _reset:
 	@${PYTHON} ${RESET_FILE}

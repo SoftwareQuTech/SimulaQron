@@ -71,13 +71,14 @@ def cli():
 ###########
 # version #
 ###########
+import importlib.metadata as metadata
 
 @cli.command()
 def version():
     """
     Prints the version of simulqron.
     """
-    print(simulaqron.__version__)
+    print(metadata.version('simulaqron'))
 
 
 #################
