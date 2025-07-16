@@ -87,11 +87,11 @@ class simulatedQubit(pb.Referenceable):
 
     @inlineCallbacks
     def lock(self):
-        self._logger.debug(f"locking sim qubit in register with num {self.register.num}")
+        self._logger.debug("locking sim qubit in register with num %d", self.register.num)
         while self.isLocked():
             yield deferLater(reactor, self._delay, lambda: None)
         yield self._lock.acquire()
-        self._logger.debug(f"got lock for sim qubit in register with num {self.register.num}")
+        self._logger.debug("got lock for sim qubit in register with num %d", self.register.num)
 
     @inlineCallbacks
     def remote_lock(self):
@@ -99,10 +99,10 @@ class simulatedQubit(pb.Referenceable):
 
     def unlock(self):
         try:
-            self._logger.debug(f"unlocking sim qubit in register with num {self.register.num}")
+            self._logger.debug("unlocking sim qubit in register with num %d", self.register.num)
             self._lock.release()
         except AssertionError as exc:
-            self._logger.error(f"AssertionError {exc}")
+            self._logger.error("AssertionError %s", exc)
 
     def remote_unlock(self):
         self.unlock()

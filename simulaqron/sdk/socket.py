@@ -41,12 +41,12 @@ class Socket(_Socket):
 
     def send(self, msg):
         """Sends a message to the remote node."""
-        self._logger.debug(f"Sending msg '{msg}'")
+        self._logger.debug("Sending msg '%s'", msg)
         raw_msg = self._serialize_msg(msg=msg)
         self._app_socket.send(raw_msg)
 
     def send_structured(self, msg):
-        self._logger.debug(f"Sending structured msg '{msg}'")
+        self._logger.debug("Sending structured msg '%s'", msg)
         raw_msg = self._serialize_structured_msg(msg=msg)
         self._app_socket.send(raw_msg)
 
@@ -61,7 +61,7 @@ class Socket(_Socket):
         if not block and not raw_msg:
             raise RuntimeError("No message to receive (not blocking)")
         msg = self._deserialize_msg(raw_msg=raw_msg)
-        self._logger.debug(f"Msg '{msg}' received")
+        self._logger.debug("Msg '%s' received", msg)
         return msg
 
     def recv_structured(self, block=True, maxsize=1024):
@@ -71,7 +71,7 @@ class Socket(_Socket):
         if not block and not raw_msg:
             raise RuntimeError("No message to receive (not blocking)")
         msg = self._deserialize_structured_msg(raw_msg=raw_msg)
-        self._logger.debug(f"Msg '{msg}' received")
+        self._logger.debug("Msg '%s' received", msg)
         return msg
 
     def recv_silent(self):
@@ -113,8 +113,10 @@ class Socket(_Socket):
                 try:
                     app_socket.bind(addr[4])
                 except OSError as err:
-                    self._logger.debug(f"Could not bind socket since: {err}\n"
-                                       f"Trying again in {self.RETRY_TIME}s...")
+                    self._logger.debug(
+                        "Could not bind socket since: %s\nTrying again in %ds...",
+                        err, self.RETRY_TIME
+                    )
                     time.sleep(self.RETRY_TIME)
                 else:
                     break
@@ -128,8 +130,8 @@ class Socket(_Socket):
                     app_socket.connect(addr[4])
                 except ConnectionRefusedError:
                     self._logger.debug(
-                        f"Could not open application socket, "
-                        f"trying again in {self.RETRY_TIME}s..."
+                        "Could not open application socket, trying again in %d s...",
+                        self.RETRY_TIME
                     )
                     time.sleep(self.RETRY_TIME)
                 else:

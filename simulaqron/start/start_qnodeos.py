@@ -89,14 +89,13 @@ def setup_netqasm_server(myName, netqasm_factory):
             break
         except CannotListenError:
             logger.error(
-                "LOCAL {}: NetQASM server address ({}) is already in use, trying again.".format(
-                    myName, myHost.port
-                )
+                "LOCAL %s: NetQASM server address (%d) is already in use, trying again.",
+                myName, myHost.port
             )
             time.sleep(_RETRY_TIME)
         except Exception as e:
             logger.error(
-                "LOCAL {}: Critical error when starting NetQASM server: {}".format(myName, e)
+                "LOCAL %s: Critical error when starting NetQASM server: %s", myName, e
             )
             reactor.stop()
     else:

@@ -133,10 +133,10 @@ def start(name, nrnodes, nodes, topology, force, keep):
     new = not keep
     if name is None:
         name = "default"
-    pidfile = os.path.join(PID_FOLDER, "simulaqron_network_{}.pid".format(name))
+    pidfile = os.path.join(PID_FOLDER, f"simulaqron_network_{name}.pid")
     if os.path.exists(pidfile):
-        logging.warning("Network with name {} is already running".format(name))
-        logging.warning("The pidfile for this network is located at {}".format(pidfile))
+        logging.warning("Network with name %s is already running", name)
+        logging.warning("The pidfile for this network is located at %s", pidfile)
         return
     if new:
         if not force:
@@ -172,9 +172,9 @@ def stop(name):
     """Stops a network."""
     if name is None:
         name = "default"
-    pidfile = os.path.join(PID_FOLDER, "simulaqron_network_{}.pid".format(name))
+    pidfile = os.path.join(PID_FOLDER, f"simulaqron_network_{name}.pid")
     if not os.path.exists(pidfile):
-        logging.warning("Network with name {} is not running".format(name))
+        logging.warning("Network with name %s is not running", name)
         return
     d = SimulaQronDaemon(pidfile=pidfile)
     d.stop()

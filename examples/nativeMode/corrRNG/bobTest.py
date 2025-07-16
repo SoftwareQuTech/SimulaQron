@@ -31,12 +31,10 @@
 import logging
 
 from simulaqron.local.setup import setup_local
-from simulaqron.general.hostConfig import socketsConfig
+from simulaqron.general.host_config import SocketsConfig
 from simulaqron.settings import simulaqron_settings
 from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
-
-from qutip import Qobj
 
 
 #####################################################################################################
@@ -105,18 +103,6 @@ class localNode(pb.Root):
 
         print("BOB: My Random Number is ", x, "\n")
 
-    def assemble_qubit(self, realM, imagM):
-        """
-        Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
-        We need this since Twisted PB does not support sending complex valued object natively.
-        """
-        M = realM
-        for s in range(len(M)):
-            for t in range(len(M)):
-                M[s][t] = realM[s][t] + 1j * imagM[s][t]
-
-        return Qobj(M)
-
 
 #####################################################################################################
 #
@@ -134,8 +120,8 @@ def main():
     classicalFile = "classicalNet.cfg"
 
     # Read configuration files for the virtual quantum, as well as the classical network
-    virtualNet = socketsConfig(network_file)
-    classicalNet = socketsConfig(classicalFile)
+    virtualNet = SocketsConfig(network_file)
+    classicalNet = SocketsConfig(classicalFile)
 
     # Check if we should run a local classical server. If so, initialize the code
     # to handle remote connections on the classical communication network

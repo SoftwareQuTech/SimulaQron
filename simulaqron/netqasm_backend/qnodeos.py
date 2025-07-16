@@ -46,5 +46,5 @@ class SubroutineHandler(QNodeController):
     def _return_msg(self, msg):
         """Return a message to the host"""
         assert self._protocol is not None, "Seems protocol of handler has not yet been set"
-        self._logger.debug(f"sending message {msg} to host")
+        self._logger.debug("sending message %s to host", msg)
         self.protocol._return_msg(msg=bytes(msg))

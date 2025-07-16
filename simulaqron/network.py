@@ -141,7 +141,7 @@ class Network:
                 self._logger.exception("Got unexpected exception when trying to connect: {}".format(err))
                 raise err
         else:
-            self._logger.debug(f"Network {self.name} is now running")
+            self._logger.debug("Network %s is now running", self.name)
             self._running = True
 
         return self._running
@@ -170,10 +170,10 @@ class Network:
         blog until the all processes are running and are connected or not.
         :param wait_until_running: bool
         """
-        self._logger.info("Starting network with name {}".format(self.name))
+        self._logger.info("Starting network with name %s", self.name)
         for p in self.processes:
             if not p.is_alive():
-                self._logger.debug("Starting process {}".format(p.name))
+                self._logger.debug("Starting process %s", p.name)
                 p.deamon = True
                 p.start()
 

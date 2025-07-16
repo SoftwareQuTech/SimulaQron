@@ -108,11 +108,11 @@ class NetQASMProtocol(Protocol):
         d.addErrback(self.log_error)
 
     def log_handled_message(self, result):
-        self._logger.info(f"Finished handling message with result = {result}")
+        self._logger.info("Finished handling message with result = %s", result)
 
     @inlineCallbacks
     def log_error(self, failure):
-        self._logger.error(f"Handling message failed with failure = {failure}")
+        self._logger.error("Handling message failed with failure = %s", failure)
         sys.stderr.write(str(failure))
         self._return_msg(msg=ErrorMessage(err_code=ErrorCode.GENERAL))
         yield deferLater(reactor, 0.1, self.stop)
@@ -136,8 +136,9 @@ class NetQASMProtocol(Protocol):
         app_id = msg.app_id
         self._add_app(app_id=app_id)
         max_qubits = msg.max_qubits
-        self._logger.debug(f"Allocating a new "
-                           f"unit module of size {max_qubits} for application with app ID {app_id}.\n")
+        self._logger.debug("Allocating a new unit module"
+                           "of size %d for application with app ID %d.\n",
+                           max_qubits, app_id)
         self._executioner.init_new_application(
             app_id=app_id,
             max_qubits=max_qubits,

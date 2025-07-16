@@ -65,7 +65,7 @@ def check_sim_backend(sim_backend):
 
 
 def run_sim_backend(node_names, sim_backend):
-    logger.debug(f"Starting simulaqron sim_backend process with nodes {node_names}")
+    logger.debug("Starting simulaqron sim_backend process with nodes %s", node_names)
     check_sim_backend(sim_backend=sim_backend)
     simulaqron_settings.sim_backend = sim_backend.value
     network = Network(name="default", nodes=node_names, force=True, new=True)

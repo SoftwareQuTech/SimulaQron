@@ -148,7 +148,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
         while True:
             try:
                 logger.debug(
-                    f"App {name} : Trying to connect to NetQASM server (at {addr[-1]})"
+                    "App %s : Trying to connect to NetQASM server (at %d)", name, addr[-1]
                 )
 
                 qnodeos_socket = socket.socket(addr[0], addr[1], addr[2])
@@ -158,24 +158,21 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 if retry_time is None or retry_time == 0:
                     raise err
                 logger.debug(
-                    "App {} : Could not connect to  NetQASM server, trying again...".format(
-                        name
-                    )
+                    "App %s : Could not connect to  NetQASM server, trying again...",
+                    name
                 )
                 time.sleep(retry_time)
                 qnodeos_socket.close()
             except Exception as err:
                 logger.exception(
-                    "App {} : Critical error when connection to NetQASM server: {}".format(
-                        name, err
-                    )
+                    "App %s : Critical error when connection to NetQASM server: %s",
+                    name, err
                 )
                 qnodeos_socket.close()
                 raise err
         logger.debug(
-            "App {} : Could not connect to  NetQASM server, trying again...".format(
-                name
-            )
+            "App %s : Could not connect to  NetQASM server, trying again...",
+            name
         )
         return qnodeos_socket
 
@@ -202,7 +199,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
         if msg_id is None:
             self._logger.debug("Waiting for any msg to be done")
         else:
-            self._logger.debug(f"Waiting for msg ID {msg_id}")
+            self._logger.debug("Waiting for msg ID %d", msg_id)
         while True:
             done_msg_id = self._handle_reply()
             if msg_id is None:
@@ -215,7 +212,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 # Other message done, not the one we're waiting for
                 # Wait for another don
                 continue
-        self._logger.debug(f"Received done for msg ID {done_msg_id}")
+        self._logger.debug("Received done for msg ID %d", done_msg_id)
 
     def _read_more_data(self):
         """Reads in some more data on the socket to qnodeos"""
@@ -224,7 +221,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
             self.buf += data
         else:
             self.buf = data
-        self._logger.debug(f"Got new data {data} on socket to qnodeos")
+        self._logger.debug("Got new data %s on socket to qnodeos", data)
 
     def _handle_reply(self):
         """Handle all next replies until a done message and return the msg ID for the done"""
@@ -241,7 +238,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
         # Remove the data of this message from the buffer
         self.buf = self.buf[len(ret_msg):]
 
-        self._logger.debug(f"Got message {ret_msg}")
+        self._logger.debug("Got message %s", ret_msg)
         if isinstance(ret_msg, MsgDoneMessage):
             self._waiting_msg_ids.remove(ret_msg.msg_id)
             self._done_msg_ids.add(ret_msg.msg_id)
@@ -266,7 +263,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
     def block(self):
         while len(self._waiting_msg_ids) > 0:
             self._logger.debug(
-                f"Blocking and waiting for msg IDs {self._waiting_msg_ids}"
+                "Blocking and waiting for msg IDs %s", self._waiting_msg_ids
             )
             # Wait for any msg to be done
             self._wait_for_done()
