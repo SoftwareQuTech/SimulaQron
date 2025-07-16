@@ -36,10 +36,10 @@ simulaqron.toolbox.reset module
     :undoc-members:
     :show-inheritance:
 
-simulaqron.toolbox.stabilizerStates module
-------------------------------------------
+simulaqron.toolbox.stabilizer_states module
+-------------------------------------------
 
-.. automodule:: simulaqron.toolbox.stabilizerStates
+.. automodule:: simulaqron.toolbox.stabilizer_states
     :members:
     :undoc-members:
     :show-inheritance:

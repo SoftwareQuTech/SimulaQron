@@ -6,12 +6,11 @@ Subpackages
 
 .. toctree::
 
-    simulaqron.cqc_backend
     simulaqron.general
     simulaqron.local
     simulaqron.run
     simulaqron.toolbox
-    simulaqron.virtNode
+    simulaqron.virtual_node
 
 Submodules
 ----------
@@ -19,7 +18,7 @@ Submodules
 simulaqron.SimulaQron module
 ----------------------------
 
-.. automodule:: simulaqron.SimulaQron
+.. automodule:: simulaqron.simulaqron
     :members:
     :undoc-members:
     :show-inheritance:
@@ -40,13 +39,6 @@ simulaqron.settings module
     :undoc-members:
     :show-inheritance:
 
-simulaqron.tests_run module
----------------------------
-
-.. automodule:: simulaqron.tests_run
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 Module contents
 ---------------

@@ -18,6 +18,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import importlib.metadata as metadata
 # import sys
 
 
@@ -57,21 +58,10 @@ project = "SimulaQron"
 copyright = "2017, Stephanie Wehner and Axel Dahlberg"
 author = "Stephanie Wehner and Axel Dahlberg"
 
-# Get the version from simulaqron __init__
-path_to_here = os.path.dirname(os.path.abspath(__file__))
-simulaqron_init = os.path.join(path_to_here, "../simulaqron", "__init__.py")
-
-with open(simulaqron_init, 'r') as f:
-    for line in f:
-        line = line.strip()
-        if line.startswith("__version__"):
-            _version = line.split("__version__ = ")[1]
-            _version = _version.split(' ')[0]
-            _version = eval(_version)
-            _short_version = '.'.join(_version.split('.')[:-1])
-            break
-    else:
-        raise RuntimeError("Could not find the version!")
+# Get the version from simulaqron
+_base_version_line = metadata.version('simulaqron')
+_version = _base_version_line
+_short_version = '.'.join(_base_version_line.split('.')[:-1])
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

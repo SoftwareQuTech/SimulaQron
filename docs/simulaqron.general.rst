@@ -4,10 +4,10 @@ simulaqron.general package
 Submodules
 ----------
 
-simulaqron.general.hostConfig module
-------------------------------------
+simulaqron.general.host_config module
+-------------------------------------
 
-.. automodule:: simulaqron.general.hostConfig
+.. automodule:: simulaqron.general.host_config
     :members:
     :undoc-members:
     :show-inheritance:
