@@ -5,8 +5,8 @@ import click
 import logging
 from daemons.prefab import run
 from daemons.interfaces import exit
+import importlib.metadata as metadata
 
-import simulaqron
 from simulaqron.network import Network
 from simulaqron.settings import simulaqron_settings, SimBackend
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
@@ -71,7 +71,6 @@ def cli():
 ###########
 # version #
 ###########
-import importlib.metadata as metadata
 
 @cli.command()
 def version():
