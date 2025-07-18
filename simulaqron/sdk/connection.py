@@ -4,7 +4,7 @@ from typing import Type
 
 from netqasm.backend.messages import (ErrorMessage, MessageHeader,
                                       MsgDoneMessage, ReturnArrayMessage,
-                                      ReturnRegMessage, deserialize_return_msg)
+                                      ReturnRegMessage, deserialize_return_msg, ErrorCode)
 from netqasm.lang.ir import GenericInstr
 from netqasm.lang.operand import Address, Register
 from netqasm.logging.glob import get_netqasm_logger
@@ -254,7 +254,10 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 value=ret_msg.values,
             )
         elif isinstance(ret_msg, ErrorMessage):
-            raise RuntimeError(f"Received error message from backend: {ret_msg}")
+            if ret_msg.err_code == ErrorCode.UNSUPP.value:
+                raise SimUnsupportedError("Operation not supported")
+            else:
+                raise RuntimeError(f"Received error message from backend: {ret_msg}")
         else:
             raise NotImplementedError(f"Unknown return message of type {type(ret_msg)}")
         # Continue handling replies until a done

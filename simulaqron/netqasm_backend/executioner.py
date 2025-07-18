@@ -15,6 +15,8 @@ from netqasm.qlink_compat import (Basis, BellState, LinkLayerErr,
                                   LinkLayerOKTypeK, LinkLayerOKTypeM,
                                   LinkLayerOKTypeR, RandomBasis, RequestType,
                                   ReturnType)
+
+from simulaqron.general import SimUnsupportedError
 from simulaqron.general.host_config import get_node_id_from_net_config
 from simulaqron.settings import simulaqron_settings
 from simulaqron.virtual_node.virtual import call_method
@@ -115,7 +117,10 @@ class VanillaSimulaQronExecutioner(Executor):
 
     def _handle_command_exception(self, exc, prog_counter, traceback_str):
         self._logger.error("At line %d: %s\n%s", prog_counter, exc, traceback_str)
-        self._return_msg(msg=ErrorMessage(err_code=ErrorCode.GENERAL))
+        if isinstance(exc, SimUnsupportedError):
+            self._return_msg(msg=ErrorMessage(err_code=ErrorCode.UNSUPP))
+        else:
+            self._return_msg(msg=ErrorMessage(err_code=ErrorCode.GENERAL))
 
     def _return_msg(self, msg):
         if self._return_msg_func is None:

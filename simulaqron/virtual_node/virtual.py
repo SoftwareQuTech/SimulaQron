@@ -28,7 +28,6 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import random
-# import traceback
 
 from collections import deque
 
@@ -44,6 +43,9 @@ from netqasm.logging.glob import get_netqasm_logger
 from simulaqron.virtual_node.basics import quantumError, noQubitError, virtNetError
 from simulaqron.virtual_node.quantum import simulatedQubit
 from simulaqron.general.host_config import SocketsConfig
+# We need this import (despite unused) to reraise local errors
+# We then supress the flake8 errors associated with that
+from simulaqron.general.errors import *  # noqa: F401, F403
 from simulaqron.settings import simulaqron_settings, SimBackend
 
 if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
@@ -56,7 +58,7 @@ else:
     raise quantumError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
 
-def reraise_remote_error(self, remote_err):
+def reraise_remote_error(remote_err):
     """
     This is a function re-raises the error thrown remotely
     :param remote_err: :obj:`twisted.spread.pb.RemoteError`
