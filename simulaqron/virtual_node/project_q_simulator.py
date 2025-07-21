@@ -93,7 +93,7 @@ class projectQEngine(quantumEngine):
 
         norm = np.dot(np.array(newQubit), np.array(newQubit).conj())
         if not norm <= 1:
-            raise quantumError("State {} is not normalized.".format(newQubit))
+            raise quantumError(f"State {newQubit} is not normalized.")
 
         # Create a fresh qubit
         num = self.add_fresh_qubit()

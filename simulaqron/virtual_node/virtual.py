@@ -879,7 +879,7 @@ class virtualNode(pb.Root):
                             q.num = q.num - 1
 
             # Remove the qubit form the list of simulated qubits
-            self._logger.debug("removing qubit %d from %d", delQubit.simNum, self.simQubits)
+            self._logger.debug("removing qubit %d from %s", delQubit.simNum, self.simQubits)
             self.simQubits.remove(delQubit)
 
         finally:

@@ -126,8 +126,8 @@ class SocketsConfig(pb.Referenceable):
                 network_config = NetworksConfigConstructor(file_path=filename).networks[network_name]
                 nodes = network_config.nodes
                 for node_name, node_config in nodes.items():
-                    hostname = getattr(node_config, "{}_hostname".format(config_type))
-                    port = getattr(node_config, "{}_port".format(config_type))
+                    hostname = getattr(node_config, f"{config_type}_hostname")
+                    port = getattr(node_config, f"{config_type}_port")
                     self.hostDict[node_name] = Host(node_name, hostname, port)
 
             elif filename.endswith(".cfg"):
@@ -140,7 +140,7 @@ class SocketsConfig(pb.Referenceable):
                             newHost = Host(words[0].strip(), words[1].strip(), words[2].strip())
                             self.hostDict[words[0]] = newHost
             else:
-                raise ValueError("Unknown file type {}".format(filename.split(".")[-1]))
+                raise ValueError(f"Unknown file type {filename.split(".")[-1]}")
 
     def print_details(self, name):
         """

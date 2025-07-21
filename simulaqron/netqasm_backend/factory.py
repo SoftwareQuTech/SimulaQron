@@ -238,7 +238,7 @@ class NetQASMFactory(Factory):
                 return False
         else:
             self._logger.warning(
-                "Node {} is not in the specified topology and is therefore "
-                "assumed to have no neighbors".format(self.name)
+                f"Node {self.name} is not in the specified topology and is therefore "
+                "assumed to have no neighbors"
             )
             return False

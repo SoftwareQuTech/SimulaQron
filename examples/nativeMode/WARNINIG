@@ -1,0 +1,5 @@
+Writing SimulaQron applications using the "native" interface is deprecated.
+
+The examples in this folder are here just for completeness.
+If you want to create a SimulaQron application, please refer to the example
+in the "netqasm" folder.

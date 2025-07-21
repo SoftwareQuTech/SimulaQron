@@ -92,9 +92,9 @@ class Network:
                 self.nodes = nodes
             self.topology = construct_topology_config(topology, self.nodes)
             if not force:
-                answer = input("Do you want to add/replace the network {} in the file {}"
-                               "with a network constisting of the nodes {}? (yes/no)"
-                               .format(self.name, self._network_config_file, self.nodes))
+                answer = input(f"Do you want to add/replace the network {self.name} in the "
+                               f"file {self._network_config_file} with a network consisting "
+                               f"of the nodes {self.nodes}? (yes/no)")
                 if answer not in ["yes", "y"]:
                     raise RuntimeError("User did not want to replace network in file")
             networks_config.add_network(node_names=self.nodes, network_name=self.name, topology=self.topology)
@@ -106,18 +106,17 @@ class Network:
                 node_names = networks_config.get_node_names(self.name)
                 self.topology = networks_config.networks[self.name].topology
             else:
-                raise ValueError("Network {} is not in the file {}\n"
-                                 "If you wish to add this network to the file, use the"
-                                 "--new flag.".format(self.name, self._network_config_file))
+                raise ValueError(f"Network {self.name} is not in the file {self._network_config_file}\n"
+                                 f"If you wish to add this network to the file, use the --new flag.")
             if nodes is None:
                 self.nodes = node_names
             else:
                 self.nodes = nodes
                 for node_name in self.nodes:
                     if node_name not in node_names:
-                        raise ValueError("Node {} is not in the current network {} in the file {}\n"
-                                         "If you wish to overwrite the current network in the file, use the"
-                                         "--new flag.".format(node_name, self.name, self._network_config_file))
+                        raise ValueError(f"Node {node_name} is not in the current network {self.name} "
+                                         f"in the file {self._network_config_file}\nIf you wish to overwrite "
+                                         f"the current network in the file, use the --new flag.")
 
         self._setup_processes()
 
@@ -138,7 +137,7 @@ class Network:
                 self._running = False
                 break
             except Exception as err:
-                self._logger.exception("Got unexpected exception when trying to connect: {}".format(err))
+                self._logger.exception("Got unexpected exception when trying to connect: %s", err)
                 raise err
         else:
             self._logger.debug("Network %s is now running", self.name)
@@ -156,10 +155,10 @@ class Network:
         mp.set_start_method("spawn", force=True)
         for node in self.nodes:
             process_virtual = mp.Process(
-                target=start_vnode, args=(node, self.name, get_log_level()), name="VirtNode {}".format(node)
+                target=start_vnode, args=(node, self.name, get_log_level()), name=f"VirtNode {node}"
             )
             process_qnodeos = mp.Process(
-                target=start_qnodeos, args=(node, self.name, get_log_level()), name="QnodeOSNode {}".format(node)
+                target=start_qnodeos, args=(node, self.name, get_log_level()), name=f"QnodeOSNode {node}"
             )
             self.processes += [process_virtual, process_qnodeos]
 
@@ -191,14 +190,15 @@ class Network:
         Stops the network.
         """
         self._running = False
-        self._logger.info("Stopping network with name {}".format(self.name))
+        self._logger.info("Stopping network with name %s", self.name)
         for p in self.processes:
             while p.is_alive():
                 time.sleep(0.1)
                 try:
                     p.terminate()
                 except Exception as err:
-                    self._logger("Could not terminate one of the processes in the network due to error: {}".format(err))
+                    self._logger.warning("Could not terminate one of the processes in the"
+                                         "network due to error: %s", err)
 
 
 def construct_topology_config(topology, nodes):

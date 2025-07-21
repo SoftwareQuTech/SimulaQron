@@ -84,7 +84,7 @@ class localNode(pb.Root):
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
             correct = state == expectedState
         else:
-            ValueError("Unknown backend {}".format(simulaqron_settings.sim_backend))
+            ValueError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
         return bool(correct)
 
@@ -132,7 +132,7 @@ class localNode(pb.Root):
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
             correct = state == expectedState
         else:
-            ValueError("Unknown backend {}".format(simulaqron_settings.sim_backend))
+            ValueError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
         return bool(correct)
 
@@ -260,7 +260,7 @@ class TestBothLocal(TestMerge):
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
             correct = state == expectedState
         else:
-            ValueError("Unknown backend {}".format(simulaqron_settings.sim_backend))
+            ValueError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
         send_end.send(correct)
 
@@ -313,7 +313,7 @@ class TestBothLocalNotSameReg(TestBothLocal):
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
             correct = state == expectedState
         else:
-            ValueError("Unknown backend {}".format(simulaqron_settings.sim_backend))
+            ValueError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
         send_end.send(correct)
 

@@ -125,7 +125,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 myHost = qnodeos_net.hostDict[name]
             else:
                 raise ValueError(
-                    "Host name '{}' is not in the qnodeos network".format(name)
+                    f"Host name '{name}' is not in the qnodeos network"
                 )
 
                 # Get IP and port number
@@ -148,7 +148,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
         while True:
             try:
                 logger.debug(
-                    "App %s : Trying to connect to NetQASM server (at %d)", name, addr[-1]
+                    "App %s : Trying to connect to NetQASM server (at %s)", name, addr[-1]
                 )
 
                 qnodeos_socket = socket.socket(addr[0], addr[1], addr[2])

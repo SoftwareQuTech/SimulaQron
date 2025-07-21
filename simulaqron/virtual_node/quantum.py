@@ -274,7 +274,7 @@ class simulatedQubit(pb.Referenceable):
         """
         backend = settings.simulaqron_settings.sim_backend
         if backend != settings.SimBackend.QUTIP.value:
-            raise RuntimeError("Cannot get reduced qubit state using backend {}".format(backend))
+            raise RuntimeError(f"Cannot get reduced qubit state using backend {backend}")
         self._logger.debug("VIRTUAL NODE %s: Returning qubit %d", self.node.name, self.num)
         return self.register.get_qubits_RI([self.num])
 

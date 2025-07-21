@@ -603,7 +603,7 @@ class VanillaSimulaQronExecutioner(Executor):
             weights = self._get_probability_weights(probability_dist_spec, num_choices=2)
             basis = random.choices([Basis.ZPLUSX, Basis.ZMINUSX], weights)[0]
         else:
-            raise ValueError("Unsupported random basis choice {}".format(random_basis_set))
+            raise ValueError(f"Unsupported random basis choice {random_basis_set}")
 
         return basis
 

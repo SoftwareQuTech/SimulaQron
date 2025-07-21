@@ -119,7 +119,7 @@ class Config:
         try:
             value = self._config[setting]
         except KeyError:
-            raise KeyError("Cannot find the setting {} in the file {}".format(setting, self._internal_settings_file))
+            raise KeyError(f"Cannot find the setting {setting} in the file {self._internal_settings_file}")
         return value
 
     def _set_setting(self, setting, value):

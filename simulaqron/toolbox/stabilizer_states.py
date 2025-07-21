@@ -131,7 +131,7 @@ class StabilizerState:
                     self._group = np.array(data, dtype=bool)
                 except Exception as err:
                     raise ValueError(
-                        "Could not create an array of the 'data' due to the following error: {}".format(err)
+                        f"Could not create an array of the 'data' due to the following error: {err}"
                     )
 
                 if len(self._group.shape) != 2:
@@ -217,9 +217,9 @@ class StabilizerState:
         return "StabilizerState(np." + self._group.__repr__() + ")"
 
     def __str__(self):
-        to_return = "Stabilizer state on {} with the following stabilizer generators:\n".format(self.num_qubits)
+        to_return = f"Stabilizer state on {self.num_qubits} with the following stabilizer generators:\n"
         for row_str in self.to_string().split('\n'):
-            to_return += "\t{}\n".format(row_str)
+            to_return += f"\t{row_str}\n"
         return to_return[:-1]
 
     def __len__(self):
@@ -229,7 +229,7 @@ class StabilizerState:
     def _row_to_string(row):
         assert (len(row) - 1) % 2 == 0
         n = int((len(row) - 1) / 2)
-        to_return = "{} ".format(StabilizerState.bool2phase[row[-1]])
+        to_return = f"{StabilizerState.bool2phase[row[-1]]} "
         for i in range(n):
             to_return += StabilizerState.bool2Pauli[(row[i], row[i + n])]
         return to_return
@@ -272,7 +272,7 @@ class StabilizerState:
         try:
             new_matrix = np.array(matrix, dtype=bool)
         except Exception as err:
-            raise ValueError("Could not create an array of the 'data' due to the following error: {}".format(err))
+            raise ValueError(f"Could not create an array of the 'data' due to the following error: {err}")
 
         if len(new_matrix.shape) != 2:
             raise ValueError("'data' needs to be an array of rank 2")
@@ -420,7 +420,7 @@ class StabilizerState:
         if isinstance(stabilizer, str):
             stab = StabilizerState._str_to_operator(stabilizer)
             if stab is None:
-                raise ValueError("Cannot parse {} as a stabilizer.".format(stabilizer))
+                raise ValueError(f"Cannot parse {stabilizer} as a stabilizer.")
         else:
             stab = list(stabilizer)
         num_cols = matrix.shape[1]
@@ -453,7 +453,7 @@ class StabilizerState:
             if not isinstance(entry, bool):
                 raise ValueError("All entries in a stabilizer should be of type `bool`.")
         if len(stabilizer) != num_cols:
-            raise ValueError("Stabilizer must be of length {}, not {}".format(num_cols, len(stabilizer)))
+            raise ValueError(f"Stabilizer must be of length {num_cols}, not {len(stabilizer)}")
 
     def add_qubit(self):
         r"""
@@ -537,7 +537,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
+            raise ValueError(f"position= {position} if not a valid qubit position (i.e. in [0, {n}]")
         yz_rows = self._group[:, position + n]
 
         # Flip phases for Y and Z rows
@@ -552,7 +552,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
+            raise ValueError(f"position= {position} if not a valid qubit position (i.e. in [0, {n}]")
         xz_rows = np.logical_xor(self._group[:, position], self._group[:, position + n])
 
         # Flip phases for X and Z rows
@@ -567,7 +567,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
+            raise ValueError(f"position= {position} if not a valid qubit position (i.e. in [0, {n}]")
         xy_rows = self._group[:, position]
 
         # Flip phases for X and Y rows
@@ -582,7 +582,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
+            raise ValueError(f"position= {position} if not a valid qubit position (i.e. in [0, {n}]")
         # Swap the Z and X columns
         self._group[:, [position, position + n]] = self._group[:, [position + n, position]]
 
@@ -599,7 +599,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
+            raise ValueError(f"position= {position} if not a valid qubit position (i.e. in [0, {n}]")
         # Perform effective CNOT from Z column to X column
         yz_rows = self._group[:, position + n]
         self._group[yz_rows, position] = np.logical_not(self._group[yz_rows, position])
@@ -617,7 +617,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
+            raise ValueError(f"position= {position} if not a valid qubit position (i.e. in [0, {n}]")
         # Perform effective CNOT from X column to Z column
         xy_rows = self._group[:, position]
         self._group[xy_rows, position + n] = np.logical_not(self._group[xy_rows, position + n])
@@ -644,9 +644,9 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (control >= 0 and control < n):
-            raise ValueError("control= {} if not a valid qubit position (i.e. in [0, {}]".format(control, n))
+            raise ValueError(f"control= {control} if not a valid qubit position (i.e. in [0, {n}]")
         if not (target >= 0 and target < n):
-            raise ValueError("target= {} if not a valid qubit position (i.e. in [0, {}]".format(target, n))
+            raise ValueError(f"target= {target} if not a valid qubit position (i.e. in [0, {n}]")
         if control == target:
             raise ValueError("Control and target qubits cannot be the same")
 
@@ -680,9 +680,9 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (control >= 0 and control < n):
-            raise ValueError("control= {} if not a valid qubit position (i.e. in [0, {}]".format(control, n))
+            raise ValueError(f"control= {control} if not a valid qubit position (i.e. in [0, {n}]")
         if not (target >= 0 and target < n):
-            raise ValueError("target= {} if not a valid qubit position (i.e. in [0, {}]".format(target, n))
+            raise ValueError(f"target= {target} if not a valid qubit position (i.e. in [0, {n}]")
         if control == target:
             raise ValueError("Control and target qubits cannot be the same")
 
@@ -714,7 +714,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position = {} if not a valid qubit position (not in [0, {}))".format(position, n))
+            raise ValueError(f"position = {position} if not a valid qubit position (not in [0, {n}))")
 
         tmp_matrix = self._group
         # Create a new matrix where the X and Z columns of the corresponding qubit are the first.

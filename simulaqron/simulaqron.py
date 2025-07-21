@@ -42,7 +42,7 @@ class SimulaQronDaemon(run.RunDaemon):
                 nodes = []
 
             if self.nrnodes and (self.nrnodes > len(nodes)):
-                nodes += ["Node{}".format(i) for i in range(self.nrnodes - len(nodes))]
+                nodes += [f"Node{i}" for i in range(self.nrnodes - len(nodes))]
         else:
             nodes = self.nodes
 
@@ -140,9 +140,9 @@ def start(name, nrnodes, nodes, topology, force, keep):
         return
     if new:
         if not force:
-            answer = input("Do you want to add/replace the network '{}' in the file {} "
-                           "with a new network? (yes/no)"
-                           .format(name, simulaqron_settings.network_config_file))
+            answer = input(f"Do you want to add/replace the network '{name}' in the file "
+                           f"{simulaqron_settings.network_config_file} with a new network? "
+                           f"(yes/no)")
             if not _is_positive_answer(answer):
                 print("Aborted!")
                 return
@@ -152,8 +152,8 @@ def start(name, nrnodes, nodes, topology, force, keep):
     except SystemExit as e:
         if e.code == exit.PIDFILE_INACCESSIBLE or\
            e.code == exit.DAEMONIZE_FAILED:
-            logging.debug("Failed to launch Simulaqron Daemon. "
-                          "Exit code reported by daemons: {}".format(e.code))
+            logging.debug(f"Failed to launch Simulaqron Daemon. "
+                          f"Exit code reported by daemons: {e.code}")
             print("Failed to launch SimulaQron Daemon. Aborted!")
 
 ###############
@@ -428,8 +428,9 @@ def add(name, network_name=None, hostname=None, app_port=None, qnodeos_port=None
     HOSTNAME: The host name of the node, e.g. localhost or 192.168.0.1
     """
     if not force:
-        answer = input("Do you want to add the node {} to the network {} in the file {}? (yes/no)."
-                       .format(name, network_name, simulaqron_settings.network_config_file))
+        answer = input(f"Do you want to add the node {name} to the "
+                       f"network {network_name} in the file "
+                       f"{simulaqron_settings.network_config_file}? (yes/no).")
         if not _is_positive_answer(answer):
             print("Aborting!")
             return
@@ -461,8 +462,9 @@ def remove(name, network_name=None, force=False):
     NAME: The name of the node, e.g. Alice
     """
     if not force:
-        answer = input("Do you want to remove the node {} to the network {} in the file {}? (yes/no)."
-                       .format(name, network_name, simulaqron_settings.network_config_file))
+        answer = input(f"Do you want to remove the node {name} to the network "
+                       f"{network_name} in the file "
+                       f"{simulaqron_settings.network_config_file}? (yes/no).")
         if not _is_positive_answer(answer):
             print("Aborting!")
             return
@@ -488,9 +490,9 @@ def default(network_name=None, force=False):
     Alice, Bob, Charlie, David, Eve
     """
     if not force:
-        answer = input("Do you want to set the network {} in the file {} to default,"
-                       "i.e. with nodes Alice, Bob, Charlie, David and Eve? (yes/no)."
-                       .format(network_name, simulaqron_settings.network_config_file))
+        answer = input(f"Do you want to set the network {network_name} in the file "
+                       f"{simulaqron_settings.network_config_file} to default, i.e. "
+                       f"with nodes Alice, Bob, Charlie, David and Eve? (yes/no).")
         if not _is_positive_answer(answer):
             print("Aborting!")
             return
@@ -509,7 +511,7 @@ def get(network_name=None):
     try:
         nodes = networks_config.get_node_names(network_name=network_name)
     except ValueError:
-        print("No network {}".format(network_name))
+        print(f"No network {network_name}")
     else:
         print(("{} " * len(nodes))[:-1].format(*nodes))
 

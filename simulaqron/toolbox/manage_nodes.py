@@ -63,8 +63,8 @@ class NetworksConfigConstructor:
             else:
                 free = self._check_port_available(hostname, port)
                 if not free:
-                    raise ValueError("Cannot add node {}, since socket address ({}, {}) is already in use."
-                                     .format(node_name, hostname, port))
+                    raise ValueError(f"Cannot add node {node_name}, since socket address "
+                                     f"({hostname}, {port}) is already in use.")
             socket_address = (hostname, port)
             self.used_sockets.append(socket_address)
             socket_addresses[i] = socket_address
@@ -164,7 +164,7 @@ class NetworksConfigConstructor:
             nodes = self.networks[network_name].nodes
             return list(nodes.values())
         else:
-            raise ValueError("{} is not a network in this config".format(network_name))
+            raise ValueError(f"{network_name} is not a network in this config")
 
     def get_node_names(self, network_name="default"):
         """
@@ -180,7 +180,7 @@ class NetworksConfigConstructor:
             nodes = self.networks[network_name].nodes
             return list(nodes.keys())
         else:
-            raise ValueError("{} is not a network in this config".format(network_name))
+            raise ValueError(f"{network_name} is not a network in this config")
 
     def to_dict(self):
         """
@@ -221,7 +221,7 @@ class NetworksConfigConstructor:
             with open(file_path, 'r') as f:
                 dict = json.load(f)
         else:
-            raise ValueError("No such file {}".format(file_path))
+            raise ValueError(f"No such file {file_path}")
 
         for network_name, network_dict in dict.items():
             nodes_dict = network_dict["nodes"]
