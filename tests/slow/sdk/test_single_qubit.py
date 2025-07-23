@@ -194,13 +194,13 @@ def prep_I_state():
     return q
 
 
+# TODO - We can test these things better when we have implemented a get_qubit_state function for simulaqron
+#  for now, we will permon tests based on the tomography function.
 class TestSingleQubitGate:
     iterations: int = 1
 
     @pytest.fixture
     def network(self):
-        print(f"Testing single qubit gates gates with {self.iterations} iterations \n")
-
         simulaqron_settings.default_settings()
         network = Network(nodes=["Alice"], force=True)
         network.start()
@@ -213,144 +213,118 @@ class TestSingleQubitGate:
     def test_X_Gate(self, network):
         with SimulaQronConnection("Alice") as conn:
             # Test X
-            print("Testing X gate:")
             exp_values = calc_exp_values(prep_X_state())
             ans = conn.test_preparation(prep_X, exp_values, iterations=self.iterations)
-            print("\n")
             assert ans
 
     def test_Y_Gate(self, network):
         with SimulaQronConnection("Alice") as conn:
             # Test Y
-            print("Testing Y gate:")
             exp_values = calc_exp_values(prep_Y_state())
             ans = conn.test_preparation(prep_Y, exp_values, iterations=self.iterations)
-            print("\n")
             assert ans
 
     def test_Z_Gate(self, network):
         with SimulaQronConnection("Alice") as conn:
             # Test Z
-            print("Testing Z gate:")
             exp_values = calc_exp_values(prep_Z_state())
             ans = conn.test_preparation(prep_Z, exp_values, iterations=self.iterations)
-            print("\n")
             assert ans
 
     def test_H_Gate(self, network):
         with SimulaQronConnection("Alice") as conn:
             # Test H
-            print("Testing H gate:")
             exp_values = calc_exp_values(prep_H_state())
             ans = conn.test_preparation(prep_H, exp_values, iterations=self.iterations)
-            print("\n")
             assert ans
 
     def test_T_Gate(self, network):
         with SimulaQronConnection("Alice") as conn:
             # Test T
-            print("Testing T gate:")
             exp_values = calc_exp_values(prep_T_state())
             if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
                 with pytest.raises(SimUnsupportedError):
                     conn.test_preparation(prep_T, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = conn.test_preparation(prep_T, exp_values, iterations=self.iterations)
-                print("\n")
                 assert ans
 
     def test_K_Gate(self, network):
         with SimulaQronConnection("Alice") as conn:
             # Test K
-            print("Testing K gate:")
             exp_values = calc_exp_values(prep_K_state())
             ans = conn.test_preparation(prep_K, exp_values, iterations=self.iterations)
-            print("\n")
             assert ans
 
     def test_X_pi8Rot(self, network):
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_X pi/8
-            print("Testing rotation (X,pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([1, 0, 0], np.pi / 8))
             if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
                 with pytest.raises(SimUnsupportedError):
                     conn.test_preparation(prep_rotx1, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = conn.test_preparation(prep_rotx1, exp_values, iterations=self.iterations)
-                print("\n")
                 assert ans
 
     def test_X_5pi8Rot(self, network):
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_X 5*pi/8
-            print("Testing rotation (X,5*pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([1, 0, 0], 5 * np.pi / 8))
             if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
                 with pytest.raises(SimUnsupportedError):
                     conn.test_preparation(prep_rotx2, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = conn.test_preparation(prep_rotx2, exp_values, iterations=self.iterations)
-                print("\n")
                 assert ans
 
     def test_Y_pi8Rot(self, network):
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_Y pi/8
-            print("Testing rotation (Y,pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([0, 1, 0], np.pi / 8))
             if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
                 with pytest.raises(SimUnsupportedError):
                     conn.test_preparation(prep_roty1, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = conn.test_preparation(prep_roty1, exp_values, iterations=self.iterations)
-                print("\n")
                 assert ans
 
     def test_Y_5pi8Rot(self, network):
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_Y 5*pi/8
-            print("Testing rotation (Y,5*pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([0, 1, 0], 5 * np.pi / 8))
             if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
                 with pytest.raises(SimUnsupportedError):
                     conn.test_preparation(prep_roty2, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = conn.test_preparation(prep_roty2, exp_values, iterations=self.iterations)
-                print("\n")
                 assert ans
 
     def test_Z_pi8Rot(self, network):
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_Z pi/8
-            print("Testing rotation (Z,pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([0, 0, 1], np.pi / 8))
             if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
                 with pytest.raises(SimUnsupportedError):
                     conn.test_preparation(prep_rotz1, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = conn.test_preparation(prep_rotz1, exp_values, iterations=self.iterations)
-                print("\n")
                 assert ans
 
     def test_Z_5pi8Rot(self, network):
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_Z 5*pi/8
-            print("Testing rotation (Z,5*pi/8) gate:")
             exp_values = calc_exp_values(prep_rot_state([0, 0, 1], 5 * np.pi / 8))
             if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
                 with pytest.raises(SimUnsupportedError):
                     conn.test_preparation(prep_rotz2, exp_values, iterations=self.iterations, progress=False)
             else:
                 ans = conn.test_preparation(prep_rotz2, exp_values, iterations=self.iterations)
-                print("\n")
                 assert ans
 
     def test_Reset(self, network):
         with SimulaQronConnection("Alice") as conn:
             # Test RESET
-            print("Testing RESET:")
             exp_values = calc_exp_values(prep_I_state())
             ans = conn.test_preparation(prep_reset, exp_values, iterations=self.iterations)
-            print("\n")
             assert ans

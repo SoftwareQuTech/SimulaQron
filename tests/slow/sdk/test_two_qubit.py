@@ -26,14 +26,17 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-import sys
-import unittest
 import numpy as np
+import pytest
+from netqasm.runtime.application import default_app_instance
 
 from simulaqron.sdk.connection import SimulaQronConnection
-from netqasm.sdk import Qubit
+from netqasm.sdk import Qubit, EPRSocket
+from simulaqron.sdk.socket import Socket
+from simulaqron.run.run import run_applications
 from simulaqron.network import Network
 from simulaqron.settings import simulaqron_settings
+from simulaqron.run.run import reset
 
 
 def calc_exp_values(q):
@@ -100,44 +103,64 @@ def prep_CPHASE_target(conn):
     return q2
 
 
-def prep_EPR1(conn):
-    with SimulaQronConnection("Alice", appID=1) as Alice:
-        qA = Alice.createEPR("Bob")
-        qB = conn.recvEPR()
-        qA.measure()
-    return qB
-
-
-def prep_EPR2(conn):
-    with SimulaQronConnection("Alice", appID=1) as Alice:
-        qB = conn.createEPR("Alice", remote_appID=1)
-        qA = Alice.recvEPR()
-        qA.measure()
-    return qB
-
-
-def prep_send(conn):
-    with SimulaQronConnection("Alice", appID=1) as Alice:
-        qA = Qubit(conn)
-        qB = Qubit(conn)
-        qA.H()
-        qA.cnot(qB)
-        conn.sendQubit(qA, "Alice", remote_appID=1)
-        qA = Alice.recvQubit()
+def EPR_Alice():
+    epr_socket = EPRSocket("Bob")
+    with SimulaQronConnection("Alice", epr_sockets=[epr_socket]):
+        qA = epr_socket.create_keep()[0]
         m = qA.measure()
-        if m == 1:
-            qB.X()
-        qB.H()
-    return qB
+        # "flush" is not necessary, since it is triggered when exiting the context.
+    return m
 
 
-def prep_recv(conn):
-    with SimulaQronConnection("Alice", appID=1) as Alice:
-        qA = Qubit(Alice)
-        qA.H()
-        Alice.sendQubit(qA, "Bob")
-        qB = conn.recvQubit()
-    return qB
+def EPR_Bob():
+    epr_socket = EPRSocket("Alice")
+    with SimulaQronConnection("Bob", epr_sockets=[epr_socket]):
+        qB = epr_socket.recv_keep()[0]
+        m = qB.measure()
+        # "flush" is not necessary, since it is triggered when exiting the context.
+    return m
+
+
+def teleport_alice():
+    socket = Socket("Alice", "Bob")
+    epr_socket = EPRSocket("Bob")
+    with SimulaQronConnection("Alice", epr_sockets=[epr_socket]) as alice:
+        # Create a qubit
+        q = Qubit(alice)
+        q.H()
+
+        # Create entanglement
+        epr = epr_socket.create_keep()[0]
+
+        # Teleport
+        q.cnot(epr)
+        q.H()
+        m1 = q.measure()
+        m2 = epr.measure()
+
+    # Send the correction information
+    msg = str((int(m1), int(m2)))
+    socket.send(msg)
+    return m1, m2
+
+
+def teleport_bob():
+    socket = Socket("Bob", "Alice")
+    epr_socket = EPRSocket("Alice")
+    with SimulaQronConnection("Bob", epr_sockets=[epr_socket]) as bob:
+        epr = epr_socket.recv_keep()[0]
+        bob.flush()
+
+        # Get the corrections
+        msg = socket.recv()
+
+        m1, m2 = eval(msg)
+        if m2 == 1:
+            epr.X()
+        if m1 == 1:
+            epr.Z()
+        meas = epr.measure()
+    return meas
 
 
 def prep_mixed_state():
@@ -152,96 +175,74 @@ def prep_H_state():
     return np.dot(q2, np.transpose(np.conj(q2)))
 
 
-@unittest.skip("We can test these things better when we have implemented a get_qubit_state function for simulaqron")
-class TwoQubitGateTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.iterations = 100
-        sys.stdout.write("Testing two qubit gates gates with {} iterations \r\n".format(cls.iterations))
+# TODO - We can test these things better when we have implemented a get_qubit_state function for simulaqron
+#  for now, we will perform tests based on the tomography function.
+class TestTwoQubitGates:
+    iterations = 100
+
+    @pytest.fixture
+    def network(self):
+        print(f"Testing two qubit gates with {self.iterations} iterations\n")
 
         simulaqron_settings.default_settings()
-        cls.network = Network(nodes=["Alice", "Bob"], force=True)
-        cls.network.start()
+        network = Network(nodes=["Alice", "Bob"], force=True)
+        network.start(wait_until_running=True)
+        yield network
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.network.stop()
+        network.stop()
         simulaqron_settings.default_settings()
+        reset()
 
-    def testCNOTControl(self):
-        with SimulaQronConnection("Bob", appID=0) as conn:
+    def test_CNOT_control(self, network):
+        with SimulaQronConnection("Bob") as conn:
             # Test CNOT control
-            sys.stdout.write("Testing CNOT control:")
             exp_values = calc_exp_values(prep_mixed_state())
             ans = conn.test_preparation(prep_CNOT_control, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
-            self.assertTrue(ans)
+            assert ans
 
-    def testCNOTTarget(self):
-        with SimulaQronConnection("Bob", appID=0) as conn:
+    def test_CNOT_target(self, network):
+        with SimulaQronConnection("Bob") as conn:
             # Test CNOT target
-            sys.stdout.write("Testing CNOT target:")
             exp_values = calc_exp_values(prep_mixed_state())
             ans = conn.test_preparation(prep_CNOT_target, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
-            self.assertTrue(ans)
+            assert ans
 
-    def testCPHASEControl(self):
-        with SimulaQronConnection("Bob", appID=0) as conn:
+    def test_CPHASE_control(self, network):
+        with SimulaQronConnection("Bob") as conn:
             # Test CPHASE control
-            sys.stdout.write("Testing CPHASE control:")
             exp_values = calc_exp_values(prep_mixed_state())
             ans = conn.test_preparation(prep_CPHASE_control, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
-            self.assertTrue(ans)
+            assert ans
 
-    def testCPHASETarget(self):
-        with SimulaQronConnection("Bob", appID=0) as conn:
+    def test_CPHASE_target(self, network):
+        with SimulaQronConnection("Bob") as conn:
             # Test CPHASE target
-            sys.stdout.write("Testing CPHASE target:")
             exp_values = calc_exp_values(prep_mixed_state())
             ans = conn.test_preparation(prep_CPHASE_target, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
-            self.assertTrue(ans)
+            assert ans
 
-    def testEPR1(self):
-        with SimulaQronConnection("Bob", appID=0) as conn:
-            # Test EPR1
-            sys.stdout.write("Testing EPR1:")
-            exp_values = calc_exp_values(prep_mixed_state())
-            ans = conn.test_preparation(prep_EPR1, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
-            self.assertTrue(ans)
+    # Tests using multiple nodes
 
-    def testEPR2(self):
-        with SimulaQronConnection("Bob", appID=0) as conn:
-            # Test EPR2
-            sys.stdout.write("Testing EPR2:")
-            exp_values = calc_exp_values(prep_mixed_state())
-            ans = conn.test_preparation(prep_EPR2, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
-            self.assertTrue(ans)
+    def test_EPRS(self, network):
+        apps = default_app_instance(
+            [
+                ("Alice", EPR_Alice),
+                ("Bob", EPR_Bob)
+            ]
+        )
+        results = run_applications(apps, use_app_config=False, enable_logging=False, num_rounds=self.iterations)
+        # both sides MUST measure the same state
+        assert int(results[0]["app_Alice"]) == int(results[0]["app_Bob"])
 
-    def testSendControl(self):
-        with SimulaQronConnection("Bob", appID=0) as conn:
-            # Test send control
-            sys.stdout.write("Testing send:")
-            exp_values = calc_exp_values(prep_H_state())
-            ans = conn.test_preparation(prep_send, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
-            self.assertTrue(ans)
-
-    def testRevTarget(self):
-        with SimulaQronConnection("Bob", appID=0) as conn:
-            # Test recv target
-            sys.stdout.write("Testing recv:")
-            exp_values = calc_exp_values(prep_H_state())
-            ans = conn.test_preparation(prep_recv, exp_values, iterations=self.iterations)
-            sys.stdout.write("\r")
-            self.assertTrue(ans)
-
-
-##################################################################################################
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_teleport(self, network):
+        # To avoid stalling the simulation, the applications *need* to run
+        # in parallel. For this reason, we use the "run_applications" method
+        # which spawns a process for each node
+        apps = default_app_instance(
+            [
+                ("Alice", teleport_alice),
+                ("Bob", teleport_bob)
+            ]
+        )
+        results = run_applications(apps, use_app_config=False, enable_logging=False, num_rounds=self.iterations)
+        #print(results)

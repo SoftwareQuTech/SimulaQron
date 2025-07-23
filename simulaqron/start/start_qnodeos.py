@@ -80,7 +80,8 @@ def setup_netqasm_server(myName, netqasm_factory):
     while timer() - t_start < _TIMEOUT:
         try:
             logger.debug(
-                "LOCAL %s: Starting local classical communication server.", myName
+                "LOCAL %s: Starting local classical communication server, port %d.",
+                myName, netqasm_factory.host.port
             )
             myHost = netqasm_factory.host
             myHost.root = netqasm_factory
@@ -123,7 +124,7 @@ def main(myName, network_name="default", log_level="WARNING"):
     # Check if we are in the host-dictionary
     if myName in qnodeos_network.hostDict:
         myHost = qnodeos_network.hostDict[myName]
-        logger.debug(f"Setting up QNodeOS protocol factory for {myName}")
+        logger.debug("Setting up QNodeOS protocol factory for %s (%s)", myName, myHost.addr)
         netqasm_factory = NetQASMFactory(
             myHost,
             myName,
