@@ -244,5 +244,5 @@ class TestTwoQubitGates:
                 ("Bob", teleport_bob)
             ]
         )
-        results = run_applications(apps, use_app_config=False, enable_logging=False, num_rounds=self.iterations)
-        #print(results)
+        _ = run_applications(apps, use_app_config=False, enable_logging=False, num_rounds=self.iterations)
+        #print(_)

@@ -217,7 +217,7 @@ class StabilizerState:
         return "StabilizerState(np." + self._group.__repr__() + ")"
 
     def __str__(self):
-        to_return = f"Stabilizer state on {self.num_qubits} with the following stabilizer generators:\n"
+        to_return = f"Stabilizer state on {self.num_qubits} with the following stabilizer generators: \n"
         for row_str in self.to_string().split('\n'):
             to_return += f"\t{row_str}\n"
         return to_return[:-1]

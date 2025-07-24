@@ -2,11 +2,12 @@ from netqasm.runtime.settings import set_simulator
 
 set_simulator("simulaqron")
 
-from netqasm.runtime.application import default_app_instance
-from netqasm.sdk.external import NetQASMConnection
-from netqasm.sdk import Qubit, EPRSocket
+from netqasm.runtime.application import default_app_instance  # noqa: E402
+from netqasm.sdk.external import NetQASMConnection  # noqa: E402
+from netqasm.sdk import Qubit, EPRSocket  # noqa: E402
 
-from simulaqron.run.run import run_applications
+from simulaqron.run.run import run_applications  # noqa: E402
+
 
 def run_alice():
     epr_socket: EPRSocket = EPRSocket("Bob")
@@ -32,6 +33,7 @@ def run_bob():
         entangled_qubit = epr_socket.recv_keep()[0]
         meas = entangled_qubit.measure()
     return meas
+
 
 if __name__ == "__main__":
     apps = default_app_instance(
