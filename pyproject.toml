@@ -45,7 +45,7 @@ test = [
 ]
 opt = [
     "projectq<=0.8.0",
-    "qutip"
+    "qutip<5.0.0"
 ]
 dev = [
     "sphinx>=7.2.6, <8.0",
