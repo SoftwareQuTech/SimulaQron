@@ -2,6 +2,8 @@ import logging
 import os
 from concurrent.futures import ProcessPoolExecutor as Pool
 from importlib import reload
+from os import PathLike
+from pathlib import Path
 from time import sleep
 from typing import Callable, Optional, Any, Dict, List
 
@@ -140,11 +142,17 @@ def run_applications(
         app_instance.logging_cfg.comm_log_dir = timed_log_dir
 
     results: List[Dict[str, Any]] = []
+    if isinstance(network_cfg, str) or isinstance(network_cfg, PathLike):
+        net_cfg = str(network_cfg)
+    elif isinstance(network_cfg, Path):
+        net_cfg = str(network_cfg.resolve())
+    else:
+        net_cfg = None
 
     for _ in range(num_rounds):
         with Pool(len(app_names)) as executor:
             # Start the backend process
-            network = run_sim_backend(app_names, sim_backend, network_cfg)
+            network = run_sim_backend(app_names, sim_backend, net_cfg)
 
             # Start the application processes
             app_futures = []
