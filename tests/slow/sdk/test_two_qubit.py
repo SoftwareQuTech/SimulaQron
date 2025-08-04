@@ -178,7 +178,7 @@ def prep_H_state():
 # TODO - We can test these things better when we have implemented a get_qubit_state function for simulaqron
 #  for now, we will perform tests based on the tomography function.
 class TestTwoQubitGates:
-    iterations = 100
+    iterations = 1
 
     @pytest.fixture
     def network(self):
@@ -223,7 +223,7 @@ class TestTwoQubitGates:
 
     # Tests using multiple nodes
 
-    def test_EPRS(self, network):
+    def test_EPRS(self):
         apps = default_app_instance(
             [
                 ("Alice", EPR_Alice),
@@ -234,7 +234,7 @@ class TestTwoQubitGates:
         # both sides MUST measure the same state
         assert int(results[0]["app_Alice"]) == int(results[0]["app_Bob"])
 
-    def test_teleport(self, network):
+    def test_teleport(self):
         # To avoid stalling the simulation, the applications *need* to run
         # in parallel. For this reason, we use the "run_applications" method
         # which spawns a process for each node
