@@ -25,7 +25,7 @@ if __name__ == "__main__":
             ("Bob", run_bob)
         ]
     )
-    network_cfg_path = Path() / "network-alice.json"
+    network_cfg_path = Path(__file__).parent / "network-alice.json"
     raw_results = run_applications(
         apps, use_app_config=False, enable_logging=False, network_cfg=network_cfg_path.resolve()
     )

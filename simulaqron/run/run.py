@@ -67,11 +67,18 @@ def check_sim_backend(sim_backend: SimBackend):
         assert has_module.main(sim_backend.value), f"To use {sim_backend} as backend you need to install the package"
 
 
-def run_sim_backend(node_names: List[str], sim_backend: SimBackend, network_config_file: str):
+def run_sim_backend(node_names: List[str], sim_backend: SimBackend, network_config_file: Optional[str]):
     logger.debug("Starting simulaqron sim_backend process with nodes %s", node_names)
     check_sim_backend(sim_backend)
     simulaqron_settings.sim_backend = sim_backend.value
-    network = Network(name="default", nodes=node_names, network_config_file=network_config_file, force=True, new=True)
+    new_network = False if network_config_file is None else True
+    network = Network(
+        name="default",
+        nodes=node_names,
+        network_config_file=network_config_file,
+        force=True,
+        new=new_network
+    )
     network.start()
     return network
 
