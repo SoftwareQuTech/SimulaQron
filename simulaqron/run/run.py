@@ -151,8 +151,12 @@ def run_applications(
     results: List[Dict[str, Any]] = []
     if isinstance(network_cfg, str) or isinstance(network_cfg, PathLike):
         net_cfg = str(network_cfg)
+        # If given a network config path, we need to update the global static config property (really bad design choice)
+        simulaqron_settings.network_config_file = net_cfg
     elif isinstance(network_cfg, Path):
         net_cfg = str(network_cfg.resolve())
+        # If given a network config path, we need to update the global static config property (really bad design choice)
+        simulaqron_settings.network_config_file = net_cfg
     else:
         net_cfg = None
 
