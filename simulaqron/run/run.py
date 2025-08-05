@@ -5,7 +5,7 @@ from importlib import reload
 from os import PathLike
 from pathlib import Path
 from time import sleep
-from typing import Callable, Optional, Any, Dict, List
+from typing import Callable, Optional, Any, Dict, List, Union
 
 from netqasm.logging.glob import get_netqasm_logger
 from netqasm.logging.output import (reset_struct_loggers,
@@ -79,7 +79,7 @@ def run_sim_backend(node_names: List[str], sim_backend: SimBackend, network_conf
 def run_applications(
     app_instance: ApplicationInstance,
     num_rounds: int = 1,
-    network_cfg: str = None,  # WARNING - The type of this argument *cannot* be harmonized
+    network_cfg: Union[str, PathLike, Path] = None,  # WARNING - The type of this argument *cannot* be harmonized
     nv_cfg: Any = None,  # Unused; it's here for harmonization with squidasm "simulate_application"
     log_cfg: LogConfig = None,
     formalism: Formalism = Formalism.KET,
