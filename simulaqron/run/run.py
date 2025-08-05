@@ -71,7 +71,7 @@ def run_sim_backend(node_names: List[str], sim_backend: SimBackend, network_conf
     logger.debug("Starting simulaqron sim_backend process with nodes %s", node_names)
     check_sim_backend(sim_backend)
     simulaqron_settings.sim_backend = sim_backend.value
-    new_network = False if network_config_file is None else True
+    new_network = True if network_config_file is None else False
     network = Network(
         name="default",
         nodes=node_names,
