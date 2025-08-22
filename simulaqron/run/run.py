@@ -1,11 +1,10 @@
 import logging
 import os
-from concurrent.futures import ProcessPoolExecutor as Pool
+from multiprocess.pool import Pool, ApplyResult
 from importlib import reload
 from os import PathLike
 from pathlib import Path
-from time import sleep
-from typing import Callable, Optional, Any, Dict, List, Union
+from typing import Callable, Optional, Any, Dict, List, Union, Generator, Tuple
 
 from netqasm.logging.glob import get_netqasm_logger
 from netqasm.logging.output import (reset_struct_loggers,
@@ -34,21 +33,11 @@ _SIMULAQRON_BACKENDS = {
 }
 
 
-def as_completed(futures, names=None, sleep_time=0):
-    futures = list(futures)
-    if names is not None:
-        names = list(names)
-    while len(futures) > 0:
-        for i, future in enumerate(futures):
-            if future.done():
-                futures.pop(i)
-                if names is None:
-                    yield future
-                else:
-                    name = names.pop(i)
-                    yield future, name
-        if sleep_time > 0:
-            sleep(sleep_time)
+def as_completed(futures: List[ApplyResult], names: List[str]) -> Generator[Tuple[ApplyResult, str], None, None]:
+    if len(futures) is not len(names):
+        raise RuntimeError("Not all registered applications have an associated name")
+    for future, name in zip(futures, names):
+        yield future, name
 
 
 def reset(save_loggers=False):
@@ -180,7 +169,7 @@ def run_applications(
                         inputs=inputs,
                     )
                     inputs["app_config"] = app_cfg
-                future = executor.submit(program.entry, **inputs)
+                future: ApplyResult = executor.apply_async(program.entry, kwds=inputs)
                 app_futures.append(future)
 
             # for app_cfg in app_cfgs:
@@ -193,8 +182,8 @@ def run_applications(
             # Join the application processes and the backend
             names = [f'app_{app_name}' for app_name in app_names]
             result = {}
-            for future, name in as_completed(app_futures, names=names):
-                result[name] = future.result()
+            for future, name in as_completed(app_futures, names):
+                result[name] = future.get()
             # if results_file is not None:
             #     save_results(results=results, results_file=results_file)
             if enable_logging:
