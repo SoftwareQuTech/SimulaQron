@@ -29,6 +29,8 @@
 
 import socket
 import struct
+from typing import Dict
+
 from twisted.spread import pb
 from ipaddress import IPv4Address
 
@@ -106,7 +108,7 @@ class SocketsConfig(pb.Referenceable):
         Therefore one needs to also specify the network_name and config_type ('vnode', 'app')
         """
         # Dictionary where we will keep host details, indexed by node name (e.g. Alice)
-        self.hostDict = {}
+        self.hostDict: Dict[str, Host] = {}
 
         # Read config file
         self.read_config(filename, network_name=network_name, config_type=config_type)

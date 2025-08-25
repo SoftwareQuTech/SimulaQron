@@ -1,10 +1,12 @@
-import pickle
+import dill
 import socket
 import time
+from typing import Optional
 
 from netqasm.logging.glob import get_netqasm_logger
+from netqasm.sdk.classical_communication.message import StructuredMessage
 from netqasm.sdk.classical_communication.socket import Socket as _Socket
-from simulaqron.general.host_config import SocketsConfig
+from simulaqron.general.host_config import SocketsConfig, Host
 from simulaqron.settings import simulaqron_settings
 
 
@@ -17,7 +19,7 @@ class Socket(_Socket):
         app_name,
         remote_app_name,
         socket_id=0,
-        timeout=None,
+        timeout: Optional[int] = None,
         use_callbacks=False,
         network_name="default",
         log_config=None,
@@ -31,29 +33,32 @@ class Socket(_Socket):
         self._network_name = network_name
 
         self._logger = get_netqasm_logger(f"{self.__class__.__name__}({app_name} <-> {remote_app_name})")
-        self._app_socket = None
-
-        self._connect()
+        self._app_socket: socket.socket = self._connect(timeout=timeout)
 
     def __del__(self):
         if self._app_socket:
             self._app_socket.close()
 
-    def send(self, msg):
+    def send(self, msg: str):
         """Sends a message to the remote node."""
         self._logger.debug("Sending msg '%s'", msg)
         raw_msg = self._serialize_msg(msg=msg)
         self._app_socket.send(raw_msg)
 
-    def send_structured(self, msg):
+    def send_structured(self, msg: StructuredMessage):
         self._logger.debug("Sending structured msg '%s'", msg)
         raw_msg = self._serialize_structured_msg(msg=msg)
         self._app_socket.send(raw_msg)
 
-    def send_silent(self, msg):
+    def send_silent(self, msg: str):
         self.send(msg)
 
-    def recv(self, block=True, maxsize=1024):
+    def recv(
+        self,
+        block: bool = True,
+        timeout: Optional[float] = None,
+        maxsize: Optional[int] = 1024
+    ) -> str:
         """Receive a message from the remote node."""
         self._logger.debug("Receiving msg")
         self._app_socket.setblocking(block)
@@ -64,7 +69,12 @@ class Socket(_Socket):
         self._logger.debug("Msg '%s' received", msg)
         return msg
 
-    def recv_structured(self, block=True, maxsize=1024):
+    def recv_structured(
+        self,
+        block: bool = True,
+        timeout: Optional[float] = None,
+        maxsize: Optional[int] = 1024,
+    ) -> StructuredMessage:
         self._logger.debug("Receiving structured msg")
         self._app_socket.setblocking(block)
         raw_msg = self._app_socket.recv(maxsize)
@@ -74,31 +84,36 @@ class Socket(_Socket):
         self._logger.debug("Msg '%s' received", msg)
         return msg
 
-    def recv_silent(self):
+    def recv_silent(
+        self,
+        block: bool = True,
+        timeout: Optional[float] = None,
+        maxsize: Optional[int] = None,
+    ) -> str:
         return self.recv()
 
     @staticmethod
-    def _serialize_msg(msg):
+    def _serialize_msg(msg: str):
         return msg.encode('utf-8')
 
     @staticmethod
-    def _deserialize_msg(raw_msg):
+    def _deserialize_msg(raw_msg: bytes):
         return raw_msg.decode('utf-8')
 
     @staticmethod
-    def _serialize_structured_msg(msg):
-        return pickle.dumps(msg)
+    def _serialize_structured_msg(msg: StructuredMessage):
+        return dill.dumps(msg)
 
-    @ staticmethod
-    def _deserialize_structured_msg(raw_msg):
-        return pickle.loads(raw_msg)
+    @staticmethod
+    def _deserialize_structured_msg(raw_msg: bytes) -> StructuredMessage:
+        return dill.loads(raw_msg)
 
-    @ property
-    def is_server(self):
+    @property
+    def is_server(self) -> bool:
         # Server will always be the "first"
         return self._node_name < self._remote_node_name
 
-    def _connect(self):
+    def _connect(self, timeout: Optional[int] = None) -> socket.socket:
         if self.is_server:
             server_name = self._node_name
         else:
@@ -122,7 +137,7 @@ class Socket(_Socket):
                     break
             app_socket.listen(1)
             conn, _ = app_socket.accept()
-            self._app_socket = conn
+            connected_socket = conn
         else:
             self._logger.debug("Trying to open application socket as client")
             while True:
@@ -136,18 +151,19 @@ class Socket(_Socket):
                     time.sleep(self.RETRY_TIME)
                 else:
                     break
-            self._app_socket = app_socket
+            connected_socket = app_socket
 
         self._logger.debug("Application socket opened")
+        return connected_socket
 
     def _get_addr_info(self, name):
         app_net = self._get_app_net_config()
-        remote_host = app_net.hostDict.get(name)
+        remote_host: Host = app_net.hostDict.get(name)
         if remote_host is None:
             raise ValueError(f"Host name '{name}' is not in the app network")
         return remote_host.addr
 
-    def _get_app_net_config(self):
+    def _get_app_net_config(self) -> SocketsConfig:
         network_config_file = simulaqron_settings.network_config_file
         app_net = SocketsConfig(network_config_file, network_name=self._network_name, config_type="app")
         return app_net
