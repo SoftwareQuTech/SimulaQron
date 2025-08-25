@@ -33,7 +33,8 @@ class Socket(_Socket):
         self._network_name = network_name
 
         self._logger = get_netqasm_logger(f"{self.__class__.__name__}({app_name} <-> {remote_app_name})")
-        self._app_socket: socket.socket = self._connect(timeout=timeout)
+        self._timeout = timeout
+        self._app_socket: socket.socket = self._connect()
 
     def __del__(self):
         if self._app_socket:
@@ -53,6 +54,19 @@ class Socket(_Socket):
     def send_silent(self, msg: str):
         self.send(msg)
 
+    def _base_recv(self, block: bool, timeout: float, maxsize: int) -> bytes:
+        if block:
+            self._app_socket.setblocking(block)
+
+        old_timeout = self._app_socket.gettimeout()
+        self._app_socket.settimeout(timeout)
+        raw_msg = self._app_socket.recv(maxsize)
+        self._app_socket.settimeout(old_timeout)
+
+        if not block and not raw_msg:
+            raise RuntimeError("No message to receive (not blocking)")
+        return raw_msg
+
     def recv(
         self,
         block: bool = True,
@@ -61,10 +75,7 @@ class Socket(_Socket):
     ) -> str:
         """Receive a message from the remote node."""
         self._logger.debug("Receiving msg")
-        self._app_socket.setblocking(block)
-        raw_msg = self._app_socket.recv(maxsize)
-        if not block and not raw_msg:
-            raise RuntimeError("No message to receive (not blocking)")
+        raw_msg = self._base_recv(block, timeout, maxsize)
         msg = self._deserialize_msg(raw_msg=raw_msg)
         self._logger.debug("Msg '%s' received", msg)
         return msg
@@ -76,10 +87,7 @@ class Socket(_Socket):
         maxsize: Optional[int] = 1024,
     ) -> StructuredMessage:
         self._logger.debug("Receiving structured msg")
-        self._app_socket.setblocking(block)
-        raw_msg = self._app_socket.recv(maxsize)
-        if not block and not raw_msg:
-            raise RuntimeError("No message to receive (not blocking)")
+        raw_msg = self._base_recv(block, timeout, maxsize)
         msg = self._deserialize_structured_msg(raw_msg=raw_msg)
         self._logger.debug("Msg '%s' received", msg)
         return msg
@@ -113,7 +121,7 @@ class Socket(_Socket):
         # Server will always be the "first"
         return self._node_name < self._remote_node_name
 
-    def _connect(self, timeout: Optional[int] = None) -> socket.socket:
+    def _connect(self) -> socket.socket:
         if self.is_server:
             server_name = self._node_name
         else:
@@ -136,12 +144,14 @@ class Socket(_Socket):
                 else:
                     break
             app_socket.listen(1)
+            app_socket.settimeout(self._timeout)
             conn, _ = app_socket.accept()
             connected_socket = conn
         else:
             self._logger.debug("Trying to open application socket as client")
             while True:
                 try:
+                    app_socket.settimeout(self._timeout)
                     app_socket.connect(addr[4])
                 except ConnectionRefusedError:
                     self._logger.debug(
