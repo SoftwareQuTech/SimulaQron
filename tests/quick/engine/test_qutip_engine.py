@@ -34,7 +34,7 @@ from simulaqron.settings import SimBackend
 
 if has_module.main(SimBackend.QUTIP.value):
 
-    from simulaqron.virtual_node.qutip_simulator import qutipEngine
+    from simulaqron.virtual_node.qutip_simulator import QutipEngine
 
     _has_module = True
 
@@ -54,8 +54,8 @@ def if_has_module(test):
 class TestQutipEngine(unittest.TestCase):
     @if_has_module
     def test_tracing(self):
-        se = qutipEngine("alice", 0, 10)
-        se2 = qutipEngine("Alice", 0, 10)
+        se = QutipEngine("alice", 0, 10)
+        se2 = QutipEngine("Alice", 0, 10)
 
         se.add_fresh_qubit()
         se.add_fresh_qubit()
@@ -77,7 +77,7 @@ class TestQutipEngine(unittest.TestCase):
 
     @if_has_module
     def test_gates(self):
-        se = qutipEngine("alice", 0, 10)
+        se = QutipEngine("alice", 0, 10)
         se.add_fresh_qubit()
         savedQubit = se.qubitReg
 
@@ -90,7 +90,7 @@ class TestQutipEngine(unittest.TestCase):
 
     @if_has_module
     def test_measure(self):
-        se = qutipEngine("alice", 0)
+        se = QutipEngine("alice", 0)
 
         se.add_fresh_qubit()
         outcome = se.measure_qubit(0)

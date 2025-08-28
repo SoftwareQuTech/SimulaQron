@@ -30,6 +30,8 @@
 import time
 import random
 import multiprocessing as mp
+from typing import List
+
 import networkx as nx
 from timeit import default_timer as timer
 
@@ -72,7 +74,7 @@ class Network:
         else:
             self.name = name
 
-        self.processes = []
+        self.processes: List[mp.Process] = []
         self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
 
         if network_config_file is None:

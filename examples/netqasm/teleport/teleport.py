@@ -14,6 +14,7 @@ def run_alice():
     with NetQASMConnection("Alice", epr_sockets=[epr_socket]) as alice:
         # Create a qubit
         q = Qubit(alice)
+        alice.flush()
         q.H()
 
         # Create entanglement

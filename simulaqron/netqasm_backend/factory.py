@@ -27,6 +27,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
+from typing import Type
 
 from twisted.internet import reactor
 from twisted.internet.defer import DeferredLock, inlineCallbacks
@@ -36,6 +37,8 @@ from twisted.internet.task import deferLater
 from netqasm.logging.glob import get_netqasm_logger
 from netqasm.backend.messages import MessageHeader, ErrorMessage, ErrorCode, deserialize_host_msg
 
+from simulaqron.general.host_config import SocketsConfig, Host
+from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
 from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 
@@ -52,7 +55,7 @@ class NetQASMProtocol(Protocol):
     # (host_app_id,remote_node,remote_app_id)
     _next_ent_id = {}
 
-    def __init__(self, factory):
+    def __init__(self, factory: "NetQASMFactory"):
 
         # NetQASM Factory, including our connection to the SimulaQron backend
         self.factory = factory
@@ -160,7 +163,14 @@ class NetQASMProtocol(Protocol):
 
 
 class NetQASMFactory(Factory):
-    def __init__(self, host, name, qnodeos_net, backend, network_name="default"):
+    def __init__(
+            self,
+            host: Host,
+            name: str,
+            qnodeos_net: SocketsConfig,
+            backend: Type[SubroutineHandler],
+            network_name: str = "default"
+    ):
         """
         Initialize NetQASM Factory.
 

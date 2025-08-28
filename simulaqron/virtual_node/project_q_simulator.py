@@ -33,10 +33,10 @@ except ImportError:
     raise RuntimeError("If you want to use the projectq backend you need to install the python package 'projectq'")
 import numpy as np
 
-from simulaqron.virtual_node.basics import quantumEngine, quantumError, noQubitError
+from simulaqron.virtual_node.basics import QuantumEngine, QuantumError, NoQubitError
 
 
-class projectQEngine(quantumEngine):
+class ProjectQEngine(QuantumEngine):
     """
     Basic quantum engine which uses ProjectQ.
 
@@ -44,7 +44,7 @@ class projectQEngine(quantumEngine):
         maxQubits:	maximum number of qubits this engine will support.
     """
 
-    def __init__(self, node, num, maxQubits=10):
+    def __init__(self, node: str, num: int, maxQubits: int = 10):
         """
         Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.
         """
@@ -67,13 +67,13 @@ class projectQEngine(quantumEngine):
             for _ in range(self.activeQubits):
                 self.measure_qubit(0)
 
-    def add_fresh_qubit(self):
+    def add_fresh_qubit(self) -> int:
         """
         Add a new qubit initialized in the \|0\> state.
         """
         # Check if we are still allowed to add qubits
         if self.activeQubits >= self.maxQubits:
-            raise noQubitError("No more qubits available in register.")
+            raise NoQubitError("No more qubits available in register.")
 
         # Prepare a clean qubit state in |0>
         qubit = self.eng.allocate_qubit()[0]
@@ -93,7 +93,7 @@ class projectQEngine(quantumEngine):
 
         norm = np.dot(np.array(newQubit), np.array(newQubit).conj())
         if not norm <= 1:
-            raise quantumError(f"State {newQubit} is not normalized.")
+            raise QuantumError(f"State {newQubit} is not normalized.")
 
         # Create a fresh qubit
         num = self.add_fresh_qubit()
@@ -108,7 +108,7 @@ class projectQEngine(quantumEngine):
         Removes the qubit with the desired number qubitNum
         """
         if (qubitNum + 1) > self.activeQubits:
-            raise quantumError("No such qubit to remove")
+            raise QuantumError("No such qubit to remove")
 
         self.measure_qubit(qubitNum)
 
@@ -220,7 +220,7 @@ class projectQEngine(quantumEngine):
         """
 
         if (qubitNum + 1) > self.activeQubits:
-            raise quantumError("No such qubit to apply a single qubit gate to")
+            raise QuantumError("No such qubit to apply a single qubit gate to")
 
         gate | self.qubitReg[qubitNum]
 
@@ -234,13 +234,13 @@ class projectQEngine(quantumEngine):
         qubit2		the second qubit
         """
         if (qubit1 + 1) > self.activeQubits:
-            raise quantumError("No such qubit to act as a control qubit")
+            raise QuantumError("No such qubit to act as a control qubit")
 
         if (qubit2 + 1) > self.activeQubits:
-            raise quantumError("No such qubit to act as a target qubit")
+            raise QuantumError("No such qubit to act as a target qubit")
 
         if qubit1 == qubit2:
-            raise quantumError("Control and target are equal")
+            raise QuantumError("Control and target are equal")
 
         gate | (self.qubitReg[qubit1], self.qubitReg[qubit2])
 
@@ -255,7 +255,7 @@ class projectQEngine(quantumEngine):
 
         # Check we have such a qubit...
         if (qubitNum + 1) > self.activeQubits:
-            raise quantumError("No such qubit to be measured.")
+            raise QuantumError("No such qubit to be measured.")
 
         pQ.ops.Measure | self.qubitReg[qubitNum]
 
@@ -295,7 +295,7 @@ class projectQEngine(quantumEngine):
         # Check whether there is space
         newNum = self.activeQubits + other.activeQubits
         if newNum > self.maxQubits:
-            raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
+            raise QuantumError("Cannot merge: qubits exceed the maximum available.\n")
 
         # Check whether there are in fact qubits to tensor up....
         if self.activeQubits == 0:
@@ -318,7 +318,7 @@ class projectQEngine(quantumEngine):
         # Check whether there is space
         newNum = self.activeQubits + activeQ
         if newNum > self.maxQubits:
-            raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
+            raise QuantumError("Cannot merge: qubits exceed the maximum available.\n")
 
         if activeQ > 0:
             # Unpack the ordering of qubits and the real and imaginary part

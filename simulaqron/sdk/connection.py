@@ -1,6 +1,7 @@
 import socket
 import time
-from typing import Type
+from threading import Thread
+from typing import Type, Optional, Callable, List, Tuple
 
 from netqasm.backend.messages import (ErrorMessage, MessageHeader,
                                       MsgDoneMessage, ReturnArrayMessage,
@@ -8,13 +9,17 @@ from netqasm.backend.messages import (ErrorMessage, MessageHeader,
 from netqasm.lang.ir import GenericInstr
 from netqasm.lang.operand import Address, Register
 from netqasm.logging.glob import get_netqasm_logger
+from netqasm.sdk import EPRSocket
+from netqasm.sdk.config import LogConfig
 from netqasm.sdk.connection import BaseNetQASMConnection
 from netqasm.sdk.network import NetworkInfo
 from netqasm.sdk.shared_memory import SharedMemoryManager
+from netqasm.sdk.transpile import SubroutineTranspiler
+
 from simulaqron.general import SimUnsupportedError
 from simulaqron.general.host_config import (SocketsConfig,
                                             get_node_id_from_net_config)
-from simulaqron.settings import SimBackend, simulaqron_settings
+from simulaqron.settings import simulaqron_settings
 
 logger = get_netqasm_logger("SimulaQronConnection")
 
@@ -25,15 +30,15 @@ class SimulaQronConnection(BaseNetQASMConnection):
 
     def __init__(
         self,
-        app_name,
-        app_id=None,
-        max_qubits=5,
-        log_config=None,
-        epr_sockets=None,
-        compiler=None,
+        app_name: str,
+        app_id: Optional[int] = None,
+        max_qubits: int = 5,
+        log_config: Optional[LogConfig] = None,
+        epr_sockets: Optional[List[EPRSocket]] = None,
+        compiler: Optional[Type[SubroutineTranspiler]] = None,
         socket_address=None,
-        conn_retry_time=0.1,
-        network_name=None,
+        conn_retry_time: float = 0.1,
+        network_name: Optional[str] = None,
     ):
         super().__init__(
             app_name=app_name,
@@ -75,9 +80,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
 
     @staticmethod
     def try_connection(
-        name,
-        socket_address=None,
-        network_name=None,
+        name: str,
+        socket_address: Optional[Tuple[str, int]] = None,
+        network_name: str = None,
     ):
         # NOTE using retry_time=None causes an error to be raised of the connection cannot
         # be established, which can be used to check if the connection is available
@@ -91,12 +96,12 @@ class SimulaQronConnection(BaseNetQASMConnection):
 
     @staticmethod
     def _create_socket(
-        name,
-        socket_address=None,
-        network_name=None,
-        retry_time=0.1,
-    ):
-        # Get network configuraton and addresses
+        name: str,
+        socket_address: Optional[Tuple[str, int]] = None,
+        network_name: str = None,
+        retry_time: Optional[float] = 0.1,
+    ) -> Tuple[SocketsConfig, socket.socket]:
+        # Get network configuration and addresses
         addr, qnodeos_net = SimulaQronConnection._setup_network_data(
             name=name,
             socket_address=socket_address,
@@ -111,12 +116,11 @@ class SimulaQronConnection(BaseNetQASMConnection):
 
     @staticmethod
     def _setup_network_data(
-        name,
-        socket_address,
-        network_name,
-    ):
-        addr = None
-        qnodeos_net = None
+        name: str,
+        socket_address: Tuple[str, int],
+        network_name: str,
+    ) -> Tuple[tuple[socket.AddressFamily, socket.SocketKind, int, str, tuple[str, int]], Optional[SocketsConfig]]:
+        qnodeos_net: Optional[SocketsConfig] = None
         if socket_address is None:
             qnodeos_net = _get_qnodeos_net_config(network_name=network_name)
 
@@ -131,7 +135,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 # Get IP and port number
             addr = myHost.addr
 
-        if socket_address is not None:
+        else:
             hostname, port = socket_address
             assert isinstance(hostname, str), "hostname should be a string"
             assert isinstance(port, int), "port should be an int"
@@ -143,7 +147,11 @@ class SimulaQronConnection(BaseNetQASMConnection):
         return addr, qnodeos_net
 
     @staticmethod
-    def _setup_socket(name, addr, retry_time=0.1):
+    def _setup_socket(
+            name: str,
+            addr: tuple[socket.AddressFamily, socket.SocketKind, int, str, Tuple[str, int]],
+            retry_time: float = 0.1
+    ) -> socket.socket:
         qnodeos_socket = None
         while True:
             try:
@@ -158,7 +166,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 if retry_time is None or retry_time == 0:
                     raise err
                 logger.debug(
-                    "App %s : Could not connect to  NetQASM server, trying again...",
+                    "App %s : Could not connect to NetQASM server, trying again...",
                     name
                 )
                 time.sleep(retry_time)
@@ -171,7 +179,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 qnodeos_socket.close()
                 raise err
         logger.debug(
-            "App %s : Could not connect to  NetQASM server, trying again...",
+            "App %s : Could not connect to NetQASM server, trying again...",
             name
         )
         return qnodeos_socket
@@ -179,19 +187,32 @@ class SimulaQronConnection(BaseNetQASMConnection):
     def _get_network_info(self) -> Type[NetworkInfo]:
         return SimulaQronNetworkInfo
 
-    def _commit_serialized_message(self, raw_msg, block=True, callback=None):
+    def _commit_serialized_message(
+            self, raw_msg: bytes, block: bool = True, callback: Optional[Callable] = None
+    ):
         """Commit a message to the backend/qnodeos"""
         msg_id = self._get_new_msg_id()
         self._waiting_msg_ids.add(msg_id)
         length = MessageHeader.len() + len(raw_msg)
         msg_hdr = MessageHeader(id=msg_id, length=length)
         self._socket.send(bytes(msg_hdr) + raw_msg)
-        if callback is not None:
-            raise NotImplementedError("Callback not yet implemented")
+        # if callback is not None:
+        #     raise NotImplementedError("Callback not yet implemented")
         if block:
             self._wait_for_done(msg_id=msg_id)
+        else:
+            # Execute callback in a new thread after the subroutine is finished
+            thread = Thread(
+                target=self._wait_for_done,
+                kwargs = {
+                    "msg_id": msg_id,
+                    "callback": callback,
+                }
+            )
+            thread.daemon = True
+            thread.start()
 
-    def _wait_for_done(self, msg_id=None):
+    def _wait_for_done(self, msg_id: Optional[int] = None, callback: Optional[Callable] = None):
         """Waits for a message to be declared done by qnodeos.
         If `msg_id` is None (default), then we wait once for any message to be done.
         The ID of this message is then returned.
@@ -207,6 +228,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 break
             elif msg_id == done_msg_id:
                 # Finished waiting for specified message
+                if callback is not None:
+                    self._logger.debug("Executing callback for message %d", done_msg_id)
+                    callback()
                 break
             else:
                 # Other message done, not the one we're waiting for
@@ -284,30 +308,30 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 f"Cannot update shared memory with entry specified as {entry}"
             )
 
-    def add_single_qubit_commands(self, instr, qubit_id):
-        # NOTE override to check that formalism supports operation
-        if instr in self.NON_STABILIZER_INSTR:
-            if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
-                raise SimUnsupportedError(
-                    f"Cannot perform instr {instr} when using stabilizer formalism"
-                )
-        super().add_single_qubit_commands(instr=instr, qubit_id=qubit_id)
-
-    def add_single_qubit_rotation_commands(
-        self, instruction, virtual_qubit_id, n=0, d=0, angle=None
-    ):
-        # NOTE override to check that formalism supports operation
-        if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
-            raise SimUnsupportedError(
-                "Cannot perform rotations when using stabilizer formalism"
-            )
-        super().add_single_qubit_rotation_commands(
-            instruction=instruction,
-            virtual_qubit_id=virtual_qubit_id,
-            n=n,
-            d=d,
-            angle=angle,
-        )
+    # def add_single_qubit_commands(self, instr, qubit_id):
+    #     # NOTE override to check that formalism supports operation
+    #     if instr in self.NON_STABILIZER_INSTR:
+    #         if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+    #             raise SimUnsupportedError(
+    #                 f"Cannot perform instr {instr} when using stabilizer formalism"
+    #             )
+    #     super().add_single_qubit_commands(instr=instr, qubit_id=qubit_id)
+    #
+    # def add_single_qubit_rotation_commands(
+    #     self, instruction, virtual_qubit_id, n=0, d=0, angle=None
+    # ):
+    #     # NOTE override to check that formalism supports operation
+    #     if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+    #         raise SimUnsupportedError(
+    #             "Cannot perform rotations when using stabilizer formalism"
+    #         )
+    #     super().add_single_qubit_rotation_commands(
+    #         instruction=instruction,
+    #         virtual_qubit_id=virtual_qubit_id,
+    #         n=n,
+    #         d=d,
+    #         angle=angle,
+    #     )
 
     def _is_done(self, msg_id):
         return msg_id in self._done_msg_ids
@@ -318,13 +342,11 @@ class SimulaQronConnection(BaseNetQASMConnection):
         return msg_id
 
 
-def _get_qnodeos_net_config(network_name):
+def _get_qnodeos_net_config(network_name: str) -> SocketsConfig:
     network_config_file = simulaqron_settings.network_config_file
-    qnodeos_net = SocketsConfig(
+    return SocketsConfig(
         network_config_file, network_name=network_name, config_type="qnodeos"
     )
-
-    return qnodeos_net
 
 
 class SimulaQronNetworkInfo(NetworkInfo):

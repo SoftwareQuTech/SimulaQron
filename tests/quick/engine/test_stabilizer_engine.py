@@ -1,20 +1,20 @@
 import unittest
 import numpy as np
 
-from simulaqron.virtual_node.stabilizer_simulator import stabilizerEngine
-from simulaqron.virtual_node.basics import noQubitError, quantumError
+from simulaqron.virtual_node.stabilizer_simulator import StabilizerEngine
+from simulaqron.virtual_node.basics import NoQubitError, QuantumError
 from simulaqron.toolbox.stabilizer_states import StabilizerState
 from simulaqron.general import SimUnsupportedError
 
 
 class TestStabilizerEngine_init(unittest.TestCase):
     def test_init(self):
-        eng = stabilizerEngine("Alice", 0)
+        eng = StabilizerEngine("Alice", 0)
         self.assertEqual(eng.maxQubits, 10)
         self.assertEqual(eng.activeQubits, 0)
         self.assertEqual(len(eng.qubitReg), 0)
 
-        eng = stabilizerEngine("Alice", 0, 5)
+        eng = StabilizerEngine("Alice", 0, 5)
         self.assertEqual(eng.maxQubits, 5)
         self.assertEqual(eng.activeQubits, 0)
         self.assertEqual(len(eng.qubitReg), 0)
@@ -22,7 +22,7 @@ class TestStabilizerEngine_init(unittest.TestCase):
 
 class TestStabilizerEngine(unittest.TestCase):
     def setUp(self):
-        self.eng = stabilizerEngine("Alice", 0)
+        self.eng = StabilizerEngine("Alice", 0)
 
     def test_add_fresh_qubit(self):
         num = self.eng.add_fresh_qubit()
@@ -33,7 +33,7 @@ class TestStabilizerEngine(unittest.TestCase):
     def test_add_to_many_fresh_qubits(self):
         for _ in range(10):
             self.eng.add_fresh_qubit()
-        with self.assertRaises(noQubitError):
+        with self.assertRaises(NoQubitError):
             self.eng.add_fresh_qubit()
 
     def test_add_qubit(self):
@@ -59,7 +59,7 @@ class TestStabilizerEngine(unittest.TestCase):
         self.eng.remove_qubit(num)
         self.assertEqual(self.eng.activeQubits, 0)
         self.assertEqual(len(self.eng.qubitReg), 0)
-        with self.assertRaises(quantumError):
+        with self.assertRaises(QuantumError):
             self.eng.remove_qubit(num)
 
     def test_get_register_RI(self):
@@ -152,7 +152,7 @@ class TestStabilizerEngine(unittest.TestCase):
         self.assertEqual(self.eng.activeQubits, 1)
 
     def test_absorb_both_empty(self):
-        eng2 = stabilizerEngine("Alice", 0)
+        eng2 = StabilizerEngine("Alice", 0)
         self.eng.absorb(eng2)
         self.assertEqual(self.eng.activeQubits, 0)
         self.assertEqual(len(self.eng.qubitReg), 0)
@@ -160,7 +160,7 @@ class TestStabilizerEngine(unittest.TestCase):
     def test_absorb_other_empty(self):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_H(num)
-        eng2 = stabilizerEngine("Alice", 0)
+        eng2 = StabilizerEngine("Alice", 0)
         self.eng.absorb(eng2)
         self.assertEqual(self.eng.activeQubits, 1)
         self.assertEqual(len(self.eng.qubitReg), 1)
@@ -168,7 +168,7 @@ class TestStabilizerEngine(unittest.TestCase):
         self.assertTrue(StabilizerState(state) == StabilizerState([[1, 0]]))
 
     def test_absorb_this_empty_H(self):
-        eng2 = stabilizerEngine("Alice", 0)
+        eng2 = StabilizerEngine("Alice", 0)
         num = eng2.add_fresh_qubit()
         eng2.apply_H(num)
         self.eng.absorb(eng2)
@@ -178,7 +178,7 @@ class TestStabilizerEngine(unittest.TestCase):
         self.assertTrue(StabilizerState(state) == StabilizerState([[1, 0]]))
 
     def test_absorb_this_empty_CNOT(self):
-        eng2 = stabilizerEngine("Alice", 0)
+        eng2 = StabilizerEngine("Alice", 0)
         num1 = eng2.add_fresh_qubit()
         num2 = eng2.add_fresh_qubit()
         eng2.apply_H(num1)
@@ -191,7 +191,7 @@ class TestStabilizerEngine(unittest.TestCase):
 
     def test_absorb_this_empty_GHZ(self):
         n = 5
-        eng2 = stabilizerEngine("Alice", 0)
+        eng2 = StabilizerEngine("Alice", 0)
         qubits = [eng2.add_fresh_qubit() for _ in range(n)]
         eng2.apply_H(qubits[0])
         for i in range(1, n):
@@ -208,7 +208,7 @@ class TestStabilizerEngine(unittest.TestCase):
 
     def test_absorb_2GHZ(self):
         n = 5
-        eng2 = stabilizerEngine("Alice", 0)
+        eng2 = StabilizerEngine("Alice", 0)
         for eng in [self.eng, eng2]:
             qubits = [eng.add_fresh_qubit() for _ in range(n)]
             eng.apply_H(qubits[0])
@@ -219,29 +219,29 @@ class TestStabilizerEngine(unittest.TestCase):
         self.assertEqual(len(self.eng.qubitReg), 2 * n)
 
     def test_absorb_to_big_this_empty(self):
-        eng2 = stabilizerEngine("Alice", 0, 11)
+        eng2 = StabilizerEngine("Alice", 0, 11)
         for _ in range(11):
             eng2.add_fresh_qubit()
-        with self.assertRaises(quantumError):
+        with self.assertRaises(QuantumError):
             self.eng.absorb(eng2)
 
     def test_absorb_to_big(self):
         self.eng.add_fresh_qubit()
-        eng2 = stabilizerEngine("Alice", 0)
+        eng2 = StabilizerEngine("Alice", 0)
         for _ in range(10):
             eng2.add_fresh_qubit()
-        with self.assertRaises(quantumError):
+        with self.assertRaises(QuantumError):
             self.eng.absorb(eng2)
 
     def test_absorb_parts_both_empty(self):
-        eng2 = stabilizerEngine("Alice", 0)
+        eng2 = StabilizerEngine("Alice", 0)
         self.eng.absorb_parts(*eng2.get_register_RI(), eng2.activeQubits)
         self.assertEqual(self.eng.activeQubits, 0)
         self.assertEqual(len(self.eng.qubitReg), 0)
 
     def test_absorb_parts(self):
         self.eng.add_fresh_qubit()
-        eng2 = stabilizerEngine("Alice", 0)
+        eng2 = StabilizerEngine("Alice", 0)
         eng2.add_fresh_qubit()
         self.eng.absorb_parts(*eng2.get_register_RI(), eng2.activeQubits)
         self.assertEqual(self.eng.activeQubits, 2)
@@ -250,7 +250,7 @@ class TestStabilizerEngine(unittest.TestCase):
         self.assertTrue(StabilizerState(state) == StabilizerState([[0, 0, 1, 0], [0, 0, 0, 1]]))
 
     def test_absorb_parts_EPR(self):
-        eng2 = stabilizerEngine("Alice", 0)
+        eng2 = StabilizerEngine("Alice", 0)
         num1 = eng2.add_fresh_qubit()
         num2 = eng2.add_fresh_qubit()
         eng2.apply_H(num1)
@@ -264,7 +264,7 @@ class TestStabilizerEngine(unittest.TestCase):
     def test_absorb_parts_other_empty(self):
         num = self.eng.add_fresh_qubit()
         self.eng.apply_H(num)
-        eng2 = stabilizerEngine("Alice", 0)
+        eng2 = StabilizerEngine("Alice", 0)
         self.eng.absorb_parts(*eng2.get_register_RI(), eng2.activeQubits)
         self.assertEqual(self.eng.activeQubits, 1)
         self.assertEqual(len(self.eng.qubitReg), 1)

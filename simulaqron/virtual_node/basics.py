@@ -31,7 +31,7 @@ import abc
 from twisted.spread import pb
 
 
-class quantumError(pb.Error):
+class QuantumError(pb.Error):
     def __init__(self, value):
         self.value = value
 
@@ -39,11 +39,11 @@ class quantumError(pb.Error):
         return repr(self.value)
 
 
-class noQubitError(quantumError):
+class NoQubitError(QuantumError):
     pass
 
 
-class virtNetError(Exception):
+class VirtNetError(Exception):
     def __init__(self, value):
         self.value = value
 
@@ -51,7 +51,7 @@ class virtNetError(Exception):
         return repr(self.value)
 
 
-class quantumEngine(pb.Referenceable):
+class QuantumEngine(pb.Referenceable, abc.ABC):
     """
     Basic quantum engine. Abstract class meant to be subclassed to implement different simulation backends.
 
@@ -62,7 +62,7 @@ class quantumEngine(pb.Referenceable):
         maxQubits	maximum number of qubits this register supports
     """
 
-    def __init__(self, node, num, maxQubits=10):
+    def __init__(self, node: str, num: int, maxQubits: int = 10):
         """
         Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.
         """
@@ -77,7 +77,7 @@ class quantumEngine(pb.Referenceable):
         self.simNode = node
 
     @abc.abstractmethod
-    def add_fresh_qubit(self):
+    def add_fresh_qubit(self) -> int:
         """
         Add a new qubit initialized in the \|0\> state.
         :return: The qubit number
@@ -86,7 +86,7 @@ class quantumEngine(pb.Referenceable):
         pass
 
     @abc.abstractmethod
-    def add_qubit(self, newQubit):
+    def add_qubit(self, newQubit) -> int:
         """
         Add new qubit in the state described by the density matrix newQubit
         :return: The qubit number
@@ -95,7 +95,7 @@ class quantumEngine(pb.Referenceable):
         pass
 
     @abc.abstractmethod
-    def remove_qubit(self, qubitNum):
+    def remove_qubit(self, qubitNum: int) -> None:
         """
         Removes the qubit with the desired number qubitNum
         :rtype: None

@@ -26,12 +26,12 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-from simulaqron.virtual_node.basics import quantumEngine, quantumError, noQubitError
+from simulaqron.virtual_node.basics import QuantumEngine, QuantumError, NoQubitError
 from simulaqron.toolbox.stabilizer_states import StabilizerState
 from simulaqron.general import SimUnsupportedError
 
 
-class stabilizerEngine(quantumEngine):
+class StabilizerEngine(QuantumEngine):
     """
     Basic quantum engine which uses stabilizer formalism. Thus only Clifford operations can be performed
 
@@ -39,7 +39,7 @@ class stabilizerEngine(quantumEngine):
         maxQubits:	maximum number of qubits this engine will support.
     """
 
-    def __init__(self, node, num, maxQubits=10):
+    def __init__(self, node: str, num: int, maxQubits: int = 10):
         """
         Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.
         """
@@ -52,13 +52,13 @@ class stabilizerEngine(quantumEngine):
     def activeQubits(self):
         return self.qubitReg.num_qubits
 
-    def add_fresh_qubit(self):
+    def add_fresh_qubit(self) -> int:
         """
         Add a new qubit initialized in the \|0\> state.
         """
         # Check if we are still allowed to add qubits
         if self.activeQubits >= self.maxQubits:
-            raise noQubitError("No more qubits available in register.")
+            raise NoQubitError("No more qubits available in register.")
 
         num = self.activeQubits
 
@@ -90,7 +90,7 @@ class stabilizerEngine(quantumEngine):
         Removes the qubit with the desired number qubitNum
         """
         if (qubitNum + 1) > self.activeQubits:
-            raise quantumError("No such qubit to remove")
+            raise QuantumError("No such qubit to remove")
 
         self.measure_qubit(qubitNum)
 
@@ -206,7 +206,7 @@ class stabilizerEngine(quantumEngine):
 
         # Check we have such a qubit...
         if (qubitNum + 1) > self.activeQubits:
-            raise quantumError("No such qubit to be measured.")
+            raise QuantumError("No such qubit to be measured.")
 
         outcome = self.qubitReg.measure(qubitNum, inplace=True)
 
@@ -238,7 +238,7 @@ class stabilizerEngine(quantumEngine):
         # Check whether there is space
         newNum = self.activeQubits + other.activeQubits
         if newNum > self.maxQubits:
-            raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
+            raise QuantumError("Cannot merge: qubits exceed the maximum available.\n")
 
         self.qubitReg = self.qubitReg.tensor_product(other.qubitReg)
 
@@ -254,6 +254,6 @@ class stabilizerEngine(quantumEngine):
         # Check whether there is space
         newNum = self.activeQubits + activeQ
         if newNum > self.maxQubits:
-            raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
+            raise QuantumError("Cannot merge: qubits exceed the maximum available.\n")
 
         self.qubitReg = self.qubitReg.tensor_product(StabilizerState(R))

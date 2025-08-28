@@ -41,7 +41,7 @@ from netqasm.logging.glob import get_netqasm_logger
 from simulaqron import settings
 
 
-class simulatedQubit(pb.Referenceable):
+class SimulatedQubit(pb.Referenceable):
     """
     Simulated qubit object in the specified local simulation engine.
 
