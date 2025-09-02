@@ -1,11 +1,15 @@
+import ctypes
 import socket
 import time
+from enum import Enum
 from threading import Thread
 from typing import Type, Optional, Callable, List, Tuple
 
+import numpy as np
+import netqasm.backend.messages as nmsg
 from netqasm.backend.messages import (ErrorMessage, MessageHeader,
                                       MsgDoneMessage, ReturnArrayMessage,
-                                      ReturnRegMessage, deserialize_return_msg, ErrorCode)
+                                      ReturnRegMessage, deserialize_return_msg, ErrorCode, Message, APP_ID)
 from netqasm.lang.ir import GenericInstr
 from netqasm.lang.operand import Address, Register
 from netqasm.logging.glob import get_netqasm_logger
@@ -196,6 +200,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
         self._waiting_msg_ids.add(msg_id)
         length = MessageHeader.len() + len(raw_msg)
         msg_hdr = MessageHeader(id=msg_id, length=length)
+        print(f"message = '{bytes(msg_hdr) + raw_msg}'")
         self._socket.send(bytes(msg_hdr) + raw_msg)
         # if callback is not None:
         #     raise NotImplementedError("Callback not yet implemented")
@@ -342,6 +347,53 @@ class SimulaQronConnection(BaseNetQASMConnection):
         self._next_msg_id += 1
         return msg_id
 
+    def get_qubit_state(self, app_id: int, qubit_id: int) -> np.array:
+        # Here we craft the special message that signals QNodeOS to
+        # retrieve the state of a qubit.
+        msg = GetQubitStateMessage(app_id=app_id, qubit_id=qubit_id)
+        #print(f"new message = '{bytes(msg)}'")
+        self._commit_message(msg)
+        return np.array([])
+
+
+# Definitions for the new message types
+QUBIT_REGISTRY_NUM = ctypes.c_uint8
+
+
+# "Extend" (by redefining the enum) the Message Type
+class MewMessageType(Enum):
+    INIT_NEW_APP = 0x00
+    OPEN_EPR_SOCKET = 0x01
+    SUBROUTINE = 0x02
+    STOP_APP = 0x03
+    SIGNAL = 0x04
+    GET_QUBIT_STATE = 0xCA
+
+
+# New class for the get qubit state message
+class GetQubitStateMessage(Message):
+    _fields_ = [
+        ("app_id", APP_ID),  # type: ignore
+        ("qubit_id", QUBIT_REGISTRY_NUM),
+    ]
+    TYPE = MewMessageType.GET_QUBIT_STATE
+
+    def __init__(self, app_id: int = 0, qubit_id: int = 0):
+        super().__init__(self.TYPE.value)
+        self.app_id = app_id
+        self.qubit_id = qubit_id
+
+
+# Really dark magic to *replace* the definitions from the netqasm library
+nmsg.MessageType = MewMessageType
+nmsg.MESSAGE_CLASSES = {
+    MewMessageType.INIT_NEW_APP: nmsg.InitNewAppMessage,
+    MewMessageType.OPEN_EPR_SOCKET: nmsg.OpenEPRSocketMessage,
+    MewMessageType.SUBROUTINE: nmsg.SubroutineMessage,
+    MewMessageType.STOP_APP: nmsg.StopAppMessage,
+    MewMessageType.SIGNAL: nmsg.SignalMessage,
+    MewMessageType.GET_QUBIT_STATE: GetQubitStateMessage
+}
 
 def _get_qnodeos_net_config(network_name: str) -> SocketsConfig:
     network_config_file = simulaqron_settings.network_config_file

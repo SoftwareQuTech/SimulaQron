@@ -8,6 +8,7 @@ from netqasm.sdk import Qubit, EPRSocket  # noqa: E402
 
 from simulaqron.run.run import run_applications  # noqa: E402
 
+
 class TestGetQubit:
     @staticmethod
     def peek_local_qubit():
@@ -51,6 +52,7 @@ class TestGetQubit:
             ]
         )
         raw_results = run_applications(apps, use_app_config=False, enable_logging=False)
+        print(raw_results)
 
     def test_get_qubit_state_teleport(self):
         apps = default_app_instance(
@@ -60,4 +62,4 @@ class TestGetQubit:
             ]
         )
         raw_results = run_applications(apps, use_app_config=False, enable_logging=False)
-
+        print(raw_results)
