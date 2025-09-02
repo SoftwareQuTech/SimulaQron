@@ -21,34 +21,37 @@ _RETRY_TIME = 0.1
 _TIMEOUT = 10
 
 
-def init_register(virtRoot, myName, node):
+def init_register(virt_root, my_name: str, node: NetQASMFactory):
     """Retrieves the relevant root objects to talk to such remote connections"""
-    logger.debug("LOCAL %s: All connections set up.", myName)
+    logger.debug("LOCAL %s: Connection to local virtual node successful", my_name)
     # Set the virtual node
-    node.set_virtual_node(virtRoot)
+    node.set_virtual_node(virt_root)
     # Start listening to NetQASM messages
-    setup_netqasm_server(myName, node)
+    setup_netqasm_server(my_name, node)
 
 
-def connect_to_virtNode(myName, netqasm_factory, virtual_network):
-    """Trys to connect to local virtual node.
+def connect_to_virt_node(my_name: str , netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig):
+    """Tries to connect to local virtual node.
 
     If connection is refused, we try again after a set amount of time
     (specified in handle_connection_error)
     """
-    logger.debug("LOCAL %s: Trying to connect to local virtual node.", myName)
-    virtual_node = virtual_network.hostDict[myName]
+    virtual_node = virtual_network.hostDict[my_name]
+    logger.debug(
+        "LOCAL %s: Trying to connect to local virtual node at %s, %d.",
+        my_name, virtual_node.hostname, virtual_node.port
+    )
     factory = pb.PBClientFactory()
     # Connect
     reactor.connectTCP(virtual_node.hostname, virtual_node.port, factory)
-    deferVirtual = factory.getRootObject()
+    defer_virtual_node = factory.getRootObject()
     # If connection succeeds do:
-    deferVirtual.addCallback(init_register, myName, netqasm_factory)
+    defer_virtual_node.addCallback(init_register, my_name, netqasm_factory)
     # If connection fails do:
-    deferVirtual.addErrback(handle_connection_error, myName, netqasm_factory, virtual_network)
+    defer_virtual_node.addErrback(handle_connection_error, my_name, netqasm_factory, virtual_network)
 
 
-def handle_connection_error(reason, myName, netqasm_factory, virtual_network):
+def handle_connection_error(reason, my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig):
     """ Handles errors from trying to connect to local virtual node.
 
     If a ConnectionRefusedError is raised another try will be made after
@@ -57,46 +60,46 @@ def handle_connection_error(reason, myName, netqasm_factory, virtual_network):
     try:
         reason.raiseException()
     except ConnectionRefusedError:
-        logger.debug("LOCAL %s: Could not connect, trying again...", myName)
+        logger.debug("LOCAL %s: Could not connect, trying again...", my_name)
         reactor.callLater(
             simulaqron_settings.conn_retry_time,
-            connect_to_virtNode,
-            myName,
+            connect_to_virt_node,
+            my_name,
             netqasm_factory,
             virtual_network,
         )
     except Exception as e:
         logger.error(
             "LOCAL %s: Critical error when connection to local virtual node: %s",
-            myName,
+            my_name,
             e,
         )
         reactor.stop()
 
 
-def setup_netqasm_server(myName, netqasm_factory):
+def setup_netqasm_server(my_name: str, netqasm_factory: NetQASMFactory):
     """Setup NetQASM server to handle remote on the classical communication network."""
     t_start = timer()
     while timer() - t_start < _TIMEOUT:
         try:
             logger.debug(
-                "LOCAL %s: Starting local classical communication server, port %d.",
-                myName, netqasm_factory.host.port
+                "LOCAL %s: Starting local QNodeOS server, port %d.",
+                my_name, netqasm_factory.host.port
             )
-            myHost = netqasm_factory.host
-            myHost.root = netqasm_factory
-            myHost.factory = netqasm_factory
-            reactor.listenTCP(myHost.port, myHost.factory)
+            my_host = netqasm_factory.host
+            my_host.root = netqasm_factory
+            my_host.factory = netqasm_factory
+            reactor.listenTCP(my_host.port, my_host.factory)
             break
         except CannotListenError:
             logger.error(
                 "LOCAL %s: NetQASM server address (%d) is already in use, trying again.",
-                myName, myHost.port
+                my_name, my_host.port
             )
             time.sleep(_RETRY_TIME)
         except Exception as e:
             logger.error(
-                "LOCAL %s: Critical error when starting NetQASM server: %s", myName, e
+                "LOCAL %s: Critical error when starting NetQASM server: %s", my_name, e
             )
             reactor.stop()
     else:
@@ -107,10 +110,10 @@ def sigterm_handler(_signo, _stack_frame):
     reactor.stop()
 
 
-def main(myName, network_name="default", log_level="WARNING"):
+def main(node_name: str, network_name="default", log_level="WARNING"):
     """Start the indicated backend NetQASM Server"""
     set_log_level(log_level)
-    logger.debug(f"Starting QNodeOS at {myName}")
+    logger.debug("Starting QNodeOS at %s", node_name)
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)
 
@@ -122,27 +125,27 @@ def main(myName, network_name="default", log_level="WARNING"):
     qnodeos_network = SocketsConfig(network_config_file, network_name=network_name, config_type="qnodeos")
 
     # Check if we are in the host-dictionary
-    if myName in qnodeos_network.hostDict:
-        myHost = qnodeos_network.hostDict[myName]
-        logger.debug("Setting up QNodeOS protocol factory for %s (%s)", myName, myHost.addr)
+    if node_name in qnodeos_network.hostDict:
+        node_host_info = qnodeos_network.hostDict[node_name]
+        logger.debug("Setting up QNodeOS protocol factory for %s", node_name)
         netqasm_factory = NetQASMFactory(
-            myHost,
-            myName,
+            node_host_info,
+            node_name,
             qnodeos_network,
             SubroutineHandler,
             network_name=network_name,
         )
     else:
-        logger.error("LOCAL %s: Cannot start classical communication servers.", myName)
+        logger.error("LOCAL %s: Cannot start classical communication servers.", node_name)
         return
 
     # Connect to the local virtual node simulating the "local" qubits
-    logger.debug(f"Connect to virtual node {myName}")
-    connect_to_virtNode(myName, netqasm_factory, virtual_network)
+    logger.debug(f"Connect to virtual node {node_name}")
+    connect_to_virt_node(node_name, netqasm_factory, virtual_network)
 
     # Run reactor
     reactor.run()
-    logger.debug(f"Ending QNodeOS at {myName}")
+    logger.debug(f"Ending QNodeOS at {node_name}")
 
 
 if __name__ == '__main__':

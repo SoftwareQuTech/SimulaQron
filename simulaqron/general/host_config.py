@@ -29,7 +29,7 @@
 
 import socket
 import struct
-from typing import Dict
+from typing import Dict, List
 
 from twisted.spread import pb
 from ipaddress import IPv4Address
@@ -37,42 +37,8 @@ from ipaddress import IPv4Address
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 
 
-def node_id(fam, ip):
-    if fam == socket.AF_INET:
-        return struct.unpack("!L", IPv4Address(ip).packed)[0]
-    else:
-        raise ValueError("No IPv6 yet :(")
-
-
-def node_id_from_addrinfo(addr):
-    fam = addr[0]
-    sockaddr = addr[4]
-    ip = sockaddr[0]
-    return node_id(fam, ip)
-
-
-def get_node_id_from_net_config(net_config, node_name):
-    """
-    NOTE node ID is the index of the node name of a sorted list of all the node names in the network.
-    """
-    if node_name not in net_config.hostDict:
-        raise ValueError(f"node name {node_name} not in host_dict ({net_config.hostDict.keys()})")
-    return list(sorted(net_config.hostDict.keys())).index(node_name)
-
-
-def load_node_names(config_file):
-    """
-    Load list of nodes from Nodes.cfg file
-
-    :param config_file: str
-        pointing to Nodes.cfg file
-    """
-    with open(config_file, 'r') as f:
-        return [line.strip() for line in f.readlines()]
-
-
 class Host(pb.Referenceable):
-    def __init__(self, name, hostname, port):
+    def __init__(self, name: str, hostname: str, port: str | int):
         """
         Initialize the details of the host. For now, we just keep the following:
 
@@ -100,7 +66,7 @@ class Host(pb.Referenceable):
 
 
 class SocketsConfig(pb.Referenceable):
-    def __init__(self, filename, network_name="default", config_type="vnode"):
+    def __init__(self, filename: str, network_name: str = "default", config_type: str = "vnode"):
         """
         Initialize by reading in the configuration file.
 
@@ -113,7 +79,7 @@ class SocketsConfig(pb.Referenceable):
         # Read config file
         self.read_config(filename, network_name=network_name, config_type=config_type)
 
-    def read_config(self, filename, network_name="default", config_type="vnode"):
+    def read_config(self, filename: str, network_name: str = "default", config_type: str = "vnode"):
         """
         Reads the configuration file in which each line has the form: node name, hostname, port number.
         For example:
@@ -144,9 +110,45 @@ class SocketsConfig(pb.Referenceable):
             else:
                 raise ValueError(f"Unknown file type {filename.split(".")[-1]}")
 
-    def print_details(self, name):
+    def print_details(self, name: str):
         """
         Prints the details of the specified node with name.
         """
         host = self.hostDict[name]
         print("Host details of ", name, ": ", host.hostname, ":", host.port)
+
+
+def node_id(fam: socket.AddressFamily, ip: str) -> int:
+    if fam == socket.AF_INET:
+        return struct.unpack("!L", IPv4Address(ip).packed)[0]
+    else:
+        raise ValueError("No IPv6 yet :(")
+
+
+def node_id_from_addrinfo(
+        addr: tuple[socket.AddressFamily, socket.SocketKind, int, str, tuple[str, int]]
+) -> int:
+    fam = addr[0]
+    sockaddr = addr[4]
+    ip = sockaddr[0]
+    return node_id(fam, ip)
+
+
+def get_node_id_from_net_config(net_config: SocketsConfig, node_name: str) -> int:
+    """
+    NOTE node ID is the index of the node name of a sorted list of all the node names in the network.
+    """
+    if node_name not in net_config.hostDict:
+        raise ValueError(f"node name {node_name} not in host_dict ({net_config.hostDict.keys()})")
+    return list(sorted(net_config.hostDict.keys())).index(node_name)
+
+
+def load_node_names(config_file: str) -> List[str]:
+    """
+    Load list of nodes from Nodes.cfg file
+
+    :param config_file: str
+        pointing to Nodes.cfg file
+    """
+    with open(config_file, 'r') as f:
+        return [line.strip() for line in f.readlines()]

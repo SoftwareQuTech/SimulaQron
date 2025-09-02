@@ -45,18 +45,18 @@ def sigterm_handler(name, _signo, _stack_frame):
     reactor.stop()
 
 
-def main(name, network_name="default", log_level="WARNING"):
+def main(name: str, network_name: str = "default", log_level: str = "WARNING"):
     set_log_level(log_level)
     signal.signal(signal.SIGTERM, partial(sigterm_handler, name))
     signal.signal(signal.SIGINT, partial(sigterm_handler, name))
 
     logger.debug("Starting VIRTUAL NODE %s", name)
     if simulaqron_settings.network_config_file is not None:
-        virtualFile = simulaqron_settings.network_config_file
+        virtual_file = simulaqron_settings.network_config_file
     else:
-        virtualFile = simulaqron_settings.vnode_file
-    be = Backend(name, virtualFile, network_name=network_name)
-    be.start(maxQubits=simulaqron_settings.max_qubits, maxRegisters=simulaqron_settings.max_registers)
+        virtual_file = simulaqron_settings.vnode_file
+    be = Backend(name, virtual_file, network_name=network_name)
+    be.start(max_qubits=simulaqron_settings.max_qubits, max_registers=simulaqron_settings.max_registers)
     logger.debug("Ending VIRTUAL NODE %s", name)
 
 

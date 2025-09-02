@@ -49,11 +49,11 @@ from simulaqron.general.errors import *  # noqa: F401, F403
 from simulaqron.settings import simulaqron_settings, SimBackend
 
 if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
-    from simulaqron.virtual_node.qutip_simulator import QutipEngine
+    from simulaqron.virtual_node.qutip_simulator import QutipEngine as QEngine
 elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ.value:
-    from simulaqron.virtual_node.project_q_simulator import ProjectQEngine
+    from simulaqron.virtual_node.project_q_simulator import ProjectQEngine as QEngine
 elif simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
-    from simulaqron.virtual_node.stabilizer_simulator import StabilizerEngine
+    from simulaqron.virtual_node.stabilizer_simulator import StabilizerEngine as QEngine
 else:
     raise QuantumError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
@@ -95,8 +95,8 @@ def call_method(obj, method_name, *args, **kwargs):
 # Backend - starts the local virtual node and connects to the other virtual nodes
 # forming the quantum network
 #
-class Backend(object):
-    def __init__(self, name, virtualFile, network_name="default"):
+class Backend:
+    def __init__(self, name, virtual_file: str, network_name: str = "default"):
         """
         Initialize. This will read the configuration file and populate the name,hostname,port information with the
         information found in the configuration file for the given name.
@@ -105,16 +105,20 @@ class Backend(object):
 
         # Read the configuration file
         try:
-            self.config = SocketsConfig(virtualFile, network_name=network_name, config_type="vnode")
+            self.config = SocketsConfig(virtual_file, network_name=network_name, config_type="vnode")
             self.myID = self.config.hostDict[name]
         except KeyError as e:
-            self._logger.error("No such name in the configuration file %s: %s", virtualFile, e)
+            self._logger.error("No such name in the configuration file %s: %s", virtual_file, e)
             raise e
         except Exception as e:
-            self._logger.error("Error reading the configuration file %s: %s", virtualFile, e)
+            self._logger.error("Error reading the configuration file %s: %s", virtual_file, e)
             raise e
 
-    def start(self, maxQubits=simulaqron_settings.max_qubits, maxRegisters=simulaqron_settings.max_registers):
+    def start(
+            self,
+            max_qubits: int = simulaqron_settings.max_qubits,
+            max_registers: int = simulaqron_settings.max_registers
+    ):
         """
         Start listening to requests from other nodes.
 
@@ -124,7 +128,7 @@ class Backend(object):
 
         try:
             self._logger.debug("Starting on port %d", self.myID.port)
-            node = VirtualNode(self.myID, self.config, maxQubits=maxQubits, maxRegisters=maxRegisters)
+            node = VirtualNode(self.myID, self.config, maxQubits=max_qubits, maxRegisters=max_registers)
             reactor.listenTCP(self.myID.port, pb.PBServerFactory(node))
 
             self._logger.debug("Running reactor")
@@ -407,14 +411,7 @@ class VirtualNode(pb.Root):
 
         self.numRegs = self.numRegs + 1
         regNum = self.get_new_reg_num()
-        if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
-            newReg = QutipEngine(self.myID, regNum, maxQubits)
-        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ.value:
-            newReg = ProjectQEngine(self.myID, regNum, maxQubits)
-        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
-            newReg = StabilizerEngine(self.myID, regNum, maxQubits)
-        else:
-            raise QuantumError(f"Unknown backend {simulaqron_settings.sim_backend}")
+        newReg = QEngine(self.myID, regNum, maxQubits)
 
         self.registers[regNum] = newReg
 

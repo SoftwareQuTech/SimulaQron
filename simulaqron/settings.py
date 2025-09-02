@@ -34,6 +34,7 @@ import os
 import json
 import logging
 from enum import Enum
+from typing import Dict, Any
 
 from simulaqron.toolbox import get_simulaqron_path
 
@@ -55,7 +56,7 @@ class Config:
     _user_settings_file = os.path.join(os.path.expanduser("~"), ".simulaqron.json")
 
     # Dictionary for settings
-    _config = {}
+    _config: Dict[str, Any] = {}
 
     _default_config = {
         "_read_user": True,
@@ -87,7 +88,7 @@ class Config:
     def __init__(self):
         self.update_settings()
 
-    def update_settings(self, default=False):
+    def update_settings(self, default: bool = False):
         # Update with default settings
         self._config.update(self._default_config)
 
@@ -115,14 +116,14 @@ class Config:
         with open(self._internal_settings_file, 'w') as f:
             json.dump(self._config, f, indent=4)
 
-    def _get_setting(self, setting):
+    def _get_setting(self, setting: str) -> Any:
         try:
             value = self._config[setting]
         except KeyError:
             raise KeyError(f"Cannot find the setting {setting} in the file {self._internal_settings_file}")
         return value
 
-    def _set_setting(self, setting, value):
+    def _set_setting(self, setting: str, value: Any):
         self._config[setting] = value
         self._write()
 
@@ -132,17 +133,17 @@ class Config:
 
     @property
     @Decorator.get_setting
-    def _read_user(self):
+    def _read_user(self) -> bool:
         pass
 
     @_read_user.setter
     @Decorator.set_setting
-    def _read_user(self, _read_user):
+    def _read_user(self, _read_user: bool):
         pass
 
     @property
     @Decorator.get_setting
-    def sim_backend(self):
+    def sim_backend(self) -> str:
         pass
 
     @sim_backend.setter
@@ -152,92 +153,92 @@ class Config:
 
     @property
     @Decorator.get_setting
-    def max_qubits(self):
+    def max_qubits(self) -> int:
         pass
 
     @max_qubits.setter
     @Decorator.set_setting
-    def max_qubits(self, max_qubits):
+    def max_qubits(self, max_qubits: int):
         pass
 
     @property
     @Decorator.get_setting
-    def max_registers(self):
+    def max_registers(self) -> int:
         pass
 
     @max_registers.setter
     @Decorator.set_setting
-    def max_registers(self, max_registers):
+    def max_registers(self, max_registers: int):
         pass
 
     @property
     @Decorator.get_setting
-    def conn_retry_time(self):
+    def conn_retry_time(self: float):
         pass
 
     @conn_retry_time.setter
     @Decorator.set_setting
-    def conn_retry_time(self, conn_retry_time):
+    def conn_retry_time(self, conn_retry_time: float):
         pass
 
     @property
     @Decorator.get_setting
-    def recv_timeout(self):
+    def recv_timeout(self) -> int:
         pass
 
     @recv_timeout.setter
     @Decorator.set_setting
-    def recv_timeout(self, recv_timeout):
+    def recv_timeout(self, recv_timeout: int):
         pass
 
     @property
     @Decorator.get_setting
-    def recv_retry_time(self):
+    def recv_retry_time(self) -> float:
         pass
 
     @recv_retry_time.setter
     @Decorator.set_setting
-    def recv_retry_time(self, recv_retry_time):
+    def recv_retry_time(self, recv_retry_time: float):
         pass
 
     @property
     @Decorator.get_setting
-    def log_level(self):
+    def log_level(self) -> int:
         pass
 
     @log_level.setter
     @Decorator.set_setting
-    def log_level(self, log_level):
+    def log_level(self, log_level: int):
         pass
 
     @property
     @Decorator.get_setting
-    def network_config_file(self):
+    def network_config_file(self) -> str:
         pass
 
     @network_config_file.setter
     @Decorator.set_setting
-    def network_config_file(self, app_file):
+    def network_config_file(self, app_file: str):
         pass
 
     @property
     @Decorator.get_setting
-    def noisy_qubits(self):
+    def noisy_qubits(self) -> bool:
         pass
 
     @noisy_qubits.setter
     @Decorator.set_setting
-    def noisy_qubits(self, noisy_qubits):
+    def noisy_qubits(self, noisy_qubits_: bool):
         pass
 
     @property
     @Decorator.get_setting
-    def t1(self):
+    def t1(self) -> float:
         pass
 
     @t1.setter
     @Decorator.set_setting
-    def t1(self, t1):
+    def t1(self, t1: float):
         pass
 
 

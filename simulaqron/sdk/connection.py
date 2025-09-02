@@ -156,7 +156,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
         while True:
             try:
                 logger.debug(
-                    "App %s : Trying to connect to NetQASM server (at %s)", name, addr[-1]
+                    "App %s : Trying to connect to NetQASM server (at %s)", name, addr
                 )
 
                 qnodeos_socket = socket.socket(addr[0], addr[1], addr[2])
@@ -179,8 +179,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 qnodeos_socket.close()
                 raise err
         logger.debug(
-            "App %s : Could not connect to NetQASM server, trying again...",
-            name
+            "App %s : Connected to NetQASM server at %s",
+            name,
+            addr
         )
         return qnodeos_socket
 
@@ -204,7 +205,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
             # Execute callback in a new thread after the subroutine is finished
             thread = Thread(
                 target=self._wait_for_done,
-                kwargs = {
+                kwargs={
                     "msg_id": msg_id,
                     "callback": callback,
                 }
@@ -247,7 +248,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
             self.buf = data
         self._logger.debug("Got new data %s on socket to qnodeos", data)
 
-    def _handle_reply(self):
+    def _handle_reply(self) -> int:
         """Handle all next replies until a done message and return the msg ID for the done"""
         # Try to read next message from the buffer otherwise read some more and try again
         try:
@@ -333,10 +334,10 @@ class SimulaQronConnection(BaseNetQASMConnection):
     #         angle=angle,
     #     )
 
-    def _is_done(self, msg_id):
+    def _is_done(self, msg_id) -> bool:
         return msg_id in self._done_msg_ids
 
-    def _get_new_msg_id(self):
+    def _get_new_msg_id(self) -> int:
         msg_id = self._next_msg_id
         self._next_msg_id += 1
         return msg_id
@@ -351,14 +352,14 @@ def _get_qnodeos_net_config(network_name: str) -> SocketsConfig:
 
 class SimulaQronNetworkInfo(NetworkInfo):
     @classmethod
-    def _get_node_id(cls, node_name):
+    def _get_node_id(cls, node_name: str) -> int:
         """Returns the node id for the node with the given name"""
         # TODO always use network name "default"?
         _qnodeos_net = _get_qnodeos_net_config(network_name="default")
         return get_node_id_from_net_config(_qnodeos_net, node_name)
 
     @classmethod
-    def _get_node_name(cls, node_id):
+    def _get_node_name(cls, node_id: int) -> str:
         """Returns the node name for the node with the given ID"""
         # TODO always use network name "default"?
         _qnodeos_net = _get_qnodeos_net_config(network_name="default")
@@ -368,13 +369,13 @@ class SimulaQronNetworkInfo(NetworkInfo):
         raise KeyError("Unknown node ID {node_id}")
 
     @classmethod
-    def get_node_id_for_app(cls, app_name):
+    def get_node_id_for_app(cls, app_name: str) -> int:
         """Returns the node id for the app with the given name"""
         # NOTE app_name and node_name are for now the same in simulaqron
         return cls._get_node_id(node_name=app_name)
 
     @classmethod
-    def get_node_name_for_app(cls, app_name):
+    def get_node_name_for_app(cls, app_name: str) -> str:
         """Returns the node name for the app with the given name"""
         # NOTE app_name and node_name are for now the same in simulaqron
         return app_name
