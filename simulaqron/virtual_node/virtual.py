@@ -42,7 +42,7 @@ from netqasm.logging.glob import get_netqasm_logger
 
 from simulaqron.virtual_node.basics import QuantumError, NoQubitError, VirtNetError
 from simulaqron.virtual_node.quantum import SimulatedQubit
-from simulaqron.general.host_config import SocketsConfig
+from simulaqron.general.host_config import SocketsConfig, Host
 # We need this import (despite unused) to reraise local errors
 # We then supress the flake8 errors associated with that
 from simulaqron.general.errors import *  # noqa: F401, F403
@@ -96,7 +96,7 @@ def call_method(obj, method_name, *args, **kwargs):
 # forming the quantum network
 #
 class Backend:
-    def __init__(self, name, virtual_file: str, network_name: str = "default"):
+    def __init__(self, name: str, virtual_file: str, network_name: str = "default"):
         """
         Initialize. This will read the configuration file and populate the name,hostname,port information with the
         information found in the configuration file for the given name.
@@ -106,7 +106,7 @@ class Backend:
         # Read the configuration file
         try:
             self.config = SocketsConfig(virtual_file, network_name=network_name, config_type="vnode")
-            self.myID = self.config.hostDict[name]
+            self.myID: Host = self.config.hostDict[name]
         except KeyError as e:
             self._logger.error("No such name in the configuration file %s: %s", virtual_file, e)
             raise e
@@ -149,8 +149,9 @@ class Backend:
 
 
 class VirtualNode(pb.Root):
-    def __init__(self, ID, config, maxQubits=simulaqron_settings.max_qubits,
-                 maxRegisters=simulaqron_settings.max_registers):
+    def __init__(self, ID: Host, config: SocketsConfig,
+                 maxQubits: int = simulaqron_settings.max_qubits,
+                 maxRegisters: int = simulaqron_settings.max_registers):
         """
         Initialize storing also our own name, hostname and port.
 
@@ -1232,7 +1233,7 @@ class VirtualNode(pb.Root):
 
 
 class VirtualQubit(pb.Referenceable):
-    def __init__(self, virtNode, simNode, simQubit, num):
+    def __init__(self, virtNode: Host, simNode: Host, simQubit: SimulatedQubit, num: int):
         """
         Creates a virtual qubit object simulated in the specified simulation register backend
 

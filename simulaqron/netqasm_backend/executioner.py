@@ -4,6 +4,7 @@ import traceback
 from collections import defaultdict
 from enum import Enum
 from functools import partial
+from typing import Any, Generator
 
 from netqasm.backend.executor import EprCmdData, Executor
 from netqasm.backend.messages import (ErrorCode, ErrorMessage,
@@ -21,7 +22,7 @@ from simulaqron.general.host_config import get_node_id_from_net_config
 from simulaqron.settings import simulaqron_settings
 from simulaqron.virtual_node.virtual import call_method
 from twisted.internet import reactor, task
-from twisted.internet.defer import inlineCallbacks
+from twisted.internet.defer import inlineCallbacks, Deferred
 
 
 class UnknownQubitError(RuntimeError):
@@ -87,7 +88,7 @@ class VanillaSimulaQronExecutioner(Executor):
         self._network_stack = NetworkStack(self)
 
     @property
-    def factory(self):
+    def factory(self) -> "NetQASMFactory":
         return self._factory
 
     @property
@@ -112,7 +113,7 @@ class VanillaSimulaQronExecutioner(Executor):
     def add_return_msg_func(self, func):
         self._return_msg_func = func
 
-    def add_factory(self, factory):
+    def add_factory(self, factory: "NetQASMFactory"):
         self._factory = factory
 
     def _handle_command_exception(self, exc, prog_counter, traceback_str):
@@ -818,6 +819,17 @@ class VanillaSimulaQronExecutioner(Executor):
         self._logger.debug("clearing phys qubit %s", physical_address)
         yield self.cmd_measure(qubit_id=physical_address, inplace=False)
         self.remove_qubit_id(qubit_id=physical_address)
+
+    @inlineCallbacks
+    def get_qubit_state(self, qubit_id: int) -> Generator[Deferred | Any, Any, Any]:
+        self._logger.debug("Retriving the state of qubit id %d", qubit_id)
+        virt_qubit = self.get_virt_qubit(qubit_id=qubit_id)
+        qubit = call_method(virt_qubit, "get_qubit")
+        # TODO - Check what's the difference between invoking "get_qubit" on the virtual qubit
+        #  and invoking "get_state" on the virtual node
+        # Next remote method should be invoked on the virtual node
+        #qubit = call_method(virt_qubit, "get_state")
+        yield qubit
 
 
 class VirtualQubitRef:

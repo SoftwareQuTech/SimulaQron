@@ -3,13 +3,12 @@ import socket
 import time
 from enum import Enum
 from threading import Thread
-from typing import Type, Optional, Callable, List, Tuple
+from typing import Type, Optional, Callable, List, Tuple, Set
 
-import numpy as np
-import netqasm.backend.messages as nmsg
 from netqasm.backend.messages import (ErrorMessage, MessageHeader,
                                       MsgDoneMessage, ReturnArrayMessage,
-                                      ReturnRegMessage, deserialize_return_msg, ErrorCode, Message, APP_ID)
+                                      ReturnRegMessage, ReturnMessage, deserialize_return_msg,
+                                      ErrorCode, Message, APP_ID)
 from netqasm.lang.ir import GenericInstr
 from netqasm.lang.operand import Address, Register
 from netqasm.logging.glob import get_netqasm_logger
@@ -17,7 +16,7 @@ from netqasm.sdk import EPRSocket
 from netqasm.sdk.config import LogConfig
 from netqasm.sdk.connection import BaseNetQASMConnection
 from netqasm.sdk.network import NetworkInfo
-from netqasm.sdk.shared_memory import SharedMemoryManager
+from netqasm.sdk.shared_memory import SharedMemoryManager, SharedMemory
 from netqasm.sdk.transpile import SubroutineTranspiler
 
 from simulaqron.general import SimUnsupportedError
@@ -65,18 +64,18 @@ class SimulaQronConnection(BaseNetQASMConnection):
         )
 
         # Next message ID
-        self._next_msg_id = 0
+        self._next_msg_id: int = 0
 
         # Messages IDs we're waiting to be done
-        self._waiting_msg_ids = set()
+        self._waiting_msg_ids: Set[int] = set()
 
         # Keep track of finished msg IDs
-        self._done_msg_ids = set()
+        self._done_msg_ids: Set[int] = set()
 
         # Buffer for returned messages
         self.buf = b""
 
-        self._shared_memory = SharedMemoryManager.create_shared_memory(app_name)
+        self._shared_memory: SharedMemory = SharedMemoryManager.create_shared_memory(app_name)
 
         self._init_new_app(max_qubits=max_qubits)
 
@@ -200,7 +199,6 @@ class SimulaQronConnection(BaseNetQASMConnection):
         self._waiting_msg_ids.add(msg_id)
         length = MessageHeader.len() + len(raw_msg)
         msg_hdr = MessageHeader(id=msg_id, length=length)
-        print(f"message = '{bytes(msg_hdr) + raw_msg}'")
         self._socket.send(bytes(msg_hdr) + raw_msg)
         # if callback is not None:
         #     raise NotImplementedError("Callback not yet implemented")
@@ -283,6 +281,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 entry=Address(address=ret_msg.address),
                 value=ret_msg.values,
             )
+            # TODO - Handle the qubit state return message here, as a new case
         elif isinstance(ret_msg, ErrorMessage):
             if ret_msg.err_code == ErrorCode.UNSUPP.value:
                 raise SimUnsupportedError("Operation not supported")
@@ -302,7 +301,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
             self._wait_for_done()
         self._logger.debug("All messages done, finished blocking")
 
-    def _update_shared_memory(self, entry, value):
+    def _update_shared_memory(self, entry: Register | Address, value: int | Optional[List[Optional[int]]]):
         shared_memory = self.shared_memory
         if isinstance(entry, Register):
             shared_memory.set_register(entry, value)
@@ -347,17 +346,18 @@ class SimulaQronConnection(BaseNetQASMConnection):
         self._next_msg_id += 1
         return msg_id
 
-    def get_qubit_state(self, app_id: int, qubit_id: int) -> np.array:
+    def get_qubit_state(self, app_id: int, qubit_id: int):
         # Here we craft the special message that signals QNodeOS to
         # retrieve the state of a qubit.
         msg = GetQubitStateMessage(app_id=app_id, qubit_id=qubit_id)
         #print(f"new message = '{bytes(msg)}'")
         self._commit_message(msg)
-        return np.array([])
+        #self.block()
 
 
 # Definitions for the new message types
 QUBIT_REGISTRY_NUM = ctypes.c_uint8
+MAX_QUBIT_STATE_LEN = 50 * len(bytes(ctypes.c_uint8()))
 
 
 # "Extend" (by redefining the enum) the Message Type
@@ -385,13 +385,14 @@ class GetQubitStateMessage(Message):
 
 
 # Really dark magic to *replace* the definitions from the netqasm library
+import netqasm.backend.messages as nmsg
 nmsg.MessageType = MewMessageType
 nmsg.MESSAGE_CLASSES = {
-    MewMessageType.INIT_NEW_APP: nmsg.InitNewAppMessage,
-    MewMessageType.OPEN_EPR_SOCKET: nmsg.OpenEPRSocketMessage,
-    MewMessageType.SUBROUTINE: nmsg.SubroutineMessage,
-    MewMessageType.STOP_APP: nmsg.StopAppMessage,
-    MewMessageType.SIGNAL: nmsg.SignalMessage,
+    nmsg.MessageType.INIT_NEW_APP: nmsg.InitNewAppMessage,
+    nmsg.MessageType.OPEN_EPR_SOCKET: nmsg.OpenEPRSocketMessage,
+    nmsg.MessageType.SUBROUTINE: nmsg.SubroutineMessage,
+    nmsg.MessageType.STOP_APP: nmsg.StopAppMessage,
+    nmsg.MessageType.SIGNAL: nmsg.SignalMessage,
     MewMessageType.GET_QUBIT_STATE: GetQubitStateMessage
 }
 

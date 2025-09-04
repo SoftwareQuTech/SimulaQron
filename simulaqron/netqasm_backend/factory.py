@@ -185,7 +185,7 @@ class NetQASMFactory(Factory):
         self.backend = backend(self)
         self.network_name = network_name
 
-        # Dictionary that keeps qubit dictorionaries for each application
+        # Dictionary that keeps qubit dictionaries for each application
         self.qubitList = {}
 
         # Lock governing access to the qubitList

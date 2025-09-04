@@ -1,12 +1,13 @@
-from typing import Optional
+from typing import Optional, Dict, Callable, Generator, Any
 
 from netqasm.lang.instr import Flavour
 from twisted.internet.defer import inlineCallbacks
-from netqasm.backend.messages import MsgDoneMessage, Message
+from netqasm.backend.messages import MsgDoneMessage, Message, MessageType
 from netqasm.backend.qnodeos import QNodeController
 from twisted.internet.protocol import Protocol
 
 from simulaqron.netqasm_backend.executioner import VanillaSimulaQronExecutioner
+from simulaqron.sdk.connection import MewMessageType, GetQubitStateMessage
 
 
 class SubroutineHandler(QNodeController):
@@ -35,6 +36,22 @@ class SubroutineHandler(QNodeController):
             msg_id=msg_id,
             msg=msg,
         )
+
+    def _handle_get_qubit_state(self, get_quibit_state_msg: GetQubitStateMessage) -> Generator[Any, None, None]:
+        assert isinstance(self._executor, VanillaSimulaQronExecutioner)
+        casted_executor: VanillaSimulaQronExecutioner = self._executor
+        yield from casted_executor.get_qubit_state(get_quibit_state_msg.qubit_id)
+
+    # We override the _get_message_handlers method so we can also handle the "get qubit state" message
+    def _get_message_handlers(self) -> Dict[MewMessageType | MessageType, Callable]:
+        return {
+            MessageType.SIGNAL: self._handle_signal,
+            MessageType.SUBROUTINE: self._handle_subroutine,
+            MessageType.INIT_NEW_APP: self._handle_init_new_app,
+            MessageType.STOP_APP: self._handle_stop_app,
+            MessageType.OPEN_EPR_SOCKET: self._handle_open_epr_socket,
+            MewMessageType.GET_QUBIT_STATE: self._handle_get_qubit_state
+        }
 
     @classmethod
     def _get_executor_class(cls, flavour: Optional[Flavour] = None):
