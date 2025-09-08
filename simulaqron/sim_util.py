@@ -1,3 +1,4 @@
+import numpy as np
 from netqasm.logging.glob import get_netqasm_logger
 from netqasm.sdk import Qubit
 
@@ -6,9 +7,24 @@ from simulaqron.sdk import SimulaQronConnection
 logger = get_netqasm_logger("sim_util")
 
 
-def get_qubit_state(qubit: Qubit, reduced_dm: bool = True):
-    """Currently we cannot get the qubit in SimulaQron, just return None"""
-    logger.warning("Cannot get the qubit state in SimulaQron")
+def get_qubit_state(qubit: Qubit, reduced_dm: bool = True) -> np.ndarray:
+    """Get the state of the qubit, only possible in simulation and can be used for debugging.
+
+    .. note:: The function gets the *current* state of the qubit(s). So make sure the subroutine is flushed
+              before calling the method.
+
+    Parameters
+    ----------
+    qubit : :class:`~netqasm.sdk.Qubit`
+        The qubit to get the state of .
+    reduced_dm : bool
+        Unused; declared to keep compatibility with other simulation engines
+
+    Returns
+    -------
+    np.array
+        The state as a density matrix.
+    """
     # Since the qubit state data is maintained by the virtual node, we need to
     # find a way to "bypass" the QNodeOS layer and retrieve the qubit state from
     # the VirtualNode layer
@@ -26,6 +42,4 @@ def get_qubit_state(qubit: Qubit, reduced_dm: bool = True):
     assert isinstance(qubit.connection, SimulaQronConnection)
     connection: SimulaQronConnection = qubit.connection
     # Retrieve the app_id and the qubit_id to pass in the message
-    # Maybe the app_id is not necessary?
-    connection.get_qubit_state(connection.app_id, qubit.qubit_id)
-    return None
+    return np.array(connection.get_qubit_state(connection.app_id, qubit.qubit_id))

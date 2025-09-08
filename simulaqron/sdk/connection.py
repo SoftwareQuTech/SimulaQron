@@ -3,7 +3,7 @@ import socket
 import time
 from enum import Enum
 from threading import Thread
-from typing import Type, Optional, Callable, List, Tuple, Set
+from typing import Type, Optional, Callable, List, Tuple, Set, Dict
 
 from netqasm.backend.messages import (ErrorMessage, MessageHeader,
                                       MsgDoneMessage, ReturnArrayMessage,
@@ -28,20 +28,19 @@ logger = get_netqasm_logger("SimulaQronConnection")
 
 
 class SimulaQronConnection(BaseNetQASMConnection):
-
     NON_STABILIZER_INSTR = [GenericInstr.T]
 
     def __init__(
-        self,
-        app_name: str,
-        app_id: Optional[int] = None,
-        max_qubits: int = 5,
-        log_config: Optional[LogConfig] = None,
-        epr_sockets: Optional[List[EPRSocket]] = None,
-        compiler: Optional[Type[SubroutineTranspiler]] = None,
-        socket_address=None,
-        conn_retry_time: float = 0.1,
-        network_name: Optional[str] = None,
+            self,
+            app_name: str,
+            app_id: Optional[int] = None,
+            max_qubits: int = 5,
+            log_config: Optional[LogConfig] = None,
+            epr_sockets: Optional[List[EPRSocket]] = None,
+            compiler: Optional[Type[SubroutineTranspiler]] = None,
+            socket_address=None,
+            conn_retry_time: float = 0.1,
+            network_name: Optional[str] = None,
     ):
         super().__init__(
             app_name=app_name,
@@ -75,6 +74,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
         # Buffer for returned messages
         self.buf = b""
 
+        # Buffer for retrieved qubit states
+        self._qubit_states: Dict[int, List[complex]] = {}
+
         self._shared_memory: SharedMemory = SharedMemoryManager.create_shared_memory(app_name)
 
         self._init_new_app(max_qubits=max_qubits)
@@ -83,9 +85,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
 
     @staticmethod
     def try_connection(
-        name: str,
-        socket_address: Optional[Tuple[str, int]] = None,
-        network_name: str = None,
+            name: str,
+            socket_address: Optional[Tuple[str, int]] = None,
+            network_name: str = None,
     ):
         # NOTE using retry_time=None causes an error to be raised of the connection cannot
         # be established, which can be used to check if the connection is available
@@ -99,10 +101,10 @@ class SimulaQronConnection(BaseNetQASMConnection):
 
     @staticmethod
     def _create_socket(
-        name: str,
-        socket_address: Optional[Tuple[str, int]] = None,
-        network_name: str = None,
-        retry_time: Optional[float] = 0.1,
+            name: str,
+            socket_address: Optional[Tuple[str, int]] = None,
+            network_name: str = None,
+            retry_time: Optional[float] = 0.1,
     ) -> Tuple[SocketsConfig, socket.socket]:
         # Get network configuration and addresses
         addr, qnodeos_net = SimulaQronConnection._setup_network_data(
@@ -119,9 +121,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
 
     @staticmethod
     def _setup_network_data(
-        name: str,
-        socket_address: Tuple[str, int],
-        network_name: str,
+            name: str,
+            socket_address: Tuple[str, int],
+            network_name: str,
     ) -> Tuple[tuple[socket.AddressFamily, socket.SocketKind, int, str, tuple[str, int]], Optional[SocketsConfig]]:
         qnodeos_net: Optional[SocketsConfig] = None
         if socket_address is None:
@@ -282,8 +284,14 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 value=ret_msg.values,
             )
         elif isinstance(ret_msg, ReturnQubitStateMessage):
-            # TODO - Properly handle the qubit state return message here
-            print(f"received: {ret_msg}")
+            # We locally store the state info to return it later. We have to
+            # do this since _handle_reply cannot return values others than the
+            # message id when handling the reply of the original message
+            self._store_qubit_state(
+                ret_msg.qubit_id,
+                ret_msg.get_real_part(),
+                ret_msg.get_imag_part()
+            )
         elif isinstance(ret_msg, ErrorMessage):
             if ret_msg.err_code == ErrorCode.UNSUPP.value:
                 raise SimUnsupportedError("Operation not supported")
@@ -315,6 +323,21 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 f"Cannot update shared memory with entry specified as {entry}"
             )
 
+    def _store_qubit_state(self, qubit_id: int, real_part: List[float], imag_part: List[float]):
+        self._logger.debug("Storing qubit state for qubit_id %d: real=%s, imag=%s",
+                           qubit_id, str(real_part), str(imag_part)
+                           )
+        # Reconstruct the complex numbers
+        self._qubit_states[qubit_id] = [r + (1j * j) for r, j in zip(real_part, imag_part)]
+
+    def _retrieve_qubit_state(self, qubit_id: int) -> List[complex]:
+        if qubit_id not in self._qubit_states:
+            logger.error("State for the qubit with id '%d' cannot be found in the conneciton buffer", qubit_id)
+            return []
+        state = self._qubit_states[qubit_id]
+        del self._qubit_states[qubit_id]
+        return state
+
     def _is_done(self, msg_id) -> bool:
         return msg_id in self._done_msg_ids
 
@@ -323,11 +346,14 @@ class SimulaQronConnection(BaseNetQASMConnection):
         self._next_msg_id += 1
         return msg_id
 
-    def get_qubit_state(self, app_id: int, qubit_id: int):
+    def get_qubit_state(self, app_id: int, qubit_id: int) -> List[complex]:
         # Here we craft the special message that signals QNodeOS to
         # retrieve the state of a qubit.
         msg = GetQubitStateMessage(app_id=app_id, qubit_id=qubit_id)
-        self._commit_message(msg)
+        # We commit the message, and block until receiving a response
+        self._commit_message(msg, block=True)
+        # Retrieve and return the qubit state
+        return self._retrieve_qubit_state(qubit_id)
 
 
 # Definitions for the new message types
@@ -405,6 +431,7 @@ class ReturnQubitStateMessage(ReturnMessage):
 
 # Really dark magic to *replace* the definitions from the netqasm library
 import netqasm.backend.messages as nmsg  # noqa: E402
+
 nmsg.MessageType = NewMessageType
 nmsg.ReturnMessageType = NewReturnMessageType
 nmsg.MESSAGE_CLASSES = {
