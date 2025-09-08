@@ -25,7 +25,7 @@ def get_qubit_state(qubit: Qubit, reduced_dm: bool = True):
     #   simply forwards it to the connection, and finally, here.
     assert isinstance(qubit.connection, SimulaQronConnection)
     connection: SimulaQronConnection = qubit.connection
-    # TODO - Retrieve the app_id and the qubit_id to pass in the message
-    #  Maybe the app_id is not necessary?
-    connection.get_qubit_state(0, qubit.qubit_id)
+    # Retrieve the app_id and the qubit_id to pass in the message
+    # Maybe the app_id is not necessary?
+    connection.get_qubit_state(connection.app_id, qubit.qubit_id)
     return None

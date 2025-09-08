@@ -47,12 +47,8 @@ class SubroutineHandler(QNodeController):
             _, [realvec, imagvec] = yield casted_executor.get_qubit_state(get_quibit_state_msg.qubit_id)
         else:
             realvec, imagvec = yield casted_executor.get_qubit_state(get_quibit_state_msg.qubit_id)
-        # TODO - Should we reconstruct the complex numbers here? they can't be serialized using `bytes()`
-        #  (nor floats) so we might need to find a new way to serialize these values
-        qubit_state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
         # Return a message to the connection object
         self._return_qubit_state(get_quibit_state_msg.qubit_id, realvec, imagvec)
-        # yield qubit_state
 
     def _return_qubit_state(self, qubit_id: int, real_part: List[float], imag_part: List[float]):
         qubit_state_message = ReturnQubitStateMessage(qubit_id, real_part, imag_part)

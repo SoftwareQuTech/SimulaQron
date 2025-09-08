@@ -283,7 +283,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
             )
         elif isinstance(ret_msg, ReturnQubitStateMessage):
             # TODO - Properly handle the qubit state return message here
-            print("received")
+            print(f"received: {ret_msg}")
         elif isinstance(ret_msg, ErrorMessage):
             if ret_msg.err_code == ErrorCode.UNSUPP.value:
                 raise SimUnsupportedError("Operation not supported")
@@ -315,31 +315,6 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 f"Cannot update shared memory with entry specified as {entry}"
             )
 
-    # def add_single_qubit_commands(self, instr, qubit_id):
-    #     # NOTE override to check that formalism supports operation
-    #     if instr in self.NON_STABILIZER_INSTR:
-    #         if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
-    #             raise SimUnsupportedError(
-    #                 f"Cannot perform instr {instr} when using stabilizer formalism"
-    #             )
-    #     super().add_single_qubit_commands(instr=instr, qubit_id=qubit_id)
-    #
-    # def add_single_qubit_rotation_commands(
-    #     self, instruction, virtual_qubit_id, n=0, d=0, angle=None
-    # ):
-    #     # NOTE override to check that formalism supports operation
-    #     if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
-    #         raise SimUnsupportedError(
-    #             "Cannot perform rotations when using stabilizer formalism"
-    #         )
-    #     super().add_single_qubit_rotation_commands(
-    #         instruction=instruction,
-    #         virtual_qubit_id=virtual_qubit_id,
-    #         n=n,
-    #         d=d,
-    #         angle=angle,
-    #     )
-
     def _is_done(self, msg_id) -> bool:
         return msg_id in self._done_msg_ids
 
@@ -352,14 +327,12 @@ class SimulaQronConnection(BaseNetQASMConnection):
         # Here we craft the special message that signals QNodeOS to
         # retrieve the state of a qubit.
         msg = GetQubitStateMessage(app_id=app_id, qubit_id=qubit_id)
-        #print(f"new message = '{bytes(msg)}'")
         self._commit_message(msg)
-        #self.block()
 
 
 # Definitions for the new message types
 QUBIT_REGISTRY_NUM = ctypes.c_uint8
-MAX_QUBIT_STATE_LEN = 5 * len(bytes(ctypes.c_float()))
+MAX_QUBIT_STATE_LEN = 5
 
 
 # "Extend" (by redefining the enum) the Message Type
@@ -397,8 +370,9 @@ class NewReturnMessageType(Enum):
 # New class for the return of the get qubit state message
 class ReturnQubitStateMessage(ReturnMessage):
     _fields_ = [
-        ("len", ctypes.c_uint32),
         ("qubit_id", QUBIT_REGISTRY_NUM),
+        ("len_real", ctypes.c_uint32),
+        ("len_imag", ctypes.c_uint32),
         ("real_part", MAX_QUBIT_STATE_LEN * ctypes.c_float),  # type: ignore
         ("imag_part", MAX_QUBIT_STATE_LEN * ctypes.c_float),  # type: ignore
     ]
@@ -407,12 +381,26 @@ class ReturnQubitStateMessage(ReturnMessage):
     def __init__(self, qubit_id: int, real_part: List[float], imag_part: List[float]):
         super().__init__(self.TYPE.value)
         self.qubit_id = qubit_id
+        self.len_real = len(real_part)
+        self.len_imag = len(imag_part)
+        if self.len_real > MAX_QUBIT_STATE_LEN or self.len_imag > MAX_QUBIT_STATE_LEN:
+            logger.warning("Return qubit state message too long")
         for i, v in enumerate(real_part):
             self.real_part[i] = v
         for i, v in enumerate(imag_part):
             self.imag_part[i] = v
-        self.len = (len(bytes(ctypes.c_uint32())) + len(bytes(self.qubit_id))
-                    + len(self.real_part) + len(self.imag_part))
+
+    def get_real_part(self) -> List[float]:
+        real_part: List[float] = []
+        for i in range(self.len_real):
+            real_part.append(float(self.real_part[i]))
+        return real_part
+
+    def get_imag_part(self) -> List[float]:
+        imag_part: List[float] = []
+        for i in range(self.len_imag):
+            imag_part.append(float(self.imag_part[i]))
+        return imag_part
 
 
 # Really dark magic to *replace* the definitions from the netqasm library
