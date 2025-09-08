@@ -359,11 +359,11 @@ class SimulaQronConnection(BaseNetQASMConnection):
 
 # Definitions for the new message types
 QUBIT_REGISTRY_NUM = ctypes.c_uint8
-MAX_QUBIT_STATE_LEN = 50 * len(bytes(ctypes.c_uint8()))
+MAX_QUBIT_STATE_LEN = 5 * len(bytes(ctypes.c_float()))
 
 
 # "Extend" (by redefining the enum) the Message Type
-class MewMessageType(Enum):
+class NewMessageType(Enum):
     INIT_NEW_APP = 0x00
     OPEN_EPR_SOCKET = 0x01
     SUBROUTINE = 0x02
@@ -378,7 +378,7 @@ class GetQubitStateMessage(Message):
         ("app_id", APP_ID),  # type: ignore
         ("qubit_id", QUBIT_REGISTRY_NUM),
     ]
-    TYPE = MewMessageType.GET_QUBIT_STATE
+    TYPE = NewMessageType.GET_QUBIT_STATE
 
     def __init__(self, app_id: int = 0, qubit_id: int = 0):
         super().__init__(self.TYPE.value)
@@ -399,27 +399,33 @@ class ReturnQubitStateMessage(ReturnMessage):
     _fields_ = [
         ("len", ctypes.c_uint32),
         ("qubit_id", QUBIT_REGISTRY_NUM),
-        ("state", MAX_QUBIT_STATE_LEN * ctypes.c_uint8),  # type: ignore
+        ("real_part", MAX_QUBIT_STATE_LEN * ctypes.c_float),  # type: ignore
+        ("imag_part", MAX_QUBIT_STATE_LEN * ctypes.c_float),  # type: ignore
     ]
     TYPE = NewReturnMessageType.RET_QUBIT_STATE
 
-    def __init__(self, qubit_id: int, state):
+    def __init__(self, qubit_id: int, real_part: List[float], imag_part: List[float]):
         super().__init__(self.TYPE.value)
         self.qubit_id = qubit_id
-        self.state = bytes(state)
-        self.len = len(bytes(ctypes.c_uint32())) + len(bytes(self.qubit_id)) + len(self.state)
+        for i, v in enumerate(real_part):
+            self.real_part[i] = v
+        for i, v in enumerate(imag_part):
+            self.imag_part[i] = v
+        self.len = (len(bytes(ctypes.c_uint32())) + len(bytes(self.qubit_id))
+                    + len(self.real_part) + len(self.imag_part))
 
 
 # Really dark magic to *replace* the definitions from the netqasm library
 import netqasm.backend.messages as nmsg  # noqa: E402
-nmsg.MessageType = MewMessageType
+nmsg.MessageType = NewMessageType
+nmsg.ReturnMessageType = NewReturnMessageType
 nmsg.MESSAGE_CLASSES = {
     nmsg.MessageType.INIT_NEW_APP: nmsg.InitNewAppMessage,
     nmsg.MessageType.OPEN_EPR_SOCKET: nmsg.OpenEPRSocketMessage,
     nmsg.MessageType.SUBROUTINE: nmsg.SubroutineMessage,
     nmsg.MessageType.STOP_APP: nmsg.StopAppMessage,
     nmsg.MessageType.SIGNAL: nmsg.SignalMessage,
-    MewMessageType.GET_QUBIT_STATE: GetQubitStateMessage
+    NewMessageType.GET_QUBIT_STATE: GetQubitStateMessage
 }
 nmsg.RETURN_MESSAGE_CLASSES = {
     nmsg.ReturnMessageType.DONE: MsgDoneMessage,
@@ -428,19 +434,6 @@ nmsg.RETURN_MESSAGE_CLASSES = {
     nmsg.ReturnMessageType.RET_ARR: ReturnArrayMessage,
     NewReturnMessageType.RET_QUBIT_STATE: ReturnQubitStateMessage,
 }
-
-
-def deserialize_host_msg(raw: bytes) -> Message:
-    """Convert a serialized message into a `Message` object
-
-    :param raw: serialized message (string of bytes)
-    :return: deserialized message object
-    """
-    message_type = MewMessageType(
-        nmsg.MESSAGE_TYPE.from_buffer_copy(raw[:nmsg.MESSAGE_TYPE_BYTES]).value
-    )
-    message_class = nmsg.MESSAGE_CLASSES[message_type]
-    return message_class.deserialize_from(raw)  # type: ignore
 
 
 def _get_qnodeos_net_config(network_name: str) -> SocketsConfig:
