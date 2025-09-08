@@ -281,7 +281,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 entry=Address(address=ret_msg.address),
                 value=ret_msg.values,
             )
-            # TODO - Handle the qubit state return message here, as a new case
+        elif isinstance(ret_msg, ReturnQubitStateMessage):
+            # TODO - Properly handle the qubit state return message here
+            print("received")
         elif isinstance(ret_msg, ErrorMessage):
             if ret_msg.err_code == ErrorCode.UNSUPP.value:
                 raise SimUnsupportedError("Operation not supported")
@@ -384,8 +386,32 @@ class GetQubitStateMessage(Message):
         self.qubit_id = qubit_id
 
 
+class NewReturnMessageType(Enum):
+    DONE = 0x00
+    ERR = 0x01
+    RET_ARR = 0x02
+    RET_REG = 0x03
+    RET_QUBIT_STATE = 0xFE
+
+
+# New class for the return of the get qubit state message
+class ReturnQubitStateMessage(ReturnMessage):
+    _fields_ = [
+        ("len", ctypes.c_uint32),
+        ("qubit_id", QUBIT_REGISTRY_NUM),
+        ("state", MAX_QUBIT_STATE_LEN * ctypes.c_uint8),  # type: ignore
+    ]
+    TYPE = NewReturnMessageType.RET_QUBIT_STATE
+
+    def __init__(self, qubit_id: int, state):
+        super().__init__(self.TYPE.value)
+        self.qubit_id = qubit_id
+        self.state = bytes(state)
+        self.len = len(bytes(ctypes.c_uint32())) + len(bytes(self.qubit_id)) + len(self.state)
+
+
 # Really dark magic to *replace* the definitions from the netqasm library
-import netqasm.backend.messages as nmsg
+import netqasm.backend.messages as nmsg  # noqa: E402
 nmsg.MessageType = MewMessageType
 nmsg.MESSAGE_CLASSES = {
     nmsg.MessageType.INIT_NEW_APP: nmsg.InitNewAppMessage,
@@ -395,6 +421,27 @@ nmsg.MESSAGE_CLASSES = {
     nmsg.MessageType.SIGNAL: nmsg.SignalMessage,
     MewMessageType.GET_QUBIT_STATE: GetQubitStateMessage
 }
+nmsg.RETURN_MESSAGE_CLASSES = {
+    nmsg.ReturnMessageType.DONE: MsgDoneMessage,
+    nmsg.ReturnMessageType.ERR: ErrorMessage,
+    nmsg.ReturnMessageType.RET_REG: ReturnRegMessage,
+    nmsg.ReturnMessageType.RET_ARR: ReturnArrayMessage,
+    NewReturnMessageType.RET_QUBIT_STATE: ReturnQubitStateMessage,
+}
+
+
+def deserialize_host_msg(raw: bytes) -> Message:
+    """Convert a serialized message into a `Message` object
+
+    :param raw: serialized message (string of bytes)
+    :return: deserialized message object
+    """
+    message_type = MewMessageType(
+        nmsg.MESSAGE_TYPE.from_buffer_copy(raw[:nmsg.MESSAGE_TYPE_BYTES]).value
+    )
+    message_class = nmsg.MESSAGE_CLASSES[message_type]
+    return message_class.deserialize_from(raw)  # type: ignore
+
 
 def _get_qnodeos_net_config(network_name: str) -> SocketsConfig:
     network_config_file = simulaqron_settings.network_config_file

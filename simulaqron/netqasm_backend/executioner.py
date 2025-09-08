@@ -4,25 +4,26 @@ import traceback
 from collections import defaultdict
 from enum import Enum
 from functools import partial
-from typing import Any, Generator
+from typing import Any, Generator, List
 
+import netqasm.lang.instr.core as core_instructions
+import netqasm.lang.instr.vanilla as vanilla_instructions
 from netqasm.backend.executor import EprCmdData, Executor
 from netqasm.backend.messages import (ErrorCode, ErrorMessage,
                                       ReturnArrayMessage, ReturnRegMessage)
 from netqasm.backend.network_stack import BaseNetworkStack
-from netqasm.lang import instr as instructions
 from netqasm.lang import operand
 from netqasm.qlink_compat import (Basis, BellState, LinkLayerErr,
                                   LinkLayerOKTypeK, LinkLayerOKTypeM,
                                   LinkLayerOKTypeR, RandomBasis, RequestType,
                                   ReturnType)
+from twisted.internet import reactor, task
+from twisted.internet.defer import inlineCallbacks, Deferred
 
 from simulaqron.general import SimUnsupportedError
 from simulaqron.general.host_config import get_node_id_from_net_config
 from simulaqron.settings import simulaqron_settings
 from simulaqron.virtual_node.virtual import call_method
-from twisted.internet import reactor, task
-from twisted.internet.defer import inlineCallbacks, Deferred
 
 
 class UnknownQubitError(RuntimeError):
@@ -54,21 +55,21 @@ class NetworkStack(BaseNetworkStack):
 class VanillaSimulaQronExecutioner(Executor):
 
     SIMULAQRON_OPS = {
-        instructions.vanilla.GateXInstruction: "apply_X",
-        instructions.vanilla.GateYInstruction: "apply_Y",
-        instructions.vanilla.GateZInstruction: "apply_Z",
-        instructions.vanilla.GateHInstruction: "apply_H",
-        instructions.vanilla.GateSInstruction: "apply_S",
-        instructions.vanilla.GateKInstruction: "apply_K",
-        instructions.vanilla.GateTInstruction: "apply_T",
-        instructions.vanilla.CnotInstruction: "cnot_onto",
-        instructions.vanilla.CphaseInstruction: "cphase_onto",
+        vanilla_instructions.GateXInstruction: "apply_X",
+        vanilla_instructions.GateYInstruction: "apply_Y",
+        vanilla_instructions.GateZInstruction: "apply_Z",
+        vanilla_instructions.GateHInstruction: "apply_H",
+        vanilla_instructions.GateSInstruction: "apply_S",
+        vanilla_instructions.GateKInstruction: "apply_K",
+        vanilla_instructions.GateTInstruction: "apply_T",
+        vanilla_instructions.CnotInstruction: "cnot_onto",
+        vanilla_instructions.CphaseInstruction: "cphase_onto",
     }
 
     ROTATION_AXIS = {
-        instructions.vanilla.RotXInstruction: (1, 0, 0),
-        instructions.vanilla.RotYInstruction: (0, 1, 0),
-        instructions.vanilla.RotZInstruction: (0, 0, 1),
+        vanilla_instructions.RotXInstruction: (1, 0, 0),
+        vanilla_instructions.RotYInstruction: (0, 1, 0),
+        vanilla_instructions.RotZInstruction: (0, 0, 1),
     }
 
     # Dictionary storing the next unique entanglement id for each used (host_app_id,remote_node,remote_app_id)
@@ -88,7 +89,7 @@ class VanillaSimulaQronExecutioner(Executor):
         self._network_stack = NetworkStack(self)
 
     @property
-    def factory(self) -> "NetQASMFactory":
+    def factory(self) -> "NetQASMFactory":  # noqa: F821
         return self._factory
 
     @property
@@ -113,7 +114,7 @@ class VanillaSimulaQronExecutioner(Executor):
     def add_return_msg_func(self, func):
         self._return_msg_func = func
 
-    def add_factory(self, factory: "NetQASMFactory"):
+    def add_factory(self, factory: "NetQASMFactory"):  # noqa: F821
         self._factory = factory
 
     def _handle_command_exception(self, exc, prog_counter, traceback_str):
@@ -128,7 +129,7 @@ class VanillaSimulaQronExecutioner(Executor):
             raise RuntimeError("Cannot return msg since no function is set")
         self._return_msg_func(msg=msg)
 
-    def _instr_qalloc(self, subroutine_id, instr: instructions.core.QAllocInstruction):
+    def _instr_qalloc(self, subroutine_id, instr: core_instructions.QAllocInstruction):
         physical_address = yield from super()._instr_qalloc(
             subroutine_id=subroutine_id,
             instr=instr,
@@ -156,7 +157,7 @@ class VanillaSimulaQronExecutioner(Executor):
 
     def _do_single_qubit_instr(self, instr, subroutine_id, address):
         position = self._get_position(subroutine_id=subroutine_id, address=address)
-        if isinstance(instr, instructions.core.InitInstruction):
+        if isinstance(instr, core_instructions.InitInstruction):
             yield self.cmd_reset(qubit_id=position)
         else:
             simulaqron_gate = self._get_simulaqron_gate(instr=instr)
@@ -281,7 +282,7 @@ class VanillaSimulaQronExecutioner(Executor):
         self._logger.debug("waiting a bit")
         yield d
 
-    def _update_shared_memory(self, app_id, entry, value):
+    def _update_shared_memory(self, app_id: int, entry: operand.Register | operand.Address, value: int | List[int]):
         if isinstance(entry, operand.Register):
             self._logger.debug("Updating host about register %s with value %s", entry, value)
             self._return_msg(msg=ReturnRegMessage(
@@ -421,12 +422,12 @@ class VanillaSimulaQronExecutioner(Executor):
             )
 
         # Produce EPR-pair
-        h_gate = self._get_simulaqron_gate(instr=instructions.vanilla.GateHInstruction())
+        h_gate = self._get_simulaqron_gate(instr=vanilla_instructions.GateHInstruction())
         yield self.apply_single_qubit_gate(
             gate=h_gate,
             qubit_id=qubit_id,
         )
-        cnot_gate = self._get_simulaqron_gate(instr=instructions.vanilla.CnotInstruction())
+        cnot_gate = self._get_simulaqron_gate(instr=vanilla_instructions.CnotInstruction())
         yield self.apply_two_qubit_gate(
             gate=cnot_gate,
             qubit_id1=qubit_id,
@@ -530,13 +531,13 @@ class VanillaSimulaQronExecutioner(Executor):
         if basis == Basis.Z:
             pass
         elif basis == Basis.X:
-            h_gate = self._get_simulaqron_gate(instr=instructions.vanilla.GateHInstruction())
+            h_gate = self._get_simulaqron_gate(instr=vanilla_instructions.GateHInstruction())
             yield self.apply_single_qubit_gate(
                 gate=h_gate,
                 qubit_id=qubit_id,
             )
         elif basis == Basis.Y:
-            k_gate = self._get_simulaqron_gate(instr=instructions.vanilla.GateKInstruction())
+            k_gate = self._get_simulaqron_gate(instr=vanilla_instructions.GateKInstruction())
             yield self.apply_single_qubit_gate(
                 gate=k_gate,
                 qubit_id=qubit_id,
@@ -824,12 +825,13 @@ class VanillaSimulaQronExecutioner(Executor):
     def get_qubit_state(self, qubit_id: int) -> Generator[Deferred | Any, Any, Any]:
         self._logger.debug("Retriving the state of qubit id %d", qubit_id)
         virt_qubit = self.get_virt_qubit(qubit_id=qubit_id)
-        qubit = call_method(virt_qubit, "get_qubit")
         # TODO - Check what's the difference between invoking "get_qubit" on the virtual qubit
         #  and invoking "get_state" on the virtual node
+        #qubit = call_method(virt_qubit, "get_qubit")
         # Next remote method should be invoked on the virtual node
         #qubit = call_method(virt_qubit, "get_state")
-        yield qubit
+        qubit = yield call_method(virt_qubit, "get_register_RI")
+        return qubit
 
 
 class VirtualQubitRef:

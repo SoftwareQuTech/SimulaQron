@@ -13,11 +13,15 @@ class TestGetQubit:
     @staticmethod
     def peek_local_qubit():
         with NetQASMConnection("Alice") as alice:
-            q = Qubit(alice)
-            q.H()
+            qA = Qubit(alice)
+            qB = Qubit(alice)
+            qA.H()
+            qB.X()
 
             alice.flush()
-            return get_qubit_state(q)
+            stateA = get_qubit_state(qA)
+            stateB = get_qubit_state(qB)
+            return stateB
 
     @staticmethod
     def alice_teleport():

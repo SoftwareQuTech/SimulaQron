@@ -171,5 +171,7 @@ def main():
 
 
 ##################################################################################################
-logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=logging.DEBUG)
-main()
+if __name__ == "__main__":
+    #simulaqron_settings.sim_backend = "qutip"
+    logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=logging.DEBUG)
+    main()

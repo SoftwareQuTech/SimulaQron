@@ -6,8 +6,10 @@ from netqasm.backend.messages import MsgDoneMessage, Message, MessageType
 from netqasm.backend.qnodeos import QNodeController
 from twisted.internet.protocol import Protocol
 
+import simulaqron.settings as settings
 from simulaqron.netqasm_backend.executioner import VanillaSimulaQronExecutioner
-from simulaqron.sdk.connection import MewMessageType, GetQubitStateMessage
+from simulaqron.sdk.connection import (MewMessageType, GetQubitStateMessage,
+                                       ReturnQubitStateMessage)
 
 
 class SubroutineHandler(QNodeController):
@@ -40,7 +42,21 @@ class SubroutineHandler(QNodeController):
     def _handle_get_qubit_state(self, get_quibit_state_msg: GetQubitStateMessage) -> Generator[Any, None, None]:
         assert isinstance(self._executor, VanillaSimulaQronExecutioner)
         casted_executor: VanillaSimulaQronExecutioner = self._executor
-        yield from casted_executor.get_qubit_state(get_quibit_state_msg.qubit_id)
+        # The ProjectQ backend also returns an unused mapping; we need to fix that
+        if settings.simulaqron_settings.sim_backend == settings.SimBackend.PROJECTQ.value:
+            _, [realvec, imagvec] = yield casted_executor.get_qubit_state(get_quibit_state_msg.qubit_id)
+        else:
+            realvec, imagvec = yield casted_executor.get_qubit_state(get_quibit_state_msg.qubit_id)
+        # TODO - Should we reconstruct the complex numbers here? they can't be serialized using `bytes()`
+        #  (nor floats) so we might need to find a new way to serialize these values
+        qubit_state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
+        # Return a message to the connection object
+        self._return_qubit_state(get_quibit_state_msg.qubit_id, qubit_state)
+        yield qubit_state
+
+    def _return_qubit_state(self, qubit_id: int, qubit_state):
+        qubit_state_message = ReturnQubitStateMessage(qubit_id, qubit_state)
+        self._return_msg(msg=qubit_state_message)
 
     # We override the _get_message_handlers method so we can also handle the "get qubit state" message
     def _get_message_handlers(self) -> Dict[MewMessageType | MessageType, Callable]:
