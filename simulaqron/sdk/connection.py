@@ -206,6 +206,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
             self._wait_for_done(msg_id=msg_id)
         else:
             # Execute callback in a new thread after the subroutine is finished
+            # TODO - This is not well designed; we need to avoid blocking, and execute the callback
+            #  once the ack msg *for the message id* arrives!!!!
+            #  Moreover, we need to stop the thread and join it right after that!
             thread = Thread(
                 target=self._wait_for_done,
                 kwargs={
@@ -249,7 +252,8 @@ class SimulaQronConnection(BaseNetQASMConnection):
             self.buf += data
         else:
             self.buf = data
-        self._logger.debug("Got new data %s on socket to qnodeos", data)
+        self._logger.debug("Got new data '%s' on socket to qnodeos", data)
+        print(f"Got new data '{data}' on socket to qnodeos")
 
     def _handle_reply(self) -> int:
         """Handle all next replies until a done message and return the msg ID for the done"""
@@ -413,7 +417,6 @@ class RichErrorMessage(ReturnMessage):
         self.err_msg_len = len(err_bytes)
         for i, v in enumerate(err_bytes):
             self.err_msg[i] = v
-        print("here")
 
     def get_err_msg(self) -> str:
         bytes_vals: List[int] = []

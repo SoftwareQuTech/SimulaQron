@@ -115,8 +115,7 @@ class NetQASMProtocol(Protocol):
 
     @inlineCallbacks
     def log_error(self, failure):
-        self._logger.error("Handling message failed with failure = %s", failure)
-        # sys.stderr.write(str(failure))
+        self._logger.error("Handling message failed with failure = %s", failure.value)
         self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.GENERAL, err_msg=str(failure.value)))
         yield deferLater(reactor, 0.1, self.stop)
 
