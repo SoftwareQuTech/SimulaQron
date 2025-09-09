@@ -9,8 +9,7 @@ from typing import Any, Generator, List
 import netqasm.lang.instr.core as core_instructions
 import netqasm.lang.instr.vanilla as vanilla_instructions
 from netqasm.backend.executor import EprCmdData, Executor
-from netqasm.backend.messages import (ErrorCode, ErrorMessage,
-                                      ReturnArrayMessage, ReturnRegMessage)
+from netqasm.backend.messages import (ErrorCode, ReturnArrayMessage, ReturnRegMessage)
 from netqasm.backend.network_stack import BaseNetworkStack
 from netqasm.lang import operand
 from netqasm.qlink_compat import (Basis, BellState, LinkLayerErr,
@@ -22,6 +21,7 @@ from twisted.internet.defer import inlineCallbacks, Deferred
 
 from simulaqron.general import SimUnsupportedError
 from simulaqron.general.host_config import get_node_id_from_net_config
+from simulaqron.sdk.connection import RichErrorMessage
 from simulaqron.settings import simulaqron_settings
 from simulaqron.virtual_node.virtual import call_method
 
@@ -53,7 +53,6 @@ class NetworkStack(BaseNetworkStack):
 
 
 class VanillaSimulaQronExecutioner(Executor):
-
     SIMULAQRON_OPS = {
         vanilla_instructions.GateXInstruction: "apply_X",
         vanilla_instructions.GateYInstruction: "apply_Y",
@@ -120,9 +119,9 @@ class VanillaSimulaQronExecutioner(Executor):
     def _handle_command_exception(self, exc, prog_counter, traceback_str):
         self._logger.error("At line %d: %s\n%s", prog_counter, exc, traceback_str)
         if isinstance(exc, SimUnsupportedError):
-            self._return_msg(msg=ErrorMessage(err_code=ErrorCode.UNSUPP))
+            self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.UNSUPP, err_msg="Unsupported simulation engine"))
         else:
-            self._return_msg(msg=ErrorMessage(err_code=ErrorCode.GENERAL))
+            self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.GENERAL, err_msg="General error"))
 
     def _return_msg(self, msg):
         if self._return_msg_func is None:
@@ -300,13 +299,13 @@ class VanillaSimulaQronExecutioner(Executor):
             raise TypeError(f"Cannot update shared memory with entry specified as {entry}")
 
     def _do_create_epr(
-        self,
-        subroutine_id,
-        remote_node_id,
-        epr_socket_id,
-        q_array_address,
-        arg_array_address,
-        ent_results_array_address,
+            self,
+            subroutine_id,
+            remote_node_id,
+            epr_socket_id,
+            q_array_address,
+            arg_array_address,
+            ent_results_array_address,
     ):
         create_request = self._get_create_request(
             subroutine_id=subroutine_id,
@@ -344,12 +343,12 @@ class VanillaSimulaQronExecutioner(Executor):
             )
 
     def _do_recv_epr(
-        self,
-        subroutine_id,
-        remote_node_id,
-        epr_socket_id,
-        q_array_address,
-        ent_results_array_address
+            self,
+            subroutine_id,
+            remote_node_id,
+            epr_socket_id,
+            q_array_address,
+            ent_results_array_address
     ):
         app_id = self._get_app_id(subroutine_id=subroutine_id)
         num_pairs = self._get_num_pairs_from_array(
@@ -382,13 +381,13 @@ class VanillaSimulaQronExecutioner(Executor):
 
     @inlineCallbacks
     def cmd_epr(
-        self,
-        create_id,
-        remote_node_id,
-        epr_socket_id,
-        remote_epr_socket_id,
-        qubit_id,
-        create_request,
+            self,
+            create_id,
+            remote_node_id,
+            epr_socket_id,
+            remote_epr_socket_id,
+            qubit_id,
+            create_request,
     ):
         """
         Create EPR pair with another node.
@@ -628,12 +627,12 @@ class VanillaSimulaQronExecutioner(Executor):
 
     @inlineCallbacks
     def send_epr_half(
-        self,
-        qubit_id,
-        epr_socket_id,
-        remote_node_name,
-        remote_epr_socket_id,
-        ent_info
+            self,
+            qubit_id,
+            epr_socket_id,
+            remote_node_name,
+            remote_epr_socket_id,
+            ent_info
     ):
         """
         Send qubit to another node.
@@ -674,13 +673,13 @@ class VanillaSimulaQronExecutioner(Executor):
 
     @inlineCallbacks
     def send_epr_outcome_half(
-        self,
-        epr_socket_id,
-        remote_node_name,
-        remote_epr_socket_id,
-        ent_info,
-        remote_outcome,
-        remote_basis
+            self,
+            epr_socket_id,
+            remote_node_name,
+            remote_epr_socket_id,
+            ent_info,
+            remote_outcome,
+            remote_basis
     ):
         """
         Send outcome from measure directly to another node.
@@ -827,9 +826,9 @@ class VanillaSimulaQronExecutioner(Executor):
         virt_qubit = self.get_virt_qubit(qubit_id=qubit_id)
         # TODO - Check what's the difference between invoking "get_qubit" on the virtual qubit
         #  and invoking "get_state" on the virtual node
-        #qubit = call_method(virt_qubit, "get_qubit")
+        # qubit = call_method(virt_qubit, "get_qubit")
         # Next remote method should be invoked on the virtual node
-        #qubit = call_method(virt_qubit, "get_state")
+        # qubit = call_method(virt_qubit, "get_state")
         qubit = yield call_method(virt_qubit, "get_register_RI")
         return qubit
 

@@ -5,7 +5,7 @@ from enum import Enum
 from threading import Thread
 from typing import Type, Optional, Callable, List, Tuple, Set, Dict
 
-from netqasm.backend.messages import (ErrorMessage, MessageHeader,
+from netqasm.backend.messages import (MessageHeader,
                                       MsgDoneMessage, ReturnArrayMessage,
                                       ReturnRegMessage, ReturnMessage, deserialize_return_msg,
                                       ErrorCode, Message, APP_ID)
@@ -202,8 +202,6 @@ class SimulaQronConnection(BaseNetQASMConnection):
         length = MessageHeader.len() + len(raw_msg)
         msg_hdr = MessageHeader(id=msg_id, length=length)
         self._socket.send(bytes(msg_hdr) + raw_msg)
-        # if callback is not None:
-        #     raise NotImplementedError("Callback not yet implemented")
         if block:
             self._wait_for_done(msg_id=msg_id)
         else:
@@ -292,11 +290,11 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 ret_msg.get_real_part(),
                 ret_msg.get_imag_part()
             )
-        elif isinstance(ret_msg, ErrorMessage):
+        elif isinstance(ret_msg, RichErrorMessage):
             if ret_msg.err_code == ErrorCode.UNSUPP.value:
                 raise SimUnsupportedError("Operation not supported")
             else:
-                raise RuntimeError(f"Received error message from backend: {ret_msg}")
+                raise RuntimeError(f"Received error message from backend: {ret_msg.get_err_msg()}")
         else:
             raise NotImplementedError(f"Unknown return message of type {type(ret_msg)}")
         # Continue handling replies until a done
@@ -359,6 +357,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
 # Definitions for the new message types
 QUBIT_REGISTRY_NUM = ctypes.c_uint8
 MAX_QUBIT_STATE_LEN = 5
+MAX_ERR_MSG_LEN = 100
 
 
 # "Extend" (by redefining the enum) the Message Type
@@ -391,6 +390,36 @@ class NewReturnMessageType(Enum):
     RET_ARR = 0x02
     RET_REG = 0x03
     RET_QUBIT_STATE = 0xFE
+
+
+class RichErrorMessage(ReturnMessage):
+    """Enriched message to the Host that an error occurred at the quantum node controller."""
+
+    _fields_ = [
+        ("err_code", ctypes.c_uint8),
+        ("err_msg_len", ctypes.c_uint32),
+        ("err_msg", MAX_ERR_MSG_LEN * ctypes.c_uint8),
+    ]
+
+    # This works because the enum types are mapped to the very same value
+    TYPE = NewReturnMessageType.ERR
+
+    def __init__(self, err_code: ErrorCode, err_msg: str):
+        super().__init__(self.TYPE.value)
+        err_bytes = err_msg.encode("utf-8")
+        if len(err_bytes) > MAX_ERR_MSG_LEN:
+            logger.warning("Reported error message too long")
+        self.err_code = err_code.value
+        self.err_msg_len = len(err_bytes)
+        for i, v in enumerate(err_bytes):
+            self.err_msg[i] = v
+        print("here")
+
+    def get_err_msg(self) -> str:
+        bytes_vals: List[int] = []
+        for i in range(self.err_msg_len):
+            bytes_vals.append(self.err_msg[i])
+        return bytes(bytes_vals).decode("utf-8")
 
 
 # New class for the return of the get qubit state message
@@ -444,7 +473,7 @@ nmsg.MESSAGE_CLASSES = {
 }
 nmsg.RETURN_MESSAGE_CLASSES = {
     nmsg.ReturnMessageType.DONE: MsgDoneMessage,
-    nmsg.ReturnMessageType.ERR: ErrorMessage,
+    nmsg.ReturnMessageType.ERR: RichErrorMessage,
     nmsg.ReturnMessageType.RET_REG: ReturnRegMessage,
     nmsg.ReturnMessageType.RET_ARR: ReturnArrayMessage,
     NewReturnMessageType.RET_QUBIT_STATE: ReturnQubitStateMessage,

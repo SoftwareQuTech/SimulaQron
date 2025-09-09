@@ -1,9 +1,9 @@
 from typing import Optional, Dict, Callable, Generator, Any, List
 
-from netqasm.lang.instr import Flavour
-from twisted.internet.defer import inlineCallbacks
 from netqasm.backend.messages import MsgDoneMessage, Message, MessageType
 from netqasm.backend.qnodeos import QNodeController
+from netqasm.lang.instr import Flavour
+from twisted.internet.defer import inlineCallbacks
 from twisted.internet.protocol import Protocol
 
 import simulaqron.settings as settings
@@ -13,7 +13,8 @@ from simulaqron.sdk.connection import (NewMessageType, GetQubitStateMessage,
 
 
 class SubroutineHandler(QNodeController):
-    def __init__(self, factory, instr_log_dir: Optional[str] = None, flavour: Optional[Flavour] = None):
+    def __init__(self, factory: "NetQASMFactory", instr_log_dir: Optional[str] = None,
+                 flavour: Optional[Flavour] = None):
         super().__init__(factory.name, instr_log_dir=instr_log_dir, flavour=flavour)
 
         self.factory = factory
