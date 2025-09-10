@@ -18,6 +18,7 @@ from netqasm.sdk.config import LogConfig
 from netqasm.sdk.shared_memory import SharedMemoryManager
 from netqasm.util.yaml import dump_yaml
 from simulaqron.network import Network
+from simulaqron.sdk import SimulaQronConnection
 from simulaqron.settings import SimBackend, simulaqron_settings
 from simulaqron.toolbox import has_module
 
@@ -150,7 +151,8 @@ def run_applications(
         net_cfg = None
 
     for _ in range(num_rounds):
-        with Pool(len(app_names)) as executor:
+        with Pool(len(app_names) + 3) as executor:
+            SimulaQronConnection.PROCESS_POOL = executor
             # Start the backend process
             network = run_sim_backend(app_names, sim_backend, net_cfg)
 
@@ -182,17 +184,18 @@ def run_applications(
             # Join the application processes and the backend
             names = [f'app_{app_name}' for app_name in app_names]
             result = {}
-            for future, name in as_completed(app_futures, names):
-                result[name] = future.get()
-            # if results_file is not None:
-            #     save_results(results=results, results_file=results_file)
-            if enable_logging:
-                assert timed_log_dir is not None
-                path = os.path.join(timed_log_dir, "results.yaml")
-                dump_yaml(data=result, file_path=path)
-
-            results.append(result)
-            network.stop()
+            try:
+                for future, name in as_completed(app_futures, names):
+                    result[name] = future.get()
+                # if results_file is not None:
+                #     save_results(results=results, results_file=results_file)
+                if enable_logging:
+                    assert timed_log_dir is not None
+                    path = os.path.join(timed_log_dir, "results.yaml")
+                    dump_yaml(data=result, file_path=path)
+            finally:
+                results.append(result)
+                network.stop()
 
         reset(save_loggers=True)
 

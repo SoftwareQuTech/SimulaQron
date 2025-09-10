@@ -2,7 +2,7 @@ import ctypes
 import socket
 import time
 from enum import Enum
-from threading import Thread
+from multiprocess.pool import Pool
 from typing import Type, Optional, Callable, List, Tuple, Set, Dict
 
 from netqasm.backend.messages import (MessageHeader,
@@ -29,6 +29,12 @@ logger = get_netqasm_logger("SimulaQronConnection")
 
 class SimulaQronConnection(BaseNetQASMConnection):
     NON_STABILIZER_INSTR = [GenericInstr.T]
+
+    # Process poool will be set externally when launching the applications
+    # This is due to the fact that the code creating the connections will run
+    # *inside a pool worker*, so it cannot create a new process pool because the
+    # worker itself is a daemon process.
+    PROCESS_POOL: Optional[Pool] = None
 
     def __init__(
             self,
@@ -64,6 +70,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
 
         # Next message ID
         self._next_msg_id: int = 0
+
+        # Messages ID's with deferred callbacks
+        self._messages_callbacks: Dict[int, Callable] = {}
 
         # Messages IDs we're waiting to be done
         self._waiting_msg_ids: Set[int] = set()
@@ -203,21 +212,12 @@ class SimulaQronConnection(BaseNetQASMConnection):
         msg_hdr = MessageHeader(id=msg_id, length=length)
         self._socket.send(bytes(msg_hdr) + raw_msg)
         if block:
-            self._wait_for_done(msg_id=msg_id)
+            self._wait_for_done(msg_id=msg_id, callback=callback)
         else:
-            # Execute callback in a new thread after the subroutine is finished
-            # TODO - This is not well designed; we need to avoid blocking, and execute the callback
-            #  once the ack msg *for the message id* arrives!!!!
-            #  Moreover, we need to stop the thread and join it right after that!
-            thread = Thread(
-                target=self._wait_for_done,
-                kwargs={
-                    "msg_id": msg_id,
-                    "callback": callback,
-                }
-            )
-            thread.daemon = True
-            thread.start()
+            # Register the callback so it will be called once the message
+            # is acknowledged
+            self._messages_callbacks[msg_id] = callback
+
 
     def _wait_for_done(self, msg_id: Optional[int] = None, callback: Optional[Callable] = None):
         """Waits for a message to be declared done by qnodeos.
@@ -253,56 +253,64 @@ class SimulaQronConnection(BaseNetQASMConnection):
         else:
             self.buf = data
         self._logger.debug("Got new data '%s' on socket to qnodeos", data)
-        print(f"Got new data '{data}' on socket to qnodeos")
 
     def _handle_reply(self) -> int:
         """Handle all next replies until a done message and return the msg ID for the done"""
         # Try to read next message from the buffer otherwise read some more and try again
-        try:
-            ret_msg = deserialize_return_msg(self.buf)
-        except ValueError:
-            # Incomplete message
-            self._logger.debug("Incomplete message")
-            time.sleep(0.1)
-            self._read_more_data()
-            return self._handle_reply()
+        # TODO - Change the while to use a condition that can be controlled externally
+        while True:
+            try:
+                ret_msg = deserialize_return_msg(self.buf)
+            except ValueError:
+                # Incomplete message
+                self._logger.debug("Incomplete message")
+                time.sleep(0.1)
+                self._read_more_data()
+                continue
 
-        # Remove the data of this message from the buffer
-        self.buf = self.buf[len(ret_msg):]
+            # Remove the data of this message from the buffer
+            self.buf = self.buf[len(ret_msg):]
 
-        self._logger.debug("Got message %s", ret_msg)
-        if isinstance(ret_msg, MsgDoneMessage):
-            self._waiting_msg_ids.remove(ret_msg.msg_id)
-            self._done_msg_ids.add(ret_msg.msg_id)
-            return ret_msg.msg_id
-        elif isinstance(ret_msg, ReturnRegMessage):
-            self._update_shared_memory(
-                entry=Register.from_raw(raw=ret_msg.register),
-                value=ret_msg.value,
-            )
-        elif isinstance(ret_msg, ReturnArrayMessage):
-            self._update_shared_memory(
-                entry=Address(address=ret_msg.address),
-                value=ret_msg.values,
-            )
-        elif isinstance(ret_msg, ReturnQubitStateMessage):
-            # We locally store the state info to return it later. We have to
-            # do this since _handle_reply cannot return values others than the
-            # message id when handling the reply of the original message
-            self._store_qubit_state(
-                ret_msg.qubit_id,
-                ret_msg.get_real_part(),
-                ret_msg.get_imag_part()
-            )
-        elif isinstance(ret_msg, RichErrorMessage):
-            if ret_msg.err_code == ErrorCode.UNSUPP.value:
-                raise SimUnsupportedError("Operation not supported")
+            self._logger.debug("Got message %s", ret_msg)
+            if isinstance(ret_msg, MsgDoneMessage):
+                self._waiting_msg_ids.remove(ret_msg.msg_id)
+                self._done_msg_ids.add(ret_msg.msg_id)
+                # Call the registered callback, if any
+                if ret_msg.msg_id in self._messages_callbacks:
+                    if SimulaQronConnection.PROCESS_POOL is None:
+                        raise RuntimeError("Callback process pool was not set correctly")
+                    if self._messages_callbacks[ret_msg.msg_id] is not None:
+                        SimulaQronConnection.PROCESS_POOL.apply_async(
+                            self._messages_callbacks[ret_msg.msg_id]
+                        )
+                    del self._messages_callbacks[ret_msg.msg_id]
+                return ret_msg.msg_id
+            elif isinstance(ret_msg, ReturnRegMessage):
+                self._update_shared_memory(
+                    entry=Register.from_raw(raw=ret_msg.register),
+                    value=ret_msg.value,
+                )
+            elif isinstance(ret_msg, ReturnArrayMessage):
+                self._update_shared_memory(
+                    entry=Address(address=ret_msg.address),
+                    value=ret_msg.values,
+                )
+            elif isinstance(ret_msg, ReturnQubitStateMessage):
+                # We locally store the state info to return it later. We have to
+                # do this since _handle_reply cannot return values others than the
+                # message id when handling the reply of the original message
+                self._store_qubit_state(
+                    ret_msg.qubit_id,
+                    ret_msg.get_real_part(),
+                    ret_msg.get_imag_part()
+                )
+            elif isinstance(ret_msg, RichErrorMessage):
+                if ret_msg.err_code == ErrorCode.UNSUPP.value:
+                    raise SimUnsupportedError("Operation not supported")
+                else:
+                    raise RuntimeError(f"Received error message from backend: {ret_msg.get_err_msg()}")
             else:
-                raise RuntimeError(f"Received error message from backend: {ret_msg.get_err_msg()}")
-        else:
-            raise NotImplementedError(f"Unknown return message of type {type(ret_msg)}")
-        # Continue handling replies until a done
-        return self._handle_reply()
+                raise NotImplementedError(f"Unknown return message of type {type(ret_msg)}")
 
     def block(self):
         while len(self._waiting_msg_ids) > 0:

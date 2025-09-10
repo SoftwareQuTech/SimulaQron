@@ -29,7 +29,7 @@
 
 import time
 import random
-import multiprocessing as mp
+from multiprocess.context import Process
 from typing import List
 
 import networkx as nx
@@ -74,7 +74,7 @@ class Network:
         else:
             self.name = name
 
-        self.processes: List[mp.Process] = []
+        self.processes: List[Process] = []
         self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
 
         if network_config_file is None:
@@ -154,12 +154,12 @@ class Network:
         """
         Setup the processes forming the network, however they are not started yet.
         """
-        mp.set_start_method("spawn", force=True)
+        #mp.set_start_method("spawn", force=True)
         for node in self.nodes:
-            process_virtual = mp.Process(
+            process_virtual = Process(
                 target=start_vnode, args=(node, self.name, get_log_level()), name=f"VirtNode {node}"
             )
-            process_qnodeos = mp.Process(
+            process_qnodeos = Process(
                 target=start_qnodeos, args=(node, self.name, get_log_level()), name=f"QnodeOSNode {node}"
             )
             self.processes += [process_virtual, process_qnodeos]
@@ -198,6 +198,7 @@ class Network:
                 time.sleep(0.1)
                 try:
                     p.terminate()
+                    p.join()
                 except Exception as err:
                     self._logger.warning("Could not terminate one of the processes in the"
                                          "network due to error: %s", err)
