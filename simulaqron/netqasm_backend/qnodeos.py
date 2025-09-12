@@ -45,9 +45,9 @@ class SubroutineHandler(QNodeController):
         casted_executor: VanillaSimulaQronExecutioner = self._executor
         # The ProjectQ backend also returns an unused mapping; we need to fix that
         if settings.simulaqron_settings.sim_backend == settings.SimBackend.PROJECTQ.value:
-            _, [realvec, imagvec] = yield casted_executor.get_qubit_state(get_quibit_state_msg.qubit_id)
+            _, [realvec, imagvec] = yield from casted_executor.get_qubit_state(get_quibit_state_msg.qubit_id)
         else:
-            realvec, imagvec = yield casted_executor.get_qubit_state(get_quibit_state_msg.qubit_id)
+            realvec, imagvec = yield from casted_executor.get_qubit_state(get_quibit_state_msg.qubit_id)
         # Return a message to the connection object
         self._return_qubit_state(get_quibit_state_msg.qubit_id, realvec, imagvec)
 

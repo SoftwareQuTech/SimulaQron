@@ -137,7 +137,7 @@ class Backend:
             self._logger.error("NetQASM server address (%d) is already in use.", self.myID.port)
             return
         except Exception as e:
-            self._logger.error("Critical error when starting local virtual node server: %s", e)
+            self._logger.exception("Critical error when starting local virtual node server: %s", e)
             return
 
 

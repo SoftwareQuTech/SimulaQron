@@ -52,25 +52,20 @@ def reset(save_loggers=False):
     reload(logging)
 
 
-def check_sim_backend(sim_backend: SimBackend):
-    if sim_backend in [SimBackend.PROJECTQ, SimBackend.QUTIP]:
-        assert has_module.main(sim_backend.value), f"To use {sim_backend} as backend you need to install the package"
-
-
 def run_sim_backend(node_names: List[str], sim_backend: SimBackend, network_config_file: Optional[str]):
     logger.debug("Starting simulaqron sim_backend process with nodes %s", node_names)
-    check_sim_backend(sim_backend)
+    if sim_backend in [SimBackend.PROJECTQ, SimBackend.QUTIP]:
+        assert has_module.main(sim_backend.value),\
+            f"To use {sim_backend} as backend you need to install the package"
     simulaqron_settings.sim_backend = sim_backend.value
     new_network = True if network_config_file is None else False
-    network = Network(
+    return Network(
         name="default",
         nodes=node_names,
         network_config_file=network_config_file,
         force=True,
         new=new_network
     )
-    network.start()
-    return network
 
 
 def run_applications(
@@ -155,6 +150,7 @@ def run_applications(
             SimulaQronConnection.PROCESS_POOL = executor
             # Start the backend process
             network = run_sim_backend(app_names, sim_backend, net_cfg)
+            network.start()
 
             # Start the application processes
             app_futures = []

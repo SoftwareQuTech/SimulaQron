@@ -2,6 +2,7 @@ import ctypes
 import socket
 import time
 from enum import Enum
+
 from multiprocess.pool import Pool
 from typing import Type, Optional, Callable, List, Tuple, Set, Dict
 
@@ -210,14 +211,14 @@ class SimulaQronConnection(BaseNetQASMConnection):
         self._waiting_msg_ids.add(msg_id)
         length = MessageHeader.len() + len(raw_msg)
         msg_hdr = MessageHeader(id=msg_id, length=length)
-        self._socket.send(bytes(msg_hdr) + raw_msg)
+        written = self._socket.send(bytes(msg_hdr) + raw_msg)
+        self._logger.debug("Written %d bytes to NetQASM server", written)
         if block:
             self._wait_for_done(msg_id=msg_id, callback=callback)
         else:
             # Register the callback so it will be called once the message
             # is acknowledged
             self._messages_callbacks[msg_id] = callback
-
 
     def _wait_for_done(self, msg_id: Optional[int] = None, callback: Optional[Callable] = None):
         """Waits for a message to be declared done by qnodeos.
@@ -247,7 +248,10 @@ class SimulaQronConnection(BaseNetQASMConnection):
 
     def _read_more_data(self):
         """Reads in some more data on the socket to qnodeos"""
-        data = self._socket.recv(1024)
+        try:
+            data = self._socket.recv(1024)
+        except Exception as err:
+            self._logger.exception("Error in recv from NetQASM server", err)
         if self.buf:
             self.buf += data
         else:
@@ -266,6 +270,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 self._logger.debug("Incomplete message")
                 time.sleep(0.1)
                 self._read_more_data()
+                continue
+            except Exception as exc:
+                self._logger.exception("Unexpected exception:", exc)
                 continue
 
             # Remove the data of this message from the buffer

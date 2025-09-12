@@ -822,14 +822,14 @@ class VanillaSimulaQronExecutioner(Executor):
 
     @inlineCallbacks
     def get_qubit_state(self, qubit_id: int) -> Generator[Deferred | Any, Any, Any]:
-        self._logger.debug("Retriving the state of qubit id %d", qubit_id)
+        self._logger.debug("Retrieving the state of qubit id %d", qubit_id)
         virt_qubit = self.get_virt_qubit(qubit_id=qubit_id)
         # TODO - Check what's the difference between invoking "get_qubit" on the virtual qubit
         #  and invoking "get_state" on the virtual node
         # qubit = call_method(virt_qubit, "get_qubit")
         # Next remote method should be invoked on the virtual node
         # qubit = call_method(virt_qubit, "get_state")
-        qubit = yield call_method(virt_qubit, "get_register_RI")
+        qubit = yield from call_method(virt_qubit, "get_register_RI")
         return qubit
 
 
