@@ -13,7 +13,7 @@ from simulaqron.sdk.connection import (NewMessageType, GetQubitStateMessage,
 
 
 class SubroutineHandler(QNodeController):
-    def __init__(self, factory: "NetQASMFactory", instr_log_dir: Optional[str] = None,
+    def __init__(self, factory: "NetQASMFactory", instr_log_dir: Optional[str] = None,  # noqa: F821
                  flavour: Optional[Flavour] = None):
         super().__init__(factory.name, instr_log_dir=instr_log_dir, flavour=flavour)
 
