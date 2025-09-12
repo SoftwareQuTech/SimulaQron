@@ -16,9 +16,10 @@ from netqasm.qlink_compat import (Basis, BellState, LinkLayerErr,
                                   LinkLayerOKTypeK, LinkLayerOKTypeM,
                                   LinkLayerOKTypeR, RandomBasis, RequestType,
                                   ReturnType)
-from twisted.internet import reactor, task
+from twisted.internet import task
 from twisted.internet.defer import inlineCallbacks, Deferred
 
+from simulaqron.reactor import reactor
 from simulaqron.general import SimUnsupportedError
 from simulaqron.general.host_config import get_node_id_from_net_config
 from simulaqron.sdk.connection import RichErrorMessage

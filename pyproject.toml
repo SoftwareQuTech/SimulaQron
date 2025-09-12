@@ -61,7 +61,8 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-exclude = ["tests", "docs", "examples"]
+include = ["simulaqron"]
+exclude = ["simulaqron/config"]
 
 [project.scripts]
 simulaqron = "simulaqron.simulaqron:cli"

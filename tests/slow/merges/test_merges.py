@@ -5,7 +5,6 @@ import numpy as np
 import multiprocessing as mp
 
 from twisted.spread import pb
-from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
 
 from simulaqron.general.host_config import SocketsConfig
@@ -13,6 +12,7 @@ from simulaqron.local.setup import setup_local, assemble_qubit
 from simulaqron.network import Network
 from simulaqron.settings import simulaqron_settings, SimBackend
 from simulaqron.toolbox.stabilizer_states import StabilizerState
+from simulaqron.reactor import reactor
 
 
 class localNode(pb.Root):

@@ -4,12 +4,12 @@ import time
 import signal
 from timeit import default_timer as timer
 
-from twisted.internet import reactor
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
 from twisted.spread import pb
 
 from netqasm.logging.glob import get_netqasm_logger, set_log_level
 
+from simulaqron.reactor import reactor
 from simulaqron.netqasm_backend.factory import NetQASMFactory
 from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
 from simulaqron.general.host_config import SocketsConfig

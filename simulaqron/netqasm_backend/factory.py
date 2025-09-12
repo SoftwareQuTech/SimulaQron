@@ -31,11 +31,11 @@ from typing import Type
 from netqasm.backend.messages import MessageHeader, ErrorCode, deserialize_host_msg, Message, \
     InitNewAppMessage
 from netqasm.logging.glob import get_netqasm_logger
-from twisted.internet import reactor
 from twisted.internet.defer import DeferredLock, inlineCallbacks
 from twisted.internet.protocol import Factory, Protocol, connectionDone
 #from twisted.internet.task import deferLater
 
+from simulaqron.reactor import reactor
 from simulaqron.general.host_config import SocketsConfig, Host
 from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
 from simulaqron.sdk.connection import RichErrorMessage

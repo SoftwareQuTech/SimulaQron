@@ -30,11 +30,12 @@
 import logging
 import time
 from twisted.spread import pb
-from twisted.internet import reactor, error
+from twisted.internet import error
 from twisted.internet.defer import DeferredList
 from twisted.internet.error import ReactorNotRunning
 
 from simulaqron.settings import simulaqron_settings
+from simulaqron.reactor import reactor
 
 
 #####################################################################################################

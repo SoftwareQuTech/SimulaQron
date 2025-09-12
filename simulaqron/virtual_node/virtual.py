@@ -32,7 +32,6 @@ import random
 from collections import deque
 
 from twisted.spread import pb
-from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, DeferredLock, Deferred, DeferredList
 from twisted.internet.task import deferLater
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
@@ -47,6 +46,7 @@ from simulaqron.general.host_config import SocketsConfig, Host
 # We then supress the flake8 errors associated with that
 from simulaqron.general.errors import *  # noqa: F401, F403
 from simulaqron.settings import simulaqron_settings, SimBackend
+from simulaqron.reactor import reactor
 
 if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
     from simulaqron.virtual_node.qutip_simulator import QutipEngine as QEngine
