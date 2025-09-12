@@ -2,16 +2,27 @@ import numpy as np
 import pytest
 from netqasm.runtime.settings import set_simulator
 
+from simulaqron.settings import simulaqron_settings, SimBackend
+
 set_simulator("simulaqron")
 
 from netqasm.runtime.application import default_app_instance  # noqa: E402
 from netqasm.sdk.external import NetQASMConnection, get_qubit_state  # noqa: E402
 from netqasm.sdk import Qubit, EPRSocket  # noqa: E402
 
-from simulaqron.run.run import run_applications  # noqa: E402
+from simulaqron.run.run import run_applications, reset  # noqa: E402
 
 
 class TestGetQubit:
+    @pytest.fixture(autouse=True)
+    def network(self):
+        simulaqron_settings.default_settings()
+        simulaqron_settings.sim_backend = SimBackend.PROJECTQ.value
+        yield
+        simulaqron_settings.default_settings()
+        simulaqron_settings.sim_backend = SimBackend.PROJECTQ.value
+        reset()
+
     @staticmethod
     def peek_new_unflushed_qubit():
         with NetQASMConnection("Alice") as alice:
@@ -66,9 +77,7 @@ class TestGetQubit:
             meas = entangled_qubit.measure()
         return meas
 
-    def test_peek_new_unflushed_qubit(self):
-        # TODO - This method should raise an Exception; not freeze the simulation
-        #  Maybe we need to re-throw exceptions from lower levers?
+    def test_peek_new_unflushed_qubit(self, network):
         apps = default_app_instance(
             [
                 ("Alice", TestGetQubit.peek_new_unflushed_qubit)
@@ -78,7 +87,7 @@ class TestGetQubit:
             _ = run_applications(apps, use_app_config=False, enable_logging=False)
         assert "Alice: Qubit 0 not found" in str(exc.value)
 
-    def test_get_basic_state_local(self):
+    def test_get_basic_state_local(self, network):
         apps = default_app_instance(
             [
                 ("Alice", TestGetQubit.peek_init_qubit)
@@ -88,7 +97,7 @@ class TestGetQubit:
         assert np.array_equal(raw_results[0]["app_Alice"], np.array([1.0 + 0j, 0 + 0j]))
 
     @pytest.mark.skip(reason="todo - fix this test")
-    def test_get_qubit_state_local(self):
+    def test_get_qubit_state_local(self, network):
         apps = default_app_instance(
             [
                 ("Alice", TestGetQubit.peek_local_qubit)
@@ -98,7 +107,7 @@ class TestGetQubit:
         print(raw_results)
 
     @pytest.mark.skip(reason="todo - fix this test")
-    def test_get_qubit_state_teleport(self):
+    def test_get_qubit_state_teleport(self, network):
         apps = default_app_instance(
             [
                 ("Alice", TestGetQubit.alice_teleport),
