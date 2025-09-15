@@ -1,14 +1,17 @@
+import math
+
 import numpy as np
 import pytest
 from netqasm.runtime.settings import set_simulator
+from netqasm.sdk.classical_communication.message import StructuredMessage
 
 from simulaqron.settings import simulaqron_settings, SimBackend
 
 set_simulator("simulaqron")
 
 from netqasm.runtime.application import default_app_instance  # noqa: E402
-from netqasm.sdk.external import NetQASMConnection, get_qubit_state  # noqa: E402
-from netqasm.sdk import Qubit, EPRSocket  # noqa: E402
+from netqasm.sdk.external import NetQASMConnection, Socket, get_qubit_state  # noqa: E402
+from netqasm.sdk import Qubit, EPRSocket, set_qubit_state  # noqa: E402
 
 from simulaqron.run.run import run_applications, reset  # noqa: E402
 
@@ -53,29 +56,44 @@ class TestGetQubit:
 
     @staticmethod
     def alice_teleport():
+        classical_socket = Socket("Alice", "Bob")
         epr_socket: EPRSocket = EPRSocket("Bob")
         with NetQASMConnection("Alice", epr_sockets=[epr_socket]) as alice:
             # Create a qubit
             q = Qubit(alice)
-            q.H()
-
-            # Create entanglement
+            set_qubit_state(q, math.pi / 2.0, math.pi / 4.0)
             epr = epr_socket.create_keep()[0]
+            alice.flush()
+            alice_state = get_qubit_state(q)
 
             # Teleport
             q.cnot(epr)
             q.H()
+
             m1 = q.measure()
             m2 = epr.measure()
-        return m1, m2
+            alice.flush()
+
+            classical_socket.send_structured(StructuredMessage("Corrections", f"{int(m1)},{int(m2)}"))
+        return {"m1": int(m1), "m2": int(m2), "alice_state": alice_state}
 
     @staticmethod
     def bob_teleport():
+        classical_socket = Socket("Bob", "Alice")
         epr_socket: EPRSocket = EPRSocket("Alice")
-        with NetQASMConnection("Bob", epr_sockets=[epr_socket]):
+        with NetQASMConnection("Bob", epr_sockets=[epr_socket]) as bob:
             entangled_qubit = epr_socket.recv_keep()[0]
-            meas = entangled_qubit.measure()
-        return meas
+            bob.flush()
+
+            msg = classical_socket.recv_structured()
+            m1, m2 = msg.payload.split(",")
+            if int(m2) == 1:
+                entangled_qubit.X()
+            if int(m1) == 1:
+                entangled_qubit.Z()
+            bob.flush()
+            bob_state = get_qubit_state(entangled_qubit)
+        return {"bob_state": bob_state}
 
     def test_peek_new_unflushed_qubit(self, network):
         apps = default_app_instance(
@@ -106,7 +124,6 @@ class TestGetQubit:
         raw_results = run_applications(apps, use_app_config=False, enable_logging=False)
         print(raw_results)
 
-    @pytest.mark.skip(reason="todo - fix this test")
     def test_get_qubit_state_teleport(self, network):
         apps = default_app_instance(
             [
@@ -115,4 +132,4 @@ class TestGetQubit:
             ]
         )
         raw_results = run_applications(apps, use_app_config=False, enable_logging=False)
-        print(raw_results)
+        assert np.array_equal(raw_results[0]["app_Alice"]["alice_state"], raw_results[0]["app_Bob"]["bob_state"])
