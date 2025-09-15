@@ -26,12 +26,25 @@ class TestGetQubit:
         simulaqron_settings.sim_backend = SimBackend.PROJECTQ.value
         reset()
 
+    # Here we define the quantum programs used in the tests
+
     @staticmethod
     def peek_new_unflushed_qubit():
         with NetQASMConnection("Alice") as alice:
             q_a = Qubit(alice)
             state_a = get_qubit_state(q_a)
             return state_a
+
+    @staticmethod
+    def peek_unflushed_qubit():
+        with NetQASMConnection("Alice") as alice:
+            q = Qubit(alice)
+            q.H()
+            alice.flush()
+
+            q.X()
+            get_qubit_state(q)
+            return
 
     @staticmethod
     def peek_init_qubit():
@@ -74,7 +87,9 @@ class TestGetQubit:
             m2 = epr.measure()
             alice.flush()
 
-            classical_socket.send_structured(StructuredMessage("Corrections", f"{int(m1)},{int(m2)}"))
+            classical_socket.send_structured(
+                StructuredMessage("Corrections", f"{int(m1)}/{int(m2)}")
+            )
         return {"m1": int(m1), "m2": int(m2), "alice_state": alice_state}
 
     @staticmethod
@@ -86,7 +101,7 @@ class TestGetQubit:
             bob.flush()
 
             msg = classical_socket.recv_structured()
-            m1, m2 = msg.payload.split(",")
+            m1, m2 = msg.payload.split("/")
             if int(m2) == 1:
                 entangled_qubit.X()
             if int(m1) == 1:
@@ -94,6 +109,8 @@ class TestGetQubit:
             bob.flush()
             bob_state = get_qubit_state(entangled_qubit)
         return {"bob_state": bob_state}
+
+    # From here down, the actual tests
 
     def test_peek_new_unflushed_qubit(self, network):
         apps = default_app_instance(
@@ -103,7 +120,17 @@ class TestGetQubit:
         )
         with pytest.raises(RuntimeError) as exc:
             _ = run_applications(apps, use_app_config=False, enable_logging=False)
-        assert "Alice: Qubit 0 not found" in str(exc.value)
+        assert "Qubit 0 has unflushed operations" in str(exc.value)
+
+    def test_peek_unflushed_qubit(self, network):
+        apps = default_app_instance(
+            [
+                ("Alice", TestGetQubit.peek_unflushed_qubit)
+            ]
+        )
+        with pytest.raises(RuntimeError) as exc:
+            _ = run_applications(apps, use_app_config=False, enable_logging=False)
+        assert "Qubit 0 has unflushed operations" in str(exc.value)
 
     def test_get_basic_state_local(self, network):
         apps = default_app_instance(

@@ -364,6 +364,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
         return msg_id
 
     def get_qubit_state(self, app_id: int, qubit_id: int) -> List[complex]:
+        # Check if there are some pending (unflushed) operations on the qubit
+        if len(self.builder._pending_commands) > 0:
+            raise RuntimeError(f"Qubit {qubit_id} has unflushed operations")
         # Here we craft the special message that signals QNodeOS to
         # retrieve the state of a qubit.
         msg = GetQubitStateMessage(app_id=app_id, qubit_id=qubit_id)
