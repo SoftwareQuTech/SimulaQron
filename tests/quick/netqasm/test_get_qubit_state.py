@@ -139,6 +139,7 @@ class TestGetQubit:
             ]
         )
         raw_results = run_applications(apps, use_app_config=False, enable_logging=False)
+        # We expect the qubit to be initialized in the |0> state = [1 0]
         assert np.array_equal(raw_results[0]["app_Alice"], np.array([1.0 + 0.0j, 0 + 0.0j]))
 
     def test_get_qubit_state_local(self, network):
