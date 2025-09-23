@@ -16,9 +16,9 @@ class Socket(_Socket):
 
     def __init__(
         self,
-        app_name,
-        remote_app_name,
-        socket_id=0,
+        app_name: str,
+        remote_app_name: str,
+        socket_id: int = 0,
         timeout: Optional[int] = None,
         use_callbacks=False,
         network_name="default",
@@ -34,6 +34,9 @@ class Socket(_Socket):
 
         self._logger = get_netqasm_logger(f"{self.__class__.__name__}({app_name} <-> {remote_app_name})")
         self._timeout = timeout
+        # We define _app_socket as None as a default value, so the __del__ method
+        # does not fail when the socket could not be connected correctly.
+        self._app_socket = None
         self._app_socket: socket.socket = self._connect()
 
     def __del__(self):
