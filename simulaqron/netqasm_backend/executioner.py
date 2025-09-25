@@ -121,10 +121,8 @@ class VanillaSimulaQronExecutioner(Executor):
         self._logger.error("At line %d: %s\n%s", prog_counter, exc, traceback_str)
         if isinstance(exc, SimUnsupportedError):
             self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.UNSUPP, err_msg="Unsupported simulation engine"))
-        elif isinstance(exc, ValueError):
-            self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.GENERAL, err_msg=str(exc)))
         else:
-            self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.GENERAL, err_msg="General error"))
+            self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.GENERAL, err_msg=str(exc)))
 
     def _return_msg(self, msg):
         if self._return_msg_func is None:
