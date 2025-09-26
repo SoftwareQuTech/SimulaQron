@@ -26,6 +26,7 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+from typing import Tuple, Dict, List
 
 try:
     import projectq as pQ
@@ -112,7 +113,7 @@ class ProjectQEngine(QuantumEngine):
 
         self.measure_qubit(qubitNum)
 
-    def get_register_RI(self):
+    def _get_internal_qubit_state(self) -> Tuple[Dict[int, int], List[complex]]:
         """
         Retrieves the entire register in real and imaginary parts and returns the result as a
         list. Twisted only likes to send real valued lists, not complex ones.
@@ -121,9 +122,14 @@ class ProjectQEngine(QuantumEngine):
         order, state = self.eng.backend.cheat()
         # Update the order based on the positions in the qubitReg
         # and not of the qubit IDs
-        q_reg_order = {}
+        q_reg_order: Dict[int, int] = {}
         for i, q in enumerate(self.qubitReg):
             q_reg_order[i] = order[q.id]
+
+        return q_reg_order, state
+
+    def get_register_RI(self) -> Tuple[Dict[int, int], Tuple[Tuple[float, ...], Tuple[float, ...]]]:
+        q_reg_order, state = self._get_internal_qubit_state()
 
         # Note previously the format of real and imaginary numbers were
         # expected, use the same even though Re will be the qubit mapping
@@ -132,6 +138,13 @@ class ProjectQEngine(QuantumEngine):
         Im = tuple(n.imag for n in state)
 
         return q_reg_order, (Re, Im)
+
+    def get_density_matrix_RI(self) -> Tuple[List[float], List[float]]:
+        # Get the internal state of the qubit, and compute the outer product |q><q|
+        _, raw_qubit_state = self._get_internal_qubit_state()
+        qubit_state = np.array(raw_qubit_state)
+        density_matrix = np.outer(qubit_state, qubit_state)
+        return density_matrix.real.tolist(), density_matrix.real.tolist()
 
     def apply_H(self, qubitNum):
         """

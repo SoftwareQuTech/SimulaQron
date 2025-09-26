@@ -30,6 +30,7 @@
 import random
 
 from collections import deque
+from typing import Tuple, List
 
 from twisted.spread import pb
 from twisted.internet.defer import inlineCallbacks, DeferredLock, Deferred, DeferredList
@@ -38,6 +39,7 @@ from twisted.internet.error import ConnectionRefusedError, CannotListenError
 from twisted.spread.pb import RemoteError, RemoteReference
 
 from netqasm.logging.glob import get_netqasm_logger
+from typing_extensions import Generator
 
 from simulaqron.virtual_node.basics import QuantumError, NoQubitError, VirtNetError
 from simulaqron.virtual_node.quantum import SimulatedQubit
@@ -1091,7 +1093,7 @@ class VirtualNode(pb.Root):
 
     def remote_get_register(self, qubit):
         """
-        Return the value of of a locally simulated register which contains this virtual qubit.
+        Return the value of a locally simulated register which contains this virtual qubit.
         """
 
         (realM, imagM) = qubit.simQubit.register.get_register_RI()
@@ -1103,7 +1105,7 @@ class VirtualNode(pb.Root):
 
     def remote_get_register_del(self, qubitNum):
         """
-        Return the value of of a locally simulated register, and remove the simulated qubits from this node.
+        Return the value of a locally simulated register, and remove the simulated qubits from this node.
 
         Caution: virtual qubits not updated.
         """
@@ -1715,6 +1717,19 @@ class VirtualQubit(pb.Referenceable):
                 self._logger.error("cannot get qubit number.")
 
         return (R, I)
+
+    @inlineCallbacks
+    def remote_get_density_matrix_RI(
+            self
+    ) -> Generator[Deferred, Tuple[List[float], List[float]], Tuple[List[float], List[float]]]:
+        # This function calls itself recursively *on the remote* if the simulated node
+        # is not the current node
+        # Otherwise, it calls the corresponding function of the local simulated qubit
+        if self.simNode == self.virtNode:
+            real_part, im_part = self.simQubit.register.get_density_matrix_RI()
+        else:
+            real_part, im_part = yield call_method(self.simQubit, "get_density_matrix_RI")
+        return real_part, im_part
 
     @inlineCallbacks
     def remote_get_register_RI(self):

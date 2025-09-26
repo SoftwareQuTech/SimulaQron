@@ -28,6 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import math
 import cmath
+from typing import Tuple, List
 
 import numpy as np
 import logging
@@ -134,7 +135,7 @@ class QutipEngine(QuantumEngine):
 
         return (Re, Im)
 
-    def get_register_RI(self):
+    def get_register_RI(self) -> Tuple[List[float], List[float]]:
         """
         Retrieves the entire register in real and imaginary parts and returns the result as a
         list. Twisted only likes to send real valued lists, not complex ones.
@@ -142,7 +143,13 @@ class QutipEngine(QuantumEngine):
         Re = self.qubitReg.full().real.tolist()
         Im = self.qubitReg.full().imag.tolist()
 
-        return (Re, Im)
+        return Re, Im
+
+    def get_density_matrix_RI(self) -> Tuple[Tuple[float], Tuple[float]]:
+        # Qutip uses density matrices as the internal representation, so we don't need
+        # to compute the outer product to get the result
+        real_part, im_part = self.get_register_RI()
+        return tuple(*real_part), tuple(*im_part)
 
     def apply_H(self, qubitNum):
         """

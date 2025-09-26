@@ -26,7 +26,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from typing import Type
+from typing import Type, Dict
 
 from netqasm.backend.messages import MessageHeader, ErrorCode, deserialize_host_msg, Message, \
     InitNewAppMessage
@@ -117,6 +117,7 @@ class NetQASMProtocol(Protocol):
     def log_error(self, failure):
         self._logger.error("Handling message failed with failure = %s", failure.value)
         self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.GENERAL, err_msg=str(failure.value)))
+        yield None
         #yield deferLater(reactor, 0.1, self.stop)
 
     def stop(self):
@@ -188,7 +189,7 @@ class NetQASMFactory(Factory):
         self.network_name = network_name
 
         # Dictionary that keeps qubit dictionaries for each application
-        self.qubitList = {}
+        self.qubitList: Dict[int, "VirtualQubitRef"] = {}  # noqa: F821
 
         # Lock governing access to the qubitList
         self._lock = DeferredLock()

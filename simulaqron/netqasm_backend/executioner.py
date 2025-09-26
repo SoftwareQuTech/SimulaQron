@@ -4,7 +4,7 @@ import traceback
 from collections import defaultdict
 from enum import Enum
 from functools import partial
-from typing import Any, Generator, List
+from typing import Any, Generator, List, Tuple
 
 import netqasm.lang.instr.core as core_instructions
 import netqasm.lang.instr.vanilla as vanilla_instructions
@@ -822,16 +822,13 @@ class VanillaSimulaQronExecutioner(Executor):
         self.remove_qubit_id(qubit_id=physical_address)
 
     @inlineCallbacks
-    def get_qubit_state(self, qubit_id: int) -> Generator[Deferred | Any, Any, Any]:
+    def get_qubit_state(
+            self, qubit_id: int
+    ) -> Generator[Deferred, Tuple[List[float], List[float]], Tuple[List[float], List[float]]]:
         self._logger.debug("Retrieving the state of qubit id %d", qubit_id)
         virt_qubit = self.get_virt_qubit(qubit_id=qubit_id)
-        # TODO - Check what's the difference between invoking "get_qubit" on the virtual qubit
-        #  and invoking "get_state" on the virtual node
-        # qubit = call_method(virt_qubit, "get_qubit")
-        # Next remote method should be invoked on the virtual node
-        # qubit = call_method(virt_qubit, "get_state")
-        qubit = yield from call_method(virt_qubit, "get_register_RI")
-        return qubit
+        real_part, im_part = yield call_method(virt_qubit, "get_density_matrix_RI")
+        return real_part, im_part
 
 
 class VirtualQubitRef:

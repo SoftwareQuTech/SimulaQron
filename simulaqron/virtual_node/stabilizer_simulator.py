@@ -26,6 +26,8 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+from typing import Tuple
+
 from simulaqron.virtual_node.basics import QuantumEngine, QuantumError, NoQubitError
 from simulaqron.toolbox.stabilizer_states import StabilizerState
 from simulaqron.general import SimUnsupportedError
@@ -106,6 +108,10 @@ class StabilizerEngine(QuantumEngine):
         Im = None
 
         return Re, Im
+
+    def get_density_matrix_RI(self) -> Tuple[Tuple[float], Tuple[float]]:
+        # TODO - Implement this
+        raise NotImplementedError("get_density_matrix_RI is not implemented for stabilizer engine.")
 
     def apply_H(self, qubitNum):
         """
