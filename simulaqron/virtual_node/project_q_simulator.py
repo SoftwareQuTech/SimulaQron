@@ -144,7 +144,7 @@ class ProjectQEngine(QuantumEngine):
         _, raw_qubit_state = self._get_internal_qubit_state()
         qubit_state = np.array(raw_qubit_state)
         density_matrix = np.outer(qubit_state, qubit_state)
-        return density_matrix.real.tolist(), density_matrix.real.tolist()
+        return density_matrix.real.tolist(), density_matrix.imag.tolist()
 
     def apply_H(self, qubitNum):
         """

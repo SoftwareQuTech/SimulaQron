@@ -48,7 +48,7 @@ class SubroutineHandler(QNodeController):
         # Return a message to the connection object
         self._return_qubit_state(get_quibit_state_msg.qubit_id, realvec, imagvec)
 
-    def _return_qubit_state(self, qubit_id: int, real_part: List[float], imag_part: List[float]):
+    def _return_qubit_state(self, qubit_id: int, real_part: List[List[float]], imag_part: List[List[float]]):
         qubit_state_message = ReturnQubitStateMessage(qubit_id, real_part, imag_part)
         self._return_msg(msg=qubit_state_message)
 

@@ -85,7 +85,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
         self.buf = b""
 
         # Buffer for retrieved qubit states
-        self._qubit_states: Dict[int, List[complex]] = {}
+        self._qubit_states: Dict[int, List[List[complex]]] = {}
 
         self._shared_memory: SharedMemory = SharedMemoryManager.create_shared_memory(app_name)
 
@@ -308,6 +308,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 # message id when handling the reply of the original message
                 self._store_qubit_state(
                     ret_msg.qubit_id,
+                    ret_msg.dimension,
                     ret_msg.get_real_part(),
                     ret_msg.get_imag_part()
                 )
@@ -340,12 +341,23 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 f"Cannot update shared memory with entry specified as {entry}"
             )
 
-    def _store_qubit_state(self, qubit_id: int, real_part: List[float], imag_part: List[float]):
+    def _store_qubit_state(
+            self,
+            qubit_id: int,
+            dimension: int,
+            real_part: List[List[float]],
+            imag_part: List[List[float]]
+    ):
         self._logger.debug("Storing qubit state for qubit_id %d: real=%s, imag=%s",
                            qubit_id, str(real_part), str(imag_part)
                            )
-        # Reconstruct the complex numbers
-        self._qubit_states[qubit_id] = [r + (1j * j) for r, j in zip(real_part, imag_part)]
+        density_matrix: List[List[complex]] = []
+        for i in range(dimension):
+            row: List[complex] = []
+            for j in range(dimension):
+                row.append(real_part[i][j] + (1j * imag_part[i][j]))
+            density_matrix.append(row)
+        self._qubit_states[qubit_id] = density_matrix
 
     def _retrieve_qubit_state(self, qubit_id: int) -> List[complex]:
         if qubit_id not in self._qubit_states:
@@ -445,37 +457,58 @@ class RichErrorMessage(ReturnMessage):
 
 # New class for the return of the get qubit state message
 class ReturnQubitStateMessage(ReturnMessage):
+    # TODO - Adapt this class to accept square, 2-dim arrays
     _fields_ = [
         ("qubit_id", QUBIT_REGISTRY_NUM),
-        ("len_real", ctypes.c_uint32),
-        ("len_imag", ctypes.c_uint32),
-        ("real_part", MAX_QUBIT_STATE_LEN * ctypes.c_float),  # type: ignore
-        ("imag_part", MAX_QUBIT_STATE_LEN * ctypes.c_float),  # type: ignore
+        ("dim", ctypes.c_uint32),
+        ("real_part", MAX_QUBIT_STATE_LEN * (MAX_QUBIT_STATE_LEN * ctypes.c_float)),  # type: ignore
+        ("imag_part", MAX_QUBIT_STATE_LEN * (MAX_QUBIT_STATE_LEN * ctypes.c_float)),  # type: ignore
     ]
     TYPE = NewReturnMessageType.RET_QUBIT_STATE
 
-    def __init__(self, qubit_id: int, real_part: List[float], imag_part: List[float]):
+    def __init__(self, qubit_id: int, real_part: List[List[float]], imag_part: List[List[float]]):
         super().__init__(self.TYPE.value)
-        self.qubit_id = qubit_id
-        self.len_real = len(real_part)
-        self.len_imag = len(imag_part)
-        if self.len_real > MAX_QUBIT_STATE_LEN or self.len_imag > MAX_QUBIT_STATE_LEN:
-            logger.warning("Return qubit state message too long")
-        for i, v in enumerate(real_part):
-            self.real_part[i] = v
-        for i, v in enumerate(imag_part):
-            self.imag_part[i] = v
 
-    def get_real_part(self) -> List[float]:
-        real_part: List[float] = []
-        for i in range(self.len_real):
-            real_part.append(float(self.real_part[i]))
+        # Sanity checks - given matrices are square
+        assert len(real_part) > 0
+        assert len(imag_part) > 0
+        assert len(real_part) == len(imag_part) and True
+        for row in real_part:
+            assert len(row) > 0
+            assert len(row) == len(real_part)
+        for row in imag_part:
+            assert len(row) > 0
+            assert len(row) == len(imag_part)
+
+        self.qubit_id = qubit_id
+        self.dim = len(real_part)
+        if self.dim > MAX_QUBIT_STATE_LEN :
+            logger.warning("Return qubit state message too long")
+        for i in range(self.dim):
+            for j in range(self.dim):
+                self.real_part[i][j] = real_part[i][j]
+                self.imag_part[i][j] = imag_part[i][j]
+
+    @property
+    def dimension(self) -> int :
+        return self.dim
+
+    def get_real_part(self) -> List[List[float]]:
+        real_part: List[List[float]] = []
+        for i in range(self.dim):
+            row: List[float] = []
+            for j in range(self.dim):
+                row.append(float(self.real_part[i][j]))
+            real_part.append(row)
         return real_part
 
-    def get_imag_part(self) -> List[float]:
-        imag_part: List[float] = []
-        for i in range(self.len_imag):
-            imag_part.append(float(self.imag_part[i]))
+    def get_imag_part(self) -> List[List[float]]:
+        imag_part: List[List[float]] = []
+        for i in range(self.dim):
+            row: List[float] = []
+            for j in range(self.dim):
+                row.append(float(self.imag_part[i][j]))
+            imag_part.append(row)
         return imag_part
 
 
