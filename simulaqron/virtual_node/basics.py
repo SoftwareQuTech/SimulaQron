@@ -113,6 +113,16 @@ class QuantumEngine(pb.Referenceable, abc.ABC):
         pass
 
     @abc.abstractmethod
+    def get_density_matrix_RI(self):
+        """
+        Retrieves the entire register in real and imaginary parts and returns the result of
+        the outer product. In other words, if the qubit is in state |q>, this function
+        returns the density matrix |q><q| of the qubit.
+        :return: The density matrix real and imaginary parts of a qubit state
+        """
+        pass
+
+    @abc.abstractmethod
     def apply_H(self, qubitNum):
         """
         Applies a Hadamard gate to the qubits with number qubitNum.

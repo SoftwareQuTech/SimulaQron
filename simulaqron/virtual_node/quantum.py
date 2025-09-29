@@ -262,6 +262,12 @@ class SimulatedQubit(pb.Referenceable):
         """
         return self.register.get_register_RI()
 
+    def remote_get_density_matrix_RI(self):
+        """
+        Returns the matrix density as per the internal state of the qubit.
+        """
+        return self.register.get_density_matrix_RI()
+
     def remote_get_numbers(self):
         """
         Returns the number of the simulating register.
