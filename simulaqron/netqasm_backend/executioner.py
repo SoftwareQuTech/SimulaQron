@@ -4,7 +4,7 @@ import traceback
 from collections import defaultdict
 from enum import Enum
 from functools import partial
-from typing import Any, Generator, List, Tuple
+from typing import Generator, List, Tuple
 
 import netqasm.lang.instr.core as core_instructions
 import netqasm.lang.instr.vanilla as vanilla_instructions

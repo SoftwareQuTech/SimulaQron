@@ -6,7 +6,6 @@ from netqasm.lang.instr import Flavour
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.protocol import Protocol
 
-import simulaqron.settings as settings
 from simulaqron.netqasm_backend.executioner import VanillaSimulaQronExecutioner
 from simulaqron.sdk.connection import (NewMessageType, GetQubitStateMessage,
                                        ReturnQubitStateMessage)

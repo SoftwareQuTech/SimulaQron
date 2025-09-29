@@ -164,4 +164,7 @@ class TestGetQubit:
             ]
         )
         raw_results = run_applications(apps, use_app_config=False, enable_logging=False)
-        assert np.isclose(raw_results[0]["app_Alice"]["alice_state"], raw_results[0]["app_Bob"]["bob_state"], rtol=1e-10).all()
+        assert np.isclose(
+            raw_results[0]["app_Alice"]["alice_state"],
+            raw_results[0]["app_Bob"]["bob_state"],
+            rtol=1e-10).all()

@@ -35,6 +35,7 @@ import logging
 
 try:
     import qutip as qp
+    import qutip.qip.operations.gates as gate_ops
 except ImportError:
     raise RuntimeError("If you want to use the qutip backend you need to install the python package 'qutip'")
 
@@ -270,8 +271,8 @@ class QutipEngine(QuantumEngine):
         qubitNum 	the number of the qubit this gate is applied to
         """
 
+        overallU = gate_ops.gate_expand_1toN(gateU, self.activeQubits, qubitNum)
         # Compute the overall unitary, identity everywhere with gateU at position qubitNum
-        overallU = qp.gate_expand_1toN(gateU, self.activeQubits, qubitNum)
 
         # Qutip distinguishes between system dimensionality and matrix dimensionality
         # so we need to make sure it knows we are talking about multiple qubits
@@ -328,11 +329,11 @@ class QutipEngine(QuantumEngine):
         # Construct the two measurement operators, and put them at the right position
         v0 = qp.basis(2, 0)
         P0 = v0 * v0.dag()
-        M0 = qp.gate_expand_1toN(P0, self.activeQubits, qubitNum)
+        M0 = gate_ops.gate_expand_1toN(P0, self.activeQubits, qubitNum)
 
         v1 = qp.basis(2, 1)
         P1 = v1 * v1.dag()
-        M1 = qp.gate_expand_1toN(P1, self.activeQubits, qubitNum)
+        M1 = gate_ops.gate_expand_1toN(P1, self.activeQubits, qubitNum)
 
         # Compute the success probabilities
         obj = M0 * self.qubitReg
