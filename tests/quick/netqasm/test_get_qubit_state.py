@@ -85,11 +85,10 @@ class TestGetQubit:
 
             m1 = q.measure()
             m2 = epr.measure()
-            alice.flush()
 
-            classical_socket.send_structured(
-                StructuredMessage("Corrections", f"{int(m1)}/{int(m2)}")
-            )
+        classical_socket.send_structured(
+            StructuredMessage("Corrections", f"{int(m1)}/{int(m2)}")
+        )
         return {"m1": int(m1), "m2": int(m2), "alice_state": alice_state}
 
     @staticmethod
@@ -152,7 +151,7 @@ class TestGetQubit:
         #qubit A: H(|0>) = 1/sqrt(2) |0> + 1/sqrt(2) |1> =  1/sqrt(2) [1 0] + 1/sqrt(2) [0 1]
         expected_h = np.array([1.0 / math.sqrt(2.0) + 0.0j, 1.0 / math.sqrt(2.0) + 0.0j])
         # Note: Due to loss in serialization, we allow a tolerance of 1e-5 when comparing all the members
-        assert np.isclose(raw_results[0]["app_Alice"]["state_a"], np.outer(expected_h, expected_h), rtol=1e-5).all()
+        assert np.isclose(raw_results[0]["app_Alice"]["state_a"], np.outer(expected_h, expected_h), rtol=1e-10).all()
         # qubit B: X(|0>) = |1> = [0 1]
         expected_x = np.array([0.0 + 0.0j, 1 + 0.0j])
         assert np.array_equal(raw_results[0]["app_Alice"]["state_b"], np.outer(expected_x, expected_x))
@@ -165,4 +164,4 @@ class TestGetQubit:
             ]
         )
         raw_results = run_applications(apps, use_app_config=False, enable_logging=False)
-        assert np.array_equal(raw_results[0]["app_Alice"]["alice_state"], raw_results[0]["app_Bob"]["bob_state"])
+        assert np.isclose(raw_results[0]["app_Alice"]["alice_state"], raw_results[0]["app_Bob"]["bob_state"], rtol=1e-10).all()
