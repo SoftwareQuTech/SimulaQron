@@ -26,7 +26,7 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+import importlib
 import random
 
 from collections import deque
@@ -66,11 +66,13 @@ def reraise_remote_error(remote_err):
     :param remote_err: :obj:`twisted.spread.pb.RemoteError`
     :return: class
     """
-    # Get name of remote error
-    error_name = remote_err.remoteType.split(b".")[-1].decode()
+    # Get names of remote package and remote error class
+    error_pkg_name = [pkg.decode() for pkg in remote_err.remoteType.split(b".")[:-1]]
+    error_class_name = remote_err.remoteType.split(b".")[-1].decode()
 
-    # Get class of remote error
-    error_class = eval(error_name)
+    # Dynamically import the module and the class within the module
+    error_pkg = importlib.import_module(".".join(error_pkg_name))
+    error_class = getattr(error_pkg, error_class_name)
 
     raise error_class(str(remote_err))
 
