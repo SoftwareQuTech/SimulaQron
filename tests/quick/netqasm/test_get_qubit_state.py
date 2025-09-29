@@ -140,7 +140,7 @@ class TestGetQubit:
         )
         raw_results = run_applications(apps, use_app_config=False, enable_logging=False)
         # We expect the qubit to be initialized in the |0> state = [1 0]
-        assert np.array_equal(raw_results[0]["app_Alice"], np.array([1.0 + 0.0j, 0 + 0.0j]))
+        assert np.array_equal(raw_results[0]["app_Alice"], np.array([[1.0 + 0.0j, 0 + 0.0j], [0.0 + 0.0j, 0 + 0.0j]]))
 
     def test_get_qubit_state_local(self, network):
         apps = default_app_instance(
@@ -149,13 +149,13 @@ class TestGetQubit:
             ]
         )
         raw_results = run_applications(apps, use_app_config=False, enable_logging=False)
-        print(raw_results)
         #qubit A: H(|0>) = 1/sqrt(2) |0> + 1/sqrt(2) |1> =  1/sqrt(2) [1 0] + 1/sqrt(2) [0 1]
-        expected = np.array([1.0 / math.sqrt(2.0) + 0.0j, 1.0 / math.sqrt(2.0) + 0.0j])
+        expected_h = np.array([1.0 / math.sqrt(2.0) + 0.0j, 1.0 / math.sqrt(2.0) + 0.0j])
         # Note: Due to loss in serialization, we allow a tolerance of 1e-5 when comparing all the members
-        assert np.isclose(raw_results[0]["app_Alice"]["state_a"], expected, rtol=1e-5).all()
+        assert np.isclose(raw_results[0]["app_Alice"]["state_a"], np.outer(expected_h, expected_h), rtol=1e-5).all()
         # qubit B: X(|0>) = |1> = [0 1]
-        assert np.array_equal(raw_results[0]["app_Alice"]["state_b"], np.array([0.0 + 0.0j, 1 + 0.0j]))
+        expected_x = np.array([0.0 + 0.0j, 1 + 0.0j])
+        assert np.array_equal(raw_results[0]["app_Alice"]["state_b"], np.outer(expected_x, expected_x))
 
     def test_get_qubit_state_teleport(self, network):
         apps = default_app_instance(
