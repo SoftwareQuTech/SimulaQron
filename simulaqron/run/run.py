@@ -1,5 +1,7 @@
 import logging
 import os
+
+from multiprocess.context import SpawnContext
 from multiprocess.pool import Pool, ApplyResult
 from importlib import reload
 from os import PathLike
@@ -67,6 +69,9 @@ def run_sim_backend(node_names: List[str], sim_backend: SimBackend, network_conf
         new=new_network
     )
 
+def err_callback_example(exc: Exception):
+    print(exc)
+
 
 def run_applications(
     app_instance: ApplicationInstance,
@@ -79,6 +84,7 @@ def run_applications(
     post_function: Optional[Callable] = None,
     enable_logging: bool = True,
     hardware: Any = None,  # Unused; it's here for harmonization with squidasm "simulate_application"
+    init_func: Callable = None,
 ) -> List[Dict[str, Any]]:
     """Executes functions containing application scripts,
 
@@ -106,6 +112,12 @@ def run_applications(
         Whether to enable logging.
     hardware: Any
         Unused argument. Any parameter given here will be ignored.
+    init_func: Callable
+        Function to execute to initialize the state of the child processes. The implemented
+        executor uses the *spawn* method for creating new processes. In this sense, the
+        child processes *do not receive* a copy of the full memory, but only what is needed.
+        In particular, all modules will be reimported in the child processes, hence any
+        state of the classes *will not transfer* to the child processes.
 
     Returns
     -------
@@ -146,7 +158,7 @@ def run_applications(
         net_cfg = None
 
     for _ in range(num_rounds):
-        with Pool(len(app_names) + 3) as executor:
+        with SpawnContext().Pool(processes=len(app_names) + 3, initializer=init_func) as executor:
             SimulaQronConnection.PROCESS_POOL = executor
             # Start the backend process
             network = run_sim_backend(app_names, sim_backend, net_cfg)
@@ -167,7 +179,8 @@ def run_applications(
                         inputs=inputs,
                     )
                     inputs["app_config"] = app_cfg
-                future: ApplyResult = executor.apply_async(program.entry, kwds=inputs)
+                    # executor.apply()
+                future: ApplyResult = executor.apply_async(program.entry, kwds=inputs, error_callback=err_callback_example)
                 app_futures.append(future)
 
             # for app_cfg in app_cfgs:
