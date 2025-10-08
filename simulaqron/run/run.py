@@ -1,8 +1,9 @@
 import logging
 import os
+import signal
 
-from multiprocess.context import SpawnContext
-from multiprocess.pool import Pool, ApplyResult
+from multiprocess.context import ForkContext
+from multiprocess.pool import ApplyResult
 from importlib import reload
 from os import PathLike
 from pathlib import Path
@@ -69,8 +70,17 @@ def run_sim_backend(node_names: List[str], sim_backend: SimBackend, network_conf
         new=new_network
     )
 
-def err_callback_example(exc: Exception):
-    print(exc)
+
+def send_sigterm_to_process(parent_pid: int):
+    def wrapper(exc):
+        os.kill(parent_pid, signal.SIGTERM)
+    return wrapper
+
+
+def stop_network(network: Network):
+    def wrapper(signum: int, frame):
+        network.stop()
+    return wrapper
 
 
 def run_applications(
@@ -102,8 +112,8 @@ def run_applications(
     log_cfg: LogConfig
         Configuration for the logging.
     formalism: Formalism
-        Qubit formalism to use for the simulation. On this value depends
-        The SimulaQron backend to use.
+        Qubit formalism to use for the simulation. The SimulaQron
+        backend to use depends on this value.
     use_app_config: bool
         Whether to give app_config as argument to app's main()
     post_function: Optional[Callable]
@@ -158,10 +168,12 @@ def run_applications(
         net_cfg = None
 
     for _ in range(num_rounds):
-        with SpawnContext().Pool(processes=len(app_names) + 3, initializer=init_func) as executor:
+        with ForkContext().Pool(processes=len(app_names) + 3, initializer=init_func) as executor:
             SimulaQronConnection.PROCESS_POOL = executor
             # Start the backend process
             network = run_sim_backend(app_names, sim_backend, net_cfg)
+            signal.signal(signal.SIGINT, stop_network(network))
+            signal.signal(signal.SIGTERM, stop_network(network))
             network.start()
 
             # Start the application processes
@@ -179,8 +191,13 @@ def run_applications(
                         inputs=inputs,
                     )
                     inputs["app_config"] = app_cfg
-                    # executor.apply()
-                future: ApplyResult = executor.apply_async(program.entry, kwds=inputs, error_callback=err_callback_example)
+                future: ApplyResult = executor.apply_async(
+                    program.entry,
+                    kwds=inputs,
+                    # The error callback with get invoked in the child process, so
+                    # we tell the parent (current pid) to sigal *all* the children
+                    error_callback=send_sigterm_to_process(os.getpid())
+                )
                 app_futures.append(future)
 
             # for app_cfg in app_cfgs:

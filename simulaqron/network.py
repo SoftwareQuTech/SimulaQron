@@ -29,7 +29,7 @@
 
 import time
 import random
-from multiprocess.context import SpawnProcess as Process
+from multiprocess.context import ForkProcess as Process
 from typing import List
 
 import networkx as nx

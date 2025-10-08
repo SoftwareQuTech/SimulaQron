@@ -60,7 +60,7 @@ else:
     raise QuantumError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
 
-def reraise_remote_error(remote_err):
+def reraise_remote_error(remote_err: RemoteError):
     """
     This is a function re-raises the error thrown remotely
     :param remote_err: :obj:`twisted.spread.pb.RemoteError`
