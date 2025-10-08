@@ -543,7 +543,7 @@ class VirtualNode(pb.Root):
                 newVirtNum,
             )
         except RemoteError as remote_err:
-            self.reraise_remote_error(remote_err)
+            reraise_remote_error(remote_err)
 
     def remote_netqasm_add_recv_list(self, fromName, from_epr_socket_id, to_epr_socket_id, new_virt_num=None):
         """
@@ -625,7 +625,7 @@ class VirtualNode(pb.Root):
                 rawEntInfo,
             )
         except RemoteError as remote_err:
-            self.reraise_remote_error(remote_err)
+            reraise_remote_error(remote_err)
 
     def remote_netqasm_add_epr_list(self, fromName, from_epr_socket_id, to_epr_socket_id, new_virt_num, rawEntInfo):
         """
@@ -706,7 +706,7 @@ class VirtualNode(pb.Root):
                 try:
                     newNum = yield call_method(remoteNode.root, "add_qubit", self.myID.name, qubit.simQubit)
                 except RemoteError as remote_err:
-                    self.reraise_remote_error(remote_err)
+                    reraise_remote_error(remote_err)
             else:
                 self._logger.debug("Sending qubit simulated remotely at %s", qubit.simNode.name)
                 # Also lock the virtual node of the simulating node unless it is the remoteNode or this node
@@ -718,11 +718,11 @@ class VirtualNode(pb.Root):
                     try:
                         simQubitNum = yield call_method(qubit.simQubit, "get_sim_number")
                     except RemoteError as remote_err:
-                        self.reraise_remote_error(remote_err)
+                        reraise_remote_error(remote_err)
                     try:
                         newNum = yield call_method(qubit.simNode.root, "transfer_qubit", simQubitNum, targetName)
                     except RemoteError as remote_err:
-                        self.reraise_remote_error(remote_err)
+                        reraise_remote_error(remote_err)
                 finally:
                     if locked_node is not None:
                         yield call_method(locked_node.root, "release_global_lock")
@@ -768,7 +768,7 @@ class VirtualNode(pb.Root):
             try:
                 newNum = yield call_method(remoteNode.root, "add_qubit", self.myID.name, simQubit)
             except RemoteError as remote_err:
-                self.reraise_remote_error(remote_err)
+                reraise_remote_error(remote_err)
 
         return newNum
 
@@ -986,7 +986,7 @@ class VirtualNode(pb.Root):
         try:
             (R, I, activeQ, oldRegNum, oldQubitNum) = yield call_method(simNode.root, "get_register_del", simQubitNum)
         except RemoteError as remote_err:
-            self.reraise_remote_error(remote_err)
+            reraise_remote_error(remote_err)
 
         # Get numbering offset from previous register: append at end
         offset = localReg.activeQubits
@@ -1015,7 +1015,7 @@ class VirtualNode(pb.Root):
                 try:
                     yield call_method(nb.root, "update_virtual_merge", self.myID.name, simNodeName, oldRegNum, newD)
                 except RemoteError as remote_err:
-                    self.reraise_remote_error(remote_err)
+                    reraise_remote_error(remote_err)
 
         # Locally, we might also already have virtual qubits which were in the remote simulated
         # register. Update them as well
@@ -1070,7 +1070,7 @@ class VirtualNode(pb.Root):
                 try:
                     (givenNum, givenReg) = yield call_method(q.simQubit, "get_numbers")
                 except RemoteError as remote_err:
-                    self.reraise_remote_error(remote_err)
+                    reraise_remote_error(remote_err)
 
             # Check if this qubit needs updating
             if q.simNode == oldSimNode and givenReg == oldRegNum:
@@ -1181,12 +1181,12 @@ class VirtualNode(pb.Root):
                 try:
                     (num, name) = yield call_method(q.simQubit, "get_details")
                 except RemoteError as remote_err:
-                    self.reraise_remote_error(remote_err)
+                    reraise_remote_error(remote_err)
                 nums.append(num)
             try:
                 (R, I) = yield call_method(qList[0].simNode.root, "get_state", nums)
             except RemoteError as remote_err:
-                self.reraise_remote_error(remote_err)
+                reraise_remote_error(remote_err)
 
         return (R, I)
 
@@ -1453,7 +1453,7 @@ class VirtualQubit(pb.Referenceable):
                 simNum = yield call_method(qubit.simQubit, "get_sim_number")
                 yield call_method(qubit.simNode.root, "lock_reg_qubits", simNum)
         except RemoteError as remote_err:
-            self.virtNode.root.reraise_remote_error(remote_err)
+            reraise_remote_error(remote_err)
 
     @inlineCallbacks
     def _unlock_inreg(self, qubit):
@@ -1468,7 +1468,7 @@ class VirtualQubit(pb.Referenceable):
                 simNum = yield call_method(qubit.simQubit, "get_sim_number")
                 yield call_method(qubit.simNode.root, "unlock_reg_qubits", simNum)
         except RemoteError as remote_err:
-            self.virtNode.root.reraise_remote_error(remote_err)
+            reraise_remote_error(remote_err)
 
     @inlineCallbacks
     def remote_cnot_onto(self, target):
@@ -1651,7 +1651,7 @@ class VirtualQubit(pb.Referenceable):
                     # Finally, execute the two qubit gate
                     getattr(self.simQubit, localName)(targetNum)
         except RemoteError as remote_err:
-            self.virtNode.root.reraise_remote_error(remote_err)
+            reraise_remote_error(remote_err)
         finally:
             # Release the locks in the register of the control (which now contains also the others)
             yield self._unlock_inreg(self)
@@ -1714,7 +1714,7 @@ class VirtualQubit(pb.Referenceable):
                 try:
                     (R, I) = yield call_method(self.simQubit, "get_qubit")
                 except RemoteError as remote_err:
-                    self.virtNode.root.reraise_remote_error(remote_err)
+                    reraise_remote_error(remote_err)
             except ConnectionError:
                 self._logger.error("cannot get qubit number.")
 
