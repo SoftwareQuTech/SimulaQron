@@ -31,7 +31,7 @@ logger = get_netqasm_logger("SimulaQronConnection")
 class SimulaQronConnection(BaseNetQASMConnection):
     NON_STABILIZER_INSTR = [GenericInstr.T]
 
-    # Process poool will be set externally when launching the applications
+    # Process pool will be set externally when launching the applications
     # This is due to the fact that the code creating the connections will run
     # *inside a pool worker*, so it cannot create a new process pool because the
     # worker itself is a daemon process.

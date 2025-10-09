@@ -29,7 +29,7 @@
 
 import time
 import random
-from multiprocess.context import ForkProcess as Process
+from multiprocess.context import SpawnProcess as Process
 from typing import List
 
 import networkx as nx
@@ -154,7 +154,6 @@ class Network:
         """
         Setup the processes forming the network, however they are not started yet.
         """
-        #mp.set_start_method("spawn", force=True)
         for node in self.nodes:
             process_virtual = Process(
                 target=start_vnode, args=(node, self.name, get_log_level()), name=f"VirtNode {node}"

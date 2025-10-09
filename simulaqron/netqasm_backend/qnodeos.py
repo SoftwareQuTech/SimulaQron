@@ -1,5 +1,6 @@
-from typing import Optional, Dict, Callable, Generator, Any, List
+from typing import Optional, Dict, Callable, Generator, Any, List, Type
 
+from netqasm.backend.executor import Executor
 from netqasm.backend.messages import MsgDoneMessage, Message, MessageType
 from netqasm.backend.qnodeos import QNodeController
 from netqasm.lang.instr import Flavour
@@ -63,7 +64,7 @@ class SubroutineHandler(QNodeController):
         }
 
     @classmethod
-    def _get_executor_class(cls, flavour: Optional[Flavour] = None):
+    def _get_executor_class(cls, flavour: Optional[Flavour] = None) -> Type[Executor]:
         return VanillaSimulaQronExecutioner
 
     def _mark_message_finished(self, msg_id: int, msg: Message):

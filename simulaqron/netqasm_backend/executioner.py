@@ -129,8 +129,8 @@ class VanillaSimulaQronExecutioner(Executor):
             raise RuntimeError("Cannot return msg since no function is set")
         self._return_msg_func(msg=msg)
 
-    def _instr_qalloc(self, subroutine_id, instr: core_instructions.QAllocInstruction):
-        physical_address = yield from super()._instr_qalloc(
+    def _instr_qalloc(self, subroutine_id: int, instr: core_instructions.QAllocInstruction):
+        physical_address = yield super()._instr_qalloc(
             subroutine_id=subroutine_id,
             instr=instr,
         )

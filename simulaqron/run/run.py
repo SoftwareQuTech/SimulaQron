@@ -2,13 +2,14 @@ import logging
 import os
 import signal
 
-from multiprocess.context import ForkContext
+from multiprocess.context import SpawnContext as ProcessContext
 from multiprocess.pool import ApplyResult
 from importlib import reload
 from os import PathLike
 from pathlib import Path
 from typing import Callable, Optional, Any, Dict, List, Union, Generator, Tuple
 
+from multiprocess.sharedctypes import SynchronizedArray
 from netqasm.logging.glob import get_netqasm_logger
 from netqasm.logging.output import (reset_struct_loggers,
                                     save_all_struct_loggers)
@@ -55,12 +56,14 @@ def reset(save_loggers=False):
     reload(logging)
 
 
-def run_sim_backend(node_names: List[str], sim_backend: SimBackend, network_config_file: Optional[str]):
-    logger.debug("Starting simulaqron sim_backend process with nodes %s", node_names)
+def setup_sim_backend(sim_backend: SimBackend):
     if sim_backend in [SimBackend.PROJECTQ, SimBackend.QUTIP]:
         assert has_module.main(sim_backend.value),\
             f"To use {sim_backend} as backend you need to install the package"
     simulaqron_settings.sim_backend = sim_backend.value
+
+
+def configure_network(node_names: List[str], network_config_file: Optional[str]):
     new_network = True if network_config_file is None else False
     return Network(
         name="default",
@@ -71,16 +74,40 @@ def run_sim_backend(node_names: List[str], sim_backend: SimBackend, network_conf
     )
 
 
-def send_sigterm_to_process(parent_pid: int):
-    def wrapper(exc):
-        os.kill(parent_pid, signal.SIGTERM)
-    return wrapper
+# Global array helper to store PIDs of the children processes running the applications
+# Note; this array *will not* store the pids of the QNodeOS and/or Vnode processes
+apps_pids: Optional[SynchronizedArray] = None
+
+def _worker_initializer(synced_array: SynchronizedArray):
+    # We simply store the reference of the synced object for this process
+    global apps_pids
+    apps_pids = synced_array
 
 
-def stop_network(network: Network):
-    def wrapper(signum: int, frame):
-        network.stop()
-    return wrapper
+def _app_wrapper(**kwargs):
+    global apps_pids
+    assert apps_pids is not None
+    assert "__instance_num" in kwargs and isinstance(kwargs["__instance_num"], int)
+    assert "__entry_function" in kwargs and isinstance(kwargs["__entry_function"], Callable)
+
+    # Save the pid for this worker
+    apps_pids[kwargs["__instance_num"]] = os.getpid()
+    entry_function = kwargs["__entry_function"]
+    del kwargs["__entry_function"]
+    del kwargs["__instance_num"]
+
+    # TODO - Signal handler for the SIGINT signal?
+
+    # Call the app main function
+    return entry_function(**kwargs)
+
+
+def _signal_other_apps(exc: BaseException):
+    global apps_pids
+    assert apps_pids is not None
+    for pid in apps_pids:
+        print(f"Sending SIGINT to pid {pid}")
+        os.kill(pid, signal.SIGINT)
 
 
 def run_applications(
@@ -168,19 +195,29 @@ def run_applications(
         net_cfg = None
 
     for _ in range(num_rounds):
-        with ForkContext().Pool(processes=len(app_names) + 3, initializer=init_func) as executor:
+        process_ctx = ProcessContext()
+        synced_array =  process_ctx.Array('i', len(app_instance.app.programs))
+        executor = process_ctx.Pool(
+            processes=len(app_names) + 3,
+            initializer=_worker_initializer,
+            initargs=[synced_array]
+        )
+        with executor:
             SimulaQronConnection.PROCESS_POOL = executor
-            # Start the backend process
-            network = run_sim_backend(app_names, sim_backend, net_cfg)
-            signal.signal(signal.SIGINT, stop_network(network))
-            signal.signal(signal.SIGTERM, stop_network(network))
+            global apps_pids
+            apps_pids = synced_array
+            logger.debug("Starting simulaqron sim_backend process with nodes %s", app_names)
+            setup_sim_backend(sim_backend)
+            network = configure_network(app_names, net_cfg)
+
+            # Start the processes that support the simulator: QNodeOS + VirtualNode
             network.start()
 
             # Start the application processes
             app_futures = []
 
             programs = app_instance.app.programs
-            for program in programs:
+            for i, program in enumerate(programs):
                 inputs = app_instance.program_inputs[program.party]
                 if use_app_config:
                     app_cfg = AppConfig(
@@ -191,12 +228,14 @@ def run_applications(
                         inputs=inputs,
                     )
                     inputs["app_config"] = app_cfg
+                inputs["__instance_num"] = i
+                inputs["__entry_function"] = program.entry
                 future: ApplyResult = executor.apply_async(
-                    program.entry,
+                    _app_wrapper,
                     kwds=inputs,
                     # The error callback with get invoked in the child process, so
-                    # we tell the parent (current pid) to sigal *all* the children
-                    error_callback=send_sigterm_to_process(os.getpid())
+                    # we tell other applications that they need to stop
+                    error_callback=_signal_other_apps
                 )
                 app_futures.append(future)
 
