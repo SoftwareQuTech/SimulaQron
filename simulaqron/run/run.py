@@ -5,6 +5,7 @@ import signal
 from multiprocess.context import SpawnContext as ProcessContext
 from multiprocess.pool import ApplyResult
 from importlib import reload
+from importlib.util import find_spec
 from os import PathLike
 from pathlib import Path
 from typing import Callable, Optional, Any, Dict, List, Union, Generator, Tuple
@@ -58,7 +59,7 @@ def reset(save_loggers=False):
 
 def setup_sim_backend(sim_backend: SimBackend):
     if sim_backend in [SimBackend.PROJECTQ, SimBackend.QUTIP]:
-        assert has_module.main(sim_backend.value),\
+        assert find_spec(sim_backend.value) is not None,\
             f"To use {sim_backend} as backend you need to install the package"
     simulaqron_settings.sim_backend = sim_backend.value
 
@@ -195,6 +196,12 @@ def run_applications(
         net_cfg = None
 
     for _ in range(num_rounds):
+        network = configure_network(app_names, net_cfg)
+
+        # Start the processes that support the simulator: QNodeOS + VirtualNode
+        network.start()
+
+        # Create the executor pool
         process_ctx = ProcessContext()
         synced_array =  process_ctx.Array('i', len(app_instance.app.programs))
         executor = process_ctx.Pool(
@@ -202,54 +209,51 @@ def run_applications(
             initializer=_worker_initializer,
             initargs=[synced_array]
         )
-        with executor:
-            SimulaQronConnection.PROCESS_POOL = executor
-            global apps_pids
-            apps_pids = synced_array
-            logger.debug("Starting simulaqron sim_backend process with nodes %s", app_names)
-            setup_sim_backend(sim_backend)
-            network = configure_network(app_names, net_cfg)
 
-            # Start the processes that support the simulator: QNodeOS + VirtualNode
-            network.start()
+        try:
+            with executor:
+                SimulaQronConnection.PROCESS_POOL = executor
+                global apps_pids
+                apps_pids = synced_array
+                logger.debug("Starting simulaqron sim_backend process with nodes %s", app_names)
+                setup_sim_backend(sim_backend)
 
-            # Start the application processes
-            app_futures = []
+                # Start the application processes
+                app_futures = []
 
-            programs = app_instance.app.programs
-            for i, program in enumerate(programs):
-                inputs = app_instance.program_inputs[program.party]
-                if use_app_config:
-                    app_cfg = AppConfig(
-                        app_name=program.party,
-                        node_name=program.party,  # node name should be same as app name
-                        main_func=program.entry,
-                        log_config=app_instance.logging_cfg,
-                        inputs=inputs,
+                programs = app_instance.app.programs
+                for i, program in enumerate(programs):
+                    inputs = app_instance.program_inputs[program.party]
+                    if use_app_config:
+                        app_cfg = AppConfig(
+                            app_name=program.party,
+                            node_name=program.party,  # node name should be same as app name
+                            main_func=program.entry,
+                            log_config=app_instance.logging_cfg,
+                            inputs=inputs,
+                        )
+                        inputs["app_config"] = app_cfg
+                    inputs["__instance_num"] = i
+                    inputs["__entry_function"] = program.entry
+                    future: ApplyResult = executor.apply_async(
+                        _app_wrapper,
+                        kwds=inputs,
+                        # The error callback with get invoked in the child process, so
+                        # we tell other applications that they need to stop
+                        error_callback=_signal_other_apps
                     )
-                    inputs["app_config"] = app_cfg
-                inputs["__instance_num"] = i
-                inputs["__entry_function"] = program.entry
-                future: ApplyResult = executor.apply_async(
-                    _app_wrapper,
-                    kwds=inputs,
-                    # The error callback with get invoked in the child process, so
-                    # we tell other applications that they need to stop
-                    error_callback=_signal_other_apps
-                )
-                app_futures.append(future)
+                    app_futures.append(future)
 
-            # for app_cfg in app_cfgs:
-            #     inputs = app_cfg.inputs
-            #     if use_app_config:
-            #         inputs['app_config'] = app_cfg
-            #     future = executor.submit(app_cfg.main_func, **inputs)
-            #     app_futures.append(future)
+                # for app_cfg in app_cfgs:
+                #     inputs = app_cfg.inputs
+                #     if use_app_config:
+                #         inputs['app_config'] = app_cfg
+                #     future = executor.submit(app_cfg.main_func, **inputs)
+                #     app_futures.append(future)
 
-            # Join the application processes and the backend
-            names = [f'app_{app_name}' for app_name in app_names]
-            result = {}
-            try:
+                # Join the application processes and the backend
+                names = [f'app_{app_name}' for app_name in app_names]
+                result = {}
                 for future, name in as_completed(app_futures, names):
                     result[name] = future.get()
                 # if results_file is not None:
@@ -258,10 +262,11 @@ def run_applications(
                     assert timed_log_dir is not None
                     path = os.path.join(timed_log_dir, "results.yaml")
                     dump_yaml(data=result, file_path=path)
-            finally:
                 results.append(result)
                 network.stop()
 
+        finally:
+            network.stop()
         reset(save_loggers=True)
 
     if enable_logging:

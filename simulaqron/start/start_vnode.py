@@ -42,7 +42,7 @@ logger = get_netqasm_logger("start_vnode")
 
 
 def sigterm_handler(name, _signo, _stack_frame):
-    logger.info("Shutting down Node")
+    print("Shutting down Node from signal %d." % _signo, flush=True)
     reactor.stop()
 
 

@@ -33,7 +33,7 @@ from netqasm.backend.messages import MessageHeader, ErrorCode, deserialize_host_
 from netqasm.logging.glob import get_netqasm_logger
 from twisted.internet.defer import DeferredLock, inlineCallbacks
 from twisted.internet.protocol import Factory, Protocol, connectionDone
-#from twisted.internet.task import deferLater
+from twisted.internet.task import deferLater
 
 from simulaqron.reactor import reactor
 from simulaqron.general.host_config import SocketsConfig, Host
@@ -41,6 +41,7 @@ from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
 from simulaqron.sdk.connection import RichErrorMessage
 from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
+from simulaqron.virtual_node.virtual import call_method
 
 
 class IncompleteMessageError(ValueError):
@@ -117,8 +118,9 @@ class NetQASMProtocol(Protocol):
     def log_error(self, failure):
         self._logger.error("Handling message failed with failure = %s", failure.value)
         self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.GENERAL, err_msg=str(failure.value)))
-        yield None
-        #yield deferLater(reactor, 0.1, self.stop)
+        #self.transport.abortConnection()
+        #yield None
+        yield deferLater(reactor, 0.1, self.stop)
 
     def stop(self):
         self.factory.stop()
@@ -204,6 +206,7 @@ class NetQASMFactory(Factory):
             self.topology = networks_config.networks[network_name].topology
 
     def stop(self):
+        yield call_method(self.virtRoot, "stop_vnode")
         reactor.stop()
 
     def buildProtocol(self, addr):

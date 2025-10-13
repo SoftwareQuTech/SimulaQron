@@ -29,15 +29,11 @@
 
 import unittest
 
-from simulaqron.toolbox import has_module
-from simulaqron.settings import SimBackend
+from importlib.util import find_spec
 
-if has_module.main(SimBackend.QUTIP.value):
-
+if find_spec("qutip") is not None:
     from simulaqron.virtual_node.qutip_simulator import QutipEngine
-
     _has_module = True
-
 else:
 
     _has_module = False

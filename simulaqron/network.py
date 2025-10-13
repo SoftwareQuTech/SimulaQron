@@ -29,7 +29,7 @@
 
 import time
 import random
-from multiprocess.context import SpawnProcess as Process
+from multiprocess.context import ForkProcess as Process
 from typing import List
 
 import networkx as nx
@@ -201,6 +201,9 @@ class Network:
                 except Exception as err:
                     self._logger.warning("Could not terminate one of the processes in the"
                                          "network due to error: %s", err)
+
+    def __str__(self):
+        return f"Network '{self.name}', procs: {self.processes}"
 
 
 def construct_topology_config(topology, nodes):

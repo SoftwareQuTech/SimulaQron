@@ -2,10 +2,21 @@ import pytest
 from netqasm.runtime.application import default_app_instance
 
 from simulaqron.run import run_applications
+from simulaqron.run.run import reset
 from simulaqron.sdk.socket import Socket
+from simulaqron.settings import simulaqron_settings, SimBackend
 
 
 class TestClassicalSocket:
+    @pytest.fixture(autouse=True)
+    def network(self):
+        simulaqron_settings.default_settings()
+        simulaqron_settings.sim_backend = SimBackend.PROJECTQ.value
+        yield
+        simulaqron_settings.default_settings()
+        simulaqron_settings.sim_backend = SimBackend.PROJECTQ.value
+        reset()
+
     @staticmethod
     def alice_program_sender():
         classical_socket: Socket = Socket("Alice", "Bob")

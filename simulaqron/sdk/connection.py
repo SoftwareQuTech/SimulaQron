@@ -251,7 +251,8 @@ class SimulaQronConnection(BaseNetQASMConnection):
         try:
             data = self._socket.recv(1024)
         except Exception as err:
-            self._logger.exception("Error in recv from NetQASM server", err)
+            self._logger.exception("Error in recv from NetQASM server")
+            raise err
         if self.buf:
             self.buf += data
         else:
@@ -391,7 +392,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
 # Definitions for the new message types
 QUBIT_REGISTRY_NUM = ctypes.c_uint8
 MAX_QUBIT_STATE_LEN = 5
-MAX_ERR_MSG_LEN = 100
+MAX_ERR_MSG_LEN = 500
 
 
 # "Extend" (by redefining the enum) the Message Type

@@ -1,20 +1,16 @@
 import unittest
 import numpy as np
 
-from simulaqron.toolbox import has_module
-from simulaqron.settings import SimBackend
+from importlib.util import find_spec
 
-if has_module.main(SimBackend.PROJECTQ.value):
-
+if find_spec("projectq") is not None:
     from simulaqron.virtual_node.project_q_simulator import ProjectQEngine
     from simulaqron.virtual_node.basics import NoQubitError, QuantumError
 
     from projectq.types._qubit import Qubit
 
     _has_module = True
-
 else:
-
     _has_module = False
 
 

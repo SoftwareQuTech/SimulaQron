@@ -18,6 +18,7 @@ from netqasm.qlink_compat import (Basis, BellState, LinkLayerErr,
                                   ReturnType)
 from twisted.internet import task
 from twisted.internet.defer import inlineCallbacks, Deferred
+from twisted.spread import pb
 
 from simulaqron.reactor import reactor
 from simulaqron.general import SimUnsupportedError
@@ -832,7 +833,7 @@ class VanillaSimulaQronExecutioner(Executor):
 
 
 class VirtualQubitRef:
-    def __init__(self, qubit_id=0, timestamp=0, virt=0):
+    def __init__(self, qubit_id: int, timestamp: int , virt: pb.Referenceable):
         self.qubit_id = qubit_id
         self.timestamp = timestamp
         self.virt = virt
