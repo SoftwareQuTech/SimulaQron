@@ -1,40 +1,86 @@
-import unittest
+import tempfile
 import json
-import random
+import pytest
+from importlib import resources
+from pathlib import Path
 
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, SimBackend
 
 
-#####################
-# TODO Add more tests
-#####################
-
-class TestSettings(unittest.TestCase):
-    @classmethod
-    def tearDownClass(cls):
-        simulaqron_settings.default_settings()
-
+class TestSettings:
     def test_default_settings(self):
+        __expected_default_settings = """
+        {
+            "_read_user": true,
+            "max_qubits": 20,
+            "max_registers": 1000,
+            "conn_retry_time": 0.5,
+            "recv_timeout": 100,
+            "recv_retry_time": 0.1,
+            "log_level": 30,
+            "sim_backend": "stabilizer",
+            "network_config_file": "CHANGE_ME",
+            "noisy_qubits": false,
+            "t1": 1.0
+        }
+        """
+        expected_settings = json.loads(__expected_default_settings)
+        # For testing purposes, we need to "adjust" some of teh expected values:
+        expected_settings["sim_backend"] =SimBackend[expected_settings["sim_backend"].upper()]
+        with resources.path("simulaqron._default_config", "default_network.json") as path:
+            expected_settings["network_config_file"] = str(path)
+
         simulaqron_settings.default_settings()
-        for key, value in simulaqron_settings._default_config.items():
-            self.assertEqual(getattr(simulaqron_settings, key), value)
+        for key, value in expected_settings.items():
+            assert getattr(simulaqron_settings, key) == value
 
-    def test_set_settings(self):
-        new_settings = {}
-        for key in simulaqron_settings._default_config:
-            value = random.randint(0, 100)
-            new_settings[key] = value
-            setattr(simulaqron_settings, key, value)
+    def test_non_existent_network_config(self):
+        _original_settings = """
+        {
+            "_read_user": false,
+            "max_qubits": 10,
+            "max_registers": 500,
+            "conn_retry_time": 0.25,
+            "recv_timeout": 10,
+            "recv_retry_time": 0.05,
+            "log_level": 30,
+            "sim_backend": "projectq",
+            "network_config_file": "/not/existing/network.json",
+            "noisy_qubits": false,
+            "t1": 2.0
+        }
+        """
+        _expected_settings = """
+        {
+            "_read_user": false,
+            "max_qubits": 10,
+            "max_registers": 500,
+            "conn_retry_time": 0.25,
+            "recv_timeout": 10,
+            "recv_retry_time": 0.05,
+            "log_level": 30,
+            "sim_backend": "projectq",
+            "network_config_file": "CHANGE_ME",
+            "noisy_qubits": false,
+            "t1": 2.0
+        }
+        """
+        expected_settings = json.loads(_expected_settings)
+        # For testing purposes, we need to "adjust" some of teh expected values:
+        expected_settings["sim_backend"] =SimBackend[expected_settings["sim_backend"].upper()]
+        with resources.path("simulaqron._default_config", "default_network.json") as path:
+            expected_settings["network_config_file"] = str(path)
 
-        with open(simulaqron_settings._internal_settings_file, 'r') as f:
-            file_settings = json.load(f)
+        _original_settings = json.loads(_original_settings)
+        with tempfile.NamedTemporaryFile(mode="w+", encoding="utf-8", delete_on_close=False) as file:
+            json.dump(_original_settings, file)
+            file.close()
 
-        for key, value in new_settings.items():
-            self.assertEqual(getattr(simulaqron_settings, key), value)
-            self.assertEqual(value, file_settings[key])
+            simulaqron_settings.load_from_file(Path(file.name))
+            for key, value in expected_settings.items():
+                assert getattr(simulaqron_settings, key) == value
 
-        self.test_default_settings()
-
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_load_non_existent_config_file(self):
+        with pytest.raises(FileNotFoundError) as error:
+            simulaqron_settings.load_from_file("/non/existent/file")
+        assert "File /non/existent/file does not exist" in str(error.value)

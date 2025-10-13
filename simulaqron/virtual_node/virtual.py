@@ -50,11 +50,11 @@ from simulaqron.general.errors import *  # noqa: F401, F403
 from simulaqron.settings import simulaqron_settings, SimBackend
 from simulaqron.reactor import reactor
 
-if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
+if simulaqron_settings.sim_backend == SimBackend.QUTIP:
     from simulaqron.virtual_node.qutip_simulator import QutipEngine as QEngine
-elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ.value:
+elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
     from simulaqron.virtual_node.project_q_simulator import ProjectQEngine as QEngine
-elif simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+elif simulaqron_settings.sim_backend == SimBackend.STABILIZER:
     from simulaqron.virtual_node.stabilizer_simulator import StabilizerEngine as QEngine
 else:
     raise QuantumError(f"Unknown backend {simulaqron_settings.sim_backend}")
@@ -1228,7 +1228,7 @@ class VirtualNode(pb.Root):
     @inlineCallbacks
     def remote_stop_vnode(self):
         # sys.stdout.write(f"Stopping virtual node pid {os.getpid()}")
-        print(f"Stopping virtual node pid {os.getpid()}", flush=True)
+        # print(f"Stopping virtual node pid {os.getpid()}", flush=True)
         reactor.stop()
 
 

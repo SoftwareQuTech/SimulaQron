@@ -69,13 +69,13 @@ def runClientNode(qReg, virtRoot, myName, classicalNet):
     yield q1.callRemote("apply_H")
 
     # For information purposes, let's print the state of that qubit
-    if simulaqron_settings.sim_backend == "qutip":
+    if simulaqron_settings.sim_backend.value == "qutip":
         realRho, imagRho = yield q1.callRemote("get_qubit")
         state = np.array(assemble_qubit(realRho, imagRho), dtype=complex)
-    elif simulaqron_settings.sim_backend == "projectq":
+    elif simulaqron_settings.sim_backend.value == "projectq":
         realvec, imagvec = yield virtRoot.callRemote("get_register_RI", q1)
         state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
-    elif simulaqron_settings.sim_backend == "stabilizer":
+    elif simulaqron_settings.sim_backend.value == "stabilizer":
         array, _ = yield virtRoot.callRemote("get_register_RI", q1)
         state = StabilizerState(array)
     else:

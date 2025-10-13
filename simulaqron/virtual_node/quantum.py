@@ -279,7 +279,7 @@ class SimulatedQubit(pb.Referenceable):
         Returns the state of the qubits in the list qList by tracing out the rest.
         """
         backend = settings.simulaqron_settings.sim_backend
-        if backend != settings.SimBackend.QUTIP.value:
+        if backend != settings.SimBackend.QUTIP:
             raise RuntimeError(f"Cannot get reduced qubit state using backend {backend}")
         self._logger.debug("VIRTUAL NODE %s: Returning qubit %d", self.node.name, self.num)
         return self.register.get_qubits_RI([self.num])

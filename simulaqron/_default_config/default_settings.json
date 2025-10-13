@@ -1,0 +1,13 @@
+{
+    "_read_user": true,
+    "max_qubits": 20,
+    "max_registers": 1000,
+    "conn_retry_time": 0.5,
+    "recv_timeout": 100,
+    "recv_retry_time": 0.1,
+    "log_level": 30,
+    "sim_backend": "stabilizer",
+    "network_config_file": "default_network.json",
+    "noisy_qubits": false,
+    "t1": 1.0
+}

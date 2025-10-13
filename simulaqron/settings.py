@@ -30,16 +30,12 @@
 #########################
 # SETTINGS FOR SIMULAQRON
 #########################
-import os
 import json
-import logging
 from enum import Enum
+from importlib import resources
+from os import PathLike
+from pathlib import Path
 from typing import Dict, Any
-
-from simulaqron.toolbox import get_simulaqron_path
-
-simulaqron_path = get_simulaqron_path.main()
-config_folder = os.path.join(simulaqron_path, "config")
 
 
 class SimBackend(Enum):
@@ -47,30 +43,16 @@ class SimBackend(Enum):
     PROJECTQ = "projectq"
     QUTIP = "qutip"
 
+    def __str__(self):
+        return self.value
+
+    def __repr__(self):
+        return str(self)
+
 
 class Config:
-    simulaqron_path = get_simulaqron_path.main()
-    config_folder = os.path.join(simulaqron_path, "config")
-
-    _internal_settings_file = os.path.join(simulaqron_path, "config", "settings.json")
-    _user_settings_file = os.path.join(os.path.expanduser("~"), ".simulaqron.json")
-
     # Dictionary for settings
     _config: Dict[str, Any] = {}
-
-    _default_config = {
-        "_read_user": True,
-        "max_qubits": 20,
-        "max_registers": 1000,
-        "conn_retry_time": 0.5,
-        "recv_timeout": 100,  # (x 100 ms)
-        "recv_retry_time": 0.1,  # (seconds)
-        "log_level": logging.WARNING,
-        "sim_backend": SimBackend.STABILIZER.value,
-        "network_config_file": os.path.join(config_folder, "network.json"),
-        "noisy_qubits": False,
-        "t1": 1.0
-    }
 
     class Decorator:
         @classmethod
@@ -86,50 +68,58 @@ class Config:
             return updated_func
 
     def __init__(self):
-        self.update_settings()
+        self._loaded_file = ""  # Will be correctly setup when loading the default config
+        # We populate the object with the default configuration
+        self.default_settings()
 
-    def update_settings(self, default: bool = False):
-        # Update with default settings
-        self._config.update(self._default_config)
-
-        # Update with internal settings (if exists and default is False)
-        if not default:
-            if os.path.exists(self._internal_settings_file):
-                with open(self._internal_settings_file, 'r') as f:
-                    internal_config = json.load(f)
-                    self._config.update(internal_config)
+    def update_settings(self, config: Dict[str, Any]):
+        # Update the config with the given data
+        if "network_config_file" in config:
+            # We need to resolve the path of the network config file
+            given_network_config = Path(config["network_config_file"]).resolve()
+            if given_network_config.exists() and given_network_config.is_file():
+                config["network_config_file"] = str(given_network_config)
             else:
-                self._write()
-
-            # Update with internal settings (if exists and _read_user is True)
-            if self._read_user:
-                if os.path.exists(self._user_settings_file):
-                    with open(self._user_settings_file, 'r') as f:
-                        user_config = json.load(f)
-                        self._config.update(user_config)
+                # If it doesn't exist, we load the default
+                resource = resources.path(
+                    "simulaqron._default_config",
+                    "default_network.json"
+                )
+                with resource as network_path:
+                    network_specs_path = network_path.resolve()
+                    assert network_specs_path.exists() and network_path.is_file()
+                    config["network_config_file"] = str(network_specs_path)
+            config["sim_backend"] = SimBackend[config["sim_backend"].upper()]
+        self._config.update(config)
 
     def default_settings(self):
-        self.update_settings(default=True)
-        self._write()
+        default_settings = resources.path("simulaqron._default_config", "default_settings.json")
+        with default_settings as default_settings_path:
+            self._loaded_file = str(default_settings_path)
+            self.load_from_file(default_settings_path)
 
-    def _write(self):
-        with open(self._internal_settings_file, 'w') as f:
-            json.dump(self._config, f, indent=4)
+    def load_from_file(self, path: PathLike):
+        file_path = Path(str(path)).resolve()
+        if file_path.exists() and file_path.is_file():
+            self._loaded_file = str(file_path)
+            with open(file_path, 'r') as file:
+                config = json.load(file)
+                self.update_settings(config)
+        else:
+            raise FileNotFoundError(f"File {file_path} does not exist or is not a file")
 
     def _get_setting(self, setting: str) -> Any:
         try:
             value = self._config[setting]
         except KeyError:
-            raise KeyError(f"Cannot find the setting {setting} in the file {self._internal_settings_file}")
+            raise KeyError(f"Cannot find the setting {setting} in the file {self._loaded_file}")
         return value
 
     def _set_setting(self, setting: str, value: Any):
         self._config[setting] = value
-        self._write()
 
-    # Below are the settings, note that _get_setting and _set_setting are automaticaly
-    # called when a setting is set or get. When a value is set the values is saved to the
-    # settings (json) file using the name of the property as key.
+    # Below are the settings, note that _get_setting and _set_setting are automatically
+    # called when a setting is set or get.
 
     @property
     @Decorator.get_setting
@@ -143,12 +133,12 @@ class Config:
 
     @property
     @Decorator.get_setting
-    def sim_backend(self) -> str:
+    def sim_backend(self) -> SimBackend:
         pass
 
     @sim_backend.setter
     @Decorator.set_setting
-    def sim_backend(self, sim_backend):
+    def sim_backend(self, sim_backend: SimBackend):
         pass
 
     @property

@@ -1,10 +1,8 @@
-import os
 import json
 import time
 import unittest
 from timeit import default_timer as timer
 
-from simulaqron.toolbox import get_simulaqron_path
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 from simulaqron.settings import simulaqron_settings
 from simulaqron.network import Network
@@ -21,7 +19,8 @@ class TestInitNetwork(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        default_network_config_file = simulaqron_settings._default_config["network_config_file"]
+        simulaqron_settings.default_settings()
+        default_network_config_file = simulaqron_settings.network_config_file
         network_config = NetworksConfigConstructor(default_network_config_file)
         network_config.reset()
         network_config.write_to_file()
@@ -41,8 +40,7 @@ class TestInitNetwork(unittest.TestCase):
             self.assert_nodes(neigh1, neigh2)
 
     def check_nodes_and_topology_in_file(self, network):
-        simulaqron_path = get_simulaqron_path.main()
-        network_config_file = os.path.join(simulaqron_path, "config", "network.json")
+        network_config_file = simulaqron_settings.network_config_file
         with open(network_config_file, 'r') as f:
             network_config = json.load(f)
         nodes_in_file = list(network_config[network.name]["nodes"].keys())

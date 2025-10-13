@@ -12,7 +12,7 @@ class NetworksConfigConstructor:
         be written to a file by calling the method 'write_to_file'.
 
         :param file_path: None or str
-            Path to the network config_file. If None an empty networkconfig constructor is initalized.
+            Path to the network config_file. If None an empty networkconfig constructor is initialized.
             Otherwise the content of the file is loaded.
         """
         self.networks = {}

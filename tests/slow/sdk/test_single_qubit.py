@@ -201,13 +201,11 @@ class TestSingleQubitGate:
 
     @pytest.fixture
     def network(self):
-        simulaqron_settings.default_settings()
         network = Network(nodes=["Alice"], force=True)
         network.start()
         yield network
 
         network.stop()
-        simulaqron_settings.default_settings()
         reset()
 
     def test_X_Gate(self, network):
@@ -242,7 +240,7 @@ class TestSingleQubitGate:
         with SimulaQronConnection("Alice") as conn:
             # Test T
             exp_values = calc_exp_values(prep_T_state())
-            if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+            if simulaqron_settings.sim_backend == SimBackend.STABILIZER:
                 with pytest.raises(SimUnsupportedError):
                     conn.test_preparation(prep_T, exp_values, iterations=self.iterations, progress=False)
             else:
@@ -260,7 +258,7 @@ class TestSingleQubitGate:
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_X pi/8
             exp_values = calc_exp_values(prep_rot_state([1, 0, 0], np.pi / 8))
-            if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+            if simulaqron_settings.sim_backend == SimBackend.STABILIZER:
                 with pytest.raises(SimUnsupportedError):
                     conn.test_preparation(prep_rotx1, exp_values, iterations=self.iterations, progress=False)
             else:
@@ -271,7 +269,7 @@ class TestSingleQubitGate:
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_X 5*pi/8
             exp_values = calc_exp_values(prep_rot_state([1, 0, 0], 5 * np.pi / 8))
-            if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+            if simulaqron_settings.sim_backend == SimBackend.STABILIZER:
                 with pytest.raises(SimUnsupportedError):
                     conn.test_preparation(prep_rotx2, exp_values, iterations=self.iterations, progress=False)
             else:
@@ -282,7 +280,7 @@ class TestSingleQubitGate:
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_Y pi/8
             exp_values = calc_exp_values(prep_rot_state([0, 1, 0], np.pi / 8))
-            if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+            if simulaqron_settings.sim_backend == SimBackend.STABILIZER:
                 with pytest.raises(SimUnsupportedError):
                     conn.test_preparation(prep_roty1, exp_values, iterations=self.iterations, progress=False)
             else:
@@ -293,7 +291,7 @@ class TestSingleQubitGate:
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_Y 5*pi/8
             exp_values = calc_exp_values(prep_rot_state([0, 1, 0], 5 * np.pi / 8))
-            if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+            if simulaqron_settings.sim_backend == SimBackend.STABILIZER:
                 with pytest.raises(SimUnsupportedError):
                     conn.test_preparation(prep_roty2, exp_values, iterations=self.iterations, progress=False)
             else:
@@ -304,7 +302,7 @@ class TestSingleQubitGate:
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_Z pi/8
             exp_values = calc_exp_values(prep_rot_state([0, 0, 1], np.pi / 8))
-            if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+            if simulaqron_settings.sim_backend == SimBackend.STABILIZER:
                 with pytest.raises(SimUnsupportedError):
                     conn.test_preparation(prep_rotz1, exp_values, iterations=self.iterations, progress=False)
             else:
@@ -315,7 +313,7 @@ class TestSingleQubitGate:
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_Z 5*pi/8
             exp_values = calc_exp_values(prep_rot_state([0, 0, 1], 5 * np.pi / 8))
-            if simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+            if simulaqron_settings.sim_backend == SimBackend.STABILIZER:
                 with pytest.raises(SimUnsupportedError):
                     conn.test_preparation(prep_rotz2, exp_values, iterations=self.iterations, progress=False)
             else:

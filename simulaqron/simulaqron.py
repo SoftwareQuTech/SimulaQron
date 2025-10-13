@@ -16,7 +16,8 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 PID_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".simulaqron_pids")
 
 # Check that the default network_config_file exists
-default_network_config_file = simulaqron_settings._default_config["network_config_file"]
+simulaqron_settings.default_settings()
+default_network_config_file = simulaqron_settings.network_config_file
 if not os.path.exists(default_network_config_file):
     networks_config = NetworksConfigConstructor()
     networks_config.reset()

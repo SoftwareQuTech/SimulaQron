@@ -35,7 +35,6 @@ from netqasm.sdk import Qubit, EPRSocket
 from simulaqron.sdk.socket import Socket
 from simulaqron.run.run import run_applications
 from simulaqron.network import Network
-from simulaqron.settings import simulaqron_settings
 from simulaqron.run.run import reset
 
 
@@ -184,13 +183,11 @@ class TestTwoQubitGates:
     def network(self):
         print(f"Testing two qubit gates with {self.iterations} iterations\n")
 
-        simulaqron_settings.default_settings()
         network = Network(nodes=["Alice", "Bob"], force=True)
         network.start(wait_until_running=True)
         yield network
 
         network.stop()
-        simulaqron_settings.default_settings()
         reset()
 
     def test_CNOT_control(self, network):

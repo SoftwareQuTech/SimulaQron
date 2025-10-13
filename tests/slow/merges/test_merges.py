@@ -67,18 +67,18 @@ class localNode(pb.Root):
         yield self.q1.callRemote("apply_H")
         yield self.q1.callRemote("cnot_onto", self.q2)
 
-        if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
+        if simulaqron_settings.sim_backend == SimBackend.QUTIP:
             # Output state
             (realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits", [self.q1, self.q2])
             rho = assemble_qubit(realRho, imagRho)
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
-        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ.value:
+        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
             (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", self.q1)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
-        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER:
             (array, _) = yield self.virtRoot.callRemote("get_register_RI", self.q1)
             state = StabilizerState(array)
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
@@ -115,18 +115,18 @@ class localNode(pb.Root):
             yield q.callRemote("apply_H")
             yield q.callRemote("cnot_onto", qA)
 
-        if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
+        if simulaqron_settings.sim_backend == SimBackend.QUTIP:
             # Output state
             (realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits", [qA, q])
             rho = assemble_qubit(realRho, imagRho)
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
-        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ.value:
+        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
             (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", qA)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
-        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER:
             (array, _) = yield self.virtRoot.callRemote("get_register_RI", qA)
             state = StabilizerState(array)
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
@@ -243,18 +243,18 @@ class TestBothLocal(TestMerge):
         yield qA.callRemote("apply_H")
         yield qA.callRemote("cnot_onto", qB)
 
-        if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
+        if simulaqron_settings.sim_backend == SimBackend.QUTIP:
             # Output state
             (realRho, imagRho) = yield virtRoot.callRemote("get_multiple_qubits", [qA, qB])
             rho = assemble_qubit(realRho, imagRho)
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
-        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ.value:
+        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
             (realvec, imagvec, _, _, _) = yield virtRoot.callRemote("get_register", qA)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
-        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER:
             (array, _, _, _, _) = yield virtRoot.callRemote("get_register", qA)
             state = StabilizerState(array)
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
@@ -296,18 +296,18 @@ class TestBothLocalNotSameReg(TestBothLocal):
         yield qA.callRemote("apply_H")
         yield qA.callRemote("cnot_onto", qB)
 
-        if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
+        if simulaqron_settings.sim_backend == SimBackend.QUTIP:
             # Output state
             (realRho, imagRho) = yield virtRoot.callRemote("get_multiple_qubits", [qA, qB])
             rho = assemble_qubit(realRho, imagRho)
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
-        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ.value:
+        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
             (realvec, imagvec, _, _, _) = yield virtRoot.callRemote("get_register", qA)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
-        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER:
             (array, _, _, _, _) = yield virtRoot.callRemote("get_register", qA)
             state = StabilizerState(array)
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
