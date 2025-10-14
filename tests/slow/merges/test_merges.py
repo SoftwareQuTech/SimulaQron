@@ -189,7 +189,7 @@ class TestMerge(unittest.TestCase):
         setup_local(name, virtualNet, classicalNet, lNode, node_code, send_end)
 
     def run_test(self, classical_net_file):
-        mp.set_start_method("spawn", force=True)
+        mp.set_start_method("fork", force=True)
         pipe_list = []
         for name, node_code in zip(self.nodes, self.node_codes):
             recv_end, send_end = mp.Pipe(False)

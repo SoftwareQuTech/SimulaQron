@@ -2,7 +2,7 @@ import logging
 import os
 import signal
 
-from multiprocess.context import SpawnContext as ProcessContext
+from multiprocess.context import ForkContext as ProcessContext
 from multiprocess.pool import ApplyResult
 from importlib import reload
 from importlib.util import find_spec
