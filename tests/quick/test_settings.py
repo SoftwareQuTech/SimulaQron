@@ -4,6 +4,7 @@ import pytest
 from importlib import resources
 from pathlib import Path
 
+import simulaqron._default_config
 from simulaqron.settings import simulaqron_settings, SimBackend
 
 
@@ -26,9 +27,9 @@ class TestSettings:
         """
         expected_settings = json.loads(__expected_default_settings)
         # For testing purposes, we need to "adjust" some of teh expected values:
-        expected_settings["sim_backend"] =SimBackend[expected_settings["sim_backend"].upper()]
-        with resources.path("simulaqron._default_config", "default_network.json") as path:
-            expected_settings["network_config_file"] = str(path)
+        expected_settings["sim_backend"] = SimBackend[expected_settings["sim_backend"].upper()]
+        path = resources.files(simulaqron._default_config).joinpath("default_network.json")
+        expected_settings["network_config_file"] = str(path)
 
         simulaqron_settings.default_settings()
         for key, value in expected_settings.items():
@@ -68,8 +69,8 @@ class TestSettings:
         expected_settings = json.loads(_expected_settings)
         # For testing purposes, we need to "adjust" some of teh expected values:
         expected_settings["sim_backend"] =SimBackend[expected_settings["sim_backend"].upper()]
-        with resources.path("simulaqron._default_config", "default_network.json") as path:
-            expected_settings["network_config_file"] = str(path)
+        path = resources.files("simulaqron._default_config").joinpath("default_network.json")
+        expected_settings["network_config_file"] = str(path)
 
         _original_settings = json.loads(_original_settings)
         with tempfile.NamedTemporaryFile(mode="w+", encoding="utf-8", delete_on_close=False) as file:

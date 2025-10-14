@@ -37,6 +37,8 @@ from os import PathLike
 from pathlib import Path
 from typing import Dict, Any
 
+import simulaqron._default_config
+
 # This is the name of the "local" simulaqron settings.
 # If a file named like this is found in the CWD, it will be
 # automatically loaded when creating the config file
@@ -92,22 +94,17 @@ class Config:
                 config["network_config_file"] = str(given_network_config)
             else:
                 # If it doesn't exist, we load the default
-                resource = resources.path(
-                    "simulaqron._default_config",
-                    "default_network.json"
-                )
-                with resource as network_path:
-                    network_specs_path = network_path.resolve()
-                    assert network_specs_path.exists() and network_path.is_file()
-                    config["network_config_file"] = str(network_specs_path)
+                resource = resources.files(simulaqron._default_config).joinpath("default_network.json")
+                network_path = Path(str(resource)).resolve()
+                assert network_path.exists() and network_path.is_file()
+                config["network_config_file"] = str(network_path)
             config["sim_backend"] = SimBackend[config["sim_backend"].upper()]
         self._config.update(config)
 
     def default_settings(self):
-        default_settings = resources.path("simulaqron._default_config", "default_settings.json")
-        with default_settings as default_settings_path:
-            self._loaded_file = str(default_settings_path)
-            self.load_from_file(default_settings_path)
+        default_settings_path = resources.files(simulaqron._default_config).joinpath("default_settings.json")
+        self._loaded_file = str(default_settings_path)
+        self.load_from_file(Path(self._loaded_file))
 
     def load_from_file(self, path: PathLike):
         file_path = Path(str(path)).resolve()
