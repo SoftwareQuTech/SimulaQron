@@ -1,12 +1,10 @@
-import unittest
-import os
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 from simulaqron.general.host_config import NetworksConfigConstructor, SocketsConfig
 
-PATH_TO_HERE = os.path.abspath(os.path.dirname(__file__))
 
-
-class TestNetworkConfig(unittest.TestCase):
+class TestNetworkConfig:
     def test_read_write(self):
         network_config = NetworksConfigConstructor()
 
@@ -15,30 +13,28 @@ class TestNetworkConfig(unittest.TestCase):
         network_config.add_node("Charlie", network_name="test")
 
         dct1 = network_config.to_dict()
-        file_path = os.path.join(PATH_TO_HERE, "resources", "test.json")
-        network_config.write_to_file(file_path)
+        with NamedTemporaryFile(mode="w", delete_on_close=False) as temp_file:
+            network_config.write_to_file(temp_file.name)
+            temp_file.close()
 
-        network_config2 = NetworksConfigConstructor(file_path=file_path)
-        dct2 = network_config2.to_dict()
+            network_config2 = NetworksConfigConstructor(file_path=temp_file.name)
+            dct2 = network_config2.to_dict()
 
-        self.assertEqual(dct1, dct2)
-        self.assertIn("Alice", dct1["default"]["nodes"])
-        self.assertIn("Bob", dct1["default"]["nodes"])
-        self.assertIn("Charlie", dct1["test"]["nodes"])
+            assert dct1 == dct2
+            assert "Alice" in dct1["default"]["nodes"]
+            assert "Bob" in dct1["default"]["nodes"]
+            assert "Charlie" in dct1["test"]["nodes"]
 
 
-class TestSocketsConfig(unittest.TestCase):
+class TestSocketsConfig:
     def test_load_file(self):
-        file_path1 = os.path.join(PATH_TO_HERE, "resources", "sockets.cfg")
-        conf1 = SocketsConfig(file_path1)
+        this_file_folder = Path(__file__).parent
+        sockets_config_path = this_file_folder / "resources" /  "sockets.cfg"
+        conf1 = SocketsConfig(str(sockets_config_path.resolve()))
 
-        file_path2 = os.path.join(PATH_TO_HERE, "resources", "network.json")
-        conf2 = SocketsConfig(file_path2, config_type="qnodeos")
+        network_config_path = this_file_folder / "resources" / "network.json"
+        conf2 = SocketsConfig(str(network_config_path.resolve()), config_type="qnodeos")
 
         for node_name, host in conf1.hostDict.items():
-            self.assertEqual(host.port, conf2.hostDict[node_name].port)
-            self.assertEqual(host.hostname, conf2.hostDict[node_name].hostname)
-
-
-if __name__ == '__main__':
-    unittest.main()
+            assert host.port == conf2.hostDict[node_name].port
+            assert host.hostname == conf2.hostDict[node_name].hostname
