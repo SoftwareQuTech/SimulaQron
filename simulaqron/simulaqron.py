@@ -1,27 +1,23 @@
 #!/usr/bin/env python3
-import os
 import time
 import click
 import logging
 from daemons.prefab import run
 from daemons.interfaces import exit
+from pathlib import Path
 import importlib.metadata as metadata
 
 from simulaqron.network import Network
 from simulaqron.settings import simulaqron_settings, SimBackend
 from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
-from simulaqron.toolbox.reset import main as reset_simulaqron
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
-PID_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".simulaqron_pids")
+# PID folder should be "LOCAL"
+PID_FOLDER = Path.home() /  ".simulaqron_pids"
 
-# Check that the default network_config_file exists
-simulaqron_settings.default_settings()
-default_network_config_file = simulaqron_settings.network_config_file
-if not os.path.exists(default_network_config_file):
-    networks_config = NetworksConfigConstructor()
-    networks_config.reset()
-    networks_config.write_to_file(default_network_config_file)
+# If the pid folder does not exist, create it
+if not PID_FOLDER.exists():
+    Path.mkdir(PID_FOLDER)
 
 
 class SimulaQronDaemon(run.RunDaemon):
@@ -129,13 +125,14 @@ def version():
          "If you want to supress this question, use the --force/-f flag.",
     is_flag=True,
 )
+
 def start(name, nrnodes, nodes, topology, force, keep):
     """Starts a network with the given parameters or from config files."""
     new = not keep
     if name is None:
         name = "default"
-    pidfile = os.path.join(PID_FOLDER, f"simulaqron_network_{name}.pid")
-    if os.path.exists(pidfile):
+    pidfile = PID_FOLDER / f"simulaqron_network_{name}.pid"
+    if pidfile.exists():
         logging.warning("Network with name %s is already running", name)
         logging.warning("The pidfile for this network is located at %s", pidfile)
         return
@@ -173,8 +170,8 @@ def stop(name):
     """Stops a network."""
     if name is None:
         name = "default"
-    pidfile = os.path.join(PID_FOLDER, f"simulaqron_network_{name}.pid")
-    if not os.path.exists(pidfile):
+    pidfile = PID_FOLDER / f"simulaqron_network_{name}.pid"
+    if pidfile.exists():
         logging.warning("Network with name %s is not running", name)
         return
     d = SimulaQronDaemon(pidfile=pidfile)
@@ -203,14 +200,13 @@ def reset(force):
     else:
         answer = "yes"
     if _is_positive_answer(answer):
-        for entry in os.listdir(PID_FOLDER):
-            if entry.endswith(".pid"):
-                pidfile = os.path.join(PID_FOLDER, entry)
-                d = SimulaQronDaemon(pidfile=pidfile)
+        for entry in PID_FOLDER.iterdir():
+            if entry.suffix == ".pid":
+                d = SimulaQronDaemon(pidfile=entry)
                 d.stop()
-                if os.path.exists(pidfile):
-                    os.remove(pidfile)
-        reset_simulaqron()
+                if entry.exists():
+                    entry.unlink()
+        simulaqron_settings.default_settings()
     else:
         print("Aborting!")
 
