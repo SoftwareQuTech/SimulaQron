@@ -50,15 +50,6 @@ from simulaqron.general.errors import *  # noqa: F401, F403
 from simulaqron.settings import simulaqron_settings, SimBackend
 from simulaqron.reactor import reactor
 
-if simulaqron_settings.sim_backend == SimBackend.QUTIP:
-    from simulaqron.virtual_node.qutip_simulator import QutipEngine as QEngine
-elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
-    from simulaqron.virtual_node.project_q_simulator import ProjectQEngine as QEngine
-elif simulaqron_settings.sim_backend == SimBackend.STABILIZER:
-    from simulaqron.virtual_node.stabilizer_simulator import StabilizerEngine as QEngine
-else:
-    raise QuantumError(f"Unknown backend {simulaqron_settings.sim_backend}")
-
 
 def reraise_remote_error(remote_err: RemoteError):
     """
@@ -416,6 +407,17 @@ class VirtualNode(pb.Root):
 
         self.numRegs = self.numRegs + 1
         regNum = self.get_new_reg_num()
+        if simulaqron_settings.sim_backend == SimBackend.QUTIP:
+            simulator_pkg = importlib.import_module("simulaqron.virtual_node.qutip_simulator")
+            QEngine = simulator_pkg.QutipEngine
+        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
+            simulator_pkg = importlib.import_module("simulaqron.virtual_node.project_q_simulator")
+            QEngine = simulator_pkg.ProjectQEngine
+        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER:
+            simulator_pkg = importlib.import_module("simulaqron.virtual_node.stabilizer_simulator")
+            QEngine = simulator_pkg.StabilizerEngine
+        else:
+            raise QuantumError(f"Unknown backend {simulaqron_settings.sim_backend}")
         newReg = QEngine(self.myID, regNum, maxQubits)
 
         self.registers[regNum] = newReg
