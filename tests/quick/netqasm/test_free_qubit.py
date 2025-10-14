@@ -16,10 +16,8 @@ class TestFreeQubit:
     @pytest.fixture(autouse=True)
     def network(self):
         simulaqron_settings.default_settings()
-        simulaqron_settings.sim_backend = SimBackend.PROJECTQ.value
+        simulaqron_settings.sim_backend = SimBackend.PROJECTQ
         yield
-        simulaqron_settings.default_settings()
-        simulaqron_settings.sim_backend = SimBackend.PROJECTQ.value
         reset()
 
     @staticmethod

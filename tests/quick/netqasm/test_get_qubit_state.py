@@ -22,8 +22,6 @@ class TestGetQubit:
         simulaqron_settings.default_settings()
         simulaqron_settings.sim_backend = SimBackend.PROJECTQ
         yield
-        simulaqron_settings.default_settings()
-        simulaqron_settings.sim_backend = SimBackend.PROJECTQ
         reset()
 
     # Here we define the quantum programs used in the tests
