@@ -8,67 +8,67 @@
                 ],
                 "qnodeos_socket": [
                     "localhost",
-                    8016
+                    8002
                 ],
                 "vnode_socket": [
                     "localhost",
-                    8024
+                    8003
                 ]
             },
             "Bob": {
                 "app_socket": [
                     "localhost",
-                    8026
+                    8010
                 ],
                 "qnodeos_socket": [
                     "localhost",
-                    8032
+                    8011
                 ],
                 "vnode_socket": [
                     "localhost",
-                    8033
+                    8012
                 ]
             },
             "Charlie": {
                 "app_socket": [
                     "localhost",
-                    8046
+                    8020
                 ],
                 "qnodeos_socket": [
                     "localhost",
-                    8047
+                    8021
                 ],
                 "vnode_socket": [
                     "localhost",
-                    8048
+                    8022
                 ]
             },
             "David": {
                 "app_socket": [
                     "localhost",
-                    8049
+                    8030
                 ],
                 "qnodeos_socket": [
                     "localhost",
-                    8050
+                    8031
                 ],
                 "vnode_socket": [
                     "localhost",
-                    8051
+                    8032
                 ]
             },
             "Eve": {
                 "app_socket": [
                     "localhost",
-                    8052
+                    8033
                 ],
                 "qnodeos_socket": [
                     "localhost",
-                    8053
+                    8034
                 ],
                 "vnode_socket": [
                     "localhost",
-                    8054
+                    8035
                 ]
             }
         },

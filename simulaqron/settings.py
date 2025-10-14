@@ -37,6 +37,11 @@ from os import PathLike
 from pathlib import Path
 from typing import Dict, Any
 
+# This is the name of the "local" simulaqron settings.
+# If a file named like this is found in the CWD, it will be
+# automatically loaded when creating the config file
+SIMULAQRON_SETTINGS_FILENAME = "simulaqron_settings.json"
+
 
 class SimBackend(Enum):
     STABILIZER = "stabilizer"
@@ -68,9 +73,15 @@ class Config:
             return updated_func
 
     def __init__(self):
-        self._loaded_file = ""  # Will be correctly setup when loading the default config
-        # We populate the object with the default configuration
-        self.default_settings()
+        self._loaded_file = ""  # Will be correctly setup when loading the config
+
+        # We populate the object with the configuration
+        local_settings_file = (Path.cwd() / SIMULAQRON_SETTINGS_FILENAME).resolve()
+        if local_settings_file.exists() and local_settings_file.is_file():
+            self._loaded_file = str(local_settings_file)
+            self.load_from_file(local_settings_file)
+        else:
+            self.default_settings()
 
     def update_settings(self, config: Dict[str, Any]):
         # Update the config with the given data
