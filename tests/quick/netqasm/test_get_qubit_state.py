@@ -1,4 +1,5 @@
 import math
+from tempfile import NamedTemporaryFile
 
 import numpy as np
 import pytest
@@ -6,6 +7,7 @@ from netqasm.runtime.settings import set_simulator
 from netqasm.sdk.classical_communication.message import StructuredMessage
 
 from simulaqron.settings import simulaqron_settings, SimBackend
+from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
 
 set_simulator("simulaqron")
 
@@ -18,11 +20,18 @@ from simulaqron.run.run import run_applications, reset  # noqa: E402
 
 class TestGetQubit:
     @pytest.fixture(autouse=True)
-    def network(self):
-        simulaqron_settings.default_settings()
-        simulaqron_settings.sim_backend = SimBackend.PROJECTQ
-        yield
-        reset()
+    def configuration(self):
+        with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as network_settings_file:
+            network_config = NetworksConfigConstructor.default_network_constructor()
+            network_config.write_to_file(network_settings_file.name)
+            with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as simulaqron_settings_file:
+                simulaqron_settings.default_settings()
+                simulaqron_settings.sim_backend = SimBackend.PROJECTQ.value
+                simulaqron_settings.network_config_file = network_settings_file.name
+                simulaqron_settings.save_to_file(simulaqron_settings_file.name)
+                simulaqron_settings.load_from_file(simulaqron_settings_file.name)
+                yield
+                reset()
 
     # Here we define the quantum programs used in the tests
 
@@ -109,7 +118,7 @@ class TestGetQubit:
 
     # From here down, the actual tests
 
-    def test_peek_new_unflushed_qubit(self, network):
+    def test_peek_new_unflushed_qubit(self):
         apps = default_app_instance(
             [
                 ("Alice", TestGetQubit.peek_new_unflushed_qubit)
@@ -119,7 +128,7 @@ class TestGetQubit:
             _ = run_applications(apps, use_app_config=False, enable_logging=False)
         assert "Qubit 0 has unflushed operations" in str(exc.value)
 
-    def test_peek_unflushed_qubit(self, network):
+    def test_peek_unflushed_qubit(self):
         apps = default_app_instance(
             [
                 ("Alice", TestGetQubit.peek_unflushed_qubit)
@@ -129,7 +138,7 @@ class TestGetQubit:
             _ = run_applications(apps, use_app_config=False, enable_logging=False)
         assert "Qubit 0 has unflushed operations" in str(exc.value)
 
-    def test_get_basic_state_local(self, network):
+    def test_get_basic_state_local(self):
         apps = default_app_instance(
             [
                 ("Alice", TestGetQubit.peek_init_qubit)
@@ -139,7 +148,7 @@ class TestGetQubit:
         # We expect the qubit to be initialized in the |0> state = [1 0]
         assert np.array_equal(raw_results[0]["app_Alice"], np.array([[1.0 + 0.0j, 0 + 0.0j], [0.0 + 0.0j, 0 + 0.0j]]))
 
-    def test_get_qubit_state_local(self, network):
+    def test_get_qubit_state_local(self):
         apps = default_app_instance(
             [
                 ("Alice", TestGetQubit.peek_local_qubit)
@@ -154,7 +163,7 @@ class TestGetQubit:
         expected_x = np.array([0.0 + 0.0j, 1 + 0.0j])
         assert np.array_equal(raw_results[0]["app_Alice"]["state_b"], np.outer(expected_x, expected_x))
 
-    def test_get_qubit_state_teleport(self, network):
+    def test_get_qubit_state_teleport(self):
         apps = default_app_instance(
             [
                 ("Alice", TestGetQubit.alice_teleport),

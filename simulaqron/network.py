@@ -29,8 +29,10 @@
 
 import time
 import random
+from os import PathLike
+
 from multiprocess.context import ForkProcess as Process
-from typing import List
+from typing import List, Optional, Dict, Any
 
 import networkx as nx
 from timeit import default_timer as timer
@@ -49,18 +51,20 @@ from simulaqron.sdk import SimulaQronConnection
 
 
 class Network:
-    def __init__(self, name=None, nodes=None, topology=None, network_config_file=None, force=False, new=True):
+    def __init__(self, name: str = "default", nodes: Optional[List[str]] = None,
+                 topology: Optional[Dict[str, Any]] = None, network_config_file: PathLike | str = None,
+                 force: bool = False, new: bool = True):
         """
         Used to spin up a simulated network.
 
         If new=True then a fresh network with only the specified nodes
         (or the default Alice, Bob, Charlie, David and Eve) are created and overwriting the current network with
-        the same name in the network config file. Otherwise only the specified nodes are started without changing
-        the config file. Note that if the nodes does not currently exists and new=False, an ValueError is raised.
+        the same name in the network config file. Otherwise, only the specified nodes are started without changing
+        the config file. Note that if the nodes does not currently exist and new=False, an ValueError is raised.
 
         If force=False an input to confirm the overwriting is issued.
 
-        :param name: None or str (defualts to "default")
+        :param name: None or str (defaults to "default")
         :param nodes: None or list of str
         :param topology: None or dict
         :param network_config_file: None or str (defaults to simulaqron_settings.network_config_file
@@ -68,11 +72,7 @@ class Network:
         :param new: bool
         """
         self._running = False
-
-        if name is None:
-            self.name = "default"
-        else:
-            self.name = name
+        self.name = name
 
         self.processes: List[Process] = []
         self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
@@ -97,7 +97,7 @@ class Network:
                 answer = input(f"Do you want to add/replace the network {self.name} in the "
                                f"file {self._network_config_file} with a network consisting "
                                f"of the nodes {self.nodes}? (yes/no)")
-                if answer not in ["yes", "y"]:
+                if answer.lower() not in ["yes", "y"]:
                     raise RuntimeError("User did not want to replace network in file")
             networks_config.add_network(node_names=self.nodes, network_name=self.name, topology=self.topology)
             networks_config.write_to_file(self._network_config_file)

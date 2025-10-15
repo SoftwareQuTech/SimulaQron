@@ -31,7 +31,7 @@
 # SETTINGS FOR SIMULAQRON
 #########################
 import json
-from enum import Enum
+from enum import StrEnum
 from importlib import resources
 from os import PathLike
 from pathlib import Path
@@ -45,7 +45,7 @@ import simulaqron._default_config
 SIMULAQRON_SETTINGS_FILENAME = "simulaqron_settings.json"
 
 
-class SimBackend(Enum):
+class SimBackend(StrEnum):
     STABILIZER = "stabilizer"
     PROJECTQ = "projectq"
     QUTIP = "qutip"

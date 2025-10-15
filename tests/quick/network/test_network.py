@@ -1,5 +1,6 @@
 import json
 import time
+from tempfile import NamedTemporaryFile
 from typing import List
 
 import pytest
@@ -34,35 +35,36 @@ class TestInitNetwork:
         self._assert_topology(topology_in_file, network.topology)
 
     @pytest.fixture(autouse=True)
-    def network(self):
-        self.network = None
-        self.default_nodes = ["Alice", "Bob", "Charlie", "David", "Eve"]
-        self.default_topology = None
-        yield
-        self._check_nodes_and_topology_in_file(self.network)
+    def network_file(self):
+        with NamedTemporaryFile() as net_config_file:
+            self.network = None
+            self.default_nodes = ["Alice", "Bob", "Charlie", "David", "Eve"]
+            self.default_topology = None
+            yield net_config_file.name
+            self._check_nodes_and_topology_in_file(self.network)
 
-    def test_init_no_argument(self):
-        self.network = Network(force=True)
+    def test_init_no_argument(self, network_file: str):
+        self.network = Network(force=True, network_config_file=network_file)
         self._assert_nodes(self.network.nodes, self.default_nodes)
         self._assert_topology(self.network.topology, self.default_topology)
 
-    def test_init_node_argument(self):
+    def test_init_node_argument(self, network_file: str):
         nodes = ["Test3", "Test4"]
-        self.network = Network(nodes=nodes, force=True)
+        self.network = Network(nodes=nodes, force=True, network_config_file=network_file)
         self._assert_nodes(self.network.nodes, nodes)
         self._assert_topology(self.network.topology, self.default_topology)
 
-    def test_init_topology_argument(self):
+    def test_init_topology_argument(self, network_file: str):
         topology = {"Test1": [], "Test2": [], "Test3": []}
         nodes = list(topology.keys())
-        self.network = Network(topology=topology, force=True)
+        self.network = Network(topology=topology, force=True, network_config_file=network_file)
         self._assert_nodes(self.network.nodes, nodes)
         self._assert_topology(self.network.topology, topology)
 
-    def test_init_node_and_topology_argument(self):
+    def test_init_node_and_topology_argument(self, network_file: str):
         nodes = ["Test5", "Test6"]
         topology = {"Test5": ["Test6"], "Test6": ["Test5"]}
-        self.network = Network(nodes=nodes, topology=topology, force=True)
+        self.network = Network(nodes=nodes, topology=topology, force=True, network_config_file=network_file)
         self._assert_nodes(self.network.nodes, nodes)
         self._assert_topology(self.network.topology, topology)
 

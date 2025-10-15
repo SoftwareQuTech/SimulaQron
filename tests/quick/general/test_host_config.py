@@ -6,7 +6,7 @@ from simulaqron.general.host_config import NetworksConfigConstructor, SocketsCon
 
 class TestNetworkConfig:
     def test_read_write(self):
-        network_config = NetworksConfigConstructor()
+        network_config = NetworksConfigConstructor(file_path=None)
 
         network_config.add_node("Alice")
         network_config.add_node("Bob")

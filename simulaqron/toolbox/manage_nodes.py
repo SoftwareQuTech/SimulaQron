@@ -1,11 +1,16 @@
-import os
 import json
 from contextlib import closing
 import socket
+from importlib import resources
+from os import PathLike
+from pathlib import Path
+from typing import Optional, Self
+
+import simulaqron._default_config
 
 
 class NetworksConfigConstructor:
-    def __init__(self, file_path=None):
+    def __init__(self, file_path: Optional[PathLike | str]):
         """
         Used to construct the config file of networks.abs
         When all nodes and networks are added the content of this object can
@@ -17,10 +22,14 @@ class NetworksConfigConstructor:
         """
         self.networks = {}
         self.used_sockets = []
-        self.file_path = file_path
-        if self.file_path is not None:
-            if os.path.exists(self.file_path):
-                self.read_from_file()
+        self.file_path = None if file_path is None else Path(str(file_path))
+        if self.file_path is not None and self.file_path.exists():
+            self.read_from_file(self.file_path)
+
+    @classmethod
+    def default_network_constructor(cls) -> Self:
+        default_network_path = resources.files(simulaqron._default_config).joinpath("default_network.json")
+        return cls(Path(str(default_network_path)))
 
     def add_node(self, node_name, network_name="default", app_hostname=None, qnodeos_hostname=None, vnode_hostname=None,
                  app_port=None, qnodeos_port=None, vnode_port=None, neighbors=None):
@@ -205,7 +214,7 @@ class NetworksConfigConstructor:
         with open(file_path, 'w') as f:
             json.dump(dict, f, indent=4)
 
-    def read_from_file(self, file_path=None):
+    def read_from_file(self, file_path: PathLike | str):
         """
         Reads config from a file.
 
@@ -217,7 +226,7 @@ class NetworksConfigConstructor:
         if file_path is None:
             raise ValueError("Since this networks config was not initialized with a file_path you need to specify one")
 
-        if os.path.exists(file_path):
+        if Path(str(file_path)).exists():
             with open(file_path, 'r') as f:
                 dict = json.load(f)
         else:

@@ -122,7 +122,7 @@ def run_applications(
     hardware: Any = None,  # Unused; it's here for harmonization with squidasm "simulate_application"
     init_func: Callable = None,
 ) -> List[Dict[str, Any]]:
-    """Executes functions containing application scripts,
+    """Executes functions containing quantum applications.
 
     Parameters
     ----------
