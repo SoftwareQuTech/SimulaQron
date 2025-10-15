@@ -7,14 +7,14 @@ from simulaqron.run import run_applications
 from simulaqron.run.run import reset
 from simulaqron.sdk.socket import Socket
 from simulaqron.settings import simulaqron_settings, SimBackend
-from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
+from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
 
 
 class TestClassicalSocket:
     @pytest.fixture(autouse=True)
     def configurations(self):
         with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as network_settings_file:
-            network_config = NetworksConfigConstructor.default_network_constructor()
+            network_config = NetworkConfigBuilder.using_default_network()
             network_config.write_to_file(network_settings_file.name)
             with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as simulaqron_settings_file:
                 simulaqron_settings.default_settings()

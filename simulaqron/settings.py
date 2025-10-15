@@ -116,6 +116,16 @@ class Config:
         else:
             raise FileNotFoundError(f"File {file_path} does not exist or is not a file")
 
+    def save_to_file(self, path: PathLike):
+        file_path = Path(str(path)).resolve()
+        with open(file_path, 'w') as file:
+            json.dump(self._config, file)
+
+    def remove_local_config(self):
+        file_path = (Path.cwd() / SIMULAQRON_SETTINGS_FILENAME).resolve()
+        if file_path.exists():
+            file_path.unlink()
+
     def _get_setting(self, setting: str) -> Any:
         try:
             value = self._config[setting]

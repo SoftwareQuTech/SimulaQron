@@ -242,4 +242,3 @@ class TestTwoQubitGates:
             ]
         )
         _ = run_applications(apps, use_app_config=False, enable_logging=False, num_rounds=self.iterations)
-        #print(_)

@@ -39,7 +39,7 @@ from timeit import default_timer as timer
 
 from netqasm.logging.glob import get_netqasm_logger, get_log_level
 
-from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
+from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
 from simulaqron.settings import simulaqron_settings
 from simulaqron.start import start_vnode, start_qnodeos
 from simulaqron.sdk import SimulaQronConnection
@@ -78,11 +78,12 @@ class Network:
         self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
 
         if network_config_file is None:
-            self._network_config_file = simulaqron_settings.network_config_file
+            network_config_file = simulaqron_settings.network_config_file
         else:
-            self._network_config_file = network_config_file
+            network_config_file = network_config_file
 
-        networks_config = NetworksConfigConstructor(file_path=self._network_config_file)
+        networks_config = NetworkConfigBuilder()
+        networks_config.read_from_file(network_config_file)
 
         if new:
             if nodes is None:
@@ -95,12 +96,12 @@ class Network:
             self.topology = construct_topology_config(topology, self.nodes)
             if not force:
                 answer = input(f"Do you want to add/replace the network {self.name} in the "
-                               f"file {self._network_config_file} with a network consisting "
+                               f"file {network_config_file} with a network consisting "
                                f"of the nodes {self.nodes}? (yes/no)")
                 if answer.lower() not in ["yes", "y"]:
                     raise RuntimeError("User did not want to replace network in file")
             networks_config.add_network(node_names=self.nodes, network_name=self.name, topology=self.topology)
-            networks_config.write_to_file(self._network_config_file)
+            networks_config.write_to_file(network_config_file)
         else:
             if topology is not None:
                 raise ValueError("If new is False a topology cannot be used.")
@@ -108,7 +109,7 @@ class Network:
                 node_names = networks_config.get_node_names(self.name)
                 self.topology = networks_config.networks[self.name].topology
             else:
-                raise ValueError(f"Network {self.name} is not in the file {self._network_config_file}\n"
+                raise ValueError(f"Network {self.name} is not in the file {network_config_file}\n"
                                  f"If you wish to add this network to the file, use the --new flag.")
             if nodes is None:
                 self.nodes = node_names
@@ -117,7 +118,7 @@ class Network:
                 for node_name in self.nodes:
                     if node_name not in node_names:
                         raise ValueError(f"Node {node_name} is not in the current network {self.name} "
-                                         f"in the file {self._network_config_file}\nIf you wish to overwrite "
+                                         f"in the file {network_config_file}\nIf you wish to overwrite "
                                          f"the current network in the file, use the --new flag.")
 
         self._setup_processes()

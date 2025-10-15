@@ -6,7 +6,7 @@ from netqasm.runtime.settings import set_simulator
 
 from simulaqron.run.run import reset, run_applications
 from simulaqron.settings import simulaqron_settings, SimBackend
-from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
+from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
 
 set_simulator("simulaqron")
 
@@ -19,7 +19,7 @@ class TestFreeQubit:
     @pytest.fixture(autouse=True)
     def configuration(self):
         with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as network_settings_file:
-            network_config = NetworksConfigConstructor.default_network_constructor()
+            network_config = NetworkConfigBuilder.using_default_network()
             network_config.write_to_file(network_settings_file.name)
             with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as simulaqron_settings_file:
                 simulaqron_settings.default_settings()

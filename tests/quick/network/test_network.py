@@ -36,23 +36,22 @@ class TestInitNetwork:
 
     @pytest.fixture(autouse=True)
     def network_file(self):
-        with NamedTemporaryFile() as net_config_file:
+        with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as net_config_file:
             self.network = None
-            self.default_nodes = ["Alice", "Bob", "Charlie", "David", "Eve"]
-            self.default_topology = None
             yield net_config_file.name
             self._check_nodes_and_topology_in_file(self.network)
 
     def test_init_no_argument(self, network_file: str):
         self.network = Network(force=True, network_config_file=network_file)
-        self._assert_nodes(self.network.nodes, self.default_nodes)
-        self._assert_topology(self.network.topology, self.default_topology)
+        default_nodes = ["Alice", "Bob", "Charlie", "David", "Eve"]
+        self._assert_nodes(self.network.nodes, default_nodes)
+        self._assert_topology(self.network.topology, None)
 
     def test_init_node_argument(self, network_file: str):
         nodes = ["Test3", "Test4"]
         self.network = Network(nodes=nodes, force=True, network_config_file=network_file)
         self._assert_nodes(self.network.nodes, nodes)
-        self._assert_topology(self.network.topology, self.default_topology)
+        self._assert_topology(self.network.topology, None)
 
     def test_init_topology_argument(self, network_file: str):
         topology = {"Test1": [], "Test2": [], "Test3": []}

@@ -34,7 +34,7 @@ from typing import Dict, List
 from twisted.spread import pb
 from ipaddress import IPv4Address
 
-from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
+from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
 
 
 class Host(pb.Referenceable):
@@ -91,7 +91,9 @@ class SocketsConfig(pb.Referenceable):
                     raise ValueError("Type needs to be either 'vnode', 'qnodeos' or 'app'")
                 if network_name is None:
                     network_name = "default"
-                network_config = NetworksConfigConstructor(file_path=filename).networks[network_name]
+                network_builder = NetworkConfigBuilder()
+                network_builder.read_from_file(filename)
+                network_config = network_builder.networks[network_name]
                 nodes = network_config.nodes
                 for node_name, node_config in nodes.items():
                     hostname = getattr(node_config, f"{config_type}_hostname")

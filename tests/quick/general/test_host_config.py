@@ -1,12 +1,12 @@
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-from simulaqron.general.host_config import NetworksConfigConstructor, SocketsConfig
+from simulaqron.general.host_config import NetworkConfigBuilder, SocketsConfig
 
 
 class TestNetworkConfig:
     def test_read_write(self):
-        network_config = NetworksConfigConstructor(file_path=None)
+        network_config = NetworkConfigBuilder()
 
         network_config.add_node("Alice")
         network_config.add_node("Bob")
@@ -17,7 +17,8 @@ class TestNetworkConfig:
             network_config.write_to_file(temp_file.name)
             temp_file.close()
 
-            network_config2 = NetworksConfigConstructor(file_path=temp_file.name)
+            network_config2 = NetworkConfigBuilder()
+            network_config2.read_from_file(temp_file.name)
             dct2 = network_config2.to_dict()
 
             assert dct1 == dct2

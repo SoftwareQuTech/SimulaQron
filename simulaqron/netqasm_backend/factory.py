@@ -40,7 +40,7 @@ from simulaqron.general.host_config import SocketsConfig, Host
 from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
 from simulaqron.sdk.connection import RichErrorMessage
 from simulaqron.settings import simulaqron_settings
-from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
+from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
 from simulaqron.virtual_node.virtual import call_method
 
 
@@ -202,7 +202,8 @@ class NetQASMFactory(Factory):
         # topology
         self.topology = None
         if simulaqron_settings.network_config_file is not None:
-            networks_config = NetworksConfigConstructor(simulaqron_settings.network_config_file)
+            networks_config = NetworkConfigBuilder()
+            networks_config.read_from_file(simulaqron_settings.network_config_file)
             self.topology = networks_config.networks[network_name].topology
 
     def stop(self):
