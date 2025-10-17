@@ -32,11 +32,13 @@ import numpy as np
 import pytest
 from netqasm.runtime.application import default_app_instance
 
+# IMPORTANT - Import Network *before* SimulaQronConnection, so the message handlers
+# can initialize correctly.
+from simulaqron.network import Network
 from simulaqron.sdk.connection import SimulaQronConnection
 from netqasm.sdk import Qubit, EPRSocket
 from simulaqron.sdk.socket import Socket
 from simulaqron.run.run import run_applications
-from simulaqron.network import Network
 from simulaqron.run.run import reset
 from simulaqron.settings import simulaqron_settings
 from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder

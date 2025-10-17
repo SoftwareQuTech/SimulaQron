@@ -29,12 +29,10 @@
 
 import time
 import random
+import networkx as nx
 from os import PathLike
-
 from multiprocess.context import ForkProcess as Process
 from typing import List, Optional, Dict, Any
-
-import networkx as nx
 from timeit import default_timer as timer
 
 from netqasm.logging.glob import get_netqasm_logger, get_log_level
