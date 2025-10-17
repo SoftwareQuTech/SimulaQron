@@ -26,6 +26,8 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+from tempfile import NamedTemporaryFile
+
 import numpy as np
 import pytest
 from netqasm.runtime.application import default_app_instance
@@ -36,6 +38,8 @@ from simulaqron.sdk.socket import Socket
 from simulaqron.run.run import run_applications
 from simulaqron.network import Network
 from simulaqron.run.run import reset
+from simulaqron.settings import simulaqron_settings
+from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
 
 
 def calc_exp_values(q):
@@ -181,14 +185,19 @@ class TestTwoQubitGates:
 
     @pytest.fixture
     def network(self):
-        print(f"Testing two qubit gates with {self.iterations} iterations\n")
+        simulaqron_settings.default_settings()
+        with NamedTemporaryFile(suffix=".json", delete_on_close=False) as net_config_file:
+            simulaqron_settings.network_config_file = net_config_file.name
+            network_builder = NetworkConfigBuilder()
+            network_builder.using_default_network()
+            network_builder.write_to_file(net_config_file.name)
+            network = Network(nodes=["Alice", "Bob"], force=True)
+            network.start(wait_until_running=True)
+            yield network
 
-        network = Network(nodes=["Alice", "Bob"], force=True)
-        network.start(wait_until_running=True)
-        yield network
+            network.stop()
+            reset()
 
-        network.stop()
-        reset()
 
     def test_CNOT_control(self, network):
         with SimulaQronConnection("Bob") as conn:

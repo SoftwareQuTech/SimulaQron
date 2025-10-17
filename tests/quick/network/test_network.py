@@ -8,6 +8,7 @@ from timeit import default_timer as timer
 
 from simulaqron.settings import simulaqron_settings
 from simulaqron.network import Network
+from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
 
 
 class TestInitNetwork:
@@ -36,7 +37,15 @@ class TestInitNetwork:
 
     @pytest.fixture(autouse=True)
     def network_file(self):
+        simulaqron_settings.default_settings()
+        # We initialize a temporary file with the default network config
+        network_builder = NetworkConfigBuilder()
+        network_builder.using_default_network()
         with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as net_config_file:
+            # We also need to specify the location of the temporal file as the network config file
+            simulaqron_settings.network_config_file = net_config_file.name
+            network_builder.write_to_file(net_config_file.name)
+            net_config_file.close()
             self.network = None
             yield net_config_file.name
             self._check_nodes_and_topology_in_file(self.network)
@@ -71,7 +80,21 @@ class TestInitNetwork:
 class TestStartStopNetwork:
     nodes = ["Test1", "Test2", "Test3"]
 
-    def test_start(self):
+    @pytest.fixture(autouse=True)
+    def network_file(self):
+        simulaqron_settings.default_settings()
+        # We initialize a temporary file with the default network config
+        network_builder = NetworkConfigBuilder()
+        network_builder.using_default_network()
+        with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as net_config_file:
+            # We also need to specify the location of the temporal file as the network config file
+            simulaqron_settings.network_config_file = net_config_file.name
+            network_builder.write_to_file(net_config_file.name)
+            net_config_file.close()
+            self.network = None
+            yield net_config_file.name
+
+    def test_start(self, network_file: str):
         network = Network(nodes=self.nodes, force=True)
         assert len(network.processes) == 2 * len(self.nodes)
         for p in network.processes:

@@ -14,7 +14,7 @@ class NetworkConfigBuilder:
         """
         Used to construct the config file of networks.
         """
-        self.networks: Dict[str, _NetworkConfig] = {}
+        self.networks: Dict[str, NetworkConfig] = {}
         self.used_sockets: List[Tuple[str, int]] = []
 
     @classmethod
@@ -86,7 +86,7 @@ class NetworkConfigBuilder:
                 neighbors=neighbors,
             )
         else:
-            network = _NetworkConfig()
+            network = NetworkConfig()
             network.add_node(name=node_name, app_hostname=app_hostname, qnodeos_hostname=qnodeos_hostname,
                              vnode_hostname=vnode_hostname, app_port=app_port, qnodeos_port=qnodeos_port,
                              vnode_port=vnode_port, neighbors=neighbors)
@@ -215,7 +215,7 @@ class NetworkConfigBuilder:
         for network_name, network_dict in dictionary.items():
             nodes_dict = network_dict["nodes"]
             topology = network_dict["topology"]
-            network = _NetworkConfig()
+            network = NetworkConfig()
             network.topology = topology
 
             for node_name, node_dict in nodes_dict.items():
@@ -230,9 +230,9 @@ class NetworkConfigBuilder:
                 for socket_address in socket_addresses:
                     if socket_address not in self.used_sockets:
                         self.used_sockets.append(socket_address)
-                node = _NodeConfig(name=node_name, app_hostname=app_hostname, qnodeos_hostname=qnodeos_hostname,
-                                   vnode_hostname=vnode_hostname, app_port=app_port, qnodeos_port=qnodeos_port,
-                                   vnode_port=vnode_port)
+                node = NodeConfig(name=node_name, app_hostname=app_hostname, qnodeos_hostname=qnodeos_hostname,
+                                  vnode_hostname=vnode_hostname, app_port=app_port, qnodeos_port=qnodeos_port,
+                                  vnode_port=vnode_port)
                 network.nodes[node_name] = node
             self.networks[network_name] = network
 
@@ -279,13 +279,13 @@ class NetworkConfigBuilder:
         return True
 
 
-class _NetworkConfig:
+class NetworkConfig:
     def __init__(self):
         """
         Used by NetworksConfigConstructor to keep track of the config of a single network.
         """
         self.topology: Optional[Dict[str, List[str]]] = None
-        self.nodes: Dict[str, _NodeConfig] = {}
+        self.nodes: Dict[str, NodeConfig] = {}
 
     def add_node(
         self, name: str, app_hostname: Optional[str] = None, qnodeos_hostname: Optional[str] = None,
@@ -327,7 +327,7 @@ class _NetworkConfig:
 
             self.topology[name] = neighbors
 
-        self.nodes[name] = _NodeConfig(
+        self.nodes[name] = NodeConfig(
             name=name,
             app_hostname=app_hostname,
             qnodeos_hostname=qnodeos_hostname,
@@ -346,7 +346,7 @@ class _NetworkConfig:
         return {"nodes": nodes, "topology": self.topology}
 
 
-class _NodeConfig:
+class NodeConfig:
     def __init__(self, name: str, app_hostname: Optional[str], qnodeos_hostname: Optional[str],
                  vnode_hostname: Optional[str], app_port: Optional[int], qnodeos_port: Optional[int],
                  vnode_port: Optional[int]):
