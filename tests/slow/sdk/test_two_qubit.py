@@ -193,6 +193,7 @@ class TestTwoQubitGates:
             network_builder = NetworkConfigBuilder()
             network_builder.using_default_network()
             network_builder.write_to_file(net_config_file.name)
+            net_config_file.close()
             network = Network(nodes=["Alice", "Bob"], force=True)
             network.start(wait_until_running=True)
             yield network
@@ -231,7 +232,7 @@ class TestTwoQubitGates:
 
     # Tests using multiple nodes
 
-    def test_EPRS(self):
+    def test_EPRS(self, network):
         apps = default_app_instance(
             [
                 ("Alice", EPR_Alice),
@@ -242,7 +243,7 @@ class TestTwoQubitGates:
         # both sides MUST measure the same state
         assert int(results[0]["app_Alice"]) == int(results[0]["app_Bob"])
 
-    def test_teleport(self):
+    def test_teleport(self, network):
         # To avoid stalling the simulation, the applications *need* to run
         # in parallel. For this reason, we use the "run_applications" method
         # which spawns a process for each node
