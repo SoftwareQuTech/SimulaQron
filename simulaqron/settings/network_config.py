@@ -9,6 +9,100 @@ from typing import Optional, Self, Dict, List, Tuple, Any
 import simulaqron._default_config
 
 
+class NodeConfig:
+    def __init__(self, name: str, app_hostname: Optional[str], qnodeos_hostname: Optional[str],
+                 vnode_hostname: Optional[str], app_port: Optional[int], qnodeos_port: Optional[int],
+                 vnode_port: Optional[int]):
+        """
+        Used by _NetworkConfig to keep track of the config of a single node.
+        """
+        self.name = name
+        self.app_hostname = app_hostname
+        self.qnodeos_hostname = qnodeos_hostname
+        self.vnode_hostname = vnode_hostname
+        self.app_port = app_port
+        self.qnodeos_port = qnodeos_port
+        self.vnode_port = vnode_port
+
+    def to_dict(self) -> Dict[str, List[str | int | None]]:
+        """
+        Constructs a dictionary with all the config of this node.
+        :return: dict
+        """
+        return {
+            "app_socket": [self.app_hostname, self.app_port],
+            "qnodeos_socket": [self.qnodeos_hostname, self.qnodeos_port],
+            "vnode_socket": [self.vnode_hostname, self.vnode_port]
+        }
+
+
+class NetworkConfig:
+    def __init__(self):
+        """
+        Used by NetworksConfigConstructor to keep track of the config of a single network.
+        """
+        self.topology: Optional[Dict[str, List[str]]] = None
+        self.nodes: Dict[str, NodeConfig] = {}
+
+    def add_node(
+        self, name: str, app_hostname: Optional[str] = None, qnodeos_hostname: Optional[str] = None,
+        vnode_hostname: Optional[str] = None, app_port: Optional[int] = None, qnodeos_port: Optional[int] = None,
+        vnode_port: Optional[int] = None, neighbors: Optional[List[str]] = None,
+    ):
+        """
+        Adds a node with the given name to a network (default: "default").
+        If hostnames are None they will default to 'localhost'.
+        If the port numbers None, unused ones will be chosen between 8000 and 9000.
+        If neighbors are specified a restricted topology can be constructed (default is fully connected).
+
+        :param name: str
+            Name of the node, e.g. Alice
+        :param app_hostname: str or None
+            Hostname, e.g. localhost (default) or 192.168.0.1
+        :param qnodeos_hostname: str or None
+            Hostname, e.g. localhost (default) or 192.168.0.1
+        :param vnode_hostname: str or None
+            Hostname, e.g. localhost (default) or 192.168.0.1
+        :param app_port: int or None
+            Port number for the application
+        :param qnodeos_port: int or None
+            Port number for the qnodeos server
+        :param vnode_port: int or None
+            Port number for the virtual node
+        :param neighbors: (list of str) or None
+            A list of neighbors, of this node.
+            If None all current nodes in the network will be adjacent to the added node.
+        :return: None
+        """
+        if neighbors is not None:
+            if self.topology is None:
+                # Assume that whatever nodes were there before are fully connected
+                self.topology = {}
+                node_names = self.nodes.keys()
+                for node_name in node_names:
+                    self.topology[node_name] = [neigh for neigh in node_names if not neigh == node_name]
+
+            self.topology[name] = neighbors
+
+        self.nodes[name] = NodeConfig(
+            name=name,
+            app_hostname=app_hostname,
+            qnodeos_hostname=qnodeos_hostname,
+            vnode_hostname=vnode_hostname,
+            app_port=app_port,
+            qnodeos_port=qnodeos_port,
+            vnode_port=vnode_port,
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Constructs a dictionary with all the config of this network.
+        :return: dict
+        """
+        nodes = {node_name: node.to_dict() for node_name, node in self.nodes.items()}
+        return {"nodes": nodes, "topology": self.topology}
+
+
 class NetworkConfigBuilder:
     def __init__(self):
         """
@@ -147,7 +241,7 @@ class NetworkConfigBuilder:
         """
         self.networks.pop(network_name, None)
 
-    def get_nodes(self, network_name: str = "default") -> List[Any]:
+    def get_nodes(self, network_name: str = "default") -> List[NodeConfig]:
         """
         Returns the node-config objects (_NodeConfig) in a network.
 
@@ -277,97 +371,3 @@ class NetworkConfigBuilder:
             except socket.error:
                 return False
         return True
-
-
-class NetworkConfig:
-    def __init__(self):
-        """
-        Used by NetworksConfigConstructor to keep track of the config of a single network.
-        """
-        self.topology: Optional[Dict[str, List[str]]] = None
-        self.nodes: Dict[str, NodeConfig] = {}
-
-    def add_node(
-        self, name: str, app_hostname: Optional[str] = None, qnodeos_hostname: Optional[str] = None,
-        vnode_hostname: Optional[str] = None, app_port: Optional[int] = None, qnodeos_port: Optional[int] = None,
-        vnode_port: Optional[int] = None, neighbors: Optional[List[str]] = None,
-    ):
-        """
-        Adds a node with the given name to a network (default: "default").
-        If hostnames are None they will default to 'localhost'.
-        If the port numbers None, unused ones will be chosen between 8000 and 9000.
-        If neighbors are specified a restricted topology can be constructed (default is fully connected).
-
-        :param name: str
-            Name of the node, e.g. Alice
-        :param app_hostname: str or None
-            Hostname, e.g. localhost (default) or 192.168.0.1
-        :param qnodeos_hostname: str or None
-            Hostname, e.g. localhost (default) or 192.168.0.1
-        :param vnode_hostname: str or None
-            Hostname, e.g. localhost (default) or 192.168.0.1
-        :param app_port: int or None
-            Port number for the application
-        :param qnodeos_port: int or None
-            Port number for the qnodeos server
-        :param vnode_port: int or None
-            Port number for the virtual node
-        :param neighbors: (list of str) or None
-            A list of neighbors, of this node.
-            If None all current nodes in the network will be adjacent to the added node.
-        :return: None
-        """
-        if neighbors is not None:
-            if self.topology is None:
-                # Assume that whatever nodes were there before are fully connected
-                self.topology = {}
-                node_names = self.nodes.keys()
-                for node_name in node_names:
-                    self.topology[node_name] = [neigh for neigh in node_names if not neigh == node_name]
-
-            self.topology[name] = neighbors
-
-        self.nodes[name] = NodeConfig(
-            name=name,
-            app_hostname=app_hostname,
-            qnodeos_hostname=qnodeos_hostname,
-            vnode_hostname=vnode_hostname,
-            app_port=app_port,
-            qnodeos_port=qnodeos_port,
-            vnode_port=vnode_port,
-        )
-
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Constructs a dictionary with all the config of this network.
-        :return: dict
-        """
-        nodes = {node_name: node.to_dict() for node_name, node in self.nodes.items()}
-        return {"nodes": nodes, "topology": self.topology}
-
-
-class NodeConfig:
-    def __init__(self, name: str, app_hostname: Optional[str], qnodeos_hostname: Optional[str],
-                 vnode_hostname: Optional[str], app_port: Optional[int], qnodeos_port: Optional[int],
-                 vnode_port: Optional[int]):
-        """
-        Used by _NetworkConfig to keep track of the config of a single node.
-        """
-        self.name = name
-        self.app_hostname = app_hostname
-        self.qnodeos_hostname = qnodeos_hostname
-        self.vnode_hostname = vnode_hostname
-        self.app_port = app_port
-        self.qnodeos_port = qnodeos_port
-        self.vnode_port = vnode_port
-
-    def to_dict(self) -> Dict[str, List[str | int | None]]:
-        """
-        Constructs a dictionary with all the config of this node.
-        :return: dict
-        """
-        return {
-            "app_socket": [self.app_hostname, self.app_port],
-            "qnodeos_socket": [self.qnodeos_hostname, self.qnodeos_port],
-            "vnode_socket": [self.vnode_hostname, self.vnode_port]
-        }

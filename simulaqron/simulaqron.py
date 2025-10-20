@@ -10,8 +10,9 @@ from pathlib import Path
 import importlib.metadata as metadata
 
 from simulaqron.network import Network
-from simulaqron.settings import simulaqron_settings, SimBackend, SIMULAQRON_SETTINGS_FILENAME
-from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
+from simulaqron.settings import simulaqron_settings
+from simulaqron.settings.simulaqron_config import SimBackend, SIMULAQRON_SETTINGS_FILENAME
+from simulaqron.settings.network_config import NetworkConfigBuilder
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 # PID folder should be "LOCAL"

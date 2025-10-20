@@ -37,7 +37,7 @@ from timeit import default_timer as timer
 
 from netqasm.logging.glob import get_netqasm_logger, get_log_level
 
-from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
+from simulaqron.settings.network_config import NetworkConfigBuilder
 from simulaqron.settings import simulaqron_settings
 from simulaqron.start import start_vnode, start_qnodeos
 from simulaqron.sdk import SimulaQronConnection

@@ -24,7 +24,8 @@ from netqasm.sdk.shared_memory import SharedMemoryManager
 from netqasm.util.yaml import dump_yaml
 from simulaqron.network import Network
 from simulaqron.sdk import SimulaQronConnection
-from simulaqron.settings import SimBackend, simulaqron_settings
+from simulaqron.settings import simulaqron_settings
+from simulaqron.settings.simulaqron_config import SimBackend
 
 logger = get_netqasm_logger()
 

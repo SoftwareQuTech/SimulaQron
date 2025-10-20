@@ -6,8 +6,9 @@ import pytest
 from netqasm.runtime.settings import set_simulator
 from netqasm.sdk.classical_communication.message import StructuredMessage
 
-from simulaqron.settings import simulaqron_settings, SimBackend
-from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
+from simulaqron.settings import simulaqron_settings
+from simulaqron.settings.simulaqron_config import SimBackend
+from simulaqron.settings.network_config import NetworkConfigBuilder
 
 set_simulator("simulaqron")
 

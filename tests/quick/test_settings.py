@@ -5,7 +5,8 @@ from importlib import resources
 from pathlib import Path
 
 import simulaqron._default_config
-from simulaqron.settings import simulaqron_settings, SimBackend
+from simulaqron.settings import simulaqron_settings
+from simulaqron.settings.simulaqron_config import SimBackend
 
 
 class TestSettings:

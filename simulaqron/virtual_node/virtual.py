@@ -47,7 +47,8 @@ from simulaqron.general.host_config import SocketsConfig, Host
 # We need this import (despite unused) to reraise local errors
 # We then supress the flake8 errors associated with that
 from simulaqron.general.errors import *  # noqa: F401, F403
-from simulaqron.settings import simulaqron_settings, SimBackend
+from simulaqron.settings import simulaqron_settings
+from simulaqron.settings.simulaqron_config import SimBackend
 from simulaqron.reactor import reactor
 
 

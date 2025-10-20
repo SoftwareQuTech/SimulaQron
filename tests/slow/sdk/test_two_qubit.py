@@ -41,7 +41,7 @@ from simulaqron.sdk.socket import Socket
 from simulaqron.run.run import run_applications
 from simulaqron.run.run import reset
 from simulaqron.settings import simulaqron_settings
-from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
+from simulaqron.settings.network_config import NetworkConfigBuilder
 
 
 def calc_exp_values(q):

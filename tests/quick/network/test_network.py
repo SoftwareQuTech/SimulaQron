@@ -8,7 +8,7 @@ from timeit import default_timer as timer
 
 from simulaqron.settings import simulaqron_settings
 from simulaqron.network import Network
-from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
+from simulaqron.settings.network_config import NetworkConfigBuilder
 
 
 class TestInitNetwork:

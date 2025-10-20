@@ -40,7 +40,7 @@ from simulaqron.general.host_config import SocketsConfig, Host
 from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
 from simulaqron.sdk.connection import RichErrorMessage
 from simulaqron.settings import simulaqron_settings
-from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
+from simulaqron.settings.network_config import NetworkConfigBuilder
 from simulaqron.virtual_node.virtual import call_method
 
 

@@ -5,8 +5,9 @@ import pytest
 from netqasm.runtime.settings import set_simulator
 
 from simulaqron.run.run import reset, run_applications
-from simulaqron.settings import simulaqron_settings, SimBackend
-from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
+from simulaqron.settings import simulaqron_settings
+from simulaqron.settings.simulaqron_config import SimBackend
+from simulaqron.settings.network_config import NetworkConfigBuilder
 
 set_simulator("simulaqron")
 

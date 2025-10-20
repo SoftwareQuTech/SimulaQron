@@ -34,7 +34,7 @@ from typing import Dict, List
 from twisted.spread import pb
 from ipaddress import IPv4Address
 
-from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
+from simulaqron.settings.network_config import NetworkConfigBuilder
 
 
 class Host(pb.Referenceable):

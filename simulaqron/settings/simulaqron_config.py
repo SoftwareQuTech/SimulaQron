@@ -248,6 +248,3 @@ class Config:
     @Decorator.set_setting
     def t1(self, t1: float):
         pass
-
-
-simulaqron_settings = Config()

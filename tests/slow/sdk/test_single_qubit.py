@@ -34,12 +34,13 @@ from scipy.linalg import expm
 
 from netqasm.sdk.qubit import Qubit
 
-from simulaqron.settings import simulaqron_settings, SimBackend
+from simulaqron.settings import simulaqron_settings
+from simulaqron.settings.simulaqron_config import SimBackend
 from simulaqron.network import Network
 from simulaqron.sdk.connection import SimulaQronConnection
 from simulaqron.run.run import reset
 from simulaqron.general import SimUnsupportedError
-from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
+from simulaqron.settings.network_config import NetworkConfigBuilder
 
 
 def calc_exp_values(q):

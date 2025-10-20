@@ -6,8 +6,9 @@ from netqasm.runtime.application import default_app_instance
 from simulaqron.run import run_applications
 from simulaqron.run.run import reset
 from simulaqron.sdk.socket import Socket
-from simulaqron.settings import simulaqron_settings, SimBackend
-from simulaqron.toolbox.manage_nodes import NetworkConfigBuilder
+from simulaqron.settings import simulaqron_settings
+from simulaqron.settings.simulaqron_config import SimBackend
+from simulaqron.settings.network_config import NetworkConfigBuilder
 
 
 class TestClassicalSocket:
