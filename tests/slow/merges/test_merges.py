@@ -1,12 +1,14 @@
 import os
 import logging
 import unittest
+
 import numpy as np
-import multiprocessing as mp
 
 from twisted.spread import pb
 from twisted.internet.defer import inlineCallbacks
 
+from multiprocess.context import ForkProcess as Process
+from multiprocess.connection import Pipe
 from simulaqron.general.host_config import SocketsConfig
 from simulaqron.local.setup import setup_local, assemble_qubit
 from simulaqron.network import Network
@@ -190,13 +192,12 @@ class TestMerge(unittest.TestCase):
         setup_local(name, virtualNet, classicalNet, lNode, node_code, send_end)
 
     def run_test(self, classical_net_file):
-        mp.set_start_method("fork", force=True)
         pipe_list = []
         for name, node_code in zip(self.nodes, self.node_codes):
-            recv_end, send_end = mp.Pipe(False)
-            p = mp.Process(target=self.setup_node,
-                           args=[name, node_code, classical_net_file, send_end],
-                           name=name)
+            recv_end, send_end = Pipe(False)
+            p = Process(target=self.setup_node,
+                        args=[name, node_code, classical_net_file, send_end],
+                        name=name)
             self.processes.append(p)
             pipe_list.append(recv_end)
 

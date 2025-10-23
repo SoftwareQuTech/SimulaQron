@@ -9,6 +9,7 @@ local_scheme = "no-local-version" # exclude "+<hash>" from version name so we ca
 name = "simulaqron"
 dynamic = ["version"]
 dependencies = [
+    "dataclasses-serialization>=1.3.1, <2.0",
     "numpy>=1.14.0,<2.0.0",
     "dill>=0.4.0,<1.0.0",
     "scipy>=1.1.0,<2.0.0",

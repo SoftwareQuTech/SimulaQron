@@ -185,10 +185,10 @@ def run_applications(
     results: List[Dict[str, Any]] = []
     if isinstance(network_cfg, str) or isinstance(network_cfg, PathLike):
         net_cfg = str(network_cfg)
-        simulaqron_settings.network_config_file = net_cfg
+        simulaqron_settings.network_config_file = Path(net_cfg).resolve()
     elif isinstance(network_cfg, Path):
         net_cfg = str(network_cfg.resolve())
-        simulaqron_settings.network_config_file = net_cfg
+        simulaqron_settings.network_config_file = Path(net_cfg).resolve()
     else:
         net_cfg = None
 

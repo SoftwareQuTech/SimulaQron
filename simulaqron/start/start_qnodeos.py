@@ -118,7 +118,7 @@ def main(node_name: str, network_name="default", log_level="WARNING"):
     signal.signal(signal.SIGINT, sigterm_handler)
 
     # Since version 3.0.0 a single config file is used
-    network_config_file = simulaqron_settings.network_config_file
+    network_config_file = str(simulaqron_settings.network_config_file)
 
     # Read configuration files for the virtual quantum, as well as the classical network
     virtual_network = SocketsConfig(network_config_file, network_name=network_name, config_type="vnode")

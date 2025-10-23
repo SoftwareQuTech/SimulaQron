@@ -178,5 +178,5 @@ class Socket(_Socket):
 
     def _get_app_net_config(self) -> SocketsConfig:
         network_config_file = simulaqron_settings.network_config_file
-        app_net = SocketsConfig(network_config_file, network_name=self._network_name, config_type="app")
+        app_net = SocketsConfig(str(network_config_file), network_name=self._network_name, config_type="app")
         return app_net

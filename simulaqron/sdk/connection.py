@@ -538,7 +538,7 @@ nmsg.RETURN_MESSAGE_CLASSES = {
 def _get_qnodeos_net_config(network_name: str) -> SocketsConfig:
     network_config_file = simulaqron_settings.network_config_file
     return SocketsConfig(
-        network_config_file, network_name=network_name, config_type="qnodeos"
+        str(network_config_file), network_name=network_name, config_type="qnodeos"
     )
 
 

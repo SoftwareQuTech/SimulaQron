@@ -1,4 +1,5 @@
 import json
+import socket
 from contextlib import closing
 import socket
 from importlib import resources

@@ -53,7 +53,7 @@ def main(name: str, network_name: str = "default", log_level: str = "WARNING"):
 
     logger.debug("Starting VIRTUAL NODE %s", name)
     if simulaqron_settings.network_config_file is not None:
-        virtual_file = simulaqron_settings.network_config_file
+        virtual_file = str(simulaqron_settings.network_config_file)
     else:
         virtual_file = simulaqron_settings.vnode_file
     be = Backend(name, virtual_file, network_name=network_name)
