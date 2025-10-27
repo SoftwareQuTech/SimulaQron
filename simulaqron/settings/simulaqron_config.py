@@ -31,15 +31,16 @@
 #########################
 import json
 import logging
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, fields, InitVar
 from enum import Enum
-
-from dataclasses_serialization.json import JSONSerializer
 from os import PathLike
 from pathlib import Path
 from typing import Self
 
+from dataclasses_serialization.json import JSONSerializer
 from dataclasses_serialization.json import JSONSerializerMixin
+
+from ..settings.network_config import NetworkConfigBuilder
 
 # This is the name of the "local" simulaqron settings.
 # If a file named like this is found in the CWD, it will be
@@ -61,6 +62,7 @@ class SimBackend(JSONSerializerMixin, Enum):
 
 @dataclass
 class SimulaqronConfig(JSONSerializerMixin):
+    network_config_file: InitVar[Path] = (Path.home() / ".simulaqron" / "default_network.json").resolve()
     # Default config
     max_qubits: int = 20
     max_registers: int = 1000
@@ -71,9 +73,27 @@ class SimulaqronConfig(JSONSerializerMixin):
     recv_max_retries: int = 10
     log_level: int = logging.WARNING
     sim_backend: SimBackend = SimBackend.STABILIZER
-    network_config_file: Path = (Path.home() / ".simulaqron" / "default_network.json").resolve()
     noisy_qubits: bool = False
     t1: float = 1.0
+
+    def __post_init__(self, network_config_file: Path):
+        self.network_config_file = network_config_file if isinstance(network_config_file, Path) \
+            else (Path.home() / ".simulaqron" / "default_network.json").resolve()
+        self._builder = NetworkConfigBuilder()
+
+    @property
+    def builder(self) -> NetworkConfigBuilder:
+        return self._builder
+
+    @property
+    def network_config_file(self) -> Path:
+        return self._net_cfg_file
+
+    @network_config_file.setter
+    def network_config_file(self, value: Path):
+        # TODO - Insert the logic to reload the _builder
+        #  when this property is updated
+        self._net_cfg_file = value
 
     @classmethod
     def _create_home_settings_folder(cls):
@@ -100,16 +120,21 @@ class SimulaqronConfig(JSONSerializerMixin):
     def load_from_known_sources(cls) -> Self:
         cwd_settings_file = (Path.cwd() / SIMULAQRON_SETTINGS_FILENAME).resolve()
         home_settings_file = (Path.home() / ".simulaqron" / SIMULAQRON_SETTINGS_FILENAME).resolve()
-        if cwd_settings_file.exists() and cwd_settings_file.is_file():
-            return cls._deserialize_from_file(cwd_settings_file)
-        else:
-            cls._create_home_settings_folder()
-            if home_settings_file.exists() and cwd_settings_file.is_file():
-                return cls._deserialize_from_file(home_settings_file)
-            else:
-                new_default_config = cls()
-                new_default_config.save_to_file(home_settings_file)
-                return new_default_config
+
+        files_to_load = [cwd_settings_file, home_settings_file]
+
+        for file in files_to_load:
+            try:
+                if file.exists() and file.is_file():
+                    return cls._deserialize_from_file(file)
+            except json.JSONDecodeError:
+                # Nothing to do; try next one
+                pass
+
+        # Ultimate case; we create a new config file in the ohme and load it
+        new_default_config = cls()
+        new_default_config.save_to_file(home_settings_file)
+        return new_default_config
 
     def default_settings(self):
         default_config = SimulaqronConfig()

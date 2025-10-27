@@ -1,7 +1,7 @@
 import json
 import socket
 from contextlib import closing
-import socket
+from dataclasses import dataclass
 from importlib import resources
 from os import PathLike
 from pathlib import Path
@@ -10,20 +10,18 @@ from typing import Optional, Self, Dict, List, Tuple, Any
 import simulaqron._default_config
 
 
+@dataclass
 class NodeConfig:
-    def __init__(self, name: str, app_hostname: Optional[str], qnodeos_hostname: Optional[str],
-                 vnode_hostname: Optional[str], app_port: Optional[int], qnodeos_port: Optional[int],
-                 vnode_port: Optional[int]):
-        """
-        Used by _NetworkConfig to keep track of the config of a single node.
-        """
-        self.name = name
-        self.app_hostname = app_hostname
-        self.qnodeos_hostname = qnodeos_hostname
-        self.vnode_hostname = vnode_hostname
-        self.app_port = app_port
-        self.qnodeos_port = qnodeos_port
-        self.vnode_port = vnode_port
+    """
+    Used by _NetworkConfig to keep track of the config of a single node.
+    """
+    name: str
+    app_hostname: Optional[str]
+    qnodeos_hostname: Optional[str]
+    vnode_hostname: Optional[str]
+    app_port: Optional[int]
+    qnodeos_port: Optional[int]
+    vnode_port: Optional[int]
 
     def to_dict(self) -> Dict[str, List[str | int | None]]:
         """
@@ -37,6 +35,7 @@ class NodeConfig:
         }
 
 
+# @dataclass
 class NetworkConfig:
     def __init__(self):
         """
@@ -46,9 +45,9 @@ class NetworkConfig:
         self.nodes: Dict[str, NodeConfig] = {}
 
     def add_node(
-        self, name: str, app_hostname: Optional[str] = None, qnodeos_hostname: Optional[str] = None,
-        vnode_hostname: Optional[str] = None, app_port: Optional[int] = None, qnodeos_port: Optional[int] = None,
-        vnode_port: Optional[int] = None, neighbors: Optional[List[str]] = None,
+            self, name: str, app_hostname: Optional[str] = None, qnodeos_hostname: Optional[str] = None,
+            vnode_hostname: Optional[str] = None, app_port: Optional[int] = None, qnodeos_port: Optional[int] = None,
+            vnode_port: Optional[int] = None, neighbors: Optional[List[str]] = None,
     ):
         """
         Adds a node with the given name to a network (default: "default").
@@ -119,7 +118,7 @@ class NetworkConfigBuilder:
         new_builder.read_from_file(Path(str(default_network_path)))
         return new_builder
 
-    def add_node(self, node_name: str , network_name: str ="default", app_hostname: Optional[str] = None,
+    def add_node(self, node_name: str, network_name: str = "default", app_hostname: Optional[str] = None,
                  qnodeos_hostname: Optional[str] = None, vnode_hostname: Optional[str] = None,
                  app_port: Optional[int] = None, qnodeos_port: Optional[int] = None,
                  vnode_port: Optional[int] = None, neighbors: List[str] = None):
