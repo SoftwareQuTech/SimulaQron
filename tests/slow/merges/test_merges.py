@@ -1,5 +1,5 @@
+import sys
 import os
-import logging
 import unittest
 
 import numpy as np
@@ -9,6 +9,8 @@ from twisted.internet.defer import inlineCallbacks
 
 from multiprocess.context import ForkProcess as Process
 from multiprocess.connection import Pipe
+from netqasm.logging.glob import set_log_level, get_netqasm_logger
+from logging import DEBUG
 from simulaqron.general.host_config import SocketsConfig
 from simulaqron.local.setup import setup_local, assemble_qubit
 from simulaqron.network import Network
@@ -16,6 +18,8 @@ from simulaqron.settings import simulaqron_settings
 from simulaqron.settings.simulaqron_config import SimBackend
 from simulaqron.toolbox.stabilizer_states import StabilizerState
 from simulaqron.reactor import reactor
+
+_logger = get_netqasm_logger("test_merges")
 
 
 class localNode(pb.Root):
@@ -44,7 +48,7 @@ class localNode(pb.Root):
         virtualNum	number of the virtual qubit corresponding to the EPR pair received
         """
 
-        logging.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
+        _logger.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
 
         if self.num_qubits_received == 0:
             self.q1 = yield self.virtRoot.callRemote("get_virtual_ref", virtualNum)
@@ -64,7 +68,7 @@ class localNode(pb.Root):
         virtualNum	number of the virtual qubit corresponding to the EPR pair received
         """
 
-        logging.debug("LOCAL %s: Got both qubits from Alice and Bob.", self.node.name)
+        _logger.debug("LOCAL %s: Got both qubits from Alice and Bob.", self.node.name)
 
         # We'll test an operation that will cause a merge of the two remote registers
         yield self.q1.callRemote("apply_H")
@@ -102,7 +106,7 @@ class localNode(pb.Root):
         virtualNum	number of the virtual qubit corresponding to the EPR pair received
         """
 
-        logging.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
+        _logger.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
 
         # Get a reference to our side of the EPR pair
         qA = yield self.virtRoot.callRemote("get_virtual_ref", virtualNum)
@@ -162,6 +166,7 @@ class TestMerge(unittest.TestCase):
     def tearDownClass(cls):
         for p in cls.processes:
             p.terminate()
+            p.join()
 
         cls.network.stop()
         reactor.crash()
@@ -169,6 +174,11 @@ class TestMerge(unittest.TestCase):
 
     @staticmethod
     def setup_node(name, node_code, classical_net_file, send_end):
+        if simulaqron_settings.log_level == DEBUG:
+            stdout_file = open(f"stdout-setup-node-{name}-{os.getpid()}.out.txt", "w")
+            stderr_file = open(f"stderr-setup-node-{name}-{os.getpid()}.out.txt", "w")
+            sys.stdout = stdout_file
+            sys.stderr = stderr_file
         # This file defines the network of virtual quantum nodes
         virtualFile = os.path.join(os.path.dirname(__file__), "configs", "network.json")
 
@@ -235,7 +245,7 @@ class TestBothLocal(TestMerge):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
 
         # Create 2 qubits
         qA = yield virtRoot.callRemote("new_qubit_inreg", qReg)
@@ -286,7 +296,7 @@ class TestBothLocalNotSameReg(TestBothLocal):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
         # Create a second register
         newReg = yield virtRoot.callRemote("add_register")
 
@@ -343,14 +353,14 @@ class TestBothRemote(TestMerge):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
 
         # Create qubit
         qA = yield virtRoot.callRemote("new_qubit_inreg", qReg)
 
         # Instruct the virtual node to transfer the qubit
         remoteNum = yield virtRoot.callRemote("send_qubit", qA, "Charlie")
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
 
         # Tell Charlie the number of the virtual qubit so the can use it locally
         # and extend it to a GHZ state with Charlie
@@ -374,14 +384,14 @@ class TestBothRemote(TestMerge):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
 
         # Create qubits
         qB = yield virtRoot.callRemote("new_qubit_inreg", qReg)
 
         # Instruct the virtual node to transfer the qubit
         remoteNum = yield virtRoot.callRemote("send_qubit", qB, "Charlie")
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
 
         # Tell Charlie the number of the virtual qubit so the can use it locally
         # and extend it to a GHZ state with Charlie
@@ -404,7 +414,7 @@ class TestBothRemote(TestMerge):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
         send_end.send(True)
 
     def test(self):
@@ -432,7 +442,7 @@ class TestBothRemoteSameNodeDiffReg(TestMerge):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
 
         # Create new register
         newReg = yield virtRoot.callRemote("new_register")
@@ -444,8 +454,8 @@ class TestBothRemoteSameNodeDiffReg(TestMerge):
         # Instruct the virtual node to transfer the qubit
         remoteNumA = yield virtRoot.callRemote("send_qubit", qA, "Bob")
         remoteNumB = yield virtRoot.callRemote("send_qubit", qB, "Bob")
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumA)
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumB)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumA)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumB)
 
         # Tell Charlie the number of the virtual qubit so the can use it locally
         # and extend it to a GHZ state with Charlie
@@ -470,7 +480,7 @@ class TestBothRemoteSameNodeDiffReg(TestMerge):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
         send_end.send(True)
 
     def test(self):
@@ -491,7 +501,7 @@ class TestBothRemoteSameNodeSameReg(TestBothRemoteSameNodeDiffReg):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
 
         # Create 2 qubits
         qA = yield virtRoot.callRemote("new_qubit_inreg", qReg)
@@ -505,8 +515,8 @@ class TestBothRemoteSameNodeSameReg(TestBothRemoteSameNodeDiffReg):
         # Instruct the virtual node to transfer the qubit
         remoteNumA = yield virtRoot.callRemote("send_qubit", qA, "Bob")
         remoteNumB = yield virtRoot.callRemote("send_qubit", qB, "Bob")
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumA)
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumB)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumA)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumB)
 
         # Tell Charlie the number of the virtual qubit so the can use it locally
         # and extend it to a GHZ state with Charlie
@@ -534,14 +544,14 @@ class TestRemoteAtoB(TestBothRemoteSameNodeDiffReg):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
 
         # Create qubit
         qA = yield virtRoot.callRemote("new_qubit_inreg", qReg)
 
         # Instruct the virtual node to transfer the qubit
         remoteNum = yield virtRoot.callRemote("send_qubit", qA, "Bob")
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
 
         # Tell Bob the number of the virtual qubit so the can use it locally
         bob = classicalNet.hostDict["Bob"]
@@ -566,14 +576,14 @@ class TestRemoteBtoA(TestBothRemoteSameNodeDiffReg):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
 
         # Create qubit
         qA = yield virtRoot.callRemote("new_qubit_inreg", qReg)
 
         # Instruct the virtual node to transfer the qubit
         remoteNum = yield virtRoot.callRemote("send_qubit", qA, "Bob")
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
 
         # Tell Bob the number of the virtual qubit so the can use it locally
         bob = classicalNet.hostDict["Bob"]
