@@ -84,7 +84,7 @@ class localNode(pb.Root):
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
         elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
-            (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", self.q1)
+            _, (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", self.q1)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
@@ -132,7 +132,7 @@ class localNode(pb.Root):
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
         elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
-            (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", qA)
+            _, (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", qA)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
@@ -189,9 +189,6 @@ class TestMerge(unittest.TestCase):
         cls._network_def_file.close()
         simulaqron_settings_file.unlink()
         network_settings_file.unlink()
-
-        reactor.crash()
-        simulaqron_settings.default_settings()
 
     @staticmethod
     def setup_node(name, node_code, classical_net_file, send_end):
@@ -283,7 +280,7 @@ class TestBothLocal(TestMerge):
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
         elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
-            (realvec, imagvec, _, _, _) = yield virtRoot.callRemote("get_register", qA)
+            (_, (realvec, imagvec), _, _, _) = yield virtRoot.callRemote("get_register", qA)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
@@ -336,7 +333,7 @@ class TestBothLocalNotSameReg(TestBothLocal):
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
         elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
-            (realvec, imagvec, _, _, _) = yield virtRoot.callRemote("get_register", qA)
+            (_, (realvec, imagvec), _, _, _) = yield virtRoot.callRemote("get_register", qA)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))

@@ -129,11 +129,11 @@ class Backend:
 
             self._logger.debug("Running reactor")
             reactor.run()
-        except CannotListenError:
-            self._logger.exception("NetQASM server address (%d) is already in use.", self.myID.port)
+        except CannotListenError as exc:
+            self._logger.debug("NetQASM server address (%d) is already in use.", self.myID.port, exc_info=exc)
             return
         except Exception as e:
-            self._logger.exception("Critical error when starting local virtual node server: %s", e)
+            self._logger.debug("Critical error when starting local virtual node server", exc_info=e)
             return
 
 
