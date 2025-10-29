@@ -13,6 +13,7 @@ from simulaqron.settings import simulaqron_settings
 class Socket(_Socket):
 
     RETRY_TIME = 0.1
+    MAX_RETRIES = 10
 
     def __init__(
         self,
@@ -131,11 +132,13 @@ class Socket(_Socket):
             server_name = self._remote_node_name
         addr = self._get_addr_info(name=server_name)
         app_socket = socket.socket(addr[0], addr[1], addr[2])
+        attempt = 0
 
         if self.is_server:
             self._logger.debug("Trying to open application socket as server")
             app_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             while True:
+                attempt += 1
                 try:
                     app_socket.bind(addr[4])
                 except OSError as err:
@@ -143,6 +146,8 @@ class Socket(_Socket):
                         "Could not bind socket since: %s\nTrying again in %ds...",
                         err, self.RETRY_TIME
                     )
+                    if attempt > self.MAX_RETRIES:
+                        raise err
                     time.sleep(self.RETRY_TIME)
                 else:
                     break
@@ -153,15 +158,18 @@ class Socket(_Socket):
         else:
             self._logger.debug("Trying to open application socket as client")
             while True:
+                attempt += 1
                 try:
                     app_socket.settimeout(self._timeout)
                     app_socket.connect(addr[4])
-                except ConnectionRefusedError:
+                except ConnectionRefusedError as err:
                     self._logger.debug(
                         "Could not open application socket, trying again in %d s...",
                         self.RETRY_TIME
                     )
                     time.sleep(self.RETRY_TIME)
+                    if attempt > self.MAX_RETRIES:
+                        raise err
                 else:
                     break
             connected_socket = app_socket
