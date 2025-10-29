@@ -130,7 +130,7 @@ class Backend:
             self._logger.debug("Running reactor")
             reactor.run()
         except CannotListenError:
-            self._logger.error("NetQASM server address (%d) is already in use.", self.myID.port)
+            self._logger.exception("NetQASM server address (%d) is already in use.", self.myID.port)
             return
         except Exception as e:
             self._logger.exception("Critical error when starting local virtual node server: %s", e)
@@ -273,11 +273,12 @@ class VirtualNode(pb.Root):
 
         try:
             reason.raiseException()
-        except ConnectionRefusedError:
-            self._logger.debug("Could not connect to %s, trying again...", node.name)
+        except ConnectionRefusedError as err:
+            self._logger.debug("Could not connect to %s (%s, %d), trying again...",
+                               node.name, node.hostname, node.port, exc_info=err)
             reactor.callLater(simulaqron_settings.conn_retry_time, self.connect_to_node, node)
         except Exception as e:
-            self._logger.error(e)
+            self._logger.exception(e)
             reactor.stop()
 
     def get_virtual_id(self):
