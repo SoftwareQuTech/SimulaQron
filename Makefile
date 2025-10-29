@@ -3,7 +3,9 @@ PIP            = pip3
 EXAMPLES_DIR   = examples
 SIMULAQRON_DIR = simulaqron
 TEST_DIR       = tests
-RESET_FILE     = ${SIMULAQRON_DIR}/toolbox/reset.py
+
+# IMPORTANT: For running in makefile, we need to use only 1 thread in OMP library
+export OMP_NUM_THREADS=1
 
 clean: _delete_pyc _delete_pid _clear_build _reset
 
@@ -25,18 +27,11 @@ requirements python-deps:
 install-optional: install
 	@${PYTHON} -m pip install .\[opt\]
 
-_reset:
-	@${PYTHON} ${RESET_FILE}
+tests:
+	@${PYTHON} -m pytest -v ${TEST_DIR}/quick
 
-_tests:
-	@${PYTHON} -m pytest ${TEST_DIR}/quick
-
-tests: _tests _reset
-
-_tests_all:
-	@${PYTHON} -m pytest ${TEST_DIR}
-
-tests_all: _tests_all _reset
+tests_all:
+	@${PYTHON} -m pytest -v --capture=tee-sys ${TEST_DIR}
 
 install: test-deps
 	@$(PYTHON) -m pip install -e . ${PIP_FLAGS}

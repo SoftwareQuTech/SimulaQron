@@ -12,7 +12,7 @@ from twisted.internet.defer import inlineCallbacks
 
 from multiprocess.context import ForkProcess as Process
 from multiprocess.connection import Pipe
-from netqasm.logging.glob import set_log_level, get_netqasm_logger
+from netqasm.logging.glob import get_netqasm_logger
 from logging import DEBUG
 from simulaqron.general.host_config import SocketsConfig
 from simulaqron.local.setup import setup_local, assemble_qubit
@@ -161,7 +161,6 @@ class TestMerge(unittest.TestCase):
             cls._simulaqron_settings_file = simulaqron_settings_file
             simulaqron_settings.default_settings()
             simulaqron_settings.sim_backend = SimBackend.PROJECTQ
-            simulaqron_settings.log_level = DEBUG
             with NamedTemporaryFile(mode="w+", suffix=".json", delete=False) as network_def_file:
                 cls._network_def_file = network_def_file
                 path_to_here = os.path.dirname(os.path.abspath(__file__))

@@ -163,6 +163,10 @@ def run_applications(
         The i-th entry of the list will correspond to the i-th execution round of the
         simulation.
     """
+    # Before all; we need to instruct the OMP library to use a single thread to avoid
+    # heavy-processes deadlocks
+    os.environ["OMP_NUM_THREADS"] = "1"
+
     # app_names = [app_cfg.app_name for app_cfg in app_cfgs]
     app_names: List[str] = [program.party for program in app_instance.app.programs]
     sim_backend: SimBackend = _SIMULAQRON_BACKENDS[formalism]
