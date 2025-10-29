@@ -1,6 +1,9 @@
 import sys
 import os
 import unittest
+from pathlib import Path
+from shutil import copyfile
+from tempfile import NamedTemporaryFile
 
 import numpy as np
 
@@ -154,13 +157,23 @@ class TestMerge(unittest.TestCase):
         cls.processes = []
         cls.processes_to_wait_for = None
 
-        simulaqron_settings.default_settings()
-        path_to_here = os.path.dirname(os.path.abspath(__file__))
-        network_config_file = os.path.join(path_to_here, "configs", "network.json")
-        simulaqron_settings.network_config_file = network_config_file
-        nodes = ["Alice", "Bob", "Charlie"]
-        cls.network = Network(nodes=nodes, force=True)
-        cls.network.start()
+        with NamedTemporaryFile(mode="w+", suffix=".json", delete=False) as simulaqron_settings_file:
+            cls._simulaqron_settings_file = simulaqron_settings_file
+            simulaqron_settings.default_settings()
+            simulaqron_settings.sim_backend = SimBackend.PROJECTQ
+            simulaqron_settings.log_level = DEBUG
+            with NamedTemporaryFile(mode="w+", suffix=".json", delete=False) as network_def_file:
+                cls._network_def_file = network_def_file
+                path_to_here = os.path.dirname(os.path.abspath(__file__))
+                network_config_file = os.path.join(path_to_here, "configs", "network.json")
+                copyfile(network_config_file, network_def_file.name)
+                simulaqron_settings.network_config_file = network_def_file.name
+                simulaqron_settings.save_to_file(simulaqron_settings_file.name)
+                nodes = ["Alice", "Bob", "Charlie"]
+                cls.network = Network(nodes=nodes, force=True)
+                cls.network.start()
+        # cls.network = Network(nodes=nodes, force=True)
+        # cls.network.start()
 
     @classmethod
     def tearDownClass(cls):
@@ -169,6 +182,14 @@ class TestMerge(unittest.TestCase):
             p.join()
 
         cls.network.stop()
+        # Remove the files created for config
+        simulaqron_settings_file = Path(cls._simulaqron_settings_file.name)
+        network_settings_file = Path(cls._network_def_file.name)
+        cls._simulaqron_settings_file.close()
+        cls._network_def_file.close()
+        simulaqron_settings_file.unlink()
+        network_settings_file.unlink()
+
         reactor.crash()
         simulaqron_settings.default_settings()
 
@@ -180,7 +201,7 @@ class TestMerge(unittest.TestCase):
             sys.stdout = stdout_file
             sys.stderr = stderr_file
         # This file defines the network of virtual quantum nodes
-        virtualFile = os.path.join(os.path.dirname(__file__), "configs", "network.json")
+        virtualFile = simulaqron_settings.network_config_file
 
         # This file defines the nodes acting as servers in the classical communication network
         classicalFile = os.path.join(os.path.dirname(__file__), "configs", classical_net_file)
