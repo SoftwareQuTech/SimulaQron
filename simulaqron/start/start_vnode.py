@@ -27,7 +27,8 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+import logging
+import os
 import sys
 import signal
 from functools import partial
@@ -40,13 +41,23 @@ from simulaqron.reactor import reactor
 
 logger = get_netqasm_logger("start_vnode")
 
+stdout_file = None
+
 
 def sigterm_handler(name, _signo, _stack_frame):
     print("Shutting down Node from signal %d." % _signo, flush=True)
+    global stdout_file
+    stdout_file.flush()
+    stdout_file.close()
     reactor.stop()
 
 
-def main(name: str, network_name: str = "default", log_level: str = "WARNING"):
+def start_vnode(name: str, network_name: str = "default", log_level: str = "WARNING"):
+    if simulaqron_settings.log_level == logging.DEBUG:
+        global stdout_file
+        stdout_file = open(f"stdout-stderr-vnode-{name}-{os.getpid()}.out.txt", "w")
+        sys.stdout = stdout_file
+        sys.stderr = stdout_file
     set_log_level(log_level)
     signal.signal(signal.SIGTERM, partial(sigterm_handler, name))
     signal.signal(signal.SIGINT, partial(sigterm_handler, name))
@@ -62,4 +73,4 @@ def main(name: str, network_name: str = "default", log_level: str = "WARNING"):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    start_vnode(sys.argv[1])

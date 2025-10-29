@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import logging
+import os
 import sys
 import time
 import signal
@@ -48,10 +50,10 @@ def connect_to_virt_node(my_name: str , netqasm_factory: NetQASMFactory, virtual
     # If connection succeeds do:
     defer_virtual_node.addCallback(init_register, my_name, netqasm_factory)
     # If connection fails do:
-    defer_virtual_node.addErrback(handle_connection_error, my_name, netqasm_factory, virtual_network)
+    defer_virtual_node.addErrback(handle_connection_error, my_name, netqasm_factory, virtual_network, virtual_node.hostname, virtual_node.port)
 
 
-def handle_connection_error(reason, my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig):
+def handle_connection_error(reason, my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig, virtual_node_hostname: str, virtual_node_port: int):
     """ Handles errors from trying to connect to local virtual node.
 
     If a ConnectionRefusedError is raised another try will be made after
@@ -59,8 +61,9 @@ def handle_connection_error(reason, my_name: str, netqasm_factory: NetQASMFactor
     """
     try:
         reason.raiseException()
-    except ConnectionRefusedError:
-        logger.debug("LOCAL %s: Could not connect, trying again...", my_name)
+    except ConnectionRefusedError as err:
+        # TODO - Implement checking of max number of connections
+        logger.debug("LOCAL %s: Could not connect to Virtual node (%s, %d), trying again...", my_name, virtual_node_hostname, virtual_node_port, exc_info=err)
         reactor.callLater(
             simulaqron_settings.conn_retry_time,
             connect_to_virt_node,
@@ -105,12 +108,21 @@ def setup_netqasm_server(my_name: str, netqasm_factory: NetQASMFactory):
     else:
         reactor.stop()
 
+stdout_file = None
 
 def sigterm_handler(_signo, _stack_frame):
+    global stdout_file
+    stdout_file.flush()
+    stdout_file.close()
     reactor.stop()
 
 
-def main(node_name: str, network_name="default", log_level="WARNING"):
+def start_qnodeos(node_name: str, network_name: str = "default", log_level: str = "WARNING"):
+    if simulaqron_settings.log_level == logging.DEBUG:
+        global stdout_file
+        stdout_file = open(f"stdout-stderr-qnos-{node_name}-{os.getpid()}.out.txt", "w")
+        sys.stdout = stdout_file
+        sys.stderr = stdout_file
     """Start the indicated backend NetQASM Server"""
     set_log_level(log_level)
     logger.debug("Starting QNodeOS at %s", node_name)
@@ -149,4 +161,4 @@ def main(node_name: str, network_name="default", log_level="WARNING"):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    start_qnodeos(sys.argv[1])
