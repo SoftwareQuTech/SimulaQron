@@ -159,4 +159,4 @@ class SimulaqronConfig(JSONSerializerMixin):
         file_path = Path(str(path)).resolve()
         with file_path.open("wt") as file:
             serialized = JSONSerializer.serialize(self)
-            json.dump(serialized, file)
+            json.dump(serialized, file, indent=4)
