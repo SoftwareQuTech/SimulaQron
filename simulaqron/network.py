@@ -75,13 +75,11 @@ class Network:
         self.processes: List[Process] = []
         self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
 
-        if network_config_file is None:
-            network_config_file = simulaqron_settings.network_config_file
+        if network_config_file is not None:
+            simulaqron_settings.network_config_file = network_config_file
         else:
-            network_config_file = network_config_file
-
-        networks_config = NetworkConfigBuilder()
-        networks_config.read_from_file(network_config_file)
+            network_config_file = simulaqron_settings.network_config_file
+        networks_config = simulaqron_settings.network_builder
 
         if new:
             if nodes is None:

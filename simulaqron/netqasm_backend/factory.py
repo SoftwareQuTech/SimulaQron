@@ -202,8 +202,7 @@ class NetQASMFactory(Factory):
         # topology
         self.topology = None
         if simulaqron_settings.network_config_file is not None:
-            networks_config = NetworkConfigBuilder()
-            networks_config.read_from_file(simulaqron_settings.network_config_file)
+            networks_config = simulaqron_settings.network_builder
             self.topology = networks_config.networks[network_name].topology
 
     def stop(self):
