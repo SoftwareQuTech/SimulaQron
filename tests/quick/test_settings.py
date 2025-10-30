@@ -1,15 +1,71 @@
 import tempfile
 import json
 import pytest
-from dataclasses_serialization.json import JSONSerializer
+import shutil
 from pathlib import Path
+from tempfile import NamedTemporaryFile
+from dataclasses_serialization.json import JSONSerializer
 
 from simulaqron.settings import simulaqron_settings
-from simulaqron.settings.simulaqron_config import SimulaqronConfig
+from simulaqron.settings.simulaqron_config import (SimulaqronConfig,
+                                                   DEFAULT_SIMULAQRON_NETWORK_FILENAME,
+                                                   DEFAULT_SIMULAQRON_SETTINGS_FILENAME)
+
+
+cwd_settings = (Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME).resolve()
+cwd_network = (Path.home() / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
+home_settings = (Path.cwd() / ".simulaqron" / DEFAULT_SIMULAQRON_SETTINGS_FILENAME).resolve()
+home_network = (Path.home() / ".simulaqron" / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
 
 
 class TestSettings:
-    def test_default_settings(self):
+    @pytest.fixture
+    def clean_settings(self):
+        # Load the setting files in cwd and home, saved them in a temp file
+        if cwd_settings.exists() and cwd_settings.is_file():
+            orig_cwd_settings = NamedTemporaryFile(suffix=".json", mode="w", delete_on_close=False).__enter__()
+            shutil.copyfile(cwd_settings, orig_cwd_settings.name)
+        else:
+            orig_cwd_settings = None
+        if cwd_network.is_file() and cwd_network.is_file():
+            orig_cwd_network = NamedTemporaryFile(suffix=".json", mode="w", delete_on_close=False).__enter__()
+            shutil.copyfile(cwd_network, orig_cwd_network.name)
+        else:
+            orig_cwd_network = None
+        if home_settings.exists() and home_settings.is_file():
+            orig_home_settings = NamedTemporaryFile(suffix=".json", mode="w", delete_on_close=False).__enter__()
+            shutil.copyfile(home_settings, orig_home_settings.name)
+        else:
+            orig_home_settings = None
+        if home_network.is_file() and home_network.is_file():
+            orig_home_network = NamedTemporaryFile(suffix=".json", mode="w", delete_on_close=False).__enter__()
+            shutil.copyfile(home_network, orig_home_network.name)
+        else:
+            orig_home_network = None
+        # Proceed with the test case
+        yield
+        # Restore the loaded files in the original locations
+        if orig_cwd_settings is not None:
+            shutil.copyfile(orig_cwd_settings.name, cwd_settings)
+            orig_cwd_settings.__exit__(None, None, None)
+        if orig_home_settings is not None:
+            shutil.copyfile(orig_home_settings.name, home_settings)
+            orig_home_settings.__exit__(None, None, None)
+        if orig_cwd_network is not None:
+            shutil.copyfile(orig_cwd_network.name, cwd_network)
+            orig_cwd_network.__exit__(None, None, None)
+        if orig_home_network is not None:
+            shutil.copyfile(orig_home_network.name, home_network)
+            orig_home_network.__exit__(None, None, None)
+
+    @staticmethod
+    def _cleanup_config_files():
+        files_to_check = [cwd_settings, cwd_network, home_settings, home_network]
+        for file in files_to_check:
+            if file.exists() and file.is_file():
+                file.unlink()
+
+    def test_create_default_settings(self, clean_settings):
         __expected_default_settings = """
         {
             "max_qubits": 20,
@@ -27,11 +83,17 @@ class TestSettings:
         }
         """
         expected_settings_dict = json.loads(__expected_default_settings)
-        path = (Path.home() / ".simulaqron" / "default_network.json").resolve()
+        path = (Path.home() / ".simulaqron" / "simulaqron_network.json").resolve()
         expected_settings_dict["network_config_file"] = str(path)
         expected_settings = JSONSerializer.deserialize(SimulaqronConfig, expected_settings_dict)
 
         assert simulaqron_settings == expected_settings
+
+        assert simulaqron_settings.network_builder is not None
+        assert simulaqron_settings.network_config_file.exists()
+        assert simulaqron_settings.network_config_file.is_file()
+
+        TestSettings._cleanup_config_files()
 
     def test_non_existent_network_config(self):
         _original_settings = """

@@ -3,9 +3,11 @@ from pathlib import Path
 from typing import Type, Dict, Any
 
 from dataclasses_serialization.json import JSONSerializer
-from dataclasses_serialization.serializer_base import DeserializationError, dict_serialization
+from dataclasses_serialization.serializer_base import (DeserializationError,
+                                                       dict_serialization)
 
-from ..settings.simulaqron_config import SIMULAQRON_SETTINGS_FILENAME, SimulaqronConfig, SimBackend
+from ..settings.simulaqron_config import (DEFAULT_SIMULAQRON_SETTINGS_FILENAME,
+                                          SimulaqronConfig, SimBackend)
 
 
 def init_serialization():
@@ -43,7 +45,7 @@ def path_serializer(obj: Path) -> str:
 @JSONSerializer.register_deserializer(Path)
 def path_deserializer(cls: Type[Path], path: str) -> Path:
     if path == "$DEFAULT_NETWORK":
-        return (cls.home() / ".simulaqron" / SIMULAQRON_SETTINGS_FILENAME).resolve()
+        return (cls.home() / ".simulaqron" / DEFAULT_SIMULAQRON_SETTINGS_FILENAME).resolve()
     return cls(path).resolve()
 
 
@@ -60,7 +62,7 @@ def simulaqron_config_serializer(obj: SimulaqronConfig) -> str:
 
 @JSONSerializer.register_deserializer(SimulaqronConfig)
 def simulaqron_config_deserializer(cls: Type[SimulaqronConfig], obj: Dict[str, Any]) -> SimulaqronConfig:
-    new_obj = cls(network_config_file=obj["network_config_file"])
+    new_obj = cls(network_config_file=JSONSerializer.deserialize(Path, obj["network_config_file"]))
     new_obj.max_qubits = obj["max_qubits"]
     new_obj.max_registers = obj["max_registers"]
     new_obj.conn_retry_time = obj["conn_retry_time"]

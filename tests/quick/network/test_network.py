@@ -43,8 +43,8 @@ class TestInitNetwork:
         network_builder.using_default_network()
         with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as net_config_file:
             # We also need to specify the location of the temporal file as the network config file
-            simulaqron_settings.network_config_file = net_config_file.name
             network_builder.write_to_file(net_config_file.name)
+            simulaqron_settings.network_config_file = net_config_file.name
             net_config_file.close()
             self.network = None
             yield net_config_file.name
@@ -88,8 +88,8 @@ class TestStartStopNetwork:
         network_builder.using_default_network()
         with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as net_config_file:
             # We also need to specify the location of the temporal file as the network config file
-            simulaqron_settings.network_config_file = net_config_file.name
             network_builder.write_to_file(net_config_file.name)
+            simulaqron_settings.network_config_file = net_config_file.name
             net_config_file.close()
             self.network = None
             yield net_config_file.name

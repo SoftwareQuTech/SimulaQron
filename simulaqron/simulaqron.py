@@ -11,7 +11,7 @@ import importlib.metadata as metadata
 
 from simulaqron.network import Network
 from simulaqron.settings import simulaqron_settings
-from simulaqron.settings.simulaqron_config import SimBackend, SIMULAQRON_SETTINGS_FILENAME
+from simulaqron.settings.simulaqron_config import SimBackend, DEFAULT_SIMULAQRON_SETTINGS_FILENAME
 from simulaqron.settings.network_config import NetworkConfigBuilder
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -199,7 +199,7 @@ def reset(force: Optional[bool]):
     if not force:
         answer = input("Are you sure you want to reset simulaqron?\nThis will revert settings and "
                        "network config files to the default values.\nNote, this action will remove "
-                       f"the file at {SIMULAQRON_SETTINGS_FILENAME} if it exists.\n"
+                       f"the file at {DEFAULT_SIMULAQRON_SETTINGS_FILENAME} if it exists.\n"
                        "(yes/no)")
     else:
         answer = "yes"
@@ -216,8 +216,8 @@ def reset(force: Optional[bool]):
 
 def updates_local_config(command_function: Callable):
     def wrapper(*args, **kwargs):
-        local_settings = Path.cwd() / SIMULAQRON_SETTINGS_FILENAME
-        if local_settings.exists():
+        local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+        if local_settings.exists() and local_settings.is_file():
             simulaqron_settings.load_from_file(local_settings)
         else:
             simulaqron_settings.default_settings()
@@ -242,7 +242,7 @@ def set():
 def default():
     """Sets all settings back to default and saves it as a local configuration file"""
     simulaqron_settings.default_settings()
-    simulaqron_settings.save_to_file(Path.cwd() / SIMULAQRON_SETTINGS_FILENAME)
+    simulaqron_settings.save_to_file(Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME)
 
 
 @set.command()
@@ -333,9 +333,9 @@ def t1(value):
 
 def loads_local_config(command_function: Callable):
     def wrapper(*args, **kwargs):
-        local_settings = Path.cwd() / SIMULAQRON_SETTINGS_FILENAME
-        if local_settings.exists():
-            simulaqron_settings.load_from_file(Path.cwd() / SIMULAQRON_SETTINGS_FILENAME)
+        local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+        if local_settings.exists() and local_settings.is_file():
+            simulaqron_settings.load_from_file(Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME)
         else:
             simulaqron_settings.default_settings()
         command_function(*args, **kwargs)

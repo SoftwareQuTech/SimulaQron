@@ -45,7 +45,8 @@ from ..settings.network_config import NetworkConfigBuilder
 # This is the name of the "local" simulaqron settings.
 # If a file named like this is found in the CWD, it will be
 # automatically loaded when creating the config file
-SIMULAQRON_SETTINGS_FILENAME = "simulaqron_settings.json"
+DEFAULT_SIMULAQRON_SETTINGS_FILENAME = "simulaqron_settings.json"
+DEFAULT_SIMULAQRON_NETWORK_FILENAME = "simulaqron_network.json"
 
 
 class SimBackend(JSONSerializerMixin, Enum):
@@ -62,7 +63,7 @@ class SimBackend(JSONSerializerMixin, Enum):
 
 @dataclass
 class SimulaqronConfig(JSONSerializerMixin):
-    network_config_file: InitVar[Path] = (Path.home() / ".simulaqron" / "default_network.json").resolve()
+    network_config_file: InitVar[Path] = (Path.home() / ".simulaqron" / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
     # Default config
     max_qubits: int = 20
     max_registers: int = 1000
@@ -77,12 +78,19 @@ class SimulaqronConfig(JSONSerializerMixin):
     t1: float = 1.0
 
     def __post_init__(self, network_config_file: Path):
-        self.network_config_file = network_config_file if isinstance(network_config_file, Path) \
-            else (Path.home() / ".simulaqron" / "default_network.json").resolve()
-        self._builder = NetworkConfigBuilder()
+        if isinstance(network_config_file, Path) and network_config_file.exists() and network_config_file.is_file():
+            self._builder = NetworkConfigBuilder()
+            net_cfg_file = network_config_file.resolve()
+        else:
+            # Given network config file is invalid or does not exist. Use the default one
+            # and write it to the expected location
+            net_cfg_file = (Path.home() / ".simulaqron" / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
+            self._builder = NetworkConfigBuilder.using_default_network()
+            self._builder.write_to_file(net_cfg_file)
+        self.network_config_file = net_cfg_file
 
     @property
-    def builder(self) -> NetworkConfigBuilder:
+    def network_builder(self) -> NetworkConfigBuilder:
         return self._builder
 
     @property
@@ -90,9 +98,12 @@ class SimulaqronConfig(JSONSerializerMixin):
         return self._net_cfg_file
 
     @network_config_file.setter
-    def network_config_file(self, value: Path):
-        # TODO - Insert the logic to reload the _builder
-        #  when this property is updated
+    def network_config_file(self, value: Path | str):
+        if isinstance(value, str):
+            value = Path(value).resolve()
+        # If we set the network config file, update the NetworkConfigBuilder
+        if value.exists() and value.is_file():
+            self._builder.read_from_file(value)
         self._net_cfg_file = value
 
     @classmethod
@@ -118,8 +129,8 @@ class SimulaqronConfig(JSONSerializerMixin):
 
     @classmethod
     def load_from_known_sources(cls) -> Self:
-        cwd_settings_file = (Path.cwd() / SIMULAQRON_SETTINGS_FILENAME).resolve()
-        home_settings_file = (Path.home() / ".simulaqron" / SIMULAQRON_SETTINGS_FILENAME).resolve()
+        cwd_settings_file = (Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME).resolve()
+        home_settings_file = (Path.home() / ".simulaqron" / DEFAULT_SIMULAQRON_SETTINGS_FILENAME).resolve()
 
         files_to_load = [cwd_settings_file, home_settings_file]
 

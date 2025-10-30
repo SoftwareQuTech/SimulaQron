@@ -113,6 +113,7 @@ class NetworkConfigBuilder:
 
     @classmethod
     def using_default_network(cls) -> Self:
+        # We use the embedded default network here
         default_network_path = resources.files(simulaqron._default_config).joinpath("default_network.json")
         new_builder = cls()
         new_builder.read_from_file(Path(str(default_network_path)))
@@ -300,8 +301,10 @@ class NetworkConfigBuilder:
         if file_path is None:
             raise ValueError("No path specified to read the network configuration")
 
-        if Path(str(file_path)).exists():
-            with open(file_path, 'r') as f:
+        file_path = Path(str(file_path))
+
+        if file_path.exists():
+            with file_path.open('r') as f:
                 dictionary = json.load(f)
         else:
             raise ValueError(f"No such file {file_path}")
