@@ -100,14 +100,20 @@ def _app_wrapper(**kwargs):
     # TODO - Signal handler for the SIGINT signal?
 
     # Call the app main function
-    return entry_function(**kwargs)
+    try:
+        return entry_function(**kwargs)
+    except BaseException as e:
+        _signal_other_apps()
+        raise e
 
 
-def _signal_other_apps(exc: BaseException):
+def _signal_other_apps():
     global apps_pids
     assert apps_pids is not None
     for pid in apps_pids:
-        os.kill(pid, signal.SIGINT)
+        # Do not send SIGINT to self process
+        if pid != os.getpid():
+            os.kill(pid, signal.SIGINT)
 
 
 def run_applications(
@@ -241,7 +247,7 @@ def run_applications(
                         kwds=inputs,
                         # The error callback with get invoked in the child process, so
                         # we tell other applications that they need to stop
-                        error_callback=_signal_other_apps
+                        #error_callback=_signal_other_apps
                     )
                     app_futures.append(future)
 
