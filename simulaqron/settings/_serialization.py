@@ -46,7 +46,8 @@ def path_serializer(obj: Path) -> str:
 def path_deserializer(cls: Type[Path], path: str) -> Path:
     if path == "$DEFAULT_NETWORK":
         return (cls.home() / ".simulaqron" / DEFAULT_SIMULAQRON_SETTINGS_FILENAME).resolve()
-    return cls(path).resolve()
+    # If the path is given, we will resolve it later
+    return cls(path)
 
 
 @JSONSerializer.register_serializer(SimulaqronConfig)

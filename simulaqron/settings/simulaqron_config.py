@@ -80,7 +80,7 @@ class SimulaqronConfig(JSONSerializerMixin):
     def __post_init__(self, network_config_file: Path):
         if isinstance(network_config_file, Path) and network_config_file.exists() and network_config_file.is_file():
             self._builder = NetworkConfigBuilder()
-            net_cfg_file = network_config_file.resolve()
+            net_cfg_file = network_config_file
         else:
             # Given network config file is invalid or does not exist. Use the default one
             # and write it to the expected location
