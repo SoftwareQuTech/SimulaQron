@@ -12,8 +12,8 @@ from simulaqron.settings import simulaqron_settings
 
 class Socket(_Socket):
 
-    RETRY_TIME = 0.1
-    MAX_RETRIES = 10
+    RETRY_TIME = 0.2
+    MAX_RETRIES = 20
 
     def __init__(
         self,
@@ -33,7 +33,7 @@ class Socket(_Socket):
         self._use_callbacks = use_callbacks
         self._network_name = network_name
 
-        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({app_name} <-> {remote_app_name})")
+        self._logger = get_netqasm_logger(f"{self.__class__.__name__}(L:{app_name} <-> R:{remote_app_name})")
         self._timeout = timeout
         # We define _app_socket as None as a default value, so the __del__ method
         # does not fail when the socket could not be connected correctly.
@@ -41,6 +41,9 @@ class Socket(_Socket):
         self._app_socket: socket.socket = self._connect()
 
     def __del__(self):
+        self.close()
+
+    def close(self):
         if self._app_socket:
             self._app_socket.close()
 
@@ -141,37 +144,40 @@ class Socket(_Socket):
                 attempt += 1
                 try:
                     app_socket.bind(addr[4])
+                    break
                 except OSError as err:
                     self._logger.debug(
-                        "Could not bind socket since: %s\nTrying again in %ds...",
-                        err, self.RETRY_TIME
+                        "Could not bind socket since: %s, Trying again in %ds (attempt %d of %d)...",
+                        err, self.RETRY_TIME, attempt, self.MAX_RETRIES, exc_info=err
                     )
                     if attempt > self.MAX_RETRIES:
                         raise err
                     time.sleep(self.RETRY_TIME)
-                else:
-                    break
             app_socket.listen(1)
             app_socket.settimeout(self._timeout)
             conn, _ = app_socket.accept()
+            self._logger.debug("Classical socket as server accepted connection.")
             connected_socket = conn
         else:
             self._logger.debug("Trying to open application socket as client")
             while True:
                 attempt += 1
                 try:
-                    app_socket.settimeout(self._timeout)
+                    #app_socket.settimeout(self._timeout)
                     app_socket.connect(addr[4])
+                    break
                 except ConnectionRefusedError as err:
                     self._logger.debug(
-                        "Could not open application socket, trying again in %d s...",
-                        self.RETRY_TIME
+                        "Could not open application socket, trying again in %f s (attempt %d of %d)...",
+                        self.RETRY_TIME, attempt, self.MAX_RETRIES, exc_info=err
                     )
                     time.sleep(self.RETRY_TIME)
                     if attempt > self.MAX_RETRIES:
                         raise err
-                else:
-                    break
+                except Exception as err:
+                    self._logger.exception("Could not open application socket due to unexpected error")
+                    raise err
+            self._logger.debug("Classical socket connected as client")
             connected_socket = app_socket
 
         self._logger.debug("Application socket opened")

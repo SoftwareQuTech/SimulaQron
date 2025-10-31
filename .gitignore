@@ -13,3 +13,5 @@
 
 cqc/backend/logFile*
 examples/**/log/*
+
+*.out.txt
