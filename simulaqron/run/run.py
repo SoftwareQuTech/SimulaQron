@@ -39,11 +39,10 @@ _SIMULAQRON_BACKENDS = {
 }
 
 
-def as_completed(futures: List[ApplyResult], names: List[str]) -> Generator[Tuple[ApplyResult, str], None, None]:
+def as_completed(futures: List[ApplyResult], names: List[str]) -> List[Tuple[ApplyResult, str]]:
     if len(futures) is not len(names):
         raise RuntimeError("Not all registered applications have an associated name")
-    for future, name in zip(futures, names):
-        yield future, name
+    return [(future, name) for future, name in zip(futures, names)]
 
 
 def reset(save_loggers=False):
@@ -261,8 +260,13 @@ def run_applications(
                 # Join the application processes and the backend
                 names = [f'app_{app_name}' for app_name in app_names]
                 result = {}
-                for future, name in as_completed(app_futures, names):
-                    result[name] = future.get()
+                futures = as_completed(app_futures, names)
+                while len(result) < len(app_names):
+                    for future, name in futures:
+                        if name in result:
+                            continue
+                        if future.ready():
+                            result[name] = future.get()
                 # if results_file is not None:
                 #     save_results(results=results, results_file=results_file)
                 if enable_logging:
@@ -271,7 +275,6 @@ def run_applications(
                     dump_yaml(data=result, file_path=path)
                 results.append(result)
                 network.stop()
-
         finally:
             network.stop()
         reset(save_loggers=True)
