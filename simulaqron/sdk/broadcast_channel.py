@@ -1,4 +1,5 @@
 from netqasm.sdk.classical_communication.broadcast_channel import BroadcastChannelBySockets
+
 from .socket import Socket
 
 

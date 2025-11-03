@@ -30,12 +30,11 @@ import random
 import time
 
 import numpy as np
-from twisted.spread import pb
-from twisted.internet.defer import DeferredLock
-from twisted.internet.task import deferLater
-from twisted.internet.defer import inlineCallbacks
-
 from netqasm.logging.glob import get_netqasm_logger
+from twisted.internet.defer import DeferredLock
+from twisted.internet.defer import inlineCallbacks
+from twisted.internet.task import deferLater
+from twisted.spread import pb
 
 from simulaqron.reactor import reactor
 import simulaqron.settings as settings

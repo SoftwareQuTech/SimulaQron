@@ -28,17 +28,15 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import importlib
 import random
-
 from collections import deque
 from typing import Tuple, List
 
-from twisted.spread import pb
-from twisted.internet.defer import inlineCallbacks, DeferredLock, Deferred, DeferredList
-from twisted.internet.task import deferLater
-from twisted.internet.error import ConnectionRefusedError, CannotListenError
-from twisted.spread.pb import RemoteError, RemoteReference
-
 from netqasm.logging.glob import get_netqasm_logger
+from twisted.internet.defer import inlineCallbacks, DeferredLock, Deferred, DeferredList
+from twisted.internet.error import ConnectionRefusedError, CannotListenError
+from twisted.internet.task import deferLater
+from twisted.spread import pb
+from twisted.spread.pb import RemoteError, RemoteReference
 from typing_extensions import Generator
 
 from simulaqron.virtual_node.basics import QuantumError, NoQubitError, VirtNetError

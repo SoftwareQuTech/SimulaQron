@@ -2,10 +2,9 @@ import ctypes
 import socket
 import time
 from enum import Enum
-
-from multiprocess.pool import Pool
 from typing import Type, Optional, Callable, List, Tuple, Set, Dict
 
+from multiprocess.pool import Pool
 from netqasm.backend.messages import (MessageHeader,
                                       MsgDoneMessage, ReturnArrayMessage,
                                       ReturnRegMessage, ReturnMessage, deserialize_return_msg,
@@ -483,7 +482,7 @@ class ReturnQubitStateMessage(ReturnMessage):
 
         self.qubit_id = qubit_id
         self.dim = len(real_part)
-        if self.dim > MAX_QUBIT_STATE_LEN :
+        if self.dim > MAX_QUBIT_STATE_LEN:
             logger.warning("Return qubit state message too long")
         for i in range(self.dim):
             for j in range(self.dim):
@@ -491,7 +490,7 @@ class ReturnQubitStateMessage(ReturnMessage):
                 self.imag_part[i][j] = imag_part[i][j]
 
     @property
-    def dimension(self) -> int :
+    def dimension(self) -> int:
         return self.dim
 
     def get_real_part(self) -> List[List[float]]:

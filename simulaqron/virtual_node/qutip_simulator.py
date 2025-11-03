@@ -26,12 +26,12 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-import math
 import cmath
+import logging
+import math
 from typing import Tuple, List
 
 import numpy as np
-import logging
 
 try:
     import qutip as qp

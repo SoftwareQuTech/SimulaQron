@@ -833,7 +833,7 @@ class VanillaSimulaQronExecutioner(Executor):
 
 
 class VirtualQubitRef:
-    def __init__(self, qubit_id: int, timestamp: int , virt: pb.Referenceable):
+    def __init__(self, qubit_id: int, timestamp: int, virt: pb.Referenceable):
         self.qubit_id = qubit_id
         self.timestamp = timestamp
         self.virt = virt

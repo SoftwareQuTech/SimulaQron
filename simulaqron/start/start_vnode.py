@@ -29,15 +29,15 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import logging
 import os
-import sys
 import signal
+import sys
 from functools import partial
 
 from netqasm.logging.glob import get_netqasm_logger, set_log_level
 
+from simulaqron.reactor import reactor
 from simulaqron.virtual_node.virtual import Backend
 from simulaqron.settings import simulaqron_settings
-from simulaqron.reactor import reactor
 
 logger = get_netqasm_logger("start_vnode")
 

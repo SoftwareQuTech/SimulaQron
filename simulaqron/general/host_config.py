@@ -29,10 +29,10 @@
 
 import socket
 import struct
+from ipaddress import IPv4Address
 from typing import Dict, List
 
 from twisted.spread import pb
-from ipaddress import IPv4Address
 
 from simulaqron.settings.network_config import NetworkConfigBuilder
 

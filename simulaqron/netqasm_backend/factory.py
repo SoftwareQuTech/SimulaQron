@@ -40,7 +40,6 @@ from simulaqron.general.host_config import SocketsConfig, Host
 from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
 from simulaqron.sdk.connection import RichErrorMessage
 from simulaqron.settings import simulaqron_settings
-from simulaqron.settings.network_config import NetworkConfigBuilder
 from simulaqron.virtual_node.virtual import call_method
 
 
@@ -118,8 +117,8 @@ class NetQASMProtocol(Protocol):
     def log_error(self, failure):
         self._logger.error("Handling message failed with failure = %s", failure.value)
         self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.GENERAL, err_msg=str(failure.value)))
-        #self.transport.abortConnection()
-        #yield None
+        # self.transport.abortConnection()
+        # yield None
         yield deferLater(reactor, 0.1, self.stop)
 
     def stop(self):

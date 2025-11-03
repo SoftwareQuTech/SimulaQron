@@ -2,7 +2,6 @@ from ._serialization import init_serialization
 from .network_config import NetworkConfigBuilder
 from .simulaqron_config import SimulaqronConfig, DEFAULT_SIMULAQRON_SETTINGS_FILENAME
 
-
 init_serialization()
 
 # Centralized way to store the config. It reads the local configuration

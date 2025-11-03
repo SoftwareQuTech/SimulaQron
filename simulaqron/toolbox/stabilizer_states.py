@@ -7,10 +7,11 @@
 #
 ##########################################################################################
 
-import numpy as np
-import networkx as nx
-from scipy.linalg import block_diag
 from random import randint
+
+import networkx as nx
+import numpy as np
+from scipy.linalg import block_diag
 
 
 class StabilizerState:
@@ -495,9 +496,9 @@ class StabilizerState:
             return self
         else:
             this_X_stab = self._group[:, : self.num_qubits]
-            this_Z_stab = self._group[:, self.num_qubits : -1]
+            this_Z_stab = self._group[:, self.num_qubits: -1]
             other_X_stab = other._group[:, : other.num_qubits]
-            other_Z_stab = other._group[:, other.num_qubits : -1]
+            other_Z_stab = other._group[:, other.num_qubits: -1]
 
             new_X_stab = block_diag(this_X_stab, other_X_stab)
             new_Z_stab = block_diag(this_Z_stab, other_Z_stab)
@@ -736,7 +737,7 @@ class StabilizerState:
             if not inplace:
                 # Simply remove first generator and columns for X and Z of this qubit
                 X_part = tmp_matrix[1:n, 1:n]
-                Z_part_and_phase = tmp_matrix[1:n, n + 1 :]
+                Z_part_and_phase = tmp_matrix[1:n, n + 1:]
                 self._group = np.concatenate((X_part, Z_part_and_phase), 1)
                 self._nr_rows = n - 1
             else:
@@ -843,7 +844,7 @@ class StabilizerState:
                 operations.append(("Z", j))
         # Spp is now in the form of (I,Gamma) where Gamma is the adj mat of the Graph
         # SQC equivalent to the stabilizer state.
-        adj_mat = Spp.to_array()[:, n : 2 * n]
+        adj_mat = Spp.to_array()[:, n: 2 * n]
         G = nx.from_numpy_array(adj_mat)
 
         if return_operations:

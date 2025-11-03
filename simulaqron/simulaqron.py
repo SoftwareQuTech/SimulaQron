@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
+import importlib.metadata as metadata
+import logging
 import time
+from pathlib import Path
 from typing import Optional, Callable
 
 import click
-import logging
-from daemons.prefab import run
 from daemons.interfaces import exit
-from pathlib import Path
-import importlib.metadata as metadata
+from daemons.prefab import run
 
 from simulaqron.network import Network
 from simulaqron.settings import simulaqron_settings
-from simulaqron.settings.simulaqron_config import SimBackend, DEFAULT_SIMULAQRON_SETTINGS_FILENAME
 from simulaqron.settings.network_config import NetworkConfigBuilder
+from simulaqron.settings.simulaqron_config import SimBackend, DEFAULT_SIMULAQRON_SETTINGS_FILENAME
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 # PID folder should be "LOCAL"
-PID_FOLDER = Path.home() /  ".simulaqron_pids"
+PID_FOLDER = Path.home() / ".simulaqron_pids"
 
 # If the pid folder does not exist, create it
 if not PID_FOLDER.exists():
@@ -129,7 +129,6 @@ def version():
          "If you want to supress this question, use the --force/-f flag.",
     is_flag=True,
 )
-
 def start(name: str, nrnodes: Optional[int], nodes: Optional[str],
           topology: Optional[str], force: Optional[bool], keep: Optional[bool]):
     """Starts a network with the given parameters or from config files."""
@@ -153,11 +152,12 @@ def start(name: str, nrnodes: Optional[int], nodes: Optional[str],
     try:
         d.start()
     except SystemExit as e:
-        if e.code == exit.PIDFILE_INACCESSIBLE or\
-           e.code == exit.DAEMONIZE_FAILED:
+        if e.code == exit.PIDFILE_INACCESSIBLE or \
+                e.code == exit.DAEMONIZE_FAILED:
             logging.debug(f"Failed to launch Simulaqron Daemon. "
                           f"Exit code reported by daemons: {e.code}")
             print("Failed to launch SimulaQron Daemon. Aborted!")
+
 
 ###############
 # stop command #
@@ -181,6 +181,7 @@ def stop(name: Optional[str]):
         return
     d = SimulaQronDaemon(pidfile=pidfile)
     d.stop()
+
 
 #################
 # reset command #
@@ -214,6 +215,7 @@ def reset(force: Optional[bool]):
     else:
         print("Aborting!")
 
+
 def updates_local_config(command_function: Callable):
     def wrapper(*args, **kwargs):
         local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
@@ -225,6 +227,7 @@ def updates_local_config(command_function: Callable):
         simulaqron_settings.load_from_file(local_settings)
         command_function(*args, **kwargs)
         simulaqron_settings.save_to_file(local_settings)
+
     return wrapper
 
 
@@ -327,6 +330,7 @@ def t1(value):
     """The effective T1 to be used for noisy qubits"""
     simulaqron_settings.t1 = value
 
+
 ###############
 # get command #
 ###############
@@ -339,6 +343,7 @@ def loads_local_config(command_function: Callable):
         else:
             simulaqron_settings.default_settings()
         command_function(*args, **kwargs)
+
     return wrapper
 
 
@@ -420,6 +425,7 @@ def t1():
     """The effective T1 to be used for noisy qubits"""
     print(simulaqron_settings.t1)
 
+
 ###############
 # node command #
 ###############
@@ -463,7 +469,8 @@ def nodes():
     help="Force re-write of network_config_file.\n",
     is_flag=True,
 )
-def add(name: Optional[str], network_name: Optional[str], hostname=None, app_port=None, qnodeos_port=None, vnode_port=None, neighbors=None,
+def add(name: Optional[str], network_name: Optional[str], hostname=None, app_port=None, qnodeos_port=None,
+        vnode_port=None, neighbors=None,
         force=False):
     """
     Add a node to the network.

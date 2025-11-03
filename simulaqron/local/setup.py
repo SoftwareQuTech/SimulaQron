@@ -30,10 +30,10 @@
 import time
 
 from netqasm.logging.glob import get_netqasm_logger
-from twisted.spread import pb
 from twisted.internet import error
 from twisted.internet.defer import DeferredList
 from twisted.internet.error import ReactorNotRunning
+from twisted.spread import pb
 
 from simulaqron.reactor import reactor
 
@@ -118,7 +118,6 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
 
 
 def init_register(resList, myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
-
     _logger.debug("LOCAL %s: All connections set up.", myName)
 
     # Retrieve the connection to the local virtual node, if successfull

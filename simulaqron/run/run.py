@@ -2,15 +2,14 @@ import logging
 import os
 import signal
 import time
-
-from multiprocess.context import ForkContext as ProcessContext
-from multiprocess.pool import ApplyResult
 from importlib import reload
 from importlib.util import find_spec
 from os import PathLike
 from pathlib import Path
 from typing import Callable, Optional, Any, Dict, List, Union, Tuple
 
+from multiprocess.context import ForkContext as ProcessContext
+from multiprocess.pool import ApplyResult
 from multiprocess.sharedctypes import SynchronizedArray
 from netqasm.logging.glob import get_netqasm_logger
 from netqasm.logging.output import (reset_struct_loggers,
@@ -23,6 +22,7 @@ from netqasm.sdk.classical_communication import reset_socket_hub
 from netqasm.sdk.config import LogConfig
 from netqasm.sdk.shared_memory import SharedMemoryManager
 from netqasm.util.yaml import dump_yaml
+
 from simulaqron.network import Network
 from simulaqron.sdk import SimulaQronConnection
 from simulaqron.settings import simulaqron_settings
@@ -59,7 +59,7 @@ def reset(save_loggers=False):
 
 def setup_sim_backend(sim_backend: SimBackend):
     if sim_backend in [SimBackend.PROJECTQ, SimBackend.QUTIP]:
-        assert find_spec(sim_backend.value) is not None,\
+        assert find_spec(sim_backend.value) is not None, \
             f"To use {sim_backend} as backend you need to install the package"
     simulaqron_settings.sim_backend = sim_backend
 
@@ -78,6 +78,7 @@ def configure_network(node_names: List[str], network_config_file: Optional[str])
 # Global array helper to store PIDs of the children processes running the applications
 # Note; this array *will not* store the pids of the QNodeOS and/or Vnode processes
 apps_pids: Optional[SynchronizedArray] = None
+
 
 def _worker_initializer(synced_array: SynchronizedArray):
     # We simply store the reference of the synced object for this process
@@ -117,17 +118,17 @@ def _signal_other_apps():
 
 
 def run_applications(
-    app_instance: ApplicationInstance,
-    num_rounds: int = 1,
-    network_cfg: Union[str, PathLike, Path] = None,  # WARNING - The type of this argument *cannot* be harmonized
-    nv_cfg: Any = None,  # Unused; it's here for harmonization with squidasm "simulate_application"
-    log_cfg: LogConfig = None,
-    formalism: Formalism = Formalism.KET,
-    use_app_config: bool = True,
-    post_function: Optional[Callable] = None,
-    enable_logging: bool = True,
-    hardware: Any = None,  # Unused; it's here for harmonization with squidasm "simulate_application"
-    init_func: Callable = None,
+        app_instance: ApplicationInstance,
+        num_rounds: int = 1,
+        network_cfg: Union[str, PathLike, Path] = None,  # WARNING - The type of this argument *cannot* be harmonized
+        nv_cfg: Any = None,  # Unused; it's here for harmonization with squidasm "simulate_application"
+        log_cfg: LogConfig = None,
+        formalism: Formalism = Formalism.KET,
+        use_app_config: bool = True,
+        post_function: Optional[Callable] = None,
+        enable_logging: bool = True,
+        hardware: Any = None,  # Unused; it's here for harmonization with squidasm "simulate_application"
+        init_func: Callable = None,
 ) -> List[Dict[str, Any]]:
     """Executes functions containing quantum applications.
 
@@ -210,7 +211,7 @@ def run_applications(
 
         # Create the executor pool
         process_ctx = ProcessContext()
-        synced_array =  process_ctx.Array('i', len(app_instance.app.programs))
+        synced_array = process_ctx.Array('i', len(app_instance.app.programs))
         executor = process_ctx.Pool(
             processes=len(app_names) + 3,
             initializer=_worker_initializer,

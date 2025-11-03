@@ -1,29 +1,29 @@
-import dill
 import socket
 import time
 from typing import Optional
 
+import dill
 from netqasm.logging.glob import get_netqasm_logger
 from netqasm.sdk.classical_communication.message import StructuredMessage
 from netqasm.sdk.classical_communication.socket import Socket as _Socket
+
 from simulaqron.general.host_config import SocketsConfig, Host
 from simulaqron.settings import simulaqron_settings
 
 
 class Socket(_Socket):
-
     RETRY_TIME = 0.2
     MAX_RETRIES = 20
 
     def __init__(
-        self,
-        app_name: str,
-        remote_app_name: str,
-        socket_id: int = 0,
-        timeout: Optional[int] = None,
-        use_callbacks=False,
-        network_name="default",
-        log_config=None,
+            self,
+            app_name: str,
+            remote_app_name: str,
+            socket_id: int = 0,
+            timeout: Optional[int] = None,
+            use_callbacks=False,
+            network_name="default",
+            log_config=None,
     ):
         assert socket_id == 0, (
             "SimulaQron socket does not support setting socket ID, this is instead done in the config file"
@@ -75,10 +75,10 @@ class Socket(_Socket):
         return raw_msg
 
     def recv(
-        self,
-        block: bool = True,
-        timeout: Optional[float] = None,
-        maxsize: Optional[int] = 1024
+            self,
+            block: bool = True,
+            timeout: Optional[float] = None,
+            maxsize: Optional[int] = 1024
     ) -> str:
         """Receive a message from the remote node."""
         self._logger.debug("Receiving msg")
@@ -88,10 +88,10 @@ class Socket(_Socket):
         return msg
 
     def recv_structured(
-        self,
-        block: bool = True,
-        timeout: Optional[float] = None,
-        maxsize: Optional[int] = 1024,
+            self,
+            block: bool = True,
+            timeout: Optional[float] = None,
+            maxsize: Optional[int] = 1024,
     ) -> StructuredMessage:
         self._logger.debug("Receiving structured msg")
         raw_msg = self._base_recv(block, timeout, maxsize)
@@ -100,10 +100,10 @@ class Socket(_Socket):
         return msg
 
     def recv_silent(
-        self,
-        block: bool = True,
-        timeout: Optional[float] = None,
-        maxsize: Optional[int] = None,
+            self,
+            block: bool = True,
+            timeout: Optional[float] = None,
+            maxsize: Optional[int] = None,
     ) -> str:
         return self.recv()
 
@@ -163,7 +163,7 @@ class Socket(_Socket):
             while True:
                 attempt += 1
                 try:
-                    #app_socket.settimeout(self._timeout)
+                    # app_socket.settimeout(self._timeout)
                     app_socket.connect(addr[4])
                     break
                 except ConnectionRefusedError as err:

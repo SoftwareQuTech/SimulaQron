@@ -27,20 +27,22 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import time
 import random
-import networkx as nx
+import time
 from os import PathLike
-from multiprocess.context import ForkProcess as Process
-from typing import List, Optional, Dict, Any
 from timeit import default_timer as timer
+from typing import List, Optional, Dict, Any
 
+import networkx as nx
+from multiprocess.context import ForkProcess as Process
 from netqasm.logging.glob import get_netqasm_logger, get_log_level
 
-from simulaqron.settings.network_config import NetworkConfigBuilder
 from simulaqron.settings import simulaqron_settings
 from simulaqron.start import start_vnode, start_qnodeos
+# WARNING - this import *needs* to be after importing start_vnode and start_qnodeos
+# Otherwise the code that patches some netqasm internal definitions will not work correctly!
 from simulaqron.sdk import SimulaQronConnection
+
 
 #########################################################################################
 # Network class, sets up (part of) a simulated network.                                 #
@@ -219,7 +221,7 @@ def construct_topology_config(topology, nodes):
         elif topology == "complete":
             adjacency_dct = {}
             for i, node in enumerate(nodes):
-                adjacency_dct[node] = nodes[:i] + nodes[i + 1 :]
+                adjacency_dct[node] = nodes[:i] + nodes[i + 1:]
 
         elif topology == "ring":
             adjacency_dct = {}
