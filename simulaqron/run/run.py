@@ -8,7 +8,7 @@ from importlib import reload
 from importlib.util import find_spec
 from os import PathLike
 from pathlib import Path
-from typing import Callable, Optional, Any, Dict, List, Union, Generator, Tuple
+from typing import Callable, Optional, Any, Dict, List, Union, Tuple
 
 from multiprocess.sharedctypes import SynchronizedArray
 from netqasm.logging.glob import get_netqasm_logger
@@ -244,9 +244,6 @@ def run_applications(
                     future: ApplyResult = executor.apply_async(
                         _app_wrapper,
                         kwds=inputs,
-                        # The error callback with get invoked in the child process, so
-                        # we tell other applications that they need to stop
-                        #error_callback=_signal_other_apps
                     )
                     app_futures.append(future)
 
@@ -267,6 +264,7 @@ def run_applications(
                             continue
                         if future.ready():
                             result[name] = future.get()
+                        time.sleep(0.1)
                 # if results_file is not None:
                 #     save_results(results=results, results_file=results_file)
                 if enable_logging:
