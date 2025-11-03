@@ -75,6 +75,7 @@ class SimulaqronConfig(JSONSerializerMixin):
     log_level: int = logging.WARNING
     sim_backend: SimBackend = SimBackend.STABILIZER
     noisy_qubits: bool = False
+    max_app_waiting_time: float = -1.0  # In seconds, negative means unlimited waiting
     t1: float = 1.0
 
     def __post_init__(self, network_config_file: Path):

@@ -1,6 +1,7 @@
 import logging
 import os
 import signal
+import time
 
 from multiprocess.context import ForkContext as ProcessContext
 from multiprocess.pool import ApplyResult
@@ -258,6 +259,7 @@ def run_applications(
                 names = [f'app_{app_name}' for app_name in app_names]
                 result = {}
                 futures = as_completed(app_futures, names)
+                start_time = time.time()
                 while len(result) < len(app_names):
                     for future, name in futures:
                         if name in result:
@@ -265,6 +267,14 @@ def run_applications(
                         if future.ready():
                             result[name] = future.get()
                         time.sleep(0.1)
+                        waited_for = time.time() - start_time
+                        if 0.0 < simulaqron_settings.max_app_waiting_time < waited_for:
+                            raise TimeoutError("SimulaQron: max app waiting time exceeded; "
+                                               "app did not finish in time. Please check that "
+                                               "your code runs correctly standalone. If your "
+                                               "code takes a long time to run, please adjust the "
+                                               "value of 'max_app_waiting_time' in your simulaqron"
+                                               "settings file.")
                 # if results_file is not None:
                 #     save_results(results=results, results_file=results_file)
                 if enable_logging:

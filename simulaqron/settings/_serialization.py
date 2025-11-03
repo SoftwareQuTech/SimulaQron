@@ -76,5 +76,7 @@ def simulaqron_config_deserializer(cls: Type[SimulaqronConfig], obj: Dict[str, A
     new_obj.log_level = obj["log_level"]
     new_obj.sim_backend = JSONSerializer.deserialize(SimBackend, obj["sim_backend"])
     new_obj.noisy_qubits = obj["noisy_qubits"]
+    if "max_app_waiting_time" in obj:
+        new_obj.max_app_waiting_time = obj["max_app_waiting_time"]
     new_obj.t1 = obj["t1"]
     return new_obj
