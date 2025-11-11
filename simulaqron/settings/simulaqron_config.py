@@ -158,6 +158,14 @@ class SimulaqronConfig(JSONSerializerMixin):
 
     def save_to_file(self, path: PathLike):
         file_path = Path(str(path)).resolve()
+
+        # Create all the parent folder if they not exists
+        if not file_path.parent.exists():
+            file_path.parent.mkdir(parents=True)
+
+        # Poke the file, so it exists before opening
+        file_path.touch(exist_ok=True)
+
         with file_path.open("wt") as file:
             serialized = JSONSerializer.serialize(self)
             json.dump(serialized, file, indent=4)

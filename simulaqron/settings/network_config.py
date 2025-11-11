@@ -287,8 +287,18 @@ class NetworkConfigBuilder:
         if file_path is None:
             raise ValueError("Since this networks config was not initialized with a file_path you need to specify one")
 
+        # Create the Path object
+        file_path = Path(str(file_path)).resolve()
+
+        # Create all the parent folder if they not exists
+        if not file_path.parent.exists():
+            file_path.parent.mkdir(parents=True)
+
+        # Poke the file, so it exists before opening
+        file_path.touch(exist_ok=True)
+
         dictionary = self.to_dict()
-        with open(file_path, 'w') as f:
+        with file_path.open('wt') as f:
             json.dump(dictionary, f, indent=4)
 
     def read_from_file(self, file_path: PathLike | str):
