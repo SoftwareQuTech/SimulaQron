@@ -122,6 +122,8 @@ class SimulaqronConfig(JSONSerializerMixin):
             new_val = getattr(new_config, field.name)
             setattr(self, field.name, new_val)
 
+        self.network_config_file = new_config.network_config_file
+
     @classmethod
     def _deserialize_from_file(cls, file_path: Path) -> Self:
         with file_path.resolve().open("rt") as file:
