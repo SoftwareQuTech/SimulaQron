@@ -56,6 +56,7 @@ class Network:
                  force: bool = False, new: bool = True):
         """
         Used to spin up a simulated network.
+        This class uses the already-loaded network configuration, and *makes no change to it*.
 
         If new=True then a fresh network with only the specified nodes
         (or the default Alice, Bob, Charlie, David and Eve) are created and overwriting the current network with
@@ -205,7 +206,9 @@ class Network:
         return f"Network '{self.name}', procs: {self.processes}"
 
 
-def construct_topology_config(topology, nodes):
+# Helper functions to build topologies
+
+def construct_topology_config(topology: str | Dict | None, nodes: List[str]) -> Optional[Dict[str, List[str]]]:
     """
     Constructs a json file at config/topology.json, used to define the topology of the network.
 
@@ -215,22 +218,22 @@ def construct_topology_config(topology, nodes):
         List of the names of the nodes.
     :return: None
     """
-    if topology is not None:
-        if isinstance(topology, dict):
+    if isinstance(topology, str):
+        # Trick to get the integer after "random_connected": split on that string
+        topology = topology.split("random_connected")
+
+    adjacency_dct = {}
+    match topology:
+        case dict() | None:
             return topology
-        elif topology == "complete":
-            adjacency_dct = {}
+        case ["complete"]:
             for i, node in enumerate(nodes):
                 adjacency_dct[node] = nodes[:i] + nodes[i + 1:]
-
-        elif topology == "ring":
-            adjacency_dct = {}
+        case ["ring"]:
             nn = len(nodes)
             for i, node in enumerate(nodes):
                 adjacency_dct[node] = [nodes[(i - 1) % nn], nodes[(i + 1) % nn]]
-
-        elif topology == "path":
-            adjacency_dct = {}
+        case ["path"]:
             nn = len(nodes)
             for i, node in enumerate(nodes):
                 if i == 0:
@@ -239,13 +242,12 @@ def construct_topology_config(topology, nodes):
                     adjacency_dct[node] = [nodes[i - 1]]
                 else:
                     adjacency_dct[node] = [nodes[(i - 1) % nn], nodes[(i + 1) % nn]]
-
-        elif topology == "random_tree":
+        case ["random_tree"]:
             adjacency_dct = get_random_tree(nodes)
-
-        elif topology[:16] == "random_connected":
+        case ["", raw_nr_edges]:
+            # Here the "randon_connected" matches, and we also get the raw # of edges
             try:
-                nr_edges = int(topology[17:])
+                nr_edges = int(raw_nr_edges)
             except ValueError:
                 raise ValueError(
                     "When specifying a random connected graph use the format 'random_connected_{nr_edges}',"
@@ -257,12 +259,9 @@ def construct_topology_config(topology, nodes):
                     "where 'nr_edges' is the number of edges of the graph."
                 )
             adjacency_dct = get_random_connected(nodes, nr_edges)
-
-        else:
+        case _:
             raise ValueError("Unknown topology name")
-        return adjacency_dct
-    else:
-        return None
+    return adjacency_dct
 
 
 def get_random_tree(nodes):

@@ -1,11 +1,12 @@
 import json
 import socket
 from contextlib import closing
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from importlib import resources
 from os import PathLike
 from pathlib import Path
 from typing import Optional, Self, Dict, List, Tuple, Any
+from dataclasses_serialization.json import JSONSerializer
 
 import simulaqron._default_config
 
@@ -13,61 +14,52 @@ import simulaqron._default_config
 @dataclass
 class NodeConfig:
     """
-    Used by _NetworkConfig to keep track of the config of a single node.
+    Used by NetworkConfig to keep track of the config of a single node.
     """
     name: str
-    app_hostname: Optional[str]
-    qnodeos_hostname: Optional[str]
-    vnode_hostname: Optional[str]
-    app_port: Optional[int]
-    qnodeos_port: Optional[int]
-    vnode_port: Optional[int]
-
-    def to_dict(self) -> Dict[str, List[str | int | None]]:
-        """
-        Constructs a dictionary with all the config of this node.
-        :return: dict
-        """
-        return {
-            "app_socket": [self.app_hostname, self.app_port],
-            "qnodeos_socket": [self.qnodeos_hostname, self.qnodeos_port],
-            "vnode_socket": [self.vnode_hostname, self.vnode_port]
-        }
+    app_port: int
+    qnodeos_port: int
+    vnode_port: int
+    app_hostname: str = "localhost"
+    qnodeos_hostname: str = "localhost"
+    vnode_hostname: str = "localhost"
 
 
-# @dataclass
+@dataclass
 class NetworkConfig:
-    def __init__(self):
-        """
-        Used by NetworksConfigConstructor to keep track of the config of a single network.
-        """
-        self.topology: Optional[Dict[str, List[str]]] = None
-        self.nodes: Dict[str, NodeConfig] = {}
+    """
+    Used by NetworksConfigConstructor to keep track of the config of a single network.
+    """
+
+    name: str
+    topology: Optional[Dict[str, List[str]]] = None
+    nodes: Dict[str, NodeConfig] = field(default_factory=dict)
 
     def add_node(
-            self, name: str, app_hostname: Optional[str] = None, qnodeos_hostname: Optional[str] = None,
-            vnode_hostname: Optional[str] = None, app_port: Optional[int] = None, qnodeos_port: Optional[int] = None,
-            vnode_port: Optional[int] = None, neighbors: Optional[List[str]] = None,
+            self, name: str,
+            app_hostname: str, qnodeos_hostname: str, vnode_hostname: str,
+            app_port: int, qnodeos_port: int, vnode_port: int,
+            neighbors: Optional[List[str]] = None,
     ):
         """
-        Adds a node with the given name to a network (default: "default").
-        If hostnames are None they will default to 'localhost'.
+        Adds a node with the given name to the network
+        If hostnames are not given they will default to 'localhost'.
         If the port numbers None, unused ones will be chosen between 8000 and 9000.
         If neighbors are specified a restricted topology can be constructed (default is fully connected).
 
         :param name: str
             Name of the node, e.g. Alice
-        :param app_hostname: str or None
-            Hostname, e.g. localhost (default) or 192.168.0.1
-        :param qnodeos_hostname: str or None
-            Hostname, e.g. localhost (default) or 192.168.0.1
-        :param vnode_hostname: str or None
-            Hostname, e.g. localhost (default) or 192.168.0.1
-        :param app_port: int or None
+        :param app_hostname: str
+            Hostname (e.g. localhost) or IP address (e.g. 192.168.0.1)
+        :param qnodeos_hostname: str
+            Hostname (e.g. localhost) or IP address (e.g. 192.168.0.1)
+        :param vnode_hostname: str
+            Hostname (e.g. localhost) or IP address (e.g. 192.168.0.1)
+        :param app_port: int
             Port number for the application
-        :param qnodeos_port: int or None
+        :param qnodeos_port: int
             Port number for the qnodeos server
-        :param vnode_port: int or None
+        :param vnode_port: int
             Port number for the virtual node
         :param neighbors: (list of str) or None
             A list of neighbors, of this node.
@@ -94,22 +86,17 @@ class NetworkConfig:
             vnode_port=vnode_port,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Constructs a dictionary with all the config of this network.
-        :return: dict
-        """
-        nodes = {node_name: node.to_dict() for node_name, node in self.nodes.items()}
-        return {"nodes": nodes, "topology": self.topology}
+    def remove_node(self, node_name: str):
+        self.nodes.pop(node_name, None)
 
-
+@dataclass
 class NetworkConfigBuilder:
-    def __init__(self):
-        """
-        Used to construct the config file of networks.
-        """
-        self.networks: Dict[str, NetworkConfig] = {}
-        self.used_sockets: List[Tuple[str, int]] = []
+    """
+    Used to construct the config file of networks.
+    """
+
+    networks: Dict[str, NetworkConfig] = field(default_factory=dict)
+    used_sockets: List[Tuple[str, int]] = field(default_factory=list)
 
     @classmethod
     def using_default_network(cls) -> Self:
@@ -119,10 +106,30 @@ class NetworkConfigBuilder:
         new_builder.read_from_file(Path(str(default_network_path)))
         return new_builder
 
-    def add_node(self, node_name: str, network_name: str = "default", app_hostname: Optional[str] = None,
-                 qnodeos_hostname: Optional[str] = None, vnode_hostname: Optional[str] = None,
-                 app_port: Optional[int] = None, qnodeos_port: Optional[int] = None,
-                 vnode_port: Optional[int] = None, neighbors: List[str] = None):
+    def _correct_network_port_if_needed(self, hostname: str, port: int) -> int:
+        """
+        Checks if the given port is valid (>0) and if it is free. If not, it will
+        allocate a new port in the range 8000-9000 which is free, and hence can be used
+        to listen to new connections
+        Args:
+            hostname: str
+                The hostname to test the port on.
+            port: int
+                The port number to test if it is usable
+        Returns:
+            A port number which is guaranteed to be valid, and ready to be used
+            to listen to connections on.
+        """
+        if port < -1:
+            port = self._get_unused_port(hostname)
+        if not self._check_port_available(hostname, port):
+            raise ValueError(f"Socket address combination ({hostname}, {port}) is already in use.")
+        return port
+
+    def add_node(self, node_name: str, network_name: str = "default", app_hostname: str = "localhost",
+                 qnodeos_hostname: str = "localhost", vnode_hostname: str = "localhost",
+                 app_port: int = -1, qnodeos_port: int = -1,
+                 vnode_port: int = -1, neighbors: Optional[List[str]] = None):
         """
         Adds a node with the given name to a network (default: "default").
         If hostnames are None they will default to 'localhost'.
@@ -133,85 +140,77 @@ class NetworkConfigBuilder:
             Name of the node, e.g. Alice
         :param network_name: str
             Name of the network (default: "default")
-        :param app_hostname: str or None
-            Hostname, e.g. localhost (default) or 192.168.0.1
-        :param qnodeos_hostname: str or None
-            Hostname, e.g. localhost (default) or 192.168.0.1
-        :param vnode_hostname: str or None
-            Hostname, e.g. localhost (default) or 192.168.0.1
-        :param app_port: int or None
-            Port number for the application
-        :param qnodeos_port: int or None
-            Port number for the qnodeos server
-        :param vnode_port: int or None
-            Port number for the virtual node
+        :param app_hostname: str
+            Hostname, e.g. localhost (the default if not given) or 192.168.0.1
+        :param qnodeos_hostname: str
+            Hostname, e.g. localhost (the default if not given) or 192.168.0.1
+        :param vnode_hostname: str
+            Hostname, e.g. localhost (the default if not given) or 192.168.0.1
+        :param app_port: int
+            Port number for the application. A free port in the range 8000-9000 will be allocated if not given
+        :param qnodeos_port: int
+            Port number for the application. A free port in the range 8000-9000 will be allocated if not given
+        :param vnode_port: int
+            Port number for the application. A free port in the range 8000-9000 will be allocated if not given
         :param neighbors: (list of str) or None
             A list of neighbors, of this node.
             If None all current nodes in the network will be adjacent to the added node.
         :return: None
         """
-        socket_addresses = [(app_hostname, app_port), (qnodeos_hostname, qnodeos_port), (vnode_hostname, vnode_port)]
-        for i, socket_address in enumerate(socket_addresses):
-            hostname, port = socket_address
-            if hostname is None:
-                hostname = "localhost"
-            if port is None:
-                port = self._get_unused_port(hostname)
-            else:
-                free = self._check_port_available(hostname, port)
-                if not free:
-                    raise ValueError(f"Cannot add node {node_name}, since socket address "
-                                     f"({hostname}, {port}) is already in use.")
-            socket_address = (hostname, port)
-            self.used_sockets.append(socket_address)
-            socket_addresses[i] = socket_address
 
-        app_hostname, app_port = socket_addresses[0]
-        qnodeos_hostname, qnodeos_port = socket_addresses[1]
-        vnode_hostname, vnode_port = socket_addresses[2]
-        if network_name in self.networks:
-            self.networks[network_name].add_node(
-                name=node_name,
-                app_hostname=app_hostname,
-                qnodeos_hostname=qnodeos_hostname,
-                vnode_hostname=vnode_hostname,
-                app_port=app_port,
-                qnodeos_port=qnodeos_port,
-                vnode_port=vnode_port,
-                neighbors=neighbors,
-            )
-        else:
-            network = NetworkConfig()
-            network.add_node(name=node_name, app_hostname=app_hostname, qnodeos_hostname=qnodeos_hostname,
-                             vnode_hostname=vnode_hostname, app_port=app_port, qnodeos_port=qnodeos_port,
-                             vnode_port=vnode_port, neighbors=neighbors)
-            self.networks[network_name] = network
+        try:
+            # Process app hostname/port
+            app_port = self._correct_network_port_if_needed(app_hostname, app_port)
+            self.used_sockets.append((app_hostname, app_port))
+
+            # Process qnodeos hostname/port
+            qnodeos_port = self._correct_network_port_if_needed(qnodeos_hostname, qnodeos_port)
+            self.used_sockets.append((qnodeos_hostname, qnodeos_port))
+
+            # Process qnodeos hostname/port
+            vnode_port = self._correct_network_port_if_needed(vnode_hostname, vnode_port)
+            self.used_sockets.append((vnode_hostname, vnode_port))
+        except ValueError as e:
+            raise ValueError(f"Cannot add node {node_name}", e)
+
+        if network_name not in self.networks:
+            # network doesn't exist, create a new one
+            network = NetworkConfig(network_name)
+
+        # At this point, we are sure that the network exists in self.networks
+        network = self.networks[network_name]
+        network.add_node(name=node_name,
+                         app_hostname=app_hostname,
+                         qnodeos_hostname=qnodeos_hostname,
+                         vnode_hostname=vnode_hostname,
+                         app_port=app_port,
+                         qnodeos_port=qnodeos_port,
+                         vnode_port=vnode_port,
+                         neighbors=neighbors)
 
     def remove_node(self, node_name: str, network_name: str = "default"):
         """
         Removes a node from the network.
 
         :param node_name: str
-            Name of the node, e.g. Alice
+            Name of the node to remove, e.g. Alice
         :param network_name: str
-            Name of the network (default: "default")
+            Name of the network to delete the node from (default: "default")
         """
         if network_name in self.networks:
-            nodes = self.networks[network_name].nodes
-            nodes.pop(node_name, None)
+            self.networks[network_name].remove_node(node_name)
+        else:
+            raise ValueError(f"Unknown network name {network_name}")
 
     def reset(self):
         """
         Resets the current object to a single network ("default")
-        with the nodes Alice, Bob, Charlie, David and Eve.
-        Note that this does not overwrite any config file but can be done
-        by calling 'write_to_file'.
-        :return:
+        with the nodes "Alice", "Bob", "Charlie", "David" and "Eve".
         """
-        for network_name in list(self.networks.keys()):
+        for network_name in self.networks.keys():
             self.remove_network(network_name=network_name)
         node_names = ["Alice", "Bob", "Charlie", "David", "Eve"]
-        self.add_network(node_names=node_names)
+        self.add_network(node_names=node_names, network_name="default")
 
     def add_network(self, node_names: List[str], network_name: str = "default",
                     topology: Optional[Dict[str, List[str]]] = None):
@@ -270,13 +269,6 @@ class NetworkConfigBuilder:
         else:
             raise ValueError(f"{network_name} is not a network in this config")
 
-    def to_dict(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Constructs a dictionary with all the content that can be written to a json file
-        :return: dict
-        """
-        return {network_name: network.to_dict() for network_name, network in self.networks.items()}
-
     def write_to_file(self, file_path: PathLike | str):
         """
         Writes the content of this config to a file.
@@ -297,9 +289,8 @@ class NetworkConfigBuilder:
         # Poke the file, so it exists before opening
         file_path.touch(exist_ok=True)
 
-        dictionary = self.to_dict()
         with file_path.open('wt') as f:
-            json.dump(dictionary, f, indent=4)
+            f.write(JSONSerializer.serialize(self))
 
     def read_from_file(self, file_path: PathLike | str):
         """
@@ -343,6 +334,23 @@ class NetworkConfigBuilder:
                 network.nodes[node_name] = node
             self.networks[network_name] = network
 
+    # Helper properties and pythonic accessors
+    @property
+    def nodes(self) -> List[NodeConfig]:
+        """
+        Access the nodes of the default network held by this configuration.
+        Returns:
+            A list of NodeConfig objects.
+        """
+        return self.get_nodes(network_name="default")
+
+    def __getattr__(self, item: str) -> NetworkConfig:
+        if isinstance(item, str):
+            return self.networks[item]
+        else:
+            raise ValueError(f"Item '{item}' cannot be matched to a network in this config.")
+
+    # Helper functions
     def _get_unused_port(self, hostname: str) -> int:
         """
         Returns an unused port in the interval 8000 to 9000, if such exists, otherwise returns None.
