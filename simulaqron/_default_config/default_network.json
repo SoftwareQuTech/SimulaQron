@@ -1,77 +1,88 @@
-{
-  "default": {
-    "nodes": {
-      "Alice": {
-        "app_socket": [
-          "localhost",
-          8001
-        ],
-        "qnodeos_socket": [
-          "localhost",
-          8002
-        ],
-        "vnode_socket": [
-          "localhost",
-          8003
-        ]
+[
+  {
+    "name": "default",
+    "nodes": [
+      {
+        "Alice": {
+          "app_socket": [
+            "localhost",
+            8001
+          ],
+          "qnodeos_socket": [
+            "localhost",
+            8002
+          ],
+          "vnode_socket": [
+            "localhost",
+            8003
+          ]
+        }
       },
-      "Bob": {
-        "app_socket": [
-          "localhost",
-          8010
-        ],
-        "qnodeos_socket": [
-          "localhost",
-          8011
-        ],
-        "vnode_socket": [
-          "localhost",
-          8012
-        ]
+      {
+        "Bob": {
+          "app_socket": [
+            "localhost",
+            8010
+          ],
+          "qnodeos_socket": [
+            "localhost",
+            8011
+          ],
+          "vnode_socket": [
+            "localhost",
+            8012
+          ]
+        }
       },
-      "Charlie": {
-        "app_socket": [
-          "localhost",
-          8020
-        ],
-        "qnodeos_socket": [
-          "localhost",
-          8021
-        ],
-        "vnode_socket": [
-          "localhost",
-          8022
-        ]
+      {
+        "Charlie": {
+          "app_socket": [
+            "localhost",
+            8020
+          ],
+          "qnodeos_socket": [
+            "localhost",
+            8021
+          ],
+          "vnode_socket": [
+            "localhost",
+            8022
+          ]
+        }
       },
-      "David": {
-        "app_socket": [
-          "localhost",
-          8030
-        ],
-        "qnodeos_socket": [
-          "localhost",
-          8031
-        ],
-        "vnode_socket": [
-          "localhost",
-          8032
-        ]
+      {
+        "David": {
+          "app_socket": [
+            "localhost",
+            8030
+          ],
+          "qnodeos_socket": [
+            "localhost",
+            8031
+          ],
+          "vnode_socket": [
+            "localhost",
+            8032
+          ]
+        }
       },
-      "Eve": {
-        "app_socket": [
-          "localhost",
-          8033
-        ],
-        "qnodeos_socket": [
-          "localhost",
-          8034
-        ],
-        "vnode_socket": [
-          "localhost",
-          8035
-        ]
+      {
+        "Eve": {
+          "app_socket": [
+            "localhost",
+            8040
+          ],
+          "qnodeos_socket": [
+            "localhost",
+            8041
+          ],
+          "vnode_socket": [
+            "localhost",
+            8042
+          ]
+        }
       }
-    },
+    ],
     "topology": null
   }
-}
+]
