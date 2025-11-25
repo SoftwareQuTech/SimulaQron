@@ -297,7 +297,12 @@ class NetworkConfigBuilder:
         :param network_name: str
             Name of the network (default: "default")
         """
-        self.networks.pop(network_name, None)
+        removed_network = self.networks.pop(network_name, None)
+        if removed_network is not None:
+            for _, node_cfg in removed_network.nodes.items():
+                self.used_sockets.remove((node_cfg.app_hostname, node_cfg.app_port))
+                self.used_sockets.remove((node_cfg.qnodeos_hostname, node_cfg.qnodeos_port))
+                self.used_sockets.remove((node_cfg.vnode_hostname, node_cfg.vnode_port))
 
     def get_nodes(self, network_name: str = "default") -> List[NodeConfig]:
         """
