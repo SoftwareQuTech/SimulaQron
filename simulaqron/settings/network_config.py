@@ -97,11 +97,24 @@ class NetworkConfig:
             vnode_port=vnode_port,
         )
 
-    def remove_node(self, node_name: str):
-        self.nodes.pop(node_name, None)
+    def remove_node(self, node_name: str) -> NodeConfig | None:
+        """
+        Removes the node with the given name and returns it. Returns none if the given
+        node name was not found in this network.
+        Args:
+            node_name: str
+                The name of the node to remove. None if the node name does not exist.
+        Returns:
+            The removed node. None if the given name was not found.
+        """
+        return self.nodes.pop(node_name, None)
 
     def add_node_config(self, node_cfg: NodeConfig):
         self.nodes[node_cfg.name] = node_cfg
+
+    @property
+    def is_empty(self) -> bool:
+        return len(self.nodes) <= 0
 
     @property
     def nodes_names(self) -> List[str]:
@@ -238,7 +251,19 @@ class NetworkConfigBuilder:
             Name of the network to delete the node from (default: "default")
         """
         if network_name in self.networks:
-            self.networks[network_name].remove_node(node_name)
+            old_node = self.networks[network_name].remove_node(node_name)
+            if old_node is None:
+                # node_name did not exist; just continue
+                return
+
+            # Remove the tuples from the used sockets
+            self.used_sockets.remove((old_node.app_hostname, old_node.app_port))
+            self.used_sockets.remove((old_node.qnodeos_hostname, old_node.qnodeos_port))
+            self.used_sockets.remove((old_node.vnode_hostname, old_node.vnode_port))
+
+            # Remove the network if it's now empty
+            if self.networks[network_name].is_empty:
+                self.networks.pop(network_name)
         else:
             raise ValueError(f"Unknown network name {network_name}")
 
