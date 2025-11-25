@@ -158,7 +158,6 @@ class TestNetworksSettings:
         assert all(TestNetworksSettings._check_node_config(network_config.get_nodes("test")[0]))
         assert all(TestNetworksSettings._check_node_config(network_config.get_nodes("test-b")[0]))
 
-    @pytest.mark.skip(reason="TODO - Implement this test")
     def test_remove_network(self, reset_net_cfg):
         network_config.remove_all_networks()
 
@@ -166,8 +165,14 @@ class TestNetworksSettings:
         network_config.add_node("Bob")
         network_config.add_node("Charlie", network_name="test")
 
-        network_config
-        # TODO - Finish this test
+        network_config.remove_network("default")
+        # We expect 1 node in each network since Alice belongs to network "test" and Bob to "test-b"
+        assert len(network_config.get_nodes("test")) == 1
+
+        # Each node uses 3 sockets, so we expect 3 used socket pairs
+        assert len(network_config.used_sockets) == 3
+        assert network_config.get_nodes("test")[0].name == "Charlie"
+        assert all(TestNetworksSettings._check_node_config(network_config.get_nodes("test")[0]))
 
     @pytest.mark.skip(reason="TODO - Implement this test")
     def test_serialize_network_config(self, reset_net_cfg):
