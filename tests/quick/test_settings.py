@@ -1,4 +1,3 @@
-import tempfile
 import json
 import pytest
 import shutil
@@ -139,7 +138,7 @@ class TestSettings:
         expected_settings = JSONSerializer.deserialize(SimulaqronConfig, expected_settings_dict)
 
         _original_settings = json.loads(_original_settings)
-        with tempfile.NamedTemporaryFile(mode="w+", encoding="utf-8", delete_on_close=False) as file:
+        with NamedTemporaryFile(mode="w+", encoding="utf-8", delete_on_close=False) as file:
             json.dump(_original_settings, file)
             file.close()
 

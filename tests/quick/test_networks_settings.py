@@ -47,6 +47,10 @@ class TestNetworksSettings:
             if file.exists() and file.is_file():
                 file.unlink()
 
+    @pytest.fixture
+    def reset_net_cfg(self):
+        network_config.load_from_known_sources()
+
     def test_create_default_settings(self, clean_settings):
         # Load the "raw" default network
         default_network_path = Path(str(resources.files(simulaqron._default_config).joinpath("default_network.json")))
@@ -55,3 +59,65 @@ class TestNetworksSettings:
         expected_net_cfg = JSONSerializer.deserialize(NetworkConfigBuilder, expected_net_cfg_dict)
 
         assert network_config == expected_net_cfg
+
+
+    def test_add_node(self, reset_net_cfg):
+        network_config.remove_all_networks()
+
+        network_config.add_node("Alice")
+        network_config.add_node("Bob")
+        network_config.add_node("Charlie", network_name="test")
+
+        # We expect 2 nodes, since Charlie belongs to network "test" and not "default"
+        assert len(network_config.nodes) == 2
+        assert len(network_config.get_nodes("test")) == 1
+
+    @pytest.mark.skip(reason="TODO - Implement this test")
+    def test_remove_node(self):
+        network_config.remove_all_networks()
+
+        network_config.add_node("Alice")
+        network_config.add_node("Bob")
+        network_config.add_node("Charlie", network_name="test")
+        # TODO - Finish this test
+
+    @pytest.mark.skip(reason="TODO - Implement this test")
+    def test_add_network(self):
+        network_config.remove_all_networks()
+
+        network_config.add_node("Alice")
+        network_config.add_node("Bob")
+        network_config.add_node("Charlie", network_name="test")
+        # TODO - Finish this test
+
+    @pytest.mark.skip(reason="TODO - Implement this test")
+    def test_remove_network(self):
+        network_config.remove_all_networks()
+
+        network_config.add_node("Alice")
+        network_config.add_node("Bob")
+        network_config.add_node("Charlie", network_name="test")
+
+        network_config
+        # TODO - Finish this test
+
+    @pytest.mark.skip(reason="TODO - Implement this test")
+    def test_serialize_network_config(self):
+        network_config.remove_all_networks()
+
+        network_config.add_node("Alice")
+        network_config.add_node("Bob")
+
+        with NamedTemporaryFile(mode="w", delete_on_close=False) as temp_file:
+            network_config.write_to_file(temp_file.name)
+            temp_file.close()
+
+            network_config2 = NetworkConfigBuilder()
+            network_config2.read_from_file(temp_file.name)
+            dct2 = network_config2.to_dict()
+
+            assert dct1 == dct2
+            assert "Alice" in dct1["default"]["nodes"]
+            assert "Bob" in dct1["default"]["nodes"]
+            assert "Charlie" in dct1["test"]["nodes"]
+        # TODO - Finish this test

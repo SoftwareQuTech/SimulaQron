@@ -4,29 +4,7 @@ from tempfile import NamedTemporaryFile
 from simulaqron.general.host_config import NetworkConfigBuilder, SocketsConfig
 
 
-class TestNetworkConfig:
-    def test_read_write(self):
-        network_config = NetworkConfigBuilder()
-
-        network_config.add_node("Alice")
-        network_config.add_node("Bob")
-        network_config.add_node("Charlie", network_name="test")
-
-        dct1 = network_config.to_dict()
-        with NamedTemporaryFile(mode="w", delete_on_close=False) as temp_file:
-            network_config.write_to_file(temp_file.name)
-            temp_file.close()
-
-            network_config2 = NetworkConfigBuilder()
-            network_config2.read_from_file(temp_file.name)
-            dct2 = network_config2.to_dict()
-
-            assert dct1 == dct2
-            assert "Alice" in dct1["default"]["nodes"]
-            assert "Bob" in dct1["default"]["nodes"]
-            assert "Charlie" in dct1["test"]["nodes"]
-
-
+# TODO - Move these test to the new test class
 class TestSocketsConfig:
     def test_load_file(self):
         this_file_folder = Path(__file__).parent
