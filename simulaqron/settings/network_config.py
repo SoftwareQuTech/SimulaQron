@@ -1,4 +1,5 @@
 import json
+import shutil
 import socket
 from contextlib import closing
 from dataclasses import dataclass, field
@@ -9,6 +10,8 @@ from typing import Optional, Self, Dict, List, Tuple, Any
 from dataclasses_serialization.json import JSONSerializer
 
 import simulaqron._default_config
+
+DEFAULT_SIMULAQRON_NETWORK_FILENAME = "simulaqron_network.json"
 
 
 @dataclass
@@ -23,6 +26,14 @@ class NodeConfig:
     app_hostname: str = "localhost"
     qnodeos_hostname: str = "localhost"
     vnode_hostname: str = "localhost"
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, NodeConfig):
+            return False
+        return (self.name == other.name and self.app_port == other.app_port and
+                self.qnodeos_port == other.qnodeos_port and self.vnode_port == other.vnode_port and
+                self.app_hostname == other.app_hostname and self.qnodeos_hostname == other.qnodeos_hostname and
+                self.vnode_hostname == other.vnode_hostname)
 
 
 @dataclass
@@ -89,6 +100,19 @@ class NetworkConfig:
     def remove_node(self, node_name: str):
         self.nodes.pop(node_name, None)
 
+    def add_node_config(self, node_cfg: NodeConfig):
+        self.nodes[node_cfg.name] = node_cfg
+
+    @property
+    def nodes_names(self) -> List[str]:
+        return list(self.nodes.keys())
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, NetworkConfig):
+            return False
+        nodes_are_equal = [this_node == other_node for this_node, other_node in zip(self.nodes, other.nodes)]
+        return self.name == other.name and self.topology == other.topology and all(nodes_are_equal)
+
 @dataclass
 class NetworkConfigBuilder:
     """
@@ -125,6 +149,21 @@ class NetworkConfigBuilder:
         if not self._check_port_available(hostname, port):
             raise ValueError(f"Socket address combination ({hostname}, {port}) is already in use.")
         return port
+
+    def add_network_config(self, net_cfg: NetworkConfig):
+        """
+        Method used to deserialize NetworksSpecsConfig.
+        Args:
+            net_cfg: NetworkConfig
+                The network configu object to add to the specifications.
+        """
+        self.networks[net_cfg.name] = net_cfg
+
+        # Update the used_sockets object
+        for node_name, node_config in net_cfg.nodes.items():
+            self.used_sockets.append((node_config.app_hostname, node_config.app_port))
+            self.used_sockets.append((node_config.qnodeos_hostname, node_config.qnodeos_port))
+            self.used_sockets.append((node_config.vnode_hostname, node_config.vnode_port))
 
     def add_node(self, node_name: str, network_name: str = "default", app_hostname: str = "localhost",
                  qnodeos_hostname: str = "localhost", vnode_hostname: str = "localhost",
@@ -316,23 +355,31 @@ class NetworkConfigBuilder:
             network = NetworkConfig()
             network.topology = topology
 
-            for node_name, node_dict in nodes_dict.items():
-                app_hostname, app_port = node_dict["app_socket"]
-                qnodeos_hostname, qnodeos_port = node_dict["qnodeos_socket"]
-                vnode_hostname, vnode_port = node_dict["vnode_socket"]
-                socket_addresses = [
-                    (app_hostname, app_port),
-                    (qnodeos_hostname, qnodeos_port),
-                    (vnode_hostname, vnode_port),
-                ]
-                for socket_address in socket_addresses:
-                    if socket_address not in self.used_sockets:
-                        self.used_sockets.append(socket_address)
-                node = NodeConfig(name=node_name, app_hostname=app_hostname, qnodeos_hostname=qnodeos_hostname,
-                                  vnode_hostname=vnode_hostname, app_port=app_port, qnodeos_port=qnodeos_port,
-                                  vnode_port=vnode_port)
-                network.nodes[node_name] = node
-            self.networks[network_name] = network
+    @classmethod
+    def _deserialize_from_file(cls, file_path: Path) -> Self:
+        with file_path.resolve().open("rt") as file:
+            config_content = json.load(file)
+            return JSONSerializer.deserialize(cls, config_content)
+
+    @classmethod
+    def load_from_known_sources(cls) -> Self:
+        cwd_networks_file = (Path.cwd() / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
+        home_networks_file = (Path.home() / ".simulaqron" / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
+
+        files_to_load = [cwd_networks_file, home_networks_file]
+
+        for file in files_to_load:
+            try:
+                if file.exists() and file.is_file():
+                    return cls._deserialize_from_file(file)
+            except json.JSONDecodeError:
+                # Nothing to do; try next one
+                pass
+
+        # Ultimate case; we create a new config file in the home and load it
+        default_net_cfg_path = Path(str(resources.files(simulaqron._default_config).joinpath("default_network.json")))
+        shutil.copyfile(default_net_cfg_path, home_networks_file)
+        return cls._deserialize_from_file(home_networks_file)
 
     # Helper properties and pythonic accessors
     @property
@@ -351,6 +398,12 @@ class NetworkConfigBuilder:
             raise ValueError(f"Item '{item}' cannot be matched to a network in this config.")
 
     # Helper functions
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, NetworkConfigBuilder):
+            return False
+        nodes_eq = [current_node == other_node for current_node, other_node in zip(self.nodes, other.nodes)]
+        return all(nodes_eq)
+
     def _get_unused_port(self, hostname: str) -> int:
         """
         Returns an unused port in the interval 8000 to 9000, if such exists, otherwise returns None.
