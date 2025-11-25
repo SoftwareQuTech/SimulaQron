@@ -67,6 +67,18 @@ class TestNetworksSettings:
 
         assert network_config == expected_net_cfg
 
+        # Each node uses 3 sockets, so we expect 15 used socket pairs
+        assert len(network_config.used_sockets) == 15
+
+        assert network_config.nodes[0].name == "Alice"
+        assert network_config.nodes[1].name == "Bob"
+        assert network_config.nodes[2].name == "Charlie"
+        assert network_config.nodes[3].name == "David"
+        assert network_config.nodes[4].name == "Eve"
+
+        for node in network_config.nodes:
+            assert all(TestNetworksSettings._check_node_config(node))
+
 
     def test_add_node(self, reset_net_cfg):
         network_config.remove_all_networks()
@@ -79,15 +91,18 @@ class TestNetworksSettings:
         assert len(network_config.nodes) == 2
         assert len(network_config.get_nodes("test")) == 1
 
+        # Each node uses 3 sockets, so we expect 9 used socket pairs
+        assert len(network_config.used_sockets) == 9
+
         assert network_config.nodes[0].name == "Alice"
         assert network_config.nodes[1].name == "Bob"
         assert network_config.get_nodes("test")[0].name == "Charlie"
 
-        assert TestNetworksSettings._check_node_config(network_config.nodes[0])
-        assert TestNetworksSettings._check_node_config(network_config.nodes[1])
-        assert TestNetworksSettings._check_node_config(network_config.get_nodes("test")[0])
+        for node in network_config.nodes:
+            assert all(TestNetworksSettings._check_node_config(node))
+        assert all(TestNetworksSettings._check_node_config(network_config.get_nodes("test")[0]))
 
-    def test_remove_node(self):
+    def test_remove_node(self, reset_net_cfg):
         network_config.remove_all_networks()
 
         network_config.add_node("Alice")
@@ -100,11 +115,14 @@ class TestNetworksSettings:
         assert len(network_config.nodes) == 1
         assert len(network_config.get_nodes("test")) == 1
 
+        # Each node uses 3 sockets, so we expect 6 used socket pairs
+        assert len(network_config.used_sockets) == 6
+
         assert network_config.nodes[0].name == "Bob"
         assert network_config.get_nodes("test")[0].name == "Charlie"
 
-        assert TestNetworksSettings._check_node_config(network_config.nodes[0])
-        assert TestNetworksSettings._check_node_config(network_config.get_nodes("test")[0])
+        assert all(TestNetworksSettings._check_node_config(network_config.nodes[0]))
+        assert all(TestNetworksSettings._check_node_config(network_config.get_nodes("test")[0]))
 
         network_config.remove_node("Charlie", network_name="test")
 
@@ -114,31 +132,34 @@ class TestNetworksSettings:
 
         assert network_config.nodes[0].name == "Bob"
 
-        assert TestNetworksSettings._check_node_config(network_config.nodes[0])
+        assert all(TestNetworksSettings._check_node_config(network_config.nodes[0]))
 
-    def test_add_network(self):
+    def test_add_network(self, reset_net_cfg):
         network_config.remove_all_networks()
 
         network_config.add_network("Alice", network_name="test")
         network_config.add_network(["Bob"], network_name="test-b")
 
-        # We expect 1 node in each network since Charlie belongs to network "test" and not "default"
+        # We expect that network "default" will not exist
         with pytest.raises(ValueError) as err:
             len(network_config.nodes)
         assert str(err.value) == "default is not a network in this config"
+
+        # We expect 1 node in each network since Alice belongs to network "test" and Bob to "test-b"
         assert len(network_config.get_nodes("test")) == 1
         assert len(network_config.get_nodes("test-b")) == 1
+
+        # Each node uses 3 sockets, so we expect 6 used socket pairs
+        assert len(network_config.used_sockets) == 6
 
         assert network_config.get_nodes("test")[0].name == "Alice"
         assert network_config.get_nodes("test-b")[0].name == "Bob"
 
-        assert TestNetworksSettings._check_node_config(network_config.get_nodes("test")[0])
-        assert TestNetworksSettings._check_node_config(network_config.get_nodes("test-b")[0])
-
-
+        assert all(TestNetworksSettings._check_node_config(network_config.get_nodes("test")[0]))
+        assert all(TestNetworksSettings._check_node_config(network_config.get_nodes("test-b")[0]))
 
     @pytest.mark.skip(reason="TODO - Implement this test")
-    def test_remove_network(self):
+    def test_remove_network(self, reset_net_cfg):
         network_config.remove_all_networks()
 
         network_config.add_node("Alice")
@@ -149,7 +170,7 @@ class TestNetworksSettings:
         # TODO - Finish this test
 
     @pytest.mark.skip(reason="TODO - Implement this test")
-    def test_serialize_network_config(self):
+    def test_serialize_network_config(self, reset_net_cfg):
         network_config.remove_all_networks()
 
         network_config.add_node("Alice")
