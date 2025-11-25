@@ -52,6 +52,12 @@ class TestNetworksSettings:
     def reset_net_cfg(self):
         network_config.load_from_known_sources()
 
+    @staticmethod
+    def _check_node_config(node: NodeConfig) -> Tuple[bool, ...]:
+        return (node.app_hostname == "localhost", 8000 <= node.app_port <= 9000,
+                node.qnodeos_hostname == "localhost", 8000 <= node.qnodeos_port <= 9000,
+                node.vnode_hostname == "localhost", 8000 <= node.vnode_port <= 9000,)
+
     def test_create_default_settings(self, clean_settings):
         # Load the "raw" default network
         default_network_path = Path(str(resources.files(simulaqron._default_config).joinpath("default_network.json")))
@@ -60,12 +66,6 @@ class TestNetworksSettings:
         expected_net_cfg = JSONSerializer.deserialize(NetworkConfigBuilder, expected_net_cfg_dict)
 
         assert network_config == expected_net_cfg
-
-    @staticmethod
-    def _check_node_config(node: NodeConfig) -> Tuple[bool, ...]:
-        return (node.app_hostname == "localhost", 8000 <= node.app_port <= 9000,
-                node.qnodeos_hostname == "localhost", 8000 <= node.qnodeos_port <= 9000,
-                node.vnode_hostname == "localhost", 8000 <= node.vnode_port <= 9000,)
 
 
     def test_add_node(self, reset_net_cfg):
@@ -116,14 +116,26 @@ class TestNetworksSettings:
 
         assert TestNetworksSettings._check_node_config(network_config.nodes[0])
 
-    @pytest.mark.skip(reason="TODO - Implement this test")
     def test_add_network(self):
         network_config.remove_all_networks()
 
-        network_config.add_node("Alice")
-        network_config.add_node("Bob")
-        network_config.add_node("Charlie", network_name="test")
-        # TODO - Finish this test
+        network_config.add_network("Alice", network_name="test")
+        network_config.add_network(["Bob"], network_name="test-b")
+
+        # We expect 1 node in each network since Charlie belongs to network "test" and not "default"
+        with pytest.raises(ValueError) as err:
+            len(network_config.nodes)
+        assert str(err.value) == "default is not a network in this config"
+        assert len(network_config.get_nodes("test")) == 1
+        assert len(network_config.get_nodes("test-b")) == 1
+
+        assert network_config.get_nodes("test")[0].name == "Alice"
+        assert network_config.get_nodes("test-b")[0].name == "Bob"
+
+        assert TestNetworksSettings._check_node_config(network_config.get_nodes("test")[0])
+        assert TestNetworksSettings._check_node_config(network_config.get_nodes("test-b")[0])
+
+
 
     @pytest.mark.skip(reason="TODO - Implement this test")
     def test_remove_network(self):

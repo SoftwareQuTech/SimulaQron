@@ -279,6 +279,9 @@ class NetworkConfigBuilder:
         :param topology: None or dict
             The topology of the network (optional) (default is fully connected)
         """
+        if isinstance(node_names, str):
+            # The user passes a string... they probably meant to add a single node, so we make it a list
+            node_names = [node_names]
         self.remove_network(network_name=network_name)
         for node_name in node_names:
             if topology is not None:
