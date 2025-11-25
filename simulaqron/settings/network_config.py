@@ -144,7 +144,7 @@ class NetworkConfigBuilder:
             A port number which is guaranteed to be valid, and ready to be used
             to listen to connections on.
         """
-        if port < -1:
+        if port < 0:
             port = self._get_unused_port(hostname)
         if not self._check_port_available(hostname, port):
             raise ValueError(f"Socket address combination ({hostname}, {port}) is already in use.")
@@ -215,6 +215,7 @@ class NetworkConfigBuilder:
         if network_name not in self.networks:
             # network doesn't exist, create a new one
             network = NetworkConfig(network_name)
+            self.networks[network.name] = network
 
         # At this point, we are sure that the network exists in self.networks
         network = self.networks[network_name]
@@ -240,16 +241,6 @@ class NetworkConfigBuilder:
             self.networks[network_name].remove_node(node_name)
         else:
             raise ValueError(f"Unknown network name {network_name}")
-
-    def reset(self):
-        """
-        Resets the current object to a single network ("default")
-        with the nodes "Alice", "Bob", "Charlie", "David" and "Eve".
-        """
-        for network_name in self.networks.keys():
-            self.remove_network(network_name=network_name)
-        node_names = ["Alice", "Bob", "Charlie", "David", "Eve"]
-        self.add_network(node_names=node_names, network_name="default")
 
     def add_network(self, node_names: List[str], network_name: str = "default",
                     topology: Optional[Dict[str, List[str]]] = None):
@@ -307,6 +298,10 @@ class NetworkConfigBuilder:
             return list(nodes.keys())
         else:
             raise ValueError(f"{network_name} is not a network in this config")
+
+    def remove_all_networks(self):
+        for network_name in self.network_names:
+            self.remove_network(network_name)
 
     def write_to_file(self, file_path: PathLike | str):
         """
@@ -390,6 +385,10 @@ class NetworkConfigBuilder:
             A list of NodeConfig objects.
         """
         return self.get_nodes(network_name="default")
+
+    @property
+    def network_names(self) -> List[str]:
+        return list(self.networks.keys())
 
     def __getattr__(self, item: str) -> NetworkConfig:
         if isinstance(item, str):
