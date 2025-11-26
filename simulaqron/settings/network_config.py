@@ -7,7 +7,7 @@ from importlib import resources
 from os import PathLike
 from pathlib import Path
 from typing import Optional, Self, Dict, List, Tuple, Any
-from dataclasses_serialization.json import JSONSerializer
+from dataclasses_serialization.json import JSONSerializer, JSONSerializerMixin
 
 import simulaqron._default_config
 
@@ -15,7 +15,7 @@ DEFAULT_SIMULAQRON_NETWORK_FILENAME = "simulaqron_network.json"
 
 
 @dataclass
-class NodeConfig:
+class NodeConfig(JSONSerializerMixin):
     """
     Used by NetworkConfig to keep track of the config of a single node.
     """
@@ -37,7 +37,7 @@ class NodeConfig:
 
 
 @dataclass
-class NetworkConfig:
+class NetworkConfig(JSONSerializerMixin):
     """
     Used by NetworksConfigConstructor to keep track of the config of a single network.
     """
@@ -127,7 +127,7 @@ class NetworkConfig:
         return self.name == other.name and self.topology == other.topology and all(nodes_are_equal)
 
 @dataclass
-class NetworkConfigBuilder:
+class NetworkConfigBuilder(JSONSerializerMixin):
     """
     Used to construct the config file of networks.
     """
@@ -357,7 +357,7 @@ class NetworkConfigBuilder:
         file_path.touch(exist_ok=True)
 
         with file_path.open('wt') as f:
-            f.write(JSONSerializer.serialize(self))
+            json.dump(JSONSerializer.serialize(self), f, indent=4)
 
     def read_from_file(self, file_path: PathLike | str):
         """
