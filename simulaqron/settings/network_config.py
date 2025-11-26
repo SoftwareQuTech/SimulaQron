@@ -2,7 +2,7 @@ import json
 import shutil
 import socket
 from contextlib import closing
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from importlib import resources
 from os import PathLike
 from pathlib import Path
@@ -372,16 +372,15 @@ class NetworkConfigBuilder(JSONSerializerMixin):
         file_path = Path(str(file_path))
 
         if file_path.exists():
-            with file_path.open('r') as f:
-                dictionary = json.load(f)
+            new_config = self._deserialize_from_file(file_path)
         else:
             raise ValueError(f"No such file {file_path}")
 
-        for network_name, network_dict in dictionary.items():
-            nodes_dict = network_dict["nodes"]
-            topology = network_dict["topology"]
-            network = NetworkConfig()
-            network.topology = topology
+        cls_fields = fields(self.__class__)
+
+        for class_field in cls_fields:
+            new_val = getattr(new_config, class_field.name)
+            setattr(self, class_field.name, new_val)
 
     @classmethod
     def _deserialize_from_file(cls, file_path: Path) -> Self:
