@@ -34,11 +34,11 @@ from typing import Dict, List
 
 from twisted.spread import pb
 
-from simulaqron.settings.network_config import NetworkConfigBuilder
+from simulaqron.settings.network_config import NetworkConfigBuilder, NodeConfigType
 
 
 class Host(pb.Referenceable):
-    def __init__(self, name: str, hostname: str, port: str | int):
+    def __init__(self, name: str, hostname: str, port: int):
         """
         Initialize the details of the host. For now, we just keep the following:
 
@@ -49,7 +49,7 @@ class Host(pb.Referenceable):
 
         self.name = name
         self.hostname = hostname
-        self.port = int(port)
+        self.port = port
 
         # Lookup IP address
         addrs = socket.getaddrinfo(hostname, port, proto=socket.IPPROTO_TCP, family=socket.AF_INET)
@@ -66,7 +66,7 @@ class Host(pb.Referenceable):
 
 
 class SocketsConfig(pb.Referenceable):
-    def __init__(self, filename: str, network_name: str = "default", config_type: str = "vnode"):
+    def __init__(self, nets_config: NetworkConfigBuilder, network_name: str = "default", config_type: str | NodeConfigType = "vnode"):
         """
         Initialize by reading in the configuration file.
 
@@ -76,41 +76,8 @@ class SocketsConfig(pb.Referenceable):
         # Dictionary where we will keep host details, indexed by node name (e.g. Alice)
         self.hostDict: Dict[str, Host] = {}
 
-        # Read config file
-        self.read_config(filename, network_name=network_name, config_type=config_type)
-
-    def read_config(self, filename: str, network_name: str = "default", config_type: str = "vnode"):
-        """
-        Reads the configuration file in which each line has the form: node name, hostname, port number.
-        For example:
-        Alice, localhost, 8888
-        """
-        with open(filename) as confFile:
-            if filename.endswith(".json"):
-                if config_type not in ["vnode", "qnodeos", "app"]:
-                    raise ValueError("Type needs to be either 'vnode', 'qnodeos' or 'app'")
-                if network_name is None:
-                    network_name = "default"
-                network_builder = NetworkConfigBuilder()
-                network_builder.read_from_file(filename)
-                network_config = network_builder.networks[network_name]
-                nodes = network_config.nodes
-                for node_name, node_config in nodes.items():
-                    hostname = getattr(node_config, f"{config_type}_hostname")
-                    port = getattr(node_config, f"{config_type}_port")
-                    self.hostDict[node_name] = Host(node_name, hostname, port)
-
-            elif filename.endswith(".cfg"):
-                for line in confFile:
-                    if not line.startswith("#"):
-                        words = line.split(",")
-
-                        # We will simply ignore lines which are not of the right form
-                        if len(words) == 3:
-                            newHost = Host(words[0].strip(), words[1].strip(), words[2].strip())
-                            self.hostDict[words[0]] = newHost
-            else:
-                raise ValueError(f"Unknown file type {filename.split(".")[-1]}")
+        for node in nets_config.get_nodes(network_name):
+            self.hostDict[node.name] = Host(node.name, *node.get_config(config_type))
 
     def print_details(self, name: str):
         """

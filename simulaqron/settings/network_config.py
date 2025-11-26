@@ -3,6 +3,7 @@ import shutil
 import socket
 from contextlib import closing
 from dataclasses import dataclass, field, fields
+from enum import StrEnum
 from importlib import resources
 from os import PathLike
 from pathlib import Path
@@ -12,6 +13,12 @@ from dataclasses_serialization.json import JSONSerializer, JSONSerializerMixin
 import simulaqron._default_config
 
 DEFAULT_SIMULAQRON_NETWORK_FILENAME = "simulaqron_network.json"
+
+
+class NodeConfigType(StrEnum):
+    APP = "app"
+    QNODEOS = "qnodeos",
+    VNODE = "vnode"
 
 
 @dataclass
@@ -26,6 +33,25 @@ class NodeConfig(JSONSerializerMixin):
     app_hostname: str = "localhost"
     qnodeos_hostname: str = "localhost"
     vnode_hostname: str = "localhost"
+
+    def get_config(self, config_type: str | NodeConfigType) -> Tuple[str, int]:
+        """
+        Gets the corresponding host and port config tuple for the given type
+        Args:
+            config_type: str | NodeConfigType
+                The type of configuration to get. Can either be expressed as a string or a NodeConfigType.
+        Returns:
+            A tuple containing the host and port config for the given configuration type.
+        """
+        if isinstance(config_type, str):
+            config_type = NodeConfigType(config_type)
+        match config_type:
+            case NodeConfigType.APP():
+                return self.app_hostname, self.app_port
+            case NodeConfigType.QNODEOS():
+                return self.qnodeos_hostname, self.qnodeos_port
+            case NodeConfigType.VNODE():
+                return self.vnode_hostname, self.vnode_port
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, NodeConfig):
