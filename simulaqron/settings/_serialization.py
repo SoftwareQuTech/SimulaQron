@@ -84,7 +84,7 @@ def simulaqron_config_deserializer(cls: Type[SimulaqronConfig], obj: Dict[str, A
 
 
 @JSONSerializer.register_serializer(NodeConfig)
-def node_config_serializer(obj: NodeConfig) -> str:
+def node_config_serializer(obj: NodeConfig) -> Dict[str, List[str | int]]:
     node_config_dict = {
         "app_socket": [obj.app_hostname, obj.app_port],
         "qnodeos_socket": [obj.qnodeos_hostname, obj.qnodeos_port],
@@ -114,7 +114,7 @@ def node_config_deserializer(cls: Type[NodeConfig], obj: Dict[str, Any]) -> Node
 
 
 @JSONSerializer.register_serializer(NetworkConfig)
-def network_config_serializer(obj: NetworkConfig) -> str:
+def network_config_serializer(obj: NetworkConfig) -> Dict[str, Any]:
     nodes_dict = {
         "nodes": {
             node_cfg.name: JSONSerializer.serialize(node_cfg)
@@ -135,7 +135,7 @@ def network_config_deserializer(cls: Type[NetworkConfig], obj: Dict[str, Any]) -
 
 
 @JSONSerializer.register_serializer(NetworkConfigBuilder)
-def network_config_builder_serializer(obj: NetworkConfigBuilder) -> str:
+def network_config_builder_serializer(obj: NetworkConfigBuilder) -> Dict[str, Any]:
     networks_dict = {
         network_name: JSONSerializer.serialize(network_obj)
         for network_name, network_obj in obj.networks.items()
