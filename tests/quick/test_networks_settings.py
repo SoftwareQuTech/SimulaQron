@@ -1,5 +1,5 @@
 import json
-from typing import Tuple
+from typing import Tuple, List
 
 import pytest
 import shutil
@@ -174,23 +174,76 @@ class TestNetworksSettings:
         assert network_config.get_nodes("test")[0].name == "Charlie"
         assert all(TestNetworksSettings._check_node_config(network_config.get_nodes("test")[0]))
 
-    @pytest.mark.skip(reason="TODO - Implement this test")
+    @staticmethod
+    def _build_expected_config(alice_ports: List[int], bob_ports: List[int]):
+        return ("[\n"
+                "    {\n"
+                "        \"name\": \"default\"\n"
+                "        \"nodes\": [\n"
+                "            {\n"
+                "                \"Alice\": {\n"
+                "                    \"app_socket\": [\n"
+                "                        \"localhost\",\n"
+                f"                        {alice_ports[0]},\n"
+                "                    ],\n"
+                "                    \"qnodeos_socket\": [\n"
+                "                        \"localhost\",\n"
+                f"                        {alice_ports[1]},\n"
+                "                    ],\n"
+                "                    \"vnode_socket\": [\n"
+                "                        \"localhost\",\n"
+                f"                        {alice_ports[2]},\n"
+                "                    ]\n"
+                "            }\n"
+                "        ],\n"
+                "        \"topology\": null\n"
+                "    },\n"
+                "    {\n"
+                "        \"name\": \"test\"\n"
+                "        \"nodes\": [\n"
+                "            {\n"
+                "                \"Bob\": {\n"
+                "                    \"app_socket\": [\n"
+                "                        \"localhost\",\n"
+                f"                        {bob_ports[0]},\n"
+                "                    ],\n"
+                "                    \"qnodeos_socket\": [\n"
+                "                        \"localhost\",\n"
+                f"                        {bob_ports[1]},\n"
+                "                    ],\n"
+                "                    \"vnode_socket\": [\n"
+                "                        \"localhost\",\n"
+                f"                        {bob_ports[2]},\n"
+                "                    ]\n"
+                "            }\n"
+                "        ],\n"
+                "        \"topology\": null\n"
+                "    }\n"
+                "]")
+
     def test_serialize_network_config(self, reset_net_cfg):
         network_config.remove_all_networks()
 
         network_config.add_node("Alice")
-        network_config.add_node("Bob")
+        network_config.add_node("Bob", network_name="test")
 
-        with NamedTemporaryFile(mode="w", delete_on_close=False) as temp_file:
+        alice_ports = [
+            network_config.get_nodes(network_name="default")[0].app_port,
+            network_config.get_nodes(network_name="default")[0].qnodeos_port,
+            network_config.get_nodes(network_name="default")[0].vnode_port
+        ]
+
+        bob_ports = [
+            network_config.get_nodes(network_name="test")[0].app_port,
+            network_config.get_nodes(network_name="test")[0].qnodeos_port,
+            network_config.get_nodes(network_name="test")[0].vnode_port
+        ]
+
+        expected_network_config = TestNetworksSettings._build_expected_config(alice_ports, bob_ports)
+
+        with NamedTemporaryFile(mode="wt", delete_on_close=False) as temp_file:
             network_config.write_to_file(temp_file.name)
-            temp_file.close()
+            temp_file.flush()
 
-            network_config2 = NetworkConfigBuilder()
-            network_config2.read_from_file(temp_file.name)
-            dct2 = network_config2.to_dict()
-
-            assert dct1 == dct2
-            assert "Alice" in dct1["default"]["nodes"]
-            assert "Bob" in dct1["default"]["nodes"]
-            assert "Charlie" in dct1["test"]["nodes"]
-        # TODO - Finish this test
+            serialized_content = Path(temp_file.name).read_text()
+            assert serialized_content == expected_network_config
