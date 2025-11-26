@@ -31,7 +31,7 @@
 #########################
 import json
 import logging
-from dataclasses import dataclass, fields, InitVar
+from dataclasses import dataclass, fields
 from enum import Enum
 from os import PathLike
 from pathlib import Path
@@ -40,13 +40,10 @@ from typing import Self
 from dataclasses_serialization.json import JSONSerializer
 from dataclasses_serialization.json import JSONSerializerMixin
 
-from ..settings.network_config import NetworkConfigBuilder
-
 # This is the name of the "local" simulaqron settings.
 # If a file named like this is found in the CWD, it will be
 # automatically loaded when creating the config file
 DEFAULT_SIMULAQRON_SETTINGS_FILENAME = "simulaqron_settings.json"
-DEFAULT_SIMULAQRON_NETWORK_FILENAME = "simulaqron_network.json"
 
 
 class SimBackend(JSONSerializerMixin, Enum):
@@ -63,7 +60,6 @@ class SimBackend(JSONSerializerMixin, Enum):
 
 @dataclass
 class SimulaqronConfig(JSONSerializerMixin):
-    network_config_file: InitVar[Path] = (Path.home() / ".simulaqron" / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
     # Default config
     max_qubits: int = 20
     max_registers: int = 1000
@@ -77,35 +73,6 @@ class SimulaqronConfig(JSONSerializerMixin):
     noisy_qubits: bool = False
     max_app_waiting_time: float = -1.0  # In seconds, negative means unlimited waiting
     t1: float = 1.0
-
-    def __post_init__(self, network_config_file: Path):
-        if isinstance(network_config_file, Path) and network_config_file.exists() and network_config_file.is_file():
-            self._builder = NetworkConfigBuilder()
-            net_cfg_file = network_config_file
-        else:
-            # Given network config file is invalid or does not exist. Use the default one
-            # and write it to the expected location
-            net_cfg_file = (Path.home() / ".simulaqron" / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
-            self._builder = NetworkConfigBuilder.using_default_network()
-            self._builder.write_to_file(net_cfg_file)
-        self.network_config_file = net_cfg_file
-
-    @property
-    def network_builder(self) -> NetworkConfigBuilder:
-        return self._builder
-
-    @property
-    def network_config_file(self) -> Path:
-        return self._net_cfg_file
-
-    @network_config_file.setter
-    def network_config_file(self, value: Path | str):
-        if isinstance(value, str):
-            value = Path(value).resolve()
-        # If we set the network config file, update the NetworkConfigBuilder
-        if value.exists() and value.is_file():
-            self._builder.read_from_file(value)
-        self._net_cfg_file = value
 
     @classmethod
     def _create_home_settings_folder(cls):
@@ -121,8 +88,6 @@ class SimulaqronConfig(JSONSerializerMixin):
         for field in cls_fields:
             new_val = getattr(new_config, field.name)
             setattr(self, field.name, new_val)
-
-        self.network_config_file = new_config.network_config_file
 
     @classmethod
     def _deserialize_from_file(cls, file_path: Path) -> Self:

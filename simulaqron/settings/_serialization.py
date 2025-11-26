@@ -51,17 +51,6 @@ def path_deserializer(cls: Type[Path], path: str) -> Path:
     return cls(path)
 
 
-@JSONSerializer.register_serializer(SimulaqronConfig)
-def simulaqron_config_serializer(obj: SimulaqronConfig) -> str:
-    object_dict = dict(obj.__dict__)
-    net_cfg_path = str(obj.network_config_file)
-    del object_dict["_builder"]
-    del object_dict["_net_cfg_file"]
-    object_dict["network_config_file"] = net_cfg_path
-    serialized = JSONSerializer.serialize(dict_serialization(object_dict))
-    return serialized
-
-
 @JSONSerializer.register_deserializer(SimulaqronConfig)
 def simulaqron_config_deserializer(cls: Type[SimulaqronConfig], obj: Dict[str, Any]) -> SimulaqronConfig:
     new_obj = cls()

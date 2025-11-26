@@ -1,4 +1,4 @@
-from .network_config import NetworkConfigBuilder
+from .network_config import NetworkConfigBuilder, DEFAULT_SIMULAQRON_NETWORK_FILENAME
 from .simulaqron_config import SimulaqronConfig, DEFAULT_SIMULAQRON_SETTINGS_FILENAME
 from ._serialization import init_serialization
 
