@@ -249,3 +249,12 @@ class TestNetworksSettings:
 
             serialized_content = Path(temp_file.name).read_text()
             assert serialized_content == expected_network_config
+
+    def test_deserialize_network_config(self, reset_net_cfg):
+        raw_config = TestNetworksSettings._build_expected_config([8020, 8021, 8022], [8050, 8051, 8052])
+        with NamedTemporaryFile(mode="wt", delete_on_close=False) as temp_file:
+            temp_file.write(raw_config)
+            temp_file.flush()
+
+            network_config.read_from_file(temp_file.name)
+            assert json.dumps(JSONSerializer.serialize(network_config), indent=4) == raw_config
