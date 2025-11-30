@@ -60,7 +60,7 @@ def reset(save_loggers=False):
 
 
 def check_sim_backend(sim_backend):
-    if sim_backend in [SimBackend.PROJECTQ, SimBackend.QUTIP]:
+    if sim_backend in [SimBackend.PROJECTQ, SimBackend.PYQRACK, SimBackend.QUTIP]:
         assert has_module.main(sim_backend.value), f"To use {sim_backend} as backend you need to install the package"
 
 

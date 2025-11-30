@@ -44,6 +44,7 @@ config_folder = os.path.join(simulaqron_path, "config")
 class SimBackend(Enum):
     STABILIZER = "stabilizer"
     PROJECTQ = "projectq"
+    PYQRACK = "pyqrack"
     QUTIP = "qutip"
 
 
