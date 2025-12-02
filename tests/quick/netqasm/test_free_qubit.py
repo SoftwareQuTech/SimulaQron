@@ -3,6 +3,7 @@ import pytest
 from netqasm.runtime.settings import set_simulator
 
 from simulaqron.run.run import run_applications
+from simulaqron.settings import simulaqron_settings, network_config
 
 set_simulator("simulaqron")
 
@@ -12,6 +13,11 @@ from netqasm.sdk import Qubit  # noqa: E402
 
 
 class TestFreeQubit:
+    @pytest.fixture(autouse=True)
+    def reset_configs(self):
+        simulaqron_settings.default_settings()
+        network_config.using_default_network()
+
     @staticmethod
     def too_many_qubits():
         with NetQASMConnection("Alice", max_qubits=2) as alice:
