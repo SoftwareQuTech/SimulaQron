@@ -408,6 +408,11 @@ class NetworkConfigBuilder(JSONSerializerMixin):
             new_val = getattr(new_config, class_field.name)
             setattr(self, class_field.name, new_val)
 
+    def read_from_legacy_files(self, app_file_path: PathLike | str,
+                               qnodeos_file_path: PathLike | str,
+                               vnode_file_path: PathLike | str):
+        raise NotImplementedError("Reading form legacy config files is not supported yet")
+
     @classmethod
     def _deserialize_from_file(cls, file_path: Path) -> Self:
         with file_path.resolve().open("rt") as file:
