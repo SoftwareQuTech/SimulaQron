@@ -161,13 +161,13 @@ class NetworkConfigBuilder(JSONSerializerMixin):
     networks: Dict[str, NetworkConfig] = field(default_factory=dict)
     used_sockets: List[Tuple[str, int]] = field(default_factory=list)
 
-    @classmethod
-    def using_default_network(cls) -> Self:
+    def using_default_network(self):
         # We use the embedded default network here
         default_network_path = resources.files(simulaqron._default_config).joinpath("default_network.json")
-        new_builder = cls()
+        new_builder = NetworkConfigBuilder()
         new_builder.read_from_file(Path(str(default_network_path)))
-        return new_builder
+        self.networks = new_builder.networks
+        self.used_sockets = new_builder.used_sockets
 
     def _correct_network_port_if_needed(self, hostname: str, port: int) -> int:
         """

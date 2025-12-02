@@ -68,7 +68,7 @@ class Network:
         self.processes: List[Process] = []
         self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
 
-        # Determine the nodes to start, usiing the in-memory network config
+        # Determine the nodes to start, using the in-memory network config
         self._nodes_to_start: List[NodeConfig] = []
         for node in network_config.get_nodes(network_name):
             if node.name in nodes:
