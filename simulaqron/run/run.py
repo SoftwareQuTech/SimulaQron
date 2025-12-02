@@ -194,7 +194,7 @@ def run_applications(
         pass
 
     for _ in range(num_rounds):
-        network = Network(network_name="default", nodes=network_config.get_nodes("default"))
+        network = Network(network_name="default", nodes=network_config.get_node_names("default"))
 
         # Start the processes that support the simulator: QNodeOS + VirtualNode
         network.start()
