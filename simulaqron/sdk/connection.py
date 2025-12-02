@@ -46,7 +46,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
             compiler: Optional[Type[SubroutineTranspiler]] = None,
             socket_address=None,
             conn_retry_time: float = 0.1,
-            network_name: Optional[str] = None,
+            network_name: str = "default",
     ):
         super().__init__(
             app_name=app_name,
@@ -96,7 +96,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
     def try_connection(
             name: str,
             socket_address: Optional[Tuple[str, int]] = None,
-            network_name: str = None,
+            network_name: str = "default",
     ):
         # NOTE using retry_time=None causes an error to be raised of the connection cannot
         # be established, which can be used to check if the connection is available
@@ -111,9 +111,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
     @staticmethod
     def _create_socket(
             name: str,
+            network_name: str,
             socket_address: Optional[Tuple[str, int]] = None,
-            network_name: str = None,
-            retry_time: Optional[float] = 0.1,
+            retry_time: float = 0.1,
     ) -> Tuple[SocketsConfig, socket.socket]:
         # Get network configuration and addresses
         addr, qnodeos_net = SimulaQronConnection._setup_network_data(
