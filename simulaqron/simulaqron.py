@@ -82,6 +82,13 @@ def version():
 
 @cli.command()
 @click.option(
+    "--network-config-file",
+    help=f"Use the given network config file. Defaults to the file named {DEFAULT_SIMULAQRON_NETWORK_FILENAME} "
+         f"on the current directory.",
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True, path_type=Path),
+    default=Path.cwd() / DEFAULT_SIMULAQRON_NETWORK_FILENAME
+)
+@click.option(
     "--name",
     help="Give the network a name to be able to start multiple (default: 'default')",
     type=str,
@@ -102,8 +109,9 @@ def version():
     type=str,
     default="",
 )
-def start(name: str, nrnodes: int, nodes: str):
+def start(name: str, nrnodes: int, nodes: str, network_config_file: Path):
     """Starts a network with the given parameters or from config files."""
+    network_config.read_from_file(network_config_file)
     pidfile = PID_FOLDER / f"simulaqron_network_{name}.pid"
     if pidfile.exists():
         logging.warning("Network with name %s is already running", name)
@@ -399,14 +407,6 @@ def recv_retry_time():
 @loads_local_config
 def log_level():
     print(simulaqron_settings.log_level)
-
-
-@get.command(
-    help="The path to the network_config_file to be used"
-)
-@loads_local_config
-def network_config_file():
-    print(simulaqron_settings.network_config_file)
 
 
 @get.command(
