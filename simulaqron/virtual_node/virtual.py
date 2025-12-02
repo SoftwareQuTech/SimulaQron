@@ -45,7 +45,7 @@ from simulaqron.general.host_config import SocketsConfig, Host
 # We need this import (despite unused) to reraise local errors
 # We then supress the flake8 errors associated with that
 from simulaqron.general.errors import *  # noqa: F401, F403
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, network_config
 from simulaqron.settings.simulaqron_config import SimBackend
 from simulaqron.reactor import reactor
 
@@ -90,23 +90,16 @@ def call_method(obj, method_name, *args, **kwargs):
 # forming the quantum network
 #
 class Backend:
-    def __init__(self, name: str, virtual_file: str, network_name: str = "default"):
+    def __init__(self, name: str, network_name: str = "default"):
         """
-        Initialize. This will read the configuration file and populate the name,hostname,port information with the
+        Initialize. This will read the networks configuration and populate the name,hostname,port information with the
         information found in the configuration file for the given name.
         """
         self._logger = get_netqasm_logger(f"{self.__class__.__name__}({name})")
 
         # Read the configuration file
-        try:
-            self.config = SocketsConfig(virtual_file, network_name=network_name, config_type="vnode")
-            self.myID: Host = self.config.hostDict[name]
-        except KeyError as e:
-            self._logger.error("No such name in the configuration file %s: %s", virtual_file, e)
-            raise e
-        except Exception as e:
-            self._logger.error("Error reading the configuration file %s: %s", virtual_file, e)
-            raise e
+        self.config = SocketsConfig(network_config, network_name=network_name, config_type="vnode")
+        self.myID: Host = self.config.hostDict[name]
 
     def start(
             self,

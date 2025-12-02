@@ -63,11 +63,7 @@ def start_vnode(name: str, network_name: str = "default", log_level: str = "WARN
     signal.signal(signal.SIGINT, partial(sigterm_handler, name))
 
     logger.debug("Starting VIRTUAL NODE %s", name)
-    if simulaqron_settings.network_config_file is not None:
-        virtual_file = str(simulaqron_settings.network_config_file)
-    else:
-        virtual_file = simulaqron_settings.vnode_file
-    be = Backend(name, virtual_file, network_name=network_name)
+    be = Backend(name, network_name=network_name)
     be.start(max_qubits=simulaqron_settings.max_qubits, max_registers=simulaqron_settings.max_registers)
     logger.debug("Ending VIRTUAL NODE %s", name)
 
