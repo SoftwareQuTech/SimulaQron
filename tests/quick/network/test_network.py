@@ -1,7 +1,5 @@
-import json
 import time
 from tempfile import NamedTemporaryFile
-from typing import List
 
 import pytest
 from timeit import default_timer as timer
@@ -11,74 +9,8 @@ from simulaqron.network import Network
 from simulaqron.settings.network_config import NetworkConfigBuilder
 
 
-class TestInitNetwork:
-    def _assert_nodes(self, nodes1: List[str], nodes2: List[str]):
-        assert set(nodes1) == set(nodes2)
-
-    def _assert_topology(self, topology1, topology2):
-        if topology1 is None:
-            assert topology2 is None
-            return
-        assert len(topology1) == len(topology2)
-        for key, neigh1 in topology1.items():
-            assert key in topology2
-            neigh2 = topology2[key]
-            self._assert_nodes(neigh1, neigh2)
-
-    def _check_nodes_and_topology_in_file(self, network: Network):
-        network_config_file = simulaqron_settings.network_config_file
-        with open(network_config_file, 'r') as f:
-            network_config = json.load(f)
-        nodes_in_file = list(network_config[network.name]["nodes"].keys())
-        self._assert_nodes(nodes_in_file, network.nodes)
-
-        topology_in_file = network_config[network.name]["topology"]
-        self._assert_topology(topology_in_file, network.topology)
-
-    @pytest.fixture(autouse=True)
-    def network_file(self):
-        simulaqron_settings.default_settings()
-        # We initialize a temporary file with the default network config
-        network_builder = NetworkConfigBuilder()
-        network_builder.using_default_network()
-        with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as net_config_file:
-            # We also need to specify the location of the temporal file as the network config file
-            network_builder.write_to_file(net_config_file.name)
-            simulaqron_settings.network_config_file = net_config_file.name
-            net_config_file.close()
-            self.network = None
-            yield net_config_file.name
-            self._check_nodes_and_topology_in_file(self.network)
-
-    def test_init_no_argument(self, network_file: str):
-        self.network = Network(force=True, network_config_file=network_file)
-        default_nodes = ["Alice", "Bob", "Charlie", "David", "Eve"]
-        self._assert_nodes(self.network.nodes, default_nodes)
-        self._assert_topology(self.network.topology, None)
-
-    def test_init_node_argument(self, network_file: str):
-        nodes = ["Test3", "Test4"]
-        self.network = Network(nodes=nodes, force=True, network_config_file=network_file)
-        self._assert_nodes(self.network.nodes, nodes)
-        self._assert_topology(self.network.topology, None)
-
-    def test_init_topology_argument(self, network_file: str):
-        topology = {"Test1": [], "Test2": [], "Test3": []}
-        nodes = list(topology.keys())
-        self.network = Network(topology=topology, force=True, network_config_file=network_file)
-        self._assert_nodes(self.network.nodes, nodes)
-        self._assert_topology(self.network.topology, topology)
-
-    def test_init_node_and_topology_argument(self, network_file: str):
-        nodes = ["Test5", "Test6"]
-        topology = {"Test5": ["Test6"], "Test6": ["Test5"]}
-        self.network = Network(nodes=nodes, topology=topology, force=True, network_config_file=network_file)
-        self._assert_nodes(self.network.nodes, nodes)
-        self._assert_topology(self.network.topology, topology)
-
-
 class TestStartStopNetwork:
-    nodes = ["Test1", "Test2", "Test3"]
+    nodes = ["Alice", "Bob", "Charlie"]
 
     @pytest.fixture(autouse=True)
     def network_file(self):
@@ -89,13 +21,11 @@ class TestStartStopNetwork:
         with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as net_config_file:
             # We also need to specify the location of the temporal file as the network config file
             network_builder.write_to_file(net_config_file.name)
-            simulaqron_settings.network_config_file = net_config_file.name
             net_config_file.close()
-            self.network = None
             yield net_config_file.name
 
     def test_start(self, network_file: str):
-        network = Network(nodes=self.nodes, force=True)
+        network = Network(nodes=self.nodes)
         assert len(network.processes) == 2 * len(self.nodes)
         for p in network.processes:
             assert p.is_alive() is False
@@ -105,13 +35,13 @@ class TestStartStopNetwork:
             assert p.is_alive() is True
 
     def test_stop(self):
-        network = Network(force=True)
+        network = Network(nodes=self.nodes)
         network.stop()
         for p in network.processes:
             assert p.is_alive() is False
 
     def test_start_stop(self):
-        network = Network(force=True)
+        network = Network(nodes=self.nodes)
         network.start(wait_until_running=True)
         for p in network.processes:
             assert p.is_alive() is True
@@ -120,7 +50,7 @@ class TestStartStopNetwork:
             assert p.is_alive() is False
 
     def test_no_wait(self):
-        network = Network(nodes=self.nodes, force=True)
+        network = Network(nodes=self.nodes)
         network.start(wait_until_running=False)
         assert network.running is False
 
@@ -136,6 +66,6 @@ class TestStartStopNetwork:
         assert network.running is True
 
     def test_del(self):
-        network = Network(force=True)
+        network = Network(nodes=self.nodes)
         network.start(wait_until_running=True)
         del network

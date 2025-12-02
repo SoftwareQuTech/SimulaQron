@@ -46,11 +46,11 @@ class NodeConfig(JSONSerializerMixin):
         if isinstance(config_type, str):
             config_type = NodeConfigType(config_type)
         match config_type:
-            case NodeConfigType.APP():
+            case NodeConfigType.APP:
                 return self.app_hostname, self.app_port
-            case NodeConfigType.QNODEOS():
+            case NodeConfigType.QNODEOS:
                 return self.qnodeos_hostname, self.qnodeos_port
-            case NodeConfigType.VNODE():
+            case NodeConfigType.VNODE:
                 return self.vnode_hostname, self.vnode_port
 
     def __eq__(self, other) -> bool:
@@ -448,7 +448,7 @@ class NetworkConfigBuilder(JSONSerializerMixin):
     def network_names(self) -> List[str]:
         return list(self.networks.keys())
 
-    def __getattr__(self, item: str) -> NetworkConfig:
+    def __getitem__(self, item: str) -> NetworkConfig:
         if isinstance(item, str):
             return self.networks[item]
         else:
