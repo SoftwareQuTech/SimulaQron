@@ -83,7 +83,7 @@ def version():
 @cli.command()
 @click.option(
     "--network-config-file",
-    help=f"Use the given network config file. Defaults to the file named {DEFAULT_SIMULAQRON_NETWORK_FILENAME} "
+    help=f"Use the given network config file. Defaults to the file named '{DEFAULT_SIMULAQRON_NETWORK_FILENAME}' "
          f"on the current directory.",
     type=click.Path(exists=True, dir_okay=False, resolve_path=True, path_type=Path),
     default=Path.cwd() / DEFAULT_SIMULAQRON_NETWORK_FILENAME
@@ -97,7 +97,7 @@ def version():
 @click.option(
     "-N",
     "--nrnodes",
-    help="Number of nodes to start. This argument will start nodes named 'Node<i>',\n"
+    help="Number of nodes to start. This argument will start nodes named 'Node<i>', "
          "until the number of nodes is reached.",
     type=int,
     default=0,
@@ -187,20 +187,6 @@ def reset(force: bool):
         print("Aborting!")
 
 
-def updates_local_config(command_function: Callable):
-    def wrapper(*args, **kwargs):
-        local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
-        if not local_settings.exists():
-            local_settings.touch()
-            simulaqron_settings.default_settings()
-            simulaqron_settings.save_to_file(local_settings)
-        simulaqron_settings.load_from_file(local_settings)
-        command_function(*args, **kwargs)
-        simulaqron_settings.save_to_file(local_settings)
-
-    return wrapper
-
-
 ###############
 # set command #
 ###############
@@ -227,9 +213,16 @@ def default():
     "value",
     type=click.Choice([b.value for b in SimBackend])
 )
-@updates_local_config
 def sim_backend(value):
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if not local_settings.exists():
+        local_settings.touch()
+        simulaqron_settings.default_settings()
+        simulaqron_settings.save_to_file(local_settings)
+    simulaqron_settings.load_from_file(local_settings)
     simulaqron_settings.sim_backend = value
+    simulaqron_settings.save_to_file(local_settings)
+    print(f"Configuration saved to file: '{local_settings}'")
 
 
 @set.command(
@@ -239,9 +232,16 @@ def sim_backend(value):
     'value',
     type=int
 )
-@updates_local_config
 def max_qubits(value):
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if not local_settings.exists():
+        local_settings.touch()
+        simulaqron_settings.default_settings()
+        simulaqron_settings.save_to_file(local_settings)
+    simulaqron_settings.load_from_file(local_settings)
     simulaqron_settings.max_qubits = value
+    simulaqron_settings.save_to_file(local_settings)
+    print(f"Configuration saved to file: '{local_settings}'")
 
 
 @set.command(
@@ -251,9 +251,16 @@ def max_qubits(value):
     'value',
     type=int
 )
-@updates_local_config
 def max_registers(value):
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if not local_settings.exists():
+        local_settings.touch()
+        simulaqron_settings.default_settings()
+        simulaqron_settings.save_to_file(local_settings)
+    simulaqron_settings.load_from_file(local_settings)
     simulaqron_settings.max_registers = value
+    simulaqron_settings.save_to_file(local_settings)
+    print(f"Configuration saved to file: '{local_settings}'")
 
 
 @set.command(
@@ -263,9 +270,16 @@ def max_registers(value):
     'value',
     type=float
 )
-@updates_local_config
 def conn_retry_time(value):
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if not local_settings.exists():
+        local_settings.touch()
+        simulaqron_settings.default_settings()
+        simulaqron_settings.save_to_file(local_settings)
+    simulaqron_settings.load_from_file(local_settings)
     simulaqron_settings.conn_retry_time = value
+    simulaqron_settings.save_to_file(local_settings)
+    print(f"Configuration saved to file: '{local_settings}'")
 
 
 @set.command(
@@ -275,9 +289,16 @@ def conn_retry_time(value):
     'value',
     type=float
 )
-@updates_local_config
 def recv_timeout(value):
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if not local_settings.exists():
+        local_settings.touch()
+        simulaqron_settings.default_settings()
+        simulaqron_settings.save_to_file(local_settings)
+    simulaqron_settings.load_from_file(local_settings)
     simulaqron_settings.recv_timeout = value
+    simulaqron_settings.save_to_file(local_settings)
+    print(f"Configuration saved to file: '{local_settings}'")
 
 
 @set.command(
@@ -287,9 +308,16 @@ def recv_timeout(value):
     'value',
     type=float
 )
-@updates_local_config
 def recv_retry_time(value):
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if not local_settings.exists():
+        local_settings.touch()
+        simulaqron_settings.default_settings()
+        simulaqron_settings.save_to_file(local_settings)
+    simulaqron_settings.load_from_file(local_settings)
     simulaqron_settings.recv_retry_time = value
+    simulaqron_settings.save_to_file(local_settings)
+    print(f"Configuration saved to file: '{local_settings}'")
 
 
 @set.command(
@@ -299,9 +327,16 @@ def recv_retry_time(value):
     'value',
     type=int
 )
-@updates_local_config
 def log_level(value):
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if not local_settings.exists():
+        local_settings.touch()
+        simulaqron_settings.default_settings()
+        simulaqron_settings.save_to_file(local_settings)
+    simulaqron_settings.load_from_file(local_settings)
     simulaqron_settings.log_level = value
+    simulaqron_settings.save_to_file(local_settings)
+    print(f"Configuration saved to file: '{local_settings}'")
 
 
 @set.command(
@@ -311,12 +346,19 @@ def log_level(value):
     'value',
     type=click.Choice(["on", "off"])
 )
-@updates_local_config
 def noisy_qubits(value):
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if not local_settings.exists():
+        local_settings.touch()
+        simulaqron_settings.default_settings()
+        simulaqron_settings.save_to_file(local_settings)
+    simulaqron_settings.load_from_file(local_settings)
     if value == "on":
         simulaqron_settings.noisy_qubits = True
     else:
         simulaqron_settings.noisy_qubits = False
+    simulaqron_settings.save_to_file(local_settings)
+    print(f"Configuration saved to file: '{local_settings}'")
 
 
 @set.command(
@@ -326,25 +368,21 @@ def noisy_qubits(value):
     'value',
     type=float
 )
-@updates_local_config
 def t1(value):
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if not local_settings.exists():
+        local_settings.touch()
+        simulaqron_settings.default_settings()
+        simulaqron_settings.save_to_file(local_settings)
+    simulaqron_settings.load_from_file(local_settings)
     simulaqron_settings.t1 = value
+    simulaqron_settings.save_to_file(local_settings)
+    print(f"Configuration saved to file: '{local_settings}'")
 
 
 ###############
 # get command #
 ###############
-
-def loads_local_config(command_function: Callable):
-    def wrapper(*args, **kwargs):
-        local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
-        if local_settings.exists() and local_settings.is_file():
-            simulaqron_settings.load_from_file(Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME)
-        else:
-            simulaqron_settings.default_settings()
-        command_function(*args, **kwargs)
-
-    return wrapper
 
 
 @cli.group()
@@ -356,64 +394,112 @@ def get():
 @get.command(
     help="The backend to use (stabilizer, projectq, qutip).",
 )
-@loads_local_config
 def sim_backend():
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if local_settings.exists() and local_settings.is_file():
+        simulaqron_settings.load_from_file(Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME)
+        print(f"Configuration loaded from file: '{local_settings}':")
+    else:
+        print(f"Configuration from default configuration:")
+        simulaqron_settings.default_settings()
     print(simulaqron_settings.sim_backend)
 
 
 @get.command(
     help="Max virt-qubits per node and max sim-qubits per register."
 )
-@loads_local_config
 def max_qubits():
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if local_settings.exists() and local_settings.is_file():
+        simulaqron_settings.load_from_file(Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME)
+        print(f"Configuration loaded from file: '{local_settings}':")
+    else:
+        print(f"Configuration from default configuration:")
+        simulaqron_settings.default_settings()
     print(simulaqron_settings.max_qubits)
 
 
 @get.command(
     help="How many registers a node can hold."
 )
-@loads_local_config
 def max_registers():
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if local_settings.exists() and local_settings.is_file():
+        simulaqron_settings.load_from_file(Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME)
+        print(f"Configuration loaded from file: '{local_settings}':")
+    else:
+        print(f"Configuration from default configuration:")
+        simulaqron_settings.default_settings()
     print(simulaqron_settings.max_registers)
 
 
 @get.command(
     help="If setup fails, how long to wait until a retry."
 )
-@loads_local_config
 def conn_retry_time():
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if local_settings.exists() and local_settings.is_file():
+        simulaqron_settings.load_from_file(Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME)
+        print(f"Configuration loaded from file: '{local_settings}':")
+    else:
+        print(f"Configuration from default configuration:")
+        simulaqron_settings.default_settings()
     print(simulaqron_settings.conn_retry_time)
 
 
 @get.command(
     help="When receiving a qubit or EPR pair, how long to wait until raising a timeout."
 )
-@loads_local_config
 def recv_timeout():
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if local_settings.exists() and local_settings.is_file():
+        simulaqron_settings.load_from_file(Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME)
+        print(f"Configuration loaded from file: '{local_settings}':")
+    else:
+        print(f"Configuration from default configuration:")
+        simulaqron_settings.default_settings()
     print(simulaqron_settings.recv_timeout)
 
 
 @get.command(
     help="When receiving a qubit or EPR pair, how long to wait between checks of whether a qubit is received."
 )
-@loads_local_config
 def recv_retry_time():
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if local_settings.exists() and local_settings.is_file():
+        simulaqron_settings.load_from_file(Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME)
+        print(f"Configuration loaded from file: '{local_settings}':")
+    else:
+        print(f"Configuration from default configuration:")
+        simulaqron_settings.default_settings()
     print(simulaqron_settings.recv_retry_time)
 
 
 @get.command(
     help="Log level for both backend and frontend."
 )
-@loads_local_config
 def log_level():
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if local_settings.exists() and local_settings.is_file():
+        simulaqron_settings.load_from_file(Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME)
+        print(f"Configuration loaded from file: '{local_settings}':")
+    else:
+        print(f"Configuration from default configuration:")
+        simulaqron_settings.default_settings()
     print(simulaqron_settings.log_level)
 
 
 @get.command(
     help="Whether qubits should be noisy (on/off)"
 )
-@loads_local_config
 def noisy_qubits():
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if local_settings.exists() and local_settings.is_file():
+        simulaqron_settings.load_from_file(Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME)
+        print(f"Configuration loaded from file: '{local_settings}':")
+    else:
+        print(f"Configuration from default configuration:")
+        simulaqron_settings.default_settings()
     if simulaqron_settings.noisy_qubits:
         print("on")
     else:
@@ -423,8 +509,14 @@ def noisy_qubits():
 @get.command(
     help="The effective T1 to be used for noisy qubits"
 )
-@loads_local_config
 def t1():
+    local_settings = Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME
+    if local_settings.exists() and local_settings.is_file():
+        simulaqron_settings.load_from_file(Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME)
+        print(f"Configuration loaded from file: '{local_settings}':")
+    else:
+        print(f"Configuration from default configuration:")
+        simulaqron_settings.default_settings()
     print(simulaqron_settings.t1)
 
 
