@@ -28,6 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import time
+from typing import Callable
 
 from netqasm.logging.glob import get_netqasm_logger
 from twisted.internet import error
@@ -35,6 +36,7 @@ from twisted.internet.defer import DeferredList
 from twisted.internet.error import ReactorNotRunning
 from twisted.spread import pb
 
+from simulaqron.general.host_config import SocketsConfig
 from simulaqron.reactor import reactor
 
 _logger = get_netqasm_logger("setup-local")
@@ -48,7 +50,8 @@ _logger = get_netqasm_logger("setup-local")
 # and other classical communication servers.
 
 
-def setup_local(myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
+def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsConfig,
+                lNode: pb.Root, func: Callable, *args, **kwargs):
     """
     Sets up
     - local classical communication server (if desired according to the configuration file)

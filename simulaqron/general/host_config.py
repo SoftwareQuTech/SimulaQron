@@ -66,12 +66,15 @@ class Host(pb.Referenceable):
 
 
 class SocketsConfig(pb.Referenceable):
-    def __init__(self, nets_config: NetworkConfigBuilder, network_name: str = "default", config_type: str | NodeConfigType = "vnode"):
+    def __init__(self, nets_config: NetworkConfigBuilder, network_name: str = "default",
+                 config_type: str | NodeConfigType = "vnode"):
         """
         Initialize by reading in the configuration file.
 
-        With version 3.0.0 there is a single config used for all networks and all config types.
-        Therefore one needs to also specify the network_name and config_type ('vnode', 'app')
+        With version 4.0.0, we use the already in-memory information to create the SocketsConfig object.
+        This avoids reading the file multiple times, which might have been updated by other processes
+        in between reads. Additionally, this also simplifies the code, and reduces the potential source
+        of bugs in the configuration read/write code.
         """
         # Dictionary where we will keep host details, indexed by node name (e.g. Alice)
         self.hostDict: Dict[str, Host] = {}
@@ -110,14 +113,3 @@ def get_node_id_from_net_config(net_config: SocketsConfig, node_name: str) -> in
     if node_name not in net_config.hostDict:
         raise ValueError(f"node name {node_name} not in host_dict ({net_config.hostDict.keys()})")
     return list(sorted(net_config.hostDict.keys())).index(node_name)
-
-
-def load_node_names(config_file: str) -> List[str]:
-    """
-    Load list of nodes from Nodes.cfg file
-
-    :param config_file: str
-        pointing to Nodes.cfg file
-    """
-    with open(config_file, 'r') as f:
-        return [line.strip() for line in f.readlines()]
