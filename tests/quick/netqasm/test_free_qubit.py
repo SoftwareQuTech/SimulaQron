@@ -1,13 +1,8 @@
-from tempfile import NamedTemporaryFile
-
 import pytest
 
 from netqasm.runtime.settings import set_simulator
 
-from simulaqron.run.run import reset, run_applications
-from simulaqron.settings import simulaqron_settings
-from simulaqron.settings.simulaqron_config import SimBackend
-from simulaqron.settings.network_config import NetworkConfigBuilder
+from simulaqron.run.run import run_applications
 
 set_simulator("simulaqron")
 
@@ -17,20 +12,6 @@ from netqasm.sdk import Qubit  # noqa: E402
 
 
 class TestFreeQubit:
-    @pytest.fixture(autouse=True)
-    def configuration(self):
-        with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as network_settings_file:
-            network_config = NetworkConfigBuilder.using_default_network()
-            network_config.write_to_file(network_settings_file.name)
-            with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as simulaqron_settings_file:
-                simulaqron_settings.default_settings()
-                simulaqron_settings.sim_backend = SimBackend.PROJECTQ.value
-                simulaqron_settings.network_config_file = network_settings_file.name
-                simulaqron_settings.save_to_file(simulaqron_settings_file.name)
-                simulaqron_settings.load_from_file(simulaqron_settings_file.name)
-                yield
-                reset()
-
     @staticmethod
     def too_many_qubits():
         with NetQASMConnection("Alice", max_qubits=2) as alice:

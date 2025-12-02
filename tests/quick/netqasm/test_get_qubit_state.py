@@ -1,14 +1,9 @@
 import math
-from tempfile import NamedTemporaryFile
 
 import numpy as np
 import pytest
 from netqasm.runtime.settings import set_simulator
 from netqasm.sdk.classical_communication.message import StructuredMessage
-
-from simulaqron.settings import simulaqron_settings
-from simulaqron.settings.simulaqron_config import SimBackend
-from simulaqron.settings.network_config import NetworkConfigBuilder
 
 set_simulator("simulaqron")
 
@@ -20,20 +15,6 @@ from simulaqron.run.run import run_applications, reset  # noqa: E402
 
 
 class TestGetQubit:
-    @pytest.fixture(autouse=True)
-    def configuration(self):
-        with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as network_settings_file:
-            network_config = NetworkConfigBuilder.using_default_network()
-            network_config.write_to_file(network_settings_file.name)
-            with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as simulaqron_settings_file:
-                simulaqron_settings.default_settings()
-                simulaqron_settings.sim_backend = SimBackend.PROJECTQ.value
-                simulaqron_settings.network_config_file = network_settings_file.name
-                simulaqron_settings.save_to_file(simulaqron_settings_file.name)
-                simulaqron_settings.load_from_file(simulaqron_settings_file.name)
-                yield
-                reset()
-
     # Here we define the quantum programs used in the tests
 
     @staticmethod
