@@ -1,30 +1,19 @@
-from tempfile import NamedTemporaryFile
-
 import pytest
 from netqasm.runtime.application import default_app_instance
 
 from simulaqron.run import run_applications
-from simulaqron.run.run import reset
 from simulaqron.sdk.socket import Socket
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, network_config
 from simulaqron.settings.simulaqron_config import SimBackend
-from simulaqron.settings.network_config import NetworkConfigBuilder
 
 
 class TestClassicalSocket:
     @pytest.fixture(autouse=True)
     def configurations(self):
-        with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as network_settings_file:
-            network_config = NetworkConfigBuilder.using_default_network()
-            network_config.write_to_file(network_settings_file.name)
-            with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as simulaqron_settings_file:
-                simulaqron_settings.default_settings()
-                simulaqron_settings.sim_backend = SimBackend.PROJECTQ.value
-                simulaqron_settings.network_config_file = network_settings_file.name
-                simulaqron_settings.save_to_file(simulaqron_settings_file.name)
-                simulaqron_settings.load_from_file(simulaqron_settings_file.name)
-                yield
-                reset()
+        simulaqron_settings.default_settings()
+        simulaqron_settings.sim_backend = SimBackend.PROJECTQ
+        network_config.using_default_network()
+        yield
 
     @staticmethod
     def alice_program_sender():

@@ -21,7 +21,7 @@ class TestGetQubitState:
     @pytest.fixture(autouse=True)
     def reset_configs(self):
         simulaqron_settings.default_settings()
-        simulaqron_settings.sim_backend = SimBackend.PROJECTQ.value
+        simulaqron_settings.sim_backend = SimBackend.PROJECTQ
         network_config.using_default_network()
 
     # Here we define the quantum programs used in the tests
