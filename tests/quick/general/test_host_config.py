@@ -31,9 +31,9 @@ class TestSocketsConfig:
     @pytest.mark.skip(reason="Reading network config from legacy format files is not implemented yet")
     def test_load_legacy_net_config_file(self):
         this_file_folder = Path(__file__).parent
-        sockets_config_path = this_file_folder / "resources" /  "sockets.cfg"
-        qnodeos_config_path = this_file_folder / "resources" /  "qnodeos.cfg"
-        virtual_config_path = this_file_folder / "resources" /  "virtual.cfg"
+        sockets_config_path = this_file_folder / "resources" / "sockets.cfg"
+        qnodeos_config_path = this_file_folder / "resources" / "qnodeos.cfg"
+        virtual_config_path = this_file_folder / "resources" / "virtual.cfg"
         network_config.read_from_legacy_files(app_file_path=sockets_config_path,
                                               qnodeos_config_path=qnodeos_config_path,
                                               virtual_config_path=virtual_config_path)
@@ -43,7 +43,6 @@ class TestSocketsConfig:
         vnode_conf = SocketsConfig(network_config)
 
         TestSocketsConfig._assert_results(app_conf, qnodeos_conf, vnode_conf)
-
 
     def test_load_new_net_config_file(self):
         this_file_folder = Path(__file__).parent

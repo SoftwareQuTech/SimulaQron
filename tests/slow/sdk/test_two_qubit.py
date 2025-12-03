@@ -201,7 +201,6 @@ class TestTwoQubitGates:
             network.stop()
             reset()
 
-
     def test_CNOT_control(self, network):
         with SimulaQronConnection("Bob") as conn:
             # Test CNOT control

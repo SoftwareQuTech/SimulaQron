@@ -1,6 +1,6 @@
-import pytest
-import numpy as np
 import networkx as nx
+import numpy as np
+import pytest
 
 from simulaqron.toolbox.stabilizer_states import StabilizerState
 
@@ -163,10 +163,10 @@ class TestStabilizerStates:
         assert S.Pauli_phase_tracking([False, True], [True, True])
         assert S.Pauli_phase_tracking([True, False], [False, True])
 
-        assert (S.Pauli_phase_tracking([True, False], [True, True]) ==
-                S.Pauli_phase_tracking([True, True], [False, True]))
-        assert (S.Pauli_phase_tracking([False, True], [True, False]) ==
-                S.Pauli_phase_tracking([True, True], [False, True]))
+        assert (S.Pauli_phase_tracking([True, False], [True, True]) == S.Pauli_phase_tracking([True, True],
+                                                                                              [False, True]))
+        assert (S.Pauli_phase_tracking([False, True], [True, False]) == S.Pauli_phase_tracking([True, True],
+                                                                                               [False, True]))
 
     def test_gaussian_elimination(self):
         S = StabilizerState(["XZZ", "YIX", "IXX"])
@@ -369,13 +369,13 @@ class TestStabilizerStates:
 
     @pytest.mark.parametrize("stabilizer, expected",
                              [  # stabilizer, expected
-                                ("XX", True),
-                                ("+1XX", True),
-                                ("-1XX", False),
-                                ("+1YY", False),
-                                ("-1YY", True),
-                                ("+1YI", False),
-                                ("IY", False),
+                                 ("XX", True),
+                                 ("+1XX", True),
+                                 ("-1XX", False),
+                                 ("+1YY", False),
+                                 ("-1YY", True),
+                                 ("+1YI", False),
+                                 ("IY", False),
                              ])
     def test_contains(self, stabilizer, expected):
         s = StabilizerState(["XX", "ZZ"])

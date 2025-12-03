@@ -9,8 +9,8 @@ from daemons.interfaces import exit
 from daemons.prefab import run
 
 from simulaqron.network import Network
-from simulaqron.settings import simulaqron_settings, network_config
 from simulaqron.settings import LOCAL_SIMULAQRON_SETTINGS, LOCAL_NETWORK_SETTINGS, HOME_NETWORK_SETTINGS
+from simulaqron.settings import simulaqron_settings, network_config
 from simulaqron.settings.network_config import NodeConfig, DEFAULT_SIMULAQRON_NETWORK_FILENAME
 from simulaqron.settings.simulaqron_config import SimBackend
 
@@ -29,6 +29,7 @@ class RunningSimulaQronDaemon(run.RunDaemon):
     This class is useful to stop the already-running daemons without needed to read all
     the required configurations.
     """
+
     def __init__(self, pidfile: Path):
         assert pidfile is not None
         super().__init__(pidfile=pidfile)
@@ -74,8 +75,8 @@ def version():
 @cli.command()
 @click.option(
     "--network-config-file",
-    help=f"Use the given network config file. Defaults to the file named '{DEFAULT_SIMULAQRON_NETWORK_FILENAME}' "
-         f"on the current directory.",
+    help=f"Use the given network config file. Defaults to the file named "  # noqa: E131
+         f"'{DEFAULT_SIMULAQRON_NETWORK_FILENAME}' on the current directory.",  # noqa: E131
     type=click.Path(exists=True, dir_okay=False, resolve_path=True, path_type=Path),
     default=LOCAL_NETWORK_SETTINGS
 )
@@ -109,9 +110,9 @@ def start(name: str, nrnodes: int, nodes: str, network_config_file: Path):
         logging.warning("The pidfile for this network is located at %s", pidfile)
         return
     nodes = nodes.split(",")
-    if len(nodes) <=0:
-        print(f"WARNING - The list of nodes to start is empty. If you specified the --nrnodes option "
-              f"this can be normal. Please check your invocation line if needed.")
+    if len(nodes) <= 0:
+        print("WARNING - The list of nodes to start is empty. If you specified the --nrnodes option "
+              "this can be normal. Please check your invocation line if needed.")
     if nrnodes > 0 and len(nodes) < nrnodes:
         nodes += [f"Node{i}" for i in range(nrnodes - len(nodes))]
     d = SimulaQronDaemon(pidfile=pidfile, name=name, nodes=nodes)
@@ -381,9 +382,9 @@ def get():
 def sim_backend():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
         simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
-        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}':")
+        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
-        print(f"Configuration from default configuration:")
+        print("Configuration from default configuration")
         simulaqron_settings.default_settings()
     print(simulaqron_settings.sim_backend)
 
@@ -394,9 +395,9 @@ def sim_backend():
 def max_qubits():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
         simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
-        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}':")
+        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
-        print(f"Configuration from default configuration:")
+        print("Configuration from default configuration")
         simulaqron_settings.default_settings()
     print(simulaqron_settings.max_qubits)
 
@@ -407,9 +408,9 @@ def max_qubits():
 def max_registers():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
         simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
-        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}':")
+        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
-        print(f"Configuration from default configuration:")
+        print("Configuration from default configuration")
         simulaqron_settings.default_settings()
     print(simulaqron_settings.max_registers)
 
@@ -420,9 +421,9 @@ def max_registers():
 def conn_retry_time():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
         simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
-        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}':")
+        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
-        print(f"Configuration from default configuration:")
+        print("Configuration from default configuration")
         simulaqron_settings.default_settings()
     print(simulaqron_settings.conn_retry_time)
 
@@ -433,9 +434,9 @@ def conn_retry_time():
 def recv_timeout():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
         simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
-        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}':")
+        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
-        print(f"Configuration from default configuration:")
+        print("Configuration from default configuration")
         simulaqron_settings.default_settings()
     print(simulaqron_settings.recv_timeout)
 
@@ -446,9 +447,9 @@ def recv_timeout():
 def recv_retry_time():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
         simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
-        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}':")
+        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
-        print(f"Configuration from default configuration:")
+        print("Configuration from default configuration")
         simulaqron_settings.default_settings()
     print(simulaqron_settings.recv_retry_time)
 
@@ -459,9 +460,9 @@ def recv_retry_time():
 def log_level():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
         simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
-        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}':")
+        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
-        print(f"Configuration from default configuration:")
+        print("Configuration from default configuration")
         simulaqron_settings.default_settings()
     print(simulaqron_settings.log_level)
 
@@ -472,9 +473,9 @@ def log_level():
 def noisy_qubits():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
         simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
-        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}':")
+        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
-        print(f"Configuration from default configuration:")
+        print("Configuration from default configuration")
         simulaqron_settings.default_settings()
     if simulaqron_settings.noisy_qubits:
         print("on")
@@ -488,9 +489,9 @@ def noisy_qubits():
 def t1():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
         simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
-        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}':")
+        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
-        print(f"Configuration from default configuration:")
+        print("Configuration from default configuration")
         simulaqron_settings.default_settings()
     print(simulaqron_settings.t1)
 
@@ -531,8 +532,8 @@ def nodes():
               help="The neighbors of the node in the network separated by ',' (no space).\n \
                     For example '--neighbors Bob,Charlie,David'.\n \
                     If not specified all current nodes in the network will be neighbors.")
-def add(name: str, network_name: str, hostname: str , app_port: int, qnodeos_port: int,
-        vnode_port: int, neighbors: Optional[str]=None):
+def add(name: str, network_name: str, hostname: str, app_port: int, qnodeos_port: int,
+        vnode_port: int, neighbors: Optional[str] = None):
     """
     Add a node to the network.
 
@@ -545,13 +546,13 @@ def add(name: str, network_name: str, hostname: str , app_port: int, qnodeos_por
         neighbors = [neighbor.strip() for neighbor in neighbors]
     network_config.read_from_file(LOCAL_NETWORK_SETTINGS)
     network_config.add_node(node_name=name, network_name=network_name,
-                             app_hostname=hostname, qnodeos_hostname=hostname, vnode_hostname=hostname,
-                             app_port=app_port, qnodeos_port=qnodeos_port, vnode_port=vnode_port,
-                             neighbors=neighbors)
+                            app_hostname=hostname, qnodeos_hostname=hostname, vnode_hostname=hostname,
+                            app_port=app_port, qnodeos_port=qnodeos_port, vnode_port=vnode_port,
+                            neighbors=neighbors)
     network_config.write_to_file(LOCAL_NETWORK_SETTINGS)
     added_node: NodeConfig = network_config.get_nodes(network_name=network_name)[name]
     print(f"Node with name '{added_node.name}' was added to the network with name '{network_name}'.\n"
-          f"Socket addresses are:\n"
+          "Socket addresses are: \n"
           f"* App/Classical: '({added_node.app_hostname}, {added_node.app_port})\n"
           f"* QNodeOS: '({added_node.qnodeos_hostname}, {added_node.qnodeos_port})\n"
           f"* Virtual Node: '({added_node.vnode_hostname}, {added_node.vnode_port})\n")

@@ -30,7 +30,7 @@
 import socket
 import struct
 from ipaddress import IPv4Address
-from typing import Dict, List
+from typing import Dict
 
 from twisted.spread import pb
 

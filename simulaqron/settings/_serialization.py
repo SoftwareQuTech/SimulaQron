@@ -107,12 +107,13 @@ def network_config_serializer(obj: NetworkConfig) -> Dict[str, Any]:
     nodes_dict = {
         "name" : obj.name,
         "nodes": [
-            { node_cfg.name: JSONSerializer.serialize(node_cfg) }
+            {node_cfg.name: JSONSerializer.serialize(node_cfg)}
             for node_cfg in obj.nodes.values()
         ],
         "topology": JSONSerializer.serialize(obj.topology)
     }
     return JSONSerializer.serialize(nodes_dict)
+
 
 @JSONSerializer.register_deserializer(NetworkConfig)
 def network_config_deserializer(cls: Type[NetworkConfig], obj: Dict[str, Any]) -> NetworkConfig:

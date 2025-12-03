@@ -14,7 +14,7 @@ from netqasm.runtime.application import default_app_instance  # noqa: E402
 from netqasm.sdk.external import NetQASMConnection, Socket, get_qubit_state  # noqa: E402
 from netqasm.sdk import Qubit, EPRSocket, set_qubit_state  # noqa: E402
 
-from simulaqron.run.run import run_applications, reset  # noqa: E402
+from simulaqron.run.run import run_applications  # noqa: E402
 
 
 class TestGetQubitState:

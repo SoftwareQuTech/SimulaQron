@@ -125,7 +125,7 @@ class localNode(pb.Root):
         else:
             ValueError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
-        print(f"Qubit is:\n{state}")
+        print(f"Qubit is: \n{state}")
 
 
 #####################################################################################################

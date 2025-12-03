@@ -15,6 +15,7 @@ from simulaqron.settings.network_config import DEFAULT_SIMULAQRON_NETWORK_FILENA
 cwd_network = (Path.cwd() / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
 home_network = (Path.home() / ".simulaqron" / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
 
+
 class TestNetworksSettings:
     @pytest.fixture
     def clean_settings(self):
@@ -78,7 +79,6 @@ class TestNetworksSettings:
 
         for node in network_config.nodes:
             assert all(TestNetworksSettings._check_node_config(node))
-
 
     def test_add_node(self, reset_net_cfg):
         network_config.remove_all_networks()

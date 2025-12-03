@@ -8,6 +8,7 @@ from importlib import resources
 from os import PathLike
 from pathlib import Path
 from typing import Optional, Self, Dict, List, Tuple, Any
+
 from dataclasses_serialization.json import JSONSerializer, JSONSerializerMixin
 
 import simulaqron._default_config
@@ -60,10 +61,12 @@ class NodeConfig(JSONSerializerMixin):
     def __eq__(self, other) -> bool:
         if not isinstance(other, NodeConfig):
             return False
-        return (self.name == other.name and self.app_port == other.app_port and
-                self.qnodeos_port == other.qnodeos_port and self.vnode_port == other.vnode_port and
-                self.app_hostname == other.app_hostname and self.qnodeos_hostname == other.qnodeos_hostname and
-                self.vnode_hostname == other.vnode_hostname)
+        names_equal = self.name == other.name
+        app_sockets_equal = self.app_hostname == other.app_hostname and self.app_port == other.app_port
+        qnos_sockets_equal = self.qnodeos_hostname == other.qnodeos_hostname and self.qnodeos_port == other.qnodeos_port
+        vnode_sockets_equal = self.vnode_hostname == other.vnode_hostname and self.vnode_port == other.vnode_port
+
+        return names_equal and app_sockets_equal and qnos_sockets_equal and vnode_sockets_equal
 
 
 @dataclass
@@ -155,6 +158,7 @@ class NetworkConfig(JSONSerializerMixin):
             return False
         nodes_are_equal = [this_node == other_node for this_node, other_node in zip(self.nodes, other.nodes)]
         return self.name == other.name and self.topology == other.topology and all(nodes_are_equal)
+
 
 @dataclass
 class NetworkConfigBuilder(JSONSerializerMixin):

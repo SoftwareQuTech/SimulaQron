@@ -20,7 +20,7 @@ class TestProjectQEnginInit:
     def test_init(self):
         eng = ProjectQEngine("Alice", 0)
         assert eng.maxQubits == 10
-        assert eng.activeQubits== 0
+        assert eng.activeQubits == 0
         assert len(eng.qubitReg) == 0
 
         eng = ProjectQEngine("Alice", 0, 5)
