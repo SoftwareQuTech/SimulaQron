@@ -33,7 +33,8 @@ import numpy as np
 
 from simulaqron.local.setup import setup_local, assemble_qubit
 from simulaqron.general.host_config import SocketsConfig
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, network_config, LOCAL_SIMULAQRON_SETTINGS, LOCAL_NETWORK_SETTINGS
+from simulaqron.settings.network_config import NodeConfigType
 from simulaqron.toolbox.stabilizer_states import StabilizerState
 from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
@@ -116,7 +117,7 @@ class localNode(pb.Root):
             (realRho, imagRho) = yield eprB.callRemote("get_qubit")
             state = np.array(assemble_qubit(realRho, imagRho), dtype=complex)
         elif simulaqron_settings.sim_backend.value == "projectq":
-            realvec, imagvec = yield self.virtRoot.callRemote("get_register_RI", eprB)
+            _, (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", eprB)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
         elif simulaqron_settings.sim_backend.value == "stabilizer":
             array, _, = yield self.virtRoot.callRemote("get_register_RI", eprB)
@@ -124,7 +125,7 @@ class localNode(pb.Root):
         else:
             ValueError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
-        print(f"Qubit is:\n{state}")
+        print(f"Qubit is: \n{state}")
 
 
 #####################################################################################################
@@ -137,14 +138,20 @@ def main():
     myName = "Bob"
 
     # This file defines the network of virtual quantum nodes
-    network_file = simulaqron_settings.network_config_file
+    # network_file = simulaqron_settings.network_config_file
+    # virtualNet = SocketsConfig(network_file)
 
     # This file defines the nodes acting as servers in the classical communication network
-    classicalFile = "classicalNet.cfg"
+    # classicalFile = "classicalNet.cfg"
+    # classicalNet = SocketsConfig(classicalFile)
+
+    # We load the local configuration files
+    simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+    network_config.read_from_file(LOCAL_NETWORK_SETTINGS)
 
     # Read configuration files for the virtual quantum, as well as the classical network
-    virtualNet = SocketsConfig(network_file)
-    classicalNet = SocketsConfig(classicalFile)
+    virtualNet = SocketsConfig(network_config, config_type=NodeConfigType.VNODE)
+    classicalNet = SocketsConfig(network_config, config_type=NodeConfigType.APP)
 
     # Check if we should run a local classical server. If so, initialize the code
     # to handle remote connections on the classical communication network

@@ -1,14 +1,12 @@
 import math
-from tempfile import NamedTemporaryFile
 
 import numpy as np
 import pytest
 from netqasm.runtime.settings import set_simulator
 from netqasm.sdk.classical_communication.message import StructuredMessage
 
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, network_config
 from simulaqron.settings.simulaqron_config import SimBackend
-from simulaqron.settings.network_config import NetworkConfigBuilder
 
 set_simulator("simulaqron")
 
@@ -16,26 +14,17 @@ from netqasm.runtime.application import default_app_instance  # noqa: E402
 from netqasm.sdk.external import NetQASMConnection, Socket, get_qubit_state  # noqa: E402
 from netqasm.sdk import Qubit, EPRSocket, set_qubit_state  # noqa: E402
 
-from simulaqron.run.run import run_applications, reset  # noqa: E402
+from simulaqron.run.run import run_applications  # noqa: E402
 
 
-class TestGetQubit:
+class TestGetQubitState:
     @pytest.fixture(autouse=True)
-    def configuration(self):
-        with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as network_settings_file:
-            network_config = NetworkConfigBuilder.using_default_network()
-            network_config.write_to_file(network_settings_file.name)
-            with NamedTemporaryFile(mode="w", suffix=".json", delete_on_close=False) as simulaqron_settings_file:
-                simulaqron_settings.default_settings()
-                simulaqron_settings.sim_backend = SimBackend.PROJECTQ.value
-                simulaqron_settings.network_config_file = network_settings_file.name
-                simulaqron_settings.save_to_file(simulaqron_settings_file.name)
-                simulaqron_settings.load_from_file(simulaqron_settings_file.name)
-                yield
-                reset()
+    def reset_configs(self):
+        simulaqron_settings.default_settings()
+        simulaqron_settings.sim_backend = SimBackend.PROJECTQ
+        network_config.using_default_network()
 
     # Here we define the quantum programs used in the tests
-
     @staticmethod
     def peek_new_unflushed_qubit():
         with NetQASMConnection("Alice") as alice:
@@ -122,7 +111,7 @@ class TestGetQubit:
     def test_peek_new_unflushed_qubit(self):
         apps = default_app_instance(
             [
-                ("Alice", TestGetQubit.peek_new_unflushed_qubit)
+                ("Alice", TestGetQubitState.peek_new_unflushed_qubit)
             ]
         )
         with pytest.raises(RuntimeError) as exc:
@@ -132,7 +121,7 @@ class TestGetQubit:
     def test_peek_unflushed_qubit(self):
         apps = default_app_instance(
             [
-                ("Alice", TestGetQubit.peek_unflushed_qubit)
+                ("Alice", TestGetQubitState.peek_unflushed_qubit)
             ]
         )
         with pytest.raises(RuntimeError) as exc:
@@ -142,7 +131,7 @@ class TestGetQubit:
     def test_get_basic_state_local(self):
         apps = default_app_instance(
             [
-                ("Alice", TestGetQubit.peek_init_qubit)
+                ("Alice", TestGetQubitState.peek_init_qubit)
             ]
         )
         raw_results = run_applications(apps, use_app_config=False, enable_logging=False)
@@ -152,7 +141,7 @@ class TestGetQubit:
     def test_get_qubit_state_local(self):
         apps = default_app_instance(
             [
-                ("Alice", TestGetQubit.peek_local_qubit)
+                ("Alice", TestGetQubitState.peek_local_qubit)
             ]
         )
         raw_results = run_applications(apps, use_app_config=False, enable_logging=False)
@@ -167,8 +156,8 @@ class TestGetQubit:
     def test_get_qubit_state_teleport(self):
         apps = default_app_instance(
             [
-                ("Alice", TestGetQubit.alice_teleport),
-                ("Bob", TestGetQubit.bob_teleport)
+                ("Alice", TestGetQubitState.alice_teleport),
+                ("Bob", TestGetQubitState.bob_teleport)
             ]
         )
         raw_results = run_applications(apps, use_app_config=False, enable_logging=False)

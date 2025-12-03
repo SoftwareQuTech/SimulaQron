@@ -5,32 +5,32 @@
             {
                 "Alice": {
                     "app_socket": [
-                        "192.168.0.160",
+                        "localhost",
                         8001
                     ],
                     "qnodeos_socket": [
-                        "192.168.0.160",
-                        8005
+                        "localhost",
+                        8002
                     ],
                     "vnode_socket": [
-                        "192.168.0.160",
-                        8020
+                        "localhost",
+                        8003
                     ]
                 }
             },
             {
                 "Bob": {
                     "app_socket": [
-                        "192.168.20.249",
-                        8032
+                        "localhost",
+                        8010
                     ],
                     "qnodeos_socket": [
-                        "192.168.20.249",
-                        8037
+                        "localhost",
+                        8011
                     ],
                     "vnode_socket": [
-                        "192.168.20.249",
-                        8050
+                        "localhost",
+                        8012
                     ]
                 }
             }

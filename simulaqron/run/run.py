@@ -25,7 +25,7 @@ from netqasm.util.yaml import dump_yaml
 
 from simulaqron.network import Network
 from simulaqron.sdk import SimulaQronConnection
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, network_config
 from simulaqron.settings.simulaqron_config import SimBackend
 
 logger = get_netqasm_logger()
@@ -62,17 +62,6 @@ def setup_sim_backend(sim_backend: SimBackend):
         assert find_spec(sim_backend.value) is not None, \
             f"To use {sim_backend} as backend you need to install the package"
     simulaqron_settings.sim_backend = sim_backend
-
-
-def configure_network(node_names: List[str], network_config_file: Optional[str]):
-    new_network = True if network_config_file is None else False
-    return Network(
-        name="default",
-        nodes=node_names,
-        network_config_file=network_config_file,
-        force=True,
-        new=new_network
-    )
 
 
 # Global array helper to store PIDs of the children processes running the applications
@@ -196,15 +185,16 @@ def run_applications(
     results: List[Dict[str, Any]] = []
     if isinstance(network_cfg, str) or isinstance(network_cfg, PathLike):
         net_cfg = str(network_cfg)
-        simulaqron_settings.network_config_file = Path(net_cfg).resolve()
+        network_config.read_from_file(net_cfg)
     elif isinstance(network_cfg, Path):
         net_cfg = str(network_cfg.resolve())
-        simulaqron_settings.network_config_file = Path(net_cfg).resolve()
+        network_config.read_from_file(net_cfg)
     else:
-        net_cfg = None
+        # If no network config file was given, we keep with the default-loaded (pwd, or home)
+        pass
 
     for _ in range(num_rounds):
-        network = configure_network(app_names, net_cfg)
+        network = Network(network_name="default", nodes=network_config.get_node_names("default"))
 
         # Start the processes that support the simulator: QNodeOS + VirtualNode
         network.start()

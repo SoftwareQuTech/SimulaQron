@@ -39,7 +39,7 @@ from simulaqron.reactor import reactor
 from simulaqron.general.host_config import SocketsConfig, Host
 from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
 from simulaqron.sdk.connection import RichErrorMessage
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import network_config
 from simulaqron.virtual_node.virtual import call_method
 
 
@@ -199,10 +199,7 @@ class NetQASMFactory(Factory):
 
         # Read in topology, if specified. topology=None means fully connected
         # topology
-        self.topology = None
-        if simulaqron_settings.network_config_file is not None:
-            networks_config = simulaqron_settings.network_builder
-            self.topology = networks_config.networks[network_name].topology
+        self.topology = network_config[network_name].topology
 
     def stop(self):
         yield call_method(self.virtRoot, "stop_vnode")

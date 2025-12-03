@@ -22,7 +22,7 @@ from netqasm.sdk.transpile import SubroutineTranspiler
 from simulaqron.general import SimUnsupportedError
 from simulaqron.general.host_config import (SocketsConfig,
                                             get_node_id_from_net_config)
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import network_config
 
 logger = get_netqasm_logger("SimulaQronConnection")
 
@@ -46,7 +46,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
             compiler: Optional[Type[SubroutineTranspiler]] = None,
             socket_address=None,
             conn_retry_time: float = 0.1,
-            network_name: Optional[str] = None,
+            network_name: str = "default",
     ):
         super().__init__(
             app_name=app_name,
@@ -96,7 +96,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
     def try_connection(
             name: str,
             socket_address: Optional[Tuple[str, int]] = None,
-            network_name: str = None,
+            network_name: str = "default",
     ):
         # NOTE using retry_time=None causes an error to be raised of the connection cannot
         # be established, which can be used to check if the connection is available
@@ -105,15 +105,15 @@ class SimulaQronConnection(BaseNetQASMConnection):
             name=name,
             socket_address=socket_address,
             network_name=network_name,
-            retry_time=None,
+            retry_time=-1.0,
         )
 
     @staticmethod
     def _create_socket(
             name: str,
+            network_name: str,
             socket_address: Optional[Tuple[str, int]] = None,
-            network_name: str = None,
-            retry_time: Optional[float] = 0.1,
+            retry_time: float = 0.1,
     ) -> Tuple[SocketsConfig, socket.socket]:
         # Get network configuration and addresses
         addr, qnodeos_net = SimulaQronConnection._setup_network_data(
@@ -136,8 +136,8 @@ class SimulaQronConnection(BaseNetQASMConnection):
     ) -> Tuple[tuple[socket.AddressFamily, socket.SocketKind, int, str, tuple[str, int]], Optional[SocketsConfig]]:
         qnodeos_net: Optional[SocketsConfig] = None
         if socket_address is None:
-            qnodeos_net = _get_qnodeos_net_config(network_name=network_name)
 
+            qnodeos_net = SocketsConfig(network_config, network_name=network_name, config_type="qnodeos")
             # Host data
             if name in qnodeos_net.hostDict:
                 myHost = qnodeos_net.hostDict[name]
@@ -177,7 +177,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 qnodeos_socket.connect(addr[4])
                 break
             except ConnectionRefusedError as err:
-                if retry_time is None or retry_time == 0:
+                if retry_time <= 0:
                     raise err
                 logger.debug(
                     "App %s : Could not connect to NetQASM server, trying again...",
@@ -279,46 +279,50 @@ class SimulaQronConnection(BaseNetQASMConnection):
             self.buf = self.buf[len(ret_msg):]
 
             self._logger.debug("Got message %s", ret_msg)
-            if isinstance(ret_msg, MsgDoneMessage):
-                self._waiting_msg_ids.remove(ret_msg.msg_id)
-                self._done_msg_ids.add(ret_msg.msg_id)
-                # Call the registered callback, if any
-                if ret_msg.msg_id in self._messages_callbacks:
-                    if SimulaQronConnection.PROCESS_POOL is None:
-                        raise RuntimeError("Callback process pool was not set correctly")
-                    if self._messages_callbacks[ret_msg.msg_id] is not None:
-                        SimulaQronConnection.PROCESS_POOL.apply_async(
-                            self._messages_callbacks[ret_msg.msg_id]
-                        )
-                    del self._messages_callbacks[ret_msg.msg_id]
-                return ret_msg.msg_id
-            elif isinstance(ret_msg, ReturnRegMessage):
-                self._update_shared_memory(
-                    entry=Register.from_raw(raw=ret_msg.register),
-                    value=ret_msg.value,
-                )
-            elif isinstance(ret_msg, ReturnArrayMessage):
-                self._update_shared_memory(
-                    entry=Address(address=ret_msg.address),
-                    value=ret_msg.values,
-                )
-            elif isinstance(ret_msg, ReturnQubitStateMessage):
-                # We locally store the state info to return it later. We have to
-                # do this since _handle_reply cannot return values others than the
-                # message id when handling the reply of the original message
-                self._store_qubit_state(
-                    ret_msg.qubit_id,
-                    ret_msg.dimension,
-                    ret_msg.get_real_part(),
-                    ret_msg.get_imag_part()
-                )
-            elif isinstance(ret_msg, RichErrorMessage):
-                if ret_msg.err_code == ErrorCode.UNSUPP.value:
-                    raise SimUnsupportedError("Operation not supported")
-                else:
-                    raise RuntimeError(f"Received error message from backend: {ret_msg.get_err_msg()}")
-            else:
-                raise NotImplementedError(f"Unknown return message of type {type(ret_msg)}")
+            match ret_msg:
+                case MsgDoneMessage():
+                    self._waiting_msg_ids.remove(ret_msg.msg_id)
+                    self._done_msg_ids.add(ret_msg.msg_id)
+                    # Call the registered callback, if any
+                    if ret_msg.msg_id in self._messages_callbacks:
+                        if SimulaQronConnection.PROCESS_POOL is None:
+                            raise RuntimeError("Callback process pool was not set correctly")
+                        if self._messages_callbacks[ret_msg.msg_id] is not None:
+                            SimulaQronConnection.PROCESS_POOL.apply_async(
+                                self._messages_callbacks[ret_msg.msg_id]
+                            )
+                        del self._messages_callbacks[ret_msg.msg_id]
+                    return ret_msg.msg_id
+                case ReturnRegMessage():
+                    self._update_shared_memory(
+                        entry=Register.from_raw(raw=ret_msg.register),
+                        value=ret_msg.value,
+                    )
+                    return -1
+                case ReturnArrayMessage():
+                    self._update_shared_memory(
+                        entry=Address(address=ret_msg.address),
+                        value=ret_msg.values,
+                    )
+                    return -1
+                case ReturnQubitStateMessage():
+                    # We locally store the state info to return it later. We have to
+                    # do this since _handle_reply cannot return values others than the
+                    # message id when handling the reply of the original message
+                    self._store_qubit_state(
+                        ret_msg.qubit_id,
+                        ret_msg.dimension,
+                        ret_msg.get_real_part(),
+                        ret_msg.get_imag_part()
+                    )
+                    return -1
+                case RichErrorMessage():
+                    if ret_msg.err_code == ErrorCode.UNSUPP.value:
+                        raise SimUnsupportedError("Operation not supported")
+                    else:
+                        raise RuntimeError(f"Received error message from backend: {ret_msg.get_err_msg()}")
+                case _:
+                    raise NotImplementedError(f"Unknown return message of type {type(ret_msg)}")
 
     def block(self):
         while len(self._waiting_msg_ids) > 0:
@@ -534,26 +538,19 @@ nmsg.RETURN_MESSAGE_CLASSES = {
 }
 
 
-def _get_qnodeos_net_config(network_name: str) -> SocketsConfig:
-    network_config_file = simulaqron_settings.network_config_file
-    return SocketsConfig(
-        str(network_config_file), network_name=network_name, config_type="qnodeos"
-    )
-
-
 class SimulaQronNetworkInfo(NetworkInfo):
     @classmethod
     def _get_node_id(cls, node_name: str) -> int:
         """Returns the node id for the node with the given name"""
         # TODO always use network name "default"?
-        _qnodeos_net = _get_qnodeos_net_config(network_name="default")
+        _qnodeos_net = SocketsConfig(network_config, config_type="qnodeos")
         return get_node_id_from_net_config(_qnodeos_net, node_name)
 
     @classmethod
     def _get_node_name(cls, node_id: int) -> str:
         """Returns the node name for the node with the given ID"""
         # TODO always use network name "default"?
-        _qnodeos_net = _get_qnodeos_net_config(network_name="default")
+        _qnodeos_net = SocketsConfig(network_config, config_type="qnodeos")
         for node_name, host in _qnodeos_net.hostDict.items():
             if node_id == host.ip:
                 return node_name

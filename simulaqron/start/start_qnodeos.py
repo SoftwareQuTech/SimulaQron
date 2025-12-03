@@ -14,7 +14,7 @@ from simulaqron.reactor import reactor
 from simulaqron.netqasm_backend.factory import NetQASMFactory
 from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
 from simulaqron.general.host_config import SocketsConfig
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, network_config
 
 logger = get_netqasm_logger("start_qnodeos")
 
@@ -133,12 +133,9 @@ def start_qnodeos(node_name: str, network_name: str = "default", log_level: str 
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)
 
-    # Since version 3.0.0 a single config file is used
-    network_config_file = str(simulaqron_settings.network_config_file)
-
     # Read configuration files for the virtual quantum, as well as the classical network
-    virtual_network = SocketsConfig(network_config_file, network_name=network_name, config_type="vnode")
-    qnodeos_network = SocketsConfig(network_config_file, network_name=network_name, config_type="qnodeos")
+    virtual_network = SocketsConfig(network_config, network_name=network_name, config_type="vnode")
+    qnodeos_network = SocketsConfig(network_config, network_name=network_name, config_type="qnodeos")
 
     # Check if we are in the host-dictionary
     if node_name in qnodeos_network.hostDict:

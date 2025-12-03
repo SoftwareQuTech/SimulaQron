@@ -28,6 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import time
+from typing import Callable
 
 from netqasm.logging.glob import get_netqasm_logger
 from twisted.internet import error
@@ -35,6 +36,7 @@ from twisted.internet.defer import DeferredList
 from twisted.internet.error import ReactorNotRunning
 from twisted.spread import pb
 
+from simulaqron.general.host_config import SocketsConfig
 from simulaqron.reactor import reactor
 
 _logger = get_netqasm_logger("setup-local")
@@ -48,20 +50,28 @@ _logger = get_netqasm_logger("setup-local")
 # and other classical communication servers.
 
 
-def setup_local(myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
+def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsConfig,
+                lNode: pb.Root, func: Callable, *args, **kwargs):
     """
-    Sets up
-    - local classical communication server (if desired according to the configuration file)
-    - client connection to the local virtual node quantum backend
-    - client connections to all other classical communication servers
+    Sets up a local classical communication server (if desired according to the configuration file),
+    a client connection to the local virtual node quantum backend and a client connections to all other
+    classical communication servers
 
-    Arguments
-    myName            name of this node (string)
-    virtualNet        servers of the virtual nodes (dictionary of host objects)
-    classicalNet      servers on the classical communication network (dictionary of host objects)
-    lNode             Twisted PB root to use as local server (if applicable)
-    func              function to run if all connections are set up
-    args, kwargs   additional arguments to be given to func
+    Args:
+        myName (str):
+            name of this node
+        virtualNet (SocketsConfig):
+            servers of the virtual nodes (dictionary of host objects)
+        classicalNet (SocketsConfig):
+            servers on the classical communication network (dictionary of host objects)
+        lNode (pb.Root):
+            Twisted PB root to use as local server (if applicable)
+        func (Callable):
+            function to run if all connections are set up
+        *args (Any):
+            additional arguments to be given to ``func``
+        **kwargs (Any):
+            additional keyword-based arguments to be passed to ``func``
     """
 
     # Initialize Twisted callback framework
@@ -70,8 +80,10 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
     # If we are listed as a server node for the classical network, start this server
     if myName in classicalNet.hostDict:
         try:
-            _logger.debug("LOCAL %s: Starting local classical communication server.", myName)
             nb = classicalNet.hostDict[myName]
+            _logger.debug("LOCAL %s: Starting local classical communication server (%s: %s, %d).",
+                          myName, nb.name, nb.hostname, nb.port
+                          )
             nb.root = lNode
             nb.factory = pb.PBServerFactory(nb.root)
             reactor.listenTCP(nb.port, nb.factory)
@@ -83,8 +95,9 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
     time.sleep(3)
 
     # Connect to the local virtual node simulating the "local" qubits
-    _logger.debug("LOCAL %s: Connecting to local virtual node.", myName)
     node = virtualNet.hostDict[myName]
+    _logger.debug("LOCAL %s: Connecting to local virtual node (%s: %s, %d).", myName, node.name, node.hostname,
+                  node.port)
     factory = pb.PBClientFactory()
     reactor.connectTCP(node.hostname, node.port, factory)
     deferVirtual = factory.getRootObject()
@@ -94,7 +107,8 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
     for node in classicalNet.hostDict:
         nb = classicalNet.hostDict[node]
         if nb.name != myName:
-            _logger.debug("LOCAL %s: Making classical connection to %s.", myName, nb.name)
+            _logger.debug("LOCAL %s: Making classical connection to %s (%s: %s, %d).", myName, nb.name, nb.name,
+                          nb.hostname, nb.port)
             nb.factory = pb.PBClientFactory()
             reactor.connectTCP(nb.hostname, nb.port, nb.factory)
             dList.append(nb.factory.getRootObject())
@@ -117,10 +131,11 @@ def setup_local(myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
 #
 
 
-def init_register(resList, myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
+def init_register(resList: DeferredList, myName: str, virtualNet: SocketsConfig, classicalNet: SocketsConfig,
+                  lNode: pb.Root, func: Callable, *args, **kwargs):
     _logger.debug("LOCAL %s: All connections set up.", myName)
 
-    # Retrieve the connection to the local virtual node, if successfull
+    # Retrieve the connection to the local virtual node, if successful
     j = 0
     if resList[j][0]:
         virtRoot = resList[j][1]

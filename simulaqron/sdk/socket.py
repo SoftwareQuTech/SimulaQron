@@ -8,7 +8,7 @@ from netqasm.sdk.classical_communication.message import StructuredMessage
 from netqasm.sdk.classical_communication.socket import Socket as _Socket
 
 from simulaqron.general.host_config import SocketsConfig, Host
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import network_config
 
 
 class Socket(_Socket):
@@ -33,7 +33,7 @@ class Socket(_Socket):
         self._use_callbacks = use_callbacks
         self._network_name = network_name
 
-        self._logger = get_netqasm_logger(f"{self.__class__.__name__}(L:{app_name} <-> R:{remote_app_name})")
+        self._logger = get_netqasm_logger(f"{self.__class__.__name__}(L: {app_name} <-> R: {remote_app_name})")
         self._timeout = timeout
         # We define _app_socket as None as a default value, so the __del__ method
         # does not fail when the socket could not be connected correctly.
@@ -191,6 +191,5 @@ class Socket(_Socket):
         return remote_host.addr
 
     def _get_app_net_config(self) -> SocketsConfig:
-        network_config_file = simulaqron_settings.network_config_file
-        app_net = SocketsConfig(str(network_config_file), network_name=self._network_name, config_type="app")
+        app_net = SocketsConfig(network_config, network_name=self._network_name, config_type="app")
         return app_net
