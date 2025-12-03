@@ -13,7 +13,7 @@ Bob to check whether the teleportation worked correctly.
 
 
 To start run:
-- simulaqron start --nodes=Alice,Bob --keep
+- simulaqron start --nodes=Alice,Bob --network-config-file classicalNet.json
 
 sh run.sh
 

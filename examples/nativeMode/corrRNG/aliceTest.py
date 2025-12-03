@@ -31,7 +31,7 @@ import logging
 
 from simulaqron.local.setup import setup_local
 from simulaqron.general.host_config import SocketsConfig
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, network_config
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet import reactor
 from twisted.spread import pb
@@ -117,11 +117,12 @@ def main():
 
     myName = "Alice" # we are Alice
 
-    # This file defines the network of virtual quantum nodes
-    virtualNet = SocketsConfig(str(simulaqron_settings.network_config_file), network_name="default", config_type="vnode")
+    # This file defines the network of virtual quantum nodes and the network used for classical communication
+    network_config.read_from_file("classicalNet.json")
 
-    # This file defines the network used for classical communication
-    classicalNet = SocketsConfig("classicalNet.json", network_name="default", config_type="app")
+    # Using the config, we then get the right sockets configuration type
+    virtualNet = SocketsConfig(network_config, network_name="default", config_type="vnode")
+    classicalNet = SocketsConfig(network_config, network_name="default", config_type="app")
 
    # Check if we should run a server (if this node is listed in classicalNet)
     if myName in classicalNet.hostDict:
