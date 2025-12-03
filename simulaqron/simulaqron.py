@@ -146,7 +146,7 @@ def stop(name: str):
     """Stops a network."""
     assert name is not None
     pidfile = PID_FOLDER / f"simulaqron_network_{name}.pid"
-    if pidfile.exists():
+    if not pidfile.exists():
         logging.warning("Network with name %s is not running", name)
         return
     d = RunningSimulaQronDaemon(pidfile=pidfile)
