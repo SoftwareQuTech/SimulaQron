@@ -3,12 +3,11 @@ from pathlib import Path
 from typing import Type, Dict, Any, List
 
 from dataclasses_serialization.json import JSONSerializer
-from dataclasses_serialization.serializer_base import (DeserializationError,
-                                                       dict_serialization)
+from dataclasses_serialization.serializer_base import DeserializationError
 
 from .network_config import NodeConfig, NetworkConfig, NetworkConfigBuilder
-from ..settings.simulaqron_config import (DEFAULT_SIMULAQRON_SETTINGS_FILENAME,
-                                          SimulaqronConfig, SimBackend)
+from ..settings import HOME_SIMULAQRON_SETTINGS
+from ..settings.simulaqron_config import SimulaqronConfig, SimBackend
 
 
 def init_serialization():
@@ -45,10 +44,11 @@ def path_serializer(obj: Path) -> str:
 # Registration of Deserializer for python enums
 @JSONSerializer.register_deserializer(Path)
 def path_deserializer(cls: Type[Path], path: str) -> Path:
-    if path == "$DEFAULT_NETWORK":
-        return (cls.home() / ".simulaqron" / DEFAULT_SIMULAQRON_SETTINGS_FILENAME).resolve()
-    # If the path is given, we will resolve it later
-    return cls(path)
+    match path:
+        case "$DEFAULT_NETWORK":
+            return HOME_SIMULAQRON_SETTINGS
+        case _:
+            return cls(path)
 
 
 @JSONSerializer.register_deserializer(SimulaqronConfig)

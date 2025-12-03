@@ -40,10 +40,11 @@ from typing import Self
 from dataclasses_serialization.json import JSONSerializer
 from dataclasses_serialization.json import JSONSerializerMixin
 
-# This is the name of the "local" simulaqron settings.
-# If a file named like this is found in the CWD, it will be
-# automatically loaded when creating the config file
+# Some helpers paths that point to the usual locations where the
+# configurations can reside:
 DEFAULT_SIMULAQRON_SETTINGS_FILENAME = "simulaqron_settings.json"
+LOCAL_SIMULAQRON_SETTINGS = (Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME).resolve()
+HOME_SIMULAQRON_SETTINGS = (Path.home() / ".simulaqron" / DEFAULT_SIMULAQRON_SETTINGS_FILENAME).resolve()
 
 
 class SimBackend(JSONSerializerMixin, Enum):
@@ -97,8 +98,8 @@ class SimulaqronConfig(JSONSerializerMixin):
 
     @classmethod
     def load_from_known_sources(cls) -> Self:
-        cwd_settings_file = (Path.cwd() / DEFAULT_SIMULAQRON_SETTINGS_FILENAME).resolve()
-        home_settings_file = (Path.home() / ".simulaqron" / DEFAULT_SIMULAQRON_SETTINGS_FILENAME).resolve()
+        cwd_settings_file = LOCAL_SIMULAQRON_SETTINGS.resolve()
+        home_settings_file = HOME_SIMULAQRON_SETTINGS.resolve()
 
         files_to_load = [cwd_settings_file, home_settings_file]
 

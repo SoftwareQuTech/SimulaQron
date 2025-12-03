@@ -12,7 +12,11 @@ from dataclasses_serialization.json import JSONSerializer, JSONSerializerMixin
 
 import simulaqron._default_config
 
+# Some helpers paths that point to the usual locations where the
+# configurations can reside:
 DEFAULT_SIMULAQRON_NETWORK_FILENAME = "simulaqron_network.json"
+HOME_NETWORK_SETTINGS = (Path.home() / ".simulaqron" / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
+LOCAL_NETWORK_SETTINGS = (Path.cwd() / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
 
 
 class NodeConfigType(StrEnum):
@@ -421,8 +425,8 @@ class NetworkConfigBuilder(JSONSerializerMixin):
 
     @classmethod
     def load_from_known_sources(cls) -> Self:
-        cwd_networks_file = (Path.cwd() / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
-        home_networks_file = (Path.home() / ".simulaqron" / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
+        cwd_networks_file = LOCAL_NETWORK_SETTINGS.resolve()
+        home_networks_file = HOME_NETWORK_SETTINGS.resolve()
 
         files_to_load = [cwd_networks_file, home_networks_file]
 
