@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
 import importlib.metadata as metadata
 import logging
 import time
 from pathlib import Path
-from typing import Optional, Callable, List
+from typing import Optional, List
 
 import click
 from daemons.interfaces import exit
@@ -48,15 +47,6 @@ class SimulaQronDaemon(run.RunDaemon):
 
         while True:
             time.sleep(0.1)
-
-
-def _is_positive_answer(answer: str):
-    """
-    Used to check if an answer is positive from a user.
-    """
-    if answer.lower() in ["yes", "y"]:
-        return True
-    return False
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -119,6 +109,9 @@ def start(name: str, nrnodes: int, nodes: str, network_config_file: Path):
         logging.warning("The pidfile for this network is located at %s", pidfile)
         return
     nodes = nodes.split(",")
+    if len(nodes) <=0:
+        print(f"WARNING - The list of nodes to start is empty. If you specified the --nrnodes option "
+              f"this can be normal. Please check your invocation line if needed.")
     if nrnodes > 0 and len(nodes) < nrnodes:
         nodes += [f"Node{i}" for i in range(nrnodes - len(nodes))]
     d = SimulaQronDaemon(pidfile=pidfile, name=name, nodes=nodes)
@@ -174,7 +167,7 @@ def reset(force: bool):
                        "(yes/no)")
     else:
         answer = "yes"
-    if _is_positive_answer(answer):
+    if answer.lower() in ["yes", "y"]:
         for entry in PID_FOLDER.iterdir():
             if entry.suffix == ".pid":
                 d = RunningSimulaQronDaemon(pidfile=entry)
