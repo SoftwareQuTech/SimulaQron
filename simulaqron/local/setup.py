@@ -53,18 +53,25 @@ _logger = get_netqasm_logger("setup-local")
 def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsConfig,
                 lNode: pb.Root, func: Callable, *args, **kwargs):
     """
-    Sets up
-    - local classical communication server (if desired according to the configuration file)
-    - client connection to the local virtual node quantum backend
-    - client connections to all other classical communication servers
+    Sets up a local classical communication server (if desired according to the configuration file),
+    a client connection to the local virtual node quantum backend and a client connections to all other
+    classical communication servers
 
-    Arguments
-    myName            name of this node (string)
-    virtualNet        servers of the virtual nodes (dictionary of host objects)
-    classicalNet      servers on the classical communication network (dictionary of host objects)
-    lNode             Twisted PB root to use as local server (if applicable)
-    func              function to run if all connections are set up
-    args, kwargs   additional arguments to be given to func
+    Args:
+        myName (str):
+            name of this node
+        virtualNet (SocketsConfig):
+            servers of the virtual nodes (dictionary of host objects)
+        classicalNet (SocketsConfig):
+            servers on the classical communication network (dictionary of host objects)
+        lNode (pb.Root):
+            Twisted PB root to use as local server (if applicable)
+        func (Callable):
+            function to run if all connections are set up
+        *args (Any):
+            additional arguments to be given to ``func``
+        **kwargs (Any):
+            additional keyword-based arguments to be passed to ``func``
     """
 
     # Initialize Twisted callback framework
@@ -120,10 +127,11 @@ def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsCon
 #
 
 
-def init_register(resList, myName, virtualNet, classicalNet, lNode, func, *args, **kwargs):
+def init_register(resList: DeferredList, myName: str, virtualNet: SocketsConfig, classicalNet: SocketsConfig,
+                  lNode: pb.Root, func: Callable, *args, **kwargs):
     _logger.debug("LOCAL %s: All connections set up.", myName)
 
-    # Retrieve the connection to the local virtual node, if successfull
+    # Retrieve the connection to the local virtual node, if successful
     j = 0
     if resList[j][0]:
         virtRoot = resList[j][1]
