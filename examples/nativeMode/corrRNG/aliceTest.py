@@ -31,7 +31,7 @@ import logging
 
 from simulaqron.local.setup import setup_local
 from simulaqron.general.host_config import SocketsConfig
-from simulaqron.settings import simulaqron_settings, network_config
+from simulaqron.settings import network_config
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet import reactor
 from twisted.spread import pb
@@ -115,7 +115,7 @@ class localNode(pb.Root):
 #
 def main():
 
-    myName = "Alice" # we are Alice
+    myName = "Alice"  # we are Alice
 
     # This file defines the network of virtual quantum nodes and the network used for classical communication
     network_config.read_from_file("classicalNet.json")
@@ -124,7 +124,7 @@ def main():
     virtualNet = SocketsConfig(network_config, network_name="default", config_type="vnode")
     classicalNet = SocketsConfig(network_config, network_name="default", config_type="app")
 
-   # Check if we should run a server (if this node is listed in classicalNet)
+    # Check if we should run a server (if this node is listed in classicalNet)
     if myName in classicalNet.hostDict:
         # Create the local classical server
         logging.debug("LOCAL %s: Creating classical server.", myName)
@@ -132,8 +132,9 @@ def main():
     else:
         myNode = None
 
-	# Connect and run
+    # Connect and run
     setup_local(myName, virtualNet, classicalNet, myNode, runClientNode)
+
 
 ##################################################################################################
 logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=logging.DEBUG)
