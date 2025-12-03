@@ -332,11 +332,11 @@ class NetworkConfigBuilder(JSONSerializerMixin):
 
     def get_nodes(self, network_name: str = "default") -> List[NodeConfig]:
         """
-        Returns the node-config objects (_NodeConfig) in a network.
+        Returns the node-config objects (NodeConfig) in a network that belong to the given network.
 
         :param network_name: str
             Name of the network (default: "default")
-        :return: list of _NodeConfig
+        :return: list of NodeConfig
         """
         if network_name in self.networks:
             nodes = self.networks[network_name].nodes

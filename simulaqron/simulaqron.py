@@ -11,7 +11,7 @@ from daemons.prefab import run
 
 from simulaqron.network import Network
 from simulaqron.settings import simulaqron_settings, network_config
-from simulaqron.settings.network_config import DEFAULT_SIMULAQRON_NETWORK_FILENAME
+from simulaqron.settings.network_config import DEFAULT_SIMULAQRON_NETWORK_FILENAME, NodeConfig
 from simulaqron.settings.simulaqron_config import SimBackend, DEFAULT_SIMULAQRON_SETTINGS_FILENAME
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -575,6 +575,12 @@ def add(name: str, network_name: str, hostname: str , app_port: int, qnodeos_por
                              app_port=app_port, qnodeos_port=qnodeos_port, vnode_port=vnode_port,
                              neighbors=neighbors)
     network_config.write_to_file(cwd_network_config_path)
+    added_node: NodeConfig = network_config.get_nodes(network_name=network_name)[name]
+    print(f"Node with name '{added_node.name}' was added to the network with name '{network_name}'.\n"
+          f"Socket addresses are:\n"
+          f"* App/Classical: '({added_node.app_hostname}, {added_node.app_port})\n"
+          f"* QNodeOS: '({added_node.qnodeos_hostname}, {added_node.qnodeos_port})\n"
+          f"* Virtual Node: '({added_node.vnode_hostname}, {added_node.vnode_port})\n")
 
 
 @nodes.command()
@@ -591,10 +597,11 @@ def remove(name: str, network_name: str):
     network_config.read_from_file(cwd_network_config_path)
     network_config.remove_node(node_name=name, network_name=network_name)
     network_config.write_to_file(cwd_network_config_path)
+    print(f"Node with name '{name}' was removed from the network with name '{network_name}'.\n")
 
 
 @nodes.command()
-def default(network_name: str):
+def default():
     """
     Sets the default nodes of the network.
 
@@ -604,6 +611,7 @@ def default(network_name: str):
     cwd_network_config_path = Path.cwd() / DEFAULT_SIMULAQRON_NETWORK_FILENAME
     network_config.using_default_network()
     network_config.write_to_file(cwd_network_config_path)
+    print(f"Default network saved to file: '{cwd_network_config_path}'")
 
 
 @nodes.command()
