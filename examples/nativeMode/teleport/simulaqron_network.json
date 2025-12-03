@@ -1,0 +1,40 @@
+[
+    {
+        "name": "default",
+        "nodes": [
+            {
+                "Alice": {
+                    "app_socket": [
+                        "localhost",
+                        8001
+                    ],
+                    "qnodeos_socket": [
+                        "localhost",
+                        8002
+                    ],
+                    "vnode_socket": [
+                        "localhost",
+                        8003
+                    ]
+                }
+            },
+            {
+                "Bob": {
+                    "app_socket": [
+                        "localhost",
+                        8010
+                    ],
+                    "qnodeos_socket": [
+                        "localhost",
+                        8011
+                    ],
+                    "vnode_socket": [
+                        "localhost",
+                        8012
+                    ]
+                }
+            }
+        ],
+        "topology": null
+    }
+]
