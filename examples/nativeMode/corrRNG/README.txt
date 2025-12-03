@@ -10,3 +10,12 @@ Bob proceeds to recover the teleported qubit.
 
 In this example, we simply print out the initial state to be teleported, as well as the final state received by
 Bob to check whether the teleportation worked correctly.
+
+
+To start run:
+- simulaqron start --nodes=Alice,Bob --keep
+
+sh run.sh
+
+To terminate run:
+sh terminate.sh

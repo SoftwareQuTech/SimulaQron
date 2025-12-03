@@ -115,31 +115,24 @@ class localNode(pb.Root):
 #
 def main():
 
-    # In this example, we are Alice.
-    myName = "Alice"
+    myName = "Alice" # we are Alice
 
     # This file defines the network of virtual quantum nodes
-    network_file = simulaqron_settings.network_config_file
+    virtualNet = SocketsConfig(str(simulaqron_settings.network_config_file), network_name="default", config_type="vnode")
 
-    # This file defines the nodes acting as servers in the classical communication network
-    classicalFile = "classicalNet.cfg"
+    # This file defines the network used for classical communication
+    classicalNet = SocketsConfig("classicalNet.json", network_name="default", config_type="app")
 
-    # Read configuration files for the virtual quantum, as well as the classical network
-    virtualNet = SocketsConfig(network_file)
-    classicalNet = SocketsConfig(classicalFile)
-
-    # Check if we should run a local classical server. If so, initialize the code
-    # to handle remote connections on the classical communication network
+   # Check if we should run a server (if this node is listed in classicalNet)
     if myName in classicalNet.hostDict:
-        lNode = localNode(classicalNet.hostDict[myName], classicalNet)
+        # Create the local classical server
+        logging.debug("LOCAL %s: Creating classical server.", myName)
+        myNode = localNode(virtualNet.hostDict[myName], classicalNet)
     else:
-        lNode = None
+        myNode = None
 
-        # Set up the local classical server if applicable, and connect to the virtual
-        # node and other classical servers. Once all connections are set up, this will
-        # execute the function runClientNode
-    setup_local(myName, virtualNet, classicalNet, lNode, runClientNode)
-
+	# Connect and run
+    setup_local(myName, virtualNet, classicalNet, myNode, runClientNode)
 
 ##################################################################################################
 logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=logging.DEBUG)
