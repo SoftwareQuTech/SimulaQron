@@ -80,8 +80,8 @@ def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsCon
     # If we are listed as a server node for the classical network, start this server
     if myName in classicalNet.hostDict:
         try:
-            _logger.debug("LOCAL %s: Starting local classical communication server.", myName)
             nb = classicalNet.hostDict[myName]
+            _logger.debug("LOCAL %s: Starting local classical communication server (%s: %s, %d).", myName, nb.name, nb.hostname, nb.port)
             nb.root = lNode
             nb.factory = pb.PBServerFactory(nb.root)
             reactor.listenTCP(nb.port, nb.factory)
@@ -93,8 +93,8 @@ def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsCon
     time.sleep(3)
 
     # Connect to the local virtual node simulating the "local" qubits
-    _logger.debug("LOCAL %s: Connecting to local virtual node.", myName)
     node = virtualNet.hostDict[myName]
+    _logger.debug("LOCAL %s: Connecting to local virtual node (%s: %s, %d).", myName, node.name, node.hostname, node.port)
     factory = pb.PBClientFactory()
     reactor.connectTCP(node.hostname, node.port, factory)
     deferVirtual = factory.getRootObject()
@@ -104,7 +104,7 @@ def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsCon
     for node in classicalNet.hostDict:
         nb = classicalNet.hostDict[node]
         if nb.name != myName:
-            _logger.debug("LOCAL %s: Making classical connection to %s.", myName, nb.name)
+            _logger.debug("LOCAL %s: Making classical connection to %s (%s: %s, %d).", myName, nb.name, nb.name, nb.hostname, nb.port)
             nb.factory = pb.PBClientFactory()
             reactor.connectTCP(nb.hostname, nb.port, nb.factory)
             dList.append(nb.factory.getRootObject())
