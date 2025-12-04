@@ -258,3 +258,28 @@ class TestNetworksSettings:
 
             network_config.read_from_file(temp_file.name)
             assert json.dumps(JSONSerializer.serialize(network_config), indent=4) == raw_config
+
+    def test_load_old_json_format(self):
+        this_file_folder = Path(__file__).parent
+        old_json_config_path = this_file_folder / "resources" / "old_format.json"
+        network_config.read_from_file(old_json_config_path)
+
+        assert len(network_config.networks) == 1
+        assert network_config.networks[0].name == "default"
+        assert len(network_config.nodes) == 2
+
+        assert network_config.nodes[0].name == "Alice"
+        assert network_config.nodes[0].app_hostname == "localhost"
+        assert network_config.nodes[0].app_port == 8821
+        assert network_config.nodes[0].qnodeos_hostname == "localhost"
+        assert network_config.nodes[0].qnodeos_port == 8822
+        assert network_config.nodes[0].vnode_hostname == "localhost"
+        assert network_config.nodes[0].qnodeos_port == 8823
+
+        assert network_config.nodes[1].name == "Bob"
+        assert network_config.nodes[1].app_hostname == "localhost"
+        assert network_config.nodes[1].app_port == 8831
+        assert network_config.nodes[1].qnodeos_hostname == "localhost"
+        assert network_config.nodes[1].qnodeos_port == 8832
+        assert network_config.nodes[1].vnode_hostname == "localhost"
+        assert network_config.nodes[1].qnodeos_port == 8833
