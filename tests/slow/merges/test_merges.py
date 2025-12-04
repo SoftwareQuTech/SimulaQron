@@ -1,9 +1,7 @@
 import sys
 import os
 import unittest
-from pathlib import Path
-from shutil import copyfile
-from tempfile import NamedTemporaryFile
+from typing import Callable, List
 
 import numpy as np
 
@@ -11,13 +9,14 @@ from twisted.spread import pb
 from twisted.internet.defer import inlineCallbacks
 
 from multiprocess.context import ForkProcess as Process
-from multiprocess.connection import Pipe
+from multiprocess.connection import Pipe, Connection
 from netqasm.logging.glob import get_netqasm_logger
 from logging import DEBUG
 from simulaqron.general.host_config import SocketsConfig
 from simulaqron.local.setup import setup_local, assemble_qubit
 from simulaqron.network import Network
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, network_config
+from simulaqron.settings.network_config import NodeConfigType
 from simulaqron.settings.simulaqron_config import SimBackend
 from simulaqron.toolbox.stabilizer_states import StabilizerState
 from simulaqron.reactor import reactor
@@ -147,7 +146,6 @@ class localNode(pb.Root):
         return bool(correct)
 
 
-# @for_all_methods()
 class TestMerge(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -156,23 +154,15 @@ class TestMerge(unittest.TestCase):
 
         cls.processes = []
         cls.processes_to_wait_for = None
+        simulaqron_settings.default_settings()
+        simulaqron_settings.sim_backend = SimBackend.PROJECTQ
 
-        with NamedTemporaryFile(mode="w+", suffix=".json", delete=False) as simulaqron_settings_file:
-            cls._simulaqron_settings_file = simulaqron_settings_file
-            simulaqron_settings.default_settings()
-            simulaqron_settings.sim_backend = SimBackend.PROJECTQ
-            with NamedTemporaryFile(mode="w+", suffix=".json", delete=False) as network_def_file:
-                cls._network_def_file = network_def_file
-                path_to_here = os.path.dirname(os.path.abspath(__file__))
-                network_config_file = os.path.join(path_to_here, "configs", "network.json")
-                copyfile(network_config_file, network_def_file.name)
-                simulaqron_settings.network_config_file = network_def_file.name
-                simulaqron_settings.save_to_file(simulaqron_settings_file.name)
-                nodes = ["Alice", "Bob", "Charlie"]
-                cls.network = Network(nodes=nodes, force=True)
-                cls.network.start()
-        # cls.network = Network(nodes=nodes, force=True)
-        # cls.network.start()
+        path_to_here = os.path.dirname(os.path.abspath(__file__))
+        network_config_file = os.path.join(path_to_here, "configs", "network.json")
+        network_config.read_from_file(network_config_file)
+        nodes = ["Alice", "Bob", "Charlie"]
+        cls.network = Network(nodes=nodes)
+        cls.network.start()
 
     @classmethod
     def tearDownClass(cls):
@@ -181,30 +171,23 @@ class TestMerge(unittest.TestCase):
             p.join()
 
         cls.network.stop()
-        # Remove the files created for config
-        simulaqron_settings_file = Path(cls._simulaqron_settings_file.name)
-        network_settings_file = Path(cls._network_def_file.name)
-        cls._simulaqron_settings_file.close()
-        cls._network_def_file.close()
-        simulaqron_settings_file.unlink()
-        network_settings_file.unlink()
 
     @staticmethod
-    def setup_node(name, node_code, classical_net_file, send_end):
+    def setup_node(name: str, node_code: Callable, nodes_in_classical_network: List[str], send_end: Connection):
         if simulaqron_settings.log_level == DEBUG:
             stdout_file = open(f"stdout-setup-node-{name}-{os.getpid()}.out.txt", "w")
             stderr_file = open(f"stderr-setup-node-{name}-{os.getpid()}.out.txt", "w")
             sys.stdout = stdout_file
             sys.stderr = stderr_file
-        # This file defines the network of virtual quantum nodes
-        virtualFile = simulaqron_settings.network_config_file
+        # We get the virtual nodes network configuration from the loaded network config
+        virtualNet = SocketsConfig(network_config, config_type=NodeConfigType.VNODE)
 
-        # This file defines the nodes acting as servers in the classical communication network
-        classicalFile = os.path.join(os.path.dirname(__file__), "configs", classical_net_file)
+        # We get the classical nodes network configuration from the loaded network config
+        classicalNet = SocketsConfig(network_config, config_type=NodeConfigType.APP)
 
-        # Read configuration files for the virtual quantum, as well as the classical network
-        virtualNet = SocketsConfig(virtualFile)
-        classicalNet = SocketsConfig(classicalFile)
+        # We also filter the nodes that will participate in the classical network, so we don't
+        # start local nodes unnecessarily
+        classicalNet.filter(nodes_in_classical_network)
 
         # Check if we should run a local classical server. If so, initialize the code
         # to handle remote connections on the classical communication network
@@ -218,13 +201,13 @@ class TestMerge(unittest.TestCase):
         # execute the function runClientNode
         setup_local(name, virtualNet, classicalNet, lNode, node_code, send_end)
 
-    def run_test(self, classical_net_file):
+    def run_test(self, nodes_in_class_network: List[str]):
         pipe_list = []
-        for name, node_code in zip(self.nodes, self.node_codes):
+        for node_name, node_code in zip(self.nodes, self.node_codes):
             recv_end, send_end = Pipe(False)
             p = Process(target=self.setup_node,
-                        args=[name, node_code, classical_net_file, send_end],
-                        name=name)
+                        args=[node_name, node_code, nodes_in_class_network, send_end],
+                        name=node_name)
             self.processes.append(p)
             pipe_list.append(recv_end)
 
@@ -296,7 +279,8 @@ class TestBothLocal(TestMerge):
         reactor.stop()
 
     def test(self):
-        self.run_test("Alice.cfg")
+        # Original arg: "Alice.cfg" -> specifies NO node in the classical network
+        self.run_test([])
 
 
 class TestBothLocalNotSameReg(TestBothLocal):
@@ -435,7 +419,8 @@ class TestBothRemote(TestMerge):
         send_end.send(True)
 
     def test(self):
-        self.run_test("AliceBobCharlie.cfg")
+        # Original arg: "AliceBobCharlie.cfg" -> specifies "Alice", "Bob", and "Charlie" in the classical network
+        self.run_test(["Alice", "Bob", "Charlie"])
 
 
 class TestBothRemoteSameNodeDiffReg(TestMerge):
@@ -501,7 +486,8 @@ class TestBothRemoteSameNodeDiffReg(TestMerge):
         send_end.send(True)
 
     def test(self):
-        self.run_test("AliceBob.cfg")
+        # Original arg: "AliceBob.cfg" -> specifies "Alice", and "Bob" in the classical network
+        self.run_test(["Alice", "Bob"])
 
 
 class TestBothRemoteSameNodeSameReg(TestBothRemoteSameNodeDiffReg):
