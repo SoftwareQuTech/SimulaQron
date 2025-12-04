@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Optional, Self, Dict, List, Tuple, Any
 
 from dataclasses_serialization.json import JSONSerializer, JSONSerializerMixin
+from docutils.nodes import node_class_names
 
 import simulaqron._default_config
 
@@ -170,6 +171,11 @@ class NetworkConfigBuilder(JSONSerializerMixin):
     used_sockets: List[Tuple[str, int]] = field(default_factory=list)
 
     def using_default_network(self):
+        """
+        Loads the default networks in the current networks configuration object. The default
+        configuration contains a single network named "default", which contains 5 nodes named
+        "Alice", "Bob", "Charlie", "David" and "Eve".
+        """
         # We use the embedded default network here
         default_network_path = resources.files(simulaqron._default_config).joinpath("default_network.json")
         new_builder = NetworkConfigBuilder()
@@ -417,14 +423,31 @@ class NetworkConfigBuilder(JSONSerializerMixin):
             setattr(self, class_field.name, new_val)
 
     def read_from_legacy_files(self, app_file_path: PathLike | str,
-                               qnodeos_file_path: PathLike | str,
-                               vnode_file_path: PathLike | str):
+                               vnode_file_path: PathLike | str,
+                               qnodeos_file_path: Optional[PathLike | str] = None):
         raise NotImplementedError("Reading form legacy config files is not supported yet")
+
+    @staticmethod
+    def _correct_old_format(config_content: Dict[str, Any] | List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        if isinstance(config_content, list):
+            return config_content
+        # Here we assume that we are working with a dictionary
+        assert isinstance(config_content, dict)
+        reformatted_config = []
+        for network_name, net_spec in config_content.items():
+            new_network = {
+                "name": network_name,
+                "nodes": [{node_name: node_spec} for node_name, node_spec in net_spec["nodes"].items()],
+                "topology": net_spec["topology"]
+            }
+            reformatted_config.append(new_network)
+        return reformatted_config
 
     @classmethod
     def _deserialize_from_file(cls, file_path: Path) -> Self:
         with file_path.resolve().open("rt") as file:
             config_content = json.load(file)
+            config_content = NetworkConfigBuilder._correct_old_format(config_content)
             return JSONSerializer.deserialize(cls, config_content)
 
     @classmethod
