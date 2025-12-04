@@ -47,8 +47,9 @@ stdout_file = None
 def sigterm_handler(name, _signo, _stack_frame):
     print("Shutting down Node from signal %d." % _signo, flush=True)
     global stdout_file
-    stdout_file.flush()
-    stdout_file.close()
+    if stdout_file is not None:
+        stdout_file.flush()
+        stdout_file.close()
     reactor.stop()
 
 
