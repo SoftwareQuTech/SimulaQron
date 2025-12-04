@@ -30,7 +30,7 @@
 import socket
 import struct
 from ipaddress import IPv4Address
-from typing import Dict
+from typing import Dict, List
 
 from twisted.spread import pb
 
@@ -88,6 +88,21 @@ class SocketsConfig(pb.Referenceable):
         """
         host = self.hostDict[name]
         print("Host details of ", name, ": ", host.hostname, ":", host.port)
+
+    def filter(self, nodes_to_keep: List[str]):
+        """
+        Filter the loaded sockets configurations to only contain the given names.
+        If a given node name is not found in the loaded one, it will simply be ignored
+        from the exclusion process (i.e. it will not break the process)
+        Args:
+            nodes_to_keep: List[str]
+                The node names to keep after filtering.
+        """
+        nodes_kept = {}
+        for node_name in self.hostDict.keys():
+            if node_name in nodes_to_keep:
+                nodes_kept[node_name] = self.hostDict[node_name]
+        self.hostDict = nodes_kept
 
 
 def node_id(fam: socket.AddressFamily, ip: str) -> int:
