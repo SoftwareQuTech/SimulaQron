@@ -428,11 +428,17 @@ class NetworkConfigBuilder(JSONSerializerMixin):
         raise NotImplementedError("Reading form legacy config files is not supported yet")
 
     @staticmethod
-    def _correct_old_format(config_content: Dict[str, Any] | List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        if isinstance(config_content, list):
-            return config_content
-        # Here we assume that we are working with a dictionary
-        assert isinstance(config_content, dict)
+    def _is_old_json_format(config_content: Dict[str, Any] | List[Dict[str, Any]]) -> bool:
+        match config_content:
+            case list():
+                return False
+            case dict():
+                return True
+            case _:
+                raise ValueError("JSON network configi file does not have a valid format.")
+
+    @staticmethod
+    def _correct_old_format(config_content: Dict[str, Any]) -> List[Dict[str, Any]]:
         reformatted_config = []
         for network_name, net_spec in config_content.items():
             new_network = {
@@ -447,8 +453,11 @@ class NetworkConfigBuilder(JSONSerializerMixin):
     def _deserialize_from_file(cls, file_path: Path) -> Self:
         with file_path.resolve().open("rt") as file:
             config_content = json.load(file)
+        if NetworkConfigBuilder._is_old_json_format(config_content):
             config_content = NetworkConfigBuilder._correct_old_format(config_content)
-            return JSONSerializer.deserialize(cls, config_content)
+            with file_path.open("wt") as file:
+                json.dump(config_content, file, indent=4)
+        return JSONSerializer.deserialize(cls, config_content)
 
     @classmethod
     def load_from_known_sources(cls) -> Self:
