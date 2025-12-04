@@ -40,8 +40,9 @@ from netqasm.sdk import Qubit, EPRSocket
 from simulaqron.sdk.socket import Socket
 from simulaqron.run.run import run_applications
 from simulaqron.run.run import reset
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, network_config
 from simulaqron.settings.network_config import NetworkConfigBuilder
+from simulaqron.settings.simulaqron_config import SimBackend
 
 
 def calc_exp_values(q):
@@ -183,46 +184,41 @@ def prep_H_state():
 # TODO - We can test these things better when we have implemented a get_qubit_state function for simulaqron
 #  for now, we will perform tests based on the tomography function.
 class TestTwoQubitGates:
-    iterations = 1
+    iterations: int = 1
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def network(self):
         simulaqron_settings.default_settings()
-        with NamedTemporaryFile(suffix=".json", delete_on_close=False) as net_config_file:
-            simulaqron_settings.network_config_file = net_config_file.name
-            network_builder = NetworkConfigBuilder()
-            network_builder.using_default_network()
-            network_builder.write_to_file(net_config_file.name)
-            net_config_file.close()
-            network = Network(nodes=["Alice", "Bob"], force=True)
-            network.start(wait_until_running=True)
-            yield network
+        simulaqron_settings.sim_backend = SimBackend.PROJECTQ
+        network_config.using_default_network()
+        network = Network(nodes=["Alice", "Bob"])
+        network.start(wait_until_running=True)
+        yield
+        network.stop()
+        reset()
 
-            network.stop()
-            reset()
-
-    def test_CNOT_control(self, network):
+    def test_CNOT_control(self):
         with SimulaQronConnection("Bob") as conn:
             # Test CNOT control
             exp_values = calc_exp_values(prep_mixed_state())
             ans = conn.test_preparation(prep_CNOT_control, exp_values, iterations=self.iterations)
             assert ans
 
-    def test_CNOT_target(self, network):
+    def test_CNOT_target(self):
         with SimulaQronConnection("Bob") as conn:
             # Test CNOT target
             exp_values = calc_exp_values(prep_mixed_state())
             ans = conn.test_preparation(prep_CNOT_target, exp_values, iterations=self.iterations)
             assert ans
 
-    def test_CPHASE_control(self, network):
+    def test_CPHASE_control(self):
         with SimulaQronConnection("Bob") as conn:
             # Test CPHASE control
             exp_values = calc_exp_values(prep_mixed_state())
             ans = conn.test_preparation(prep_CPHASE_control, exp_values, iterations=self.iterations)
             assert ans
 
-    def test_CPHASE_target(self, network):
+    def test_CPHASE_target(self):
         with SimulaQronConnection("Bob") as conn:
             # Test CPHASE target
             exp_values = calc_exp_values(prep_mixed_state())
@@ -231,7 +227,7 @@ class TestTwoQubitGates:
 
     # Tests using multiple nodes
 
-    def test_EPRS(self, network):
+    def test_EPRS(self):
         apps = default_app_instance(
             [
                 ("Alice", EPR_Alice),
@@ -242,7 +238,7 @@ class TestTwoQubitGates:
         # both sides MUST measure the same state
         assert int(results[0]["app_Alice"]) == int(results[0]["app_Bob"])
 
-    def test_teleport(self, network):
+    def test_teleport(self):
         # To avoid stalling the simulation, the applications *need* to run
         # in parallel. For this reason, we use the "run_applications" method
         # which spawns a process for each node

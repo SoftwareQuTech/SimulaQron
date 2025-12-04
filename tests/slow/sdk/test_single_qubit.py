@@ -34,7 +34,7 @@ from scipy.linalg import expm
 
 from netqasm.sdk.qubit import Qubit
 
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, network_config
 from simulaqron.settings.simulaqron_config import SimBackend
 from simulaqron.network import Network
 from simulaqron.sdk.connection import SimulaQronConnection
@@ -199,54 +199,50 @@ def prep_I_state():
 
 
 # TODO - We can test these things better when we have implemented a get_qubit_state function for simulaqron
-#  for now, we will permon tests based on the tomography function.
+#  for now, we will perform tests based on the tomography function.
 class TestSingleQubitGate:
     iterations: int = 1
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def network(self):
         simulaqron_settings.default_settings()
-        with NamedTemporaryFile(suffix=".json", delete_on_close=False) as net_config_file:
-            simulaqron_settings.network_config_file = net_config_file.name
-            network_builder = NetworkConfigBuilder()
-            network_builder.using_default_network()
-            network_builder.write_to_file(net_config_file.name)
-            network = Network(nodes=["Alice"], force=True)
-            network.start()
-            yield network
+        simulaqron_settings.sim_backend = SimBackend.PROJECTQ
+        network_config.using_default_network()
+        network = Network(nodes=["Alice"])
+        network.start()
+        yield
+        network.stop()
+        reset()
 
-            network.stop()
-            reset()
-
-    def test_X_Gate(self, network):
+    def test_X_Gate(self):
         with SimulaQronConnection("Alice") as conn:
             # Test X
             exp_values = calc_exp_values(prep_X_state())
             ans = conn.test_preparation(prep_X, exp_values, iterations=self.iterations)
             assert ans
 
-    def test_Y_Gate(self, network):
+    def test_Y_Gate(self):
         with SimulaQronConnection("Alice") as conn:
             # Test Y
             exp_values = calc_exp_values(prep_Y_state())
             ans = conn.test_preparation(prep_Y, exp_values, iterations=self.iterations)
             assert ans
 
-    def test_Z_Gate(self, network):
+    def test_Z_Gate(self):
         with SimulaQronConnection("Alice") as conn:
             # Test Z
             exp_values = calc_exp_values(prep_Z_state())
             ans = conn.test_preparation(prep_Z, exp_values, iterations=self.iterations)
             assert ans
 
-    def test_H_Gate(self, network):
+    def test_H_Gate(self):
         with SimulaQronConnection("Alice") as conn:
             # Test H
             exp_values = calc_exp_values(prep_H_state())
             ans = conn.test_preparation(prep_H, exp_values, iterations=self.iterations)
             assert ans
 
-    def test_T_Gate(self, network):
+    def test_T_Gate(self):
         with SimulaQronConnection("Alice") as conn:
             # Test T
             exp_values = calc_exp_values(prep_T_state())
@@ -257,14 +253,14 @@ class TestSingleQubitGate:
                 ans = conn.test_preparation(prep_T, exp_values, iterations=self.iterations)
                 assert ans
 
-    def test_K_Gate(self, network):
+    def test_K_Gate(self):
         with SimulaQronConnection("Alice") as conn:
             # Test K
             exp_values = calc_exp_values(prep_K_state())
             ans = conn.test_preparation(prep_K, exp_values, iterations=self.iterations)
             assert ans
 
-    def test_X_pi8Rot(self, network):
+    def test_X_pi8Rot(self):
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_X pi/8
             exp_values = calc_exp_values(prep_rot_state([1, 0, 0], np.pi / 8))
@@ -275,7 +271,7 @@ class TestSingleQubitGate:
                 ans = conn.test_preparation(prep_rotx1, exp_values, iterations=self.iterations)
                 assert ans
 
-    def test_X_5pi8Rot(self, network):
+    def test_X_5pi8Rot(self):
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_X 5*pi/8
             exp_values = calc_exp_values(prep_rot_state([1, 0, 0], 5 * np.pi / 8))
@@ -286,7 +282,7 @@ class TestSingleQubitGate:
                 ans = conn.test_preparation(prep_rotx2, exp_values, iterations=self.iterations)
                 assert ans
 
-    def test_Y_pi8Rot(self, network):
+    def test_Y_pi8Rot(self):
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_Y pi/8
             exp_values = calc_exp_values(prep_rot_state([0, 1, 0], np.pi / 8))
@@ -297,7 +293,7 @@ class TestSingleQubitGate:
                 ans = conn.test_preparation(prep_roty1, exp_values, iterations=self.iterations)
                 assert ans
 
-    def test_Y_5pi8Rot(self, network):
+    def test_Y_5pi8Rot(self):
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_Y 5*pi/8
             exp_values = calc_exp_values(prep_rot_state([0, 1, 0], 5 * np.pi / 8))
@@ -308,7 +304,7 @@ class TestSingleQubitGate:
                 ans = conn.test_preparation(prep_roty2, exp_values, iterations=self.iterations)
                 assert ans
 
-    def test_Z_pi8Rot(self, network):
+    def test_Z_pi8Rot(self):
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_Z pi/8
             exp_values = calc_exp_values(prep_rot_state([0, 0, 1], np.pi / 8))
@@ -319,7 +315,7 @@ class TestSingleQubitGate:
                 ans = conn.test_preparation(prep_rotz1, exp_values, iterations=self.iterations)
                 assert ans
 
-    def test_Z_5pi8Rot(self, network):
+    def test_Z_5pi8Rot(self):
         with SimulaQronConnection("Alice") as conn:
             # Test ROT_Z 5*pi/8
             exp_values = calc_exp_values(prep_rot_state([0, 0, 1], 5 * np.pi / 8))
@@ -330,7 +326,7 @@ class TestSingleQubitGate:
                 ans = conn.test_preparation(prep_rotz2, exp_values, iterations=self.iterations)
                 assert ans
 
-    def test_Reset(self, network):
+    def test_Reset(self):
         with SimulaQronConnection("Alice") as conn:
             # Test RESET
             exp_values = calc_exp_values(prep_I_state())
