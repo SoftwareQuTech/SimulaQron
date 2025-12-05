@@ -32,9 +32,11 @@ import logging
 
 from simulaqron.local.setup import setup_local
 from simulaqron.general.host_config import SocketsConfig
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import network_config
 from twisted.spread import pb
 from twisted.internet import reactor
+
+from simulaqron.settings.network_config import NodeConfigType
 
 
 ###
@@ -130,15 +132,25 @@ def main():
     # In this example, we are YOURNAME
     myName = "YOURNAME"
 
-    # This file defines the network of virtual quantum nodes
-    network_file = simulaqron_settings.network_config_file
+    # This file defines the nodes on the network. This file contains all the information
+    # about classical and virtual nodes sockets
+    network_config_file = "network_config.json"
 
-    # This file defines the nodes acting as servers in the classical communication network
-    classicalFile = "./classicalNet.cfg"
+    # To make use of the network config file, we need to use the "network_config" to
+    # load this file in memory
+    network_config.read_from_file(network_config_file)
 
-    # Read configuration files for the virtual quantum, as well as the classical network
-    virtualNet = SocketsConfig(network_file)
-    classicalNet = SocketsConfig(classicalFile)
+    # Use the loaded network configuration to get the virtual quantum, as well as the classical network
+    virtualNet = SocketsConfig(network_config, config_type=NodeConfigType.VNODE)
+    classicalNet = SocketsConfig(network_config, config_type=NodeConfigType.APP)
+
+    # By default, *all nodes* described in the network configuration will be loaded in the SocketsConfig
+    # object. With this information, SimulaQron will start all of those nodes, either as local classical
+    # or virtual nodes (depending on the specified configuration type).
+    # In some cases, this is not desired, and we want ot start *a subset* of these nodes.
+    # To do this, we can use the method "filter" from the SocketsConfig object to specify the nodes
+    # we want to keep (and hence, start)
+    classicalNet.filter(["Alice", "Bob"])
 
     # Check if we should run a local classical server. If so, initialize the code
     # to handle remote connections on the classical communication network
