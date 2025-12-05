@@ -51,7 +51,7 @@ class SimulaQronDaemon(run.RunDaemon):
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
-def cli():
+def cli_entry_point():
     """Command line interface for interacting with SimulaQron."""
     pass
 
@@ -60,7 +60,7 @@ def cli():
 # version #
 ###########
 
-@cli.command()
+@cli_entry_point.command()
 def version():
     """
     Prints the version of simulqron.
@@ -72,7 +72,7 @@ def version():
 # start command #
 #################
 
-@cli.command()
+@cli_entry_point.command()
 @click.option(
     "--network-config-file",
     help=f"Use the given network config file. Defaults to the file named "  # noqa: E131
@@ -130,7 +130,7 @@ def start(name: str, nrnodes: int, nodes: str, network_config_file: Path):
 # stop command #
 ###############
 
-@cli.command()
+@cli_entry_point.command()
 @click.option(
     "--name",
     help="Stop the network with then a given name (default: default)",
@@ -152,7 +152,7 @@ def stop(name: str):
 # reset command #
 #################
 
-@cli.command()
+@cli_entry_point.command()
 @click.option(
     "-f",
     "--force",
@@ -185,7 +185,7 @@ def reset(force: bool):
 # set command #
 ###############
 
-@cli.group(
+@cli_entry_point.group(
     help="Change a simulaqron setting"
 )
 def set():
@@ -370,7 +370,7 @@ def t1(value):
 ###############
 
 
-@cli.group()
+@cli_entry_point.group()
 def get():
     """Get a setting"""
     pass
@@ -500,7 +500,7 @@ def t1():
 # node command #
 ###############
 
-@cli.group()
+@cli_entry_point.group()
 def nodes():
     """
     Manage the nodes in the simulated network.
@@ -616,4 +616,4 @@ if __name__ == "__main__":
         format="%(asctime)s:%(levelname)s:%(message)s",
         level=simulaqron_settings.log_level,
     )
-    cli()
+    cli_entry_point()
