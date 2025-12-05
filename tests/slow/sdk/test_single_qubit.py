@@ -40,7 +40,7 @@ from simulaqron.network import Network
 from simulaqron.sdk.connection import SimulaQronConnection
 from simulaqron.run.run import reset
 from simulaqron.general import SimUnsupportedError
-from simulaqron.settings.network_config import NetworkConfigBuilder
+from simulaqron.settings.network_config import NetworksConfiguration
 
 
 def calc_exp_values(q):

@@ -176,7 +176,7 @@ def reset(force: bool):
                 if entry.exists():
                     entry.unlink()
         simulaqron_settings.default_settings()
-        simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     else:
         print("Aborting!")
 
@@ -197,7 +197,7 @@ def set():
 )
 def default():
     simulaqron_settings.default_settings()
-    simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
 
 
 @set.command(
@@ -211,10 +211,10 @@ def sim_backend(value):
     if not LOCAL_SIMULAQRON_SETTINGS.exists():
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
-        simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.sim_backend = value
-    simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
@@ -229,10 +229,10 @@ def max_qubits(value):
     if not LOCAL_SIMULAQRON_SETTINGS.exists():
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
-        simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.max_qubits = value
-    simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
@@ -247,10 +247,10 @@ def max_registers(value):
     if not LOCAL_SIMULAQRON_SETTINGS.exists():
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
-        simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.max_registers = value
-    simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
@@ -265,10 +265,10 @@ def conn_retry_time(value):
     if not LOCAL_SIMULAQRON_SETTINGS.exists():
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
-        simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.conn_retry_time = value
-    simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
@@ -283,10 +283,10 @@ def recv_timeout(value):
     if not LOCAL_SIMULAQRON_SETTINGS.exists():
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
-        simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.recv_timeout = value
-    simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
@@ -301,10 +301,10 @@ def recv_retry_time(value):
     if not LOCAL_SIMULAQRON_SETTINGS.exists():
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
-        simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.recv_retry_time = value
-    simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
@@ -319,10 +319,10 @@ def log_level(value):
     if not LOCAL_SIMULAQRON_SETTINGS.exists():
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
-        simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.log_level = value
-    simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
@@ -337,13 +337,13 @@ def noisy_qubits(value):
     if not LOCAL_SIMULAQRON_SETTINGS.exists():
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
-        simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     if value == "on":
         simulaqron_settings.noisy_qubits = True
     else:
         simulaqron_settings.noisy_qubits = False
-    simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
@@ -358,10 +358,10 @@ def t1(value):
     if not LOCAL_SIMULAQRON_SETTINGS.exists():
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
-        simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.t1 = value
-    simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 

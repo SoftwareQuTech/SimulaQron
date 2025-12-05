@@ -81,6 +81,12 @@ class SimulaqronConfig(JSONSerializerMixin):
         home_setting_folder.mkdir(parents=True, exist_ok=True)
 
     def read_from_file(self, file_path: Path | str):
+        """
+        Reads the SimulaQron configuration from the given file path.
+        Args:
+            file_path: Path, str
+                A `pathlib.Path` or `str` representing the file path to read the configurations from.
+        """
         if isinstance(file_path, str):
             file_path = Path(file_path).resolve()
         new_config = self._deserialize_from_file(file_path)
@@ -98,6 +104,20 @@ class SimulaqronConfig(JSONSerializerMixin):
 
     @classmethod
     def read_from_known_sources(cls) -> Self:
+        """
+        Reads the SimulaQron configuration from usual locations.
+        This method will try to load the configuration files *in the following order* from (1)
+        the current folder (`./simulaqron_settings.json`) and, (2) simulaqron settings in the
+        user's home folder (`~/.simulaqron/simulaqron_settings.json`).
+
+        If none of these files exists, this method will create a SimulaQron configuration in
+        user's home folder (`~/.simulaqron/simulaqron_settings.json`) containing the default
+        SimulaQron configuration.
+
+        To check the default configuration, check the documentation of `default_settings`.
+        See Also:
+            default_settings()
+        """
         cwd_settings_file = LOCAL_SIMULAQRON_SETTINGS.resolve()
         home_settings_file = HOME_SIMULAQRON_SETTINGS.resolve()
 
@@ -113,10 +133,26 @@ class SimulaqronConfig(JSONSerializerMixin):
 
         # Ultimate case; we create a new config file in the ohme and load it
         new_default_config = cls()
-        new_default_config.save_to_file(home_settings_file)
+        new_default_config.write_to_file(home_settings_file)
         return new_default_config
 
     def default_settings(self):
+        """
+        Resets the current SimulaQron configuration object to its default configuration set.
+        The default configuration is:
+            * max_qubits = 20
+            * max_registers = 1000
+            * conn_retry_time = 0.5
+            * conn_max_retries = 10
+            * recv_timeout = 100
+            * recv_retry_time = 0.1
+            * recv_max_retries = 10
+            * log_level = logging.WARNING
+            * sim_backend = SimBackend.STABILIZER
+            * noisy_qubits = False
+            * max_app_waiting_time = -1.0  # In seconds, negative means unlimited waiting
+            * t1: float = 1.0
+        """
         default_config = SimulaqronConfig()
         cls_fields = fields(self.__class__)
 
@@ -124,7 +160,13 @@ class SimulaqronConfig(JSONSerializerMixin):
             new_val = getattr(default_config, field.name)
             setattr(self, field.name, new_val)
 
-    def save_to_file(self, path: PathLike):
+    def write_to_file(self, path: PathLike):
+        """
+        Writes the current in-memory configuration (`simulaqron_config`) to the given file path.
+        Args:
+            path:
+                A `PathLike` object (even a string) representing the path to write the configuration to.
+        """
         file_path = Path(str(path)).resolve()
 
         # Create all the parent folder if they not exists

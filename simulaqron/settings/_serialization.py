@@ -5,7 +5,7 @@ from typing import Type, Dict, Any, List
 from dataclasses_serialization.json import JSONSerializer
 from dataclasses_serialization.serializer_base import DeserializationError
 
-from .network_config import NodeConfig, NetworkConfig, NetworkConfigBuilder
+from .network_config import NodeConfig, NetworkConfig, NetworksConfiguration
 from ..settings import HOME_SIMULAQRON_SETTINGS
 from ..settings.simulaqron_config import SimulaqronConfig, SimBackend
 
@@ -125,13 +125,13 @@ def network_config_deserializer(cls: Type[NetworkConfig], obj: Dict[str, Any]) -
     return net_cfg
 
 
-@JSONSerializer.register_serializer(NetworkConfigBuilder)
-def network_config_builder_serializer(obj: NetworkConfigBuilder) -> List[Dict[str, Any]]:
+@JSONSerializer.register_serializer(NetworksConfiguration)
+def network_config_builder_serializer(obj: NetworksConfiguration) -> List[Dict[str, Any]]:
     return [JSONSerializer.serialize(network) for network in obj.networks.values()]
 
 
-@JSONSerializer.register_deserializer(NetworkConfigBuilder)
-def network_config_builder_deserializer(cls: Type[NetworkConfigBuilder], obj: List[Dict]) -> NetworkConfigBuilder:
+@JSONSerializer.register_deserializer(NetworksConfiguration)
+def network_config_builder_deserializer(cls: Type[NetworksConfiguration], obj: List[Dict]) -> NetworksConfiguration:
     new_obj = cls()
     for raw_network in obj:
         network_spec: NetworkConfig = JSONSerializer.deserialize(NetworkConfig, raw_network)

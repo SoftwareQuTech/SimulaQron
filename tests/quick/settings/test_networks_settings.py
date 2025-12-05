@@ -9,7 +9,7 @@ from tempfile import NamedTemporaryFile
 from dataclasses_serialization.json import JSONSerializer
 
 import simulaqron._default_config
-from simulaqron.settings import network_config, NetworkConfigBuilder
+from simulaqron.settings import network_config, NetworksConfiguration
 from simulaqron.settings.network_config import DEFAULT_SIMULAQRON_NETWORK_FILENAME, NodeConfig
 
 cwd_network = (Path.cwd() / DEFAULT_SIMULAQRON_NETWORK_FILENAME).resolve()
@@ -64,7 +64,7 @@ class TestNetworksSettings:
         default_network_path = Path(str(resources.files(simulaqron._default_config).joinpath("default_network.json")))
 
         expected_net_cfg_dict = json.loads(default_network_path.read_text())
-        expected_net_cfg = JSONSerializer.deserialize(NetworkConfigBuilder, expected_net_cfg_dict)
+        expected_net_cfg = JSONSerializer.deserialize(NetworksConfiguration, expected_net_cfg_dict)
 
         assert network_config == expected_net_cfg
 

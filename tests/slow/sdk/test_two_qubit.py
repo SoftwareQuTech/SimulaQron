@@ -41,7 +41,7 @@ from simulaqron.sdk.socket import Socket
 from simulaqron.run.run import run_applications
 from simulaqron.run.run import reset
 from simulaqron.settings import simulaqron_settings, network_config
-from simulaqron.settings.network_config import NetworkConfigBuilder
+from simulaqron.settings.network_config import NetworksConfiguration
 from simulaqron.settings.simulaqron_config import SimBackend
 
 

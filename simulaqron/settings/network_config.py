@@ -73,7 +73,7 @@ class NodeConfig(JSONSerializerMixin):
 @dataclass
 class NetworkConfig(JSONSerializerMixin):
     """
-    Used by NetworksConfigConstructor to keep track of the config of a single network.
+    Used by NetworksConfiguration to keep track of the config of a single network.
     """
 
     name: str
@@ -162,7 +162,7 @@ class NetworkConfig(JSONSerializerMixin):
 
 
 @dataclass
-class NetworkConfigBuilder(JSONSerializerMixin):
+class NetworksConfiguration(JSONSerializerMixin):
     """
     Used to construct the config file of networks.
     """
@@ -174,11 +174,14 @@ class NetworkConfigBuilder(JSONSerializerMixin):
         """
         Loads the default networks in the current networks configuration object. The default
         configuration contains a single network named "default", which contains 5 nodes named
-        "Alice", "Bob", "Charlie", "David" and "Eve".
+        "Alice", "Bob", "Charlie", "David" and "Eve". Each node contains configuration to run
+        in `localhost` with a unique port between 8000 and 9000.
+
+        For the specific configuration, you can check the file `simulaqron/_default_config/default_network.json`.
         """
         # We use the embedded default network here
         default_network_path = resources.files(simulaqron._default_config).joinpath("default_network.json")
-        new_builder = NetworkConfigBuilder()
+        new_builder = NetworksConfiguration()
         new_builder.read_from_file(Path(str(default_network_path)))
         self.networks = new_builder.networks
         self.used_sockets = new_builder.used_sockets
@@ -373,6 +376,9 @@ class NetworkConfigBuilder(JSONSerializerMixin):
             raise ValueError(f"{network_name} is not a network in this config")
 
     def remove_all_networks(self):
+        """
+        Deletes all the in-memory networks from the configuration.
+        """
         for network_name in self.network_names:
             self.remove_network(network_name)
 
@@ -435,7 +441,7 @@ class NetworkConfigBuilder(JSONSerializerMixin):
             case dict():
                 return True
             case _:
-                raise ValueError("JSON network configi file does not have a valid format.")
+                raise ValueError("JSON network config file does not have a valid format.")
 
     @staticmethod
     def _correct_old_format(config_content: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -453,14 +459,28 @@ class NetworkConfigBuilder(JSONSerializerMixin):
     def _deserialize_from_file(cls, file_path: Path) -> Self:
         with file_path.resolve().open("rt") as file:
             config_content = json.load(file)
-        if NetworkConfigBuilder._is_old_json_format(config_content):
-            config_content = NetworkConfigBuilder._correct_old_format(config_content)
+        if NetworksConfiguration._is_old_json_format(config_content):
+            config_content = NetworksConfiguration._correct_old_format(config_content)
             with file_path.open("wt") as file:
                 json.dump(config_content, file, indent=4)
         return JSONSerializer.deserialize(cls, config_content)
 
     @classmethod
     def read_from_known_sources(cls) -> Self:
+        """
+        Reads the network configuration from usual locations.
+        This method will try to load the network configuration files *in the following order*
+        from (1) the current folder (`./simulaqron_network.json`) and, (2) simulaqron settings
+        in the user's home folder (`~/.simulaqron/simulaqron_network.json`).
+
+        If none of these files exists, this method will create a network configuration in
+        user's home folder (`~/.simulaqron/simulaqron_network.json`) containing the default
+        SimulaQron configuration.
+
+        To check the default configuration, check the documentation of `using_default_network`.
+        See Also:
+            using_default_network()
+        """
         cwd_networks_file = LOCAL_NETWORK_SETTINGS.resolve()
         home_networks_file = HOME_NETWORK_SETTINGS.resolve()
 
@@ -491,6 +511,11 @@ class NetworkConfigBuilder(JSONSerializerMixin):
 
     @property
     def network_names(self) -> List[str]:
+        """
+        Gets the loaded network names.
+        Returns:
+            A list of strings with the network names.
+        """
         return list(self.networks.keys())
 
     def __getitem__(self, item: str) -> NetworkConfig:
@@ -501,7 +526,7 @@ class NetworkConfigBuilder(JSONSerializerMixin):
 
     # Helper functions
     def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, NetworkConfigBuilder):
+        if not isinstance(other, NetworksConfiguration):
             return False
         nodes_eq = [current_node == other_node for current_node, other_node in zip(self.nodes, other.nodes)]
         return all(nodes_eq)

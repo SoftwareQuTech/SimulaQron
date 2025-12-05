@@ -34,7 +34,7 @@ from typing import Dict, List
 
 from twisted.spread import pb
 
-from simulaqron.settings.network_config import NetworkConfigBuilder, NodeConfigType
+from simulaqron.settings.network_config import NetworksConfiguration, NodeConfigType
 
 
 class Host(pb.Referenceable):
@@ -66,7 +66,7 @@ class Host(pb.Referenceable):
 
 
 class SocketsConfig(pb.Referenceable):
-    def __init__(self, nets_config: NetworkConfigBuilder, network_name: str = "default",
+    def __init__(self, nets_config: NetworksConfiguration, network_name: str = "default",
                  config_type: str | NodeConfigType = "vnode"):
         """
         Initialize by reading in the configuration file.
