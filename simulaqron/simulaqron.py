@@ -212,7 +212,7 @@ def sim_backend(value):
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
         simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.sim_backend = value
     simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
@@ -230,7 +230,7 @@ def max_qubits(value):
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
         simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.max_qubits = value
     simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
@@ -248,7 +248,7 @@ def max_registers(value):
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
         simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.max_registers = value
     simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
@@ -266,7 +266,7 @@ def conn_retry_time(value):
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
         simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.conn_retry_time = value
     simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
@@ -284,7 +284,7 @@ def recv_timeout(value):
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
         simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.recv_timeout = value
     simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
@@ -302,7 +302,7 @@ def recv_retry_time(value):
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
         simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.recv_retry_time = value
     simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
@@ -320,7 +320,7 @@ def log_level(value):
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
         simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.log_level = value
     simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
@@ -338,7 +338,7 @@ def noisy_qubits(value):
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
         simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     if value == "on":
         simulaqron_settings.noisy_qubits = True
     else:
@@ -359,7 +359,7 @@ def t1(value):
         LOCAL_SIMULAQRON_SETTINGS.touch()
         simulaqron_settings.default_settings()
         simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     simulaqron_settings.t1 = value
     simulaqron_settings.save_to_file(LOCAL_SIMULAQRON_SETTINGS)
     print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
@@ -381,7 +381,7 @@ def get():
 )
 def sim_backend():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
-        simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
         print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
         print("Configuration from default configuration")
@@ -394,7 +394,7 @@ def sim_backend():
 )
 def max_qubits():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
-        simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
         print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
         print("Configuration from default configuration")
@@ -407,7 +407,7 @@ def max_qubits():
 )
 def max_registers():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
-        simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
         print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
         print("Configuration from default configuration")
@@ -420,7 +420,7 @@ def max_registers():
 )
 def conn_retry_time():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
-        simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
         print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
         print("Configuration from default configuration")
@@ -433,7 +433,7 @@ def conn_retry_time():
 )
 def recv_timeout():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
-        simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
         print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
         print("Configuration from default configuration")
@@ -446,7 +446,7 @@ def recv_timeout():
 )
 def recv_retry_time():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
-        simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
         print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
         print("Configuration from default configuration")
@@ -459,7 +459,7 @@ def recv_retry_time():
 )
 def log_level():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
-        simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
         print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
         print("Configuration from default configuration")
@@ -472,7 +472,7 @@ def log_level():
 )
 def noisy_qubits():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
-        simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
         print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
         print("Configuration from default configuration")
@@ -488,7 +488,7 @@ def noisy_qubits():
 )
 def t1():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
-        simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+        simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
         print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
         print("Configuration from default configuration")

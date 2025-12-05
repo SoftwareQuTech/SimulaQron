@@ -157,7 +157,7 @@ def main():
     # classicalNet = SocketsConfig(classicalFile)
 
     # We load the local configuration files
-    simulaqron_settings.load_from_file(LOCAL_SIMULAQRON_SETTINGS)
+    simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
     network_config.read_from_file(LOCAL_NETWORK_SETTINGS)
 
     # Read configuration files for the virtual quantum, as well as the classical network

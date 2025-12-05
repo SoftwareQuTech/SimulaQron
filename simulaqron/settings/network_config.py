@@ -460,7 +460,7 @@ class NetworkConfigBuilder(JSONSerializerMixin):
         return JSONSerializer.deserialize(cls, config_content)
 
     @classmethod
-    def load_from_known_sources(cls) -> Self:
+    def read_from_known_sources(cls) -> Self:
         cwd_networks_file = LOCAL_NETWORK_SETTINGS.resolve()
         home_networks_file = HOME_NETWORK_SETTINGS.resolve()
 

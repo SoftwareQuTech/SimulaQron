@@ -80,7 +80,7 @@ class SimulaqronConfig(JSONSerializerMixin):
         home_setting_folder = (Path.home() / ".simulaqron").resolve()
         home_setting_folder.mkdir(parents=True, exist_ok=True)
 
-    def load_from_file(self, file_path: Path | str):
+    def read_from_file(self, file_path: Path | str):
         if isinstance(file_path, str):
             file_path = Path(file_path).resolve()
         new_config = self._deserialize_from_file(file_path)
@@ -97,7 +97,7 @@ class SimulaqronConfig(JSONSerializerMixin):
             return JSONSerializer.deserialize(cls, config_content)
 
     @classmethod
-    def load_from_known_sources(cls) -> Self:
+    def read_from_known_sources(cls) -> Self:
         cwd_settings_file = LOCAL_SIMULAQRON_SETTINGS.resolve()
         home_settings_file = HOME_SIMULAQRON_SETTINGS.resolve()
 

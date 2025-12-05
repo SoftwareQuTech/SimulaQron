@@ -9,9 +9,9 @@ init_serialization()
 # Centralized way to store the config. It reads the local configuration
 # if exists, otherwise, it simply populates the in-memory configs object
 # with the default values
-simulaqron_settings = SimulaqronConfig.load_from_known_sources()
+simulaqron_settings = SimulaqronConfig.read_from_known_sources()
 
 # Centralized way to store the config of the network. It reads the local
 # configuration if exists, otherwise, it simply populates the in-memory
 # configs object with the default values
-network_config = NetworkConfigBuilder.load_from_known_sources()
+network_config = NetworkConfigBuilder.read_from_known_sources()

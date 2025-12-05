@@ -77,5 +77,5 @@ class TestSettings:
 
     def test_load_non_existent_config_file(self):
         with pytest.raises(FileNotFoundError) as error:
-            simulaqron_settings.load_from_file("/non/existent/file")
+            simulaqron_settings.read_from_file("/non/existent/file")
         assert "No such file or directory: '/non/existent/file'" in str(error.value)

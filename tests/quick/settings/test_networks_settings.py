@@ -51,7 +51,7 @@ class TestNetworksSettings:
 
     @pytest.fixture
     def reset_net_cfg(self):
-        network_config.load_from_known_sources()
+        network_config.read_from_known_sources()
 
     @staticmethod
     def _check_node_config(node: NodeConfig) -> Tuple[bool, ...]:
