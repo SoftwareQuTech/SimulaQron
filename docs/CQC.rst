@@ -1,5 +1,8 @@
-The CQC interface
+DEPRECATED - The CQC interface
 =================
+
+WARNING - The CQC interface ahas been deprecated, and it is no longer present in this release of SimulaQron.
+Please refer to the NetQASM interface documentation to create quantum applications.
 
 SimulaQron can be access from any programming language supporting network connections. Instructions to the quantum hardware simulation can be sent via the CQC interface described `here <https://softwarequtech.github.io/CQC-Python/interface.html>`_.
 

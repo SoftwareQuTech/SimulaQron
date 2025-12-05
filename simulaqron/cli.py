@@ -125,6 +125,13 @@ def version():
     default=LOCAL_NETWORK_SETTINGS
 )
 @click.option(
+    "--simulaqron-config-file",
+    help=f"Use the given simulaqron config file. Defaults to the file named "  # noqa: E131
+         f"'{DEFAULT_SIMULAQRON_NETWORK_FILENAME}' on the current directory.",  # noqa: E131
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True, path_type=Path),
+    default=LOCAL_SIMULAQRON_SETTINGS
+)
+@click.option(
     "--name",
     help="Give the network a name to be able to start multiple (default: 'default')",
     type=str,
@@ -145,12 +152,20 @@ def version():
     type=str,
     default="",
 )
-def start(name: str, nrnodes: int, nodes: str, network_config_file: Path):
+def start(name: str, nrnodes: int, nodes: str, simulaqron_config_file: Path, network_config_file: Path):
     """Starts a network with the given parameters or from config files."""
-    if not _path_exists(network_config):
-        print(f"The given network config file '{network_config}' does not exist or it is a folder.\n"
+    # Checks the simulaqron config
+    if not _path_exists(simulaqron_config_file):
+        print(f"The given simulaqron config file '{simulaqron_config_file}' does not exist or it is a folder.\n"
+              "Please check the path given to the --simulaqron-config-file option.")
+        return
+    # Checks the network config
+    if not _path_exists(network_config_file):
+        print(f"The given network config file '{network_config_file}' does not exist or it is a folder.\n"
               "Please check the path given to the --network-config-file option.")
         return
+    # Load SimulaQron and network configs
+    simulaqron_settings.read_from_file(simulaqron_config_file)
     network_config.read_from_file(network_config_file)
     pidfile = PID_FOLDER / f"simulaqron_network_{name}.pid"
     if pidfile.exists():
