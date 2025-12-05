@@ -167,12 +167,25 @@ def start(name: str, nrnodes: int, nodes: str, simulaqron_config_file: Path, net
     # Load SimulaQron and network configs
     simulaqron_settings.read_from_file(simulaqron_config_file)
     network_config.read_from_file(network_config_file)
+    # Check that the network name exists in the network configuration
+    if not name in network_config.networks:
+        print(f"The network '{name}' was not found in the network configuration file '{network_config_file}'.\n"
+              f"Please check the name you passed in the --name option and try again.")
+        return
+    # Check that the nodes to start exist in the given network
+    nodes = nodes.split(",")
+    for node_to_start in nodes:
+        if not node_to_start in network_config.networks[name]:
+            print(f"The node '{node_to_start}' was not found in the network named '{name} 'specified in"
+                  f" the configuration file '{network_config_file}'.\nPlease check the list of names you "
+                  f"passed in the --nodes option and try again.")
+            return
+    # Check that there is no other network with the same name running
     pidfile = PID_FOLDER / f"simulaqron_network_{name}.pid"
     if pidfile.exists():
         logging.warning("Network with name %s is already running", name)
         logging.warning("The pidfile for this network is located at %s", pidfile)
         return
-    nodes = nodes.split(",")
     if len(nodes) <= 0:
         print("WARNING - The list of nodes to start is empty. If you specified the --nrnodes option "
               "this can be normal. Please check your invocation line if needed.")
