@@ -30,7 +30,7 @@ from typing import Type, Dict
 
 from netqasm.backend.messages import MessageHeader, ErrorCode, deserialize_host_msg, Message, \
     InitNewAppMessage
-from netqasm.logging.glob import get_netqasm_logger
+import logging
 from twisted.internet.defer import DeferredLock, inlineCallbacks
 from twisted.internet.protocol import Factory, Protocol, connectionDone
 from twisted.internet.task import deferLater
@@ -81,7 +81,7 @@ class NetQASMProtocol(Protocol):
         # Convenience
         self.name = self.factory.name
 
-        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
+        self._logger = logging.getLogger(f"{self.__class__.__name__}({self.name})")
         self._logger.debug("Initialized Protocol")
 
     def connectionMade(self):
@@ -195,7 +195,7 @@ class NetQASMFactory(Factory):
         # Lock governing access to the qubitList
         self._lock = DeferredLock()
 
-        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({name})")
+        self._logger = logging.getLogger(f"{self.__class__.__name__}({name})")
 
         # Read in topology, if specified. topology=None means fully connected
         # topology

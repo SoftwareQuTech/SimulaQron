@@ -1,10 +1,10 @@
 import numpy as np
-from netqasm.logging.glob import get_netqasm_logger
+import logging
 from netqasm.sdk import Qubit
 
 from simulaqron.sdk import SimulaQronConnection
 
-logger = get_netqasm_logger("sim_util")
+logger = logging.getLogger("sim_util")
 
 
 def get_qubit_state(qubit: Qubit, reduced_dm: bool = True) -> np.ndarray:

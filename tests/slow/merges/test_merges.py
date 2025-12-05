@@ -12,7 +12,7 @@ from twisted.internet.defer import inlineCallbacks
 
 from multiprocess.context import ForkProcess as Process
 from multiprocess.connection import Pipe
-from netqasm.logging.glob import get_netqasm_logger
+import logging
 from logging import DEBUG
 from simulaqron.general.host_config import SocketsConfig
 from simulaqron.local.setup import setup_local, assemble_qubit
@@ -22,7 +22,7 @@ from simulaqron.settings.simulaqron_config import SimBackend
 from simulaqron.toolbox.stabilizer_states import StabilizerState
 from simulaqron.reactor import reactor
 
-_logger = get_netqasm_logger("test_merges")
+_logger = logging.getLogger("test_merges")
 
 
 class localNode(pb.Root):

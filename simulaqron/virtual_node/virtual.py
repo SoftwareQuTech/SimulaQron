@@ -31,7 +31,7 @@ import random
 from collections import deque
 from typing import Tuple, List
 
-from netqasm.logging.glob import get_netqasm_logger
+import logging
 from twisted.internet.defer import inlineCallbacks, DeferredLock, Deferred, DeferredList
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
 from twisted.internet.task import deferLater
@@ -95,7 +95,7 @@ class Backend:
         Initialize. This will read the networks configuration and populate the name,hostname,port information with the
         information found in the configuration file for the given name.
         """
-        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({name})")
+        self._logger = logging.getLogger(f"{self.__class__.__name__}({name})")
 
         # Read the configuration file
         self.config = SocketsConfig(network_config, network_name=network_name, config_type="vnode")
@@ -147,7 +147,7 @@ class VirtualNode(pb.Root):
         maxQubits	maximum number of qubits to use in the default engine (default 10)
         maxRegister	maximum number of registers
         """
-        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({ID.name})")
+        self._logger = logging.getLogger(f"{self.__class__.__name__}({ID.name})")
 
         # Store our own host identifiers and configuration
         self.myID = ID
@@ -1248,7 +1248,7 @@ class VirtualQubit(pb.Referenceable):
         simQubit	reference to the underlying qubit object (may be remote)
         num		number ID among the virtual qubits
         """
-        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({virtNode.name}, {num})")
+        self._logger = logging.getLogger(f"{self.__class__.__name__}({virtNode.name}, {num})")
 
         # Node where this qubit is virtually located
         self.virtNode = virtNode

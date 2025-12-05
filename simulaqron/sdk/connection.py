@@ -11,7 +11,7 @@ from netqasm.backend.messages import (MessageHeader,
                                       ErrorCode, Message, APP_ID)
 from netqasm.lang.ir import GenericInstr
 from netqasm.lang.operand import Address, Register
-from netqasm.logging.glob import get_netqasm_logger
+import logging
 from netqasm.sdk import EPRSocket
 from netqasm.sdk.config import LogConfig
 from netqasm.sdk.connection import BaseNetQASMConnection
@@ -24,7 +24,7 @@ from simulaqron.general.host_config import (SocketsConfig,
                                             get_node_id_from_net_config)
 from simulaqron.settings import network_config
 
-logger = get_netqasm_logger("SimulaQronConnection")
+logger = logging.getLogger("SimulaQronConnection")
 
 
 class SimulaQronConnection(BaseNetQASMConnection):

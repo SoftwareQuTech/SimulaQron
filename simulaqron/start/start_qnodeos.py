@@ -6,7 +6,7 @@ import sys
 import time
 from timeit import default_timer as timer
 
-from netqasm.logging.glob import get_netqasm_logger, set_log_level
+import logging
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
 from twisted.spread import pb
 
@@ -16,7 +16,7 @@ from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
 from simulaqron.general.host_config import SocketsConfig
 from simulaqron.settings import simulaqron_settings, network_config
 
-logger = get_netqasm_logger("start_qnodeos")
+logger = logging.getLogger("start_vnode")
 
 _RETRY_TIME = 0.1
 _TIMEOUT = 10
@@ -24,7 +24,7 @@ _TIMEOUT = 10
 
 def init_register(virt_root, my_name: str, node: NetQASMFactory):
     """Retrieves the relevant root objects to talk to such remote connections"""
-    logger.debug("LOCAL %s: Connection to local virtual node successful", my_name)
+    logger.debug("START_QNODEOS %s: Connection to local virtual node successful", my_name)
     # Set the virtual node
     node.set_virtual_node(virt_root)
     # Start listening to NetQASM messages
@@ -39,7 +39,7 @@ def connect_to_virt_node(my_name: str, netqasm_factory: NetQASMFactory, virtual_
     """
     virtual_node = virtual_network.hostDict[my_name]
     logger.debug(
-        "LOCAL %s: Trying to connect to local virtual node at %s, %d.",
+        "START_QNODEOS %s: Trying to connect to local virtual node at %s, %d.",
         my_name, virtual_node.hostname, virtual_node.port
     )
     factory = pb.PBClientFactory()
@@ -64,7 +64,7 @@ def handle_connection_error(reason, my_name: str, netqasm_factory: NetQASMFactor
         reason.raiseException()
     except ConnectionRefusedError as err:
         # TODO - Implement checking of max number of connections
-        logger.debug("LOCAL %s: Could not connect to Virtual node (%s, %d), trying again...", my_name,
+        logger.debug("START_QNODEOS %s: Could not connect to Virtual node (%s, %d), trying again...", my_name,
                      virtual_node_hostname, virtual_node_port, exc_info=err)
         reactor.callLater(
             simulaqron_settings.conn_retry_time,
@@ -75,7 +75,7 @@ def handle_connection_error(reason, my_name: str, netqasm_factory: NetQASMFactor
         )
     except Exception as e:
         logger.error(
-            "LOCAL %s: Critical error when connection to local virtual node: %s",
+            "START_QNODEOS %s: Critical error when connection to local virtual node: %s",
             my_name,
             e,
         )
@@ -88,7 +88,7 @@ def setup_netqasm_server(my_name: str, netqasm_factory: NetQASMFactory):
     while timer() - t_start < _TIMEOUT:
         try:
             logger.debug(
-                "LOCAL %s: Starting local QNodeOS server, port %d.",
+                "START_QNODEOS %s: Starting local QNodeOS server, port %d.",
                 my_name, netqasm_factory.host.port
             )
             my_host = netqasm_factory.host
@@ -98,13 +98,13 @@ def setup_netqasm_server(my_name: str, netqasm_factory: NetQASMFactory):
             break
         except CannotListenError:
             logger.error(
-                "LOCAL %s: NetQASM server address (%d) is already in use, trying again.",
+                 "START_QNODEOS: %s: NetQASM server address (%d) is already in use, trying again.",
                 my_name, my_host.port
             )
             time.sleep(_RETRY_TIME)
         except Exception as e:
             logger.error(
-                "LOCAL %s: Critical error when starting NetQASM server: %s", my_name, e
+                "START_QNODEOS %s: Critical error when starting NetQASM server: %s", my_name, e
             )
             reactor.stop()
     else:
@@ -124,12 +124,20 @@ def sigterm_handler(_signo, _stack_frame):
 def start_qnodeos(node_name: str, network_name: str = "default", log_level: str = "WARNING"):
     if simulaqron_settings.log_level == logging.DEBUG:
         global stdout_file
-        stdout_file = open(f"stdout-stderr-qnos-{node_name}-{os.getpid()}.out.txt", "w")
+        stdout_file = open(f"/tmp/simulaqron-stdout-stderr-qnos-{node_name}-{os.getpid()}.out.txt", "w")
         sys.stdout = stdout_file
         sys.stderr = stdout_file
+
+    # Force configure root logger with a handler
+    logging.basicConfig(
+        format="%(asctime)s:%(levelname)s:%(name)s:%(filename)s:%(lineno)d:%(message)s",
+        level=logging.DEBUG,
+        force=True,
+        stream=stdout_file  # send logs to the same file
+    )
+
     """Start the indicated backend NetQASM Server"""
-    set_log_level(log_level)
-    logger.debug("Starting QNodeOS at %s", node_name)
+    logger.debug("START_QNODEOS: Starting QNodeOS at %s", node_name)
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)
 
@@ -140,7 +148,7 @@ def start_qnodeos(node_name: str, network_name: str = "default", log_level: str 
     # Check if we are in the host-dictionary
     if node_name in qnodeos_network.hostDict:
         node_host_info = qnodeos_network.hostDict[node_name]
-        logger.debug("Setting up QNodeOS protocol factory for %s", node_name)
+        logger.debug("START_QNODEOS: Setting up QNodeOS protocol factory for %s", node_name)
         netqasm_factory = NetQASMFactory(
             node_host_info,
             node_name,
@@ -149,16 +157,16 @@ def start_qnodeos(node_name: str, network_name: str = "default", log_level: str 
             network_name=network_name,
         )
     else:
-        logger.error("LOCAL %s: Cannot start classical communication servers.", node_name)
+        logger.error("START_QNODEOS %s: Cannot start classical communication servers.", node_name)
         return
 
     # Connect to the local virtual node simulating the "local" qubits
-    logger.debug(f"Connect to virtual node {node_name}")
+    logger.debug(f"START_QNODEOS: Connect to virtual node {node_name}")
     connect_to_virt_node(node_name, netqasm_factory, virtual_network)
 
     # Run reactor
     reactor.run()
-    logger.debug(f"Ending QNodeOS at {node_name}")
+    logger.debug(f"START_QNODEOS: Ending QNodeOS at {node_name}")
 
 
 if __name__ == '__main__':

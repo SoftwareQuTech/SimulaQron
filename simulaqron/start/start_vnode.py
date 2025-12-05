@@ -27,25 +27,25 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 import logging
 import os
 import signal
 import sys
 from functools import partial
 
-from netqasm.logging.glob import get_netqasm_logger, set_log_level
 
 from simulaqron.reactor import reactor
 from simulaqron.virtual_node.virtual import Backend
 from simulaqron.settings import simulaqron_settings
 
-logger = get_netqasm_logger("start_vnode")
+logger = logging.getLogger("start_vnode")
 
 stdout_file = None
 
 
 def sigterm_handler(name, _signo, _stack_frame):
-    print("Shutting down Node from signal %d." % _signo, flush=True)
+    print("START_VNODE: Shutting down Node from signal %d." % _signo, flush=True)
     global stdout_file
     stdout_file.flush()
     stdout_file.close()
@@ -53,19 +53,39 @@ def sigterm_handler(name, _signo, _stack_frame):
 
 
 def start_vnode(name: str, network_name: str = "default", log_level: str = "WARNING"):
-    if simulaqron_settings.log_level == logging.DEBUG:
-        global stdout_file
-        stdout_file = open(f"stdout-stderr-vnode-{name}-{os.getpid()}.out.txt", "w")
-        sys.stdout = stdout_file
-        sys.stderr = stdout_file
-    set_log_level(log_level)
+    """ Start the execution of a virtual simulaqron node. This node will simulate all quantum aspects 
+    of the node, and is then reachable via Twisted PB (Simulaqron Native Mode) or - when also starting QNPU - 
+    the QNPU Server which translates NetQASM to native mode. 
+    """
+
+    # We will have our logging output be written to a file in order to not distract from the app
+    # logging that the user will later see on the screen
+    stdout_file = open(f"/tmp/simulaqron-stdout-stderr-vnode-{name}-{os.getpid()}.out.txt", "w")
+    sys.stdout = stdout_file
+    sys.stderr = stdout_file
+    
+    # Force configure root logger with a handler, ensure our log output to this file
+    # will allow us to trace back exactly where it came from in the codebase
+    logging.basicConfig(
+        format="%(asctime)s:%(levelname)s:%(name)s:%(filename)s:%(lineno)d:%(message)s",
+        level=simulaqron_settings.log_level,
+        force=True,
+        stream=stdout_file  # send logs to the same file
+    )
+    
+    # Set up the handlers: those define what we will do when the process is terminated (by killing it)
     signal.signal(signal.SIGTERM, partial(sigterm_handler, name))
     signal.signal(signal.SIGINT, partial(sigterm_handler, name))
 
-    logger.debug("Starting VIRTUAL NODE %s", name)
+    # Let's now test logging works by printing a message we are starting
+    logger.debug("START_VNODE: Starting VIRTUAL NODE %s", name)
+
+    # Start the backend with the parameters configured in the simulaqron log file
     be = Backend(name, network_name=network_name)
     be.start(max_qubits=simulaqron_settings.max_qubits, max_registers=simulaqron_settings.max_registers)
-    logger.debug("Ending VIRTUAL NODE %s", name)
+
+    # Print a message we have terminated the node.
+    logger.debug("START_VNODE: Ending VIRTUAL NODE %s", name)
 
 
 if __name__ == "__main__":

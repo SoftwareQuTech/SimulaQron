@@ -11,7 +11,7 @@ from typing import Callable, Optional, Any, Dict, List, Union, Tuple
 from multiprocess.context import ForkContext as ProcessContext
 from multiprocess.pool import ApplyResult
 from multiprocess.sharedctypes import SynchronizedArray
-from netqasm.logging.glob import get_netqasm_logger
+import logging
 from netqasm.logging.output import (reset_struct_loggers,
                                     save_all_struct_loggers)
 from netqasm.runtime import env, process_logs
@@ -28,7 +28,7 @@ from simulaqron.sdk import SimulaQronConnection
 from simulaqron.settings import simulaqron_settings, network_config
 from simulaqron.settings.simulaqron_config import SimBackend
 
-logger = get_netqasm_logger()
+logger = logging.getLogger()
 
 # TODO similar code to squidasm.run.run, make base-class and subclasses?
 

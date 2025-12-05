@@ -148,5 +148,9 @@ def main():
 
 
 ##################################################################################################
-logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=logging.DEBUG)
+logging.basicConfig(
+    format="%(asctime)s:%(levelname)s:%(name)s:%(filename)s:%(lineno)d:%(message)s",
+    level=logging.DEBUG,
+    force=True
+)
 main()

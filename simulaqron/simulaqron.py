@@ -1,6 +1,7 @@
 import importlib.metadata as metadata
 import logging
 import time
+import sys
 from pathlib import Path
 from typing import Optional, List
 
@@ -26,23 +27,31 @@ if not PID_FOLDER.exists():
 class RunningSimulaQronDaemon(run.RunDaemon):
     """
     SimulaQronDaemon class used to represent SimulaQron daemons that are already running.
-    This class is useful to stop the already-running daemons without needed to read all
+    This class is useful to 5stop the already-running daemons without needed to read all
     the required configurations.
     """
 
     def __init__(self, pidfile: Path):
         assert pidfile is not None
-        super().__init__(pidfile=pidfile)
-
+        super().__init__(
+            pidfile=pidfile,
+        )
 
 class SimulaQronDaemon(run.RunDaemon):
     def __init__(self, pidfile: Path, name: str, nodes: List[str]):
-        super().__init__(pidfile=pidfile)
+        super().__init__(
+            pidfile=pidfile,
+        )
         self.name = name
         self.nodes = nodes
 
     def run(self):
         """Starts all nodes defined in netsim's config directory."""
+
+        # Let's make sure we can record the output where it's accessible
+        sys.stdout = open('/tmp/simulaqron.out', 'w', buffering=1)
+        sys.stderr = open('/tmp/simulaqron.err', 'w', buffering=1)
+
         network = Network(network_name=self.name, nodes=self.nodes)
         network.start()
 
@@ -141,6 +150,7 @@ def stop(name: str):
     """Stops a network."""
     assert name is not None
     pidfile = PID_FOLDER / f"simulaqron_network_{name}.pid"
+    logging.debug(f"Trying to open PIDfile")
     if not pidfile.exists():
         logging.warning("Network with name %s is not running", name)
         return
@@ -613,7 +623,8 @@ def get(network_name: str):
 
 if __name__ == "__main__":
     logging.basicConfig(
-        format="%(asctime)s:%(levelname)s:%(message)s",
+            logging.basicConfig(
+        format="%(asctime)s:%(levelname)s:%(filename)s:%(lineno)d:%(message)s",
         level=simulaqron_settings.log_level,
-    )
+    ))
     cli()

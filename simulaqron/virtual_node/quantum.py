@@ -30,7 +30,7 @@ import random
 import time
 
 import numpy as np
-from netqasm.logging.glob import get_netqasm_logger
+import logging
 from twisted.internet.defer import DeferredLock
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.task import deferLater
