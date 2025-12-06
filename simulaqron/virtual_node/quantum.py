@@ -80,9 +80,7 @@ class SimulatedQubit(pb.Referenceable):
         self.T1 = settings.simulaqron_settings.t1
         self.last_accessed = time.time()
 
-        self._logger = get_netqasm_logger(
-            f"{self.__class__.__name__}(node={node.name}, sim_num={simNum})"
-        )
+        self._logger = logging.getLogger() 
 
     @inlineCallbacks
     def lock(self):

@@ -152,7 +152,7 @@ class VanillaSimulaQronExecutioner(Executor):
             q = VirtualQubitRef(q_id, int(time.time()), virt)
             self.factory.qubitList[q_id] = q
             self._logger.info("Requested new physical qubit %d)", q_id)
-
+            print(f"DEBUG: Added qubit {q_id} to qubitList", flush=True)  # ADD THIS
         finally:
             self.factory._lock.release()
 

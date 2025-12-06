@@ -16,7 +16,7 @@ from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
 from simulaqron.general.host_config import SocketsConfig
 from simulaqron.settings import simulaqron_settings, network_config
 
-logger = logging.getLogger("start_vnode")
+logger = logging.getLogger("start_qnodeos")
 
 _RETRY_TIME = 0.1
 _TIMEOUT = 10
@@ -131,7 +131,7 @@ def start_qnodeos(node_name: str, network_name: str = "default", log_level: str 
     # Force configure root logger with a handler
     logging.basicConfig(
         format="%(asctime)s:%(levelname)s:%(name)s:%(filename)s:%(lineno)d:%(message)s",
-        level=logging.DEBUG,
+        level=simulaqron_settings.log_level,
         force=True,
         stream=stdout_file  # send logs to the same file
     )
