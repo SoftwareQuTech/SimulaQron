@@ -85,10 +85,51 @@ class NetQASMProtocol(Protocol):
         self._logger.debug("Initialized Protocol")
 
     def connectionMade(self):
+        self._logger.info("Connection made")
         pass
 
     def connectionLost(self, reason=connectionDone):
-        pass
+        self._logger.info(f"Connection lost: {reason}")
+        self.factory._active_protocol = None
+        self._cleanup_all()
+
+    def _cleanup_all(self):
+        """Clean up all state - Note that we allow only ONE connection
+        to one NetQASM node server at a time, making the below safe.
+
+        If we were to ever decide to allow multiple, the below is too radical
+        and decidedly unsafe.
+        """
+        self._logger.info("Cleaning up all state")
+        
+        # Clear qubit list
+        self.factory.qubitList.clear()
+        
+        # Clear protocol class state
+        NetQASMProtocol._next_q_id.clear()
+        NetQASMProtocol._next_ent_id.clear()
+        
+        # Clear executioner class state
+        from simulaqron.netqasm_backend.executioner import VanillaSimulaQronExecutioner
+        VanillaSimulaQronExecutioner._next_create_id.clear()
+        
+        # Clear executioner instance state
+        executor = self.messageHandler._executor
+        if hasattr(executor, '_network_stack'):
+            executor._network_stack._sockets.clear()
+        if hasattr(executor, '_epr_create_requests'):
+            executor._epr_create_requests.clear()
+        if hasattr(executor, '_epr_recv_requests'):
+            executor._epr_recv_requests.clear()
+        
+        # Reset shared memory
+        try:
+            from netqasm.sdk.shared_memory import SharedMemoryManager
+            SharedMemoryManager.reset_memories()
+        except Exception as e:
+            self._logger.debug(f"Could not reset shared memory: {e}")
+        
+        self._logger.info("Cleanup complete")
 
     def dataReceived(self, data):
         """
@@ -201,6 +242,12 @@ class NetQASMFactory(Factory):
         # topology
         self.topology = network_config[network_name].topology
 
+        # Track active connection - we will allow only one at a time
+        # as the code for the netqasm backend was not designed for multiple
+        # even though the virtual Node backend of SimulaQron would allow 
+        # that
+        self._active_protocol = None
+
     def stop(self):
         yield call_method(self.virtRoot, "stop_vnode")
         reactor.stop()
@@ -209,7 +256,9 @@ class NetQASMFactory(Factory):
         """
         Return an instance of NetQASMProtocol when a connection is made.
         """
-        return NetQASMProtocol(self)
+        protocol = NetQASMProtocol(self)
+        self._active_protocol = protocol
+        return protocol
 
     def set_virtual_node(self, virtRoot):
         """

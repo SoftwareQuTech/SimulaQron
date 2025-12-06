@@ -314,6 +314,12 @@ class VirtualNode(pb.Root):
     def remote_isLocked(self):
         return self._lock.locked
 
+    def remote_clear_recv_queues(self):
+        """Clear pending receive queues when an app disconnects"""
+        self.qubit_recv.clear()
+        self.qubit_recv_epr.clear()
+        self._logger.debug("Cleared receive queues")
+
     @inlineCallbacks
     def _get_global_lock(self):
         self._logger.debug("GETTING LOCK")
@@ -1786,3 +1792,6 @@ class QubitNetQASM:
         self.to_epr_socket_id = to_epr_socket_id
         self.virt_num = new_virt_num
         self.rawEntInfo = rawEntInfo
+
+
+

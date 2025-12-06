@@ -23,10 +23,6 @@ class SubroutineHandler(QNodeController):
 
         self.factory = factory
         self._logger = logging.getLogger("QnodeController")
-        # logging that the user will later see on the screen
-        #stdout_file = open(f"/tmp/simulaqron-stdout-stderr-netqasmQ-{os.getpid()}.out.txt", "w")
-        #sys.stdout = stdout_file
-        #sys.stderr = stdout_file
 
         # Force configure root logger with a handler, ensure our log output to this file
         # will allow us to trace back exactly where it came from in the codebase
@@ -34,7 +30,7 @@ class SubroutineHandler(QNodeController):
             format="%(asctime)s:%(levelname)s:%(name)s:%(filename)s:%(lineno)d:%(message)s",
             level=simulaqron_settings.log_level,
             force=True,
-            stream=sys.stdout # send logs to the same file
+            stream=sys.stdout # send logs to the standard output, we set this earlier to be in /tmp
         )
 
         # Give a way for the executioner to return messages
