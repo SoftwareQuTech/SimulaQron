@@ -96,7 +96,7 @@ class SimulaQronDaemon(run.RunDaemon):
             time.sleep(0.1)
 
 
-@click.group(context_settings=CONTEXT_SETTINGS)
+@click.group(context_settings=CONTEXT_SETTINGS, epilog="Run 'simulaqron COMMAND --help' for more information on a command.")
 def cli():
     """Command line interface for interacting with SimulaQron."""
     pass
@@ -121,8 +121,8 @@ def version():
 @cli.command()
 @click.option(
     "--network-config-file",
-    help=f"Use the given network config file. Defaults to the file named "  # noqa: E131
-         f"'{DEFAULT_SIMULAQRON_NETWORK_FILENAME}' on the current directory.",  # noqa: E131
+    help=f"Path to network config file. If not specified, uses "
+         f"./{DEFAULT_SIMULAQRON_NETWORK_FILENAME} or ~/.simulaqron/{DEFAULT_SIMULAQRON_NETWORK_FILENAME}",
     type=click.Path(exists=True, dir_okay=False, resolve_path=True, path_type=Path),
     default=None
 )
