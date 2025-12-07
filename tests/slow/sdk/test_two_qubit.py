@@ -194,7 +194,7 @@ class TestTwoQubitGates:
             network_builder.using_default_network()
             network_builder.write_to_file(net_config_file.name)
             net_config_file.close()
-            network = Network(nodes=["Alice", "Bob"], force=True)
+            network = Network(nodes=["Alice", "Bob"], network_config_file=get_default_network_config_file(use_embedded=True))
             network.start(wait_until_running=True)
             yield network
 

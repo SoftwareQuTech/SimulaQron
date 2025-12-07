@@ -206,12 +206,13 @@ class TestSingleQubitGate:
     @pytest.fixture
     def network(self):
         simulaqron_settings.default_settings()
+        simulaqron_settings.sim_backend = SimBackend.PROJECTQ
         with NamedTemporaryFile(suffix=".json", delete_on_close=False) as net_config_file:
             simulaqron_settings.network_config_file = net_config_file.name
             network_builder = NetworkConfigBuilder()
             network_builder.using_default_network()
             network_builder.write_to_file(net_config_file.name)
-            network = Network(nodes=["Alice"], force=True)
+            network = Network(nodes=["Alice"], network_config_file=get_default_network_config_file(use_embedded=True))
             network.start()
             yield network
 
