@@ -2,7 +2,7 @@ from netqasm.runtime.settings import set_simulator
 set_simulator("simulaqron")
 
 from simulaqron.settings import simulaqron_settings
-simulaqron_settings.network_config_file = "./networkConfig.json"
+simulaqron_settings.network_config_file = "./simulaqron_settings.json"
 
 from netqasm.sdk.external import NetQASMConnection
 from netqasm.sdk import Qubit, EPRSocket

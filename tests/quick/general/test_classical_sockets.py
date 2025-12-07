@@ -3,7 +3,7 @@ from netqasm.runtime.application import default_app_instance
 
 from simulaqron.run import run_applications
 from simulaqron.sdk.socket import Socket
-from simulaqron.settings import simulaqron_settings, network_config
+from simulaqron.settings import simulaqron_settings, network_config, get_default_network_config_file
 from simulaqron.settings.simulaqron_config import SimBackend
 
 
@@ -36,7 +36,7 @@ class TestClassicalSocket:
                 ("Bob", TestClassicalSocket.bob_program_receiver),
             ]
         )
-        _ = run_applications(apps, use_app_config=False, enable_logging=False)
+        _ = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False)
 
     def test_unknown_local(self):
         with pytest.raises(ValueError) as ex:

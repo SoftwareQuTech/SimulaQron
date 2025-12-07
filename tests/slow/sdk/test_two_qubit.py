@@ -40,7 +40,7 @@ from netqasm.sdk import Qubit, EPRSocket
 from simulaqron.sdk.socket import Socket
 from simulaqron.run.run import run_applications
 from simulaqron.run.run import reset
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, get_default_network_config_file
 from simulaqron.settings.network_config import NetworkConfigBuilder
 
 
@@ -238,7 +238,7 @@ class TestTwoQubitGates:
                 ("Bob", EPR_Bob)
             ]
         )
-        results = run_applications(apps, use_app_config=False, enable_logging=False, num_rounds=self.iterations)
+        results = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False, num_rounds=self.iterations)
         # both sides MUST measure the same state
         assert int(results[0]["app_Alice"]) == int(results[0]["app_Bob"])
 
@@ -252,4 +252,4 @@ class TestTwoQubitGates:
                 ("Bob", teleport_bob)
             ]
         )
-        _ = run_applications(apps, use_app_config=False, enable_logging=False, num_rounds=self.iterations)
+        _ = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False, num_rounds=self.iterations)

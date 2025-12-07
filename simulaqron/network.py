@@ -35,6 +35,7 @@ from typing import List, Optional, Dict
 import networkx as nx
 from multiprocess.context import ForkProcess as Process
 import logging
+from pathlib import Path
 
 from simulaqron.settings import network_config
 from simulaqron.settings.network_config import NodeConfig
@@ -52,7 +53,7 @@ from simulaqron.sdk import SimulaQronConnection
 
 
 class Network:
-    def __init__(self, nodes: List[str], network_name: str = "default"):
+    def __init__(self, nodes: List[str], network_config_file: Path, network_name: str = "default"):
         """
         Used to spin up a simulated network.
         This class uses the network configuration loaded in the global network_config object and
@@ -60,9 +61,14 @@ class Network:
 
         :param network_name: str
             The name of network to start. Defaults to "default".
+        :param network_config_file: Path
+            Path to network config file (required).
         :param nodes: list of str
             A list of strings with the node names to start.
         """
+
+        self._network_config_file = network_config_file
+
         self._running = False
         self.name = network_name
 
@@ -111,10 +117,14 @@ class Network:
         """
         for node in self._nodes_to_start:
             process_virtual = Process(
-                target=start_vnode, args=(node.name, self.name, simulaqron_settings.log_level), name=f"VirtNode {node.name}"
+                target=start_vnode, 
+                args=(node.name, self._network_config_file, self.name, simulaqron_settings.log_level),
+                name=f"VirtNode {node.name}"
             )
             process_qnodeos = Process(
-                target=start_qnodeos, args=(node.name, self.name, simulaqron_settings.log_level), name=f"QnodeOSNode {node.name}"
+                target=start_qnodeos, 
+                args=(node.name, self._network_config_file, self.name, simulaqron_settings.log_level),
+                name=f"QnodeOSNode {node.name}"
             )
             self.processes += [process_virtual, process_qnodeos]
 

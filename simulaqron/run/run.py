@@ -26,6 +26,7 @@ from netqasm.util.yaml import dump_yaml
 from simulaqron.network import Network
 from simulaqron.sdk import SimulaQronConnection
 from simulaqron.settings import simulaqron_settings, network_config
+from simulaqron.settings import get_default_network_config_file
 from simulaqron.settings.simulaqron_config import SimBackend
 
 logger = logging.getLogger()
@@ -183,19 +184,22 @@ def run_applications(
         app_instance.logging_cfg.comm_log_dir = timed_log_dir
 
     results: List[Dict[str, Any]] = []
-    if isinstance(network_cfg, str) or isinstance(network_cfg, PathLike):
-        net_cfg = str(network_cfg)
-        network_config.read_from_file(net_cfg)
-    elif isinstance(network_cfg, Path):
-        net_cfg = str(network_cfg.resolve())
-        network_config.read_from_file(net_cfg)
-    else:
-        # If no network config file was given, we keep with the default-loaded (pwd, or home)
-        pass
+
+    # Read the network config
+    if network_cfg is None:
+        network_cfg = get_default_network_config_file()
+   
+    network_cfg = Path(network_cfg).resolve()
+    network_config.read_from_file(network_cfg)
+    network_config.read_from_file(network_cfg)
+
 
     for _ in range(num_rounds):
-        network = Network(network_name="default", nodes=network_config.get_node_names("default"))
-
+        network = Network(
+            nodes=network_config.get_node_names("default"),
+            network_config_file=network_cfg,
+            network_name="default",
+        )
         # Start the processes that support the simulator: QNodeOS + VirtualNode
         network.start()
 

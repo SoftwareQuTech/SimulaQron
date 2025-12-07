@@ -34,7 +34,7 @@ from scipy.linalg import expm
 
 from netqasm.sdk.qubit import Qubit
 
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, get_default_network_config_file
 from simulaqron.settings.simulaqron_config import SimBackend
 from simulaqron.network import Network
 from simulaqron.sdk.connection import SimulaQronConnection

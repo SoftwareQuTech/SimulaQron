@@ -9,6 +9,7 @@ from timeit import default_timer as timer
 import logging
 from twisted.internet.error import ConnectionRefusedError, CannotListenError
 from twisted.spread import pb
+from pathlib import Path
 
 from simulaqron.reactor import reactor
 from simulaqron.netqasm_backend.factory import NetQASMFactory
@@ -121,7 +122,24 @@ def sigterm_handler(_signo, _stack_frame):
     reactor.stop()
 
 
-def start_qnodeos(node_name: str, network_name: str = "default", log_level: str = "WARNING"):
+def start_qnodeos(node_name: str, network_config_file: Path, network_name: str = "default", log_level: str = "WARNING"):
+    """
+    Start the QNPU that accepts NetQASM subroutines, and sends them as instructions to the SimulaQron virtual node
+    backend over twisted PB (Native Mode SimulaQron).
+    
+    :param name: Name of the node (e.g., 'Alice').
+    :type name: str
+    :param network_config_file: Path to network config file.
+    :type network_config_file: Path
+    :param network_name: Name of the network (e.g., 'default').
+    :type network_name: str
+    :param log_level: Logging level (e.g., 'DEBUG', 'INFO', 'WARNING').
+    :type log_level: str
+    """
+
+    # Let's ensure we read the config file
+    network_config.read_from_file(network_config_file)
+
     if simulaqron_settings.log_level == logging.DEBUG:
         global stdout_file
         stdout_file = open(f"/tmp/simulaqron-stdout-stderr-qnos-{node_name}-{os.getpid()}.out.txt", "w")

@@ -11,7 +11,7 @@ from daemons.prefab import run
 
 from simulaqron.network import Network
 from simulaqron.settings import LOCAL_SIMULAQRON_SETTINGS, LOCAL_NETWORK_SETTINGS, HOME_NETWORK_SETTINGS
-from simulaqron.settings import simulaqron_settings, network_config
+from simulaqron.settings import simulaqron_settings, get_default_network_config_file, network_config
 from simulaqron.settings.network_config import NodeConfig, DEFAULT_SIMULAQRON_NETWORK_FILENAME
 from simulaqron.settings.simulaqron_config import SimBackend
 
@@ -38,12 +38,41 @@ class RunningSimulaQronDaemon(run.RunDaemon):
         )
 
 class SimulaQronDaemon(run.RunDaemon):
-    def __init__(self, pidfile: Path, name: str, nodes: List[str]):
+    """
+    Daemon process that runs a SimulaQron network in the background.
+
+    This daemon spawns virtual nodes and QNodeOS servers for each node
+    in the network configuration. It runs until explicitly stopped.
+
+    Attributes
+    ----------
+    name : str
+        Name of the network (e.g., 'default').
+    nodes : List[str]
+        List of node names to start (e.g., ['Alice', 'Bob']).
+    network_config_file : Path
+        Path to the network configuration JSON file.
+    """
+    def __init__(self, pidfile: Path, name: str, nodes: List[str], network_config_file: Path):
+        """
+        Initialize the SimulaQron daemon.
+
+        :param pidfile: Path to the PID file used to track the daemon process.
+        :type pidfile: Path
+        :param name: Name of the network (e.g., 'default').
+        :type name: str
+        :param nodes: List of node names to start (e.g., ['Alice', 'Bob']).
+        :type nodes: List[str]
+        :param network_config_file: Path to the network configuration file.
+        :type network_config_file: Path
+        
+        """
         super().__init__(
             pidfile=pidfile,
         )
         self.name = name
         self.nodes = nodes
+        self.network_config_file = network_config_file
 
     def run(self):
         """Starts all nodes defined in netsim's config directory."""
@@ -52,7 +81,15 @@ class SimulaQronDaemon(run.RunDaemon):
         sys.stdout = open('/tmp/simulaqron.out', 'w', buffering=1)
         sys.stderr = open('/tmp/simulaqron.err', 'w', buffering=1)
 
-        network = Network(network_name=self.name, nodes=self.nodes)
+        # Let's read the config file we should be working from
+        network_config.read_from_file(self.network_config_file)
+
+        # Start the network to be simulated on this node
+        network = Network(
+            nodes=self.nodes,
+            network_config_file=self.network_config_file,
+            network_name=self.name,
+        )
         network.start()
 
         while True:
@@ -87,7 +124,7 @@ def version():
     help=f"Use the given network config file. Defaults to the file named "  # noqa: E131
          f"'{DEFAULT_SIMULAQRON_NETWORK_FILENAME}' on the current directory.",  # noqa: E131
     type=click.Path(exists=True, dir_okay=False, resolve_path=True, path_type=Path),
-    default=LOCAL_NETWORK_SETTINGS
+    default=None
 )
 @click.option(
     "--name",
@@ -112,7 +149,13 @@ def version():
 )
 def start(name: str, nrnodes: int, nodes: str, network_config_file: Path):
     """Starts a network with the given parameters or from config files."""
-    network_config.read_from_file(network_config_file)
+
+    # Read the network configuration from the indicated file
+    if network_config_file is None:
+        network_config_file = get_default_network_config_file()
+    elif not network_config_file.exists():
+        raise click.BadParameter(f"File '{network_config_file}' does not exist.")
+
     pidfile = PID_FOLDER / f"simulaqron_network_{name}.pid"
     if pidfile.exists():
         logging.warning("Network with name %s is already running", name)
@@ -124,7 +167,10 @@ def start(name: str, nrnodes: int, nodes: str, network_config_file: Path):
               "this can be normal. Please check your invocation line if needed.")
     if nrnodes > 0 and len(nodes) < nrnodes:
         nodes += [f"Node{i}" for i in range(nrnodes - len(nodes))]
-    d = SimulaQronDaemon(pidfile=pidfile, name=name, nodes=nodes)
+
+    # Let's start the simulaqron daemon. We will pass the config file so it will be available
+    # in the child process and load the same config
+    d = SimulaQronDaemon(pidfile=pidfile, name=name, nodes=nodes, network_config_file=network_config_file)
     try:
         d.start()
     except SystemExit as e:

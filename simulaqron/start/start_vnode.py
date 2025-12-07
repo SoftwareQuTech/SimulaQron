@@ -33,11 +33,13 @@ import os
 import signal
 import sys
 from functools import partial
+from pathlib import Path
 
 
 from simulaqron.reactor import reactor
 from simulaqron.virtual_node.virtual import Backend
 from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import network_config
 
 logger = logging.getLogger("start_vnode")
 
@@ -52,11 +54,23 @@ def sigterm_handler(name, _signo, _stack_frame):
     reactor.stop()
 
 
-def start_vnode(name: str, network_name: str = "default", log_level: str = "WARNING"):
+def start_vnode(name: str, network_config_file: Path, network_name: str = "default", log_level: str = "WARNING"):
     """ Start the execution of a virtual simulaqron node. This node will simulate all quantum aspects 
     of the node, and is then reachable via Twisted PB (Simulaqron Native Mode) or - when also starting QNPU - 
     the QNPU Server which translates NetQASM to native mode. 
+
+    :param name: Name of the node (e.g., 'Alice').
+    :type name: str
+    :param network_config_file: Path to network config file.
+    :type network_config_file: Path
+    :param network_name: Name of the network (e.g., 'default').
+    :type network_name: str
+    :param log_level: Logging level (e.g., 'DEBUG', 'INFO', 'WARNING').
+    :type log_level: str
     """
+
+    # Let's ensure we have read the config file. This relies on the right one being passed from network.py
+    network_config.read_from_file(network_config_file)
 
     # We will have our logging output be written to a file in order to not distract from the app
     # logging that the user will later see on the screen

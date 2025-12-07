@@ -11,9 +11,9 @@
             },
             {
                 "Bob": {
-                    "app_socket": ["localhost", 8831],
-                    "qnodeos_socket": ["localhost", 8832],
-                    "vnode_socket": ["localhost", 8833]
+                    "app_socket": ["localhost", 9831],
+                    "qnodeos_socket": ["localhost", 9832],
+                    "vnode_socket": ["localhost", 9833]
                 }
             }
         ],

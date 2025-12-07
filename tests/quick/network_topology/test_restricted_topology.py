@@ -6,7 +6,7 @@ from netqasm.sdk import EPRSocket
 from netqasm.runtime.app_config import default_app_config
 
 from simulaqron.network import Network
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, get_default_network_config_file
 from simulaqron.sdk.connection import SimulaQronConnection
 from simulaqron.run import run_applications
 
@@ -47,7 +47,7 @@ class TestRestrictedTopology:
                 outcomes.append(m)
 
         for create_name, recv_name in self.edges:
-            run_applications([
+            run_applications(network_cfg=get_default_network_config_file(use_embedded=True), apps=[
                 default_app_config(create_name, partial(create_func, create_name, recv_name)),
                 default_app_config(recv_name, partial(create_func, recv_name, create_name)),
             ], use_app_config=False)
@@ -56,7 +56,7 @@ class TestRestrictedTopology:
 
         for sender_name, receiver_name in self.non_edges:
             with self.assertRaises(RuntimeError):  # TODO correct error
-                run_applications([
+                run_applications(network_cfg=get_default_network_config_file(use_embedded=True), apps=[
                     default_app_config(create_name, partial(create_func, create_name, recv_name)),
                     default_app_config(recv_name, partial(create_func, recv_name, create_name)),
                 ], use_app_config=False)
