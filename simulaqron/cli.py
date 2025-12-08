@@ -138,21 +138,13 @@ def version():
     default="default",
 )
 @click.option(
-    "-N",
-    "--nrnodes",
-    help="Number of nodes to start. This argument will start nodes named 'Node<i>', "
-         "until the number of nodes is reached.",
-    type=int,
-    default=0,
-)
-@click.option(
     "-n",
     "--nodes",
     help="Comma separated list of nodes to start.",
     type=str,
     default="",
 )
-def start(name: str, nrnodes: int, nodes: str, simulaqron_config_file: Path, network_config_file: Path):
+def start(name: str, nodes: str, simulaqron_config_file: Path, network_config_file: Path):
     """Starts a network with the given parameters or from config files."""
     # Checks the simulaqron config
     if not _path_exists(simulaqron_config_file):
@@ -174,6 +166,9 @@ def start(name: str, nrnodes: int, nodes: str, simulaqron_config_file: Path, net
         return
     # Check that the nodes to start exist in the given network
     nodes = nodes.split(",")
+    if len(nodes) <= 0:
+        print("The list of nodes to start is empty. Please check the list given in the --nodes argument.")
+        return
     for node_to_start in nodes:
         if not node_to_start in network_config.networks[name]:
             print(f"The node '{node_to_start}' was not found in the network named '{name} 'specified in"
@@ -186,11 +181,6 @@ def start(name: str, nrnodes: int, nodes: str, simulaqron_config_file: Path, net
         logging.warning("Network with name %s is already running", name)
         logging.warning("The pidfile for this network is located at %s", pidfile)
         return
-    if len(nodes) <= 0:
-        print("WARNING - The list of nodes to start is empty. If you specified the --nrnodes option "
-              "this can be normal. Please check your invocation line if needed.")
-    if nrnodes > 0 and len(nodes) < nrnodes:
-        nodes += [f"Node{i}" for i in range(nrnodes - len(nodes))]
     d = SimulaQronDaemon(pidfile=pidfile, name=name, nodes=nodes)
     try:
         d.start()
