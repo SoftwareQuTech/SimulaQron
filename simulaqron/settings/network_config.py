@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Optional, Self, Dict, List, Tuple, Any
 
 from dataclasses_serialization.json import JSONSerializer, JSONSerializerMixin
-from docutils.nodes import node_class_names
 
 import simulaqron._default_config
 
@@ -170,21 +169,23 @@ class NetworksConfiguration(JSONSerializerMixin):
     networks: Dict[str, NetworkConfig] = field(default_factory=dict)
     used_sockets: List[Tuple[str, int]] = field(default_factory=list)
 
-    def using_default_network(self):
+    def using_default_network(self) -> Path:
         """
-        Loads the default networks in the current networks configuration object. The default
-        configuration contains a single network named "default", which contains 5 nodes named
-        "Alice", "Bob", "Charlie", "David" and "Eve". Each node contains configuration to run
-        in `localhost` with a unique port between 8000 and 9000.
+        Load the embedded default network configuration.
 
-        For the specific configuration, you can check the file `simulaqron/_default_config/default_network.json`.
+        Used for test isolation - always loads the embedded default
+        regardless of local config files.
         """
+
         # We use the embedded default network here
-        default_network_path = resources.files(simulaqron._default_config).joinpath("default_network.json")
+        default_network_path = get_default_network_config_file(use_embedded=True)
+
         new_builder = NetworksConfiguration()
-        new_builder.read_from_file(Path(str(default_network_path)))
+        new_builder.read_from_file(default_network_path)
         self.networks = new_builder.networks
         self.used_sockets = new_builder.used_sockets
+
+        return default_network_path
 
     def _correct_network_port_if_needed(self, hostname: str, port: int) -> int:
         """
@@ -412,6 +413,7 @@ class NetworksConfiguration(JSONSerializerMixin):
         :param file_path: None or str
             If a file_path was specified upon __init__ this will be used if file_path is None.
         """
+
         if file_path is None:
             raise ValueError("No path specified to read the network configuration")
 
@@ -468,36 +470,15 @@ class NetworksConfiguration(JSONSerializerMixin):
     @classmethod
     def read_from_known_sources(cls) -> Self:
         """
-        Reads the network configuration from usual locations.
-        This method will try to load the network configuration files *in the following order*
-        from (1) the current folder (`./simulaqron_network.json`) and, (2) simulaqron settings
-        in the user's home folder (`~/.simulaqron/simulaqron_network.json`).
+        Load config from the default config file.
 
-        If none of these files exists, this method will create a network configuration in
-        user's home folder (`~/.simulaqron/simulaqron_network.json`) containing the default
-        SimulaQron configuration.
+        Uses :func:`get_default_network_config_file` to resolve the path.
 
-        To check the default configuration, check the documentation of `using_default_network`.
-        See Also:
-            using_default_network()
+        :return: Loaded network configuration.
+        :rtype: NetworkConfigBuilder
         """
-        cwd_networks_file = LOCAL_NETWORK_SETTINGS.resolve()
-        home_networks_file = HOME_NETWORK_SETTINGS.resolve()
-
-        files_to_load = [cwd_networks_file, home_networks_file]
-
-        for file in files_to_load:
-            try:
-                if file.exists() and file.is_file():
-                    return cls._deserialize_from_file(file)
-            except json.JSONDecodeError:
-                # Nothing to do; try next one
-                pass
-
-        # Ultimate case; we create a new config file in the home and load it
-        default_net_cfg_path = Path(str(resources.files(simulaqron._default_config).joinpath("default_network.json")))
-        shutil.copyfile(default_net_cfg_path, home_networks_file)
-        return cls._deserialize_from_file(home_networks_file)
+        config_file = get_default_network_config_file()
+        return cls._deserialize_from_file(config_file)
 
     # Helper properties and pythonic accessors
     @property
@@ -572,3 +553,34 @@ class NetworksConfiguration(JSONSerializerMixin):
             except socket.error:
                 return False
         return True
+
+###########
+#
+
+def get_default_network_config_file(use_embedded: bool = False) -> Path:
+    """
+    Get the network config file path to use.
+
+    :param use_embedded: If True, always use the embedded default (for tests).
+        If False, uses priority: LOCAL > HOME > embedded.
+    :type use_embedded: bool
+    :return: Path to the network config file.
+    :rtype: Path
+    """
+
+    # We will use an embedded default which is used in testing
+    if use_embedded:
+        return Path(str(resources.files(simulaqron._default_config).joinpath("default_network.json")))
+
+    # Implements using the local directory setting as a priority
+    if LOCAL_NETWORK_SETTINGS.exists():
+        return LOCAL_NETWORK_SETTINGS
+    if HOME_NETWORK_SETTINGS.exists():
+        return HOME_NETWORK_SETTINGS
+
+    # Create default in HOME (matches load_from_known_sources behavior)
+    # XXX I have mixed feelings we should do this, but I leave it for now
+    default_net_cfg_path = Path(str(resources.files(simulaqron._default_config).joinpath("default_network.json")))
+    HOME_NETWORK_SETTINGS.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(default_net_cfg_path, HOME_NETWORK_SETTINGS)
+    return HOME_NETWORK_SETTINGS

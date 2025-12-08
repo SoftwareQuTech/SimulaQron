@@ -80,7 +80,7 @@ class QuantumEngine(pb.Referenceable, abc.ABC):
     @abc.abstractmethod
     def add_fresh_qubit(self) -> int:
         """
-        Add a new qubit initialized in the \|0\> state.
+        Add a new qubit initialized in the |0> state.
         :return: The qubit number
         :rtype: int
         """

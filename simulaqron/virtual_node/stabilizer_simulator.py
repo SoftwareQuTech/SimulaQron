@@ -56,7 +56,7 @@ class StabilizerEngine(QuantumEngine):
 
     def add_fresh_qubit(self) -> int:
         """
-        Add a new qubit initialized in the \|0\> state.
+        Add a new qubit initialized in the |0> state.
         """
         # Check if we are still allowed to add qubits
         if self.activeQubits >= self.maxQubits:

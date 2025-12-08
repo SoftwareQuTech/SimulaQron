@@ -34,10 +34,12 @@ from typing import List, Optional, Dict
 
 import networkx as nx
 from multiprocess.context import ForkProcess as Process
-from netqasm.logging.glob import get_netqasm_logger, get_log_level
+import logging
+from pathlib import Path
 
 from simulaqron.settings import network_config
 from simulaqron.settings.network_config import NodeConfig
+from simulaqron.settings import simulaqron_settings
 from simulaqron.start import start_vnode, start_qnodeos
 # WARNING - this import *needs* to be after importing start_vnode and start_qnodeos
 # Otherwise the code that patches some netqasm internal definitions will not work correctly!
@@ -51,7 +53,7 @@ from simulaqron.sdk import SimulaQronConnection
 
 
 class Network:
-    def __init__(self, nodes: List[str], network_name: str = "default"):
+    def __init__(self, nodes: List[str], network_config_file: Path, network_name: str = "default"):
         """
         Used to spin up a simulated network.
         This class uses the network configuration loaded in the global network_config object and
@@ -59,14 +61,19 @@ class Network:
 
         :param network_name: str
             The name of network to start. Defaults to "default".
+        :param network_config_file: Path
+            Path to network config file (required).
         :param nodes: list of str
             A list of strings with the node names to start.
         """
+
+        self._network_config_file = network_config_file
+
         self._running = False
         self.name = network_name
 
         self.processes: List[Process] = []
-        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
+        self._logger = logging.getLogger(f"{self.__class__.__name__}({self.name})")
 
         # Determine the nodes to start, using the in-memory network config
         self._nodes_to_start: List[NodeConfig] = []
@@ -110,10 +117,14 @@ class Network:
         """
         for node in self._nodes_to_start:
             process_virtual = Process(
-                target=start_vnode, args=(node.name, self.name, get_log_level()), name=f"VirtNode {node.name}"
+                target=start_vnode, 
+                args=(node.name, self._network_config_file, self.name, simulaqron_settings.log_level),
+                name=f"VirtNode {node.name}"
             )
             process_qnodeos = Process(
-                target=start_qnodeos, args=(node.name, self.name, get_log_level()), name=f"QnodeOSNode {node.name}"
+                target=start_qnodeos, 
+                args=(node.name, self._network_config_file, self.name, simulaqron_settings.log_level),
+                name=f"QnodeOSNode {node.name}"
             )
             self.processes += [process_virtual, process_qnodeos]
 

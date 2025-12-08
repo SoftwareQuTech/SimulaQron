@@ -3,7 +3,7 @@ import time
 import pytest
 from timeit import default_timer as timer
 
-from simulaqron.settings import simulaqron_settings, network_config
+from simulaqron.settings import simulaqron_settings, network_config, get_default_network_config_file, get_default_network_config_file, get_default_network_config_file
 from simulaqron.network import Network
 
 
@@ -16,7 +16,7 @@ class TestStartStopNetwork:
         network_config.using_default_network()
 
     def test_start(self, network_file: str):
-        network = Network(nodes=self.nodes)
+        network = Network(nodes=self.nodes, network_config_file=get_default_network_config_file(use_embedded=True))
         assert len(network.processes) == 2 * len(self.nodes)
         for p in network.processes:
             assert p.is_alive() is False
@@ -26,13 +26,13 @@ class TestStartStopNetwork:
             assert p.is_alive() is True
 
     def test_stop(self):
-        network = Network(nodes=self.nodes)
+        network = Network(nodes=self.nodes, network_config_file=get_default_network_config_file(use_embedded=True))
         network.stop()
         for p in network.processes:
             assert p.is_alive() is False
 
     def test_start_stop(self):
-        network = Network(nodes=self.nodes)
+        network = Network(nodes=self.nodes, network_config_file=get_default_network_config_file(use_embedded=True))
         network.start(wait_until_running=True)
         for p in network.processes:
             assert p.is_alive() is True
@@ -41,7 +41,7 @@ class TestStartStopNetwork:
             assert p.is_alive() is False
 
     def test_no_wait(self):
-        network = Network(nodes=self.nodes)
+        network = Network(nodes=self.nodes, network_config_file=get_default_network_config_file(use_embedded=True))
         network.start(wait_until_running=False)
         assert network.running is False
 
@@ -57,6 +57,6 @@ class TestStartStopNetwork:
         assert network.running is True
 
     def test_del(self):
-        network = Network(nodes=self.nodes)
+        network = Network(nodes=self.nodes, network_config_file=get_default_network_config_file(use_embedded=True))
         network.start(wait_until_running=True)
         del network

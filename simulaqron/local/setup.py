@@ -27,10 +27,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import logging
 import time
 from typing import Callable
 
-from netqasm.logging.glob import get_netqasm_logger
 from twisted.internet import error
 from twisted.internet.defer import DeferredList
 from twisted.internet.error import ReactorNotRunning
@@ -39,21 +39,21 @@ from twisted.spread import pb
 from simulaqron.general.host_config import SocketsConfig
 from simulaqron.reactor import reactor
 
-_logger = get_netqasm_logger("setup-local")
+_logger = logging.getLogger("setup-local")
 
 
 #####################################################################################################
 #
 # setup_local
 #
-# Sets up the local classical comms server (if applicable), and connects to the local virtual node
-# and other classical communication servers.
+# Sets up the local classical application level comms server (if applicable), and connects to the local 
+# virtual node and other classical communication servers.
 
 
 def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsConfig,
                 lNode: pb.Root, func: Callable, *args, **kwargs):
     """
-    Sets up a local classical communication server (if desired according to the configuration file),
+    Sets up a local classical applicaiton level communication server (if desired according to the configuration file),
     a client connection to the local virtual node quantum backend and a client connections to all other
     classical communication servers
 
@@ -81,14 +81,14 @@ def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsCon
     if myName in classicalNet.hostDict:
         try:
             nb = classicalNet.hostDict[myName]
-            _logger.debug("LOCAL %s: Starting local classical communication server (%s: %s, %d).",
+            _logger.debug("SETUP_LOCAL %s: Starting local classical communication server (%s: %s, %d).",
                           myName, nb.name, nb.hostname, nb.port
                           )
             nb.root = lNode
             nb.factory = pb.PBServerFactory(nb.root)
             reactor.listenTCP(nb.port, nb.factory)
         except Exception as e:
-            _logger.error("LOCAL %s: Cannot start classical communication servers: %s", myName, e)
+            _logger.error("SETUP_LOCAL %s: Cannot start classical communication servers: %s", myName, e)
             return
 
     # Give the server some time to start up
@@ -96,7 +96,7 @@ def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsCon
 
     # Connect to the local virtual node simulating the "local" qubits
     node = virtualNet.hostDict[myName]
-    _logger.debug("LOCAL %s: Connecting to local virtual node (%s: %s, %d).", myName, node.name, node.hostname,
+    _logger.debug("SETUP_LOCAL %s: Connecting to local virtual node (%s: %s, %d).", myName, node.name, node.hostname,
                   node.port)
     factory = pb.PBClientFactory()
     reactor.connectTCP(node.hostname, node.port, factory)
@@ -107,7 +107,7 @@ def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsCon
     for node in classicalNet.hostDict:
         nb = classicalNet.hostDict[node]
         if nb.name != myName:
-            _logger.debug("LOCAL %s: Making classical connection to %s (%s: %s, %d).", myName, nb.name, nb.name,
+            _logger.debug("SETUP_LOCAL %s: Making classical connection to %s (%s: %s, %d).", myName, nb.name, nb.name,
                           nb.hostname, nb.port)
             nb.factory = pb.PBClientFactory()
             reactor.connectTCP(nb.hostname, nb.port, nb.factory)
@@ -133,7 +133,7 @@ def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsCon
 
 def init_register(resList: DeferredList, myName: str, virtualNet: SocketsConfig, classicalNet: SocketsConfig,
                   lNode: pb.Root, func: Callable, *args, **kwargs):
-    _logger.debug("LOCAL %s: All connections set up.", myName)
+    _logger.debug("SETUP_LOCAL %s: All connections set up.", myName)
 
     # Retrieve the connection to the local virtual node, if successful
     j = 0
@@ -142,7 +142,7 @@ def init_register(resList: DeferredList, myName: str, virtualNet: SocketsConfig,
         if lNode is not None:
             lNode.set_virtual_node(virtRoot)
     else:
-        _logger.error("LOCAL %s: Connection to virtual server failed!", myName)
+        _logger.error("SETUP_LOCAL %s: Connection to virtual server failed!", myName)
         reactor.stop()
 
     # Retrieve connections to the classical nodes
@@ -152,9 +152,9 @@ def init_register(resList: DeferredList, myName: str, virtualNet: SocketsConfig,
             j = j + 1
             if resList[j][0]:
                 nb.root = resList[j][1]
-                _logger.debug("LOCAL %s: Connected node %s with %s", myName, nb.name, nb.root)
+                _logger.debug("SETUP_LOCAL %s: Connected node %s with %s", myName, nb.name, nb.root)
             else:
-                _logger.error("LOCAL %s: Connection to %s failed!", myName, nb.name)
+                _logger.error("SETUP_LOCAL %s: Connection to %s failed!", myName, nb.name)
                 reactor.stop()
 
     # On the local virtual node, we still want to initialize a qubit register
@@ -164,7 +164,7 @@ def init_register(resList: DeferredList, myName: str, virtualNet: SocketsConfig,
 
 
 def fill_register(obj, myName, lNode, virtRoot, classicalNet, func, *args, **kwargs):
-    _logger.debug("LOCAL %s: Created quantum register at virtual node.", myName)
+    _logger.debug("SETUP_LOCAL %s: Created quantum register at virtual node.", myName)
     qReg = obj
 
     # If we run a server, record the handle to the local virtual register
@@ -179,7 +179,7 @@ def localError(reason):
     """
     Error handling for the connection.
     """
-    _logger.error("Critical error: %s", reason)
+    _logger.error("SETUP_LOCAL: Critical error: %s", reason)
     try:
         reactor.stop()
     except ReactorNotRunning:

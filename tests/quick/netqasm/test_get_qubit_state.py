@@ -5,7 +5,7 @@ import pytest
 from netqasm.runtime.settings import set_simulator
 from netqasm.sdk.classical_communication.message import StructuredMessage
 
-from simulaqron.settings import simulaqron_settings, network_config
+from simulaqron.settings import simulaqron_settings, network_config, get_default_network_config_file
 from simulaqron.settings.simulaqron_config import SimBackend
 
 set_simulator("simulaqron")
@@ -115,7 +115,7 @@ class TestGetQubitState:
             ]
         )
         with pytest.raises(RuntimeError) as exc:
-            _ = run_applications(apps, use_app_config=False, enable_logging=False)
+            _ = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False)
         assert "Qubit 0 has unflushed operations" in str(exc.value)
 
     def test_peek_unflushed_qubit(self):
@@ -125,7 +125,7 @@ class TestGetQubitState:
             ]
         )
         with pytest.raises(RuntimeError) as exc:
-            _ = run_applications(apps, use_app_config=False, enable_logging=False)
+            _ = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False)
         assert "Qubit 0 has unflushed operations" in str(exc.value)
 
     def test_get_basic_state_local(self):
@@ -134,7 +134,7 @@ class TestGetQubitState:
                 ("Alice", TestGetQubitState.peek_init_qubit)
             ]
         )
-        raw_results = run_applications(apps, use_app_config=False, enable_logging=False)
+        raw_results = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False)
         # We expect the qubit to be initialized in the |0> state = [1 0]
         assert np.array_equal(raw_results[0]["app_Alice"], np.array([[1.0 + 0.0j, 0 + 0.0j], [0.0 + 0.0j, 0 + 0.0j]]))
 
@@ -144,7 +144,7 @@ class TestGetQubitState:
                 ("Alice", TestGetQubitState.peek_local_qubit)
             ]
         )
-        raw_results = run_applications(apps, use_app_config=False, enable_logging=False)
+        raw_results = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False)
         #qubit A: H(|0>) = 1/sqrt(2) |0> + 1/sqrt(2) |1> =  1/sqrt(2) [1 0] + 1/sqrt(2) [0 1]
         expected_h = np.array([1.0 / math.sqrt(2.0) + 0.0j, 1.0 / math.sqrt(2.0) + 0.0j])
         # Note: Due to loss in serialization, we allow a tolerance of 1e-5 when comparing all the members
@@ -160,7 +160,7 @@ class TestGetQubitState:
                 ("Bob", TestGetQubitState.bob_teleport)
             ]
         )
-        raw_results = run_applications(apps, use_app_config=False, enable_logging=False)
+        raw_results = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False)
         assert np.isclose(
             raw_results[0]["app_Alice"]["alice_state"],
             raw_results[0]["app_Bob"]["bob_state"],

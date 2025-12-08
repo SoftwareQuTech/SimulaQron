@@ -127,7 +127,7 @@ def main():
     # Check if we should run a server (if this node is listed in classicalNet)
     if myName in classicalNet.hostDict:
         # Create the local classical server
-        logging.debug("LOCAL %s: Creating classical server.", myName)
+        logging.debug("APP %s: Creating classical server.", myName)
         myNode = localNode(virtualNet.hostDict[myName], classicalNet)
     else:
         myNode = None
@@ -137,5 +137,9 @@ def main():
 
 
 ##################################################################################################
-logging.basicConfig(format="%(asctime)s:%(levelname)s:%(message)s", level=logging.DEBUG)
+logging.basicConfig(
+    format="%(asctime)s:%(levelname)s:%(name)s:%(filename)s:%(lineno)d:%(message)s",
+    level=logging.DEBUG,
+    force=True
+)
 main()

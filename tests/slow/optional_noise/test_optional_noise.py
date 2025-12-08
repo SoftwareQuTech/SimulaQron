@@ -12,7 +12,7 @@ import sys
 from simulaqron.sdk.connection import SimulaQronConnection
 from netqasm.sdk import Qubit
 from simulaqron.network import Network
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import simulaqron_settings, get_default_network_config_file
 
 
 def prep_z0(conn):
@@ -63,7 +63,7 @@ class TestOptionalNoise(unittest.TestCase):
         simulaqron_settings.noisy_qubits = True
         simulaqron_settings.t1 = 0.0001
 
-        cls.network = Network(nodes=["Alice"], force=True)
+        cls.network = Network(nodes=["Alice"], network_config_file=get_default_network_config_file(use_embedded=True))
         cls.network.start()
 
     @classmethod

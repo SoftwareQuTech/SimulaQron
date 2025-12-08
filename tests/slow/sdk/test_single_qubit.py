@@ -26,8 +26,6 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-from tempfile import NamedTemporaryFile
-
 import numpy as np
 import pytest
 from scipy.linalg import expm
@@ -40,7 +38,6 @@ from simulaqron.network import Network
 from simulaqron.sdk.connection import SimulaQronConnection
 from simulaqron.run.run import reset
 from simulaqron.general import SimUnsupportedError
-from simulaqron.settings.network_config import NetworksConfiguration
 
 
 def calc_exp_values(q):
@@ -207,8 +204,8 @@ class TestSingleQubitGate:
     def network(self):
         simulaqron_settings.default_settings()
         simulaqron_settings.sim_backend = SimBackend.PROJECTQ
-        network_config.using_default_network()
-        network = Network(nodes=["Alice"])
+        default_net_cfg_path = network_config.using_default_network()
+        network = Network(nodes=["Alice"], network_config_file=default_net_cfg_path)
         network.start()
         yield
         network.stop()
