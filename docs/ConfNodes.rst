@@ -5,38 +5,31 @@ Configuring the simulated network
 Starting the SimulaQron backend
 -------------------------------
 
-The backend of a SimulaQron network is a set of running virtual nodes and their corresponding CQC servers. To start the backend of a SimulaQron network run the command ``simulaqron start``.
+The backend of a SimulaQron network is a set of running virtual nodes and their corresponding `VirtualNode` servers. Starting a SimulaQron network requires using SimulaQron and network configuration files.
 
-With no arguments, a network is by default started with the five nodes Alice, Bob, Charlie, David and Eve. How to adjust the nodes and the topology of the network is described below.
+To start the backend of a SimulaQron network run the command ``simulaqron start``.
+
+The command can receive certain arguments to control the simulated network:
+
+* ``--simulaqron-config-file=PATH`` (optional): Specifies a path for the SimulaQron config file to use for the backend. If not given, simulaqron will try to read a file named ``simulaqron_settings.json`` in the current folder.
+* ``--network-config-file=PATH`` (optional): Specifies a path for the network config file to use for the backend. If not given, simulaqron will try to read a file named ``simulaqron_network.json`` in the current folder.
+* ``--name=<network-name>`` (optional): Specifies the name of the network to start. This name must correspond to one of the names specified on the given network configuration file. If this argument is not given, this value is defaulted to ``default``.
+* ``--nodes <nodes_list>`` (`required`): Specified which nodes to simulate. The ``<nodes_list>`` value is a comma separated list of the nodes names to start. All the specified node names must exist within the specified network inside the network configuration file.
+
+How to adjust the nodes and the topology of the network is described below.
 
 .. warning:: ``simulaqron start`` can fail if any of the ports specified in the config files are already in use by a running SimulaQron network or another program.
 
 To configure networks see section :ref:`networkConfig`.
-Finally for instructions on how to connect to an already runnning simulated network using CQC, see section :ref:`remoteNetwork`.
+Finally for instructions on how to connect to an already running simulated network using CQC, see section :ref:`remoteNetwork`.
 
-If you want to start a network with for example the three nodes Alex, Bart, Curt, simply type::
+If you want to start a network with, for example, the three nodes Alex, Bart, Curt, simply type::
 
     simulaqron start --nodes Alex,Bart,Curt
 
-If you simply want a network with 10 nodes, type::
+TODO
 
-    simulaqron start --nrnodes 10
-
-This will start up a network where the nodes are called Node0, Node1, ..., Node9.
-
-The --nodes and --nrnodes can be combined. Let's say you want a network with 10 nodes and that three of the nodes are called Alice, Bob and Charlie, type::
-
-    simulaqron start --nodes Alice,Bob,Charlie --nrnodes 10
-
-Which will start up a network with the nodes Alice, Bob, Charlie, Node0, Node1, ..., Node6. If --nrnodes is less than the entries in --nodes, then --nrnodes is ignored. The two keywords can also be specified shorter as -nd and -nn respectively. So the above can also be done as::
-
-    simulaqron start -n Alice,Bob,Charlie -N 10
-
-You can also specify a topology of the network. For example if you want 10 nodes in a ring topology, type::
-
-    simulaqron start --nrnodes 10 --topology ring
-
-In this network Node :math:`i` can create EPR pairs and send qubits to Node :math:`i-1 \pmod{10}` and Node :math:`i+1 \pmod{10}`. However, if a CQC message is sent to for example Node2 to produce entanglement with Node5, a error message (CQC_ERR_UNSUPP) will be returned. The options for the automatically generated topologies are currently:
+The options for the automatically generated topologies are currently:
 
 * `complete`: A fully connected. This is also used if the argument --topology is not used.
 * `ring`: A ring network, i.e. a connected topology where every node has exactly two neighbors.
@@ -59,26 +52,11 @@ The network that is then started might look like this:
 
 To create a custom topology, see below.
 
----------------------
-Using the --keep flag
----------------------
-By default simulaqron will try to overwrite the current network config of a network your trying to start.
-For example if you have a network called "my_network" with the nodes Alice, Bob and Charlie and you type::
-    
-    simulaqron start --name=my_network --nodes=Alice,Bob
-
-simulaqron will ask you if you want to edit the config file to make "my_network" be a network with the nodes Alice and Bob.
-However if you add the flag ``--keep``, simulaqron will simply start up Alice and Bob in the network "my_network" without editing the config file.
-This is useful if your planning to simulated a network between multiple physical computers.
-Since in this case, the node Charlie might be simulated at a differnent computer so you still want the addresses of Charlie in your config file but you don't want to start that node on your computer.
-
-.. note:: If you want to suppress the check from simulaqron whether you want to edit the network config file you can always add the flag ``--force`` (``-f``).
-
 -----------------
 Multiple networks
 -----------------
 
-To run multiple networks at the same time you need to given them different names by using the --name flag::
+To run multiple networks at the same time you need to give them different names by using the --name flag::
 
     simulaqron start --name NETWORK
 
@@ -107,16 +85,14 @@ which adds Maria to the network "OtherNetwork".
 You can also specify hostname and port numbers to be used for this node including what it's neighbors are using the arguments:
 
  * ``--hostname``
- * ``--app_port``
- * ``--cqc_port``
- * ``--vnode_port``
+ * ``--app-port``
+ * ``--qnodeos-port``
+ * ``--vnode-port``
  * ``--neighbors``
-
-SimulaQron will ask you before it makes any changes to the network config file. If you wan to suppress this you can add the flag ``--force`` (``-f``).
 
 If you want to build up a (or many) more complex networks it can become tedious to do this through the CLI.
 You can instead write your own network config file.
-This network config file should be a .json file and could for example look as follows.
+This network config file should be a .json file and could, for example, look as follows.
 An example of such a file can be seen below which contains two networks ("default" and "small_network") which the nodes "Alice", "Bob" and "Test" respectively::
 
     {
@@ -127,7 +103,7 @@ An example of such a file can be seen below which contains two networks ("defaul
                         "localhost",
                         8000
                     ],
-                    "cqc_socket": [
+                    "qnodeos_socket": [
                         "localhost",
                         8001
                     ],
@@ -141,7 +117,7 @@ An example of such a file can be seen below which contains two networks ("defaul
                         "localhost",
                         8007
                     ],
-                    "cqc_socket": [
+                    "qnodeos_socket": [
                         "localhost",
                         8008
                     ],
@@ -174,7 +150,12 @@ An example of such a file can be seen below which contains two networks ("defaul
         }
     }
 
-If you want simulaqron to use your custom network.json file simply set this in the settings by ``simulaqron set network-config-file your/path/my_network.json`` or add the following line to a file ``~/.simulaqron.json``: ``network_config_file: your/path/my_network.json``, where ``your/path/my_network.json`` is the path to your custom network config file.
+If you want simulaqron to use your custom network.json file simply place it in the same folder where you are running your code, and name it ``simulaqron_network.json``. You can also use name it differently, but make sure that you manually load this file in your python code::
+
+    from simulaqron.settings import network_config
+    ...
+
+    network_config.read_from_file("/path/to/your/config.json")
 
 The entries ``"topology"`` can be used to define the topology of the network.
 This could for example be::
@@ -185,7 +166,7 @@ This could for example be::
      "Charlie": ["Bob"]
     }
 
-descibing network where Alice is adjacent to Bob, Bob is adjacent to Alice and Charlie and Charlie is adjacent to Bob.
+describing a network topology where Alice is adjacent to Bob, Bob is adjacent to Alice and Charlie and Charlie is adjacent to Bob.
 
 .. note:: Undirected topologies are also supported. That is, networks where for example Alice can send a qubit to Bob but Bob cannot send a qubit to Alice.
 
