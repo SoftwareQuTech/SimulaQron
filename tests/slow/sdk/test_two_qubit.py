@@ -26,8 +26,6 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-from tempfile import NamedTemporaryFile
-
 import numpy as np
 import pytest
 from netqasm.runtime.application import default_app_instance
@@ -233,7 +231,13 @@ class TestTwoQubitGates:
                 ("Bob", EPR_Bob)
             ]
         )
-        results = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False, num_rounds=self.iterations)
+        results = run_applications(
+            apps,
+            network_cfg=get_default_network_config_file(use_embedded=True),
+            use_app_config=False,
+            enable_logging=False,
+            num_rounds=self.iterations
+        )
         # both sides MUST measure the same state
         assert int(results[0]["app_Alice"]) == int(results[0]["app_Bob"])
 
@@ -247,4 +251,10 @@ class TestTwoQubitGates:
                 ("Bob", teleport_bob)
             ]
         )
-        _ = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False, num_rounds=self.iterations)
+        _ = run_applications(
+            apps,
+            network_cfg=get_default_network_config_file(use_embedded=True),
+            use_app_config=False,
+            enable_logging=False,
+            num_rounds=self.iterations
+        )

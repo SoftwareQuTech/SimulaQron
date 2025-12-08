@@ -1,11 +1,8 @@
 from netqasm.runtime.settings import set_simulator
 set_simulator("simulaqron")
 
-from simulaqron.settings import simulaqron_settings
-simulaqron_settings.network_config_file = "./simulaqron_settings.json"
-
-from netqasm.sdk.external import NetQASMConnection
-from netqasm.sdk import EPRSocket
+from netqasm.sdk.external import NetQASMConnection  # noqa: E402
+from netqasm.sdk import EPRSocket  # noqa: E402
 
 
 def run_bob():
@@ -19,4 +16,3 @@ def run_bob():
 if __name__ == "__main__":
     result = run_bob()
     print(f"Bob measurement: {result}")
-

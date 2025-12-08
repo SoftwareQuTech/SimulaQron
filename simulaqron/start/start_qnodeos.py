@@ -97,7 +97,7 @@ def setup_netqasm_server(my_name: str, netqasm_factory: NetQASMFactory):
             break
         except CannotListenError:
             logger.error(
-                 "START_QNODEOS: %s: NetQASM server address (%d) is already in use, trying again.",
+                "START_QNODEOS: %s: NetQASM server address (%d) is already in use, trying again.",
                 my_name, my_host.port
             )
             time.sleep(_RETRY_TIME)

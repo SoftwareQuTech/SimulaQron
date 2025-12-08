@@ -11,8 +11,9 @@ from daemons.prefab import run
 
 from simulaqron.network import Network
 from simulaqron.settings import LOCAL_SIMULAQRON_SETTINGS, LOCAL_NETWORK_SETTINGS, HOME_NETWORK_SETTINGS
-from simulaqron.settings import simulaqron_settings, get_default_network_config_file, network_config
-from simulaqron.settings.network_config import NodeConfig, DEFAULT_SIMULAQRON_NETWORK_FILENAME
+from simulaqron.settings import simulaqron_settings, network_config
+from simulaqron.settings.network_config import (NodeConfig, DEFAULT_SIMULAQRON_NETWORK_FILENAME,
+                                                get_default_network_config_file)
 from simulaqron.settings.simulaqron_config import SimBackend
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -137,7 +138,10 @@ def _create_local_networks_if_needed_and_load():
     _load_local_network_or_default()
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, epilog="Run 'simulaqron COMMAND --help' for more information on a command.")
+@click.group(
+    context_settings=CONTEXT_SETTINGS,
+    epilog="Run 'simulaqron COMMAND --help' for more information on a command."
+)
 def cli_entry_point():
     """Command line interface for interacting with SimulaQron."""
     pass
@@ -162,10 +166,10 @@ def version():
 @cli_entry_point.command()
 @click.option(
     "--network-config-file",
-    help=f"Path to network config file. If not specified, uses "
-         f"./{DEFAULT_SIMULAQRON_NETWORK_FILENAME} or ~/.simulaqron/{DEFAULT_SIMULAQRON_NETWORK_FILENAME}",
+    help=f"Path to network config file. If not specified, uses ./{DEFAULT_SIMULAQRON_NETWORK_FILENAME} "  # noqa: E131
+         f"or ~/.simulaqron/{DEFAULT_SIMULAQRON_NETWORK_FILENAME}",  # noqa: E131
     type=click.Path(exists=True, dir_okay=False, resolve_path=True, path_type=Path),
-    default=LOCAL_NETWORK_SETTINGS
+    default=get_default_network_config_file()
 )
 @click.option(
     "--simulaqron-config-file",
@@ -189,43 +193,59 @@ def version():
 )
 def start(name: str, nodes: str, simulaqron_config_file: Path, network_config_file: Path):
     """Starts a network with the given parameters or from config files."""
-    # if netconfig is None:
-    # network_config_file = get_default_network_config_file()
     # Checks the simulaqron config
     if not _path_exists(simulaqron_config_file):
-        raise click.BadParameter(f"The given simulaqron config file '{simulaqron_config_file}' does not exist or it is a folder.\n"
-              "Please check the path given to the --simulaqron-config-file option.")
+        raise click.BadOptionUsage(
+            option_name="simulaqron-config-file",
+            message=f"The given simulaqron config file '{simulaqron_config_file}' does not exist or it "
+                    "is a folder.\nPlease check the path given to the --simulaqron-config-file option."  # noqa: E131
+        )
     # Checks the network config
     if not _path_exists(network_config_file):
-        raise click.BadParameter(f"The given network config file '{network_config_file}' does not exist or it is a folder.\n"
-              "Please check the path given to the --network-config-file option.")
+        raise click.BadOptionUsage(
+            option_name="network-config-file",
+            message=f"The given network config file '{network_config_file}' does not exist or it is a "
+                    "folder.\nPlease check the path given to the --network-config-file option."  # noqa: E131
+        )
     # Load SimulaQron and network configs
     simulaqron_settings.read_from_file(simulaqron_config_file)
     network_config.read_from_file(network_config_file)
     # Check that the network name exists in the network configuration
-    if not name in network_config.networks:
-        raise click.BadParameter(f"The network '{name}' was not found in the network configuration file '{network_config_file}'.\n"
-              f"Please check the name you passed in the --name option and try again.")
+    if name not in network_config.networks:
+        raise click.BadOptionUsage(
+            option_name="name",
+            message=f"The network '{name}' was not found in the network configuration file "  # noqa: E713
+                    f"'{network_config_file}'.\nPlease check the name you passed in the"  # noqa: E131
+                    " --name option and try again."  # noqa: E131
+        )
     # Check that the nodes to start exist in the given network
     nodes = nodes.split(",")
     if len(nodes) <= 0:
-        print("The list of nodes to start is empty. Please check the list given in the --nodes argument.")
-        return
+        raise click.BadOptionUsage(
+            option_name="nodes",
+            message="The list of nodes to start is empty. Please check the list given in "
+                    "the --nodes argument."
+        )
     for node_to_start in nodes:
-        if not node_to_start in network_config.networks[name]:
-            raise click.BadParameter(f"The node '{node_to_start}' was not found in the network named '{name} 'specified in"
-                  f" the configuration file '{network_config_file}'.\nPlease check the list of names you "
-                  f"passed in the --nodes option and try again.")
+        if node_to_start not in network_config.networks[name]:
+            raise click.BadOptionUsage(
+                option_name="nodes",
+                message=f"The node '{node_to_start}' was not found in the network named "  # noqa: E713
+                        f"'{name} 'specified in the configuration file '{network_config_file}'.\n"  # noqa: E131
+                        "Please check the list of names you passed in the --nodes option and try again."  # noqa: E131
+            )
     # Check that there is no other network with the same name running
     pidfile = PID_FOLDER / f"simulaqron_network_{name}.pid"
     if pidfile.exists():
-        logging.warning("Network with name %s is already running", name)
-        logging.warning("The pidfile for this network is located at %s", pidfile)
-        return
+        raise click.BadOptionUsage(
+            option_name="pidfile",
+            message=f"Network with name {name} is already running.\nThe pidfile for "
+                    f"this network is located at {pidfile}"  # noqa: E131
+        )
 
     # Let's start the simulaqron daemon. We will pass the config file so it will be available
     # in the child process and load the same config
-    d = SimulaQronDaemon(pidfile=pidfile, name=name, nodes=nodes)
+    d = SimulaQronDaemon(pidfile=pidfile, name=name, nodes=nodes, network_config_file=network_config_file)
     try:
         d.start()
     except SystemExit as e:
@@ -233,7 +253,7 @@ def start(name: str, nodes: str, simulaqron_config_file: Path, network_config_fi
                 e.code == exit.DAEMONIZE_FAILED:
             logging.debug(f"Failed to launch Simulaqron Daemon. "
                           f"Exit code reported by daemons: {e.code}")
-            print("Failed to launch SimulaQron Daemon. Aborted!")
+            raise click.BadParameter("Failed to launch SimulaQron Daemon. Aborted!")
 
 
 ###############
@@ -251,7 +271,7 @@ def stop(name: str):
     """Stops a network."""
     assert name is not None
     pidfile = PID_FOLDER / f"simulaqron_network_{name}.pid"
-    logging.debug(f"Trying to open PIDfile")
+    logging.debug("Trying to open PIDfile")
     if not pidfile.exists():
         logging.warning("Network with name %s is not running", name)
         return
@@ -289,7 +309,7 @@ def reset(force: bool):
         simulaqron_settings.default_settings()
         simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     else:
-        print("Aborting!")
+        raise click.ClickException("Aborting!")
 
 
 ###############
@@ -637,7 +657,7 @@ def get(network_name: str):
     try:
         nodes = network_config.get_node_names(network_name=network_name)
     except ValueError:
-        print(f"No network {network_name}")
+        raise click.BadParameter(f"No network {network_name}")
     else:
         print(("{} " * len(nodes))[:-1].format(*nodes))
 

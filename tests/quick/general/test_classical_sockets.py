@@ -36,7 +36,12 @@ class TestClassicalSocket:
                 ("Bob", TestClassicalSocket.bob_program_receiver),
             ]
         )
-        _ = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False)
+        _ = run_applications(
+            apps,
+            network_cfg=get_default_network_config_file(use_embedded=True),
+            use_app_config=False,
+            enable_logging=False
+        )
 
     def test_unknown_local(self):
         with pytest.raises(ValueError) as ex:

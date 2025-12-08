@@ -554,8 +554,6 @@ class NetworksConfiguration(JSONSerializerMixin):
                 return False
         return True
 
-###########
-#
 
 def get_default_network_config_file(use_embedded: bool = False) -> Path:
     """

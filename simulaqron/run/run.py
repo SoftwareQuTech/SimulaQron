@@ -193,7 +193,6 @@ def run_applications(
     network_config.read_from_file(network_cfg)
     network_config.read_from_file(network_cfg)
 
-
     for _ in range(num_rounds):
         network = Network(
             nodes=network_config.get_node_names("default"),

@@ -3,7 +3,7 @@ import time
 import pytest
 from timeit import default_timer as timer
 
-from simulaqron.settings import simulaqron_settings, network_config, get_default_network_config_file, get_default_network_config_file, get_default_network_config_file
+from simulaqron.settings import simulaqron_settings, network_config, get_default_network_config_file
 from simulaqron.network import Network
 
 

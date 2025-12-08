@@ -1,11 +1,9 @@
 from netqasm.runtime.settings import set_simulator
 set_simulator("simulaqron")
 
-from simulaqron.settings import simulaqron_settings
-simulaqron_settings.network_config_file = "./simulaqron_settings.json"
+from netqasm.sdk.external import NetQASMConnection  # noqa: E402
+from netqasm.sdk import Qubit, EPRSocket  # noqa: E402
 
-from netqasm.sdk.external import NetQASMConnection
-from netqasm.sdk import Qubit, EPRSocket
 
 def run_alice():
     epr_socket = EPRSocket("Bob")
@@ -26,4 +24,3 @@ def run_alice():
 if __name__ == "__main__":
     results = run_alice()
     print(f"Alice measurements: m1={results[0]}, m2={results[1]}")
-

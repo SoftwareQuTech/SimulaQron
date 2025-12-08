@@ -102,7 +102,12 @@ class TestFreeQubit:
             ]
         )
         with pytest.raises(RuntimeError) as exc:
-            _ = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False)
+            _ = run_applications(
+                apps,
+                network_cfg=get_default_network_config_file(use_embedded=True),
+                use_app_config=False,
+                enable_logging=False
+            )
         assert "Virtual address 2 is outside the unit module (app ID 0) which has length 2" in str(exc.value)
 
     def test_release_qubit(self):
@@ -111,7 +116,12 @@ class TestFreeQubit:
                 ("Alice", TestFreeQubit.release_qubit)
             ]
         )
-        result = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False)
+        result = run_applications(
+            apps,
+            network_cfg=get_default_network_config_file(use_embedded=True),
+            use_app_config=False,
+            enable_logging=False
+        )
         assert result[0]["app_Alice"] == 1
 
     def test_release_qubit_b(self):
@@ -120,7 +130,12 @@ class TestFreeQubit:
                 ("Alice", TestFreeQubit.release_qubit_b)
             ]
         )
-        result = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False)
+        result = run_applications(
+            apps,
+            network_cfg=get_default_network_config_file(use_embedded=True),
+            use_app_config=False,
+            enable_logging=False
+        )
         assert result[0]["app_Alice"] == 1
 
     def test_release_and_reuse_qubit(self):
@@ -129,7 +144,12 @@ class TestFreeQubit:
                 ("Alice", TestFreeQubit.release_and_reuse_qubit)
             ]
         )
-        result = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False)
+        result = run_applications(
+            apps,
+            network_cfg=get_default_network_config_file(use_embedded=True),
+            use_app_config=False,
+            enable_logging=False
+        )
         assert result[0]["app_Alice"] == 2
 
     def test_release_and_reuse_qubit_b(self):
@@ -138,5 +158,10 @@ class TestFreeQubit:
                 ("Alice", TestFreeQubit.release_and_reuse_qubit_b)
             ]
         )
-        result = run_applications(apps, network_cfg=get_default_network_config_file(use_embedded=True), use_app_config=False, enable_logging=False)
+        result = run_applications(
+            apps,
+            network_cfg=get_default_network_config_file(use_embedded=True),
+            use_app_config=False,
+            enable_logging=False
+        )
         assert result[0]["app_Alice"] == 2

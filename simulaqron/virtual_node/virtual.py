@@ -1792,6 +1792,3 @@ class QubitNetQASM:
         self.to_epr_socket_id = to_epr_socket_id
         self.virt_num = new_virt_num
         self.rawEntInfo = rawEntInfo
-
-
-

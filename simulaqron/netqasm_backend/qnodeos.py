@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 
 from typing import Optional, Dict, Callable, Generator, Any, List, Type
@@ -16,6 +15,7 @@ from simulaqron.sdk.connection import (NewMessageType, GetQubitStateMessage,
                                        ReturnQubitStateMessage)
 from simulaqron.settings import simulaqron_settings
 
+
 class SubroutineHandler(QNodeController):
     def __init__(self, factory: "NetQASMFactory", instr_log_dir: Optional[str] = None,  # noqa: F821
                  flavour: Optional[Flavour] = None):
@@ -30,7 +30,7 @@ class SubroutineHandler(QNodeController):
             format="%(asctime)s:%(levelname)s:%(name)s:%(filename)s:%(lineno)d:%(message)s",
             level=simulaqron_settings.log_level,
             force=True,
-            stream=sys.stdout # send logs to the standard output, we set this earlier to be in /tmp
+            stream=sys.stdout  # send logs to the standard output, we set this earlier to be in /tmp
         )
 
         # Give a way for the executioner to return messages
