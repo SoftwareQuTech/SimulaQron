@@ -119,7 +119,13 @@ If you want simulaqron to use your custom network.json file simply place it in t
 
     network_config.read_from_file("/path/to/your/simulaqron_network.json")
 
-The entries ``"topology"`` can be used to define the topology of the network.
+.. _network-topologies:
+
+------------------
+Network topologies
+------------------
+
+Each network configuration contains an entry named ``"topology"``, which can be used to define the topology of the network.
 This could for example be::
 
     {
@@ -136,7 +142,7 @@ describing a network topology where Alice is adjacent to Bob, Bob is adjacent to
 Generate network topologies
 ---------------------------
 
-The simulaqron tool is also capable of automatically generating network configuration with certain network topologies.
+The simulaqron tool is also capable of automatically generating certain well-known network topologies.
 The options for the automatically generated topologies are currently:
 
 * `complete`: A fully connected. This is also used if the argument --topology is not used.
@@ -157,11 +163,11 @@ The network that is then started might look like this:
     :align: center
     :alt: Programming SimulaQron Interfaces
 
-To create a custom topology, see below.
+To create a custom topology, see section :ref: `network-topologies`.
 
------------------
-Multiple networks
------------------
+--------------------------
+Starting multiple networks
+--------------------------
 
 To run multiple networks at the same time you need to give them different names in the network configuration file, and then use the names to start them by using the --name flag::
 
@@ -173,4 +179,4 @@ To stop a network with a specific name type::
 
 .. note:: By default the network name is "default". To have multiple networks running at the same time the nodes cannot use the same port numbers.
 
-How multiple networks can be setup is described below.
+The JSON configuration file can hold more than one network configuration. To check how to specify such configuration, please check the :ref: `networkConfig`.
