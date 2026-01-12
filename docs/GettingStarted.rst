@@ -5,13 +5,18 @@ Getting started
 Setup
 -----
 
-SimulaQron requires `Python 3 <https://python.org/>`_  along with the packages *cqc*, *twisted*, *numpy*, *scipy*, *networkx*, *flake8*, *click* and *daemons*.
+SimulaQron requires `Python 3.12 <https://python.org/>`_  along with the packages *cqc*, *twisted*, *numpy*, *scipy*, *networkx*, *flake8*, *click* and *daemons*.
 
 ^^^^^^^^^^^^^^^^^^^^^^
 Installation using pip
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The easiest way to install SimulaQron is using pip (requires MacOS or Linux). Simply type ::
+The easiest way to install SimulaQron is using pip (requires MacOS or Linux). Start by creating and activating a python virtual environment::
+
+    python3.12 -m venv simulaqron-venv
+    source simulaqron-venv/bin/activate
+
+Now, we can install SimulaQron by simply typing::
 
     pip3 install simulaqron
 
@@ -28,57 +33,6 @@ If you want to make sure that everything has been installed properly you can sta
     import simulaqron
     simulaqron.tests()
 
-^^^^^^^^^^^^^^^^^^^^^^^^
-Installation from source
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-If you want to get the source code, you can clone the git repository. Do::
-
-	git clone https://github.com/SoftwareQuTech/SimulaQron.git
-
-You will then
-need to set the following environment variable in order to execute the code. Assuming that
-you use bash (e.g., standard on OSX or the GIT Bash install on Windows 10), otherwise set the same variables using your favorite shell.::
-
-	export PYTHONPATH=yourPath/SimulaQron:$PYTHONPATH
-
-where yourPath is the directory containing SimulaQron. You can add this to your ~/.bashrc or ~/.bash_profile file.
-
-.. note::
-    If you want to use SimulaQron in the same way as when installed using pip you can use an alias by for example
-
-    alias simulaqron=yourPath/SimulaQron/simulaqron/SimulaQron.py
-
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Verifying the installation (if installed from source)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-To run SimulaQron you need to following Python packages:
-
-* cqc
-* numpy
-* scipy
-* twisted
-* networkx
-* flake8
-* click
-* daemons
-* qutip (optional)
-* projectq (optional)
-
-To verify that that SimulaQron is working on your computer, type::
-
-    make verify
-
-in a terminal at the root of the repository. This command will clear any .pyc files in this directory, check that the needed python packages are installed (and if not install these using pip) and run the automated tests. By default a shorter version of the tests are run. If you wish to run the full tests type :code:`make full_tests`. Not however that the full tests can take quite some time since they perform quantum tomography to tests operations on the qubits.
-By default the *stabilizer* engine will be used.
-
-.. note:: During the tests you might see quite some error messages. This is to be expected since some tests test that errors are handled correctly when something goes wrong. If the tests pass it will say OK in the end.
-
-.. If you wish to run the tests with the *qutip* backend instead, type :code:`make tests_qutip` or :code:`make full_tests_qutip`. If you want to run all tests with all three backends, type :code:`make full_tests_allBackends`. Note that running the full tests with all backends takes a lot of time.
-
-.. If :code:`make` does not work for you, you can also run the test by typing :code:`sh tests/runTests.sh --quick` (not including tomography tests) or :code:`sh tests/runTests.sh --full` (full tests).
-
 ------------------------
 Testing a simple example
 ------------------------
@@ -86,13 +40,13 @@ Testing a simple example
 Before delving into how to write any program yourself, let's first simply run one of the existing examples when programming SimulaQron through the Python library (see https://softwarequtech.github.io/CQC-Python/examples.html).
 Remember from the Overview that SimulaQron has two parts: the first are the virtual node servers that act simulate the hardware at each node as well as the quantum communication between them in a transparent manner.
 The second are the applications themselves which can be written in two ways, the direct way is to use the native mode using the Python Twisted framework connecting to the virtual node servers, see :doc:`Examples`.
-The recommended way however is the use the provided Python library that calls the virtual nodes by making use of the classical/quantum combiner interface.
-We will here illustrate how to use SimulaQron with the Python library.
+The recommended way however is the use the NetQASM library that calls the virtual nodes by making use of the classical/quantum combiner interface.
+We will here illustrate how to use SimulaQron with the NetQASM library.
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Starting the SimulaQron backend
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-By default SimulaQron uses the five nodes Alice, Bob, Charlie, David and Eve on your local computers. In this example there will be two processes for each node listening to incoming messages on a certain port number. These make up the simulation backend and the CQC server. To start the processes and thus the backend of SimulaQron simply type::
+By default SimulaQron uses the five nodes Alice, Bob, Charlie, David and Eve on your local computers. In this example there will be three processes for each node listening to incoming messages on a certain port number. These make up the simulation backend, the NetQASM server and the classical communication server. To start the processes and thus the backend of SimulaQron simply type::
 
     simulaqron start
 
@@ -121,16 +75,17 @@ Our objective will be to realize the following protocol which will generate 1 sh
 
 * Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`.
 
+TODO - Update the link references and the names of the examples (NetQASM vs pythonLib)
 The examples can be found in the repo `pythonLib <https://github.com/SoftwareQuTech/CQC-Python>`_.
 Before seeing how this example works, let us simply run the code::
 
-	cd examples/pythonLib/corrRNG
-	sh run.sh
+    cd examples/nativeMode/corrRNG
+    sh run.sh
 
 You should be seeing the following two lines::
 
-	App Alice: Measurement outcome is: 0/1
-	App Bob: Measurement outcome is: 0/1
+    App Alice: Measurement outcome is: 0/1
+    App Bob: Measurement outcome is: 0/1
 
 Note that the order of these two lines may differ, as it does not matter who measures first. So what is actually going on here? Let us first look at how we will realize the example by making an additional step (3) explicit:
 
@@ -141,26 +96,27 @@ Note that the order of these two lines may differ, as it does not matter who mea
 * Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`.
 
 While the task we want to realize here is completely trivial, the addition of step 3 does however already highlight a range of choices on how to realize step 3 and the need to find good abstractions to allow easy application development.
-One way to realize step 3 would be to hardwire Alices and Bobs measurements: if the hardware can identify the correct qubits from the entanglement generation, then we could instruct it to measure it immediately without asking for a notification from the entanglement generation process. It is clear that in a network that is a bit larger than our tiny three node setup, identifying the right setup requires a link between the underlying qubits and classical control information: this is the objective of the classical/quantum combiner.
+One way to realize step 3 would be to hardwire Alice's and Bob's measurements: if the hardware can identify the correct qubits from the entanglement generation, then we could instruct it to measure it immediately without asking for a notification from the entanglement generation process. It is clear that in a network that is a bit larger than our tiny three node setup, identifying the right setup requires a link between the underlying qubits and classical control information: this is the objective of the classical/quantum combiner.
 
 The script run.sh executes the following two python scripts::
 
-	#!/bin/sh
+    #!/bin/sh
 
-	python3 aliceTest.py
-	python3 bobTest.py &
+    python3 aliceTest.py
+    python3 bobTest.py &
 
 Let us now look at the programs for Alice and Bob.
-We first initialize an object of the class ``CQCConnection`` which will do all the communication to the virtual through the CQC interface.
-Qubits can then be created by initializing a qubit-object, which takes a ``CQCConnection`` as an input.
-On these qubits operations can be applied and they can also be sent to other nodes in the network by use of the ``CQCConnection``.
+We first initialize an object of the class ``NetQASMConnection`` which will do all the communication to the virtual through the NetQASM interface.
+Qubits can then be created by initializing a qubit-object, which takes a ``NetQASMConnection`` as an input.
+On these qubits operations can be applied and they can also be sent to other nodes in the network by use of the ``NetQASMConnection``.
 The full code in aliceTest.py is::
 
+    # Create an EPR Socket between "Alice" and "Bob"
+    epr_socket = EPRSocket("Alice", "Bob")
     # Initialize the connection
-    with CQCConnection("Alice") as Alice:
-
+    with NetQASMConnection("Alice", epr_sockets=[epr_socket]) as Alice:
         # Create an EPR pair
-        q = Alice.createEPR("Bob")
+        q = epr_socker.create_keep("Bob", number=1)[0]
 
         # Measure qubit
         m=q.measure()
@@ -171,11 +127,13 @@ The full code in aliceTest.py is::
 
 Similarly the code in bobTest.py read::
 
+    # Create an EPR Socket between "Bob" and "Alice"
+    epr_socket = EPRSocket("Bob", "Alice")
     # Initialize the connection
-    with CQCConnection("Bob") as Bob:
+    with NetQASMConnection("Bob", epr_sockets=[epr_socket]) as Bob:
 
         # Receive qubit
-        q=Bob.recvEPR()
+        q=epr_socker.receive_keep("Alice")[0]
 
         # Measure qubit
         m=q.measure()
@@ -184,6 +142,7 @@ Similarly the code in bobTest.py read::
         print("| "+to_print+" |")
         print("|"+"-"*(len(to_print)+2)+"|")
 
+TODO - Update the link references and the names of the examples (NetQASM vs pythonLib)
 For further examples, see the examples/ folder and for the docs of the Python library see https://softwarequtech.github.io/CQC-Python/index.html.
 
 --------
