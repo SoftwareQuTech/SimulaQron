@@ -14,66 +14,29 @@ The command can receive certain arguments to control the simulated network:
 * ``--simulaqron-config-file=PATH`` (optional): Specifies a path for the SimulaQron config file to use for the backend. If not given, simulaqron will try to read a file named ``simulaqron_settings.json`` in the current folder.
 * ``--network-config-file=PATH`` (optional): Specifies a path for the network config file to use for the backend. If not given, simulaqron will try to read a file named ``simulaqron_network.json`` in the current folder.
 * ``--name=<network-name>`` (optional): Specifies the name of the network to start. This name must correspond to one of the names specified on the given network configuration file. If this argument is not given, this value is defaulted to ``default``.
-* ``--nodes <nodes_list>`` (`required`): Specified which nodes to simulate. The ``<nodes_list>`` value is a comma separated list of the nodes names to start. All the specified node names must exist within the specified network inside the network configuration file.
+* ``--nodes <nodes_list>`` (`required`): Specifies which nodes to simulate. The ``<nodes_list>`` value is a comma separated list of the nodes names to start. All the specified node names must exist within the specified network inside the network configuration file.
 
 How to adjust the nodes and the topology of the network is described below.
 
 .. warning:: ``simulaqron start`` can fail if any of the ports specified in the config files are already in use by a running SimulaQron network or another program.
 
-To configure networks see section :ref:`networkConfig`.
-Finally for instructions on how to connect to an already running simulated network using CQC, see section :ref:`remoteNetwork`.
+If you want to start a network with, for example, the three nodes Alex, Bart, Curt from the network named ``network``, simply type::
 
-If you want to start a network with, for example, the three nodes Alex, Bart, Curt, simply type::
-
-    simulaqron start --nodes Alex,Bart,Curt
-
-TODO
-
-The options for the automatically generated topologies are currently:
-
-* `complete`: A fully connected. This is also used if the argument --topology is not used.
-* `ring`: A ring network, i.e. a connected topology where every node has exactly two neighbors.
-* `path`: A path network, i.e. a connected topology where every node has exactly two neighbors but there are no cycles.
-* `random_tree`: Generates a random tree, i.e. a topology without cycles.
-* `random_connected_{int}`: Generates a random connected graph with a specified number of edges. For example a random connected network on 10 nodes, can be specified as `random_connected_20`. Note that the number of edges for a network with :math:`n` nodes must be greater or equal to :math:`n-1` and less or equal to :math:`n(n-1)/1`.
-
-Along with setting up the network with the specified topology a .png figure is also generated and stored as config/topology.png. This is useful if a random network is used, to easily visualize the network used.
-
-As a final example let's combine all the arguments specified above and create a network using 15 nodes, where two of then are called Alice and Bob and the topology of the network is randomly generated as a connected graph with 20 edges::
-
-    simulaqron start -n Alice,Bob -N 15 -t random_connected_20
-
-The network that is then started might look like this:
-
-.. image:: figs/topology.png
-    :width: 400px
-    :align: center
-    :alt: Programming SimulaQrons Interfaces
-
-To create a custom topology, see below.
-
------------------
-Multiple networks
------------------
-
-To run multiple networks at the same time you need to give them different names by using the --name flag::
-
-    simulaqron start --name NETWORK
-
-To stop a network with a specific name type::
-
-    simulaqron stop --name NETWORK
-
-.. note:: By default the network name is "default". To have multiple networks running at the same time the nodes cannot use the same port numbers.
-
-How multiple networks can be setup is described below.
+    simulaqron start --name network --nodes Alex,Bart,Curt
 
 .. _networkConfig:
 
 -----------------------
 Configuring the network
 -----------------------
-Using the CLI you can add nodes to a network using for example::
+SimulaQron requires specifying a json-based network configuration. This configuration states the name of the node, and IP address/port tuples to correctly connect the SimulaQron simulations and classical communication sockets.
+
+For each configured node, you need to specify IP and address for 3 fields:
+* The ``app_socket`` field, which specifies the IP and port for connecting classical communication sockets.
+* The ``qnodeos_socket`` field, which specifies the IP and port for connecting the QnodeOS server, used to interpret NetQASM objects.
+* The ``vnode_socket`` field, which specifies the IP and port for the SimulaQron VirtualNode object, which runs the quantum simulation.
+
+Using the CLI you can add nodes to a network::
 
     simulaqron nodes add Maria
 
@@ -81,7 +44,7 @@ which adds the node Maria to the default network "default". If you want add a no
 
     simulaqron nodes add Maria --network-name="OtherNetwork"
 
-which adds Maria to the network "OtherNetwork".
+which adds Maria to the network "OtherNetwork". With no extra arguments, this invocation will configure all the sockets fields on ``localhost``, assigning a random port in the 8000-9000 range.
 You can also specify hostname and port numbers to be used for this node including what it's neighbors are using the arguments:
 
  * ``--hostname``
@@ -90,9 +53,8 @@ You can also specify hostname and port numbers to be used for this node includin
  * ``--vnode-port``
  * ``--neighbors``
 
-If you want to build up a (or many) more complex networks it can become tedious to do this through the CLI.
-You can instead write your own network config file.
-This network config file should be a .json file and could, for example, look as follows.
+If you want to build up a (or many) more complex network, it can become tedious to do this through the CLI.
+You can instead write your own network config file, as a .json file.
 An example of such a file can be seen below which contains two networks ("default" and "small_network") which the nodes "Alice", "Bob" and "Test" respectively::
 
     {
@@ -155,7 +117,7 @@ If you want simulaqron to use your custom network.json file simply place it in t
     from simulaqron.settings import network_config
     ...
 
-    network_config.read_from_file("/path/to/your/config.json")
+    network_config.read_from_file("/path/to/your/simulaqron_network.json")
 
 The entries ``"topology"`` can be used to define the topology of the network.
 This could for example be::
@@ -170,31 +132,45 @@ describing a network topology where Alice is adjacent to Bob, Bob is adjacent to
 
 .. note:: Undirected topologies are also supported. That is, networks where for example Alice can send a qubit to Bob but Bob cannot send a qubit to Alice.
 
+---------------------------
+Generate network topologies
+---------------------------
 
-------------------------------
-Starting a network from Python
-------------------------------
+The simulaqron tool is also capable of automatically generating network configuration with certain network topologies.
+The options for the automatically generated topologies are currently:
 
-You can also start a network within a Python script (this is in fact what simulaqron does), by using the class :code:`simulaqron.network.Network`. To setup a network by name "test" with the nodes Alice, Bob and Charlie, where Bob is connected with Alice and Charlie but Alice and Charlie are not connected use the following code code::
+* `complete`: A fully connected. This is also used if the argument --topology is not used.
+* `ring`: A ring network, i.e. a connected topology where every node has exactly two neighbors.
+* `path`: A path network, i.e. a connected topology where every node has exactly two neighbors but there are no cycles.
+* `random_tree`: Generates a random tree, i.e. a topology without cycles.
+* `random_connected_{int}`: Generates a random connected graph with a specified number of edges. For example a random connected network on 10 nodes, can be specified as `random_connected_20`. Note that the number of edges for a network with :math:`n` nodes must be greater or equal to :math:`n-1` and less or equal to :math:`n(n-1)/1`.
 
-   from simulaqron.network import Network
+TODO - Implement a command in the CLI to invoke the generation of topologies.
+TODO - Document that CLI command.
 
+Along with setting up the network with the specified topology a .png figure is also generated and stored as config/topology.png. This is useful if a random network is used, to easily visualize the network used.
 
-   def main():
-       # Setup the network
-       nodes = ["Alice", "Bob", "Charlie"]
-       topology = {"Alice": ["Bob"], "Bob": ["Alice", "Charlie"], "Charlie": ["Bob"]}
-       network = Network(name="test", nodes=nodes, topology=topology)
+The network that is then started might look like this:
 
-       # Start the network
-       network.start()
+.. image:: figs/topology.png
+    :width: 400px
+    :align: center
+    :alt: Programming SimulaQron Interfaces
 
-       input("To stop the network, press enter...")
+To create a custom topology, see below.
 
+-----------------
+Multiple networks
+-----------------
 
-   if __name__ == '__main__':
-       main()
+To run multiple networks at the same time you need to give them different names in the network configuration file, and then use the names to start them by using the --name flag::
 
-By default the method :code:`simulaqron.network.Network.start`, only returns when the network is running, i.e. all the connections are established. To avoid this use the argument :code:`wait_until_running=False`.
+    simulaqron start --name NETWORK
 
-.. note:: The network will stop when the network-object goes out of scope and is handled by the Python garbade collector. The network can be manually stopped with the method :code:`simulaqron.network.Network.stop`.
+To stop a network with a specific name type::
+
+    simulaqron stop --name NETWORK
+
+.. note:: By default the network name is "default". To have multiple networks running at the same time the nodes cannot use the same port numbers.
+
+How multiple networks can be setup is described below.
