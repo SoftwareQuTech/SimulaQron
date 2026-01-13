@@ -1,5 +1,5 @@
 The NetQASM interface
-=================
+=====================
 
 .. warning:: Update this document to explain the NetQASM instead of the CQC interface!
 

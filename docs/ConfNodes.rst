@@ -42,6 +42,7 @@ SimulaQron requires specifying a json-based network configuration. This configur
 and IP address/port tuples to correctly connect the SimulaQron simulations and classical communication sockets.
 
 For each configured node, you need to specify IP and address for 3 fields:
+
 * The ``app_socket`` field, which specifies the IP and port for connecting classical communication sockets.
 * The ``qnodeos_socket`` field, which specifies the IP and port for connecting the QnodeOS server, used to interpret
   NetQASM objects.
@@ -155,7 +156,7 @@ describing a network topology where Alice is adjacent to Bob, Bob is adjacent to
 adjacent to Bob.
 
 .. note:: Undirected topologies are also supported. That is, networks where for example Alice can send a qubit to
-Bob but Bob cannot send a qubit to Alice.
+    Bob but Bob cannot send a qubit to Alice.
 
 ---------------------------
 Generate network topologies
