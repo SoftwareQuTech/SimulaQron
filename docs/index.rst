@@ -43,7 +43,7 @@ SimulaQron can be installed from pip by the command :code:`pip3 install simulaqr
    Overview
    GettingStarted
    ConfNodes
-   CQC
+   NetQASM
    Examples
    simulaqron
 
