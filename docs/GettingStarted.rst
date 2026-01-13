@@ -222,7 +222,7 @@ The SimulaQron settings file contains a set of fields to control the configurati
 * ``recv_timeout``: Maximum number of milliseconds to wait for the messages when trying to create EPR pairs.
 * ``recv_retry_time``: Maximum number of milliseconds to wait between attempts to create EPR pairs.
 * ``recv_max_retries``: Maximum number of tries to attempt when creating EPR pairs.
-* ``log_level``: The log level to use for SimulaQron. The integer value in this field must match the values exposed by the python ``logging`` package. For more information about the specific values for each logging level, please check the official python documentation https://docs.python.org/3/library/logging.html#logging-levels.
+* ``log_level``: The log level to use for SimulaQron. The integer value in this field must match the values exposed by the python ``logging`` package. For more information about the specific values for each logging level, please check the `official python documentation for the logging package <https://docs.python.org/3/library/logging.html#logging-levels>`_.
 * ``sim_backend``: The backend qubit simulation that SimulaQron will use to emulate qubits. Currently, three backends are supported: "projectq", "qutip" and "stabilizer".
 * ``noisy_qubits``: Whether to enable noisy qubits simulation or not. Setting this to ``true``will randomly apply a Pauli gate after every operation, emulating noise on the qubit backend.
 * ``max_app_waiting_time``: Maximum time (in seconds) to wait before considering the running application as stalled. A value of ``-1.0`` will disable the stalling waiting time, allowing SimulaQron to wait undefinitely.
