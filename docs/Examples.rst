@@ -21,10 +21,10 @@ also be found in examples/nativeMode.
     :maxdepth: 2
     :caption: Native mode examples:
 
-    NativeModeCorrRng
-    NativeModeTemplate
-    NativeModeTeleport
-    NativeModeGraphState
+    native-mode/CorrRng
+    native-mode/Template
+    native-mode/Teleport
+    native-mode/GraphState
 
 
 
