@@ -40,11 +40,14 @@ from simulaqron.settings.network_config import NetworksConfiguration, NodeConfig
 class Host(pb.Referenceable):
     def __init__(self, name: str, hostname: str, port: int):
         """
-        Initialize the details of the host. For now, we just keep the following:
+        Class representing a host that runs a SimulaQron Virtual Node. It holds the following information:
 
-        name        informal name of the host (e.g. Alice)
-        hostname    name of the node on the network (e.g. localhost or yournode.qutech.nl)
-        port        port number on hostname
+        :param name: Informal name of the host (e.g. Alice)
+        :type name: str
+        :param hostname: Name of the node on the network (e.g. localhost or yournode.qutech.nl)
+        :type hostname: str
+        :param port: Port number on hostname
+        :type port: int
         """
 
         self.name = name
@@ -57,7 +60,7 @@ class Host(pb.Referenceable):
         self.family = addr[0]
         self.addr = addr
 
-        self.ip = node_id_from_addrinfo(addr)
+        self.ip = _node_id_from_addrinfo(addr)
 
         # Connection identifiers used after connected
         self.factory = 0
@@ -67,14 +70,24 @@ class Host(pb.Referenceable):
 
 class SocketsConfig(pb.Referenceable):
     def __init__(self, nets_config: NetworksConfiguration, network_name: str = "default",
-                 config_type: str | NodeConfigType = "vnode"):
+                 config_type: NodeConfigType | str = "vnode"):
         """
-        Initialize by reading in the configuration file.
+        Structure used to hold the sockets configuration for a particular component.
 
         With version 4.0.0, we use the already in-memory information to create the SocketsConfig object.
         This avoids reading the file multiple times, which might have been updated by other processes
         in between reads. Additionally, this also simplifies the code, and reduces the potential source
         of bugs in the configuration read/write code.
+
+        :param nets_config: :py:class:`NetworksConfiguration` object, containing the loaded ``simulaqron_network.json``
+                            file.
+        :type nets_config: NetworksConfiguration
+        :param network_name: The name of the network to use. This name must exist in the loaded network
+                             configuration object.
+        :type network_name: str
+        :param config_type: The type of configuration to use. Valid values are instances of the
+                            :py:class:`NodeConfigType` enum, or the string that represent each of those values.
+        :type config_type: NodeConfigType | str
         """
         # Dictionary where we will keep host details, indexed by node name (e.g. Alice)
         self.hostDict: Dict[str, Host] = {}
@@ -94,9 +107,9 @@ class SocketsConfig(pb.Referenceable):
         Filter the loaded sockets configurations to only contain the given names.
         If a given node name is not found in the loaded one, it will simply be ignored
         from the exclusion process (i.e. it will not break the process)
-        Args:
-            nodes_to_keep: List[str]
-                The node names to keep after filtering.
+
+        :param nodes_to_keep: The node names to keep after filtering.
+        :type nodes_to_keep: List[str]
         """
         nodes_kept = {}
         for node_name in self.hostDict.keys():
@@ -105,25 +118,34 @@ class SocketsConfig(pb.Referenceable):
         self.hostDict = nodes_kept
 
 
-def node_id(fam: socket.AddressFamily, ip: str) -> int:
+def _node_id(fam: socket.AddressFamily, ip: str) -> int:
     if fam == socket.AF_INET:
         return struct.unpack("!L", IPv4Address(ip).packed)[0]
     else:
         raise ValueError("No IPv6 yet :(")
 
 
-def node_id_from_addrinfo(
+def _node_id_from_addrinfo(
         addr: tuple[socket.AddressFamily, socket.SocketKind, int, str, tuple[str, int]]
 ) -> int:
     fam = addr[0]
     sockaddr = addr[4]
     ip = sockaddr[0]
-    return node_id(fam, ip)
+    return _node_id(fam, ip)
 
 
 def get_node_id_from_net_config(net_config: SocketsConfig, node_name: str) -> int:
     """
-    NOTE node ID is the index of the node name of a sorted list of all the node names in the network.
+    Gets the node ID from the given sockets config and node name.
+
+    .. note:: node ID is the index of the node name of a sorted list of all the node names in the network.
+
+    :param net_config: SocketsConfig object.
+    :type net_config: SocketsConfig
+    :param node_name: The name of the node to get the node ID from.
+    :type node_name: str
+    :return: The node ID from the given sockets config and node name.
+    :rtype: int
     """
     if node_name not in net_config.hostDict:
         raise ValueError(f"node name {node_name} not in host_dict ({net_config.hostDict.keys()})")

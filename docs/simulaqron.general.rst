@@ -13,6 +13,15 @@ simulaqron.general.host_config module
     :show-inheritance:
 
 
+simulaqron.general.errors module
+-------------------------------------
+
+.. automodule:: simulaqron.general.errors
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 Module contents
 ---------------
 
