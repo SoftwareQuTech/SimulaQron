@@ -157,8 +157,9 @@ To set a setting, for example to use the projectQ backend, type::
 
     simulaqron set backend projectq
 
-Alternatively, you can add a file ``.simulaqron.json`` in your home folder (i.e. ``~``).
-For example this file could look like::
+This will create a file named ``simulaqron_settings.json`` in the current folder. This new file contains a full set of simulaqron configuration, including the setting that was just configured (using the `projectq` backend, in the example).
+
+It is also possible to manually create this file::
 
      {
         "backend": "projectq",
@@ -167,4 +168,47 @@ For example this file could look like::
 
 which would set the backend to be use ProjectQ and the log-level to be debug (10). Any setting in this file will override the settings set in the CLI.
 
+Is is also possible to create a configuration file that contains all the default configurations::
+
+    simulaqron set default
+
+This command will create a file with the following configuration::
+
+    {
+        "max_qubits": 20,
+        "max_registers": 1000,
+        "conn_retry_time": 0.5,
+        "conn_max_retries": 10,
+        "recv_timeout": 100,
+        "recv_retry_time": 0.1,
+        "recv_max_retries": 10,
+        "log_level": 30,
+        "sim_backend": "stabilizer",
+        "noisy_qubits": false,
+        "max_app_waiting_time": -1.0,
+        "t1": 1.0
+    }
+
+Section :ref: `settings_fields` provides a description about each one of the configuration options in the file.
+
+Alternatively, you can place the ``simulaqron_settings.json`` file in the folder ``~/.simulaqron`` (i.e. a folder named ``.simulaqron`` in your home folder). Doing so will make your settings persist across different projects you implement using simulaqron
+
 .. note:: Settings needs to be set before starting the SimulaQron backend. If the backend is already running, stop it, set the settings and start it again.
+
+^^^^^^^^^^^^^^^^^^^
+Settings precedence
+^^^^^^^^^^^^^^^^^^^
+
+Since the simulaqron configuration file can be placed in several places, SimulaQron will follow a priority for reading the settings:
+
+* Settings file placed in the current working folder.
+* Settings file placed in the ``~/.simulaqron`` folder.
+* If none of the above is found, SimulaQron will create a settings file in the ``~/.simulaqron`` folder, then it will try to load it in that place.
+
+.. _settings_fields:
+
+^^^^^^^^^^^^^^^
+Settings Fields
+^^^^^^^^^^^^^^^
+
+TODO
