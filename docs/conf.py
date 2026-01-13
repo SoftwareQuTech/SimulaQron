@@ -17,9 +17,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
 import importlib.metadata as metadata
-# import sys
 
 
 # -- General configuration ------------------------------------------------
@@ -55,8 +53,8 @@ master_doc = "index"
 
 # General information about the project.
 project = "SimulaQron"
-copyright = "2017, Stephanie Wehner and Axel Dahlberg"
-author = "Stephanie Wehner and Axel Dahlberg"
+copyright = "2026, Stephanie Wehner, Axel Dahlberg and Diego Rivera"
+author = "Stephanie Wehner, Axel Dahlberg and Diego Rivera"
 
 # Get the version from simulaqron
 _base_version_line = metadata.version('simulaqron')

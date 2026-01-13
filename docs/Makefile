@@ -254,7 +254,9 @@ python-deps:
 _add_jekyll:
 	touch build/.nojekyll
 
-build: python-deps html _add_jekyll
+build: html _add_jekyll
+
+install-deps: python-deps
 
 open:
 	@echo "test"
