@@ -6,7 +6,7 @@ Teleporting a Qubit
 
 Let's now consider a very simple protocol, in which Alice first generates an EPR pair with Bob, and then teleports
 a qubit to Bob. To program it in SimulaQron's native mode, we will use the template described in
-:doc:`NativeModeTemplate`.
+:doc:`Template`.
 
 ------------
 The protocol

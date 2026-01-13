@@ -32,7 +32,7 @@ filling in the relevant parts of the template. Let us now discuss this template 
     Bob, localhost, 8812
 
 #. The next step is to check that on each network computer that you will run on, the global configuration file
-   starting the virtual quantum nodes is set up correctly. See :doc:`GettingStarted` on how to perform such a
+   starting the virtual quantum nodes is set up correctly. See :doc:`../GettingStarted` on how to perform such a
    configuration and start the local quantum virtual node backends.
 #. Now copy nodeTest.py to a separate file for each node. In our example above where we just have Alice (client
    only) and Bob (server only), you would copy nodeTest to aliceTest.py and bobTest.py.
