@@ -181,3 +181,6 @@ epub_copyright = copyright
 
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ["search.html"]
+
+# Also generate sphinx docs for constructors
+autoclass_content = "both"
