@@ -14,7 +14,8 @@ from multiprocess.context import ForkProcess as Process
 from multiprocess.connection import Pipe, Connection
 from logging import DEBUG
 from simulaqron.general.host_config import SocketsConfig
-from simulaqron.local.setup import setup_local, assemble_qubit
+from simulaqron.math import assemble_qubit
+from simulaqron.local.setup import setup_local
 from simulaqron.network import Network
 from simulaqron.settings import simulaqron_settings, network_config
 from simulaqron.settings.network_config import NodeConfigType

@@ -53,25 +53,24 @@ _logger = logging.getLogger("setup-local")
 def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsConfig,
                 lNode: pb.Root, func: Callable, *args, **kwargs):
     """
-    Sets up a local classical applicaiton level communication server (if desired according to the configuration file),
+    Sets up a local classical application level communication server (if desired according to the configuration file),
     a client connection to the local virtual node quantum backend and a client connections to all other
-    classical communication servers
+    classical communication servers.
 
-    Args:
-        myName (str):
-            name of this node
-        virtualNet (SocketsConfig):
-            servers of the virtual nodes (dictionary of host objects)
-        classicalNet (SocketsConfig):
-            servers on the classical communication network (dictionary of host objects)
-        lNode (pb.Root):
-            Twisted PB root to use as local server (if applicable)
-        func (Callable):
-            function to run if all connections are set up
-        *args (Any):
-            additional arguments to be given to ``func``
-        **kwargs (Any):
-            additional keyword-based arguments to be passed to ``func``
+    :param myName: Name of this node.
+    :type myName: str
+    :param virtualNet: Servers of the virtual nodes (dictionary of host objects).
+    :type virtualNet: SocketsConfig
+    :param classicalNet: Servers on the classical communication network (dictionary of host objects).
+    :type classicalNet: SocketsConfig
+    :param lNode: Twisted PB root to use as local server (if applicable).
+    :type lNode: pb.Root
+    :param func: Function to run if all connections are set up.
+    :type func: Callable
+    :param args: Additional arguments to be given to ``func``.
+    :type args: Any
+    :param kwargs: Additional keyword-based arguments to be passed to ``func``.
+    :type kwargs: Any
     """
 
     # Initialize Twisted callback framework
@@ -114,8 +113,8 @@ def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsCon
             dList.append(nb.factory.getRootObject())
 
     deferList = DeferredList(dList, consumeErrors=True)
-    deferList.addCallback(init_register, myName, virtualNet, classicalNet, lNode, func, *args, **kwargs)
-    deferList.addErrback(localError)
+    deferList.addCallback(_init_register, myName, virtualNet, classicalNet, lNode, func, *args, **kwargs)
+    deferList.addErrback(_localError)
     try:
         reactor.run()
     except error.ReactorNotRestartable:
@@ -131,7 +130,7 @@ def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsCon
 #
 
 
-def init_register(resList: DeferredList, myName: str, virtualNet: SocketsConfig, classicalNet: SocketsConfig,
+def _init_register(resList: DeferredList, myName: str, virtualNet: SocketsConfig, classicalNet: SocketsConfig,
                   lNode: pb.Root, func: Callable, *args, **kwargs):
     _logger.debug("SETUP_LOCAL %s: All connections set up.", myName)
 
@@ -159,11 +158,11 @@ def init_register(resList: DeferredList, myName: str, virtualNet: SocketsConfig,
 
     # On the local virtual node, we still want to initialize a qubit register
     defer = virtRoot.callRemote("add_register")
-    defer.addCallback(fill_register, myName, lNode, virtRoot, classicalNet, func, *args, **kwargs)
-    defer.addErrback(localError)
+    defer.addCallback(_fill_register, myName, lNode, virtRoot, classicalNet, func, *args, **kwargs)
+    defer.addErrback(_localError)
 
 
-def fill_register(obj, myName, lNode, virtRoot, classicalNet, func, *args, **kwargs):
+def _fill_register(obj, myName, lNode, virtRoot, classicalNet, func, *args, **kwargs):
     _logger.debug("SETUP_LOCAL %s: Created quantum register at virtual node.", myName)
     qReg = obj
 
@@ -175,7 +174,7 @@ def fill_register(obj, myName, lNode, virtRoot, classicalNet, func, *args, **kwa
     func(qReg, virtRoot, myName, classicalNet, *args, **kwargs)
 
 
-def localError(reason):
+def _localError(reason):
     """
     Error handling for the connection.
     """
@@ -184,16 +183,3 @@ def localError(reason):
         reactor.stop()
     except ReactorNotRunning:
         pass
-
-
-def assemble_qubit(realM, imagM):
-    """
-    Reconstitute the qubit as array from its real and imaginary components given as a list.
-    We need this since Twisted PB does not support sending complex valued object natively.
-    """
-    M = realM
-    for s in range(len(M)):
-        for t in range(len(M)):
-            M[s][t] = realM[s][t] + 1j * imagM[s][t]
-
-    return M

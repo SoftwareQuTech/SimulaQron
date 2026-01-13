@@ -30,7 +30,8 @@
 import logging
 import numpy as np
 
-from simulaqron.local.setup import setup_local, assemble_qubit
+from simulaqron.math import assemble_qubit
+from simulaqron.local.setup import setup_local
 from simulaqron.general.host_config import SocketsConfig
 from simulaqron.settings.network_config import NodeConfigType
 from simulaqron.toolbox.stabilizer_states import StabilizerState
