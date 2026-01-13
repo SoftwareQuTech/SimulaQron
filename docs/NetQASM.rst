@@ -1,7 +1,7 @@
-DEPRECATED - The CQC interface
+The NetQASM interface
 =================
 
-TODO - Update this document to explain the NetQASM interface!
+.. warning:: Update this document to explain the NetQASM instead of the CQC interface!
 
 WARNING - The CQC interface ahas been deprecated, and it is no longer present in this release of SimulaQron.
 Please refer to the NetQASM interface documentation to create quantum applications.

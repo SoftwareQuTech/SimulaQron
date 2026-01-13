@@ -172,8 +172,9 @@ The options for the automatically generated topologies are currently:
   connected network on 10 nodes, can be specified as `random_connected_20`. Note that the number of edges for a network
   with :math:`n` nodes must be greater or equal to :math:`n-1` and less or equal to :math:`n(n-1)/1`.
 
-TODO - Implement a command in the CLI to invoke the generation of topologies.
-TODO - Document that CLI command.
+.. warning:: Implement a command in the CLI to invoke the generation of topologies.
+
+.. warning:: Document that CLI command.
 
 Along with setting up the network with the specified topology a .png figure is also generated and stored as
 config/topology.png. This is useful if a random network is used, to easily visualize the network used.

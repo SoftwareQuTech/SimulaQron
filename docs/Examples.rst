@@ -12,7 +12,7 @@ The examples below assume that you have already made your way through :doc:`Gett
 node servers up and running, and ran the simple example of generating correlated randomness. Further examples can
 also be found in examples/nativeMode.
 
-TODO - Update the link to the CQC interface.
+.. warning:: Update the link to the CQC interface.
 
 .. note:: The 'native' mode is not the recommended way to program applications for SimulaQron, instead use the
     `NetQASM <https://softwarequtech.github.io/CQC-Python/index.html>`_ interface.

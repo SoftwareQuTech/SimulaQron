@@ -75,7 +75,8 @@ Our objective will be to realize the following protocol which will generate 1 sh
 
 * Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`.
 
-TODO - Update the link references and the names of the examples (NetQASM vs pythonLib)
+.. warning:: Update the link references and the names of the examples (NetQASM vs pythonLib)
+
 The examples can be found in the repo `pythonLib <https://github.com/SoftwareQuTech/CQC-Python>`_.
 Before seeing how this example works, let us simply run the code::
 
@@ -142,7 +143,8 @@ Similarly the code in bobTest.py read::
         print("| "+to_print+" |")
         print("|"+"-"*(len(to_print)+2)+"|")
 
-TODO - Update the link references and the names of the examples (NetQASM vs pythonLib)
+.. warning:: Update the link references and the names of the examples (NetQASM vs pythonLib)
+
 For further examples, see the examples/ folder and for the docs of the Python library see https://softwarequtech.github.io/CQC-Python/index.html.
 
 .. _settings:
