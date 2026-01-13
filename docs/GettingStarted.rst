@@ -145,6 +145,8 @@ Similarly the code in bobTest.py read::
 TODO - Update the link references and the names of the examples (NetQASM vs pythonLib)
 For further examples, see the examples/ folder and for the docs of the Python library see https://softwarequtech.github.io/CQC-Python/index.html.
 
+.. _settings:
+
 --------
 Settings
 --------
@@ -191,7 +193,7 @@ This command will create a file with the following configuration::
 
 Section :ref: `settings_fields` provides a description about each one of the configuration options in the file.
 
-Alternatively, you can place the ``simulaqron_settings.json`` file in the folder ``~/.simulaqron`` (i.e. a folder named ``.simulaqron`` in your home folder). Doing so will make your settings persist across different projects you implement using simulaqron
+Alternatively, you can place the ``simulaqron_settings.json`` file in the folder ``~/.simulaqron`` (i.e. a folder named ``.simulaqron`` in your home folder). Doing so will make your settings persist across different projects you implement using simulaqron.
 
 .. note:: Settings needs to be set before starting the SimulaQron backend. If the backend is already running, stop it, set the settings and start it again.
 
@@ -211,4 +213,23 @@ Since the simulaqron configuration file can be placed in several places, SimulaQ
 Settings Fields
 ^^^^^^^^^^^^^^^
 
-TODO
+The SimulaQron settings file contains a set of fields to control the configurations of the SimulaQron simulation:
+
+* ``max_qubit``: Maximum number of qubits to simulate on the Virtual Node.
+* ``max_registers``: Maximmum number of registers to use in the Virtual Node.
+* ``conn_retry_time``: Number of seconds to wait between connection retries.
+* ``conn_max_retries``: Maximum number of times to retry a connection before failing the whole execution.
+* ``recv_timeout``: Maximum number of milliseconds to wait for the messages when trying to create EPR pairs.
+* ``recv_retry_time``: Maximum number of milliseconds to wait between attempts to create EPR pairs.
+* ``recv_max_retries``: Maximum number of tries to attempt when creating EPR pairs.
+* ``log_level``: The log level to use for SimulaQron. The integer value in this field must match the values exposed by the python ``logging`` package. For more information about the specific values for each logging level, please check the official python documentation https://docs.python.org/3/library/logging.html#logging-levels.
+* ``sim_backend``: The backend qubit simulation that SimulaQron will use to emulate qubits. Currently, three backends are supported: "projectq", "qutip" and "stabilizer".
+* ``noisy_qubits``: Whether to enable noisy qubits simulation or not. Setting this to ``true``will randomly apply a Pauli gate after every operation, emulating noise on the qubit backend.
+* ``max_app_waiting_time``: Maximum time (in seconds) to wait before considering the running application as stalled. A value of ``-1.0`` will disable the stalling waiting time, allowing SimulaQron to wait undefinitely.
+* ``t1``: T1 parameter to use when applying noise on the emulated qubits. This value is only used when the ``noisy_qubit`` option is set to ``true``.
+
+The default value of all these fields can be seen in the :ref: `settings` section.
+
+.. note:: An application can become "stalled" in certain configurations, leaving the application to look "hung". This leads to a deadlock of the application. SimulaQron will wait for the configured time before considering the application as "stalled" and kill all the processes.
+
+.. warning:: Please correctly configure the ``max_app_waiting_time`` to allow your application to wait for any potential "slow" peers. A low value on this field might lead SimulaQron to killing your application prematurely.
