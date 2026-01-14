@@ -10,20 +10,15 @@ logger = logging.getLogger("sim_util")
 def get_qubit_state(qubit: Qubit, reduced_dm: bool = True) -> np.ndarray:
     """Get the state of the qubit, only possible in simulation and can be used for debugging.
 
-    .. note:: The function gets the *current* state of the qubit(s). So make sure the subroutine is flushed
-              before calling the method.
+    .. note:: The function gets the *current* state of the qubit(s). So make sure the subroutine
+              is flushed before calling the method.
 
-    Parameters
-    ----------
-    qubit : :class:`~netqasm.sdk.Qubit`
-        The qubit to get the state of .
-    reduced_dm : bool
-        Unused; declared to keep compatibility with other simulation engines
-
-    Returns
-    -------
-    np.array
-        The state as a density matrix.
+    :param qubit: The qubit(s) to get the state of.
+    :type qubit: Qubit
+    :param reduced_dm: Unused; declared to keep compatibility with other simulation engines
+    :type reduced_dm: bool
+    :return: The state as a density matrix.
+    :rtype: np.array
     """
     # Since the qubit state data is maintained by the virtual node, we need to
     # find a way to "bypass" the QNodeOS layer and retrieve the qubit state from

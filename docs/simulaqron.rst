@@ -8,17 +8,29 @@ Subpackages
 
     simulaqron.general
     simulaqron.local
+    simulaqron.netqasm_backend
     simulaqron.run
+    simulaqron.sdk
+    simulaqron.settings
+    simulaqron.start
     simulaqron.toolbox
     simulaqron.virtual_node
 
 Submodules
 ----------
 
-simulaqron.SimulaQron module
+simulaqron.cli module
 ----------------------------
 
-.. automodule:: simulaqron.simulaqron
+.. automodule:: simulaqron.cli
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simulaqron.math module
+--------------------------
+
+.. automodule:: simulaqron.math
     :members:
     :undoc-members:
     :show-inheritance:
@@ -31,14 +43,21 @@ simulaqron.network module
     :undoc-members:
     :show-inheritance:
 
-simulaqron.settings module
---------------------------
+simulaqron.reactor module
+-------------------------
 
-.. automodule:: simulaqron.settings
+.. automodule:: simulaqron.reactor
     :members:
     :undoc-members:
     :show-inheritance:
 
+simulaqron.sim_util module
+-------------------------
+
+.. automodule:: simulaqron.sim_util
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 Module contents
 ---------------

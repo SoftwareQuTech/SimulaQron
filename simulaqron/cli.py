@@ -38,24 +38,12 @@ class RunningSimulaQronDaemon(run.RunDaemon):
 
 
 class SimulaQronDaemon(run.RunDaemon):
-    """
-    Daemon process that runs a SimulaQron network in the background.
-
-    This daemon spawns virtual nodes and QNodeOS servers for each node
-    in the network configuration. It runs until explicitly stopped.
-
-    Attributes
-    ----------
-    name : str
-        Name of the network (e.g., 'default').
-    nodes : List[str]
-        List of node names to start (e.g., ['Alice', 'Bob']).
-    network_config_file : Path
-        Path to the network configuration JSON file.
-    """
     def __init__(self, pidfile: Path, name: str, nodes: List[str], network_config_file: Path):
         """
-        Initialize the SimulaQron daemon.
+        Daemon process that runs a SimulaQron network in the background.
+
+        This daemon spawns virtual nodes and QNodeOS servers for each node
+        in the network configuration. It runs until explicitly stopped.
 
         :param pidfile: Path to the PID file used to track the daemon process.
         :type pidfile: Path
@@ -192,7 +180,18 @@ def version():
     default="",
 )
 def start(name: str, nodes: str, simulaqron_config_file: Path, network_config_file: Path):
-    """Starts a network with the given parameters or from config files."""
+    """
+    Starts a network with the given parameters or from config files.
+
+    :param name: Name of the network to start.
+    :type name: str
+    :param nodes: Comma separated list of nodes to start.
+    :type nodes: str
+    :param simulaqron_config_file: Path to simulaqron's config file.
+    :type simulaqron_config_file: Path
+    :param network_config_file: Path to network config file.
+    :type network_config_file: Path
+    """
     # Checks the simulaqron config
     if not _path_exists(simulaqron_config_file):
         raise click.BadOptionUsage(
@@ -268,7 +267,12 @@ def start(name: str, nodes: str, simulaqron_config_file: Path, network_config_fi
     default="default",
 )
 def stop(name: str):
-    """Stops a network."""
+    """
+    Stops a network.
+
+    :param name: Name of the network to stop.
+    :type name: str
+    """
     assert name is not None
     pidfile = PID_FOLDER / f"simulaqron_network_{name}.pid"
     logging.debug("Trying to open PIDfile")
@@ -291,7 +295,11 @@ def stop(name: str):
     is_flag=True,
 )
 def reset(force: bool):
-    """Resets simulaqron"""
+    """
+    Resets simulaqron. This command will stop any running network and reset the local SimulaQron
+    settings to their default.
+    :param force: Don't ask for confirmation, and immediately reset the simulaqron settings.
+    """
     if not force:
         answer = input("Are you sure you want to reset simulaqron?\nThis will revert settings and "
                        "network config files to the default values.\nNote, this action will remove "
@@ -320,6 +328,9 @@ def reset(force: bool):
     help="Change a simulaqron setting"
 )
 def set():
+    """
+    Change a SimulaQron setting.
+    """
     pass
 
 
@@ -327,6 +338,9 @@ def set():
     help="Sets all settings back to default and saves it as a local configuration file in the current folder."
 )
 def default():
+    """
+    Sets all settings back to default and saves it as a local configuration file in the current folder.
+    """
     simulaqron_settings.default_settings()
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
 
@@ -338,7 +352,13 @@ def default():
     "value",
     type=click.Choice([b.value for b in SimBackend])
 )
-def sim_backend(value):
+def sim_backend(value: SimBackend):
+    """
+    The backend to use (stabilizer, projectq, qutip).
+
+    :param value: Value of the backend to use. This can either be ``stabilizer``, ``projectq`` or ``qutip``.
+    :type value: SimBackend
+    """
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.sim_backend = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
@@ -352,7 +372,13 @@ def sim_backend(value):
     'value',
     type=int
 )
-def max_qubits(value):
+def max_qubits(value: int):
+    """
+    Sets the max virt-qubits per node and max sim-qubits per register.
+
+    :param value: Value of the max virt-qubits per node and max sim-qubits per register.
+    :type value: int
+    """
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.max_qubits = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
@@ -366,7 +392,13 @@ def max_qubits(value):
     'value',
     type=int
 )
-def max_registers(value):
+def max_registers(value: int):
+    """
+    Sets how many registers a node can hold.
+
+    :param value: Value of the max registers a node can hold.
+    :type value: int
+    """
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.max_registers = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
@@ -380,7 +412,12 @@ def max_registers(value):
     'value',
     type=float
 )
-def conn_retry_time(value):
+def conn_retry_time(value: float):
+    """
+    Sets the conn_retry_time; how long to wait until a retry a connection to a SimulaQron component.
+
+    :param value: Value of the conn_retry_time.
+    """
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.conn_retry_time = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
@@ -394,7 +431,12 @@ def conn_retry_time(value):
     'value',
     type=float
 )
-def recv_timeout(value):
+def recv_timeout(value: float):
+    """
+    Sets the recv_timeout in seconds before raising a timeout when receiving a qubit or EPR pair.
+
+    :param value: Value of the recv_timeout.
+    """
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.recv_timeout = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
@@ -402,13 +444,18 @@ def recv_timeout(value):
 
 
 @set.command(
-    help="When receiving a qubit or EPR pair, how long to wait between checks of whether a qubit is received."
+    help="When receiving a qubit or EPR pair, how long to wait between attempts to receive an EPR pair half."
 )
 @click.argument(
     'value',
     type=float
 )
-def recv_retry_time(value):
+def recv_retry_time(value: float):
+    """
+    Sets the recv_retry_time value as the number of seconds to wait between attempts when receiving a qubit or EPR pair.
+
+    :param value: Value of the recv_retry_time.
+    """
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.recv_retry_time = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
@@ -422,7 +469,14 @@ def recv_retry_time(value):
     'value',
     type=int
 )
-def log_level(value):
+def log_level(value: int):
+    """
+    Sets the log level for both backend and frontend. Possible values are 10=DEBUG, 20=INFO, 30=WARNING,
+    40=ERROR, 50=CRITICAL.
+
+    :param value: Value of the log_level.
+    :type value: int
+    """
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.log_level = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
@@ -436,7 +490,13 @@ def log_level(value):
     'value',
     type=click.Choice(["on", "off"])
 )
-def noisy_qubits(value):
+def noisy_qubits(value: str):
+    """
+    Configures SimulaQron to simulate noisy qubits or not.
+    :param value: A string whether to noisy qubits or not. The string "no" will be interpreted as
+                  not using noisy qubits. Any other string will be interpreted as using noisy qubits.
+    :type value: str
+    """
     _create_local_settings_if_needed_and_load()
     if value == "on":
         simulaqron_settings.noisy_qubits = True
@@ -453,7 +513,12 @@ def noisy_qubits(value):
     'value',
     type=float
 )
-def t1(value):
+def t1(value: float):
+    """
+    Sets the T1 value for noisy qubits.
+    :param value: The T1 value for noisy qubits.
+    :type value: float
+    """
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.t1 = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
@@ -475,6 +540,9 @@ def get():
     help="The backend to use (stabilizer, projectq, qutip).",
 )
 def sim_backend():
+    """
+    Prints the current configured simulaqron backend.
+    """
     _load_local_settings_or_default()
     print(simulaqron_settings.sim_backend)
 
@@ -483,6 +551,9 @@ def sim_backend():
     help="Max virt-qubits per node and max sim-qubits per register."
 )
 def max_qubits():
+    """
+    Prints the current configured max virt-qubits per node and max sim-qubits per register.
+    """
     _load_local_settings_or_default()
     print(simulaqron_settings.max_qubits)
 
@@ -491,6 +562,9 @@ def max_qubits():
     help="How many registers a node can hold."
 )
 def max_registers():
+    """
+    Prints the current configured max number of register a node can hold.
+    """
     _load_local_settings_or_default()
     print(simulaqron_settings.max_registers)
 
@@ -499,6 +573,10 @@ def max_registers():
     help="If setup fails, how long to wait until a retry."
 )
 def conn_retry_time():
+    """
+    Prints the current configured conn_retry value; the number of seconds to wait before retrying
+    to connect to another node or SimulaQron component.
+    """
     _load_local_settings_or_default()
     print(simulaqron_settings.conn_retry_time)
 
@@ -507,6 +585,10 @@ def conn_retry_time():
     help="When receiving a qubit or EPR pair, how long to wait until raising a timeout."
 )
 def recv_timeout():
+    """
+    Prints the current configured recv_timeout value; the number of seconds to wait for receiving
+    an EPR half before raising a timeout error.
+    """
     _load_local_settings_or_default()
     print(simulaqron_settings.recv_timeout)
 
@@ -515,6 +597,10 @@ def recv_timeout():
     help="When receiving a qubit or EPR pair, how long to wait between checks of whether a qubit is received."
 )
 def recv_retry_time():
+    """
+    Prints the current configured recv_retry_time value; the number of seconds to wait between
+    attempts to receive an EPR half.
+    """
     _load_local_settings_or_default()
     print(simulaqron_settings.recv_retry_time)
 
@@ -523,6 +609,9 @@ def recv_retry_time():
     help="Log level for both backend and frontend."
 )
 def log_level():
+    """
+    Prints the current configured log level.
+    """
     _load_local_settings_or_default()
     print(simulaqron_settings.log_level)
 
@@ -531,6 +620,9 @@ def log_level():
     help="Whether qubits should be noisy (on/off)"
 )
 def noisy_qubits():
+    """
+    Prints whether SimulaQron has been configured to simulate noisy qubits or not.
+    """
     _load_local_settings_or_default()
     if simulaqron_settings.noisy_qubits:
         print("on")
@@ -542,6 +634,9 @@ def noisy_qubits():
     help="The effective T1 to be used for noisy qubits"
 )
 def t1():
+    """
+    Prints the current configured t1 value when simulating noisy qubits.
+    """
     _load_local_settings_or_default()
     print(simulaqron_settings.t1)
 
@@ -553,9 +648,10 @@ def t1():
 @cli_entry_point.group()
 def nodes():
     """
-    Manage the nodes in the simulated network.
+    Manage the nodes in the simulated network. This command *will alter* the
+    ``simulaqron_network.json`` file in the current directory.
 
-    NOTE: This needs to be done before starting the network.
+    .. note:: This needs to be done before starting the network.
     """
     pass
 
@@ -585,11 +681,24 @@ def nodes():
 def add(name: str, network_name: str, hostname: str, app_port: int, qnodeos_port: int,
         vnode_port: int, neighbors: Optional[str] = None):
     """
-    Add a node to the network.
+    Add a node to the network. This command *will modify* the ``simulaqron_network.json``
+    file in the current directory.
 
-    NAME: The name of the node, e.g. Alice
-
-    HOSTNAME: The host name of the node, e.g. localhost or 192.168.0.1
+    :param name: The name of the node to add.
+    :type name: str
+    :param network_name: The name of the network to add the node to.
+    :type network_name: str
+    :param hostname: The hostname of the machine that will run  the node, e.g. localhost.
+    :type hostname: str
+    :param app_port: The port number for the application, e.g. 8000
+    :type app_port: int
+    :param qnodeos_port: The port number for the qnodeos server, e.g. 8000
+    :type qnodeos_port: int
+    :param vnode_port: The port number for the virtual node, e.g. 8000
+    :type vnode_port: int
+    :param neighbors: A comma-separated list of neighbors of the given node. The given names
+                      *will not be checked* if they exist in the given network.
+    :type neighbors: Optional[str]
     """
     _create_local_networks_if_needed_and_load()
     network_config.read_from_file(LOCAL_NETWORK_SETTINGS)
@@ -615,9 +724,13 @@ def add(name: str, network_name: str, hostname: str, app_port: int, qnodeos_port
               help="The name of the network")
 def remove(name: str, network_name: str):
     """
-    Remove a node to the network.
+    Remove a node to the network. This command *will modify* the ``simulaqron_network.json``
+    file in the current directory.
 
-    NAME: The name of the node, e.g. Alice
+    :param name: The name of the node to remove.
+    :type name: str
+    :param network_name: The name of the network to remove the node from.
+    :type network_name: str
     """
 
     if not LOCAL_NETWORK_SETTINGS.exists() or not LOCAL_NETWORK_SETTINGS.is_file():
@@ -633,7 +746,8 @@ def remove(name: str, network_name: str):
 @nodes.command()
 def default():
     """
-    Sets the default nodes of the network.
+    Sets the default nodes of the network. This command *will modify* the ``simulaqron_network.json``
+    file in the current directory.
 
     The default network consists of the five nodes:
     Alice, Bob, Charlie, David, Eve
@@ -647,7 +761,12 @@ def default():
 @click.option('--network-name', type=str, default="default",
               help="The name of the network")
 def get(network_name: str):
-    """Get the current nodes of the network."""
+    """
+    Print the nodes present in the given network.
+
+    :param network_name: The name of the network to get the nodes from.
+    :type network_name: str
+    """
 
     if not LOCAL_NETWORK_SETTINGS.exists() or not LOCAL_NETWORK_SETTINGS.is_file():
         print(f"WARNING - the file '{LOCAL_NETWORK_SETTINGS}' was not found. The loaded "

@@ -59,12 +59,12 @@ class Network:
         This class uses the network configuration loaded in the global network_config object and
         starts the nodes mentioned in the constructor of this class.
 
-        :param network_name: str
-            The name of network to start. Defaults to "default".
-        :param network_config_file: Path
-            Path to network config file (required).
-        :param nodes: list of str
-            A list of strings with the node names to start.
+        :param nodes: A list of strings with the node names to start.
+        :type nodes: List[str]
+        :param network_config_file: Path to network config file (required).
+        :type network_config_file: str
+        :param network_name: The name of network to start. Defaults to "default".
+        :type network_name: str
         """
 
         self._network_config_file = network_config_file
@@ -84,9 +84,12 @@ class Network:
         self._setup_processes()
 
     @property
-    def running(self):
+    def running(self) -> bool:
         """
-        Is the network up and running?
+        Checks whether the network up and running.
+
+        :return: True if the network up and running. False otherwise
+        :rtype: bool
         """
         if self._running:
             return True
@@ -114,6 +117,10 @@ class Network:
     def _setup_processes(self):
         """
         Setup the processes forming the network, however they are not started yet.
+
+        This method creates the following *heavy processes* (either by forking or spawning):
+        * One for SimulaQron's Virtual Node.
+        * One for QNodeOS's (NetQASM interpreter) server.
         """
         for node in self._nodes_to_start:
             process_virtual = Process(
@@ -173,15 +180,17 @@ class Network:
 
 # Helper functions to build topologies
 
-def construct_topology_config(topology: str | Dict | None, nodes: List[str]) -> Optional[Dict[str, List[str]]]:
+def construct_topology_config(topology: str | Dict | None, nodes: List[str]) -> Dict[str, List[str]]:
     """
-    Constructs a json file at config/topology.json, used to define the topology of the network.
+    Constructs a dictionary that maps the node names with their neighbours, representing a network topology.
 
-    :param topology: str
-        Should be one of the following: None, 'complete', 'ring', 'random_tree'.
-    :param nodes: list of str
-        List of the names of the nodes.
-    :return: None
+    :param topology: The type of topology to generate. Should be one of the following: None, 'complete',
+                     'ring', 'random_tree'.
+    :type topology: str | Dict
+    :param nodes: List of the names of the nodes.
+    :type nodes: List[str]
+    :return: A dictionary where keys are the names of the nodes and values are a list of strings of their neighbors
+    :rtype: Dict[str, List[str]]
     """
     if isinstance(topology, str):
         # Trick to get the integer after "random_connected": split on that string
@@ -229,14 +238,14 @@ def construct_topology_config(topology: str | Dict | None, nodes: List[str]) -> 
     return adjacency_dct
 
 
-def get_random_tree(nodes):
+def get_random_tree(nodes: List[str]) -> Dict[str, List[str]]:
     """
     Constructs a dictionary describing a random tree, with the name of the vertices are taken from the 'nodes'
 
-    :param nodes: list of str
-        Name of the nodes to be used
-    :return: dct
-        keys are the names of the nodes and values their neighbors
+    :param nodes: Name of the nodes to be used
+    :type nodes: List[str]
+    :return: A dictionary where keys are the names of the nodes and values are a list of strings of their neighbors
+    :rtype: Dict[str, List[str]]
     """
     tree = nx.random_tree(len(nodes))
 
@@ -250,17 +259,17 @@ def get_random_tree(nodes):
     return adjacency_dct
 
 
-def get_random_connected(nodes, nr_edges):
+def get_random_connected(nodes: List[str], nr_edges: int) -> Dict[str, List[str]]:
     """
     Constructs a dictionary describing a random connected graph with a specified number of edges,
     with the name of the vertices are taken from the 'nodes'
 
-    :param nodes: list of str
-        Name of the nodes to be used
-    :param nr_edges: int
-        The number of edges that the graph should have.
-    :return: dct
-        keys are the names of the nodes and values their neighbors
+    :param nodes: Name of the nodes to be used
+    :type nodes: List[str]
+    :param nr_edges: The number of edges that the graph should have.
+    :type nr_edges: int
+    :return: A dictionary where keys are the names of the nodes and values are a list of strings of their neighbors
+    :rtype: Dict[str, List[str]]
     """
     nn = len(nodes)
     min_edges = nn - 1
