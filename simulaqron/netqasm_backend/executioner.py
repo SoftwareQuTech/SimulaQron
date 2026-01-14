@@ -4,7 +4,7 @@ import traceback
 from collections import defaultdict
 from enum import Enum
 from functools import partial
-from typing import Generator, List, Tuple
+from typing import Generator, List, Tuple, Callable, Dict
 
 import netqasm.lang.instr.core as core_instructions
 import netqasm.lang.instr.vanilla as vanilla_instructions
@@ -15,10 +15,11 @@ from netqasm.lang import operand
 from netqasm.qlink_compat import (Basis, BellState, LinkLayerErr,
                                   LinkLayerOKTypeK, LinkLayerOKTypeM,
                                   LinkLayerOKTypeR, RandomBasis, RequestType,
-                                  ReturnType)
+                                  ReturnType, LinkLayerCreate)
 from twisted.internet import task
 from twisted.internet.defer import inlineCallbacks, Deferred
 from twisted.spread import pb
+from twisted.spread.flavors import Referenceable
 
 from simulaqron.reactor import reactor
 from simulaqron.general import SimUnsupportedError
@@ -29,20 +30,27 @@ from simulaqron.virtual_node.virtual import call_method
 
 
 class UnknownQubitError(RuntimeError):
+    """
+    Raised when the requested qubit ID could not be found.
+    """
     pass
 
+_VanillaRotInstr = vanilla_instructions.RotXInstruction | vanilla_instructions.RotYInstruction | vanilla_instructions.RotZInstruction
 
+# TODO - This class is candidate to be deleted! Test and delete if not needed!
 class NetworkStack(BaseNetworkStack):
-
     def __init__(self, executioner):
-        """This is just a wrapper around the executioners methods for entanglement generation
+        """
+        This is just a wrapper around the executioners methods for entanglement generation
         in order to use the correct framework as used by the netqasm executioner.
+
+        .. warning:: This class is candidate to be deleted! Test and delete if not needed!
         """
         self._executioner = executioner
-        self._sockets = {}
+        self._sockets: Dict[int, Tuple[int, int]] = {}
 
     def put(self, request):
-        """Handles an request to the network stack"""
+        """Handles a request to the network stack"""
         raise NotImplementedError("NetworkStack.put")
 
     def setup_epr_socket(self, epr_socket_id, remote_node_id, remote_epr_socket_id, timeout=1):
@@ -52,7 +60,6 @@ class NetworkStack(BaseNetworkStack):
 
     def get_purpose_id(self, remote_node_id: int, epr_socket_id: int) -> int:
         pass
-
 
 class VanillaSimulaQronExecutioner(Executor):
     SIMULAQRON_OPS = {
@@ -84,6 +91,21 @@ class VanillaSimulaQronExecutioner(Executor):
     _num_bits_prob = 8
 
     def __init__(self, *args, **kwargs):
+        """
+        Creates a class that is capable of executing some "vanilla" NetQASM instructions using
+        the SimulaQron simulator. This is the main class that bridges the "QNodeOS" world with the
+        SimulaQron simulator.
+        Every instruction of the NetQASM subroutine is sent to an instance of this class, so the
+        "QNodeOS" server knows how to interact with SimulaQron's Virtual Node to command the execution
+        of the NetQASM instructions.
+        To this end, this class implements the ``netqasm.executor.backend.Executor`` class, overwriting
+        the methods that are invoked by the NetQASM library when executing a subroutine.
+
+        :param args: Arguments directly passed to the NetQASM ``Executor`` constructor.
+        :type args: Any
+        :param kwargs: Keyword arguments directly passed to the NetQASM ``Executor`` constructor.
+        :type kwargs: Any
+        """
         super().__init__(*args, **kwargs)
         self._return_msg_func = None
         self._factory = None
@@ -91,16 +113,24 @@ class VanillaSimulaQronExecutioner(Executor):
 
     @property
     def factory(self) -> "NetQASMFactory":  # noqa: F821
+        """
+        The NetQASM Factory associated with this executioner.
+        """
         return self._factory
 
     @property
     def node_id(self):
+        """
+        Returns the ID of the node on which this simulation runs on.
+        """
         return get_node_id_from_net_config(self.factory.qnodeos_net, self.name)
 
     @staticmethod
     def get_error_class(remote_err):
         """
         This is a function to get the error class of a remote thrown error when using callRemote.
+        .. warning:: This method is candidate to be deleted.
+
         :param remote_err: :obj:`twisted.spread.pb.RemoteError`
         :return: class
         """
@@ -112,10 +142,22 @@ class VanillaSimulaQronExecutioner(Executor):
 
         return error_class
 
-    def add_return_msg_func(self, func):
+    def add_return_msg_func(self, func: Callable):
+        """
+        Sets the function invoked for returning a message back to the client
+
+        :param func: The function tobe used to return a message back to the client.
+        :type func: Callable
+        """
         self._return_msg_func = func
 
     def add_factory(self, factory: "NetQASMFactory"):  # noqa: F821
+        """
+        Sets the factory object used in the connection.
+
+        :param factory: The factory object
+        :type factory: NetQASMFactory
+        """
         self._factory = factory
 
     def _handle_command_exception(self, exc, prog_counter, traceback_str):
@@ -138,12 +180,15 @@ class VanillaSimulaQronExecutioner(Executor):
         yield self.cmd_new(physical_address=physical_address)
 
     @inlineCallbacks
-    def cmd_new(self, physical_address):
+    def cmd_new(self, physical_address: int):
         """
-        Request a new qubit. Since we don't need it, this python NetQASM just provides very crude timing information.
-        (return_q_id is used internally)
-        (ignore_max_qubits is used internally to ignore the check of number of virtual qubits at the node
-        such that the node can temporarily create a qubit for EPR creation.)
+        Request a new qubit. Since we don't need it, this python NetQASM just provides very crude timing
+        information (return_q_id is used internally).
+        Additionally, ignore_max_qubits is used internally to ignore the check of number of virtual qubits
+        at the node such that the node can temporarily create a qubit for EPR creation.
+
+        :param physical_address: The physical address of the qubit to be created.
+        :type physical_address: int
         """
         try:
             yield self.factory._lock.acquire()
@@ -167,7 +212,8 @@ class VanillaSimulaQronExecutioner(Executor):
                 qubit_id=position,
             )
 
-    def _do_single_qubit_rotation(self, instr, subroutine_id, address, angle):
+    def _do_single_qubit_rotation(self, instr: core_instructions.RotationInstruction, subroutine_id: int, address: int, angle: float):
+        assert isinstance(instr, _VanillaRotInstr)
         position = self._get_position(subroutine_id=subroutine_id, address=address)
         axis = self._get_axis(instr=instr)
         yield self.apply_rotation(
@@ -177,17 +223,25 @@ class VanillaSimulaQronExecutioner(Executor):
         )
 
     @classmethod
-    def _get_axis(cls, instr):
+    def _get_axis(cls, instr: _VanillaRotInstr):
         axis = cls.ROTATION_AXIS.get(type(instr))
         if axis is None:
             raise ValueError(f"Unknown rotation instruction {instr}")
         return axis
 
     @inlineCallbacks
-    def apply_rotation(self, axis, angle, qubit_id):
+    def apply_rotation(self, axis: Tuple[int, int, int], angle: float, qubit_id: int):
         """
-        Apply a rotation of the qubit specified in cmd with an angle specified in xtra
-        around the axis
+        Executes a rotation of ``angle``radians around the ``axis`` axis of the specified
+        qubit ID.
+
+        :param axis: The axis to rotate around. This axis is expected to be a tuple of
+                     integers in the format (x, y, z).
+        :type axis: Tuple[int, int, int]
+        :param angle: The angle to rotate around. This angle should be in radians.
+        :type angle: float
+        :param qubit_id: The qubit to apply the rotation on.
+        :type qubit_id: int
         """
         self._logger.debug("Applying a rotation around %s to physical qubit id %d", axis, qubit_id)
         virt_qubit = self.get_virt_qubit(qubit_id=qubit_id)
@@ -203,7 +257,17 @@ class VanillaSimulaQronExecutioner(Executor):
         )
 
     @inlineCallbacks
-    def apply_two_qubit_gate(self, gate, qubit_id1, qubit_id2):
+    def apply_two_qubit_gate(self, gate: core_instructions.TwoQubitInstruction, qubit_id1: int, qubit_id2: int):
+        """
+        Applies the given two-qubits gate to the physical qubit qubit_id1 and qubit_id2.
+
+        :param gate: The two-qubit gate to apply.
+        :type gate: core_instructions.TwoQubitInstruction
+        :param qubit_id1: The qubit ID of the first qubit to use.
+        :type qubit_id1: int
+        :param qubit_id2: The qubit ID of the second qubit to use.
+        :type qubit_id2: int
+        """
         self._logger.debug("Applying %s to physical qubit id %d target %d", gate, qubit_id1, qubit_id2)
         control = self.get_virt_qubit(qubit_id=qubit_id1)
         target = self.get_virt_qubit(qubit_id=qubit_id2)
@@ -219,17 +283,31 @@ class VanillaSimulaQronExecutioner(Executor):
         return simulaqron_gate
 
     @inlineCallbacks
-    def apply_single_qubit_gate(self, gate, qubit_id):
+    def apply_single_qubit_gate(self, gate: core_instructions.SingleQubitInstruction, qubit_id: int):
+        """
+        Applies the given single-qubit gate to the specified physical qubit ID.
+
+        :param gate: The single-qubit gate to apply.
+        :type gate: core_instructions.SingleQubitInstruction
+        :param qubit_id: The qubit ID of the qubit to use.
+        :type qubit_id: int
+        """
         virt_qubit = self.get_virt_qubit(qubit_id=qubit_id)
         yield call_method(virt_qubit, gate)
 
-    def get_virt_qubit(self, qubit_id):
+    def get_virt_qubit(self, qubit_id: int) -> Referenceable:
         """
         Get reference to the virtual qubit reference in SimulaQron given app and qubit id, if it exists.
-        If not found, send back no qubit error.
-        Caution: Twisted PB does not allow references to objects to be passed back between connections.
+        If not found, raises a :py:class:`UnknownQubitError`.
+
+        .. Caution:: Twisted PB does not allow references to objects to be passed back between connections.
         If you need to pass a qubit reference back to the Twisted PB on a _different_ connection,
         then use get_virt_qubit_indep below.
+
+        :param qubit_id: The qubit to get reference to.
+        :type qubit_id: int
+        :return: The virtual qubit reference as a ``twisted.spread.flavors.Referenceable`` object.
+        :rtype: twisted.spread.flavors.Referenceable
         """
         if qubit_id not in self.factory.qubitList:
             raise UnknownQubitError(f"{self.name}: Qubit {qubit_id} not found")
@@ -237,10 +315,14 @@ class VanillaSimulaQronExecutioner(Executor):
         return qubit.virt
 
     @inlineCallbacks
-    def get_virt_qubit_num(self, qubit_id):
+    def get_virt_qubit_num(self, qubit_id: int):
         """
-        Get NUMBER (not reference!) to virtual qubit in SimulaQron specific to this connection.
-        If not found, send back no qubit error.
+        Get the *integer* qubit ID to virtual qubit in SimulaQron specific to this connection.
+        .. caution:: This method return a qubit ID (an integer), not a ``twisted.spread.flavors.Referenceable``
+                     object. If you need to get a twisted object, check :py:meth:`get_virt_qubit`.
+
+        :param qubit_id: The qubit ID to get virtual qubit ID.
+        :type qubit_id: int
         """
         # First let's get the general virtual qubit reference, if any
         virt = self.get_virt_qubit(qubit_id=qubit_id)
@@ -253,9 +335,14 @@ class VanillaSimulaQronExecutioner(Executor):
         return outcome
 
     @inlineCallbacks
-    def cmd_measure(self, qubit_id, inplace=True):
+    def cmd_measure(self, qubit_id: int, inplace=True):
         """
-        Measure
+        Executes a measure on the given qubit ID.
+
+        :param qubit_id: The qubit ID to execute measure on.
+        :type qubit_id: int
+        :param inplace: If True, execute the measurement inplace.
+        :type inplace: bool
         """
         self._logger.debug("Measuring physical qubit id %d", qubit_id)
         virt_qubit = self.get_virt_qubit(qubit_id=qubit_id)
@@ -266,9 +353,14 @@ class VanillaSimulaQronExecutioner(Executor):
         return outcome
 
     @inlineCallbacks
-    def cmd_reset(self, qubit_id, correct=True):
+    def cmd_reset(self, qubit_id: int, correct: bool=True):
         r"""
-        Reset Qubit to \|0\>
+        Reset the given qubit to the state :math:`|0>`.
+
+        :param qubit_id: The qubit ID to reset.
+        :type qubit_id: int
+        :param correct: If True, apply a correction to ensure the qubit was reset.
+        :type correct: bool
         """
         self._logger.debug("Reset physical qubit id %d", qubit_id)
         virt_qubit = self.get_virt_qubit(qubit_id=qubit_id)
@@ -278,7 +370,7 @@ class VanillaSimulaQronExecutioner(Executor):
         if correct and outcome:
             yield call_method(virt_qubit, "apply_X")
 
-    def _do_wait(self, delay=0.1):
+    def _do_wait(self, delay: float=0.1):
         d = task.deferLater(reactor, delay, lambda: self._logger.debug("Wait finished"))
         self._logger.debug("waiting a bit")
         yield d
@@ -302,12 +394,12 @@ class VanillaSimulaQronExecutioner(Executor):
 
     def _do_create_epr(
             self,
-            subroutine_id,
-            remote_node_id,
-            epr_socket_id,
-            q_array_address,
-            arg_array_address,
-            ent_results_array_address,
+            subroutine_id: int,
+            remote_node_id: int,
+            epr_socket_id: int,
+            q_array_address: int | None,
+            arg_array_address: int,
+            ent_results_array_address: int,
     ):
         create_request = self._get_create_request(
             subroutine_id=subroutine_id,
@@ -346,11 +438,11 @@ class VanillaSimulaQronExecutioner(Executor):
 
     def _do_recv_epr(
             self,
-            subroutine_id,
-            remote_node_id,
-            epr_socket_id,
-            q_array_address,
-            ent_results_array_address
+            subroutine_id: int,
+            remote_node_id: int,
+            epr_socket_id: int,
+            q_array_address: int | None,
+            ent_results_array_address: int
     ):
         app_id = self._get_app_id(subroutine_id=subroutine_id)
         num_pairs = self._get_num_pairs_from_array(
@@ -375,8 +467,8 @@ class VanillaSimulaQronExecutioner(Executor):
                 qubit_id=qubit_id,
             )
 
-    def _get_remote_epr_socket_id(self, epr_socket_id):
-        remote_entry = self.network_stack._sockets.get(epr_socket_id)
+    def _get_remote_epr_socket_id(self, epr_socket_id: int) -> int:
+        remote_entry: Tuple[int, int] = self.network_stack._sockets.get(epr_socket_id)
         if remote_entry is None:
             raise ValueError(f"Unknown EPR socket ID {epr_socket_id}")
         return remote_entry[1]
@@ -384,16 +476,29 @@ class VanillaSimulaQronExecutioner(Executor):
     @inlineCallbacks
     def cmd_epr(
             self,
-            create_id,
-            remote_node_id,
-            epr_socket_id,
-            remote_epr_socket_id,
-            qubit_id,
-            create_request,
+            create_id: int,
+            remote_node_id: int,
+            epr_socket_id: int,
+            remote_epr_socket_id: int,
+            qubit_id: int,
+            create_request: LinkLayerCreate,
     ):
         """
         Create EPR pair with another node.
-        Depending on the ips and ports this will either create an EPR-pair and send one part, or just receive.
+        Depending on the IPs and ports this will either create an EPR-pair and send one part, or just receive.
+
+        :param create_id: The create ID.
+        :type create_id: int
+        :param remote_node_id: The remote node ID.
+        :type remote_node_id: int
+        :param epr_socket_id: The EPR socket ID.
+        :type epr_socket_id: int
+        :param remote_epr_socket_id: The remote EPR socket ID.
+        :type remote_epr_socket_id: int
+        :param qubit_id: The qubit ID.
+        :type qubit_id: int
+        :param create_request: The :py:class:`LinkLayerCreate` object with the EPR information.
+        :type create_request: LinkLayerCreate
         """
         # Get ip and port of remote host
         for remote_node_name, remote_host in self.factory.qnodeos_net.hostDict.items():
@@ -508,7 +613,7 @@ class VanillaSimulaQronExecutioner(Executor):
         self._logger.debug("finished cmd_epr")
 
     @inlineCallbacks
-    def _measure_epr_qubit(self, qubit_id, request, remote: bool):
+    def _measure_epr_qubit(self, qubit_id: int, request: LinkLayerCreate, remote: bool):
         # Check the arguments depending on if this is the local or remote qubit
         if remote:
             assert request.rotation_X_remote1 == 0, "Measure directly with rotations not yet supported"
@@ -552,13 +657,16 @@ class VanillaSimulaQronExecutioner(Executor):
         return outcome, basis
 
     # NOTE this method is copied from netsquid magic
-    def _get_probability_weights(self, probability_dist_spec, num_choices):
+    def _get_probability_weights(self, probability_dist_spec: List[int], num_choices: int):
         """
-        Used internally by `_sample_basis_choice` to convert specified probability distribution to correct form
+        Used internally by `_sample_basis_choice` to convert specified probability distribution to the correct form.
 
-        :param probability_dist_spec: list of ints
-        :param num_choices: int
-        :return: list of ints
+        :param probability_dist_spec: The spec of the probability distribution.
+        :type probability_dist_spec: List[int]
+        :param num_choices: The number of choices
+        :tyoe num_choices: int
+        :return: The probability weights.
+        :rtype: List
         """
         num_values = 2 ** self._num_bits_prob
         if num_choices == 2:
@@ -611,10 +719,17 @@ class VanillaSimulaQronExecutioner(Executor):
         return basis
 
     @classmethod
-    def new_ent_id(cls, epr_socket_id, remote_node_id, remote_epr_socket_id):
+    def new_ent_id(cls, epr_socket_id: int, remote_node_id: int, remote_epr_socket_id: int):
         """
         Returns a new unique entanglement id for the specified host_app_id, remote_node and remote_app_id.
         Used by cmd_epr.
+
+        :param epr_socket_id: The EPR socket ID.
+        :type epr_socket_id: int
+        :param remote_epr_socket_id: The remote EPR socket ID.
+        :type remote_epr_socket_id: int
+        :param remote_node_id: The remote node ID.
+        :type remote_node_id: int
         """
         pair_id = (epr_socket_id, remote_node_id, remote_epr_socket_id)
         ent_id = cls._next_ent_id[pair_id]
@@ -630,14 +745,25 @@ class VanillaSimulaQronExecutioner(Executor):
     @inlineCallbacks
     def send_epr_half(
             self,
-            qubit_id,
-            epr_socket_id,
-            remote_node_name,
-            remote_epr_socket_id,
-            ent_info
+            qubit_id: int,
+            epr_socket_id: int,
+            remote_node_name: str,
+            remote_epr_socket_id: int,
+            ent_info: LinkLayerOKTypeK
     ):
         """
         Send qubit to another node.
+
+        :param qubit_id: The qubit ID.
+        :type qubit_id: int
+        :param epr_socket_id: The EPR socket ID.
+        :type epr_socket_id: int
+        :param remote_node_name: The remote node name.
+        :type remote_node_name: str
+        :param remote_epr_socket_id: The remote EPR socket ID.
+        :type remote_epr_socket_id: int
+        :param ent_info: The local entanglement information.
+        :type ent_info: LinkLayerOKTypeK
         """
         # Lookup the virtual qubit from identifier
         virt_num = yield self.get_virt_qubit_num(qubit_id=qubit_id)
@@ -676,17 +802,29 @@ class VanillaSimulaQronExecutioner(Executor):
     @inlineCallbacks
     def send_epr_outcome_half(
             self,
-            epr_socket_id,
-            remote_node_name,
-            remote_epr_socket_id,
-            ent_info,
+            epr_socket_id: int,
+            remote_node_name: str,
+            remote_epr_socket_id: int,
+            ent_info: LinkLayerOKTypeM,
             remote_outcome,
-            remote_basis
+            remote_basis: Basis
     ):
         """
         Send outcome from measure directly to another node.
-        """
 
+        :param epr_socket_id:The EPR socket ID.
+        :type epr_socket_id: int
+        :param remote_node_name: The remote node name.
+        :type remote_node_name: str
+        :param remote_epr_socket_id: The remote EPR socket ID.
+        :type remote_epr_socket_id: int
+        :param ent_info: The entanglement info objects.
+        :type ent_info: LinkLayerOKTypeM
+        :param remote_outcome: The outcome of the remote measurement.
+        :type remote_outcome:
+        :param remote_basis: The base on which the remote qubit was mesured.
+        :type remote_basis: Basis
+        """
         # Update raw entanglement information for remote node
         remote_ent_info = LinkLayerOKTypeM(
             type=ent_info.type,
@@ -738,9 +876,14 @@ class VanillaSimulaQronExecutioner(Executor):
         return ent_info.__class__(**dct)
 
     @inlineCallbacks
-    def cmd_epr_recv(self, epr_socket_id, qubit_id=None):
+    def cmd_epr_recv(self, epr_socket_id: int, qubit_id: int):
         """
         Receive half of epr from another node. Block until qubit is received.
+
+        :param epr_socket_id: The EPR socket ID.
+        :type epr_socket_id: int
+        :param qubit_id: The qubit ID.
+        :type qubit_id: int
         """
         self._logger.debug("Asking to receive for EPR socket ID %d", epr_socket_id)
 
@@ -791,7 +934,13 @@ class VanillaSimulaQronExecutioner(Executor):
 
         self._handle_epr_response(response=ent_info)
 
-    def remove_qubit_id(self, qubit_id):
+    def remove_qubit_id(self, qubit_id: int):
+        """
+        Removes the qubit ID from the NetQASMFactory object.
+
+        :param qubit_id: The qubit ID to remove.
+        :type qubit_id: int
+        """
         self._logger.debug("Removing physical qubit with ID %d from handles to simulated qubits",
                            qubit_id
                            )
@@ -826,6 +975,14 @@ class VanillaSimulaQronExecutioner(Executor):
     def get_qubit_state(
             self, qubit_id: int
     ) -> Generator[Deferred, Tuple[List[float], List[float]], Tuple[List[float], List[float]]]:
+        """
+        Retrieves the state of the given qubit ID as a real and imaginary part.
+
+        :param qubit_id: The qubit ID to retrieve the state.
+        :type qubit_id: int
+        :return: A tuple containing 2 lists of floats, representing the real and imaginary part.
+        :rtype: Generator[Deferred, Tuple[List[float], List[float]], Tuple[List[float], List[float]]]
+        """
         self._logger.debug("Retrieving the state of qubit id %d", qubit_id)
         virt_qubit = self.get_virt_qubit(qubit_id=qubit_id)
         real_part, im_part = yield call_method(virt_qubit, "get_density_matrix_RI")
@@ -834,6 +991,16 @@ class VanillaSimulaQronExecutioner(Executor):
 
 class VirtualQubitRef:
     def __init__(self, qubit_id: int, timestamp: int, virt: pb.Referenceable):
+        """
+        Reference to a Virtual Qubit.
+
+        :param qubit_id: The qubit ID to reference.
+        :type qubit_id: int
+        :param timestamp: A timestamp.
+        :type timestamp: int
+        :param virt: The Referenceable object pointing to the virtual qubit.
+        :type virt: pb.Referenceable
+        """
         self.qubit_id = qubit_id
         self.timestamp = timestamp
         self.virt = virt

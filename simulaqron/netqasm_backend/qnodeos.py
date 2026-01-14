@@ -19,6 +19,25 @@ from simulaqron.settings import simulaqron_settings
 class SubroutineHandler(QNodeController):
     def __init__(self, factory: "NetQASMFactory", instr_log_dir: Optional[str] = None,  # noqa: F821
                  flavour: Optional[Flavour] = None):
+        """
+        Class that handles the NetQASM messages and bridges the NetQASM with the SimulaQron world.
+
+        The main responsibility of this class is to "transform" the native python generators (used
+        by the NetQASM library) into twisted ``Deferred`` s.
+
+        Each time the QNodeOS Server (specifically, the NetQASMProtocol instance) receives and correctly
+        parses a NetQASM message (e.g. a subroutine), it will be delegated to this class for further
+        processing.
+
+        The main entry point that process the message is the :py:meth:`handle_netqasm_message` method.
+
+        :param factory: The :py:class:`NetQASMFactory` object.
+        :type factory: NetQASMFactory
+        :param instr_log_dir: Directory used to write log files to.
+        :type instr_log_dir: str | None
+        :param flavour: NetQASM flavour to use.
+        :type flavour: Flavour | None
+        """
         super().__init__(factory.name, instr_log_dir=instr_log_dir, flavour=flavour)
 
         self.factory = factory
@@ -41,10 +60,12 @@ class SubroutineHandler(QNodeController):
 
     @property
     def protocol(self) -> Protocol:
+        """Returns the :py:class:`NetQASMProtocol` object associated with this routine Handler."""
         return self._protocol
 
     @protocol.setter
     def protocol(self, protocol: Protocol):
+        """Sets the :py:class:`NetQASMProtocol` object associated with this routine Handler."""
         self._protocol = protocol
 
     @inlineCallbacks
@@ -53,15 +74,20 @@ class SubroutineHandler(QNodeController):
         Handle incoming NetQASM messages by bridging two async models.
     
         NetQASM's executor uses Python generators (yield from) while SimulaQron
-        uses Twisted deferreds (@inlineCallbacks). This method bridges them by:
+        uses Twisted deferred's (@inlineCallbacks). This method bridges them by:
         1. Running the parent's generator manually
         2. Detecting whether each yielded item is a Twisted Deferred or a nested generator
-        3. For Deferreds: yielding to Twisted's reactor to await completion
+        3. For Deferred's: yielding to Twisted's reactor to await completion
         4. For nested generators: consuming them fully and capturing their return value
     
         Without this bridge, nested generator return values (like physical_address
         from _instr_qalloc) would be lost, causing None to propagate through the system.
         This is also what caused the tests to fail, and probably other random weird things.
+
+        :param msg_id: The id of the message to process.
+        :type msg_id: int
+        :param msg: The message to process.
+        :type msg: Message
         """
         print(f"DEBUG handle_netqasm_message: msg_id={msg_id}", flush=True)
         gen = super().handle_netqasm_message(
@@ -127,10 +153,18 @@ class SubroutineHandler(QNodeController):
         self._return_msg(msg=ret_msg)
 
     def stop(self):
+        """
+        Stops this instance of the SubroutineHandler.
+        """
         self.factory.stop()
 
     def _return_msg(self, msg: Message):
-        """Return a message to the host"""
+        """
+        Returns (by sending it back to the application server) a message to the host
+
+        :param msg: The message to return.
+        :type msg: Message
+        """
         assert self._protocol is not None, "Seems protocol of handler has not yet been set"
         self._logger.debug("sending message %s to host", msg)
         self.protocol._return_msg(msg=bytes(msg))

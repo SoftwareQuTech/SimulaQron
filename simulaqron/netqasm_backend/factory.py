@@ -44,6 +44,9 @@ from simulaqron.virtual_node.virtual import call_method
 
 
 class IncompleteMessageError(ValueError):
+    """
+    Raised when trying to parse an incomplete NetQASM message.
+    """
     pass
 
 
@@ -56,7 +59,17 @@ class NetQASMProtocol(Protocol):
     _next_ent_id = {}
 
     def __init__(self, factory: "NetQASMFactory"):
+        """
+        Implementation of a ``twisted.internet.protocol.Protocol`` class that handles
+        the connection to a server capable of handling NetQASM messages.
 
+        This class is the entry point when a new NetQASM message is received. It is also
+        responsible for calling (in a "twisted deferred" way) the message handlers that
+        implement the logic of handling and executing the message.
+
+        :param factory: The :py:class:`NetQASMFactory` object that handles this object.
+        :type factory: NetQASMFactory
+        """
         # NetQASM Factory, including our connection to the SimulaQron backend
         self.factory = factory
 
@@ -85,16 +98,23 @@ class NetQASMProtocol(Protocol):
         self._logger.debug("Initialized Protocol")
 
     def connectionMade(self):
+        """
+        Implementation of the ``connectionMade`` method from the ``twisted.internet.protocol.Protocol`` class.
+        """
         self._logger.info("Connection made")
         pass
 
     def connectionLost(self, reason=connectionDone):
+        """
+        Implementation of the ``connectionLost`` method from the ``twisted.internet.protocol.Protocol`` class.
+        """
         self._logger.info(f"Connection lost: {reason}")
         self.factory._active_protocol = None
         self._cleanup_all()
 
     def _cleanup_all(self):
-        """Clean up all state - Note that we allow only ONE connection
+        """
+        Clean up all state - Note that we allow only ONE connection
         to one NetQASM node server at a time, making the below safe.
 
         If we were to ever decide to allow multiple, the below is too radical
@@ -131,10 +151,21 @@ class NetQASMProtocol(Protocol):
         
         self._logger.info("Cleanup complete")
 
-    def dataReceived(self, data):
+    def dataReceived(self, data: bytes):
         """
-        Receive data. We will always wait to receive enough data for the
+        We will always wait to receive enough data for the
         header, and then the entire packet first before commencing processing.
+
+        This method is the first entry point when the SimulaQron QNodeOS server
+        receives a NetQASM message. Once any data is received, it attaches it to
+        an internal buffer, and tries to parse a NetQASM message.
+        If a message cannot be parsed, the raw data will be stored and this method
+        will return, waiting form more data. It a message can be parsed, it will be
+        for further processing to the message handler (usually the
+        :py:class:´SubroutineHandler´ class).
+
+        :param data: The data received from the remote.
+        :type data: bytes
         """
         # Read whatever we received into a buffer
         if self.buf:
@@ -148,14 +179,14 @@ class NetQASMProtocol(Protocol):
             return
 
         d = self.messageHandler.handle_netqasm_message(msg_id=msg_id, msg=msg)
-        d.addCallback(self.log_handled_message)
-        d.addErrback(self.log_error)
+        d.addCallback(self._log_handled_message)
+        d.addErrback(self._log_error)
 
-    def log_handled_message(self, result):
+    def _log_handled_message(self, result):
         self._logger.info("Finished handling message with result = %s", result)
 
     @inlineCallbacks
-    def log_error(self, failure):
+    def _log_error(self, failure):
         self._logger.error("Handling message failed with failure = %s", failure.value)
         self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.GENERAL, err_msg=str(failure.value)))
         # self.transport.abortConnection()
@@ -163,6 +194,10 @@ class NetQASMProtocol(Protocol):
         yield deferLater(reactor, 0.1, self.stop)
 
     def stop(self):
+        """
+        Stops this NetQASM protocol object. No further messages will be handled
+        after invoking this method.
+        """
         self.factory.stop()
 
     def _parse_message(self):
@@ -217,9 +252,22 @@ class NetQASMFactory(Factory):
             network_name: str = "default"
     ):
         """
-        Initialize NetQASM Factory.
+        Factory class that creates :py:class:`NetQASMProtocol` objects. This factory
+        will create one protocol instance per connection.
 
-        lhost	details of the local host (class host)
+        This factory is handled by the internals of the twisted reactor, and should not be
+        instantiated by the user.
+
+        :param host: The hostname to listen to new connections.
+        :type host: str
+        :param name: A name for this protocol factory.
+        :type name: str
+        :param qnodeos_net: The :py:class:`SocketsConfig` object containing the *QNodeOS* sockets specifications.
+        :type qnodeos_net: SocketsConfig
+        :param backend: The class of QNodeOS subroutine handlers that the protocol will forward messages to.
+        :type backend: Type[SubroutineHandler]
+        :param network_name: The name of the network to handle messages from.
+        :type network_name: str
         """
 
         self.host = host
@@ -249,6 +297,10 @@ class NetQASMFactory(Factory):
         self._active_protocol = None
 
     def stop(self):
+        """
+        Stops this instance of the factory. No more protocol objects will be created
+        after invoking this method.
+        """
         yield call_method(self.virtRoot, "stop_vnode")
         reactor.stop()
 
@@ -263,13 +315,18 @@ class NetQASMFactory(Factory):
     def set_virtual_node(self, virtRoot):
         """
         Set the virtual root allowing connections to the SimulaQron backend.
+
+        :param virtRoot: The virtual root object.
         """
         self.virtRoot = virtRoot
 
-    def lookup(self, ip, port):
+    def lookup(self, ip: int, port: int) -> str | None:
         """
-        Lookup name of remote host used within SimulaQron given ip and
-        portnumber.
+        Lookup name of remote host used within SimulaQron given ip and port number.
+        :param ip: The IP address to look for. This value needs to be transformed into an integer value.
+        :param port: The port to look for.
+        :return: The name of the node that matches the IP-port pair. None if none matches.
+        :rtype: str | None
         """
         for entry in self.qnodeos_net.hostDict:
             node = self.qnodeos_net.hostDict[entry]
@@ -279,14 +336,13 @@ class NetQASMFactory(Factory):
         self._logger.debug("No such node")
         return None
 
-    def is_adjacent(self, remote_host_name):
+    def is_adjacent(self, remote_host_name: str):
         """
         Checks if remote host is adjacent to this node, according to the
         specified topology.
 
-        :param remote_host_name: str
-            The name of the remote host
-        :return:
+        :param remote_host_name: The name of the remote host
+        :type remote_host_name: str
         """
         # Check if a topology is defined, otherwise use fully connected
         if self.topology is None:
