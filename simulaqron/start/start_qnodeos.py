@@ -21,16 +21,16 @@ _RETRY_TIME = 0.1
 _TIMEOUT = 10
 
 
-def init_register(virt_root, my_name: str, node: NetQASMFactory):
+def _init_register(virt_root, my_name: str, node: NetQASMFactory):
     """Retrieves the relevant root objects to talk to such remote connections"""
     logger.debug("START_QNODEOS %s: Connection to local virtual node successful", my_name)
     # Set the virtual node
     node.set_virtual_node(virt_root)
     # Start listening to NetQASM messages
-    setup_netqasm_server(my_name, node)
+    _setup_netqasm_server(my_name, node)
 
 
-def connect_to_virt_node(my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig):
+def _connect_to_virt_node(my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig):
     """Tries to connect to local virtual node.
 
     If connection is refused, we try again after a set amount of time
@@ -46,14 +46,14 @@ def connect_to_virt_node(my_name: str, netqasm_factory: NetQASMFactory, virtual_
     reactor.connectTCP(virtual_node.hostname, virtual_node.port, factory)
     defer_virtual_node = factory.getRootObject()
     # If connection succeeds do:
-    defer_virtual_node.addCallback(init_register, my_name, netqasm_factory)
+    defer_virtual_node.addCallback(_init_register, my_name, netqasm_factory)
     # If connection fails do:
-    defer_virtual_node.addErrback(handle_connection_error, my_name, netqasm_factory, virtual_network,
+    defer_virtual_node.addErrback(_handle_connection_error, my_name, netqasm_factory, virtual_network,
                                   virtual_node.hostname, virtual_node.port)
 
 
-def handle_connection_error(reason, my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig,
-                            virtual_node_hostname: str, virtual_node_port: int):
+def _handle_connection_error(reason, my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig,
+                             virtual_node_hostname: str, virtual_node_port: int):
     """ Handles errors from trying to connect to local virtual node.
 
     If a ConnectionRefusedError is raised another try will be made after
@@ -67,7 +67,7 @@ def handle_connection_error(reason, my_name: str, netqasm_factory: NetQASMFactor
                      virtual_node_hostname, virtual_node_port, exc_info=err)
         reactor.callLater(
             simulaqron_settings.conn_retry_time,
-            connect_to_virt_node,
+            _connect_to_virt_node,
             my_name,
             netqasm_factory,
             virtual_network,
@@ -81,7 +81,7 @@ def handle_connection_error(reason, my_name: str, netqasm_factory: NetQASMFactor
         reactor.stop()
 
 
-def setup_netqasm_server(my_name: str, netqasm_factory: NetQASMFactory):
+def _setup_netqasm_server(my_name: str, netqasm_factory: NetQASMFactory):
     """Setup NetQASM server to handle remote on the classical communication network."""
     t_start = timer()
     while timer() - t_start < _TIMEOUT:
@@ -113,7 +113,7 @@ def setup_netqasm_server(my_name: str, netqasm_factory: NetQASMFactory):
 stdout_file = None
 
 
-def sigterm_handler(_signo, _stack_frame):
+def _sigterm_handler(_signo, _stack_frame):
     global stdout_file
     if stdout_file is not None:
         stdout_file.flush()
@@ -126,8 +126,8 @@ def start_qnodeos(node_name: str, network_config_file: Path, network_name: str =
     Start the QNPU that accepts NetQASM subroutines, and sends them as instructions to the SimulaQron virtual node
     backend over twisted PB (Native Mode SimulaQron).
     
-    :param name: Name of the node (e.g., 'Alice').
-    :type name: str
+    :param node_name: Name of the node (e.g., 'Alice').
+    :type node_name: str
     :param network_config_file: Path to network config file.
     :type network_config_file: Path
     :param network_name: Name of the network (e.g., 'default').
@@ -155,8 +155,8 @@ def start_qnodeos(node_name: str, network_config_file: Path, network_name: str =
 
     """Start the indicated backend NetQASM Server"""
     logger.debug("START_QNODEOS: Starting QNodeOS at %s", node_name)
-    signal.signal(signal.SIGTERM, sigterm_handler)
-    signal.signal(signal.SIGINT, sigterm_handler)
+    signal.signal(signal.SIGTERM, _sigterm_handler)
+    signal.signal(signal.SIGINT, _sigterm_handler)
 
     # Read configuration files for the virtual quantum, as well as the classical network
     virtual_network = SocketsConfig(network_config, network_name=network_name, config_type="vnode")
@@ -179,7 +179,7 @@ def start_qnodeos(node_name: str, network_config_file: Path, network_name: str =
 
     # Connect to the local virtual node simulating the "local" qubits
     logger.debug(f"START_QNODEOS: Connect to virtual node {node_name}")
-    connect_to_virt_node(node_name, netqasm_factory, virtual_network)
+    _connect_to_virt_node(node_name, netqasm_factory, virtual_network)
 
     # Run reactor
     reactor.run()

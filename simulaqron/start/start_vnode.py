@@ -44,8 +44,8 @@ logger = logging.getLogger("start_vnode")
 stdout_file = None
 
 
-def sigterm_handler(name, _signo, _stack_frame):
-    print("START_VNODE: Shutting down Node from signal %d." % _signo, flush=True)
+def _sigterm_handler(name, _signo, _stack_frame):
+    print(f"START_VNODE: Shutting down Node '{name}' from signal {_signo}.", flush=True)
     global stdout_file
     if stdout_file is not None:
         stdout_file.flush()
@@ -54,7 +54,8 @@ def sigterm_handler(name, _signo, _stack_frame):
 
 
 def start_vnode(name: str, network_config_file: Path, network_name: str = "default", log_level: str = "WARNING"):
-    """ Start the execution of a virtual simulaqron node. This node will simulate all quantum aspects 
+    """
+    Start the execution of a virtual simulaqron node. This node will simulate all quantum aspects
     of the node, and is then reachable via Twisted PB (Simulaqron Native Mode) or - when also starting QNPU - 
     the QNPU Server which translates NetQASM to native mode. 
 
@@ -87,8 +88,8 @@ def start_vnode(name: str, network_config_file: Path, network_name: str = "defau
     )
     
     # Set up the handlers: those define what we will do when the process is terminated (by killing it)
-    signal.signal(signal.SIGTERM, partial(sigterm_handler, name))
-    signal.signal(signal.SIGINT, partial(sigterm_handler, name))
+    signal.signal(signal.SIGTERM, partial(_sigterm_handler, name))
+    signal.signal(signal.SIGINT, partial(_sigterm_handler, name))
 
     # Let's now test logging works by printing a message we are starting
     logger.debug("START_VNODE: Starting VIRTUAL NODE %s", name)

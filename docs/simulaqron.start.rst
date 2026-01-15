@@ -1,19 +1,24 @@
 simulaqron.start package
-======================
-
-.. warning:: UPDATE THIS STRUCTURE!
+========================
 
 Submodules
 ----------
 
-simulaqron.run.run module
--------------------------
+simulaqron.start.start_qnodeos module
+-------------------------------------
 
-.. automodule:: simulaqron.run.run
+.. automodule:: simulaqron.start.start_qnodeos
     :members:
     :undoc-members:
     :show-inheritance:
 
+simulaqron.start.start_vnode module
+-----------------------------------
+
+.. automodule:: simulaqron.start.start_vnode
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 Module contents
 ---------------
