@@ -29,7 +29,7 @@
 import importlib
 import random
 from collections import deque
-from typing import Tuple, List
+from typing import Tuple, List, Any
 
 import logging
 from twisted.internet.defer import inlineCallbacks, DeferredLock, Deferred, DeferredList
@@ -37,7 +37,7 @@ from twisted.internet.error import ConnectionRefusedError, CannotListenError
 from twisted.internet.task import deferLater
 from twisted.spread import pb
 from twisted.spread.pb import RemoteError, RemoteReference
-from typing_extensions import Generator
+from typing_extensions import Generator, Self
 
 from simulaqron.virtual_node.basics import QuantumError, NoQubitError, VirtNetError
 from simulaqron.virtual_node.quantum import SimulatedQubit
@@ -53,8 +53,9 @@ from simulaqron.reactor import reactor
 def reraise_remote_error(remote_err: RemoteError):
     """
     This is a function re-raises the error thrown remotely
+
     :param remote_err: :obj:`twisted.spread.pb.RemoteError`
-    :return: class
+    :raises: A python class that was encoded in the Error
     """
     # Get names of remote package and remote error class
     error_pkg_name = [pkg.decode() for pkg in remote_err.remoteType.split(b".")[:-1]]
@@ -69,7 +70,18 @@ def reraise_remote_error(remote_err: RemoteError):
 
 @inlineCallbacks
 def call_method(obj, method_name, *args, **kwargs):
-    """Convenience method to call a method on an object, or a remote reference to an object"""
+    """
+    Convenience method to call a method on an object, or a remote reference to an object
+
+    :param obj: Object to call the method on.
+    :type obj: Any
+    :param method_name: Name of the method to call.
+    :type method_name: str
+    :param args: Positional arguments to pass to the method.
+    :type args: Any
+    :param kwargs: Keyword arguments to pass to the method.
+    :type kwargs: Any
+    """
     if isinstance(obj, RemoteReference):
         try:
             output = yield obj.callRemote(method_name, *args, **kwargs)
@@ -92,8 +104,14 @@ def call_method(obj, method_name, *args, **kwargs):
 class Backend:
     def __init__(self, name: str, network_name: str = "default"):
         """
-        Initialize. This will read the networks configuration and populate the name,hostname,port information with the
-        information found in the configuration file for the given name.
+        Create the Virtual Node backend. This will read the networks configuration and
+        populate the name,hostname,port information with the information found in the
+        configuration file for the given name.
+
+        :param name: Node name to start.
+        :type name: str
+        :network_name: Name of the network to start.
+        :type network_name: str
         """
         self._logger = logging.getLogger(f"{self.__class__.__name__}({name})")
 
@@ -109,8 +127,10 @@ class Backend:
         """
         Start listening to requests from other nodes.
 
-        Arguments
-        maxQubits	maximum qubits in the default register
+        :param max_qubits: Maximum qubits in the default register.
+        :type max_qubits: int
+        :param max_registers: Maximum number of registers in the default register.
+        :type max_registers: int
         """
 
         try:
@@ -142,10 +162,11 @@ class VirtualNode(pb.Root):
         """
         Initialize storing also our own name, hostname and port.
 
-        Arguments:
-        ID		host identifier of this node
-        maxQubits	maximum number of qubits to use in the default engine (default 10)
-        maxRegister	maximum number of registers
+        :param ID: Host identifier of this node
+        :param maxQubits: Maximum number of qubits to use in the default engine (default 10)
+        :type maxQubits: int
+        :param maxRegisters: Maximum number of registers
+        :type maxRegisters: int
         """
         self._logger = logging.getLogger(f"{self.__class__.__name__}({ID.name})")
 
@@ -196,8 +217,8 @@ class VirtualNode(pb.Root):
 
     def connectNet(self):
         """
-        Initialize the connections to the other virtual nodes in the network according to the available
-        configuration.
+        Initialize the connections to the other virtual nodes in the network according
+        to the available configuration.
         """
 
         for key in self.config.hostDict:
@@ -209,9 +230,9 @@ class VirtualNode(pb.Root):
 
     def remote_check_connections(self):
         """
-        Checks if all connections are up. (Just checks if the number of
-        connections equal the number of nodes in config-file)
+        Checks if all connections are up.
         """
+        # Just checks if the number of connections equal the number of nodes in config-file
         return len(self.conn) == len(self.config.hostDict)
 
     @inlineCallbacks
@@ -219,6 +240,9 @@ class VirtualNode(pb.Root):
         """
         Returns the connection specified by 'name'. If no such connection is
         up yet but name is in the configuration file, wait and try again.
+
+        :param name: The name of the node connection to retrieve.
+        :type name: str
         """
         if name in self.conn:
             return self.conn[name]
@@ -232,9 +256,13 @@ class VirtualNode(pb.Root):
             )
             return conn_to_return
 
-    def connect_to_node(self, node):
+    def connect_to_node(self, node: Host):
         """
-        Connects to other node. If node not up yet, waits for CONF_WAIT_TIME seconds.
+        Connects to other node. If node not up yet, waits for ``conn_retry_time`` seconds
+        as configured in the ``simulaqron_settings.json`` file.
+
+        :param node: The node to connect to.
+        :type node: Host
         """
         self._logger.debug("Trying to connect to node %s.", node.name)
         node.factory = pb.PBClientFactory()
@@ -243,9 +271,13 @@ class VirtualNode(pb.Root):
         defer.addCallback(self.handle_connection, node)
         defer.addErrback(self.handle_connection_error, node)
 
-    def handle_connection(self, obj, node):
+    def handle_connection(self, obj, node: Host):
         """
         Callback obtaining twisted root object when connection to the node given by the node details 'node'.
+
+        :param obj: Twisted root object.
+        :param node: The node that was connected to.
+        :type node: Host
         """
         self._logger.debug("New connection to %s.", node.name)
         # Retrieve the root object: virtualNode on the remote
@@ -257,8 +289,8 @@ class VirtualNode(pb.Root):
     def handle_connection_error(self, reason, node):
         """
         Handles errors from trying to connect to other node.
-        If a ConnectionRefusedError is raised another try will be made after CONF_WAIT_TIME seconds.
-        CONF_WAIT_TIME is set in 'settings.py'.
+        If a ConnectionRefusedError is raised another try will be made after `conn_retry_time`` seconds
+        as configured in the ``simulaqron_settings.json`` file.
         Any other error is raised again.
         """
 
@@ -272,7 +304,7 @@ class VirtualNode(pb.Root):
             self._logger.exception(e)
             reactor.stop()
 
-    def get_virtual_id(self):
+    def _get_virtual_id(self):
         """
         This is a crude and horrible cludge to generate unique IDs for virtual qubits.
         """
@@ -287,7 +319,7 @@ class VirtualNode(pb.Root):
             if used == 0:
                 return j
 
-    def get_sim_id(self):
+    def _get_sim_id(self):
         """
         Similarly, this is a crude and horrible cludge to generate unique IDs for simulated qubits.
         """
@@ -343,16 +375,18 @@ class VirtualNode(pb.Root):
     @inlineCallbacks
     def _lock_reg_qubits(self, qubit):
         """
-        Acquire the lock on all qubits in the same register as the local sim qubit qubit.
+        Acquire the lock on all qubits in the same register as the local sim qubit.
         """
         for q in self.simQubits:
             if q.register == qubit.register:
                 yield q.lock()
 
     @inlineCallbacks
-    def remote_lock_reg_qubits(self, qubitNum):
+    def remote_lock_reg_qubits(self, qubitNum: int):
         """
         Acquire the lock on all qubits in the same register as qubitNum.
+
+        :param qubitNum: The qubit number to lock.
         """
         yield self._lock_reg_qubits(self._q_num_to_obj(qubitNum))
 
@@ -366,18 +400,20 @@ class VirtualNode(pb.Root):
                 yield q.unlock()
 
     @inlineCallbacks
-    def remote_unlock_reg_qubits(self, qubitNum):
+    def remote_unlock_reg_qubits(self, qubitNum: int):
         """
         Release the lock on all qubits in the same register as qubitNum.
+
+        :param qubitNum: The qubit number on which to lock all qubits.
         """
         yield self._unlock_reg_qubits(self._q_num_to_obj(qubitNum))
 
-    def remote_add_register(self, maxQubits=10):
+    def remote_add_register(self, maxQubits: int = 10):
         """
-        Adds a new register to the node..
+        Adds a new register to the node.
 
-        Arguments:
-        maxQubits	maximum number of qubits to use in the default engine
+        :param maxQubits: Maximum number of qubits to use in the default engine
+        :type maxQubits: int
         """
         # TODO We have two methods that do the same thing, should deprecate one of them
         return self.remote_new_register(maxQubits=maxQubits)
@@ -390,13 +426,13 @@ class VirtualNode(pb.Root):
         self._next_reg_num += 1
         return reg_num
 
-    def remote_new_register(self, maxQubits=10):
+    def remote_new_register(self, maxQubits: int = 10):
         """
         Initialize a local register. Right now, this simple creates a register according to the simple engine backend
         using qubit.
 
-        Arguments:
-        maxQubits	maximum number of qubits to use in the default engine (default 10)
+        :param maxQubits: Maximum number of qubits to use in the default engine (default 10)
+        :type maxQubits: int
         """
 
         # Make sure that reg numbers are assigned correctly
@@ -438,13 +474,14 @@ class VirtualNode(pb.Root):
         self.numRegs -= 1
 
     @inlineCallbacks
-    def remote_new_qubit(self, ignore_max_qubits=False):
+    def remote_new_qubit(self, ignore_max_qubits: bool = False):
         """
         Create a new qubit in the default local register.
 
-        :param ignore_max_qubits: bool
-            Used to ignore the check if max virtual qubits is reached. This is used when creating EPR pairs
-            to be able to temporarily create a qubit.
+        :param ignore_max_qubits: Used to ignore the check if max virtual qubits is reached.
+                                  This is used when creating EPR pairs to be able to temporarily
+                                  create a qubit.
+        :type ignore_max_qubits: bool
         """
         self._logger.debug("Request to create new qubit.")
 
@@ -458,7 +495,7 @@ class VirtualNode(pb.Root):
                 raise NoQubitError("Max virtual qubits reached")
             else:
                 # Qubit in the simulation backend, initialized to |0>
-                simNum = self.get_sim_id()
+                simNum = self._get_sim_id()
 
                 # Create a new register
                 newReg = self.remote_add_register()
@@ -469,7 +506,7 @@ class VirtualNode(pb.Root):
                 self.simQubits.append(simQubit)
 
                 # Virtual qubit
-                newNum = self.get_virtual_id()
+                newNum = self._get_virtual_id()
                 newQubit = VirtualQubit(self.myID, self.myID, simQubit, newNum)
                 self.virtQubits.append(newQubit)
         finally:
@@ -496,13 +533,13 @@ class VirtualNode(pb.Root):
                 raise NoQubitError("Max virtual qubits reached")
             else:
                 # Qubit in the local simulation backend, initialized to |0>
-                simNum = self.get_sim_id()
+                simNum = self._get_sim_id()
                 simQubit = SimulatedQubit(self.myID, reg, simNum)
                 simQubit.make_fresh()
                 self.simQubits.append(simQubit)
 
                 # Virtual qubit
-                newNum = self.get_virtual_id()
+                newNum = self._get_virtual_id()
                 newQubit = VirtualQubit(self.myID, self.myID, simQubit, newNum)
                 self.virtQubits.append(newQubit)
         finally:
@@ -511,15 +548,18 @@ class VirtualNode(pb.Root):
         return newQubit
 
     @inlineCallbacks
-    def remote_netqasm_send_qubit(self, num, targetName, app_id, remote_app_id):
+    def remote_netqasm_send_qubit(self, num: int, targetName: str, app_id: int, remote_app_id: int):
         """
         Send interface for NetQASM to add the qubit to the remote nodes received list for an application.
 
-        Arguments:
-        num		number of virtual qubit to send
-        targetName	name of the node to send to
-        app_id		application asking to have this qubit delivered
-        remote_app_id	application ID to deliver the qubit to
+        :param num: Number of virtual qubit to send
+        :type num: int
+        :param targetName: Name of the node to send to
+        :type targetName: str
+        :param app_id: Application asking to have this qubit delivered
+        :type app_id: int
+        :param remote_app_id: Application ID to deliver the qubit to
+        :type remote_app_id: int
         """
         self._logger.debug("request to send qubit %d to %s", num, targetName)
 
@@ -547,9 +587,18 @@ class VirtualNode(pb.Root):
         except RemoteError as remote_err:
             reraise_remote_error(remote_err)
 
-    def remote_netqasm_add_recv_list(self, fromName, from_epr_socket_id, to_epr_socket_id, new_virt_num=None):
+    def remote_netqasm_add_recv_list(self, fromName, from_epr_socket_id: int, to_epr_socket_id: int, new_virt_num=None):
         """
         Add an item to the received list for use in NetQASM.
+
+        :param fromName: Name of the node to receive the qubit.
+        :type fromName: str
+        :param from_epr_socket_id: EPR socket ID
+        :type from_epr_socket_id: int
+        :param to_epr_socket_id: EPR socket ID
+        :type to_epr_socket_id: int
+        :param new_virt_num: New virtual qubit number
+        :type new_virt_num: int
         """
 
         if not (to_epr_socket_id in self.qubit_recv):
@@ -569,6 +618,9 @@ class VirtualNode(pb.Root):
     def remote_netqasm_get_recv(self, to_epr_socket_id):
         """
         Retrieve the next qubit with the given app ID form the received list.
+
+        :param to_epr_socket_id: EPR socket ID
+        :type to_epr_socket_id: int
         """
 
         self._logger.debug("Trying to retrieve qubit on EPR socket ID %d from recv list", to_epr_socket_id)
@@ -589,16 +641,19 @@ class VirtualNode(pb.Root):
         return self.remote_get_virtual_ref(qc.virt_num)
 
     @inlineCallbacks
-    def remote_netqasm_send_epr_half(self, num, targetName, app_id, remote_app_id, rawEntInfo):
+    def remote_netqasm_send_epr_half(self, num: int, targetName: str, app_id: int, remote_app_id: int, rawEntInfo):
         """
         Send interface for NetQASM to add the qubit to the remote nodes received list for an application.
 
-        Arguments:
-        num		number of virtual qubit to send
-        targetName	name of the node to send to
-        app_id		application asking to have this qubit delivered
-        remote_app_id	application ID to deliver the qubit to
-        entInfo		entanglement information
+        :param num: Number of virtual qubit to send
+        :type num: int
+        :param targetName: Name of the node to send to
+        :type targetName: str
+        :param app_id: Application asking to have this qubit delivered
+        :type app_id: int
+        :param remote_app_id: Application ID to deliver the qubit to
+        :type remote_app_id: int
+        :param rawEntInfo: Entanglement information
         """
         if num is None:
             # Only an outcome from measure directly so no qubit
@@ -632,6 +687,16 @@ class VirtualNode(pb.Root):
     def remote_netqasm_add_epr_list(self, fromName, from_epr_socket_id, to_epr_socket_id, new_virt_num, rawEntInfo):
         """
         Add an item to the epr list for use in NetQASM.
+
+        :param fromName: Name of the node to receive the qubit.
+        :type fromName: str
+        :param from_epr_socket_id: EPR socket ID
+        :type from_epr_socket_id: int
+        :param to_epr_socket_id: EPR socket ID
+        :type to_epr_socket_id: int
+        :param new_virt_num: New virtual qubit number
+        :type new_virt_num: int
+        :param rawEntInfo: Entanglement information
         """
 
         if not (to_epr_socket_id in self.qubit_recv_epr):
@@ -650,9 +715,12 @@ class VirtualNode(pb.Root):
         )
         self._logger.debug("Added a qubit on EPR socket ID %d to epr list", to_epr_socket_id)
 
-    def remote_netqasm_get_epr_recv(self, to_epr_socket_id):
+    def remote_netqasm_get_epr_recv(self, to_epr_socket_id: int):
         """
         Retrieve the next qubit (half of an EPR-pair) with the given app ID from the received list.
+
+        :param to_epr_socket_id: EPR socket ID
+        :type to_epr_socket_id: int
         """
         self._logger.debug("Trying to retrieve qubit on EPR socket ID %d from epr list", to_epr_socket_id)
         # Get the list corresponding to the specified application ID
@@ -675,14 +743,15 @@ class VirtualNode(pb.Root):
         return self.remote_get_virtual_ref(qc.virt_num), qc.rawEntInfo
 
     @inlineCallbacks
-    def remote_send_qubit(self, qubit, targetName):
+    def remote_send_qubit(self, qubit: int, targetName: Host):
         """
         Sends the qubit to the specified target node. This creates a new virtual qubit object at the remote node
         with the right qubit and backend details.
 
-        Arguments
-        qubit		virtual qubit to be sent
-        targetName	target ndoe to place qubit at (host object)
+        :param qubit: Virtual qubit to be sent
+        :type qubit: int
+        :param targetName: Target node to place qubit at.
+        :type targetName: Host
         """
         self._logger.debug("Request to send qubit sim Num %d to %s.", qubit.num, targetName)
         if qubit.active != 1:
@@ -741,15 +810,16 @@ class VirtualNode(pb.Root):
         return newNum
 
     @inlineCallbacks
-    def remote_transfer_qubit(self, simQubitNum, targetName):
+    def remote_transfer_qubit(self, simQubitNum: int, targetName: Host):
         """
         Transfer the qubit to the destination node if we are the simulating node. The reason why we cannot
         do this directly is that Twisted PB does not allow objects to be passed between connecting nodes.
         Only between the creator of the object and its immediate connections.
 
-        Arguments
-        simQubitNum	simulated qubit number to be sent
-        targetName	target node to place qubit at (host object)
+        :param simQubitNum: Simulated qubit number to be sent
+        :type simQubitNum: int
+        :param targetName: Target node to place qubit at (host object)
+        :type targetName: Host
         """
         self._logger.debug("Request to transfer qubit to %s.", targetName)
 
@@ -775,13 +845,14 @@ class VirtualNode(pb.Root):
         return newNum
 
     @inlineCallbacks
-    def remote_add_qubit(self, name, simQubit):
+    def remote_add_qubit(self, name: str, simQubit: SimulatedQubit):
         """
         Add a qubit to the local virtual node.
 
-        Arguments
-        name		name of the node simulating this qubit
-        simQubit 	simulated qubit reference in the backend we're adding
+        :param name: Name of the node simulating this qubit
+        :type name: str
+        :param simQubit: Simulated qubit reference in the backend we're adding
+        :type simQubit: SimulatedQubit
         """
 
         self._logger.debug("Request to add qubit from %s.", name)
@@ -801,7 +872,7 @@ class VirtualNode(pb.Root):
                 raise NoQubitError("Max virtual qubits reached")
 
             # Generate a new virtual qubit object for the qubit now at this node
-            newNum = self.get_virtual_id()
+            newNum = self._get_virtual_id()
             newQubit = VirtualQubit(self.myID, nb, simQubit, newNum)
 
             # Add to local list
@@ -811,12 +882,12 @@ class VirtualNode(pb.Root):
 
         return newNum
 
-    def remote_get_virtual_ref(self, num):
+    def remote_get_virtual_ref(self, num: int):
         """
-        Return a virual qubit object for the given number.
+        Return a virtual qubit object for the given number.
 
-        Arguments
-        num		number of the virtual qubit
+        :param num: Number of the virtual qubit
+        :type num: int
         """
 
         for q in self.virtQubits:
@@ -826,24 +897,24 @@ class VirtualNode(pb.Root):
         return None
 
     @inlineCallbacks
-    def remote_remove_sim_qubit_num(self, delNum):
+    def remote_remove_sim_qubit_num(self, delNum: int):
         """
-        Removes the simulated qubit delQubit from the node and also from the underlying engine. Relies on this qubit
-        having been locked.
+        Removes the simulated qubit delQubit from the node and also from the underlying engine.
+        Relies on this qubit having been locked.
 
-        Arguments
-        delNum		simID of the simulated qubit to delete
+        :param delNum: simID of the simulated qubit to delete
+        :type delNum: int
         """
 
         yield self._remove_sim_qubit(self._q_num_to_obj(delNum))
 
     @inlineCallbacks
-    def _remove_sim_qubit(self, delQubit):
+    def _remove_sim_qubit(self, delQubit: SimulatedQubit):
         """
         Removes the simulated qubit object.
 
-        Arguments
-        delQubit	simulated qubit object to delete
+        :param delQubit: Simulated qubit object to delete.
+        :type delQubit: SimulatedQubit
         """
         # Caution: Only qubits simulated at this node can be removed
         if delQubit not in self.simQubits:
@@ -892,14 +963,13 @@ class VirtualNode(pb.Root):
                 if q.register == delRegister:
                     q.unlock()
 
-    def remote_merge_regs(self, num1, num2):
+    def remote_merge_regs(self, num1: int, num2: int):
         """
         Merges the two local quantum registers. Note that these register may simulate virtual qubits across different
         network nodes. This will ignore maxQubits and simply create one large register allowing twice maxQubits qubits.
 
-        Arguments
-        num1 		number of the first qubit
-        num2		number of the second qubit
+        :param num1: Number of the first qubit
+        :param num2: Number of the second qubit
         """
 
         # Lookup the qubit objects corresponding to these numbers
@@ -911,14 +981,15 @@ class VirtualNode(pb.Root):
 
         self.local_merge_regs(q1, q2)
 
-    def local_merge_regs(self, qubit1, qubit2):
+    def local_merge_regs(self, qubit1: SimulatedQubit, qubit2):
         """
         Merges the two local quantum registers. Note that these register may simulate virtual qubits across different
         network nodes. This will ignore maxQubits and simply create one large register allowing twice maxQubits qubits.
 
-        Arguments
-        qubit1		qubit1 in reg1, called from remote having access to only qubits
-        qubit2		qubit2 in reg2
+        :param qubit1: qubit1 in reg1, called from remote having access to only qubits
+        :type qubit1: SimulatedQubit
+        :param qubit2: qubit2 in reg2
+        :type qubit2: SimulatedQubit
         """
         self._logger.debug(
             "Request to merge local register for qubits simNum %d and simNum %d.", qubit1.simNum, qubit2.simNum
@@ -960,14 +1031,15 @@ class VirtualNode(pb.Root):
         self.remote_delete_register(reg2)
 
     @inlineCallbacks
-    def remote_merge_from(self, simNodeName, simQubitNum, localReg):
+    def remote_merge_from(self, simNodeName: str, simQubitNum: int, localReg):
         """
         Bring a remote register to this node.
 
-        Arguments
-        simNodeName	name of the node who simulates right now
-        simQubitNum	simulation number of qubit whose register we will merge
-        localReg	local register to merge with
+        :param simNodeName: Name of the node who simulates right now
+        :type simNodeName: str
+        :param simQubitNum: Simulation number of qubit whose register we will merge
+        :type simQubitNum: int
+        :param localReg: Local register to merge with
         """
 
         self._logger.debug("Merging from %s", simNodeName)
@@ -1002,7 +1074,7 @@ class VirtualNode(pb.Root):
 
         # Make new qubit objects
         for k in range(activeQ):
-            simNum = self.get_sim_id()
+            simNum = self._get_sim_id()
             newQubit = SimulatedQubit(self.myID, localReg, simNum, offset + k)
             # Lock the qubit directly until merge is finished
             yield newQubit.lock()
@@ -1028,16 +1100,18 @@ class VirtualNode(pb.Root):
         return newD[oldQubitNum]
 
     @inlineCallbacks
-    def remote_update_virtual_merge(self, newSimNodeName, oldSimNodeName, oldRegNum, newD):
+    def remote_update_virtual_merge(self, newSimNodeName: str, oldSimNodeName: str, oldRegNum: int, newD):
         """
         Update the virtual qubits to the new simulating node, if applicable. This is extremely
         inefficient due to not keeping register information in virtualQubit.
 
-        Arguments
-        newSimNodeName	new node simulating this qubit
-        oldSimNodeName	old node simulating the qubit
-        oldReg		old register
-        newD		dictionary mapping qubit numbers to qubit objects at the new simulating node
+        :param newSimNodeName: New node simulating this qubit
+        :type newSimNodeName: str
+        :param oldSimNodeName: Old node simulating the qubit
+        :type oldSimNodeName: str
+        :param oldRegNum: Old register number
+        :type oldRegNum: int
+        :param newD: Dictionary mapping qubit numbers to qubit objects at the new simulating node.
         """
 
         self._logger.debug("Request to update local virtual qubits.")
@@ -1088,6 +1162,8 @@ class VirtualNode(pb.Root):
         """
         Return the real and imaginary part of the (possibly remote) simulated register which
         contains this virtual qubit.
+
+        :param qubit: Qubit object to get the register from.
         """
         if isinstance(qubit, VirtualQubit):
             realM, imagM = yield qubit.remote_get_register_RI()
@@ -1098,6 +1174,8 @@ class VirtualNode(pb.Root):
     def remote_get_register(self, qubit):
         """
         Return the value of a locally simulated register which contains this virtual qubit.
+
+        :param qubit: Qubit object to get the register from.
         """
 
         (realM, imagM) = qubit.simQubit.register.get_register_RI()
@@ -1107,11 +1185,14 @@ class VirtualNode(pb.Root):
 
         return (realM, imagM, activeQ, oldRegNum, oldQubitNum)
 
-    def remote_get_register_del(self, qubitNum):
+    def remote_get_register_del(self, qubitNum: int):
         """
         Return the value of a locally simulated register, and remove the simulated qubits from this node.
 
-        Caution: virtual qubits not updated.
+        .. caution:: virtual qubits not updated.
+
+        :param qubitNum: Qubit number to get the register from and remove.
+        :type qubitNum: int
         """
 
         assert self._lock.locked, "Virtual node is not locked"
@@ -1145,13 +1226,13 @@ class VirtualNode(pb.Root):
         return (realM, imagM, activeQ, oldRegNum, oldQubitNum)
 
     @inlineCallbacks
-    def remote_get_multiple_qubits(self, qList):
+    def remote_get_multiple_qubits(self, qList: List[SimulatedQubit]):
         """
         Return the state of multiple qubits virtually located at this node. This will fail if the qubits
         are not in the same register or thus also simulating node.
 
-        Arguments
-        qList		list of virtual qubits of which to retrieve the state
+        :param qList: List of virtual qubits of which to retrieve the state
+        :type qList: List[SimulatedQubit]
         """
 
         localSim = False
@@ -1192,9 +1273,12 @@ class VirtualNode(pb.Root):
 
         return (R, I)
 
-    def remote_get_state(self, simNumList):
+    def remote_get_state(self, simNumList: List[int]):
         """
         Return the state of multiple qubits corresponding to the IDs in simNumList.
+
+        :param simNumList: List of simulated qubit numbers.
+        :type simNumList: List[int]
         """
 
         # Convert simulation numbers to register and real number in register
@@ -1219,8 +1303,15 @@ class VirtualNode(pb.Root):
 
         return (realM, imagM)
 
-    def remote_sim_qubit_num_in_same_reg(self, sim_qubit_num1, sim_qubit_num2):
-        """Checks if two qubits are in the same register"""
+    def remote_sim_qubit_num_in_same_reg(self, sim_qubit_num1: int, sim_qubit_num2: int):
+        """
+        Checks if two qubits are in the same register
+
+        :param sim_qubit_num1: Qubit number 1.
+        :type sim_qubit_num1: int
+        :param sim_qubit_num2: Qubit number 2.
+        :type sim_qubit_num2: int
+        """
         sim_qubit1 = self._q_num_to_obj(sim_qubit_num1)
         sim_qubit2 = self._q_num_to_obj(sim_qubit_num2)
         assert sim_qubit1 is not None, "Sim num {sim_qubit_num1} not in this node"
@@ -1249,11 +1340,14 @@ class VirtualQubit(pb.Referenceable):
         """
         Creates a virtual qubit object simulated in the specified simulation register backend
 
-        Arguments
-        virtNode	node where this qubit is virtually located
-        simNode		node where this qubit is simulated
-        simQubit	reference to the underlying qubit object (may be remote)
-        num		number ID among the virtual qubits
+        :param virtNode: Node where this qubit is virtually located
+        :type virtNode: Host
+        :param simNode: Node where this qubit is simulated
+        :type simNode: Host
+        :param simQubit: Reference to the underlying qubit object (it can be remote)
+        :type simQubit: SimulatedQubit
+        :param num: Number ID among the virtual qubits
+        :type num: int
         """
         self._logger = logging.getLogger(f"{self.__class__.__name__}({virtNode.name}, {num})")
 
@@ -1276,15 +1370,16 @@ class VirtualQubit(pb.Referenceable):
         self.num = num
 
     @inlineCallbacks
-    def _single_gate(self, name, *args):
+    def _single_gate(self, name: str, *args: Any):
         """
         Apply the single gate function to the underlying qubit. This is an internal method used by all the other
         single qubit calls, which will perform the correct local or remote method calls as applicable after
         performing the necessary locking.
 
-        Arguments
-        name		name of the method corresponding to the name. For example: name = apply_X
-        param		parameters for gates such as rotations (axis,angle)
+        :param name: Name of the method corresponding to the name. For example: "apply_X"
+        :type name: str
+        :param args: Arguments for gates such as rotations (axis,angle)
+        :type args: Any
         """
         self._logger.debug("applying gate %s to virtual qubit %d", name, self.num)
         if self.active != 1:
@@ -1345,21 +1440,25 @@ class VirtualQubit(pb.Referenceable):
         yield self._single_gate("apply_T")
 
     @inlineCallbacks
-    def remote_apply_rotation(self, n, a):
+    def remote_apply_rotation(self, n: Tuple[int, int, int], a: float):
         """
         Apply rotation around axis n with angle a.
-        Arguments:
-        n	A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
-        a	The rotation angle in radians.
+
+        :param n: A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+        :type n: Tuple[int, int, int]
+        :param a: The rotation angle in radians.
+        :type a: float
         """
         yield self._single_gate("apply_rotation", n, a)
 
     @inlineCallbacks
-    def remote_measure(self, inplace=False):
+    def remote_measure(self, inplace: bool = False):
         """
         Measure the qubit in the standard basis. If inplace=False, this does delete the qubit from the simulation.
 
-        Returns the measurement outcome.
+        :param inplace: Whether to perform the measurement in place or not.
+        :type inplace: bool
+        :return: The measurement outcome.
         """
 
         if self.active != 1:
@@ -1388,7 +1487,7 @@ class VirtualQubit(pb.Referenceable):
         return outcome
 
     @inlineCallbacks
-    def _lock_nodes(self, target):
+    def _lock_nodes(self, target: Self):
         """
         Wrapper to acquire the global register lock on nodes that involve the qubits, and local node.
         This can in fact be everyting from a single node if both qubits are simulated locally or three nodes
@@ -1400,14 +1499,10 @@ class VirtualQubit(pb.Referenceable):
         Furthermore, when waiting for locks of a simulating node, this might change in the meantime, so we check
         that indeed the simulating nodes are the same after acquiring the locks. If not, we try again until success.
 
-        Parameters
-        ----------
-        target : :class:`~.virtualQubit`
-            virtual qubit of the target qubit
-
-        Returns
-        -------
-        list: The nodes that have been locked so that they can be unlocked again by the caller
+        :params target: Virtual qubit of the target qubit
+        :type target: VirtualQubit
+        :return: The nodes that have been locked so that they can be unlocked again by the caller
+        :rtype: List[Host]
         """
         local_node = self.virtNode
         control_sim_node = self.simNode
@@ -1449,9 +1544,12 @@ class VirtualQubit(pb.Referenceable):
                 return list(ds.keys())
 
     @inlineCallbacks
-    def _lock_inreg(self, qubit):
+    def _lock_inreg(self, qubit: Self):
         """
-        Lock all qubits in the same register as the virtual qubit qubit.
+        Lock all qubits in the same register as the virtual qubit.
+
+        :param qubit: The virtual qubit to lock all qubits in the same register.
+        :type qubit: VirtualQubit
         """
 
         try:
@@ -1464,9 +1562,12 @@ class VirtualQubit(pb.Referenceable):
             reraise_remote_error(remote_err)
 
     @inlineCallbacks
-    def _unlock_inreg(self, qubit):
+    def _unlock_inreg(self, qubit: Self):
         """
-        Lock all qubits in the same register as the virtual qubit qubit.
+        Unlock all qubits in the same register as the virtual qubit.
+
+        :param qubit: The virtual qubit to unlock all qubits in the same register.
+        :type qubit: VirtualQubit
         """
 
         try:
@@ -1479,42 +1580,43 @@ class VirtualQubit(pb.Referenceable):
             reraise_remote_error(remote_err)
 
     @inlineCallbacks
-    def remote_cnot_onto(self, target):
+    def remote_cnot_onto(self, target: Self):
         """
         Performs a CNOT operation with this qubit as control, and the other qubit as target.
 
-        Arguments
-        target		the virtual qubit to use as the target of the CNOT
+        :param target: The virtual qubit to use as the target of the CNOT
+        :type target: VirtualQubit
         """
 
         yield self._two_qubit_gate(target, "cnot_onto")
 
     @inlineCallbacks
-    def remote_cphase_onto(self, target):
+    def remote_cphase_onto(self, target: Self):
         """
         Performs a CPHASE operation with this qubit as control, and the other qubit as target.
 
-        Arguments
-        target		the virtual qubit to use as the target of the CPHASE
+        :param target: The virtual qubit to use as the target of the CPHASE
+        :type target: VirtualQubit
         """
 
         yield self._two_qubit_gate(target, "cphase_onto")
 
     @inlineCallbacks
-    def _two_qubit_gate(self, target, name):
+    def _two_qubit_gate(self, target: Self, name: str):
         """
         Perform a two qubit gate including all the required locking.
 
-        Arguments
-        target		second virtual qubit (beyond self which is the first)
-        name		name of the gate to perform
+        :param target: Second virtual qubit (beyond self which is the first)
+        :type target: VirtualQubit
+        :param name: Name of the gate to perform
+        :type name: str
         """
 
         if self.active != 1 or target.active != 1:
             self._logger.error("Attempt to manipulate qubits no longer at this node.")
             return
 
-        localName = "".join(["remote_", name])
+        localName = f"remote_{name}"
         self._logger.debug("Doing 2 qubit gate name %s and local call %s", name, localName)
 
         # First lock the relevant nodes
@@ -1671,6 +1773,9 @@ class VirtualQubit(pb.Referenceable):
         """
         Returns the number of this qubit in whatever local register it is in. Not useful for the client,
         but convenient for debugging.
+
+        :return: The number of qubits in the register where this qubit resides.
+        :rtype: int
         """
 
         if self.active != 1:
@@ -1690,18 +1795,27 @@ class VirtualQubit(pb.Referenceable):
     def remote_get_virt_num(self):
         """
         Returns the number of the virtual qubit.
+
+        :return: The number of the virtual qubit.
+        :rtype: int
         """
         return self.num
 
     def remote_get_virtNode(self):
         """
         Returns the virtNode of this virtual qubit
+
+        :return: The name of the virtual node of this qubit.
+        :rtype: str
         """
         return self.virtNode.name
 
     def remote_get_simNode(self):
         """
         Returns the simNode of this virtual qubit
+
+        :return: the name of the simNode of this qubit.
+        :rtype: str
         """
         return self.simNode.name
 
@@ -1710,6 +1824,9 @@ class VirtualQubit(pb.Referenceable):
         """
         Returns the state of this qubit in real and imaginary parts separated. This is required
         single Twisted cannot natively transfer complex valued objects.
+
+        :return: The real and imaginary part of the state of this qubit.
+        :rtype: Tule[float, float]
         """
 
         if self.active != 1:
@@ -1732,6 +1849,12 @@ class VirtualQubit(pb.Referenceable):
     def remote_get_density_matrix_RI(
             self
     ) -> Generator[Deferred, Tuple[List[float], List[float]], Tuple[List[float], List[float]]]:
+        """
+        Returns the density matrix of this qubit in real and imaginary parts separated.
+
+        :return: The density matrix decomposed in real and imaginary part.
+        :rtype: Tuple[List[float], List[float]], Tuple[List[float], List[float]]]
+        """
         # This function calls itself recursively *on the remote* if the simulated node
         # is not the current node
         # Otherwise, it calls the corresponding function of the local simulated qubit
@@ -1743,6 +1866,12 @@ class VirtualQubit(pb.Referenceable):
 
     @inlineCallbacks
     def remote_get_register_RI(self):
+        """
+        Gets the register of this qubit as imaginary and real pars separated.
+
+        :return: The register of this qubit as imaginary and real pars separated.
+        :rtype: Tuple[List[float], List[float]]
+        """
         if self.simNode == self.virtNode:
             realM, imagM = self.simQubit.register.get_register_RI()
         else:
@@ -1750,16 +1879,14 @@ class VirtualQubit(pb.Referenceable):
         return realM, imagM
 
     @inlineCallbacks
-    def _lock_simulating_node(self, exclude=None):
-        """Aquires a global lock on the simulating node
+    def _lock_simulating_node(self, exclude: List[Host] = None):
+        """Acquires a global lock on the simulating node
 
         Since the simulating node can change while trying to acquire the lock, we
         check if this happened and if so, try again.
 
-        Parameters
-        ----------
-        exclude : list
-            List of hosts which to exclude since they might already have been locked
+        :param exclude: List of hosts which to exclude since they might already have been locked.
+        :type exclude: List[Host]
         """
         if exclude is None:
             exclude = []

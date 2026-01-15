@@ -23,7 +23,7 @@ class StabilizerState:
 
     Pauli2bool = {"I": (False, False), "X": (True, False), "Y": (True, True), "Z": (False, True)}
 
-    def __init__(self, data=None, check_symplectic=True):
+    def __init__(self, data=None, check_symplectic: bool = True):
         """
         This class represent a stabilizer state and allows to be manipulated using
         Clifford operations and Pauli-measurements.
@@ -82,8 +82,8 @@ class StabilizerState:
         The entangled state (|01> + |10>)/sqrt(2) can be created as:
             StabilizerState([[1, 1, 0, 0, 0],
                               0, 0, 1, 1, 1]])
-        :param check_symplectic: bool
-            Whether to check if all stabilizers commute or not.
+        :param check_symplectic: Whether to check if all stabilizers commute or not.
+        :type check_symplectic: bool
         """
         if data is None:
             self._group = np.empty(shape=(0, 0), dtype=bool)
@@ -265,6 +265,7 @@ class StabilizerState:
         """
         Given a boolean matrix returns the matrix in row reduced echelon form
         where entries are seen as elements of GF(2), i.e. intergers modulus 2.
+
         :param matrix: The boolean matrix
         :type matrix: :obj:`numpy.array`
         :return:
