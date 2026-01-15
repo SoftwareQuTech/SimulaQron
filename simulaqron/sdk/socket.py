@@ -44,21 +44,42 @@ class Socket(_Socket):
         self.close()
 
     def close(self):
+        """
+        Closes this socket. Mo more messages can be sent or received after
+        invoking this method.
+        """
         if self._app_socket:
             self._app_socket.close()
 
     def send(self, msg: str):
-        """Sends a message to the remote node."""
+        """
+        Sends a message to the remote node.
+
+        :param msg: The message to send.
+        :type msg: str
+        """
         self._logger.debug("Sending msg '%s'", msg)
         raw_msg = self._serialize_msg(msg=msg)
         self._app_socket.send(raw_msg)
 
     def send_structured(self, msg: StructuredMessage):
+        """
+        Sends a message to the remote node as a ``StructuredMessage`` object.
+
+        :param msg: The message to send.
+        :type msg: StructuredMessage
+        """
         self._logger.debug("Sending structured msg '%s'", msg)
         raw_msg = self._serialize_structured_msg(msg=msg)
         self._app_socket.send(raw_msg)
 
     def send_silent(self, msg: str):
+        """
+        Sends a message to the remote node without logging it.
+
+        :param msg: The message to send.
+        :type msg: str
+        """
         self.send(msg)
 
     def _base_recv(self, block: bool, timeout: float, maxsize: int) -> bytes:
@@ -80,7 +101,18 @@ class Socket(_Socket):
             timeout: Optional[float] = None,
             maxsize: Optional[int] = 1024
     ) -> str:
-        """Receive a message from the remote node."""
+        """
+        Receive a message from the remote node.
+
+        :param block: Whether the underlying read operation should be blocking or not.
+        :type block: bool
+        :param timeout: Max time (in seconds) to wait for a message from the remote.
+        :type timeout: float | None
+        :param maxsize: Maximum size of bytes to read from the remote.
+        :type maxsize: int | None
+        :return: The received message as a string.
+        :rtype: str
+        """
         self._logger.debug("Receiving msg")
         raw_msg = self._base_recv(block, timeout, maxsize)
         msg = self._deserialize_msg(raw_msg=raw_msg)
@@ -93,6 +125,18 @@ class Socket(_Socket):
             timeout: Optional[float] = None,
             maxsize: Optional[int] = 1024,
     ) -> StructuredMessage:
+        """
+        Receives a message from the remote node and parses it as a ``StructuredMessage``.
+
+        :param block: Whether the underlying read operation should be blocking or not.
+        :type block: bool
+        :param timeout: Max time (in seconds) to wait for a message from the remote.
+        :type timeout: float | None
+        :param maxsize: Maximum size of bytes to read from the remote.
+        :type maxsize: int | None
+        :return: The parsed message.
+        :rtype: StructuredMessage
+        """
         self._logger.debug("Receiving structured msg")
         raw_msg = self._base_recv(block, timeout, maxsize)
         msg = self._deserialize_structured_msg(raw_msg=raw_msg)
@@ -105,6 +149,20 @@ class Socket(_Socket):
             timeout: Optional[float] = None,
             maxsize: Optional[int] = None,
     ) -> str:
+        """
+        Receives a message without logging it. All arguments passed to this
+        invocation are ignored. For more fine-grain control, please check the
+        :py:meth:`recv` method.
+
+        :param block: Ignored
+        :type block: bool
+        :param timeout: Ignored
+        :type timeout: float | None
+        :param maxsize: Ignored
+        :type maxsize: int | None
+        :return: The received message.
+        :rtype: str
+        """
         return self.recv()
 
     @staticmethod
@@ -125,6 +183,15 @@ class Socket(_Socket):
 
     @property
     def is_server(self) -> bool:
+        """
+        Check whether the local end of this socket will be acting as server or not. The decision
+        is made based on the node names: the name which is alphabetically before will act as server.
+        For example: If the socket connects "Alice" with "Bob", "Alice" will act as server, since
+        the string "Alice" comes lexicographically before the string "Bob".
+
+        :return: Whether this end of the socket should act as server or not.
+        :rtype: bool
+        """
         # Server will always be the "first"
         return self._node_name < self._remote_node_name
 

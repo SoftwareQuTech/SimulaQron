@@ -1,19 +1,32 @@
 simulaqron.sdk package
 ======================
 
-.. warning:: UPDATE THIS STRUCTURE!
-
 Submodules
 ----------
 
-simulaqron.run.run module
+simulaqron.sdk.broadcast_channel module
 -------------------------
 
-.. automodule:: simulaqron.run.run
+.. automodule:: simulaqron.sdk.broadcast_channel
     :members:
     :undoc-members:
     :show-inheritance:
 
+simulaqron.sdk.connection module
+-------------------------
+
+.. automodule:: simulaqron.sdk.connection
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simulaqron.sdk.socket module
+-------------------------
+
+.. automodule:: simulaqron.sdk.socket
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 Module contents
 ---------------

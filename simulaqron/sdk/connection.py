@@ -48,6 +48,30 @@ class SimulaQronConnection(BaseNetQASMConnection):
             conn_retry_time: float = 0.1,
             network_name: str = "default",
     ):
+        """
+        Main class representing the connection from NetQASM to the SimulaQron simulator.
+        This class implements the
+
+        :param app_name: Name of the app to run.
+        :type app_name: str
+        :param app_id: The ID of the application. If not given, a new one will be created.
+        :type app_id: int | None
+        :param max_qubits: Maximum number of qubits tu simulate in the simulator.
+        :type max_qubits: int
+        :param log_config: Configuration of the logging. Check the documentation of
+                           ``netqasm.sdk.config.LogConfig`` for more information about this.
+        :type log_config: LogConfig
+        :param epr_sockets: List of ``EPRSocket``s to use in the simulator.
+        :type epr_sockets: List[EPRSocket]
+        :param compiler: A transpiler object that transpiles the NetQASM instructions.
+        :type compiler: Type[SubroutineTranspiler] | None
+        :param socket_address: A tuple containing a hostname and port to use to connect to the QNodeOS server.
+        :type socket_address: Tuple[str, int]
+        :param conn_retry_time: Maximum time in seconds to wait between attempts to connect to the QNoseOS server.
+        :type conn_retry_time: float
+        :param network_name: The name of the network to connect to
+        :type network_name: str
+        """
         super().__init__(
             app_name=app_name,
             # NOTE currently node_name and app_name are the same in simulaqron
@@ -98,6 +122,21 @@ class SimulaQronConnection(BaseNetQASMConnection):
             socket_address: Optional[Tuple[str, int]] = None,
             network_name: str = "default",
     ):
+        """
+        Try to establish a connection to the specified node name. The connection can be made
+        by specifying the ``socket_address`` tuple (as a hostname and port number tuple) or
+        by specifying the node and network names. In the latter case, SimulaQron will search
+        for that node and network names on the loaded network configuration, and get the
+        corresponding socket configuration (hostname and port number) to connect to.
+
+        :param name: The name of the node to connect to.
+        :type name: str
+        :param socket_address: A hostname-port pair to specify the hostname and port number
+                               to connect to. This argument is optional.
+        :type socket_address: Tuple[str, int] | None
+        :param network_name: The name of the network to search the node name.
+        :type network_name: str
+        """
         # NOTE using retry_time=None causes an error to be raised of the connection cannot
         # be established, which can be used to check if the connection is available
         logger.debug("Trying if connection is up yet")
@@ -325,6 +364,9 @@ class SimulaQronConnection(BaseNetQASMConnection):
                     raise NotImplementedError(f"Unknown return message of type {type(ret_msg)}")
 
     def block(self):
+        """
+        Blocks the handling of new messages until all the pending message IDs are acknowledged.
+        """
         while len(self._waiting_msg_ids) > 0:
             self._logger.debug(
                 "Blocking and waiting for msg IDs %s", self._waiting_msg_ids
@@ -417,6 +459,15 @@ class GetQubitStateMessage(Message):
     TYPE = NewMessageType.GET_QUBIT_STATE
 
     def __init__(self, app_id: int = 0, qubit_id: int = 0):
+        """
+        Implements a specific NetQASM message to get the state of a qubit from the
+        SimulaQron simulator.
+
+        :param app_id: The app ID to get the qubit from.
+        :type app_id: int
+        :param qubit_id: The qubit ID to retrieve the state.
+        :type qubit_id: int
+        """
         super().__init__(self.TYPE.value)
         self.app_id = app_id
         self.qubit_id = qubit_id
@@ -431,8 +482,6 @@ class NewReturnMessageType(Enum):
 
 
 class RichErrorMessage(ReturnMessage):
-    """Enriched message to the Host that an error occurred at the quantum node controller."""
-
     _fields_ = [
         ("err_code", ctypes.c_uint8),
         ("err_msg_len", ctypes.c_uint32),
@@ -443,6 +492,14 @@ class RichErrorMessage(ReturnMessage):
     TYPE = NewReturnMessageType.ERR
 
     def __init__(self, err_code: ErrorCode, err_msg: str):
+        """
+        Enriched message to the Host that an error occurred at the quantum node controller.
+
+        :param err_code: The error code to report.
+        :type err_code: ErrorCode
+        :param err_msg: The error message.
+        :type err_msg: str
+        """
         super().__init__(self.TYPE.value)
         err_bytes = err_msg.encode("utf-8")
         if len(err_bytes) > MAX_ERR_MSG_LEN:
@@ -471,6 +528,16 @@ class ReturnQubitStateMessage(ReturnMessage):
     TYPE = NewReturnMessageType.RET_QUBIT_STATE
 
     def __init__(self, qubit_id: int, real_part: List[List[float]], imag_part: List[List[float]]):
+        """
+        Specific NetQASM message used to transmit the qubit state back to the application.
+
+        :param qubit_id: The qubit ID.
+        :type qubit_id: int
+        :param real_part: The real part of the qubit state.
+        :type real_part: List[List[float]]
+        :param imag_part: The imaginary part of the qubit state.
+        :type imag_part: List[List[float]]
+        """
         super().__init__(self.TYPE.value)
 
         # Sanity checks - given matrices are square
@@ -558,12 +625,26 @@ class SimulaQronNetworkInfo(NetworkInfo):
 
     @classmethod
     def get_node_id_for_app(cls, app_name: str) -> int:
-        """Returns the node id for the app with the given name"""
+        """
+        Returns the node id for the app with the given name.
+
+        :param app_name: The app name.
+        :type app_name: str
+        :return: The node ID.
+        :rtype: int
+        """
         # NOTE app_name and node_name are for now the same in simulaqron
         return cls._get_node_id(node_name=app_name)
 
     @classmethod
     def get_node_name_for_app(cls, app_name: str) -> str:
-        """Returns the node name for the app with the given name"""
+        """
+        Returns the node name for the app with the given name.
+
+        :param app_name: The app name.
+        :type app_name: str
+        :return: The node name.
+        :rtype: str
+        """
         # NOTE app_name and node_name are for now the same in simulaqron
         return app_name
