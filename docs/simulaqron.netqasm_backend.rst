@@ -5,7 +5,7 @@ Submodules
 ----------
 
 simulaqron.netqasm_backend.executioner module
--------------------------
+---------------------------------------------
 
 .. automodule:: simulaqron.netqasm_backend.executioner
     :members:
@@ -13,7 +13,7 @@ simulaqron.netqasm_backend.executioner module
     :show-inheritance:
 
 simulaqron.netqasm_backend.factory module
--------------------------
+-----------------------------------------
 
 .. automodule:: simulaqron.netqasm_backend.factory
     :members:
@@ -21,7 +21,7 @@ simulaqron.netqasm_backend.factory module
     :show-inheritance:
 
 simulaqron.netqasm_backend.qnodeos module
--------------------------
+-----------------------------------------
 
 .. automodule:: simulaqron.netqasm_backend.qnodeos
     :members:

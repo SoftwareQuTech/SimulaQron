@@ -14,7 +14,7 @@ simulaqron.general.host_config module
 
 
 simulaqron.general.errors module
--------------------------------------
+--------------------------------
 
 .. automodule:: simulaqron.general.errors
     :members:

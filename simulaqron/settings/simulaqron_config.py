@@ -48,6 +48,9 @@ HOME_SIMULAQRON_SETTINGS = (Path.home() / ".simulaqron" / DEFAULT_SIMULAQRON_SET
 
 
 class SimBackend(JSONSerializerMixin, Enum):
+    """
+    Enum used to list the supported SimulaQron backends.
+    """
     STABILIZER = "stabilizer"
     PROJECTQ = "projectq"
     QUTIP = "qutip"
@@ -61,6 +64,9 @@ class SimBackend(JSONSerializerMixin, Enum):
 
 @dataclass
 class SimulaqronConfig(JSONSerializerMixin):
+    """
+    Holds the general SimulaQron config.
+    """
     # Default config
     max_qubits: int = 20
     max_registers: int = 1000
@@ -83,9 +89,8 @@ class SimulaqronConfig(JSONSerializerMixin):
     def read_from_file(self, file_path: Path | str):
         """
         Reads the SimulaQron configuration from the given file path.
-        Args:
-            file_path: Path, str
-                A `pathlib.Path` or `str` representing the file path to read the configurations from.
+        :param file_path:  A `pathlib.Path` or `str` representing the file path to read the configurations from.
+        :type file_path: Path | str
         """
         if isinstance(file_path, str):
             file_path = Path(file_path).resolve()
@@ -115,8 +120,7 @@ class SimulaqronConfig(JSONSerializerMixin):
         SimulaQron configuration.
 
         To check the default configuration, check the documentation of `default_settings`.
-        See Also:
-            default_settings()
+        See Also: :py:meth:`default_settings`
         """
         cwd_settings_file = LOCAL_SIMULAQRON_SETTINGS.resolve()
         home_settings_file = HOME_SIMULAQRON_SETTINGS.resolve()
@@ -163,9 +167,8 @@ class SimulaqronConfig(JSONSerializerMixin):
     def write_to_file(self, path: PathLike):
         """
         Writes the current in-memory configuration (`simulaqron_config`) to the given file path.
-        Args:
-            path:
-                A `PathLike` object (even a string) representing the path to write the configuration to.
+        :param path:A `PathLike` object (even a string) representing the path to write the configuration to.
+        :type path: PathLike
         """
         file_path = Path(str(path)).resolve()
 

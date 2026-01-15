@@ -1,15 +1,21 @@
 simulaqron.settings package
-======================
-
-.. warning:: UPDATE THIS STRUCTURE!
+===========================
 
 Submodules
 ----------
 
-simulaqron.run.run module
--------------------------
+simulaqron.settings.network module
+----------------------------------
 
-.. automodule:: simulaqron.run.run
+.. automodule:: simulaqron.settings.network
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simulaqron.settings.simulaqron_config module
+--------------------------------------------
+
+.. automodule:: simulaqron.settings.simulaqron_config
     :members:
     :undoc-members:
     :show-inheritance:

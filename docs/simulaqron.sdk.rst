@@ -5,7 +5,7 @@ Submodules
 ----------
 
 simulaqron.sdk.broadcast_channel module
--------------------------
+---------------------------------------
 
 .. automodule:: simulaqron.sdk.broadcast_channel
     :members:
@@ -13,7 +13,7 @@ simulaqron.sdk.broadcast_channel module
     :show-inheritance:
 
 simulaqron.sdk.connection module
--------------------------
+--------------------------------
 
 .. automodule:: simulaqron.sdk.connection
     :members:
@@ -21,7 +21,7 @@ simulaqron.sdk.connection module
     :show-inheritance:
 
 simulaqron.sdk.socket module
--------------------------
+----------------------------
 
 .. automodule:: simulaqron.sdk.socket
     :members:

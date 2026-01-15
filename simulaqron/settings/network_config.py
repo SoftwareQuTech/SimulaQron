@@ -29,7 +29,9 @@ class NodeConfigType(StrEnum):
 @dataclass
 class NodeConfig(JSONSerializerMixin):
     """
-    Used by NetworkConfig to keep track of the config of a single node.
+    Used by NetworkConfig to keep track of the node config of a single node.
+    This object holds the hostname and port info for the application, the SimulaQron
+    Virtual Node and the QNodeOS server.
     """
     name: str
     app_port: int
@@ -41,12 +43,13 @@ class NodeConfig(JSONSerializerMixin):
 
     def get_config(self, config_type: str | NodeConfigType) -> Tuple[str, int]:
         """
-        Gets the corresponding host and port config tuple for the given type
-        Args:
-            config_type: str | NodeConfigType
-                The type of configuration to get. Can either be expressed as a string or a NodeConfigType.
-        Returns:
-            A tuple containing the host and port config for the given configuration type.
+        Gets the corresponding host and port config tuple for the given type.
+
+        :param config_type: The type of configuration to get. Can either be expressed as
+                            a string or a NodeConfigType.
+        :type config_type:  str | NodeConfigType
+        :return: A tuple containing the host and port config for the given configuration type.
+        :rtype: Tuple[str, int]
         """
         if isinstance(config_type, str):
             config_type = NodeConfigType(config_type)
@@ -72,7 +75,9 @@ class NodeConfig(JSONSerializerMixin):
 @dataclass
 class NetworkConfig(JSONSerializerMixin):
     """
-    Used by NetworksConfiguration to keep track of the config of a single network.
+    Used by NetworksConfiguration to keep track of the config of a single network. This object
+    holds the node configuration (as :py:class:`NodeConfig` instances) of all the nodes within
+    a network.
     """
 
     name: str
@@ -108,7 +113,6 @@ class NetworkConfig(JSONSerializerMixin):
         :param neighbors: (list of str) or None
             A list of neighbors, of this node.
             If None all current nodes in the network will be adjacent to the added node.
-        :return: None
         """
         if neighbors is not None:
             if self.topology is None:
@@ -134,11 +138,11 @@ class NetworkConfig(JSONSerializerMixin):
         """
         Removes the node with the given name and returns it. Returns none if the given
         node name was not found in this network.
-        Args:
-            node_name: str
-                The name of the node to remove. None if the node name does not exist.
-        Returns:
-            The removed node. None if the given name was not found.
+
+        :param node_name: The name of the node to remove. None if the node name does not exist.
+        :type node_name: str
+        :return: The removed node. None if the given name was not found.
+        :rtype: NodeConfig | None
         """
         return self.nodes.pop(node_name, None)
 
@@ -147,10 +151,16 @@ class NetworkConfig(JSONSerializerMixin):
 
     @property
     def is_empty(self) -> bool:
+        """
+        Whether this network configuration is empty or not.
+        """
         return len(self.nodes) <= 0
 
     @property
     def nodes_names(self) -> List[str]:
+        """
+        Gets a list of strings with the names of nodes on this network.
+        """
         return list(self.nodes.keys())
 
     def __eq__(self, other) -> bool:
@@ -175,6 +185,9 @@ class NetworksConfiguration(JSONSerializerMixin):
 
         Used for test isolation - always loads the embedded default
         regardless of local config files.
+
+        :return: The path of the file containing the default network configuration.
+        :rtype: Path
         """
 
         # We use the embedded default network here
@@ -191,15 +204,15 @@ class NetworksConfiguration(JSONSerializerMixin):
         """
         Checks if the given port is valid (>0) and if it is free. If not, it will
         allocate a new port in the range 8000-9000 which is free, and hence can be used
-        to listen to new connections
-        Args:
-            hostname: str
-                The hostname to test the port on.
-            port: int
-                The port number to test if it is usable
-        Returns:
-            A port number which is guaranteed to be valid, and ready to be used
-            to listen to connections on.
+        to listen to new connections.
+
+        :param hostname: The hostname to test the port on.
+        :type hostname: str
+        :param port: The port number to test if it is usable
+        :type port: int
+        :return: A port number which is guaranteed to be valid, and ready to be used
+                 to listen to connections on.
+        :rtype: int
         """
         if port < 0:
             port = self._get_unused_port(hostname)
@@ -209,10 +222,9 @@ class NetworksConfiguration(JSONSerializerMixin):
 
     def add_network_config(self, net_cfg: NetworkConfig):
         """
-        Method used to deserialize NetworksSpecsConfig.
-        Args:
-            net_cfg: NetworkConfig
-                The network configu object to add to the specifications.
+        Adds the given network config to the whole networks configuration.
+        :param net_cfg: The network configu object to add to the specifications.
+        :type net_cfg: NetworkConfig
         """
         self.networks[net_cfg.name] = net_cfg
 
@@ -232,26 +244,28 @@ class NetworksConfiguration(JSONSerializerMixin):
         If the port numbers None, unused ones will be chosen between 8000 and 9000.
         If neighbors are specified a restricted topology can be constructed (default is fully connected).
 
-        :param node_name: str
-            Name of the node, e.g. Alice
-        :param network_name: str
-            Name of the network (default: "default")
-        :param app_hostname: str
-            Hostname, e.g. localhost (the default if not given) or 192.168.0.1
-        :param qnodeos_hostname: str
-            Hostname, e.g. localhost (the default if not given) or 192.168.0.1
-        :param vnode_hostname: str
-            Hostname, e.g. localhost (the default if not given) or 192.168.0.1
-        :param app_port: int
-            Port number for the application. A free port in the range 8000-9000 will be allocated if not given
-        :param qnodeos_port: int
-            Port number for the application. A free port in the range 8000-9000 will be allocated if not given
-        :param vnode_port: int
-            Port number for the application. A free port in the range 8000-9000 will be allocated if not given
-        :param neighbors: (list of str) or None
-            A list of neighbors, of this node.
-            If None all current nodes in the network will be adjacent to the added node.
-        :return: None
+        :param node_name: Name of the node, e.g. Alice.
+        :type node_name: str
+        :param network_name: Name of the network (default: "default").
+        :type network_name: str
+        :param app_hostname: Hostname, e.g. localhost (the default if not given) or 192.168.0.1
+        :type app_hostname: str
+        :param qnodeos_hostname: Hostname, e.g. localhost (the default if not given) or 192.168.0.1
+        :type qnodeos_hostname: str
+        :param vnode_hostname: Hostname, e.g. localhost (the default if not given) or 192.168.0.1
+        :type vnode_hostname: str
+        :param app_port: Port number for the application. A free port in the range 8000-9000 will
+                         be allocated if not given
+        :type app_port: int
+        :param qnodeos_port: Port number for the application. A free port in the range 8000-9000 will
+                             be allocated if not given.
+        :type qnodeos_port: int
+        :param vnode_port: Port number for the application. A free port in the range 8000-9000 will
+                           be allocated if not given.
+        :type vnode_port: int
+        :param neighbors: A list of neighbors, of this node. If None all current nodes in the network
+                         will be adjacent to the added node.
+        :type neighbors: List[str] | None
         """
 
         try:
@@ -289,10 +303,10 @@ class NetworksConfiguration(JSONSerializerMixin):
         """
         Removes a node from the network.
 
-        :param node_name: str
-            Name of the node to remove, e.g. Alice
-        :param network_name: str
-            Name of the network to delete the node from (default: "default")
+        :param node_name: Name of the node to remove, e.g. Alice.
+        :type node_name: str
+        :param network_name: Name of the network to delete the node from (default: "default")
+        :type network_name: str
         """
         if network_name in self.networks:
             old_node = self.networks[network_name].remove_node(node_name)
@@ -316,12 +330,12 @@ class NetworksConfiguration(JSONSerializerMixin):
         """
         Adds a new network to the config, with some specified nodes.
 
-        :param node_names: list of str
-            Name of the nodes, e.g. [Alice, Bob]
-        :param network_name: str
-            Name of the network (default: "default")
-        :param topology: None or dict
-            The topology of the network (optional) (default is fully connected)
+        :param node_names: Name of the nodes, e.g. [Alice, Bob]
+        :type node_names: List[str]
+        :param network_name: Name of the network (default: "default").
+        :type network_name: str
+        :param topology: The topology of the network (optional) (default is fully connected)
+        :type topology: Dict[str, List[str]] | None
         """
         if isinstance(node_names, str):
             # The user passes a string... they probably meant to add a single node, so we make it a list
@@ -338,8 +352,8 @@ class NetworksConfiguration(JSONSerializerMixin):
         """
         Removes a network from the config.
 
-        :param network_name: str
-            Name of the network (default: "default")
+        :param network_name: Name of the network (default: "default").
+        :type network_name: str
         """
         removed_network = self.networks.pop(network_name, None)
         if removed_network is not None:
@@ -352,9 +366,10 @@ class NetworksConfiguration(JSONSerializerMixin):
         """
         Returns the node-config objects (NodeConfig) in a network that belong to the given network.
 
-        :param network_name: str
-            Name of the network (default: "default")
-        :return: list of NodeConfig
+        :param network_name: Name of the network (default: "default")
+        :type network_name: str
+        :return: A list of :py:class:`NodeConfig` classes with the nodes configuration.
+        :rtype: List[NodeConfig]
         """
         if network_name in self.networks:
             nodes = self.networks[network_name].nodes
@@ -366,9 +381,10 @@ class NetworksConfiguration(JSONSerializerMixin):
         """
         Returns the names of the nodes in a network.
 
-        :param network_name: str
-            Name of the network (default: "default")
-        :return: list of str
+        :param network_name: Name of the network (default: "default").
+        :type network_name: str
+        :return: A lit of node names in the given network.
+        :rtype: List[str]
         """
         if network_name in self.networks:
             nodes = self.networks[network_name].nodes
@@ -387,8 +403,8 @@ class NetworksConfiguration(JSONSerializerMixin):
         """
         Writes the content of this config to a file.
 
-        :param file_path: str
-            The path of the file to write the content to.
+        :param file_path: The path of the file to write the content to.
+        :type file_path: PathLike | str
         """
         if file_path is None:
             raise ValueError("Since this networks config was not initialized with a file_path you need to specify one")
@@ -410,8 +426,9 @@ class NetworksConfiguration(JSONSerializerMixin):
         """
         Reads config from a file.
 
-        :param file_path: None or str
-            If a file_path was specified upon __init__ this will be used if file_path is None.
+        :param file_path: If a file_path was specified upon __init__ this will be
+                          used if file_path is None.
+        :type file_path: PathLike | str
         """
 
         if file_path is None:
@@ -433,6 +450,20 @@ class NetworksConfiguration(JSONSerializerMixin):
     def read_from_legacy_files(self, app_file_path: PathLike | str,
                                vnode_file_path: PathLike | str,
                                qnodeos_file_path: Optional[PathLike | str] = None):
+        """
+        Constructs a network configuration from a set of legacy format (.cfg) network files.
+
+        .. warning:: This method is not implemented yet, and simply raises ``NotImplementedException``.
+
+        :param app_file_path: Path of the classical network file.
+        :type app_file_path: PathLike | str
+        :param vnode_file_path: Path of the virtual network file.
+        :type vnode_file_path: PathLike | str
+        :param qnodeos_file_path: Path of the QNodeOS network file. If this path is not give,
+                                  the same hosts as vnodes_file_path will be used, assigning a
+                                  new, random port in the 8000-9000 range.
+        :type qnodeos_file_path: PathLike | str
+        """
         raise NotImplementedError("Reading form legacy config files is not supported yet")
 
     @staticmethod
@@ -485,8 +516,9 @@ class NetworksConfiguration(JSONSerializerMixin):
     def nodes(self) -> List[NodeConfig]:
         """
         Access the nodes of the default network held by this configuration.
-        Returns:
-            A list of NodeConfig objects.
+
+        :return: A list of NodeConfig objects.
+        :rtype: list[NodeConfig]
         """
         return self.get_nodes(network_name="default")
 
@@ -494,8 +526,9 @@ class NetworksConfiguration(JSONSerializerMixin):
     def network_names(self) -> List[str]:
         """
         Gets the loaded network names.
-        Returns:
-            A list of strings with the network names.
+
+        :return: A list of strings with the network names.
+        :rtype: List[str]
         """
         return list(self.networks.keys())
 
@@ -515,9 +548,11 @@ class NetworksConfiguration(JSONSerializerMixin):
     def _get_unused_port(self, hostname: str) -> int:
         """
         Returns an unused port in the interval 8000 to 9000, if such exists, otherwise returns None.
-        :param hostname: str
-            Hostname, e.g. localhost or 192.168.0.1
-        :return: int or None
+
+        :param hostname: Hostname, e.g. localhost or 192.168.0.1
+        :type hostname: str
+        :return: A random unused port number in the  interval 8000 to 9000.
+        :rtype: int | None
         """
         for port in range(8000, 9001):
             if self._check_port_available(hostname, port):
@@ -527,11 +562,13 @@ class NetworksConfiguration(JSONSerializerMixin):
     def _check_port_available(self, hostname: str, port: int) -> bool:
         """
         Checks if the given port is not already set in the config files or used by some other process.
-        :param hostname: str
-            Hostname, e.g. localhost or 192.168.0.1
-        :param port: int
-            The port number
-        :return: bool
+
+        :param hostname: Hostname, e.g. localhost or 192.168.0.1
+        :type hostname: str
+        :param port: The port number
+        :type port: int
+        :return: Whether the port is currently available or not
+        :rtype: bool
         """
         if (hostname, port) in self.used_sockets:
             return False
@@ -542,9 +579,13 @@ class NetworksConfiguration(JSONSerializerMixin):
     def _check_socket_is_free(port: int) -> bool:
         """
         Checks if a given socket on localhost is in use.
+
         This is done by trying to open the port and check if it succeeds.
-        :param port: int
-            The port number
+
+        :param port: The port number
+        :type port: int
+        :return: Whether the given port number is available on `localhost` or not.
+        :rtype: bool
         """
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
             address = ('localhost', port)

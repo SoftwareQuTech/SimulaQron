@@ -20,7 +20,7 @@ Submodules
 ----------
 
 simulaqron.cli module
-----------------------------
+---------------------
 
 .. automodule:: simulaqron.cli
     :members:
@@ -28,7 +28,7 @@ simulaqron.cli module
     :show-inheritance:
 
 simulaqron.math module
---------------------------
+----------------------
 
 .. automodule:: simulaqron.math
     :members:
@@ -52,7 +52,7 @@ simulaqron.reactor module
     :show-inheritance:
 
 simulaqron.sim_util module
--------------------------
+--------------------------
 
 .. automodule:: simulaqron.sim_util
     :members:
