@@ -23,7 +23,7 @@ simulaqron.start.start_vnode module
 Module contents
 ---------------
 
-.. automodule:: simulaqron.run
+.. automodule:: simulaqron.start
     :members:
     :undoc-members:
     :show-inheritance:

@@ -45,13 +45,12 @@ from simulaqron.virtual_node.basics import QuantumEngine, QuantumError, NoQubitE
 
 class QutipEngine(QuantumEngine):
     """
-    Basic quantum engine which uses QuTip. Works with density matrices and in principle allows full quantum
-    dynamics via QuTip. Subsequently, this is quite slow.
+    Basic quantum engine which uses QuTip. Works with density matrices and in principle allows
+    full quantum dynamics via QuTip. Subsequently, this is quite slow.
     """
-
     def __init__(self, node: str, num: int, maxQubits: int = 10):
         """
-        Initialize the Qutip engine.
+        Initializes the Qutip engine
 
         :param node: Node name this register is started from.
         :type node: str

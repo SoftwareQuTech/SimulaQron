@@ -29,59 +29,49 @@ class StabilizerState:
         Clifford operations and Pauli-measurements.
 
         If check_symplectic=True then a check will be made that all stabilizers commute, by checking
-        That the matrix is symplectic. Otherwise no check is made.
-
-        :param data:
-            Can be one of the following:
-
-            A binary array of rank 2:
-                A binary array representing the generators of the stabilizer group.
-                If the array is n-by-2n a stabilizer state on n qubits will be represented.
-                The n first columns are the X-stabilizers and the n last the Z-stabilizer.
-                If the array is n-by-(2n+1), the last column is seen as the phase for each generator
-                as follows:
-                    0 -> 1
-                    1 -> -1
-
-            An array of rank 1 containing 'str':
-                Then each string is assumed to be a generator as for example "XXZIY"
-                Note that each string in the array should have the same length.
-                If the number of strings is 'n' then a stabilizer state on 'n' qubits is created.
-                If the strings have length 'n' then it is assumed that the phase is '+1'.
-                An explicit phase can be added to the start of the string as for example: "-1XXXY".
-                Creating a Bell-pair:
-                    StabilizerState(["XX", "ZZ"])  # The state (|00> + |11>) / sqrt(2)
-
-            'None' (default):
-                Then this is seen as a stabilizer state on no qubits, i.e. a complex number.
-                To add a qubit to such a state one can do:
-                    s = StabilizerState()
-                    s.add_qubit()  # This is now in the state |0>
-
-            'int':
-                Then a stabilizer state on this many qubits are created, all in the state |0> as:
-                    StabilizerState(5)  # This is the then the state |00000>
-
-            'networkx.Graph':
-                Then the graph state corresponding to this graph will be created.
-                This assumes that the nodes are numbered from 0 to n - 1, where n is the number of nodes.
-                For example:
-                    StabilizerState(networkx.complete_graph(5))  # Single qubit Clifford equiv. to a GHZ state
+        That the matrix is symplectic. Otherwise, no check is made.
 
         Examples:
-        A qubit in the state |0> can be created as:
-            StabilizerState([[0, 1]])
+        A qubit in the state :math:`|0>` can be created as ``StabilizerState([[0, 1]])``.
 
-        A qubit in the state |1> can be created as:
-            StabilizerState([[0, 1, 1]])
+        A qubit in the state :math:`|1>` can be created as ``StabilizerState([[0, 1, 1]])``.
 
-        The entangled state (|00> + |11>)/sqrt(2) can be created as:
-            StabilizerState([[1, 1, 0, 0],
-                              0, 0, 1, 1]])
+        The entangled state :math:`(|00> + |11>)/\sqrt(2)` can be created as
+        ``StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])``.
 
-        The entangled state (|01> + |10>)/sqrt(2) can be created as:
-            StabilizerState([[1, 1, 0, 0, 0],
-                              0, 0, 1, 1, 1]])
+        The entangled state :math:`(|01> + |10>)/\sqrt(2)` can be created as
+        ``StabilizerState([[1, 1, 0, 0, 0], [0, 0, 1, 1, 1]])``.
+
+        :param data: Can be one of the following:
+
+            * A binary array of rank 2 representing the generators of the stabilizer group.
+              If the array is n-by-2n a stabilizer state on n qubits will be represented.
+              The n first columns are the X-stabilizers and the n last the Z-stabilizer.
+              If the array is n-by-(2n+1), the last column is seen as the phase for each generator
+              as follows:
+              0 -> 1
+              1 -> -1
+            * An array of rank 1 containing ``str``:
+              Then each string is assumed to be a generator as for example ``XXZIY``
+              Note that each string in the array should have the same length.
+              If the number of strings is ``n`` then a stabilizer state on ``n`` qubits is created.
+              If the strings have length ``n`` then it is assumed that the phase is ``+1``.
+              An explicit phase can be added to the start of the string as for example: ``-1XXXY``.
+              Creating a Bell-pair:
+              ``StabilizerState(["XX", "ZZ"])  # The state (|00> + |11>) / sqrt(2)``
+            * ``None`` (default):
+              Then this is seen as a stabilizer state on no qubits, i.e. a complex number.
+              To add a qubit to such a state one can do:
+              ``s = StabilizerState()``
+              ``s.add_qubit()  # This is now in the state |0>``
+            * ``int``:
+              Then a stabilizer state on this many qubits are created, all in the state :math:`|0>` as:
+              ``StabilizerState(5)  # This is the then the state |00000>``
+            * ``networkx.Graph``:
+              Then the graph state corresponding to this graph will be created.
+              This assumes that the nodes are numbered from 0 to n - 1, where n is the number of nodes.
+              For example:
+              ``StabilizerState(networkx.complete_graph(5))  # Single qubit Clifford equiv. to a GHZ state``
         :param check_symplectic: Whether to check if all stabilizers commute or not.
         :type check_symplectic: bool
         """

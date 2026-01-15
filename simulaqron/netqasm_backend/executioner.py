@@ -45,6 +45,7 @@ class NetworkStack(BaseNetworkStack):
         in order to use the correct framework as used by the netqasm executioner.
 
         .. warning:: This class is candidate to be deleted! Test and delete if not needed!
+
         """
         self._executioner = executioner
         self._sockets: Dict[int, Tuple[int, int]] = {}
@@ -301,6 +302,7 @@ class VanillaSimulaQronExecutioner(Executor):
         If not found, raises a :py:class:`UnknownQubitError`.
 
         .. Caution:: Twisted PB does not allow references to objects to be passed back between connections.
+
         If you need to pass a qubit reference back to the Twisted PB on a _different_ connection,
         then use get_virt_qubit_indep below.
 
@@ -318,6 +320,7 @@ class VanillaSimulaQronExecutioner(Executor):
     def get_virt_qubit_num(self, qubit_id: int):
         """
         Get the *integer* qubit ID to virtual qubit in SimulaQron specific to this connection.
+
         .. caution:: This method return a qubit ID (an integer), not a ``twisted.spread.flavors.Referenceable``
                      object. If you need to get a twisted object, check :py:meth:`get_virt_qubit`.
 

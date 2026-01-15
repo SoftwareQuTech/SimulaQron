@@ -9,7 +9,7 @@ def assemble_qubit(realM: np.ndarray, imagM: np.ndarray) -> np.ndarray:
     :type realM: np.ndarray
     :param imagM: Imaginary component of the qubit.
     :type imagM: np.ndarray
-    :return: Assembled qubit as vector of :py:type:`complex` numbers.
+    :return: Assembled qubit as vector of complex numbers.
     :rtype: np.array
     """
     # We need this since Twisted PB does not support sending complex valued object natively.

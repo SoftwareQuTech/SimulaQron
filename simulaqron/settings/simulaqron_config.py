@@ -144,18 +144,18 @@ class SimulaqronConfig(JSONSerializerMixin):
         """
         Resets the current SimulaQron configuration object to its default configuration set.
         The default configuration is:
-            * max_qubits = 20
-            * max_registers = 1000
-            * conn_retry_time = 0.5
-            * conn_max_retries = 10
-            * recv_timeout = 100
-            * recv_retry_time = 0.1
-            * recv_max_retries = 10
-            * log_level = logging.WARNING
-            * sim_backend = SimBackend.STABILIZER
-            * noisy_qubits = False
-            * max_app_waiting_time = -1.0  # In seconds, negative means unlimited waiting
-            * t1: float = 1.0
+        * max_qubits = 20
+        * max_registers = 1000
+        * conn_retry_time = 0.5
+        * conn_max_retries = 10
+        * recv_timeout = 100
+        * recv_retry_time = 0.1
+        * recv_max_retries = 10
+        * log_level = logging.WARNING
+        * sim_backend = SimBackend.STABILIZER
+        * noisy_qubits = False
+        * max_app_waiting_time = -1.0  # In seconds, negative means unlimited waiting
+        * t1: float = 1.0
         """
         default_config = SimulaqronConfig()
         cls_fields = fields(self.__class__)

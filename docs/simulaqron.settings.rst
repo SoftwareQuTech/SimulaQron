@@ -4,10 +4,10 @@ simulaqron.settings package
 Submodules
 ----------
 
-simulaqron.settings.network module
-----------------------------------
+simulaqron.settings.network_config module
+-----------------------------------------
 
-.. automodule:: simulaqron.settings.network
+.. automodule:: simulaqron.settings.network_config
     :members:
     :undoc-members:
     :show-inheritance:
@@ -24,7 +24,7 @@ simulaqron.settings.simulaqron_config module
 Module contents
 ---------------
 
-.. automodule:: simulaqron.run
+.. automodule:: simulaqron.settings
     :members:
     :undoc-members:
     :show-inheritance:

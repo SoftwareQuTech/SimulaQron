@@ -31,7 +31,7 @@ simulaqron.sdk.socket module
 Module contents
 ---------------
 
-.. automodule:: simulaqron.run
+.. automodule:: simulaqron.sdk
     :members:
     :undoc-members:
     :show-inheritance:

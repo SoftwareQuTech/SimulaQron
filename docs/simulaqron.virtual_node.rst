@@ -37,7 +37,7 @@ simulaqron.virtual_node.qutip_simulator module
     :show-inheritance:
 
 simulaqron.virtual_node.stabilizer_simulator module
---------------------------------------------------
+---------------------------------------------------
 
 .. automodule:: simulaqron.virtual_node.stabilizer_simulator
     :members:

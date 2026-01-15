@@ -1,5 +1,5 @@
 simulaqron.netqasm_backend package
-======================
+==================================
 
 Submodules
 ----------

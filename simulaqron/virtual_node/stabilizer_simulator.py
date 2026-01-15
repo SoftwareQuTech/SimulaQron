@@ -35,7 +35,7 @@ from simulaqron.general import SimUnsupportedError
 
 class StabilizerEngine(QuantumEngine):
     """
-    Basic quantum engine which uses stabilizer formalism. Thus only Clifford operations can be performed
+    Basic quantum engine which uses stabilizer formalism. Thus, only Clifford operations can be performed
     """
 
     def __init__(self, node: str, num: int, maxQubits: int = 10):
