@@ -1,4 +1,3 @@
-import logging
 import os
 import signal
 import time
@@ -31,8 +30,6 @@ from simulaqron.settings.simulaqron_config import SimBackend
 
 logger = logging.getLogger()
 
-# TODO similar code to squidasm.run.run, make base-class and subclasses?
-
 
 _SIMULAQRON_BACKENDS = {
     Formalism.STAB: SimBackend.STABILIZER,
@@ -41,13 +38,19 @@ _SIMULAQRON_BACKENDS = {
 }
 
 
-def as_completed(futures: List[ApplyResult], names: List[str]) -> List[Tuple[ApplyResult, str]]:
+def _as_completed(futures: List[ApplyResult], names: List[str]) -> List[Tuple[ApplyResult, str]]:
     if len(futures) is not len(names):
         raise RuntimeError("Not all registered applications have an associated name")
     return [(future, name) for future, name in zip(futures, names)]
 
 
 def reset(save_loggers=False):
+    """
+    Resets the SimulaQron simulation to a clean state, leaving it ready for a new application execution.
+
+    :param save_loggers: Whether to save the NetQASM's struct logs in a file or not.
+    :type save_loggers: bool
+    """
     if save_loggers:
         save_all_struct_loggers()
     SharedMemoryManager.reset_memories()
@@ -58,7 +61,7 @@ def reset(save_loggers=False):
     reload(logging)
 
 
-def setup_sim_backend(sim_backend: SimBackend):
+def _setup_sim_backend(sim_backend: SimBackend):
     if sim_backend in [SimBackend.PROJECTQ, SimBackend.QUTIP]:
         assert find_spec(sim_backend.value) is not None, \
             f"To use {sim_backend} as backend you need to install the package"
@@ -67,23 +70,23 @@ def setup_sim_backend(sim_backend: SimBackend):
 
 # Global array helper to store PIDs of the children processes running the applications
 # Note; this array *will not* store the pids of the QNodeOS and/or Vnode processes
-apps_pids: Optional[SynchronizedArray] = None
+_apps_pids: Optional[SynchronizedArray] = None
 
 
 def _worker_initializer(synced_array: SynchronizedArray):
     # We simply store the reference of the synced object for this process
-    global apps_pids
-    apps_pids = synced_array
+    global _apps_pids
+    _apps_pids = synced_array
 
 
 def _app_wrapper(**kwargs):
-    global apps_pids
-    assert apps_pids is not None
+    global _apps_pids
+    assert _apps_pids is not None
     assert "__instance_num" in kwargs and isinstance(kwargs["__instance_num"], int)
     assert "__entry_function" in kwargs and isinstance(kwargs["__entry_function"], Callable)
 
     # Save the pid for this worker
-    apps_pids[kwargs["__instance_num"]] = os.getpid()
+    _apps_pids[kwargs["__instance_num"]] = os.getpid()
     entry_function = kwargs["__entry_function"]
     del kwargs["__entry_function"]
     del kwargs["__instance_num"]
@@ -99,14 +102,17 @@ def _app_wrapper(**kwargs):
 
 
 def _signal_other_apps():
-    global apps_pids
-    assert apps_pids is not None
-    for pid in apps_pids:
+    global _apps_pids
+    assert _apps_pids is not None
+    for pid in _apps_pids:
         # Do not send SIGINT to self process
         if pid != os.getpid():
             os.kill(pid, signal.SIGINT)
 
 
+# The signature of this function was "harmonized" with the `run_applications` method exposed
+# by the SquidASM simulator. The idea was to allow programs written in NetQASM to be executed
+# both in SimulaQron and SquidASM _with minimal changes_.
 def run_applications(
         app_instance: ApplicationInstance,
         num_rounds: int = 1,
@@ -120,45 +126,44 @@ def run_applications(
         hardware: Any = None,  # Unused; it's here for harmonization with squidasm "simulate_application"
         init_func: Callable = None,
 ) -> List[Dict[str, Any]]:
-    """Executes functions containing quantum applications.
+    """
+    Executes functions containing quantum applications.
 
-    Parameters
-    ----------
-    app_instance : ApplicationInstance
-        Keys should be names of nodes
-        Values should be the functions
-    num_rounds : int
-        Number executions for this simulation
-    network_cfg:
-        Path of the network configuration file.
-    nv_cfg: Any
-        Unused argument. Any parameter given here will be ignored.
-    log_cfg: LogConfig
-        Configuration for the logging.
-    formalism: Formalism
-        Qubit formalism to use for the simulation. The SimulaQron
-        backend to use depends on this value.
-    use_app_config: bool
-        Whether to give app_config as argument to app's main()
-    post_function: Optional[Callable]
-        Function to execute after all rounds have been executed.
-    enable_logging: bool
-        Whether to enable logging.
-    hardware: Any
-        Unused argument. Any parameter given here will be ignored.
-    init_func: Callable
-        Function to execute to initialize the state of the child processes. The implemented
-        executor uses the *spawn* method for creating new processes. In this sense, the
-        child processes *do not receive* a copy of the full memory, but only what is needed.
-        In particular, all modules will be reimported in the child processes, hence any
-        state of the classes *will not transfer* to the child processes.
-
-    Returns
-    -------
-    List[Dict[str, Any]]
-        List of dictionaries describing the application names and the simulation results.
-        The i-th entry of the list will correspond to the i-th execution round of the
-        simulation.
+    :param app_instance: A ``netqasm.runtime.Application`` instance containing the names of the nodes
+                         and the function that implements the application. The easiest way to create
+                         this object is by using the ``default_app_instance`` from the
+                         ``netqasm.runtime.application`` module. Please check the documentation from that
+                         method to get more information.
+    :type app_instance: ApplicationInstance
+    :param num_rounds: Number executions for this simulation.
+    :type num_rounds: int
+    :param network_cfg: Path of the network configuration file.
+    :type network_cfg: str | Path | PathLike | None
+    :param nv_cfg: Unused argument. Any parameter given here will be ignored.
+    :type nv_cfg: Any
+    :param log_cfg: Configuration object for the logging. Check the documentation of :py:class:`LogConfig`
+                    for more information abut how to configure the logging.
+    :type log_cfg: LogConfig
+    :param formalism: Qubit formalism to use for the simulation. The SimulaQron backend to use depends
+                      on this value.
+    :type formalism: Formalism
+    :param use_app_config: Whether to give app_config as argument to app's main().
+    :type use_app_config: bool
+    :param post_function: Function to execute after all rounds have been executed.
+    :type post_function: Optional[Callable]
+    :param enable_logging: Whether to enable logging.
+    :type enable_logging: bool
+    :param hardware: Unused argument. Any parameter given here will be ignored.
+    :type hardware: Any
+    :param init_func: Function to execute to initialize the state of the child processes. The implemented
+                      executor uses the *spawn* method for creating new processes. In this sense, the
+                      child processes *do not receive* a copy of the full memory, but only what is needed.
+                      In particular, all modules will be reimported in the child processes, hence any
+                      state of the classes *will not transfer* to the child processes.
+    :type init_func: Callable
+    :return: List of dictionaries describing the application names and the simulation results.
+             The i-th entry of the list will correspond to the i-th execution round of the simulation.
+    :rtype: List[Dict[str, Any]]
     """
     # Before all; we need to instruct the OMP library to use a single thread to avoid
     # heavy-processes deadlocks
@@ -214,10 +219,10 @@ def run_applications(
         try:
             with executor:
                 SimulaQronConnection.PROCESS_POOL = executor
-                global apps_pids
-                apps_pids = synced_array
+                global _apps_pids
+                _apps_pids = synced_array
                 logger.debug("Starting simulaqron sim_backend process with nodes %s", app_names)
-                setup_sim_backend(sim_backend)
+                _setup_sim_backend(sim_backend)
 
                 # Start the application processes
                 app_futures = []
@@ -252,7 +257,7 @@ def run_applications(
                 # Join the application processes and the backend
                 names = [f'app_{app_name}' for app_name in app_names]
                 result = {}
-                futures = as_completed(app_futures, names)
+                futures = _as_completed(app_futures, names)
                 start_time = time.time()
                 while len(result) < len(app_names):
                     for future, name in futures:
@@ -285,7 +290,3 @@ def run_applications(
         process_logs.make_last_log(log_dir=timed_log_dir)
 
     return results
-
-
-def save_results(results, results_file):
-    dump_yaml(data=results, file_path=results_file)
