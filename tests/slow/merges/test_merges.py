@@ -1,4 +1,6 @@
 import sys
+from pathlib import Path
+
 import pytest
 import os
 import unittest
@@ -148,8 +150,8 @@ class localNode(pb.Root):
         return bool(correct)
 
 
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestMerge(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -165,7 +167,7 @@ class TestMerge(unittest.TestCase):
         network_config_file = os.path.join(path_to_here, "configs", "network.json")
         network_config.read_from_file(network_config_file)
         nodes = ["Alice", "Bob", "Charlie"]
-        cls.network = Network(nodes=nodes)
+        cls.network = Network(nodes=nodes, network_config_file=Path(network_config_file))
         cls.network.start()
 
     @classmethod
@@ -228,8 +230,8 @@ class TestMerge(unittest.TestCase):
         self.assertTrue(all(results))
 
 
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestBothLocal(TestMerge):
     @classmethod
     def setUpClass(cls):
@@ -289,8 +291,8 @@ class TestBothLocal(TestMerge):
         self.run_test([])
 
 
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestBothLocalNotSameReg(TestBothLocal):
     @classmethod
     @inlineCallbacks
@@ -341,8 +343,8 @@ class TestBothLocalNotSameReg(TestBothLocal):
         reactor.stop()
 
 
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestBothRemote(TestMerge):
     @classmethod
     def setUpClass(cls):
@@ -433,8 +435,8 @@ class TestBothRemote(TestMerge):
         self.run_test(["Alice", "Bob", "Charlie"])
 
 
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestBothRemoteSameNodeDiffReg(TestMerge):
     @classmethod
     def setUpClass(cls):
@@ -502,8 +504,8 @@ class TestBothRemoteSameNodeDiffReg(TestMerge):
         self.run_test(["Alice", "Bob"])
 
 
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestBothRemoteSameNodeSameReg(TestBothRemoteSameNodeDiffReg):
     @staticmethod
     @inlineCallbacks
@@ -547,8 +549,8 @@ class TestBothRemoteSameNodeSameReg(TestBothRemoteSameNodeDiffReg):
         reactor.stop()
 
 
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestRemoteAtoB(TestBothRemoteSameNodeDiffReg):
     @staticmethod
     @inlineCallbacks
@@ -581,8 +583,8 @@ class TestRemoteAtoB(TestBothRemoteSameNodeDiffReg):
         reactor.stop()
 
 
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
-@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestRemoteBtoA(TestBothRemoteSameNodeDiffReg):
     @staticmethod
     @inlineCallbacks

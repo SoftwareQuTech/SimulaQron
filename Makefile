@@ -30,6 +30,9 @@ install-optional: install
 tests:
 	@${PYTHON} -m pytest -v ${TEST_DIR}/quick
 
+tests_slow:
+	@${PYTHON} -m pytest -v ${TEST_DIR}/slow
+
 tests_all:
 	@${PYTHON} -m pytest -v --capture=tee-sys ${TEST_DIR}
 
