@@ -27,6 +27,22 @@ from simulaqron.reactor import reactor
 
 _logger = logging.getLogger("test_merges")
 
+# Diego Rivera: 2026-01-16:
+# Note about moving these tests to NetQASM API.
+# NetQASM is a library that needs to be implemented by the simulators. It also
+# aims to be a higher-level abstraction layer, so it does not expose implementation
+# details from the underlying quantum simulator.
+# On the other hand, these tests aim to check the functionality of merging two
+# qubits into a single register. This functionality *is specific to the SimulaQron
+# simulator*, since it is required to allow quantum simulation distributed in
+# multiple hosts.
+# Being this said, I see two main difficulties to move these tests to NetQASM API:
+# * Since NetQASM aims to hide all implementation details, there is no NetQASM
+#   primitive to express "moving a qubit from one host to another".
+# * The functionality tested here is SimulaQron-specific. It would be difficult
+#   to rewrite these tests in NetQASM, which might hide APIs needed to fully test
+#   the underlying functionality.
+
 
 class localNode(pb.Root):
     def __init__(self, node, classicalNet):
