@@ -131,7 +131,7 @@ def setup_local(myName: str, virtualNet: SocketsConfig, classicalNet: SocketsCon
 
 
 def _init_register(resList: DeferredList, myName: str, virtualNet: SocketsConfig, classicalNet: SocketsConfig,
-                  lNode: pb.Root, func: Callable, *args, **kwargs):
+                   lNode: pb.Root, func: Callable, *args, **kwargs):
     _logger.debug("SETUP_LOCAL %s: All connections set up.", myName)
 
     # Retrieve the connection to the local virtual node, if successful

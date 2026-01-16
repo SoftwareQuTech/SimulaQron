@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 
-import pytest
 import os
 import unittest
 import logging

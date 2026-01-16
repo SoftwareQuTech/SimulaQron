@@ -30,7 +30,7 @@
 import random
 import time
 from timeit import default_timer as timer
-from typing import List, Optional, Dict
+from typing import List, Dict
 
 import networkx as nx
 from multiprocess.context import ForkProcess as Process

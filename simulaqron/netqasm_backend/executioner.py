@@ -4,7 +4,7 @@ import traceback
 from collections import defaultdict
 from enum import Enum
 from functools import partial
-from typing import Generator, List, Tuple, Callable, Dict
+from typing import Generator, List, Tuple, Callable, Dict, Union
 
 import netqasm.lang.instr.core as core_instructions
 import netqasm.lang.instr.vanilla as vanilla_instructions
@@ -35,7 +35,11 @@ class UnknownQubitError(RuntimeError):
     """
     pass
 
-_VanillaRotInstr = vanilla_instructions.RotXInstruction | vanilla_instructions.RotYInstruction | vanilla_instructions.RotZInstruction
+
+_VanillaRotInstr = Union[vanilla_instructions.RotXInstruction,
+                         vanilla_instructions.RotYInstruction,
+                         vanilla_instructions.RotZInstruction]
+
 
 # TODO - This class is candidate to be deleted! Test and delete if not needed!
 class NetworkStack(BaseNetworkStack):
@@ -61,6 +65,7 @@ class NetworkStack(BaseNetworkStack):
 
     def get_purpose_id(self, remote_node_id: int, epr_socket_id: int) -> int:
         pass
+
 
 class VanillaSimulaQronExecutioner(Executor):
     SIMULAQRON_OPS = {
@@ -213,7 +218,13 @@ class VanillaSimulaQronExecutioner(Executor):
                 qubit_id=position,
             )
 
-    def _do_single_qubit_rotation(self, instr: core_instructions.RotationInstruction, subroutine_id: int, address: int, angle: float):
+    def _do_single_qubit_rotation(
+            self,
+            instr: core_instructions.RotationInstruction,
+            subroutine_id: int,
+            address: int,
+            angle: float
+    ):
         assert isinstance(instr, _VanillaRotInstr)
         position = self._get_position(subroutine_id=subroutine_id, address=address)
         axis = self._get_axis(instr=instr)
@@ -356,7 +367,7 @@ class VanillaSimulaQronExecutioner(Executor):
         return outcome
 
     @inlineCallbacks
-    def cmd_reset(self, qubit_id: int, correct: bool=True):
+    def cmd_reset(self, qubit_id: int, correct: bool = True):
         r"""
         Reset the given qubit to the state :math:`|0>`.
 
@@ -373,7 +384,7 @@ class VanillaSimulaQronExecutioner(Executor):
         if correct and outcome:
             yield call_method(virt_qubit, "apply_X")
 
-    def _do_wait(self, delay: float=0.1):
+    def _do_wait(self, delay: float = 0.1):
         d = task.deferLater(reactor, delay, lambda: self._logger.debug("Wait finished"))
         self._logger.debug("waiting a bit")
         yield d
