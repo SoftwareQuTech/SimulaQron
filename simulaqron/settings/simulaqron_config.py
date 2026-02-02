@@ -183,6 +183,7 @@ class SimulaqronConfig(JSONSerializerMixin):
             serialized = JSONSerializer.serialize(self)
             json.dump(serialized, file, indent=4)
 
+
 def get_default_simulaqron_config_file():
     """
     Get the simulaqron config file path to use.
@@ -204,4 +205,3 @@ def get_default_simulaqron_config_file():
     HOME_SIMULAQRON_SETTINGS.parent.mkdir(parents=True, exist_ok=True)
     simulaqron_settings.write_to_file(HOME_SIMULAQRON_SETTINGS)
     return HOME_SIMULAQRON_SETTINGS
-
