@@ -182,3 +182,26 @@ class SimulaqronConfig(JSONSerializerMixin):
         with file_path.open("wt") as file:
             serialized = JSONSerializer.serialize(self)
             json.dump(serialized, file, indent=4)
+
+def get_default_simulaqron_config_file():
+    """
+    Get the simulaqron config file path to use.
+    
+    :return: Path to the simulaqron config file.
+    :rtype: Path
+    """
+    # Implements using the local directory setting as a priority
+    if LOCAL_SIMULAQRON_SETTINGS.exists():
+        return LOCAL_SIMULAQRON_SETTINGS
+    if HOME_SIMULAQRON_SETTINGS.exists():
+        return HOME_SIMULAQRON_SETTINGS
+
+    from . import simulaqron_settings
+
+    # Create default in HOME (matches load_from_known_sources behavior)
+    # XXX I have mixed feelings we should do this, but I leave it for now
+    simulaqron_settings.default_settings()
+    HOME_SIMULAQRON_SETTINGS.parent.mkdir(parents=True, exist_ok=True)
+    simulaqron_settings.write_to_file(HOME_SIMULAQRON_SETTINGS)
+    return HOME_SIMULAQRON_SETTINGS
+

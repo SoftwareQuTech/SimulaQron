@@ -14,7 +14,7 @@ from simulaqron.settings import LOCAL_SIMULAQRON_SETTINGS, LOCAL_NETWORK_SETTING
 from simulaqron.settings import simulaqron_settings, network_config
 from simulaqron.settings.network_config import (NodeConfig, DEFAULT_SIMULAQRON_NETWORK_FILENAME,
                                                 get_default_network_config_file)
-from simulaqron.settings.simulaqron_config import SimBackend
+from simulaqron.settings.simulaqron_config import SimBackend, get_default_simulaqron_config_file
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 # PID folder should be "LOCAL"
@@ -156,15 +156,15 @@ def version():
     "--network-config-file",
     help=f"Path to network config file. If not specified, uses ./{DEFAULT_SIMULAQRON_NETWORK_FILENAME} "  # noqa: E131
          f"or ~/.simulaqron/{DEFAULT_SIMULAQRON_NETWORK_FILENAME}",  # noqa: E131
-    type=click.Path(exists=True, dir_okay=False, resolve_path=True, path_type=Path),
+    type=click.Path(exists=False, dir_okay=False, resolve_path=True, path_type=Path),
     default=get_default_network_config_file()
 )
 @click.option(
     "--simulaqron-config-file",
     help=f"Use the given simulaqron config file. Defaults to the file named "  # noqa: E131
          f"'{DEFAULT_SIMULAQRON_NETWORK_FILENAME}' on the current directory.",  # noqa: E131
-    type=click.Path(exists=True, dir_okay=False, resolve_path=True, path_type=Path),
-    default=LOCAL_SIMULAQRON_SETTINGS
+    type=click.Path(exists=False, dir_okay=False, resolve_path=True, path_type=Path),
+    default=get_default_simulaqron_config_file()
 )
 @click.option(
     "--name",
@@ -226,7 +226,7 @@ def start(name: str, nodes: str, simulaqron_config_file: Path, network_config_fi
                     "the --nodes argument."
         )
     for node_to_start in nodes:
-        if node_to_start not in network_config.networks[name]:
+        if node_to_start not in network_config.networks[name].nodes:
             raise click.BadOptionUsage(
                 option_name="nodes",
                 message=f"The node '{node_to_start}' was not found in the network named "  # noqa: E713
