@@ -21,9 +21,10 @@ class Socket(_Socket):
             remote_app_name: str,
             socket_id: int = 0,
             timeout: Optional[int] = None,
-            use_callbacks=False,
-            network_name="default",
+            use_callbacks: bool = False,
+            network_name: str = "default",
             log_config=None,
+            as_server: Optional[bool] = None,
     ):
         assert socket_id == 0, (
             "SimulaQron socket does not support setting socket ID, this is instead done in the config file"
@@ -38,7 +39,7 @@ class Socket(_Socket):
         # We define _app_socket as None as a default value, so the __del__ method
         # does not fail when the socket could not be connected correctly.
         self._app_socket = None
-        self._app_socket: socket.socket = self._connect()
+        self._app_socket: socket.socket = self._connect(as_server)
 
     def __del__(self):
         self.close()
@@ -182,7 +183,7 @@ class Socket(_Socket):
         return dill.loads(raw_msg)
 
     @property
-    def is_server(self) -> bool:
+    def _should_be_server(self) -> bool:
         """
         Check whether the local end of this socket will be acting as server or not. The decision
         is made based on the node names: the name which is alphabetically before will act as server.
@@ -195,16 +196,22 @@ class Socket(_Socket):
         # Server will always be the "first"
         return self._node_name < self._remote_node_name
 
-    def _connect(self) -> socket.socket:
-        if self.is_server:
+    def _connect(self, as_server: Optional[bool] = None) -> socket.socket:
+        self_is_server: bool
+        if as_server is not None:
+            self_is_server = as_server
             server_name = self._node_name
         else:
-            server_name = self._remote_node_name
+            self_is_server = self._should_be_server
+            if self_is_server:
+                server_name = self._node_name
+            else:
+                server_name = self._remote_node_name
         addr = self._get_addr_info(name=server_name)
         app_socket = socket.socket(addr[0], addr[1], addr[2])
         attempt = 0
 
-        if self.is_server:
+        if self_is_server:
             self._logger.debug("Trying to open application socket as server")
             app_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             while True:
