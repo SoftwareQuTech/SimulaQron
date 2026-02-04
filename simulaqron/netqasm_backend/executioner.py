@@ -244,7 +244,7 @@ class VanillaSimulaQronExecutioner(Executor):
     @inlineCallbacks
     def apply_rotation(self, axis: Tuple[int, int, int], angle: float, qubit_id: int):
         """
-        Executes a rotation of ``angle``radians around the ``axis`` axis of the specified
+        Executes a rotation of ``angle`` radians around the ``axis`` axis of the specified
         qubit ID.
 
         :param axis: The axis to rotate around. This axis is expected to be a tuple of
