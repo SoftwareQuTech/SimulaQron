@@ -8,11 +8,13 @@ from simulaqron.settings.network_config import NodeConfigType
 
 async def connection_handler(reader: StreamReader, writer: StreamWriter):
     result = await reader.read(255)
-    print(f"Received message: '{result.decode("utf-8")}'")
+    print(f"Server received message: '{result.decode("utf-8")}'")
     writer.write(result)
+    print(f"Server send message: '{result.decode("utf-8")}'")
     writer.close()
 
 if __name__ == "__main__":
+    # This is "Alice" - the server
     # Load the file network configuration file
     network_config_file = Path("simulaqron_network.json")
     network_config.read_from_file(network_config_file)
