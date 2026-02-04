@@ -27,7 +27,6 @@ class SimulaQronClassicalClient:
         writer.close()
         return result
 
-
     def run_client(self, server_name: str, callback: Coroutine[Any, Any, _T]) -> _T:
         """
         Runs a function implementing a client that connects to the node with the given name.
@@ -92,9 +91,13 @@ class SimulaQronClassicalServer:
         if self._connection_handler is None:
             print("No connection handler - Did you forget to register it?")
             return
-        server = await asyncio.start_server(self._connection_handler, self._sockets_data.hostname, self._sockets_data.port)
+        server = await asyncio.start_server(
+            self._connection_handler,
+            self._sockets_data.hostname,
+            self._sockets_data.port
+        )
         print(f"BOB INFO: === {self._node_name} Server ===")
-        print(f"BOB DEBUG: Listening on {self._sockets_data.hostname}:{self._sockets_data.port}")
+        print(f"BOB DEBUG: Listening on {self._sockets_data.hostname}:{self._sockets_data.port}")  # noqa: E231
         async with server:
             await server.serve_forever()
 

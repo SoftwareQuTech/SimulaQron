@@ -33,7 +33,7 @@ async def run_alice(reader: StreamReader, writer: StreamWriter):
     # *after* the connection is closed (or after flushing the connection, untested)
     m1_val = int(m1)
     m2_val = int(m2)
-    message = f"{m1_val}:{m2_val}"
+    message = f"{m1_val}:{m2_val}"  # noqa: E231
     writer.write(message.encode("utf-8"))
     return m1_val, m2_val
 

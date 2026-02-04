@@ -6,6 +6,7 @@ from simulaqron.general.host_config import SocketsConfig
 from simulaqron.sdk.protocol import SimulaQronClassicalClient
 from simulaqron.settings.network_config import NodeConfigType
 
+
 async def client_code(reader: StreamReader, writer: StreamWriter):
     data = "Hello World!".encode("utf-8")
     writer.write(data)
@@ -13,6 +14,7 @@ async def client_code(reader: StreamReader, writer: StreamWriter):
     result = await reader.read(255)
     print(f"Client received message: '{result.decode("utf-8")}'")
     writer.close()
+
 
 if __name__ == "__main__":
     # This is "Bob" - the client

@@ -31,6 +31,7 @@ async def run_bob(reader: StreamReader, writer: StreamWriter):
     meas_val = int(meas)
     print(f"Bob measurement: {meas_val}")
 
+
 if __name__ == "__main__":
     # Load the file network configuration file
     network_config_file = Path("simulaqron_network.json")
