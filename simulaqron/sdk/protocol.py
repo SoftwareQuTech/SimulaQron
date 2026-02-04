@@ -1,9 +1,9 @@
+import asyncio
+from asyncio import StreamWriter, StreamReader
 from enum import IntEnum
-from pathlib import Path
-from typing import Any, List, Callable, Optional
+from typing import Any, Awaitable, Optional, Callable
 
-from netqasm.sdk.external import NetQASMConnection
-from simulaqron.sdk import SimulaQronConnection, Socket
+from simulaqron.general.host_config import SocketsConfig
 
 
 class ServingStatus(IntEnum):
@@ -51,37 +51,47 @@ class SimulaQronState:
         return ServingStatus.STOP
 
 
-class SimulaQronProtocol:
-    def __init__(self, network_config: str | Path, name: str):
-        self._network_config = network_config
-        self._node_name = name
-        # TODO - Load the network configuration in simulaqron!
-        pass
-
-
-class SimulaQronClassicalClient(SimulaQronProtocol):
-    def __init__(self, network_config: str | Path, name: str):
+class SimulaQronClassicalClient:
+    def __init__(self, sockets_config: SocketsConfig):
         """
         Classical client used to send classical messages to remote nodes. The given node name
         must exist on the given network configuration.
 
-        :param network_config: The path of the Network configuration.
-        :type network_config: str | Path
-        :param name: The name of the node to connect to. The name *must* exist in the network
-                     configuration file.
-        :type name: str
+        :param sockets_config: The sockets configuration for the whole network.
+        :type sockets_config: SocketsConfig
         """
-        super().__init__(network_config, name)
+        self._sockets_config = sockets_config
 
-    def connect_to(self, node_name: str) -> None:
+    async def _run_client(self, hostname: str, port: int, callback: Callable[[StreamReader, StreamWriter], Awaitable[None]]):
+        reader, writer = await asyncio.open_connection(hostname, port)
+        await callback(reader, writer)
+
+
+    def run_client(self, node_name: str, callback: Callable[[StreamReader, StreamWriter], Awaitable[None]]) -> None:
         """
-        Connects to the node with the given name.
+        Connects to the node with the given name. Once the connection has been established,
+        the given callback will be executed to start the interaction with the server.
+        The given function must have the following signature::
+
+        async def connected_handler(reader: StreamReader, writer: StreamWriter):
+            # Send a message to the server
+            writer.write("Hello world!".encode("utf-8"))
+            # Afterwards, you might want to receive an answer
+            message = await reader.read(255)
+            print(message.decode("utf-8"))
+
+        After calling this function, the
 
         :param node_name: The name of the node to connect to. The name *must* exist in the
                           configuration file given when constructing this client.
         :type node_name: str
+        :param callback: The function to be called when the connection is established.
+        :type callback: Callable[[StreamReader, StreamWriter], Awaitable[None]]
         """
-        pass
+        if node_name not in self._sockets_config.hostDict:
+            raise RuntimeError(f"The node with name '{node_name}' is not on the network configuration.")
+        socket_config = self._sockets_config.hostDict[node_name]
+        asyncio.run(self._run_client(socket_config.hostname, socket_config.port, callback))
 
     def send_message(self, message: str) -> None:
         """
@@ -90,36 +100,46 @@ class SimulaQronClassicalClient(SimulaQronProtocol):
         :param message: The message to send.
         :type message: str
         """
+        pass
 
 
-class SimulaQronClassicalServer(SimulaQronProtocol):
-    def __init__(self, network_config: str | Path, name: str, simulaqron_connection: Optional[SimulaQronConnection] = None):
-        super().__init__(network_config, name)
-        self._message_handlers: List[Callable[[SimulaQronState, str], ServingStatus]] = []
-        self._connection = simulaqron_connection
-        self._message_handlers: List[Callable[[SimulaQronState, str, NetQASMConnection], ServingStatus]] = []
-        # TODO - Define what else to do in the constructor
+class SimulaQronClassicalServer:
+    def __init__(self, sockets_config: SocketsConfig, name: str):
+        self._node_name = name
+        self._sockets_data = sockets_config.hostDict[self._node_name]
+        self._connection_handler: Optional[Callable[[StreamReader, StreamWriter], Awaitable[None]]] = None
 
-    def register_message_handler(self, handler: Callable[[SimulaQronState, str], ServingStatus]) -> None:
+    def register_client_handler(self, handler: Callable[[StreamReader, StreamWriter], Awaitable[None]]) -> None:
         """
-        Registers the given function as a message handler. The given function must have the following signature::
+        Registers the given function as a client handler. The given function must have the following signature::
 
-        def handler(state: SimulaQronState, message: str, connection: NetQASMConnection) -> ServingStatus:
-            return ServingStatus.CONTINUE
+        async def handler(reader: StreamReader, writer: StreamWriter):
+            reader = await reader.read(255)
+            ...
+            # Handle a new connection here
+            # E.g. send a response to the client
+            writer.write("answer".encode("utf-8"))
 
-        The passed function will be called once a message arrives form the remote.
-        The function must return a value to signal the server loop to keep handling or not.
-        Any other value that must be returned to the remote, must be passed using the ``add_return_values`` method
-        from the ``SimulaQronState`` object passed to the handler.
+        The passed function will be called once a new client connects.
 
-        :param handler: The function to be used as a handler.
-        :type handler: Callable[[SimulaQronState, str], ServingStatus]
+        :param handler: The function to be used as a handler. This *must* be a python coroutine
+                        (python "async" function).
+        :type handler: Callable[[StreamReader, StreamWriter], Awaitable[None]]
         """
-        self._message_handlers.append(handler)
+        self._connection_handler = handler
+
+    async def _build_server(self):
+        if self._connection_handler is None:
+            print("No connection handler - Did you forget to register it?")
+            return
+        server = await asyncio.start_server(self._connection_handler, self._sockets_data.hostname, self._sockets_data.port)
+        print(f"BOB INFO: === {self._node_name} Server ===")
+        print(f"BOB DEBUG: Listening on {self._sockets_data.hostname}:{self._sockets_data.port}")
+        async with server:
+            await server.serve_forever()
 
     def start_serving(self) -> None:
         """
         Starts the serving the clients using the registered handlers.
         """
-        # TODO - Implement
-        pass
+        asyncio.run(self._build_server())
