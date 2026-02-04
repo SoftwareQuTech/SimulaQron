@@ -1,8 +1,10 @@
 import asyncio
 from asyncio import StreamWriter, StreamReader
-from typing import Awaitable, Optional, Callable
+from typing import Awaitable, Optional, Callable, Coroutine, Any, TypeVar
 
 from simulaqron.general.host_config import SocketsConfig
+
+_T = TypeVar("_T")
 
 
 class SimulaQronClassicalClient:
@@ -16,16 +18,17 @@ class SimulaQronClassicalClient:
         """
         self._sockets_config = sockets_config
 
-    async def _run_client(self, hostname: str, port: int, callback: Callable[[StreamReader, StreamWriter], Awaitable[None]]):
+    async def _run_client(self, hostname: str, port: int, callback: Coroutine[Any, Any, _T]) -> _T:
         """
         Python coroutine that opens the connection and runs the function provided by the user.
         """
         reader, writer = await asyncio.open_connection(hostname, port)
-        await callback(reader, writer)
+        result = await callback(reader, writer)
         writer.close()
+        return result
 
 
-    def run_client(self, node_name: str, callback: Callable[[StreamReader, StreamWriter], Awaitable[None]]) -> None:
+    def run_client(self, server_name: str, callback: Coroutine[Any, Any, _T]) -> _T:
         """
         Runs a function implementing a client that connects to the node with the given name.
         Once the connection has been established, the given callback will be executed to start
@@ -44,18 +47,18 @@ class SimulaQronClassicalClient:
         Once the execution of the given function, the client will close the connection to
         the server.
 
-        :param node_name: The name of the node to connect to. The name *must* exist in the
+        :param server_name: The name of the server to connect to. The name *must* exist in the
                           configuration file given when constructing this client.
-        :type node_name: str
+        :type server_name: str
         :param callback: The function to be called when the connection is established. This function
                          implements the logic for interacting with the server. The passed function
                          *must* be a python "async" function.
         :type callback: Callable[[StreamReader, StreamWriter], Awaitable[None]]
         """
-        if node_name not in self._sockets_config.hostDict:
-            raise RuntimeError(f"The node with name '{node_name}' is not on the network configuration.")
-        socket_config = self._sockets_config.hostDict[node_name]
-        asyncio.run(self._run_client(socket_config.hostname, socket_config.port, callback))
+        if server_name not in self._sockets_config.hostDict:
+            raise RuntimeError(f"The node with name '{server_name}' is not on the network configuration.")
+        socket_config = self._sockets_config.hostDict[server_name]
+        return asyncio.run(self._run_client(socket_config.hostname, socket_config.port, callback))
 
 
 class SimulaQronClassicalServer:
