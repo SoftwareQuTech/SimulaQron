@@ -62,6 +62,18 @@ class SimulaQronClassicalClient:
 
 class SimulaQronClassicalServer:
     def __init__(self, sockets_config: SocketsConfig, name: str):
+        """
+        Classical server used to server classical clients to remote nodes. The given socket configs
+        object contains the specification of the available nodes on the network that this server can
+        interact with. Please note that this configuration *does not limit* the clients that can
+        connect to this server.
+
+        :param sockets_config: The sockets configuration for the whole network.
+        :type sockets_config: SocketsConfig
+        :param name: The name of the server to connect to. The name *must* exist in the
+                     configuration file given when constructing this server.
+        :type name: str
+        """
         self._node_name = name
         self._sockets_data = sockets_config.hostDict[self._node_name]
         self._connection_handler: Optional[Callable[[StreamReader, StreamWriter], Awaitable[None]]] = None
