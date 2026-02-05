@@ -32,6 +32,9 @@ async def run_client(reader: StreamReader, writer: StreamWriter):
     # Note: Since "read" is a python coroutine, we need to "await" it, so python can
     # execute other coroutines until the data becomes available to read.
     answer = await reader.read(100)
+    # Messages received from the server come as "bytes", which need to be decoded
+    # (using UTF-8 encoding) before using it as a string.
+    print(answer.decode("utf-8"))
 
     this_node_name = "Alice"
     other_node_name = "Bob"

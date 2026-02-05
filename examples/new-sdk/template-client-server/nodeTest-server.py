@@ -2,8 +2,8 @@ from asyncio import StreamReader, StreamWriter
 from pathlib import Path
 
 from simulaqron.general.host_config import SocketsConfig
-from simulaqron.sdk.protocol import SimulaQronClassicalClient
-from simulaqron.settings import network_config
+from simulaqron.sdk.protocol import SimulaQronClassicalServer
+from simulaqron.settings import network_config, simulaqron_settings
 from simulaqron.settings.network_config import NodeConfigType
 
 # This is recipe to use NetQASM with simulaqron backend.
@@ -27,6 +27,9 @@ async def serve_client(reader: StreamReader, writer: StreamWriter):
     # execute other coroutines (such as serving a new client) until the data becomes
     # available to read.
     answer = await reader.read(100)
+    # mMessages received from the client come as "bytes", which need to be decoded
+    # (using UTF-8 encoding) before using it as a string.
+    print(answer.decode("utf-8"))
 
     # To send a messsage, we can simply use the "wirte" method from the "writer" object
     # The argument *must* be a python bytes object, which we can get by encoding (using

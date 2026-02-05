@@ -1,8 +1,6 @@
-from asyncio import StreamReader, StreamWriter
 from pathlib import Path
 
 from simulaqron.general.host_config import SocketsConfig
-from simulaqron.sdk.protocol import SimulaQronClassicalClient
 from simulaqron.settings import network_config, simulaqron_settings
 from simulaqron.settings.network_config import NodeConfigType
 
@@ -13,13 +11,13 @@ set_simulator("simulaqron")
 # Importing NetQASM connection, Qubit and EPR socket must be *after*
 # setting the simulator for NetQASM
 from netqasm.sdk.external import NetQASMConnection  # noqa: E402
-from netqasm.sdk import Qubit, EPRSocket  # noqa: E402
+from netqasm.sdk import Qubit  # noqa: E402
 
 
 # This function contains the code of the classical client
 def quantum_program(this_node_name: str) -> int:
     # To start executing quantum operations, we need to create a NetQASM connection
-    with NetQASMConnection(this_node_name, epr_sockets=[epr_socket]) as alice:
+    with NetQASMConnection(this_node_name) as alice:
         # Create a qubit
         q = Qubit(alice)
 
