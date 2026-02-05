@@ -40,7 +40,7 @@ if __name__ == "__main__":
     # Get the socket configuration for the sockets used for the application layer
     sockets_config = SocketsConfig(network_config, "default", NodeConfigType.APP)
 
-    # Create the client
+    # Create the server
     server = SimulaQronClassicalServer(sockets_config, "Bob")
     server.register_client_handler(run_bob)
     server.start_serving()

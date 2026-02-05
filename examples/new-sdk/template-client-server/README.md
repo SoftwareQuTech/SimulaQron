@@ -1,5 +1,8 @@
-# Quantum teleport example
-Quantum teleport example, using simple NetQASM code both for Alice and Bob.
+# SimulaQron Client-Server template
+This folder can be used as a template for creating client-server applications.
+This template uses SimulaQron's new SDK, to register a handler when a new client
+connects to the server. Additionally, it also provides a simple way to execute
+client code once the connection to the server has been established.
 
 
 # How to run
@@ -12,7 +15,7 @@ First of all, make sure you are not already running existing simulaqron programs
 You can run
 
 ```shell
-./terminate.sh
+sh terminate.sh
 ```
 
 which should get rid of all things running for the teleport example itself. If you have a

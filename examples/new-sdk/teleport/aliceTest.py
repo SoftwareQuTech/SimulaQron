@@ -29,7 +29,7 @@ async def run_alice(reader: StreamReader, writer: StreamWriter):
         q.H()
         m1 = q.measure()
         m2 = epr.measure()
-    # Any value that comes from NetQASm *need* to be retrieved ("casted" to int)
+    # Any value that comes from NetQASM *need* to be retrieved ("casted" to int)
     # *after* the connection is closed (or after flushing the connection, untested)
     m1_val = int(m1)
     m2_val = int(m2)

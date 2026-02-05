@@ -1,0 +1,78 @@
+from asyncio import StreamReader, StreamWriter
+from pathlib import Path
+
+from simulaqron.general.host_config import SocketsConfig
+from simulaqron.sdk.protocol import SimulaQronClassicalClient
+from simulaqron.settings import network_config
+from simulaqron.settings.network_config import NodeConfigType
+
+# This is recipe to use NetQASM with simulaqron backend.
+from netqasm.runtime.settings import set_simulator
+set_simulator("simulaqron")
+
+# Importing NetQASM connection, Qubit and EPR socket must be *after*
+# setting the simulator for NetQASM
+from netqasm.sdk.external import NetQASMConnection  # noqa: E402
+from netqasm.sdk import Qubit, EPRSocket  # noqa: E402
+
+
+# This function contains the code to serve *one client ocnnected to this server*.
+# "reader" is an object connected to the client, which can be used to read data from the client
+# "writer" is an object connected to the client, which can be used to send data to the client
+async def serve_client(reader: StreamReader, writer: StreamWriter):
+    # If you want to receive a message (such a query) from the client, you can
+    # use the "read" method from the "reader" object. The argument is an integer that
+    # configures the maximum bytes that we are allowed to read in a single operation.
+    # Note: Since "read" is a python coroutine, we need to "await" it, so python can
+    # execute other coroutines (such as serving a new client) until the data becomes
+    # available to read.
+    answer = await reader.read(100)
+
+    # To send a messsage, we can simply use the "wirte" method from the "writer" object
+    # The argument *must* be a python bytes object, which we can get by encoding (using
+    # the UTF-8 charmap) any python string
+    message = "Hello World"
+    writer.write(message.encode("utf-8"))
+
+    this_node_name = "Bob"
+    other_node_name = "Alice"
+
+    epr_socket = EPRSocket(other_node_name)
+    with NetQASMConnection(this_node_name, epr_sockets=[epr_socket]) as bob:
+        # Create a qubit
+        q = Qubit(bob)
+        q.H()
+        # Create entanglement
+        epr = epr_socket.create_keep()[0]
+        # Teleport
+        q.cnot(epr)
+        q.H()
+        m1 = q.measure()
+        m2 = epr.measure()
+    # Any value that comes from NetQASM *need* to be retrieved ("casted" to int)
+    # *after* the connection is closed (or after flushing the connection, untested)
+    m1_val = int(m1)
+    m2_val = int(m2)
+    return m1_val, m2_val
+
+
+if __name__ == "__main__":
+    # Load the simulaqron settings file
+    simulaqron_config_file = Path("simulaqron_settings.json")
+    simulaqron_settings.read_from_file(simulaqron_config_file)
+
+    # Load the file network configuration file
+    network_config_file = Path("simulaqron_network.json")
+    network_config.read_from_file(network_config_file)
+
+    # Some data for this node:
+    network_name = "default"  # A network with this name *must* exist in "simulaqron_network.json"
+    node_name = "YourName"  # A node with this name *must* exist in "simulaqron_network.json"
+
+    # Get the socket configuration for the sockets used for the application layer
+    sockets_config = SocketsConfig(network_config, network_name, NodeConfigType.APP)
+
+    # Create the server
+    server = SimulaQronClassicalServer(sockets_config, node_name)
+    server.register_client_handler(serve_client)
+    server.start_serving()

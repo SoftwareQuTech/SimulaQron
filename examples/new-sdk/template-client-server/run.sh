@@ -17,11 +17,14 @@ done
 if [ "$START_SIMULAQRON" = true ]; then
     # Check if SimulaQron is already running
     if [ ! -f ~/.simulaqron_pids/simulaqron_network_default.pid ]; then
+        # TODO - Modify the list of nodes to start on this machine
+        # TODO - Change the filename of the network configuration if you changed that
+        # TODO - Change the filename of the simulaqron configuration if you changed that
         # If not, start simulaqron backend for both nodes
-        simulaqron start --nodes=Alice,Bob --network-config-file simulaqron_network.json
+        simulaqron start --nodes=Alice,Bob --network-config-file simulaqron_network.json --simulaqron-config-file simulaqron_settings.json
     fi
 fi
 
-python3 bobTest.py &
+python3 nodeTest-server.py &
 sleep 1
-python3 aliceTest.py
+python3 nodeTest-client.py
