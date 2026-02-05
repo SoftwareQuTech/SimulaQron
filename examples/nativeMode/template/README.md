@@ -111,4 +111,4 @@ that are still running.
 ## `doNew.sh`
 
 This is ascript that you can use to start a new instance of your application from a clean state.
-This scrip simply invokes `terminate.sh` and `run.sh` sequentially.
+This script simply invokes `terminate.sh` and `run.sh` sequentially.

@@ -101,12 +101,12 @@ Now you can run:
 
 * on Bob:
 ```shell
-python teleport-bob.py
+python bobTest.py
 ```
 
 * on Alice:
 ```shell
-python teleport-alice.py
+python aliceTest.py
 ```
 
 The code assumes you start Bob before starting Alice. Using your knowledge of network programming
