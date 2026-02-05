@@ -144,14 +144,6 @@ def main():
     virtualNet = SocketsConfig(network_config, config_type=NodeConfigType.VNODE)
     classicalNet = SocketsConfig(network_config, config_type=NodeConfigType.APP)
 
-    # By default, *all nodes* described in the network configuration will be loaded in the SocketsConfig
-    # object. With this information, SimulaQron will start all of those nodes, either as local classical
-    # or virtual nodes (depending on the specified configuration type).
-    # In some cases, this is not desired, and we want ot start *a subset* of these nodes.
-    # To do this, we can use the method "filter" from the SocketsConfig object to specify the nodes
-    # we want to keep (and hence, start)
-    classicalNet.filter(["Alice", "Bob"])
-
     # Check if we should run a local classical server. If so, initialize the code
     # to handle remote connections on the classical communication network
     if myName in classicalNet.hostDict:
