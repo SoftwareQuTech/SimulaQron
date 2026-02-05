@@ -1,0 +1,36 @@
+[
+    {
+        "name": "default",
+        "nodes":  [
+            {
+                "Alice": {
+                    "app_socket": ["localhost", 8821],
+                    "qnodeos_socket": ["localhost", 8822],
+                    "vnode_socket": ["localhost", 8823]
+                }
+            },
+            {
+                "Bob": {
+                    "app_socket": ["localhost", 8831],
+                    "qnodeos_socket": ["localhost", 8832],
+                    "vnode_socket": ["localhost", 8833]
+                }
+            },
+            {
+                "Charlie": {
+                    "app_socket": ["localhost", 8841],
+                    "qnodeos_socket": ["localhost", 8842],
+                    "vnode_socket": ["localhost", 8843]
+                }
+            },
+            {
+                "David": {
+                    "app_socket": ["localhost", 8871],
+                    "qnodeos_socket": ["localhost", 8872],
+                    "vnode_socket": ["localhost", 8873]
+                }
+            }
+        ],
+        "topology": null
+    }
+]

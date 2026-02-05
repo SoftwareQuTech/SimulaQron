@@ -27,14 +27,12 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-import os
 import logging
 import numpy as np
 
 from simulaqron.local.setup import setup_local
 from simulaqron.general.host_config import SocketsConfig
-from simulaqron.settings import simulaqron_settings
+from simulaqron.settings import network_config
 from twisted.internet.defer import inlineCallbacks
 from twisted.spread import pb
 
@@ -164,18 +162,15 @@ class localNode(pb.Root):
 
 def main():
 
-    # In this example, we are YOURNAME
+    # In this example, we are Charlie
     myName = "Charlie"
 
-    # This file defines the network of virtual quantum nodes
-    network_file = simulaqron_settings.network_config_file
+    # This file defines the network of virtual quantum nodes and the network used for classical communication
+    network_config.read_from_file("classicalNet.json")
 
-    # This file defines the nodes acting as servers in the classical communication network
-    classicalFile = os.path.join(os.path.dirname(__file__), "classicalNet.cfg")
-
-    # Read configuration files for the virtual quantum, as well as the classical network
-    virtualNet = SocketsConfig(network_file)
-    classicalNet = SocketsConfig(classicalFile)
+    # Using the config, we then get the right sockets configuration type
+    virtualNet = SocketsConfig(network_config, network_name="default", config_type="vnode")
+    classicalNet = SocketsConfig(network_config, network_name="default", config_type="app")
 
     # Check if we should run a local classical server. If so, initialize the code
     # to handle remote connections on the classical communication network

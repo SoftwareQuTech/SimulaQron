@@ -114,7 +114,6 @@ class localNode(pb.Root):
 # main
 #
 def main():
-
     myName = "Alice"  # we are Alice
 
     # This file defines the network of virtual quantum nodes and the network used for classical communication
