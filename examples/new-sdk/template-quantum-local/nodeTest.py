@@ -1,8 +1,6 @@
 from pathlib import Path
 
-from simulaqron.general.host_config import SocketsConfig
 from simulaqron.settings import network_config, simulaqron_settings
-from simulaqron.settings.network_config import NodeConfigType
 
 # This is recipe to use NetQASM with simulaqron backend.
 from netqasm.runtime.settings import set_simulator
@@ -43,13 +41,7 @@ if __name__ == "__main__":
 
     # Some data for this node:
     network_name = "default"  # A network with this name *must* exist in "simulaqron_network.json"
-    node_name = "YourName"  # A node with this name *must* exist in "simulaqron_network.json"
+    node_name = "Alice"  # A node with this name *must* exist in "simulaqron_network.json"
 
-    # Get the socket configuration for the sockets used for the application layer
-    sockets_config = SocketsConfig(network_config, network_name, NodeConfigType.APP)
-
-    # Name of one node to classically connect to
-    server_name = "Bob"
-
-    result = quantum_program()
+    result = quantum_program(node_name)
     print(result)
