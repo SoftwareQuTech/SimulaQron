@@ -18,6 +18,24 @@ class SimulaQronClassicalClient:
         """
         self._sockets_config = sockets_config
 
+    async def connect_and_run(self, server_name: str, callback: Coroutine[Any, Any, _T]) -> _T:
+        """
+        "Async" version of the `run_client` method, which can be awaited in a context of a python coroutine.
+        For more information check the documentation of the `run_client` method.
+
+        :param server_name: The name of the server to connect to. The name *must* exist in the
+                          configuration file given when constructing this client.
+        :type server_name: str
+        :param callback: The function to be called when the connection is established. This function
+                         implements the logic for interacting with the server. The passed function
+                         *must* be a python "async" function.
+        :type callback: Callable[[StreamReader, StreamWriter], Awaitable[None]]
+        """
+        if server_name not in self._sockets_config.hostDict:
+            raise RuntimeError(f"The node with name '{server_name}' is not on the network configuration.")
+        socket_config = self._sockets_config.hostDict[server_name]
+        return await self._run_client(socket_config.hostname, socket_config.port, callback)
+
     async def _run_client(self, hostname: str, port: int, callback: Coroutine[Any, Any, _T]) -> _T:
         """
         Python coroutine that opens the connection and runs the function provided by the user.
@@ -63,14 +81,14 @@ class SimulaQronClassicalClient:
 class SimulaQronClassicalServer:
     def __init__(self, sockets_config: SocketsConfig, name: str):
         """
-        Classical server used to server classical clients to remote nodes. The given socket configs
+        Classical server used to serve classical clients sending classical messages. The given socket configs
         object contains the specification of the available nodes on the network that this server can
         interact with. Please note that this configuration *does not limit* the clients that can
         connect to this server.
 
         :param sockets_config: The sockets configuration for the whole network.
         :type sockets_config: SocketsConfig
-        :param name: The name of the server to connect to. The name *must* exist in the
+        :param name: The node name of the server. The name *must* exist in the
                      configuration file given when constructing this server.
         :type name: str
         """
@@ -108,8 +126,8 @@ class SimulaQronClassicalServer:
             self._sockets_data.hostname,
             self._sockets_data.port
         )
-        print(f"BOB INFO: === {self._node_name} Server ===")
-        print(f"BOB DEBUG: Listening on {self._sockets_data.hostname}:{self._sockets_data.port}")  # noqa: E231
+        print(f"{self._node_name.lower()} INFO: === {self._node_name} Server ===")
+        print(f"{self._node_name.lower()} DEBUG: Listening on {self._sockets_data.hostname}:{self._sockets_data.port}")  # noqa: E231
         async with server:
             await server.serve_forever()
 
