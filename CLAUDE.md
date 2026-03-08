@@ -22,7 +22,8 @@
 - **Docs:** `docs/` — Sphinx documentation (currently outdated, being rewritten)
 
 ## Git / Commit Policy
-- **Never commit or push without explicit user approval.** Always show a summary of staged changes and wait for a clear "go ahead" before running `git commit`.
+- **Always run `make ci` before committing.** All linting, tests, and examples must pass before any commit is created.
+- Never commit or push without explicit user approval.
 
 ## Virtual Environment
 - The project venv is at `.venv/` — activate with `source .venv/bin/activate`
