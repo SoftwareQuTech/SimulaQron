@@ -45,7 +45,6 @@ classifiers = [
 test = [
     "flake8>=5.0.0,<6.0.0",
     "pytest>=7.1, <8.0",
-    "projectq<=0.8.0",
     "qutip<5.0.0"
 ]
 opt = [

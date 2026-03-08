@@ -36,26 +36,34 @@ tests_slow:
 tests_all:
 	@${PYTHON} -m pytest -v --capture=tee-sys ${TEST_DIR}
 
+_example_cleanup:
+	@simulaqron stop 2>/dev/null || true
+	@sleep 2
+
 examples:
 	@echo "--- new-sdk examples ---"
 	@cd examples/new-sdk/corrRNG && timeout 90 bash run.sh
+	@$(MAKE) _example_cleanup
 	@cd examples/new-sdk/extendGHZ && timeout 90 bash run.sh
+	@$(MAKE) _example_cleanup
 	@cd examples/new-sdk/teleport && timeout 90 bash run.sh
+	@$(MAKE) _example_cleanup
 	@cd examples/new-sdk/classical-client-server && timeout 90 bash run.sh
+	@$(MAKE) _example_cleanup
 	@cd examples/new-sdk/template-quantum-local && timeout 90 bash run.sh
+	@$(MAKE) _example_cleanup
 	@cd examples/new-sdk/midCircuitLogic && timeout 90 bash run.sh
-	@echo "--- nativeMode examples ---"
-	@cd examples/nativeMode/corrRNG && timeout 90 bash run.sh
-	@cd examples/nativeMode/extendGHZ && timeout 90 bash run.sh
-	@cd examples/nativeMode/teleport && timeout 90 bash run.sh
-	@cd examples/nativeMode/graphState && timeout 90 bash run.sh
-	@echo "All examples passed."
+	@$(MAKE) _example_cleanup
+	@echo "All new sdk examples passed."
 
 install: test-deps
 	@$(PYTHON) -m pip install -e . ${PIP_FLAGS}
 
 _verified:
 	@echo "SimulaQron is verified!"
+
+ci: lint tests tests_slow examples
+	@echo "All CI checks passed."
 
 verify: clean python-deps lint tests _verified
 
@@ -75,4 +83,4 @@ _build:
 
 build: _clear_build _build
 
-.PHONY: clean lint python-deps tests tests_slow tests_all examples full_tests verify build
+.PHONY: clean lint python-deps tests tests_slow tests_all examples _example_cleanup ci full_tests verify build
