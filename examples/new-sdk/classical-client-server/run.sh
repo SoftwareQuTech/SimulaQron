@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Running SimulaQron backend is not needed for this example.
 ## Check if SimulaQron is already running
