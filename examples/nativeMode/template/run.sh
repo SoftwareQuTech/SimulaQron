@@ -14,4 +14,5 @@ fi
 
 # Run the files for Alice, Bob or whatever nodes you construct
 python3 bobTest.py &
+sleep 1
 python3 aliceTest.py
