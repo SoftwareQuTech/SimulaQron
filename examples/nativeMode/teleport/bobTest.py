@@ -90,6 +90,12 @@ class localNode(pb.Root):
     def remote_test(self):
         return "Tested!"
 
+    @inlineCallbacks
+    def _wait_ready(self):
+        """Wait until setup_local has connected us to the virtual node."""
+        while self.virtRoot is None or self.qReg is None:
+            yield deferLater(reactor, 0.1, lambda: None)
+
         # This can be called by Alice to tell Bob where to get the qubit and what corrections to apply
 
     @inlineCallbacks
@@ -102,12 +108,9 @@ class localNode(pb.Root):
         virtualNum    number of the virtual qubit corresponding to the EPR pair received
         """
 
-        logging.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
+        yield self._wait_ready()
 
-        # Wait until our virtual node connection is ready — Alice may call us
-        # before setup_local has finished connecting to the virtual node.
-        while self.virtRoot is None:
-            yield deferLater(reactor, 0.05, lambda: None)
+        logging.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
 
         eprB = yield self.virtRoot.callRemote("get_virtual_ref", virtualNum)
 
@@ -132,7 +135,7 @@ class localNode(pb.Root):
         else:
             ValueError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
-        print(f"Qubit is: \n{state}")
+        print(f"Qubit is: \n{state}", flush=True)
 
 
 #####################################################################################################

@@ -11,8 +11,8 @@ if [ ! -f ~/.simulaqron_pids/simulaqron_network_default.pid ]; then
     fi
 fi
 
+sleep 5
 
 # Run the files for Alice, Bob or whatever nodes you construct
 python3 bobTest.py &
-sleep 1
 python3 aliceTest.py

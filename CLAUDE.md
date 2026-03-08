@@ -21,6 +21,9 @@
 - **Core code:** `simulaqron/` — simulator source
 - **Docs:** `docs/` — Sphinx documentation (currently outdated, being rewritten)
 
+## Git / Commit Policy
+- **Never commit or push without explicit user approval.** Always show a summary of staged changes and wait for a clear "go ahead" before running `git commit`.
+
 ## Virtual Environment
 - The project venv is at `.venv/` — activate with `source .venv/bin/activate`
 - Install with `pip install -e .` (skip `[test]` if projectq build fails)

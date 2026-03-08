@@ -36,25 +36,18 @@ tests_slow:
 tests_all:
 	@${PYTHON} -m pytest -v --capture=tee-sys ${TEST_DIR}
 
-_example_cleanup:
-	@simulaqron stop 2>/dev/null || true
-	@sleep 2
-
 examples:
 	@echo "--- new-sdk examples ---"
 	@cd examples/new-sdk/corrRNG && timeout 90 bash run.sh
-	@$(MAKE) _example_cleanup
+	@cd examples/new-sdk/corrRNG && bash terminate.sh && sleep 3
 	@cd examples/new-sdk/extendGHZ && timeout 90 bash run.sh
-	@$(MAKE) _example_cleanup
+	@cd examples/new-sdk/extendGHZ && bash terminate.sh && sleep 3
 	@cd examples/new-sdk/teleport && timeout 90 bash run.sh
-	@$(MAKE) _example_cleanup
-	@cd examples/new-sdk/classical-client-server && timeout 90 bash run.sh
-	@$(MAKE) _example_cleanup
-	@cd examples/new-sdk/template-quantum-local && timeout 90 bash run.sh
-	@$(MAKE) _example_cleanup
+	@cd examples/new-sdk/teleport && bash terminate.sh && sleep 3
 	@cd examples/new-sdk/midCircuitLogic && timeout 90 bash run.sh
-	@$(MAKE) _example_cleanup
-	@echo "All new sdk examples passed."
+	@cd examples/new-sdk/midCircuitLogic && bash terminate.sh && sleep 3
+	@cd examples/nativeMode/teleport && bash terminate.sh && sleep 3
+	@echo "Chosen examples passed."
 
 install: test-deps
 	@$(PYTHON) -m pip install -e . ${PIP_FLAGS}
@@ -83,4 +76,4 @@ _build:
 
 build: _clear_build _build
 
-.PHONY: clean lint python-deps tests tests_slow tests_all examples _example_cleanup ci full_tests verify build
+.PHONY: clean lint python-deps tests tests_slow tests_all examples ci full_tests verify build

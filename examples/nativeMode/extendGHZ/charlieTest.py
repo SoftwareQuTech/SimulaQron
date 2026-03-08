@@ -86,6 +86,12 @@ class localNode(pb.Root):
     def remote_test(self):
         return "Tested!"
 
+    @inlineCallbacks
+    def _wait_ready(self):
+        """Wait until setup_local has connected us to the virtual node."""
+        while self.virtRoot is None or self.qReg is None:
+            yield deferLater(reactor, 0.1, lambda: None)
+
         # This can be called by Alice or Bob to tell Charlie where to get the qubit and what to do next
 
     @inlineCallbacks
@@ -97,18 +103,15 @@ class localNode(pb.Root):
         virtualNum    number of the virtual qubit corresponding to the EPR pair received
         """
 
-        logging.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
+        yield self._wait_ready()
 
-        # Wait until our virtual node connection is ready — Bob may call us
-        # before setup_local has finished connecting to the virtual node.
-        while self.virtRoot is None:
-            yield deferLater(reactor, 0.05, lambda: None)
+        logging.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
 
         q = yield self.virtRoot.callRemote("get_virtual_ref", virtualNum)
 
         # Measure it
         outcome = yield q.callRemote("measure")
-        print(f"Charlie's outcome was: {outcome}")
+        print(f"Charlie's outcome was: {outcome}", flush=True)
 
 
 #####################################################################################################

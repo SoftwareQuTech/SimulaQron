@@ -9,8 +9,9 @@ if [ ! -f ~/.simulaqron_pids/simulaqron_network_default.pid ]; then
     fi
 fi
 
+sleep 5
+
 python3 bobTest.py &
-sleep 1
 python3 aliceTest.py
 
 

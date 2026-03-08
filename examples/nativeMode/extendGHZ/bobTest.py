@@ -32,7 +32,9 @@ import logging
 from simulaqron.local.setup import setup_local
 from simulaqron.general.host_config import SocketsConfig
 from simulaqron.settings import network_config
+from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
+from twisted.internet.task import deferLater
 from twisted.spread import pb
 
 
@@ -85,6 +87,12 @@ class localNode(pb.Root):
     def remote_test(self):
         return "Tested!"
 
+    @inlineCallbacks
+    def _wait_ready(self):
+        """Wait until setup_local has connected us to the virtual node."""
+        while self.virtRoot is None or self.qReg is None:
+            yield deferLater(reactor, 0.1, lambda: None)
+
         # This can be called by Alice to tell Bob where to get the qubit and what corrections to apply
 
     @inlineCallbacks
@@ -96,6 +104,8 @@ class localNode(pb.Root):
         a,b        received measurement outcomes from Alice
         virtualNum    number of the virtual qubit corresponding to the EPR pair received
         """
+
+        yield self._wait_ready()
 
         logging.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
 
@@ -115,7 +125,7 @@ class localNode(pb.Root):
 
         # Measure our qubit
         outcome = yield eprB.callRemote("measure")
-        print(f"Bob's outcome was: {outcome}")
+        print(f"Bob's outcome was: {outcome}", flush=True)
 
 
 #####################################################################################################
