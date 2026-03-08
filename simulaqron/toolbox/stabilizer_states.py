@@ -36,10 +36,10 @@ class StabilizerState:
 
         A qubit in the state :math:`|1>` can be created as ``StabilizerState([[0, 1, 1]])``.
 
-        The entangled state :math:`(|00> + |11>)/\sqrt(2)` can be created as
+        The entangled state :math:`(|00> + |11>)/\\sqrt(2)` can be created as
         ``StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])``.
 
-        The entangled state :math:`(|01> + |10>)/\sqrt(2)` can be created as
+        The entangled state :math:`(|01> + |10>)/\\sqrt(2)` can be created as
         ``StabilizerState([[1, 1, 0, 0, 0], [0, 0, 1, 1, 1]])``.
 
         :param data: Can be one of the following:
