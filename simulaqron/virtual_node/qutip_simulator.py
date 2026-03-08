@@ -427,7 +427,7 @@ class QutipEngine(QuantumEngine):
             p0, p1 = 0.5, 0.5
 
         # Sample the measurement outcome from these probabilities
-        outcome = int(np.random.choice([0, 1], 1, p=[p0, p1]))
+        outcome = np.random.choice([0, 1], p=[p0, p1]).item()
 
         # Compute the post-measurement state, getting rid of the measured qubit
         if outcome == 0:

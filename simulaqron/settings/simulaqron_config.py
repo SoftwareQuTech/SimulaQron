@@ -76,7 +76,7 @@ class SimulaqronConfig(JSONSerializerMixin):
     recv_retry_time: float = 0.1
     recv_max_retries: int = 10
     log_level: int = logging.WARNING
-    sim_backend: SimBackend = SimBackend.STABILIZER
+    sim_backend: SimBackend = SimBackend.QUTIP
     noisy_qubits: bool = False
     max_app_waiting_time: float = -1.0  # In seconds, negative means unlimited waiting
     t1: float = 1.0
@@ -152,7 +152,7 @@ class SimulaqronConfig(JSONSerializerMixin):
         * recv_retry_time = 0.1
         * recv_max_retries = 10
         * log_level = logging.WARNING
-        * sim_backend = SimBackend.STABILIZER
+        * sim_backend = SimBackend.QUTIP
         * noisy_qubits = False
         * max_app_waiting_time = -1.0  # In seconds, negative means unlimited waiting
         * t1: float = 1.0

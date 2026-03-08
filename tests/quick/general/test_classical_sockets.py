@@ -11,7 +11,7 @@ class TestClassicalSocket:
     @pytest.fixture(autouse=True)
     def configurations(self):
         simulaqron_settings.default_settings()
-        simulaqron_settings.sim_backend = SimBackend.PROJECTQ
+        simulaqron_settings.sim_backend = SimBackend.STABILIZER
         network_config.using_default_network()
         yield
 

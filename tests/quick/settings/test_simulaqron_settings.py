@@ -60,7 +60,7 @@ class TestSettings:
             "recv_retry_time": 0.1,
             "recv_max_retries": 10,
             "log_level": 30,
-            "sim_backend": "stabilizer",
+            "sim_backend": "qutip",
             "noisy_qubits": false,
             "t1": 1.0
         }

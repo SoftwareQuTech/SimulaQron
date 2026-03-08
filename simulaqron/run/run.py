@@ -117,7 +117,7 @@ def run_applications(
         network_cfg: Union[str, PathLike, Path] = None,  # WARNING - The type of this argument *cannot* be harmonized
         nv_cfg: Any = None,  # Unused; it's here for harmonization with squidasm "simulate_application"
         log_cfg: LogConfig = None,
-        formalism: Formalism = Formalism.KET,
+        formalism: Formalism = Formalism.DM,
         use_app_config: bool = True,
         post_function: Optional[Callable] = None,
         enable_logging: bool = True,
