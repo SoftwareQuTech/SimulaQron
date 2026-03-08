@@ -46,7 +46,6 @@ stdout_file = None
 
 def _sigterm_handler(name, _signo, _stack_frame):
     print(f"START_VNODE: Shutting down Node '{name}' from signal {_signo}.", flush=True)
-    global stdout_file
     if stdout_file is not None:
         stdout_file.flush()
         stdout_file.close()

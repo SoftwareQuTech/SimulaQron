@@ -1,5 +1,4 @@
 import logging
-import sys
 
 from typing import Optional, Dict, Callable, Generator, Any, List, Type
 
@@ -13,7 +12,6 @@ from twisted.internet.protocol import Protocol
 from simulaqron.netqasm_backend.executioner import VanillaSimulaQronExecutioner
 from simulaqron.sdk.connection import (NewMessageType, GetQubitStateMessage,
                                        ReturnQubitStateMessage)
-from simulaqron.settings import simulaqron_settings
 
 
 class SubroutineHandler(QNodeController):

@@ -23,7 +23,7 @@ from netqasm.sdk import EPRSocket  # noqa: E402
 
 async def send_to_charlie(reader: StreamReader, writer: StreamWriter):
     writer.write("receive_qubit".encode("utf-8"))
-    message = await  reader.read(100)
+    message = await reader.read(100)
     assert message.decode("utf-8") == "continue"
 
 

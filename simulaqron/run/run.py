@@ -80,7 +80,6 @@ def _worker_initializer(synced_array: SynchronizedArray):
 
 
 def _app_wrapper(**kwargs):
-    global _apps_pids
     assert _apps_pids is not None
     assert "__instance_num" in kwargs and isinstance(kwargs["__instance_num"], int)
     assert "__entry_function" in kwargs and isinstance(kwargs["__entry_function"], Callable)
@@ -102,7 +101,6 @@ def _app_wrapper(**kwargs):
 
 
 def _signal_other_apps():
-    global _apps_pids
     assert _apps_pids is not None
     for pid in _apps_pids:
         # Do not send SIGINT to self process

@@ -127,7 +127,7 @@ class SimulaQronClassicalServer:
             self._sockets_data.port
         )
         print(f"{self._node_name.lower()} INFO: === {self._node_name} Server ===")
-        print(f"{self._node_name.lower()} DEBUG: Listening on {self._sockets_data.hostname}:{self._sockets_data.port}")  # noqa: E231
+        print(f"{self._node_name.lower()} DEBUG: Listening on {self._sockets_data.hostname}:{self._sockets_data.port}")  # noqa: E231,E501
         async with server:
             await server.serve_forever()
 

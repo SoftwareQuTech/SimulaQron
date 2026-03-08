@@ -41,9 +41,9 @@ from simulaqron.settings.network_config import NodeConfigType
 # Each constant names a state in Bob's state machine.
 # The string value is used in log output so keep it human-readable.
 
-STATE_WAITING_PING   = "WAITING_PING"
+STATE_WAITING_PING   = "WAITING_PING"   # noqa: E221
 STATE_WAITING_THANKS = "WAITING_THANKS"
-STATE_DONE           = "DONE"
+STATE_DONE           = "DONE"           # noqa: E221
 
 
 # ── Handlers ─────────────────────────────────────────────────────────────────
@@ -83,7 +83,7 @@ async def handle_thank_you(writer: StreamWriter) -> str:
 # and anything not listed is automatically an invalid transition.
 
 BOB_DISPATCH = {
-    (STATE_WAITING_PING,   "ping"):      handle_ping,
+    (STATE_WAITING_PING,   "ping"):      handle_ping,  # noqa: E241
     (STATE_WAITING_THANKS, "thank you"): handle_thank_you,
 }
 

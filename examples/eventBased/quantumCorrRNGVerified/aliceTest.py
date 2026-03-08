@@ -52,9 +52,9 @@ from netqasm.sdk import EPRSocket  # noqa: E402
 
 # ── States ───────────────────────────────────────────────────────────────────
 
-STATE_WAITING_ACCEPT       = "WAITING_ACCEPT"
+STATE_WAITING_ACCEPT       = "WAITING_ACCEPT"        # noqa: E221
 STATE_WAITING_VERIFICATION = "WAITING_VERIFICATION"
-STATE_DONE                 = "DONE"
+STATE_DONE                 = "DONE"                  # noqa: E221
 
 
 # ── Handlers ─────────────────────────────────────────────────────────────────

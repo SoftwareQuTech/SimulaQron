@@ -46,9 +46,9 @@ from netqasm.sdk import EPRSocket  # noqa: E402
 
 # ── States ───────────────────────────────────────────────────────────────────
 
-STATE_WAITING_PROPOSAL     = "WAITING_PROPOSAL"
+STATE_WAITING_PROPOSAL     = "WAITING_PROPOSAL"      # noqa: E221
 STATE_WAITING_ALICE_RESULT = "WAITING_ALICE_RESULT"
-STATE_DONE                 = "DONE"
+STATE_DONE                 = "DONE"                  # noqa: E221
 
 # Bob stores his measurement result here so the verification handler can
 # compare it with Alice's result.

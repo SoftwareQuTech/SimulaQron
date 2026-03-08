@@ -6,14 +6,13 @@ Exercises the (state, message) dispatch table state machine and verifies
 that each node traverses the expected sequence of states.
 """
 import asyncio
-import pytest
 
 
 # ── Bob state machine (mirrors politeBob.py) ─────────────────────────────────
 
-STATE_WAITING_PING   = "WAITING_PING"
+STATE_WAITING_PING   = "WAITING_PING"   # noqa: E221
 STATE_WAITING_THANKS = "WAITING_THANKS"
-STATE_DONE           = "DONE"
+STATE_DONE           = "DONE"           # noqa: E221
 
 
 async def bob_handler(reader, writer):
@@ -55,9 +54,9 @@ async def bob_handler(reader, writer):
 
 # ── Alice state machine (mirrors politeAlice.py) ──────────────────────────────
 
-STATE_WAITING_PONG          = "WAITING_PONG"
+STATE_WAITING_PONG          = "WAITING_PONG"           # noqa: E221
 STATE_WAITING_YOURE_WELCOME = "WAITING_YOURE_WELCOME"
-ALICE_DONE                  = "DONE"
+ALICE_DONE                  = "DONE"                    # noqa: E221
 
 
 async def alice_handler(port):
@@ -130,12 +129,12 @@ def test_full_exchange_completes():
 
     # Bob's two transitions
     assert len(bob_log) == 2
-    assert bob_log[0] == (STATE_WAITING_PING,   "ping",      "pong")
+    assert bob_log[0] == (STATE_WAITING_PING,   "ping",      "pong")           # noqa: E241
     assert bob_log[1] == (STATE_WAITING_THANKS, "thank you", "you're welcome")
 
     # Alice's two transitions
     assert len(alice_log) == 2
-    assert alice_log[0] == (STATE_WAITING_PONG,          "pong",           "thank you")
+    assert alice_log[0] == (STATE_WAITING_PONG,          "pong",           "thank you")  # noqa: E241
     assert alice_log[1] == (STATE_WAITING_YOURE_WELCOME, "you're welcome", None)
 
 
@@ -188,5 +187,5 @@ def test_bob_rejects_unexpected_message_in_wrong_state():
     # First entry: invalid transition (no reply)
     assert log[0] == (STATE_WAITING_PING, "thank you", None)
     # Second and third: normal transitions
-    assert log[1] == (STATE_WAITING_PING,   "ping",      "pong")
+    assert log[1] == (STATE_WAITING_PING,   "ping",      "pong")           # noqa: E241
     assert log[2] == (STATE_WAITING_THANKS, "thank you", "you're welcome")

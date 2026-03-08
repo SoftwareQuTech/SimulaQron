@@ -51,9 +51,9 @@ from simulaqron.settings.network_config import NodeConfigType
 
 # ── States ───────────────────────────────────────────────────────────────────
 
-STATE_WAITING_PONG          = "WAITING_PONG"
+STATE_WAITING_PONG          = "WAITING_PONG"           # noqa: E221
 STATE_WAITING_YOURE_WELCOME = "WAITING_YOURE_WELCOME"
-STATE_DONE                  = "DONE"
+STATE_DONE                  = "DONE"                    # noqa: E221
 
 
 # ── Handlers ─────────────────────────────────────────────────────────────────
@@ -88,7 +88,7 @@ async def handle_youre_welcome(writer: StreamWriter) -> str:
 # and anything not listed is automatically an invalid transition.
 
 ALICE_DISPATCH = {
-    (STATE_WAITING_PONG,          "pong"):           handle_pong,
+    (STATE_WAITING_PONG,          "pong"):           handle_pong,  # noqa: E241
     (STATE_WAITING_YOURE_WELCOME, "you're welcome"): handle_youre_welcome,
 }
 

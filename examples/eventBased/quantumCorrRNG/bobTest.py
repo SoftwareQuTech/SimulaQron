@@ -38,7 +38,7 @@ from netqasm.sdk import EPRSocket  # noqa: E402
 # ── States ───────────────────────────────────────────────────────────────────
 
 STATE_WAITING_PROPOSAL = "WAITING_PROPOSAL"
-STATE_DONE             = "DONE"
+STATE_DONE             = "DONE"             # noqa: E221
 
 
 # ── Handlers ─────────────────────────────────────────────────────────────────

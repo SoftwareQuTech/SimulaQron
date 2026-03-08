@@ -114,7 +114,6 @@ stdout_file = None
 
 
 def _sigterm_handler(_signo, _stack_frame):
-    global stdout_file
     if stdout_file is not None:
         stdout_file.flush()
         stdout_file.close()
