@@ -33,7 +33,9 @@ import numpy as np
 from simulaqron.local.setup import setup_local
 from simulaqron.general.host_config import SocketsConfig
 from simulaqron.settings import network_config
+from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
+from twisted.internet.task import deferLater
 from twisted.spread import pb
 
 
@@ -96,6 +98,11 @@ class localNode(pb.Root):
         if sender == "Bob":
 
             logging.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
+
+            # Wait until our virtual node connection is ready — Bob may call us
+            # before setup_local has finished connecting to the virtual node.
+            while self.virtRoot is None:
+                yield deferLater(reactor, 0.05, lambda: None)
 
             # Get ref of qubit
             self.qC = yield self.virtRoot.callRemote("get_virtual_ref", virtualNum)

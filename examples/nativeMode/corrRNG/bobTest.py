@@ -33,7 +33,9 @@ import logging
 from simulaqron.local.setup import setup_local
 from simulaqron.general.host_config import SocketsConfig
 from simulaqron.settings import network_config
+from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
+from twisted.internet.task import deferLater
 from twisted.spread import pb
 
 from qutip import Qobj
@@ -97,6 +99,11 @@ class localNode(pb.Root):
         Arguments
         virtualNum    number of the virtual qubit corresponding to the EPR pair received
         """
+
+        # Wait until our virtual node connection is ready — Alice may call us
+        # before setup_local has finished connecting to the virtual node.
+        while self.virtRoot is None:
+            yield deferLater(reactor, 0.05, lambda: None)
 
         qB = yield self.virtRoot.callRemote("get_virtual_ref", virtualNum)
 
