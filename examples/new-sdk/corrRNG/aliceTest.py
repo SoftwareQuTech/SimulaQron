@@ -15,21 +15,26 @@ from netqasm.sdk.external import NetQASMConnection  # noqa: E402
 from netqasm.sdk import EPRSocket  # noqa: E402
 
 
-# This function contains the code of the classical client
-def quantum_program(this_node_name: str, remote_node_name: str) -> int:
-    logging.debug("LOCAL %s: Running client side program.", this_node_name)
-
+def run_alice(this_node_name: str, remote_node_name: str) -> int:
     epr_socket = EPRSocket(remote_node_name)
-    # To start executing quantum operations, we need to create a NetQASM connection
-    with NetQASMConnection(this_node_name, epr_sockets=[epr_socket]) as alice:
-        # Create an entangled qubit
-        epr = epr_socket.create_keep()[0]
 
-        # And simply measure it
-        m1 = epr.measure()
-    # Any value that comes from NetQASM *need* to be retrieved ("casted" to int)
-    # *after* the connection is closed (or after flushing the connection, untested)
+    # sim_conn is our connection to the quantum backend (SimulaQron), not to Bob.
+    # Bob is reached via EPRSocket for quantum and reader/writer for classical.
+    sim_conn = NetQASMConnection(this_node_name, epr_sockets=[epr_socket])
+
+    # Create an entangled qubit
+    epr = epr_socket.create_keep()[0]
+
+    # And simply measure it
+    m1 = epr.measure()
+
+    # flush() executes all queued quantum operations and makes measurement
+    # results available.  Before flush(), m1 is just a future/promise.
+    sim_conn.flush()
+
+    # int(m) extracts the measurement outcome — only valid after flush().
     m1_val = int(m1)
+    sim_conn.close()
     return m1_val
 
 
@@ -56,5 +61,5 @@ if __name__ == "__main__":
     node_name = "Alice"  # A node with this name *must* exist in "simulaqron_network.json"
     other_node_name = "Bob"
 
-    result = quantum_program(node_name, other_node_name)
+    result = run_alice(node_name, other_node_name)
     print(f"{node_name}: My Random Number is '{result}'")

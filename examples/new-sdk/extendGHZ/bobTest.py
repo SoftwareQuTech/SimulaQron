@@ -27,14 +27,11 @@ async def send_to_charlie(reader: StreamReader, writer: StreamWriter):
     assert message.decode("utf-8") == "continue"
 
 
-# This function contains the code of the classical client
-async def bob_program(reader: StreamReader, writer: StreamWriter) -> int:
+async def run_bob(reader: StreamReader, writer: StreamWriter) -> int:
     # This is "Bob": the middle node of the GHZ chain
     this_node_name = "Bob"
     start_node_name = "Alice"  # A node with this name *must* exist in "simulaqron_network.json"
     end_node_name = "Charlie"  # A node with this name *must* exist in "simulaqron_network.json"
-
-    logging.debug("LOCAL %s: Running client side program.", this_node_name)
 
     message = await reader.read(100)
     assert message.decode("utf-8") == "receive_qubit"
@@ -45,26 +42,35 @@ async def bob_program(reader: StreamReader, writer: StreamWriter) -> int:
     sockets = SocketsConfig(network_config, "default", NodeConfigType.APP)
 
     charlie_client = SimulaQronClassicalClient(sockets)
-    # To start executing quantum operations, we need to create a NetQASM connection
-    with NetQASMConnection(this_node_name, epr_sockets=[epr_socket_alice, epr_socket_charlie]) as bob:
-        # Receive an entangled qubit
-        epr_alice = epr_socket_alice.recv_keep()[0]
 
-        # Create a new entangled with Charlie
-        epr_charlie = epr_socket_charlie.create_keep()[0]
+    # sim_conn is our connection to the quantum backend (SimulaQron), not to
+    # Alice or Charlie.  They are reached via EPRSockets for quantum and
+    # reader/writer for classical.
+    sim_conn = NetQASMConnection(this_node_name, epr_sockets=[epr_socket_alice, epr_socket_charlie])
 
-        await charlie_client.connect_and_run(end_node_name, send_to_charlie)
+    # Receive an entangled qubit from Alice
+    epr_alice = epr_socket_alice.recv_keep()[0]
 
-        # Create the GHZ state by entangling the fresh qubit
-        epr_alice.cnot(epr_charlie)
+    # Create a new entangled pair with Charlie
+    epr_charlie = epr_socket_charlie.create_keep()[0]
 
-        writer.write("continue".encode("utf-8"))
+    await charlie_client.connect_and_run(end_node_name, send_to_charlie)
 
-        # And simply measure it
-        m1 = epr_charlie.measure()
-    # Any value that comes from NetQASM *need* to be retrieved ("casted" to int)
-    # *after* the connection is closed (or after flushing the connection, untested)
+    # Create the GHZ state by entangling the fresh qubit
+    epr_alice.cnot(epr_charlie)
+
+    writer.write("continue".encode("utf-8"))
+
+    # And simply measure it
+    m1 = epr_charlie.measure()
+
+    # flush() executes all queued quantum operations and makes measurement
+    # results available.  Before flush(), m1 is just a future/promise.
+    sim_conn.flush()
+
+    # int(m) extracts the measurement outcome — only valid after flush().
     m1_val = int(m1)
+    sim_conn.close()
     print(f"{this_node_name}: My outcome is '{m1_val}'")
     return 0
 
@@ -98,5 +104,5 @@ if __name__ == "__main__":
     server = SimulaQronClassicalServer(classical_sockets, node_name)
     client = SimulaQronClassicalClient(classical_sockets)
 
-    server.register_client_handler(bob_program)
+    server.register_client_handler(run_bob)
     server.start_serving()

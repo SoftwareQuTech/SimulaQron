@@ -16,10 +16,9 @@ from netqasm.sdk.external import NetQASMConnection  # noqa: E402
 from netqasm.sdk import Qubit, EPRSocket  # noqa: E402
 
 
-# This function contains the code to serve *one client ocnnected to this server*.
 # "reader" is an object connected to the client, which can be used to read data from the client
 # "writer" is an object connected to the client, which can be used to send data to the client
-async def serve_client(reader: StreamReader, writer: StreamWriter):
+async def run_bob(reader: StreamReader, writer: StreamWriter):
     # If you want to receive a message (such a query) from the client, you can
     # use the "read" method from the "reader" object. The argument is an integer that
     # configures the maximum bytes that we are allowed to read in a single operation.
@@ -41,21 +40,30 @@ async def serve_client(reader: StreamReader, writer: StreamWriter):
     other_node_name = "Alice"
 
     epr_socket = EPRSocket(other_node_name)
-    with NetQASMConnection(this_node_name, epr_sockets=[epr_socket]) as bob:
-        # Create a qubit
-        q = Qubit(bob)
-        q.H()
-        # Create entanglement
-        epr = epr_socket.create_keep()[0]
-        # Teleport
-        q.cnot(epr)
-        q.H()
-        m1 = q.measure()
-        m2 = epr.measure()
-    # Any value that comes from NetQASM *need* to be retrieved ("casted" to int)
-    # *after* the connection is closed (or after flushing the connection, untested)
+
+    # sim_conn is our connection to the quantum backend (SimulaQron), not to Alice.
+    # Alice is reached via EPRSocket for quantum and reader/writer for classical.
+    sim_conn = NetQASMConnection(this_node_name, epr_sockets=[epr_socket])
+
+    # Create a qubit
+    q = Qubit(sim_conn)
+    q.H()
+    # Create entanglement
+    epr = epr_socket.create_keep()[0]
+    # Teleport circuit: CNOT + H + measure both
+    q.cnot(epr)
+    q.H()
+    m1 = q.measure()
+    m2 = epr.measure()
+
+    # flush() executes all queued quantum operations and makes measurement
+    # results available.  Before flush(), m1 and m2 are just futures/promises.
+    sim_conn.flush()
+
+    # int(m) extracts the measurement outcome — only valid after flush().
     m1_val = int(m1)
     m2_val = int(m2)
+    sim_conn.close()
     return m1_val, m2_val
 
 
@@ -77,5 +85,5 @@ if __name__ == "__main__":
 
     # Create the server
     server = SimulaQronClassicalServer(sockets_config, node_name)
-    server.register_client_handler(serve_client)
+    server.register_client_handler(run_bob)
     server.start_serving()

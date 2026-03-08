@@ -1,9 +1,6 @@
 Teleporting a Qubit
 ===================
 
-.. warning:: Update the code of the examples below!!!
-.. warning:: Update the configuration file to use the JSON format!!!
-
 Let's now consider a very simple protocol, in which Alice first generates an EPR pair with Bob, and then teleports
 a qubit to Bob. To program it in SimulaQron's native mode, we will use the template described in
 :doc:`Template`.
@@ -30,18 +27,31 @@ For completeness, let's briefly recap the protocol:
 Setting up
 -----------
 
-We will run everything locally (localhost) using the standard virtualNodes.json file that defines the nodes that run
-the virtual quantum node in the background to simulate the quantum hardware::
+We will run everything locally (localhost) using the standard ``simulaqron_network.json`` file that defines the
+nodes that run the virtual quantum node in the background to simulate the quantum hardware::
 
-    # Network configuration file
-    #
-    # For each host its informal name, as well as its location in the network must
-    # be listed.
-    #
-    # [name], [hostname], [port number]
-
-    Alice, localhost, 8801
-    Bob, localhost, 8802
+    [
+        {
+            "name": "default",
+            "nodes":  [
+                {
+                    "Alice": {
+                        "app_socket": ["localhost", 8821],
+                        "qnodeos_socket": ["localhost", 8822],
+                        "vnode_socket": ["localhost", 8823]
+                    }
+                },
+                {
+                    "Bob": {
+                        "app_socket": ["localhost", 8831],
+                        "qnodeos_socket": ["localhost", 8832],
+                        "vnode_socket": ["localhost", 8833]
+                    }
+                }
+            ],
+            "topology": null
+        }
+    ]
 
 We use this same file to specify the communication channels (sockets) for passing classical messages between the
 declared nodes. The loaded network configuration can be used to construct ``SocketsConfig`` objects that contain the
@@ -85,9 +95,19 @@ Since Alice acts as a client, we will only need to fill in runClientNode. This g
         # Prepare the first one in the |-> state
         yield q1.callRemote("apply_H")
 
-        # For information purposes, let's print the state of that qubit
-        (R,I) = yield q1.callRemote("get_qubit")
-        print("Qubit to be teleported is: ", assemble_qubit(R,I))
+        # For information purposes, let's print the state of that qubit.
+        # The method to retrieve the state depends on the simulation backend.
+        if simulaqron_settings.sim_backend.value == "qutip":
+            realRho, imagRho = yield q1.callRemote("get_qubit")
+            state = np.array(assemble_qubit(realRho, imagRho), dtype=complex)
+        elif simulaqron_settings.sim_backend.value == "projectq":
+            _, (realvec, imagvec) = yield virtRoot.callRemote("get_register_RI", q1)
+            state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
+        elif simulaqron_settings.sim_backend.value == "stabilizer":
+            array, _ = yield virtRoot.callRemote("get_register_RI", q1)
+            state = StabilizerState(array)
+
+        print("Qubit to be teleported is:\n{}".format(state))
 
         # Put qubits A and B in an EPR state
         yield qA.callRemote("apply_H")
@@ -172,23 +192,19 @@ matrix of the qubit at the end for illustration.::
             if a == 1:
                 yield eprB.callRemote("apply_Z")
 
-            # Just print the qubit we received
-            (realRho, imagRho) = yield eprB.callRemote("get_qubit")
-            rho = self.assemble_qubit(realRho, imagRho)
+            # Just print the qubit we received.
+            # The method to retrieve the state depends on the simulation backend.
+            if simulaqron_settings.sim_backend.value == "qutip":
+                (realRho, imagRho) = yield eprB.callRemote("get_qubit")
+                state = np.array(assemble_qubit(realRho, imagRho), dtype=complex)
+            elif simulaqron_settings.sim_backend.value == "projectq":
+                _, (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", eprB)
+                state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
+            elif simulaqron_settings.sim_backend.value == "stabilizer":
+                array, _, = yield self.virtRoot.callRemote("get_register_RI", eprB)
+                state = StabilizerState(array)
 
-            print("Qubit is:", rho)
-
-        def assemble_qubit(self, realM, imagM):
-            """
-            Reconstitute the qubit as a qutip object from its real and imaginary components given as a list.
-            We need this since Twisted PB does not support sending complex valued object natively.
-            """
-            M = realM
-            for s in range(len(M)):
-                for t in range(len(M)):
-                    M[s][t] = realM[s][t] + 1j * imagM[s][t]
-
-            return Qobj(M)
+            print(f"Qubit is: \n{state}")
 
 --------
 Starting

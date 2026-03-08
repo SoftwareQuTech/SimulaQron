@@ -104,6 +104,11 @@ class SimulaQronConnection(BaseNetQASMConnection):
         # Keep track of finished msg IDs
         self._done_msg_ids: Set[int] = set()
 
+        # Stores an error received from the backend so it can be raised after
+        # _wait_for_done unblocks, rather than raising inside _handle_reply
+        # (which would leave the msg_id in _waiting_msg_ids and break close())
+        self._pending_error: Optional[Exception] = None
+
         # Buffer for returned messages
         self.buf = b""
 
@@ -283,6 +288,10 @@ class SimulaQronConnection(BaseNetQASMConnection):
                 # Wait for another don
                 continue
         self._logger.debug("Received done for msg ID %d", done_msg_id)
+        if self._pending_error is not None:
+            err = self._pending_error
+            self._pending_error = None
+            raise err
 
     def _read_more_data(self):
         """Reads in some more data on the socket to qnodeos"""
@@ -320,6 +329,11 @@ class SimulaQronConnection(BaseNetQASMConnection):
             self._logger.debug("Got message %s", ret_msg)
             match ret_msg:
                 case MsgDoneMessage():
+                    if ret_msg.msg_id in self._done_msg_ids:
+                        # Duplicate: already handled by a preceding RichErrorMessage for
+                        # the same subroutine. The backend sends both; skip this one so
+                        # _wait_for_done keeps looking for the message it actually needs.
+                        return -1
                     self._waiting_msg_ids.remove(ret_msg.msg_id)
                     self._done_msg_ids.add(ret_msg.msg_id)
                     # Call the registered callback, if any
@@ -356,10 +370,18 @@ class SimulaQronConnection(BaseNetQASMConnection):
                     )
                     return -1
                 case RichErrorMessage():
+                    # Treat the error as terminal for this msg_id: unblock _wait_for_done
+                    # so the client loop exits cleanly and close() can still run afterward.
+                    if ret_msg.msg_id in self._waiting_msg_ids:
+                        self._waiting_msg_ids.remove(ret_msg.msg_id)
+                    self._done_msg_ids.add(ret_msg.msg_id)
                     if ret_msg.err_code == ErrorCode.UNSUPP.value:
-                        raise SimUnsupportedError("Operation not supported")
+                        self._pending_error = SimUnsupportedError("Operation not supported")
                     else:
-                        raise RuntimeError(f"Received error message from backend: {ret_msg.get_err_msg()}")
+                        self._pending_error = RuntimeError(
+                            f"Quantum node rejected request: {ret_msg.get_err_msg()}"
+                        )
+                    return ret_msg.msg_id
                 case _:
                     raise NotImplementedError(f"Unknown return message of type {type(ret_msg)}")
 
@@ -483,6 +505,7 @@ class NewReturnMessageType(Enum):
 
 class RichErrorMessage(ReturnMessage):
     _fields_ = [
+        ("msg_id", ctypes.c_uint32),
         ("err_code", ctypes.c_uint8),
         ("err_msg_len", ctypes.c_uint32),
         ("err_msg", MAX_ERR_MSG_LEN * ctypes.c_uint8),
@@ -491,7 +514,7 @@ class RichErrorMessage(ReturnMessage):
     # This works because the enum types are mapped to the very same value
     TYPE = NewReturnMessageType.ERR
 
-    def __init__(self, err_code: ErrorCode, err_msg: str):
+    def __init__(self, err_code: ErrorCode, err_msg: str, msg_id: int = 0):
         """
         Enriched message to the Host that an error occurred at the quantum node controller.
 
@@ -499,8 +522,12 @@ class RichErrorMessage(ReturnMessage):
         :type err_code: ErrorCode
         :param err_msg: The error message.
         :type err_msg: str
+        :param msg_id: The ID of the subroutine message that caused the error, so the
+                       client can unblock its _wait_for_done loop for that message.
+        :type msg_id: int
         """
         super().__init__(self.TYPE.value)
+        self.msg_id = msg_id
         err_bytes = err_msg.encode("utf-8")
         if len(err_bytes) > MAX_ERR_MSG_LEN:
             logger.warning("Reported error message too long")

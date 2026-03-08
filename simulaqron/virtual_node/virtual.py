@@ -1318,7 +1318,6 @@ class VirtualNode(pb.Root):
         assert sim_qubit2 is not None, "Sim num {sim_qubit_num2} not in this node"
         return sim_qubit1.register == sim_qubit2.register
 
-    @inlineCallbacks
     def remote_stop_vnode(self):
         # sys.stdout.write(f"Stopping virtual node pid {os.getpid()}")
         # print(f"Stopping virtual node pid {os.getpid()}", flush=True)

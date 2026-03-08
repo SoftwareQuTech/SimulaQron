@@ -146,7 +146,7 @@ class Network:
         for p in self.processes:
             if not p.is_alive():
                 self._logger.debug("Starting process %s", p.name)
-                p.deamon = True
+                p.daemon = True
                 p.start()
 
         if wait_until_running:
@@ -165,11 +165,14 @@ class Network:
         self._running = False
         self._logger.info("Stopping network with name %s", self.name)
         for p in self.processes:
-            while p.is_alive():
-                time.sleep(0.1)
+            if p.is_alive():
                 try:
                     p.terminate()
-                    p.join()
+                    p.join(timeout=5)
+                    if p.is_alive():
+                        # Process ignored SIGTERM — force-kill it so we never hang here
+                        self._logger.warning("Process %s did not stop after SIGTERM, killing it", p.name)
+                        p.kill()
                 except Exception as err:
                     self._logger.warning("Could not terminate one of the processes in the"
                                          "network due to error: %s", err)

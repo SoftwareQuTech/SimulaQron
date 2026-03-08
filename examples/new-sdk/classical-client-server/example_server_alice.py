@@ -7,7 +7,7 @@ from simulaqron.sdk.protocol import SimulaQronClassicalServer
 from simulaqron.settings.network_config import NodeConfigType
 
 
-async def connection_handler(reader: StreamReader, writer: StreamWriter):
+async def run_alice(reader: StreamReader, writer: StreamWriter):
     result = await reader.read(255)
     print(f"Server received message: '{result.decode("utf-8")}'")
     writer.write(result)
@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
     # Register a new client handler. The given function will be called once a new client
     # opens a connection with this node.
-    server.register_client_handler(connection_handler)
+    server.register_client_handler(run_alice)
 
     # Start serving the clients
     server.start_serving()

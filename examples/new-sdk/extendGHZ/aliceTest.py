@@ -21,29 +21,34 @@ from netqasm.sdk.external import NetQASMConnection  # noqa: E402
 from netqasm.sdk import EPRSocket  # noqa: E402
 
 
-# This function contains the code of the classical client
-async def alice_program(reader: StreamReader, writer: StreamWriter) -> int:
+async def run_alice(reader: StreamReader, writer: StreamWriter) -> int:
     # This is "Alice": the start node of the GHZ chain
     this_node_name = "Alice"
     remote_node_name = "Bob"  # A node with this name *must* exist in "simulaqron_network.json"
 
-    logging.debug("LOCAL %s: Running client side program.", this_node_name)
-
     epr_socket = EPRSocket(remote_node_name)
-    # To start executing quantum operations, we need to create a NetQASM connection
-    with NetQASMConnection(this_node_name, epr_sockets=[epr_socket]):
-        # Create an entangled qubit with Bob
-        epr = epr_socket.create_keep()[0]
 
-        writer.write("receive_qubit".encode("utf-8"))
-        answer = await reader.read(100)
+    # sim_conn is our connection to the quantum backend (SimulaQron), not to Bob.
+    # Bob is reached via EPRSocket for quantum and reader/writer for classical.
+    sim_conn = NetQASMConnection(this_node_name, epr_sockets=[epr_socket])
 
-        assert answer.decode("utf-8") == "continue"
+    # Create an entangled qubit with Bob
+    epr = epr_socket.create_keep()[0]
 
-        m1 = epr.measure()
-    # Any value that comes from NetQASM *need* to be retrieved ("casted" to int)
-    # *after* the connection is closed (or after flushing the connection, untested)
+    writer.write("receive_qubit".encode("utf-8"))
+    answer = await reader.read(100)
+
+    assert answer.decode("utf-8") == "continue"
+
+    m1 = epr.measure()
+
+    # flush() executes all queued quantum operations and makes measurement
+    # results available.  Before flush(), m1 is just a future/promise.
+    sim_conn.flush()
+
+    # int(m) extracts the measurement outcome — only valid after flush().
     m1_val = int(m1)
+    sim_conn.close()
     return m1_val
 
 
@@ -82,7 +87,7 @@ if __name__ == "__main__":
     # to measure the qubit
     client = SimulaQronClassicalClient(classical_sockets)
 
-    result = client.run_client(other_node_name, alice_program)
-    #result = alice_program(1, 0)
+    result = client.run_client(other_node_name, run_alice)
+    #result = run_alice(1, 0)
 
     print(f"{node_name}: My outcome is '{result}'")

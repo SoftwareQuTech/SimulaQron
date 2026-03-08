@@ -1,10 +1,6 @@
 Template for programming in native mode
 =======================================
 
-.. warning:: Update the code of the examples below!!!
-.. warning:: Update the configuration file to use the JSON format!!!
-.. warning:: Update the explanation about how SimulaQron uses the ``simulaqron_network.json`` file!!!!
-
 In examples/nativeMode/template you will find a template that allows you to start programming relatively easily by
 filling in the relevant parts of the template. Let us now discuss this template in detail:
 
@@ -17,19 +13,32 @@ filling in the relevant parts of the template. Let us now discuss this template 
    which nodes may simply be a client program that connects to the servers to deliver messages. Let us here simply
    assume, Alice only sends information to Bob, who then acts upon the message received. In this case, we would make
    Alice a client and Bob a server. Note that one node can obviously fulfill both roles.
-#. The template will look for a file called ``simulaqron_network.json`` in the local directory to determine who acts
-   as a server and what that nodes address details are. Simulaqron will decide (lexicographically) which nodes acts as
-   a server. An example of the network configuration file is as follows::
+#. The template will look for a network configuration JSON file in the local directory to determine node
+   addresses and socket assignments. SimulaQron will decide (lexicographically) which nodes act as servers.
+   An example of the network configuration file (``network_config.json``) is as follows::
 
-    # Network configuration file
-    #
-    # For each host its informal name, as well as its location in the network must
-    # be listed.
-    #
-    # [name], [hostname], [port number]
-    #
-
-    Bob, localhost, 8812
+    [
+        {
+            "name": "default",
+            "nodes":  [
+                {
+                    "Alice": {
+                        "app_socket": ["localhost", 8821],
+                        "qnodeos_socket": ["localhost", 8822],
+                        "vnode_socket": ["localhost", 8823]
+                    }
+                },
+                {
+                    "Bob": {
+                        "app_socket": ["localhost", 8831],
+                        "qnodeos_socket": ["localhost", 8832],
+                        "vnode_socket": ["localhost", 8833]
+                    }
+                }
+            ],
+            "topology": null
+        }
+    ]
 
 #. The next step is to check that on each network computer that you will run on, the global configuration file
    starting the virtual quantum nodes is set up correctly. See :doc:`../GettingStarted` on how to perform such a

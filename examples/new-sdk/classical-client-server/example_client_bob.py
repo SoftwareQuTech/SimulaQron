@@ -7,7 +7,7 @@ from simulaqron.sdk.protocol import SimulaQronClassicalClient
 from simulaqron.settings.network_config import NodeConfigType
 
 
-async def client_code(reader: StreamReader, writer: StreamWriter):
+async def run_bob(reader: StreamReader, writer: StreamWriter):
     data = "Hello World!".encode("utf-8")
     writer.write(data)
     print(f"Client sent message '{data.decode("utf-8")}'")
@@ -30,4 +30,4 @@ if __name__ == "__main__":
 
     # Run the client. The given function will be called once the connection with
     #m the given server was established
-    client.run_client("Alice", client_code)
+    client.run_client("Alice", run_bob)

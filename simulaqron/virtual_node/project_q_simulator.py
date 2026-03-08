@@ -154,9 +154,11 @@ class ProjectQEngine(QuantumEngine):
 
         # Note previously the format of real and imaginary numbers were
         # expected, use the same even though Re will be the qubit mapping
-        # and Im the state
-        Re = tuple(n.real for n in state)
-        Im = tuple(n.imag for n in state)
+        # and Im the state.
+        # Use float() to convert numpy.float64 → Python float so Twisted PB
+        # can serialize the values (numpy scalar types become Unpersistable).
+        Re = tuple(float(n.real) for n in state)
+        Im = tuple(float(n.imag) for n in state)
 
         return q_reg_order, (Re, Im)
 
@@ -168,7 +170,6 @@ class ProjectQEngine(QuantumEngine):
         :return: The qubit density matrix real and imaginary parts.
         :rtype: Tuple[List[float], List[float]]
         """
-        # Get the internal state of the qubit, and compute the outer product |q><q|
         _, raw_qubit_state = self._get_internal_qubit_state()
         qubit_state = np.array(raw_qubit_state)
         density_matrix = np.outer(qubit_state, qubit_state)

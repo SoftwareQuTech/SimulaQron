@@ -116,6 +116,9 @@ class VanillaSimulaQronExecutioner(Executor):
         self._return_msg_func = None
         self._factory = None
         self._network_stack = NetworkStack(self)
+        # Tracks the msg_id of the subroutine currently being executed, set by
+        # SubroutineHandler before each call so error messages can carry it back.
+        self._current_msg_id: int = 0
 
     @property
     def factory(self) -> "NetQASMFactory":  # noqa: F821
@@ -169,9 +172,17 @@ class VanillaSimulaQronExecutioner(Executor):
     def _handle_command_exception(self, exc, prog_counter, traceback_str):
         self._logger.error("At line %d: %s\n%s", prog_counter, exc, traceback_str)
         if isinstance(exc, SimUnsupportedError):
-            self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.UNSUPP, err_msg="Unsupported simulation engine"))
+            self._return_msg(msg=RichErrorMessage(
+                err_code=ErrorCode.UNSUPP,
+                err_msg="Unsupported simulation engine",
+                msg_id=self._current_msg_id,
+            ))
         else:
-            self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.GENERAL, err_msg=str(exc)))
+            self._return_msg(msg=RichErrorMessage(
+                err_code=ErrorCode.GENERAL,
+                err_msg=str(exc),
+                msg_id=self._current_msg_id,
+            ))
 
     def _return_msg(self, msg):
         if self._return_msg_func is None:
@@ -203,7 +214,6 @@ class VanillaSimulaQronExecutioner(Executor):
             q = VirtualQubitRef(q_id, int(time.time()), virt)
             self.factory.qubitList[q_id] = q
             self._logger.info("Requested new physical qubit %d)", q_id)
-            print(f"DEBUG: Added qubit {q_id} to qubitList", flush=True)  # ADD THIS
         finally:
             self.factory._lock.release()
 

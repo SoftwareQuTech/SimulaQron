@@ -281,7 +281,6 @@ def run_applications(
                     path = os.path.join(timed_log_dir, "results.yaml")
                     dump_yaml(data=result, file_path=path)
                 results.append(result)
-                network.stop()
         finally:
             network.stop()
         reset(save_loggers=True)

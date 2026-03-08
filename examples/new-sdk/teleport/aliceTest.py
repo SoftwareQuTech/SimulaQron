@@ -18,21 +18,30 @@ from netqasm.sdk import Qubit, EPRSocket  # noqa: E402
 
 async def run_alice(reader: StreamReader, writer: StreamWriter):
     epr_socket = EPRSocket("Bob")
-    with NetQASMConnection("Alice", epr_sockets=[epr_socket]) as alice:
-        # Create a qubit
-        q = Qubit(alice)
-        q.H()
-        # Create entanglement
-        epr = epr_socket.create_keep()[0]
-        # Teleport
-        q.cnot(epr)
-        q.H()
-        m1 = q.measure()
-        m2 = epr.measure()
-    # Any value that comes from NetQASM *need* to be retrieved ("casted" to int)
-    # *after* the connection is closed (or after flushing the connection, untested)
+
+    # sim_conn is our connection to the quantum backend (SimulaQron), not to Bob.
+    # Bob is reached via EPRSocket for quantum and reader/writer for classical.
+    sim_conn = NetQASMConnection("Alice", epr_sockets=[epr_socket])
+
+    # Create a qubit to teleport
+    q = Qubit(sim_conn)
+    q.H()
+    # Create entanglement
+    epr = epr_socket.create_keep()[0]
+    # Teleport circuit: CNOT + H + measure both
+    q.cnot(epr)
+    q.H()
+    m1 = q.measure()
+    m2 = epr.measure()
+
+    # flush() executes all queued quantum operations and makes measurement
+    # results available.  Before flush(), m1 and m2 are just futures/promises.
+    sim_conn.flush()
+
+    # int(m) extracts the measurement outcome — only valid after flush().
     m1_val = int(m1)
     m2_val = int(m2)
+    sim_conn.close()
     message = f"{m1_val}:{m2_val}"  # noqa: E231
     writer.write(message.encode("utf-8"))
     return m1_val, m2_val

@@ -18,17 +18,27 @@ async def run_bob(reader: StreamReader, writer: StreamWriter):
     corrections_bytes = await reader.read(255)
     corrections = corrections_bytes.decode("utf-8").split(":")
     epr_socket = EPRSocket("Alice")
-    with NetQASMConnection("Bob", epr_sockets=[epr_socket]):
-        entangled_qubit = epr_socket.recv_keep()[0]
 
-        if int(corrections[0]) == 1:
-            entangled_qubit.X()
-        if int(corrections[1]) == 1:
-            entangled_qubit.Z()
-        meas = entangled_qubit.measure()
-    # Any value that comes from NetQASm *need* to be retrieved ("casted" to int)
-    # *after* the connection is closed (or after flushing the connection, untested)
+    # sim_conn is our connection to the quantum backend (SimulaQron), not to Alice.
+    # Alice is reached via EPRSocket for quantum and reader/writer for classical.
+    sim_conn = NetQASMConnection("Bob", epr_sockets=[epr_socket])
+
+    entangled_qubit = epr_socket.recv_keep()[0]
+
+    # Apply teleportation corrections based on Alice's classical message
+    if int(corrections[0]) == 1:
+        entangled_qubit.X()
+    if int(corrections[1]) == 1:
+        entangled_qubit.Z()
+    meas = entangled_qubit.measure()
+
+    # flush() executes all queued quantum operations and makes measurement
+    # results available.  Before flush(), meas is just a future/promise.
+    sim_conn.flush()
+
+    # int(m) extracts the measurement outcome — only valid after flush().
     meas_val = int(meas)
+    sim_conn.close()
     print(f"Bob measurement: {meas_val}")
 
 

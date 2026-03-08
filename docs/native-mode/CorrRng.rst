@@ -1,8 +1,6 @@
 Generate correlated randomness
 ==============================
 
-.. warning:: Update the code of the examples below!!!
-
 Having started the virtual quantum nodes, let us now run a simple test application, which already illustrates some of
 the aspects in realizing protocols. Our objective will be to realize the following protocol which will generate 1
 shared random bit between Alice and Bob. Evidently, there would be classical means to achieve this trivial task chosen
@@ -53,8 +51,8 @@ To realize this, we thus need not only the connection to the virtual quantum nod
 themselves need to run a client/server to exchange classical control information. Before looking at the code, we
 know that the setup of these servers is again determined by a configuration file, namely ``classicalNet.json``.
 This file defines which nodes act as servers in the classical communication network listening for control information
-to execute the protocol. You want to copy this to whatever example you are running. It takes the same format as
-above, where in our example only Bob will act run a server::
+to execute the protocol. You want to copy this to whatever example you are running. It takes the JSON format,
+where in our example we have Alice and Bob::
 
     [
         {

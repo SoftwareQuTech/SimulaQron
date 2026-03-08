@@ -188,7 +188,12 @@ class NetQASMProtocol(Protocol):
     @inlineCallbacks
     def _log_error(self, failure):
         self._logger.error("Handling message failed with failure = %s", failure.value)
-        self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.GENERAL, err_msg=str(failure.value)))
+        # Use the executor's current msg_id so the client's _wait_for_done loop
+        # can unblock for the correct subroutine rather than hanging forever.
+        msg_id = getattr(getattr(self.messageHandler, '_executor', None), '_current_msg_id', 0)
+        if not isinstance(msg_id, int):
+            msg_id = 0
+        self._return_msg(msg=RichErrorMessage(err_code=ErrorCode.GENERAL, err_msg=str(failure.value), msg_id=msg_id))
         # self.transport.abortConnection()
         # yield None
         yield deferLater(reactor, 0.1, self.stop)

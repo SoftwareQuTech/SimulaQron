@@ -12,20 +12,27 @@ from netqasm.sdk.external import NetQASMConnection  # noqa: E402
 from netqasm.sdk import Qubit  # noqa: E402
 
 
-# This function contains the code of the classical client
-def quantum_program(this_node_name: str) -> int:
-    # To start executing quantum operations, we need to create a NetQASM connection
-    with NetQASMConnection(this_node_name) as alice:
-        # Create a qubit
-        q = Qubit(alice)
+def run_node(this_node_name: str) -> int:
+    # sim_conn is our connection to the quantum backend (SimulaQron).
+    # All qubit operations are queued through this connection.
+    sim_conn = NetQASMConnection(this_node_name)
 
-        # Perform some local quantum operations
-        q.H()
-        q.X()
-        m1 = q.measure()
-    # Any value that comes from NetQASM *need* to be retrieved ("casted" to int)
-    # *after* the connection is closed (or after flushing the connection, untested)
+    # Create a qubit — note we pass sim_conn so the backend knows where
+    # to allocate it.
+    q = Qubit(sim_conn)
+
+    # Perform some local quantum operations
+    q.H()
+    q.X()
+    m1 = q.measure()
+
+    # flush() executes all queued quantum operations and makes measurement
+    # results available.  Before flush(), m1 is just a future/promise.
+    sim_conn.flush()
+
+    # int(m) extracts the measurement outcome — only valid after flush().
     m1_val = int(m1)
+    sim_conn.close()
     return m1_val
 
 
@@ -43,5 +50,5 @@ if __name__ == "__main__":
     network_name = "default"  # A network with this name *must* exist in "simulaqron_network.json"
     node_name = "Alice"  # A node with this name *must* exist in "simulaqron_network.json"
 
-    result = quantum_program(node_name)
+    result = run_node(node_name)
     print(result)

@@ -43,14 +43,17 @@ class SubroutineHandler(QNodeController):
         self.factory = factory
         self._logger = logging.getLogger("QnodeController")
 
-        # Force configure root logger with a handler, ensure our log output to this file
-        # will allow us to trace back exactly where it came from in the codebase
-        logging.basicConfig(
-            format="%(asctime)s:%(levelname)s:%(name)s:%(filename)s:%(lineno)d:%(message)s",
-            level=simulaqron_settings.log_level,
-            force=True,
-            stream=sys.stdout  # send logs to the standard output, we set this earlier to be in /tmp
-        )
+        # NOTE: Commented out because basicConfig(force=True) clobbers the root logger's
+        # handlers on every new connection, silently destroying any logging config set up
+        # at startup. If log output goes missing mid-run, this was the culprit.
+        # If you need to configure logging, do it once at process startup (e.g. in run.py),
+        # not here.
+        # logging.basicConfig(
+        #     format="%(asctime)s:%(levelname)s:%(name)s:%(filename)s:%(lineno)d:%(message)s",
+        #     level=simulaqron_settings.log_level,
+        #     force=True,
+        #     stream=sys.stdout  # send logs to the standard output, we set this earlier to be in /tmp
+        # )
 
         # Give a way for the executioner to return messages
         self._executor.add_return_msg_func(self._return_msg)
@@ -89,45 +92,84 @@ class SubroutineHandler(QNodeController):
         :param msg: The message to process.
         :type msg: Message
         """
-        print(f"DEBUG handle_netqasm_message: msg_id={msg_id}", flush=True)
+        # Let the executioner know which subroutine we're processing so that any
+        # RichErrorMessage it sends back carries the correct msg_id for the client
+        # to unblock its _wait_for_done loop.
+        self._executor._current_msg_id = msg_id
+
         gen = super().handle_netqasm_message(
             msg_id=msg_id,
             msg=msg,
         )
 
-        # The following is a bug fix to properly wait for twisted deferreds
-      
-        try:
-            result = None
-            iteration = 0
-            while True:
-                iteration = iteration + 1
+        # Bridge between two async models:
+        # - NetQASM's executor uses Python generators (yield from)
+        # - SimulaQron uses Twisted deferreds (@inlineCallbacks)
+        #
+        # We manually drive the netqasm generator, detecting whether each
+        # yielded item is a Twisted Deferred (wait for it) or a nested
+        # generator (consume it manually, propagating its return value back).
+        #
+        # The gen.throw() call below is critical: when a nested generator
+        # (e.g. super()._instr_qalloc) raises an exception, we must re-throw
+        # it into the outer generator so netqasm's try/except in
+        # _execute_commands can catch it and call _handle_command_exception,
+        # which sends RichErrorMessage back to the client.  Without this,
+        # the exception escapes the runner, _handle_command_exception never
+        # runs, and the client hangs waiting for a reply that never comes.
+        result = None
+        while True:
+            try:
                 item = gen.send(result)
-                if hasattr(item, 'addCallback'):  # Deferred
-                    result = yield item
-                elif hasattr(item, '__next__'):  # Nested generator - consume it
-                    nested_result = None
-                    try:
-                        while True:
-                            nested_item = item.send(nested_result)
-                            if hasattr(nested_item, 'addCallback'):
-                                nested_result = yield nested_item
-                            else:
-                                nested_result = None
-                    except StopIteration as e:
-                        result = e.value  # Get the return value from the generator
-                else:
-                    result = None
-        except StopIteration:
-            pass
+            except StopIteration:
+                break  # generator finished normally
 
-    def _handle_get_qubit_state(self, get_quibit_state_msg: GetQubitStateMessage) -> Generator[Any, None, None]:
+            if hasattr(item, 'addCallback'):  # Twisted Deferred
+                result = yield item
+            elif hasattr(item, '__next__'):  # Nested generator — consume manually
+                nested_result = None
+                try:
+                    while True:
+                        nested_item = item.send(nested_result)
+                        if hasattr(nested_item, 'addCallback'):
+                            nested_result = yield nested_item
+                        else:
+                            nested_result = None
+                except StopIteration as e:
+                    result = e.value  # propagate return value back to outer gen
+                except Exception as e:
+                    # Nested generator raised (e.g. "virtual address outside unit module").
+                    # Re-throw into the outer generator so netqasm can handle it.
+                    try:
+                        item2 = gen.throw(type(e), e)
+                        # Outer generator caught the exception and yielded again —
+                        # process item2 exactly like any other yielded item.
+                        result = None
+                        if hasattr(item2, 'addCallback'):
+                            result = yield item2
+                        elif hasattr(item2, '__next__'):
+                            nested_result2 = None
+                            try:
+                                while True:
+                                    ni2 = item2.send(nested_result2)
+                                    if hasattr(ni2, 'addCallback'):
+                                        nested_result2 = yield ni2
+                                    else:
+                                        nested_result2 = None
+                            except StopIteration as se2:
+                                result = se2.value
+                    except StopIteration:
+                        break  # outer generator finished after handling the error
+            else:
+                result = None
+
+    def _handle_get_qubit_state(self, get_qubit_state_msg: GetQubitStateMessage) -> Generator[Any, None, None]:
         assert isinstance(self._executor, VanillaSimulaQronExecutioner)
         casted_executor: VanillaSimulaQronExecutioner = self._executor
         # The ProjectQ backend also returns an unused mapping; we need to fix that
-        realvec, imagvec = yield from casted_executor.get_qubit_state(get_quibit_state_msg.qubit_id)
+        realvec, imagvec = yield from casted_executor.get_qubit_state(get_qubit_state_msg.qubit_id)
         # Return a message to the connection object
-        self._return_qubit_state(get_quibit_state_msg.qubit_id, realvec, imagvec)
+        self._return_qubit_state(get_qubit_state_msg.qubit_id, realvec, imagvec)
 
     def _return_qubit_state(self, qubit_id: int, real_part: List[List[float]], imag_part: List[List[float]]):
         qubit_state_message = ReturnQubitStateMessage(qubit_id, real_part, imag_part)

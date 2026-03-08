@@ -1,8 +1,6 @@
 Distributing a graph state
 ==========================
 
-.. warning:: Update the code of the examples below!!!
-
 Here we consider a more complicated example, where we have four parties; Alice, Bob, Charlie and David.
 They will distribute a graph state and transform this with local operations and classical communication to make
 a GHZ-like state.
@@ -96,40 +94,48 @@ Although the order described here is slightly different the end result is still 
 Setting up
 -----------
 
-.. warning:: Update the CFG files into a JSON ones and paste them here!
-.. warning:: Re-write this description to use the single JSON file, and get the classical sockets config using the
-    the SocketsConfig builder + filter method.
+We will run everything locally (localhost) using a single ``classicalNet.json`` configuration file that defines all
+nodes and their socket assignments::
 
-We will run everything locally (localhost) using the standard virtualNodes.json file found in config that define the
-virtual quantum nodes run in the background to simulate the quantum hardware::
-
-    # Network configuration file
-    #
-    # For each host its informal name, as well as its location in the network must
-    # be listed.
-    #
-    # [name], [hostname], [port number]
-
-    Alice, localhost, 8801
-    Bob, localhost, 8802
-    Charlie, localhost, 8803
-    David, localhost, 8804
+    [
+        {
+            "name": "default",
+            "nodes":  [
+                {
+                    "Alice": {
+                        "app_socket": ["localhost", 8821],
+                        "qnodeos_socket": ["localhost", 8822],
+                        "vnode_socket": ["localhost", 8823]
+                    }
+                },
+                {
+                    "Bob": {
+                        "app_socket": ["localhost", 8831],
+                        "qnodeos_socket": ["localhost", 8832],
+                        "vnode_socket": ["localhost", 8833]
+                    }
+                },
+                {
+                    "Charlie": {
+                        "app_socket": ["localhost", 8841],
+                        "qnodeos_socket": ["localhost", 8842],
+                        "vnode_socket": ["localhost", 8843]
+                    }
+                },
+                {
+                    "David": {
+                        "app_socket": ["localhost", 8871],
+                        "qnodeos_socket": ["localhost", 8872],
+                        "vnode_socket": ["localhost", 8873]
+                    }
+                }
+            ],
+            "topology": null
+        }
+    ]
 
 As we can see from the protocol above, Alice is the one that initializes the protocol and the others listen. We will
-therefore run a client at Alice and servers at Bob, Charlie and David. Since we run everything locally, we may thus
-use for the configuration file classicalNet.json::
-
-    # Network configuration file
-    #
-    # For each host its informal name, as well as its location in the network must
-    # be listed.
-    #
-    # [name], [hostname], [port number]
-    #
-
-    Bob, localhost, 8812
-    Charlie, localhost, 8813
-    David, localhost, 8814
+therefore run a client at Alice and servers at Bob, Charlie and David.
 
 Let us now provide the actual program code for all the parties.
 

@@ -21,30 +21,33 @@ from netqasm.sdk.external import NetQASMConnection  # noqa: E402
 from netqasm.sdk import EPRSocket  # noqa: E402
 
 
-# This function contains the code of the classical client
-async def charlie_program(reader: StreamReader, writer: StreamWriter) -> int:
+async def run_charlie(reader: StreamReader, writer: StreamWriter) -> int:
     # This is "Charlie": the end node of the GHZ chain
     this_node_name = "Charlie"
     remote_node_name = "Bob"
-    logging.debug("LOCAL %s: Running client side program.", this_node_name)
-
     message = await reader.read(100)
     assert message.decode("utf-8") == "receive_qubit"
     epr_socket = EPRSocket(remote_node_name)
-    # To start executing quantum operations, we need to create a NetQASM connection
-    with NetQASMConnection(this_node_name, epr_sockets=[epr_socket]) as charlie:
-        # Receive an entangled qubit
-        epr = epr_socket.recv_keep()[0]
 
-        writer.write("continue".encode("utf-8"))
+    # sim_conn is our connection to the quantum backend (SimulaQron), not to Bob.
+    # Bob is reached via EPRSocket for quantum and reader/writer for classical.
+    sim_conn = NetQASMConnection(this_node_name, epr_sockets=[epr_socket])
 
-        print("here2")
-        # And simply measure it
-        m1 = epr.measure()
-    # Any value that comes from NetQASM *need* to be retrieved ("casted" to int)
-    # *after* the connection is closed (or after flushing the connection, untested)
+    # Receive an entangled qubit
+    epr = epr_socket.recv_keep()[0]
+
+    writer.write("continue".encode("utf-8"))
+
+    # And simply measure it
+    m1 = epr.measure()
+
+    # flush() executes all queued quantum operations and makes measurement
+    # results available.  Before flush(), m1 is just a future/promise.
+    sim_conn.flush()
+
+    # int(m) extracts the measurement outcome — only valid after flush().
     m1_val = int(m1)
-
+    sim_conn.close()
     print(f"{this_node_name}: My outcome is '{m1_val}'")
     return 0
 
@@ -75,5 +78,5 @@ if __name__ == "__main__":
     sockets = SocketsConfig(network_config, network_name, NodeConfigType.APP)
 
     server = SimulaQronClassicalServer(sockets, node_name)
-    server.register_client_handler(charlie_program)
+    server.register_client_handler(run_charlie)
     server.start_serving()

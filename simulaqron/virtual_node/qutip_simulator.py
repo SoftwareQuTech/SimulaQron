@@ -37,6 +37,17 @@ from qutip import Qobj
 try:
     import qutip as qp
     import qutip.qip.operations.gates as gate_ops
+
+    # qutip-qip >= 0.3 renamed/moved gate expansion helpers.
+    # Patch the old names as shims so the rest of this file needs no changes.
+    if not hasattr(gate_ops, "gate_expand_1toN"):
+        from qutip_qip.operations import expand_operator as _expand_op
+        gate_ops.gate_expand_1toN = lambda U, N, t: _expand_op(U, N, t)
+
+    if not hasattr(qp, "gate_expand_2toN"):
+        from qutip_qip.operations import expand_operator as _expand_op
+        qp.gate_expand_2toN = lambda U, N, t1, t2: _expand_op(U, N, [t1, t2])
+
 except ImportError:
     raise RuntimeError("If you want to use the qutip backend you need to install the python package 'qutip'")
 
@@ -403,6 +414,17 @@ class QutipEngine(QuantumEngine):
         p0 = obj.tr().real
         obj = M1 * self.qubitReg
         p1 = obj.tr().real
+
+        # Clamp and renormalize to handle tiny negative values that can arise
+        # from floating-point rounding after multi-qubit gate sequences.
+        p0 = max(0.0, p0)
+        p1 = max(0.0, p1)
+        total = p0 + p1
+        if total > 0:
+            p0 /= total
+            p1 /= total
+        else:
+            p0, p1 = 0.5, 0.5
 
         # Sample the measurement outcome from these probabilities
         outcome = int(np.random.choice([0, 1], 1, p=[p0, p1]))

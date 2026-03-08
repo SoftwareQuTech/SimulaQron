@@ -1,21 +1,45 @@
-Programming via SimulaQron's native Python Twisted Interface (specific to SimulaQron)
-=====================================================================================
+SimulaQron Programming Examples
+================================
 
-One way to program SimulaQron is directly via its 'native interface' using Twisted. 
-This means writing a client program connecting directly to the local virtual quantum node, and issuing instructions
-to such simulated quantum hardware. Programming SimulaQron in its native interface is evidently Python specific, and
-meant primarily as an internal interface allowing one to explore higher level abstractions built on top of it.
-One such abstraction is the NetQASM interface.For programming in a universal, i.e., not Python specific interface
-see :doc:`NetQASM`.
+SimulaQron offers three ways to write quantum network programs, from highest-level to lowest-level:
 
-The examples below assume that you have already made your way through :doc:`GettingStarted`: you have the virtual
-node servers up and running, and ran the simple example of generating correlated randomness. Further examples can
-also be found in examples/nativeMode.
+1. **New SDK** (``examples/new-sdk/``) — The recommended approach using the NetQASM SDK.
+   Programs use ``NetQASMConnection`` and ``EPRSocket`` for quantum operations, and
+   ``SimulaQronClassicalClient``/``SimulaQronClassicalServer`` for classical messaging.
+   Start here if you are new to SimulaQron.
 
-.. warning:: Update the link to the CQC interface.
+2. **Event-based** (``examples/eventBased/``) — Builds on the new SDK by adding a state-machine
+   pattern for classical messaging.  Each node defines states, message handlers, and a dispatch
+   table.  This is the recommended pattern for protocols that interleave classical negotiation
+   with quantum operations.
 
-.. note:: The 'native' mode is not the recommended way to program applications for SimulaQron, instead use the
-    `NetQASM <https://softwarequtech.github.io/CQC-Python/index.html>`_ interface.
+3. **Native mode** (``examples/nativeMode/``) — The low-level Twisted interface that talks
+   directly to SimulaQron's virtual quantum nodes.  This is Python-specific and more verbose,
+   but gives full control over the simulation backend.
+
+The examples below assume that you have already made your way through :doc:`GettingStarted`:
+you have the virtual node servers up and running.
+
+.. toctree::
+    :maxdepth: 2
+    :caption: New SDK examples:
+
+    new-sdk/Overview
+    new-sdk/Template
+    new-sdk/CorrRNG
+    new-sdk/Teleport
+    new-sdk/ExtendGHZ
+    new-sdk/MidCircuitLogic
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Event-based examples:
+
+    event-based/Overview
+    event-based/PingPong
+    event-based/PolitePingPong
+    event-based/QuantumCorrRNG
+    event-based/QuantumCorrRNGVerified
 
 .. toctree::
     :maxdepth: 2
@@ -25,6 +49,3 @@ also be found in examples/nativeMode.
     native-mode/Template
     native-mode/Teleport
     native-mode/GraphState
-
-
-

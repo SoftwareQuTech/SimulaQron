@@ -41,6 +41,14 @@ _logger = logging.getLogger("test_merges")
 # * The functionality tested here is SimulaQron-specific. It would be difficult
 #   to rewrite these tests in NetQASM, which might hide APIs needed to fully test
 #   the underlying functionality.
+# Stephanie: 2026-03-08
+# There is no point in moving this test to netqasm: this is is not the role of netqasm here
+# best refer to the documentaiton or the simulaqron paper of what the architeture of simulaqron
+# is. And in this architecture the merge is done by the simulaqron backend always, I dont get
+# why one would consider moving this to netqasm. It's something that only happens for simulated
+# qubits. One can, however, make a similar test through the netqasm interface in addition to this one
+# and this may be valuable. But this does not mean making merges. The below also doesnt make
+# manual merges: rather it takes actions that will trigger a merge in the backend.
 
 
 class localNode(pb.Root):
