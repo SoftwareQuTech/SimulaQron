@@ -7,139 +7,178 @@ SimulaQron uses two configuration files:
 * ``simulaqron_settings.json`` — configures the simulation backend, timeouts, and other settings
   (see :ref:`settings` in :doc:`GettingStarted`)
 
--------------------------------
-Starting the SimulaQron backend
--------------------------------
+-------------------------------------------
+Running all nodes on a single machine
+-------------------------------------------
 
-The backend of a SimulaQron network is a set of running virtual nodes and their corresponding `VirtualNode` servers.
-Starting a SimulaQron network requires using SimulaQron and network configuration files.
+When developing and testing, you typically run all simulated nodes on one computer.
+In this case, all sockets use ``localhost`` and you just need distinct port numbers for each node.
 
-To start the backend of a SimulaQron network run the command ``simulaqron start``.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Using the SimulaQron CLI
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The command can receive certain arguments to control the simulated network:
+The ``simulaqron`` command manages the backend for you. To start a network with nodes Alice and Bob::
 
-* ``--simulaqron-config-file=PATH`` (optional): Specifies a path for the SimulaQron config file to use for the backend.
-  If not given, simulaqron will try to read a file named ``simulaqron_settings.json`` in the current folder.
-* ``--network-config-file=PATH`` (optional): Specifies a path for the network config file to use for the backend. If
-  not given, simulaqron will try to read a file named ``simulaqron_network.json`` in the current folder.
-* ``--name=<network-name>`` (optional): Specifies the name of the network to start. This name must correspond to one
-  of the names specified on the given network configuration file. If this argument is not given, this value is
-  defaulted to ``default``.
-* ``--nodes <nodes_list>`` (`required`): Specifies which nodes to simulate. The ``<nodes_list>`` value is a comma
-  separated list of the nodes names to start. All the specified node names must exist within the specified network
-  inside the network configuration file.
+    simulaqron start --nodes Alice,Bob
 
-How to adjust the nodes and the topology of the network is described below.
+This reads ``simulaqron_network.json`` and ``simulaqron_settings.json`` from the current directory (or uses
+defaults), starts the virtual node servers, the QNodeOS servers, and the classical communication servers for
+each node listed.
 
-.. warning:: ``simulaqron start`` can fail if any of the ports specified in the config files are already in use by a
-    running SimulaQron network or another program.
+To stop the backend::
 
-If you want to start a network with, for example, the three nodes Alex, Bart, Curt from the network named ``network``,
-simply type::
+    simulaqron stop
 
-    simulaqron start --name network --nodes Alex,Bart,Curt
+If something went wrong (e.g. the process was killed) and SimulaQron thinks the network is still running::
 
-.. _networkConfig:
+    simulaqron reset
 
------------------------
-Configuring the network
------------------------
-SimulaQron requires specifying a json-based network configuration. This configuration states the name of the node,
-and IP address/port tuples to correctly connect the SimulaQron simulations and classical communication sockets.
+The ``simulaqron start`` command accepts these arguments:
 
-For each configured node, you need to specify IP and address for 3 fields:
+* ``--nodes <nodes_list>`` (**required**): Comma-separated list of node names to start. These must exist in
+  the network configuration file.
+* ``--simulaqron-config-file=PATH`` (optional): Path to a SimulaQron settings file. Defaults to
+  ``simulaqron_settings.json`` in the current folder.
+* ``--network-config-file=PATH`` (optional): Path to a network configuration file. Defaults to
+  ``simulaqron_network.json`` in the current folder.
+* ``--name=<network-name>`` (optional): Name of the network to start (must match a name in the config file).
+  Defaults to ``default``.
 
-* The ``app_socket`` field, which specifies the IP and port for connecting classical communication sockets.
-* The ``qnodeos_socket`` field, which specifies the IP and port for connecting the QnodeOS server, used to interpret
-  NetQASM objects.
-* The ``vnode_socket`` field, which specifies the IP and port for the SimulaQron VirtualNode object, which runs the
-  quantum simulation.
+.. warning:: ``simulaqron start`` will fail if any of the ports specified in the config files are already in
+    use by a running SimulaQron network or another program.
 
-Using the CLI you can add nodes to a network::
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Using per-example run scripts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    simulaqron nodes add Maria
+Each example in ``examples/new-sdk/`` and ``examples/nativeMode/`` includes a ``run.sh`` script that starts
+the SimulaQron backend and launches the node programs. This is the easiest way to try an example::
 
-which adds the node Maria to the default network "default". If you want add a node to another network you can do::
+    cd examples/new-sdk/corrRNG
+    sh run.sh
 
-    simulaqron nodes add Maria --network-name="OtherNetwork"
+The ``run.sh`` script reads the ``simulaqron_network.json`` and ``simulaqron_settings.json`` in the example
+directory, so each example is self-contained.
 
-which adds Maria to the network "OtherNetwork". With no extra arguments, this invocation will configure all the
-sockets fields on ``localhost``, assigning a random port in the 8000-9000 range.
-You can also specify hostname and port numbers to be used for this node including what it's neighbors are using the
-arguments:
+-------------------------------------------
+Running nodes on separate machines
+-------------------------------------------
 
- * ``--hostname``
- * ``--app-port``
- * ``--qnodeos-port``
- * ``--vnode-port``
- * ``--neighbors``
+To simulate a real distributed quantum network, you can run each node on a different physical computer.
+In this case, you need to:
 
-If you want to build up a (or many) more complex network, it can become tedious to do this through the CLI.
-You can instead write your own network config file, as a .json file.
-An example of such a file can be seen below which contains two networks ("default" and "small_network") which the
-nodes "Alice", "Bob" and "Test" respectively::
+1. **Use real hostnames/IPs** instead of ``localhost`` in the ``simulaqron_network.json`` file.
+   Each node's sockets must be reachable from the other machines.
+
+2. **Copy the same** ``simulaqron_network.json`` **to every machine**. All nodes must agree on the
+   network configuration.
+
+3. **Start only the local node** on each machine. On the machine running Alice::
+
+       simulaqron start --nodes Alice
+
+   On the machine running Bob::
+
+       simulaqron start --nodes Bob
+
+4. **Run your node program** on each machine after the backend is started.
+
+An example ``simulaqron_network.json`` for a distributed setup::
 
     {
         "default": {
             "nodes": {
                 "Alice": {
-                    "app_socket": [
-                        "localhost",
-                        8000
-                    ],
-                    "qnodeos_socket": [
-                        "localhost",
-                        8001
-                    ],
-                    "vnode_socket": [
-                        "localhost",
-                        8004
-                    ]
+                    "app_socket": ["192.168.1.10", 8000],
+                    "qnodeos_socket": ["192.168.1.10", 8001],
+                    "vnode_socket": ["192.168.1.10", 8004]
                 },
                 "Bob": {
-                    "app_socket": [
-                        "localhost",
-                        8007
-                    ],
-                    "qnodeos_socket": [
-                        "localhost",
-                        8008
-                    ],
-                    "vnode_socket": [
-                        "localhost",
-                        8010
-                    ]
-                }
-            },
-            "topology": null
-        }
-        "small_network": {
-            "nodes": {
-                "Test": {
-                    "app_socket": [
-                        "localhost",
-                        8031
-                    ],
-                    "qnodeos_socket": [
-                        "localhost",
-                        8043
-                    ],
-                    "vnode_socket": [
-                        "localhost",
-                        8089
-                    ]
+                    "app_socket": ["192.168.1.20", 8000],
+                    "qnodeos_socket": ["192.168.1.20", 8001],
+                    "vnode_socket": ["192.168.1.20", 8004]
                 }
             },
             "topology": null
         }
     }
 
-If you want simulaqron to use your custom network.json file simply place it in the same folder where you are running
-your code, and name it ``simulaqron_network.json``. You can also use name it differently, but make sure that you
-manually load this file in your python code::
+.. note:: When running on separate machines, the port numbers can be the same on each machine since they
+    bind to different IP addresses.
+
+.. _networkConfig:
+
+-----------------------
+Configuring the network
+-----------------------
+
+The network configuration file (``simulaqron_network.json``) defines nodes and their socket assignments.
+For each node, you specify IP and port for three sockets:
+
+* ``app_socket`` — classical communication between application-level nodes
+* ``qnodeos_socket`` — connection to the QNodeOS server that interprets NetQASM subroutines
+* ``vnode_socket`` — connection to the SimulaQron VirtualNode that runs the quantum simulation
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Using the CLI to add nodes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can build up a network incrementally using the CLI::
+
+    simulaqron nodes add Maria
+
+This adds Maria to the default network with random ports on ``localhost``. To add to a different network::
+
+    simulaqron nodes add Maria --network-name="OtherNetwork"
+
+You can also specify explicit hostnames and ports:
+
+* ``--hostname``
+* ``--app-port``
+* ``--qnodeos-port``
+* ``--vnode-port``
+* ``--neighbors``
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Writing the JSON config manually
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For more complex setups, write the ``simulaqron_network.json`` file directly.
+Here is an example with two networks ("default" and "small_network")::
+
+    {
+        "default": {
+            "nodes": {
+                "Alice": {
+                    "app_socket": ["localhost", 8000],
+                    "qnodeos_socket": ["localhost", 8001],
+                    "vnode_socket": ["localhost", 8004]
+                },
+                "Bob": {
+                    "app_socket": ["localhost", 8007],
+                    "qnodeos_socket": ["localhost", 8008],
+                    "vnode_socket": ["localhost", 8010]
+                }
+            },
+            "topology": null
+        },
+        "small_network": {
+            "nodes": {
+                "Test": {
+                    "app_socket": ["localhost", 8031],
+                    "qnodeos_socket": ["localhost", 8043],
+                    "vnode_socket": ["localhost", 8089]
+                }
+            },
+            "topology": null
+        }
+    }
+
+Place this file in the same directory as your code and name it ``simulaqron_network.json``.
+Alternatively, load a custom path in your Python code::
 
     from simulaqron.settings import network_config
-    ...
 
     network_config.read_from_file("/path/to/your/simulaqron_network.json")
 
@@ -149,35 +188,37 @@ manually load this file in your python code::
 Network topologies
 ------------------
 
-Each network configuration contains an entry named ``"topology"``, which can be used to define the topology of the
-network. This could for example be::
+Each network configuration contains a ``"topology"`` entry that defines which nodes can communicate
+quantum information with each other. Setting it to ``null`` means fully connected (every node can reach
+every other node).
+
+A custom topology is specified as a dictionary of adjacency lists::
 
     {
      "Alice": ["Bob"],
-     "Bob": ["Alice", "Charlie"]
+     "Bob": ["Alice", "Charlie"],
      "Charlie": ["Bob"]
     }
 
-describing a network topology where Alice is adjacent to Bob, Bob is adjacent to Alice and Charlie and Charlie is
-adjacent to Bob.
+This describes a network where Alice is adjacent to Bob, Bob is adjacent to Alice and Charlie, and Charlie
+is adjacent to Bob.
 
-.. note:: Undirected topologies are also supported. That is, networks where for example Alice can send a qubit to
-    Bob but Bob cannot send a qubit to Alice.
+.. note:: Directed topologies are also supported. For example, Alice can send a qubit to Bob but Bob
+    cannot send a qubit to Alice.
 
 ---------------------------
 Generate network topologies
 ---------------------------
 
-The simulaqron tool is also capable of automatically generating certain well-known network topologies.
-The options for the automatically generated topologies are currently:
+SimulaQron can automatically generate certain well-known network topologies:
 
-* `complete`: A fully connected. This is also used if the argument --topology is not used.
-* `ring`: A ring network, i.e. a connected topology where every node has exactly two neighbors.
-* `path`: A path network, i.e. a connected topology where every node has exactly two neighbors but there are no cycles.
-* `random_tree`: Generates a random tree, i.e. a topology without cycles.
-* `random_connected_{int}`: Generates a random connected graph with a specified number of edges. For example a random
-  connected network on 10 nodes, can be specified as `random_connected_20`. Note that the number of edges for a network
-  with :math:`n` nodes must be greater or equal to :math:`n-1` and less or equal to :math:`n(n-1)/1`.
+* ``complete``: Fully connected (default if no topology is specified)
+* ``ring``: Every node has exactly two neighbors, forming a cycle
+* ``path``: Every node has at most two neighbors, no cycles
+* ``random_tree``: A random tree (connected, no cycles)
+* ``random_connected_{int}``: A random connected graph with a specified number of edges (e.g.
+  ``random_connected_20`` for 20 edges). The number of edges must be between :math:`n-1` and
+  :math:`n(n-1)/2` for :math:`n` nodes.
 
 .. note:: Topology generation via the CLI is planned but not yet implemented. For now, specify topologies
     directly in the ``simulaqron_network.json`` file (see :ref:`network-topologies`).
@@ -190,25 +231,25 @@ The network that is then started might look like this:
 .. image:: figs/topology.png
     :width: 400px
     :align: center
-    :alt: Programming SimulaQron Interfaces
+    :alt: Example network topology
 
-To create a custom topology, see section :ref: `network-topologies`.
+To create a custom topology, see section :ref:`network-topologies`.
 
 --------------------------
 Starting multiple networks
 --------------------------
 
-To run multiple networks at the same time you need to give them different names in the network configuration file,
-and then use the names to start them by using the --name flag::
+To run multiple networks at the same time, give them different names in the network configuration file
+and use the ``--name`` flag::
 
-    simulaqron start --name NETWORK
+    simulaqron start --name NETWORK --nodes Alice,Bob
 
-To stop a network with a specific name type::
+To stop a specific network::
 
     simulaqron stop --name NETWORK
 
-.. note:: By default the network name is "default". To have multiple networks running at the same time the nodes
-    cannot use the same port numbers.
+.. note:: By default the network name is "default". To have multiple networks running at the same time the
+    nodes cannot use the same port numbers.
 
-The JSON configuration file can hold more than one network configuration. To check how to specify such configuration,
-please check the :ref: `networkConfig`.
+The JSON configuration file can hold more than one network configuration. See :ref:`networkConfig` above for
+an example with multiple networks.

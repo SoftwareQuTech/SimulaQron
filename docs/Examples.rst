@@ -20,9 +20,38 @@ SimulaQron offers three ways to write quantum network programs, from highest-lev
 The examples below assume that you have already made your way through :doc:`GettingStarted`:
 you have the virtual node servers up and running.
 
+-----------------
+New SDK examples
+-----------------
+
+* :doc:`new-sdk/Overview` — Key concepts: ``NetQASMConnection``, ``EPRSocket``, ``flush()``, file structure
+* :doc:`new-sdk/Template` — Getting started: single-node and client-server templates
+* :doc:`new-sdk/CorrRNG` — EPR pairs between two nodes, correlated measurement
+* :doc:`new-sdk/Teleport` — Quantum teleportation with classical correction messages
+* :doc:`new-sdk/ExtendGHZ` — Three-party entanglement, multiple EPR sockets
+* :doc:`new-sdk/MidCircuitLogic` — Multiple ``flush()`` calls for mid-circuit classical decisions
+
+---------------------
+Event-based examples
+---------------------
+
+* :doc:`event-based/Overview` — Event-based programming model and state machines
+* :doc:`event-based/PingPong` — Classical ping-pong between two nodes
+* :doc:`event-based/PolitePingPong` — State-machine message dispatch pattern
+* :doc:`event-based/QuantumCorrRNG` — Quantum correlated RNG with state machine
+* :doc:`event-based/QuantumCorrRNGVerified` — Correlated RNG with verification protocol
+
+---------------------
+Native mode examples
+---------------------
+
+* :doc:`native-mode/Template` — Template for programming in native (Twisted) mode
+* :doc:`native-mode/CorrRng` — Correlated randomness using native mode
+* :doc:`native-mode/Teleport` — Teleportation using native mode
+* :doc:`native-mode/GraphState` — Distributing a graph state across four nodes
+
 .. toctree::
-    :maxdepth: 2
-    :caption: New SDK examples:
+    :hidden:
 
     new-sdk/Overview
     new-sdk/Template
@@ -30,21 +59,11 @@ you have the virtual node servers up and running.
     new-sdk/Teleport
     new-sdk/ExtendGHZ
     new-sdk/MidCircuitLogic
-
-.. toctree::
-    :maxdepth: 2
-    :caption: Event-based examples:
-
     event-based/Overview
     event-based/PingPong
     event-based/PolitePingPong
     event-based/QuantumCorrRNG
     event-based/QuantumCorrRNGVerified
-
-.. toctree::
-    :maxdepth: 2
-    :caption: Native mode examples:
-
     native-mode/CorrRng
     native-mode/Template
     native-mode/Teleport
