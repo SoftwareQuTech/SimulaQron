@@ -1,6 +1,9 @@
 Template for programming in native mode
 =======================================
 
+.. note:: Native mode is the low-level Twisted interface. For new projects, the NetQASM SDK is recommended.
+   See :doc:`../new-sdk/Overview`.
+
 In examples/nativeMode/template you will find a template that allows you to start programming relatively easily by
 filling in the relevant parts of the template. Let us now discuss this template in detail:
 
@@ -15,30 +18,25 @@ filling in the relevant parts of the template. Let us now discuss this template 
    Alice a client and Bob a server. Note that one node can obviously fulfill both roles.
 #. The template will look for a network configuration JSON file in the local directory to determine node
    addresses and socket assignments. SimulaQron will decide (lexicographically) which nodes act as servers.
-   An example of the network configuration file (``network_config.json``) is as follows::
+   An example of the network configuration file (``simulaqron_network.json``) is as follows::
 
-    [
-        {
-            "name": "default",
-            "nodes":  [
-                {
-                    "Alice": {
-                        "app_socket": ["localhost", 8821],
-                        "qnodeos_socket": ["localhost", 8822],
-                        "vnode_socket": ["localhost", 8823]
-                    }
+    {
+        "default": {
+            "nodes": {
+                "Alice": {
+                    "app_socket": ["localhost", 8821],
+                    "qnodeos_socket": ["localhost", 8822],
+                    "vnode_socket": ["localhost", 8823]
                 },
-                {
-                    "Bob": {
-                        "app_socket": ["localhost", 8831],
-                        "qnodeos_socket": ["localhost", 8832],
-                        "vnode_socket": ["localhost", 8833]
-                    }
+                "Bob": {
+                    "app_socket": ["localhost", 8831],
+                    "qnodeos_socket": ["localhost", 8832],
+                    "vnode_socket": ["localhost", 8833]
                 }
-            ],
+            },
             "topology": null
         }
-    ]
+    }
 
 #. The next step is to check that on each network computer that you will run on, the global configuration file
    starting the virtual quantum nodes is set up correctly. See :doc:`../GettingStarted` on how to perform such a

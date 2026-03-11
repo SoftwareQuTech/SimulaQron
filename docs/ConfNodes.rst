@@ -1,6 +1,12 @@
 Configuring the simulated network
 =================================
 
+SimulaQron uses two configuration files:
+
+* ``simulaqron_network.json`` — defines nodes, their socket ports, and network topology (described on this page)
+* ``simulaqron_settings.json`` — configures the simulation backend, timeouts, and other settings
+  (see :ref:`settings` in :doc:`GettingStarted`)
+
 -------------------------------
 Starting the SimulaQron backend
 -------------------------------
@@ -114,7 +120,7 @@ nodes "Alice", "Bob" and "Test" respectively::
                         "localhost",
                         8031
                     ],
-                    "cqc_socket": [
+                    "qnodeos_socket": [
                         "localhost",
                         8043
                     ],
@@ -173,9 +179,8 @@ The options for the automatically generated topologies are currently:
   connected network on 10 nodes, can be specified as `random_connected_20`. Note that the number of edges for a network
   with :math:`n` nodes must be greater or equal to :math:`n-1` and less or equal to :math:`n(n-1)/1`.
 
-.. warning:: Implement a command in the CLI to invoke the generation of topologies.
-
-.. warning:: Document that CLI command.
+.. note:: Topology generation via the CLI is planned but not yet implemented. For now, specify topologies
+    directly in the ``simulaqron_network.json`` file (see :ref:`network-topologies`).
 
 Along with setting up the network with the specified topology a .png figure is also generated and stored as
 config/topology.png. This is useful if a random network is used, to easily visualize the network used.

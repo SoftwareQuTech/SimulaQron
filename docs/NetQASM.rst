@@ -1,68 +1,198 @@
 The NetQASM interface
 =====================
 
-.. warning:: Update this document to explain the NetQASM instead of the CQC interface!
+SimulaQron applications are written using the **NetQASM SDK**. This page describes the core concepts and
+programming model. For complete working examples, see :doc:`Examples`.
 
-WARNING - The CQC interface ahas been deprecated, and it is no longer present in this release of SimulaQron.
-Please refer to the NetQASM interface documentation to create quantum applications.
-
-SimulaQron can be access from any programming language supporting network connections. Instructions to the quantum hardware simulation can be sent via the CQC interface described `here <https://softwarequtech.github.io/CQC-Python/interface.html>`_.
-
-A `C <https://softwarequtech.github.io/CQC-C/index.html>`_, `Python <https://softwarequtech.github.io/CQC-Python/index.html>`_, and `Rust <https://docs.rs/cqc>`_ Library for programming SimulaQron using the CQC Interface are provided. If you are new to SimulaQron, programming via the Python CQC is the easiest way to get started.
-
-^^^^^^^^^^^^
+------------
 Installation
-^^^^^^^^^^^^
+------------
 
-If you have installed SimulaQron using pip, the cqc interface for python should already be installed.
-If needed you can also only install the CQC interface in Python using pip by typing::
+The NetQASM library is included as a dependency of SimulaQron. Installing SimulaQron automatically installs
+everything you need::
 
-    pip3 install cqc
+    pip3 install simulaqron
 
-^^^^^
-Usage
-^^^^^
+--------------
+Core concepts
+--------------
 
-The python library provides a way to program a protocol on a network where the nodes listen to instructions through the classical-quantum combiner (CQC) interface. In the following examples the network is simulated by SimulaQron. But the same examples could be executed on a network with real quantum hardware which allows for instructions through the CQC interface, which is the aim for the 2020 quantum internet demonstrator.
+^^^^^^^^^^^^^^^^^^^^^
+NetQASMConnection
+^^^^^^^^^^^^^^^^^^^^^
 
-To use the Python library you first need instantiate an object from the class :code:`cqc.pythonLib.CQCConnection`. This should be done in a `context <https://docs.python.org/3/library/contextlib.html>`_, that is using a :code:`with`-statement as follows::
+Your connection to the **local quantum backend** (SimulaQron's virtual quantum node). This is *not* a connection
+to another party — it is how your node talks to its local simulated quantum hardware. All qubit operations are
+queued through this connection.
 
-    with CQCConnection("Alice") as alice:
-        # your program
+Create it once, use it throughout your program, and close it at the end::
 
-This is to make sure the CQCConnection is correctly closed by the end of the program and that the qubits in the backend are released, even if an error occurs in your program.
+    from netqasm.sdk.external import NetQASMConnection
 
-.. note:: It is still possible to initialize a :code:`CQCConnection` in the old way, i.e. without :code:`with`, however you will receive a warning message everytime you create a qubit.
+    conn = NetQASMConnection("Alice")
+    # ... queue quantum operations ...
+    conn.flush()
+    conn.close()
 
-Let's look at an extremely trivial example were we have the node `Alice` allocate a qubit, perform a Hadamard gate and measure the qubit::
+If your program uses EPR pairs, pass the EPR sockets at creation time::
 
-    with CQCConnection("Alice") as alice:
-        q = qubit(Alice)
-        q.H()
-        m = q.measure()
-        print(m)
+    conn = NetQASMConnection("Alice", epr_sockets=[epr_socket])
 
-.. note:: If you do not specify the argument ``socket_address`` specifying the hostname and port of the cqc server receiving incoming CQC messages, you need to have simulaqron installed. The python library then tries to use the socket address of this nodes specified in simulaqron.
+^^^^^^^^^^^^^^^^^^^^^
+Qubit
+^^^^^^^^^^^^^^^^^^^^^
 
-A object from the :class:`qubit`-class is created with the :class:`CQCConnection` as argument, such that whenever an operation is applied to the qubit a CQC message will be sent to the simulation backend to actually perform this operation on the simulated qubit.
-For more examples using the Python library see :doc:`GettingStarted` and https://softwarequtech.github.io/CQC-Python/examples.html
+A qubit allocated on the local quantum backend. Pass the connection so the backend knows where to allocate it::
 
-.. _remoteNetwork:
+    from netqasm.sdk import Qubit
 
-----------------------------------------
-Connecting to a remote simulated network
-----------------------------------------
+    q = Qubit(conn)
+    q.H()           # Hadamard
+    q.X()           # Pauli X
+    q.cnot(other)   # CNOT with another qubit
+    m = q.measure()
 
-If a simulated network (consisting of virtual nodes and CQC servers) are setup on a remote computer (or on your own computer), CQC messages can be sent to the correct address and port numbers to control the nodes of the network. In this section we describe how to do this.
+Gates are **queued** — nothing executes until you call ``flush()``.
 
-Given the ip and port number of the CQC server of a node, you can send CQC messages over TCP using in any way you prefer. To know how these messages should look like to perform certain instructions, refer to https://softwarequtech.github.io/CQC-Python/interface.html
+^^^^^^^^^^^^^^^^^^^^^
+EPRSocket
+^^^^^^^^^^^^^^^^^^^^^
 
-An easier way to send CQC messages to a CQC server of a node is to use the provided Python library.
-Assuming that you know the hostname and port number of the CQC server, you can then easily instantiate an object of the class :class:`~cqc.pythonLib.CQCConnection` which will communicate with the CQC server for you, using the CQC interface.
-You can directly specify the ip and port number as follows::
+Used to create or receive entangled qubit pairs with a remote node::
 
-    cqc = CQCConnection("Alice", socket_address=("1.1.1.1", 8801))
+    from netqasm.sdk import EPRSocket
 
-More information on how to then actually allocating qubits, manipulating these and creating simulated entanglement see https://softwarequtech.github.io/CQC-Python/useful_commands.html
+    # On Alice's side:
+    epr_socket = EPRSocket("Bob")
+    epr = epr_socket.create_keep()[0]
 
-We give some more detailed information below on how the classical communication between nodes in the application layer can be realized and also provide some useful commands to program a protocol using the Python library.
+    # On Bob's side:
+    epr_socket = EPRSocket("Alice")
+    epr = epr_socket.recv_keep()[0]
+
+^^^^^^^^^^^^^^^^^^^^^
+flush()
+^^^^^^^^^^^^^^^^^^^^^
+
+The **sync point** that executes all queued quantum operations and makes measurement results available.
+Before ``flush()``, measurement results are just futures/promises. After ``flush()``, you can read them
+with ``int(m)``::
+
+    m = q.measure()
+    conn.flush()          # execute everything queued so far
+    result = int(m)       # NOW this works
+
+You can call ``flush()`` multiple times on the same connection. This enables **mid-circuit classical logic**
+— measure, read the result, and decide what to do next::
+
+    m1 = q.measure()
+    conn.flush()
+    if int(m1) == 1:
+        other_qubit.X()   # conditional correction
+    conn.flush()
+
+See the mid-circuit logic example in :doc:`Examples` for a full demonstration.
+
+-----------------------
+Minimal example
+-----------------------
+
+A single-node program that creates a qubit, applies a Hadamard gate, and measures::
+
+    from netqasm.sdk.external import NetQASMConnection
+    from netqasm.sdk import Qubit
+
+    conn = NetQASMConnection("Alice")
+    q = Qubit(conn)
+    q.H()
+    m = q.measure()
+    conn.flush()
+    print("Measurement outcome:", int(m))
+    conn.close()
+
+-----------------------
+Two-node EPR example
+-----------------------
+
+Alice and Bob generate an EPR pair and each measure their qubit to get correlated random numbers.
+
+**Alice** (creates the EPR pair)::
+
+    epr_socket = EPRSocket("Bob")
+    conn = NetQASMConnection("Alice", epr_sockets=[epr_socket])
+    epr = epr_socket.create_keep()[0]
+    m = epr.measure()
+    conn.flush()
+    print("Alice:", int(m))
+    conn.close()
+
+**Bob** (receives the EPR pair)::
+
+    epr_socket = EPRSocket("Alice")
+    conn = NetQASMConnection("Bob", epr_sockets=[epr_socket])
+    epr = epr_socket.recv_keep()[0]
+    m = epr.measure()
+    conn.flush()
+    print("Bob:", int(m))
+    conn.close()
+
+Both sides will print the same random number (0 or 1), demonstrating quantum correlation.
+
+--------------------------
+Classical communication
+--------------------------
+
+For exchanging classical messages between nodes (e.g. measurement outcomes for teleportation corrections),
+SimulaQron provides ``SimulaQronClassicalClient`` and ``SimulaQronClassicalServer``.
+
+Your quantum program function receives ``(reader, writer)`` — standard asyncio streams — for sending and
+receiving classical messages::
+
+    from asyncio import StreamReader, StreamWriter
+
+    async def run_alice(reader: StreamReader, writer: StreamWriter):
+        # Quantum operations
+        conn = NetQASMConnection("Alice", epr_sockets=[epr_socket])
+        m = epr_socket.create_keep()[0].measure()
+        conn.flush()
+
+        # Send classical message to Bob
+        writer.write(str(int(m)).encode("utf-8"))
+        conn.close()
+
+    async def run_bob(reader: StreamReader, writer: StreamWriter):
+        # Receive classical message from Alice
+        data = await reader.read(255)
+        correction = int(data.decode("utf-8"))
+
+        # Use correction in quantum operations
+        conn = NetQASMConnection("Bob", epr_sockets=[epr_socket])
+        epr = epr_socket.recv_keep()[0]
+        if correction == 1:
+            epr.X()
+        conn.flush()
+        conn.close()
+
+See the :doc:`new-sdk/Template` page for how to set up the client and server, and the teleportation example
+for a complete two-node program with classical messaging.
+
+-----------------------
+Configuration
+-----------------------
+
+Each program needs two configuration files in its directory:
+
+* ``simulaqron_network.json`` — defines the nodes and their socket ports. See :doc:`ConfNodes` for details.
+* ``simulaqron_settings.json`` — configures the simulation backend and other settings. See the
+  :ref:`settings` section in :doc:`GettingStarted`.
+
+The ``stabilizer`` backend is used by default and is recommended unless you need non-Clifford gates (use
+``qutip`` in that case).
+
+-----------------------
+Further reading
+-----------------------
+
+* :doc:`Examples` — complete working examples from simple to complex
+* :doc:`new-sdk/Overview` — detailed SDK concepts and file structure
+* `NetQASM library documentation <https://netqasm.readthedocs.io/en/latest/>`_

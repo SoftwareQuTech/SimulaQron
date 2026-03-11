@@ -1,50 +1,71 @@
-.. SimulaQron documentation master file, created by
-   sphinx-quickstart on Fri May 26 13:25:00 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 SimulaQron Documentation
 ========================
 
 Welcome to the Quantum Internet simulator SimulaQron!
 
 SimulaQron is a distributed simulation of the end nodes in a future quantum internet with the specific goal to explore
-application development. The end nodes in a quantum internet are few qubit processors, which may exchange qubits using
-a quantum internet.
+application development. Each node in the simulated network provides the illusion of having a local quantum processor
+to potential applications, while the nodes connect classically to allow the exchange of simulated qubits and the
+creation of simulated entanglement.
 
-Specifically, SimulaQron allows the installation of a local simulation program on each computer in the network that
-provides the illusion of having a local quantum processor to potential applications.
+Key features
+------------
 
-The local simulation programs on each classical computer connect to each other classically, forming a simulated quantum
-internet allowing the exchange of simulated qubits between the different network nodes, as well as the creation of
-simulated entanglement.
+* **Distributed quantum internet simulation** — install a local simulation program on each computer, or run all nodes
+  on a single machine
+* **Three simulation backends** — stabilizer formalism (default, efficient), `QuTip <http://qutip.org/>`_ (mixed
+  state), and `ProjectQ <https://projectq.ch/>`_ (pure state)
+* **Two programming interfaces** — the NetQASM SDK (recommended) and a native Twisted mode for low-level access
+* **Configurable network topologies** — complete, ring, path, random tree, or custom topologies
+* **Classical communication** — built-in client/server framework for exchanging classical messages between nodes
 
-SimulaQron is written in `Python <http://www.python.org/>`_ and uses the `Twisted <https://twistedmatrix.com/>`_
-Perspective Broker. To perform the local qubit simulation, three different backends have so far been implemented:
-Using `QuTip <http://qutip.org/>`_ and mixed state, using `Project Q <https://projectq.ch/>`_ and pure states and
-finally using stabilizer formalism. However, any other quantum simulator with a python interface can easily be used as
-a local backend. The main challenge of SimulaQron is to allow the simulation of virtual qubits at different network
-nodes: since these may be entangled they cannot be simulated on one network node, which is solved by a transparent
-distributed simulation on top of in principle any local simulation engine.
+Quick start
+-----------
 
-We also have a `paper <http://iopscience.iop.org/article/10.1088/2058-9565/aad56e>`_ that describe the design of
-SimulaQron, which is also freely available on `arxiv <https://arxiv.org/abs/1712.08032>`_.
+1. **Install**::
 
-The documentation below assumes familiarity with classical network programming concepts, Python, Twisted, as well as
-an elementary understanding of quantum information. More information on a competition at
-`Our website <http://www.simulaqron.org/>`_
+      pip3 install simulaqron
 
-SimulaQron can be installed from pip by the command :code:`pip3 install simulaqron` on MacOS and Linux.
+2. **Configure your network** — create a ``simulaqron_network.json`` defining nodes and ports
+   (see :doc:`ConfNodes`)
+
+3. **Write your program** using the NetQASM SDK::
+
+      from netqasm.sdk.external import NetQASMConnection
+      from netqasm.sdk import Qubit
+
+      conn = NetQASMConnection("Alice")
+      q = Qubit(conn)
+      q.H()
+      m = q.measure()
+      conn.flush()          # execute queued operations
+      print(int(m))         # read measurement result
+      conn.close()
+
+4. **Run examples** — see :doc:`Examples` for complete working programs
+
+Where to go next
+----------------
+
+* **New to SimulaQron?** Start with :doc:`GettingStarted` for installation and your first example
+* **Want to write programs?** See :doc:`NetQASM` for the NetQASM SDK reference
+* **Looking for examples?** See :doc:`Examples` — new SDK, event-based, and native-mode examples
+* **Configuring networks and settings?** See :doc:`ConfNodes`
+* **Architecture and internals?** See :doc:`Overview`
+* **API reference?** See :ref:`modindex`
+
+We also have a `paper <http://iopscience.iop.org/article/10.1088/2058-9565/aad56e>`_ describing the design of
+SimulaQron, freely available on `arxiv <https://arxiv.org/abs/1712.08032>`_.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   Overview
    GettingStarted
-   ConfNodes
    NetQASM
    Examples
+   ConfNodes
+   Overview
    simulaqron
 
 

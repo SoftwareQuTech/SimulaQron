@@ -1,6 +1,9 @@
 Teleporting a Qubit
 ===================
 
+.. note:: Native mode is the low-level Twisted interface. For new projects, the NetQASM SDK is recommended.
+   See :doc:`../new-sdk/Overview` and the SDK version of this example at :doc:`../new-sdk/Teleport`.
+
 Let's now consider a very simple protocol, in which Alice first generates an EPR pair with Bob, and then teleports
 a qubit to Bob. To program it in SimulaQron's native mode, we will use the template described in
 :doc:`Template`.
@@ -30,28 +33,23 @@ Setting up
 We will run everything locally (localhost) using the standard ``simulaqron_network.json`` file that defines the
 nodes that run the virtual quantum node in the background to simulate the quantum hardware::
 
-    [
-        {
-            "name": "default",
-            "nodes":  [
-                {
-                    "Alice": {
-                        "app_socket": ["localhost", 8821],
-                        "qnodeos_socket": ["localhost", 8822],
-                        "vnode_socket": ["localhost", 8823]
-                    }
+    {
+        "default": {
+            "nodes": {
+                "Alice": {
+                    "app_socket": ["localhost", 8821],
+                    "qnodeos_socket": ["localhost", 8822],
+                    "vnode_socket": ["localhost", 8823]
                 },
-                {
-                    "Bob": {
-                        "app_socket": ["localhost", 8831],
-                        "qnodeos_socket": ["localhost", 8832],
-                        "vnode_socket": ["localhost", 8833]
-                    }
+                "Bob": {
+                    "app_socket": ["localhost", 8831],
+                    "qnodeos_socket": ["localhost", 8832],
+                    "vnode_socket": ["localhost", 8833]
                 }
-            ],
+            },
             "topology": null
         }
-    ]
+    }
 
 We use this same file to specify the communication channels (sockets) for passing classical messages between the
 declared nodes. The loaded network configuration can be used to construct ``SocketsConfig`` objects that contain the

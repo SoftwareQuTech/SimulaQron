@@ -5,8 +5,8 @@ Getting started
 Setup
 -----
 
-SimulaQron requires `Python 3.12 <https://python.org/>`_  along with the packages *cqc*, *twisted*, *numpy*, *scipy*,
-*networkx*, *flake8*, *click* and *daemons*.
+SimulaQron requires `Python 3.12 <https://python.org/>`_ along with the packages *netqasm*, *twisted*, *numpy*, *scipy*,
+*networkx*, *click* and *daemons*.
 
 ^^^^^^^^^^^^^^^^^^^^^^
 Installation using pip
@@ -41,14 +41,13 @@ interactive python console by typing `python3` and the::
 Testing a simple example
 ------------------------
 
-Before delving into how to write any program yourself, let's first simply run one of the existing examples when
-programming SimulaQron through the Python library (see https://softwarequtech.github.io/CQC-Python/examples.html).
-Remember from the Overview that SimulaQron has two parts: the first are the virtual node servers that act simulate
+Before delving into how to write any program yourself, let's first simply run one of the existing examples.
+Remember from the Overview that SimulaQron has two parts: the first are the virtual node servers that simulate
 the hardware at each node as well as the quantum communication between them in a transparent manner.
-The second are the applications themselves which can be written in two ways, the direct way is to use the native
-mode using the Python Twisted framework connecting to the virtual node servers, see :doc:`Examples`.
-The recommended way however is the use the NetQASM library that calls the virtual nodes by making use of the
-çclassical/quantum combiner interface. We will here illustrate how to use SimulaQron with the NetQASM library.
+The second are the applications themselves which can be written in two ways: the direct way is to use the native
+mode using the Python Twisted framework connecting to the virtual node servers (see :doc:`Examples`),
+and the recommended way is to use the NetQASM library that calls the virtual nodes via the NetQASM interface.
+We will here illustrate how to use SimulaQron with the NetQASM library.
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Starting the SimulaQron backend
@@ -94,18 +93,16 @@ Evidently, there would be classical means to achieve this trivial task chosen fo
 
 * Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`.
 
-.. warning:: Update the link references and the names of the examples (NetQASM vs pythonLib)
-
-The examples can be found in the repo `pythonLib <https://github.com/SoftwareQuTech/CQC-Python>`_.
+The examples can be found in ``examples/new-sdk/`` (see :doc:`Examples` for the full list).
 Before seeing how this example works, let us simply run the code::
 
-    cd examples/nativeMode/corrRNG
+    cd examples/new-sdk/corrRNG
     sh run.sh
 
 You should be seeing the following two lines::
 
-    App Alice: Measurement outcome is: 0/1
-    App Bob: Measurement outcome is: 0/1
+    Alice: My Random Number is '0/1'
+    Bob: My Random Number is '0/1'
 
 Note that the order of these two lines may differ, as it does not matter who measures first. So what is actually
 going on here? Let us first look at how we will realize the example by making an additional step (3) explicit:
@@ -131,47 +128,49 @@ The script run.sh executes the following two python scripts::
 
 Let us now look at the programs for Alice and Bob.
 
-We first initialize an object of the class ``NetQASMConnection`` which will do all the communication to the virtual
-through the NetQASM interface.
-Qubits can then be created by initializing a qubit-object, which takes a ``NetQASMConnection`` as an input.
-On these qubits operations can be applied and they can also be sent to other nodes in the network by use of the
-``NetQASMConnection``. The full code in aliceTest.py is::
+We first create a ``NetQASMConnection`` which handles all communication with the local quantum backend.
+An ``EPRSocket`` is used to create or receive entangled qubit pairs with a remote node.
+The key pattern is: queue operations, call ``flush()`` to execute them, then read results with ``int(m)``.
 
-    # Create an EPR Socket between "Alice" and "Bob"
-    epr_socket = EPRSocket("Alice", "Bob")
-    # Initialize the connection
-    with NetQASMConnection("Alice", epr_sockets=[epr_socket]) as Alice:
-        # Create an EPR pair
-        q = epr_socker.create_keep("Bob", number=1)[0]
+The core of aliceTest.py is::
 
-        # Measure qubit
-        m=q.measure()
-        to_print="App {}: Measurement outcome is: {}".format(Alice.name,m)
-        print("|"+"-"*(len(to_print)+2)+"|")
-        print("| "+to_print+" |")
-        print("|"+"-"*(len(to_print)+2)+"|")
+    epr_socket = EPRSocket("Bob")
 
-Similarly the code in bobTest.py read::
+    # sim_conn is our connection to the quantum backend (SimulaQron), not to Bob.
+    sim_conn = NetQASMConnection("Alice", epr_sockets=[epr_socket])
 
-    # Create an EPR Socket between "Bob" and "Alice"
-    epr_socket = EPRSocket("Bob", "Alice")
-    # Initialize the connection
-    with NetQASMConnection("Bob", epr_sockets=[epr_socket]) as Bob:
+    # Create an entangled qubit
+    epr = epr_socket.create_keep()[0]
 
-        # Receive qubit
-        q=epr_socker.receive_keep("Alice")[0]
+    # Measure it
+    m1 = epr.measure()
 
-        # Measure qubit
-        m=q.measure()
-        to_print="App {}: Measurement outcome is: {}".format(Bob.name,m)
-        print("|"+"-"*(len(to_print)+2)+"|")
-        print("| "+to_print+" |")
-        print("|"+"-"*(len(to_print)+2)+"|")
+    # flush() executes all queued quantum operations and makes measurement
+    # results available.  Before flush(), m1 is just a future/promise.
+    sim_conn.flush()
 
-.. warning:: Update the link references and the names of the examples (NetQASM vs pythonLib)
+    # int(m) extracts the measurement outcome — only valid after flush().
+    m1_val = int(m1)
+    sim_conn.close()
 
-For further examples, see the examples/ folder and for the docs of the Python library see
-https://softwarequtech.github.io/CQC-Python/index.html.
+Similarly the core of bobTest.py is::
+
+    epr_socket = EPRSocket("Alice")
+
+    # sim_conn is our connection to the quantum backend (SimulaQron), not to Alice.
+    sim_conn = NetQASMConnection("Bob", epr_sockets=[epr_socket])
+
+    # Receive an entangled qubit
+    epr = epr_socket.recv_keep()[0]
+
+    # Measure it
+    m1 = epr.measure()
+
+    sim_conn.flush()
+    m1_val = int(m1)
+    sim_conn.close()
+
+For further examples, see :doc:`Examples` and :doc:`NetQASM` for the full SDK reference.
 
 .. _settings:
 

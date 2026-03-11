@@ -1,6 +1,9 @@
 Generate correlated randomness
 ==============================
 
+.. note:: Native mode is the low-level Twisted interface. For new projects, the NetQASM SDK is recommended.
+   See :doc:`../new-sdk/Overview` and the SDK version of this example at :doc:`../new-sdk/CorrRNG`.
+
 Having started the virtual quantum nodes, let us now run a simple test application, which already illustrates some of
 the aspects in realizing protocols. Our objective will be to realize the following protocol which will generate 1
 shared random bit between Alice and Bob. Evidently, there would be classical means to achieve this trivial task chosen
@@ -54,28 +57,23 @@ This file defines which nodes act as servers in the classical communication netw
 to execute the protocol. You want to copy this to whatever example you are running. It takes the JSON format,
 where in our example we have Alice and Bob::
 
-    [
-        {
-            "name": "default",
-            "nodes":  [
-                {
-                    "Alice": {
-                        "app_socket": ["localhost", 8821],
-                        "qnodeos_socket": ["localhost", 8822],
-                        "vnode_socket": ["localhost", 8823]
-                    }
+    {
+        "default": {
+            "nodes": {
+                "Alice": {
+                    "app_socket": ["localhost", 8821],
+                    "qnodeos_socket": ["localhost", 8822],
+                    "vnode_socket": ["localhost", 8823]
                 },
-                {
-                    "Bob": {
-                        "app_socket": ["localhost", 8831],
-                        "qnodeos_socket": ["localhost", 8832],
-                        "vnode_socket": ["localhost", 8833]
-                    }
+                "Bob": {
+                    "app_socket": ["localhost", 8831],
+                    "qnodeos_socket": ["localhost", 8832],
+                    "vnode_socket": ["localhost", 8833]
                 }
-            ],
+            },
             "topology": null
         }
-    ]
+    }
 
 The first thing that happens if we execute the script doNew.sh is that after some setting up it will call run.sh,
 executing::

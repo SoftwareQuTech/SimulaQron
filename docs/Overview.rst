@@ -21,16 +21,14 @@ The second way to run applications is via a higher level interface, the NetQASM 
 applications to later use real quantum hardware more easily instead of SimulaQron, then this is the interface to use.
 Examples of how to program using the NetQASM can be found in :doc:`NetQASM`.
 
-.. warning:: Update this image (I don't have the sources though... I might need to make them from scratch)
-
-.. image:: figs/CQC_schematic_v3.png
-    :width: 400px
+.. image:: figs/netqasm_architecture.png
+    :width: 500px
     :align: center
     :alt: SimulaQron Programming Interfaces
 
 Practically, SimulaQron's Backend is a server process running on each local classical computer (or on a single
 classical computer), emulating quantum hardware. The backend can be programmed directly using Twisted PB (native mode).
-For clarity, not efficiency, the NetqASM Backend is a separate server process, which connects to the SimulaQron backend
+For clarity, not efficiency, the NetQASM Backend is a separate server process, which connects to the SimulaQron backend
 using Twisted PB. If you are starting out, programming in the Python NetQASM library is by far the easiest way to get
 going! Further information about the Python NetQASM library can be found in https://netqasm.readthedocs.io/en/latest/.
 
@@ -171,7 +169,7 @@ any code. The easiest way to proceed is to:
 Automated tests
 ^^^^^^^^^^^^^^^
 
-There are number of automated tests that test many (but not all) of the features of SimulaQron and the CQC interface.
+There are number of automated tests that test many (but not all) of the features of SimulaQron and the NetQASM interface.
 See :doc:`GettingStarted` for how to run these.
 Some of the automated tests use quantum tomography and are thus inherently probabilistic.
 Therefore if you see that one of these fails, you can try to run the test again and see if it is consistent.

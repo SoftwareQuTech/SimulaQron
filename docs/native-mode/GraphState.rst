@@ -1,6 +1,9 @@
 Distributing a graph state
 ==========================
 
+.. note:: Native mode is the low-level Twisted interface. For new projects, the NetQASM SDK is recommended.
+   See :doc:`../new-sdk/Overview`.
+
 Here we consider a more complicated example, where we have four parties; Alice, Bob, Charlie and David.
 They will distribute a graph state and transform this with local operations and classical communication to make
 a GHZ-like state.
@@ -94,45 +97,36 @@ Although the order described here is slightly different the end result is still 
 Setting up
 -----------
 
-We will run everything locally (localhost) using a single ``classicalNet.json`` configuration file that defines all
+We will run everything locally (localhost) using a single ``simulaqron_network.json`` configuration file that defines all
 nodes and their socket assignments::
 
-    [
-        {
-            "name": "default",
-            "nodes":  [
-                {
-                    "Alice": {
-                        "app_socket": ["localhost", 8821],
-                        "qnodeos_socket": ["localhost", 8822],
-                        "vnode_socket": ["localhost", 8823]
-                    }
+    {
+        "default": {
+            "nodes": {
+                "Alice": {
+                    "app_socket": ["localhost", 8821],
+                    "qnodeos_socket": ["localhost", 8822],
+                    "vnode_socket": ["localhost", 8823]
                 },
-                {
-                    "Bob": {
-                        "app_socket": ["localhost", 8831],
-                        "qnodeos_socket": ["localhost", 8832],
-                        "vnode_socket": ["localhost", 8833]
-                    }
+                "Bob": {
+                    "app_socket": ["localhost", 8831],
+                    "qnodeos_socket": ["localhost", 8832],
+                    "vnode_socket": ["localhost", 8833]
                 },
-                {
-                    "Charlie": {
-                        "app_socket": ["localhost", 8841],
-                        "qnodeos_socket": ["localhost", 8842],
-                        "vnode_socket": ["localhost", 8843]
-                    }
+                "Charlie": {
+                    "app_socket": ["localhost", 8841],
+                    "qnodeos_socket": ["localhost", 8842],
+                    "vnode_socket": ["localhost", 8843]
                 },
-                {
-                    "David": {
-                        "app_socket": ["localhost", 8871],
-                        "qnodeos_socket": ["localhost", 8872],
-                        "vnode_socket": ["localhost", 8873]
-                    }
+                "David": {
+                    "app_socket": ["localhost", 8871],
+                    "qnodeos_socket": ["localhost", 8872],
+                    "vnode_socket": ["localhost", 8873]
                 }
-            ],
+            },
             "topology": null
         }
-    ]
+    }
 
 As we can see from the protocol above, Alice is the one that initializes the protocol and the others listen. We will
 therefore run a client at Alice and servers at Bob, Charlie and David.
@@ -445,7 +439,7 @@ We first start the virtual quantum node backend, by executing::
 
 We then start up the programs for the parties themselves. These will connect to the virtual quantum nodes, and
 execute the quantum commands and classical communication outlined above, in the same directory as we placed
-classicalNet.json::
+simulaqron_network.json::
 
     python3 bobTest.py &
     python3 charlieTest.py &
