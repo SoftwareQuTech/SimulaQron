@@ -2,7 +2,7 @@ Template for programming in native mode
 =======================================
 
 .. note:: Native mode is the low-level Twisted interface. For new projects, the NetQASM SDK is recommended.
-   See :doc:`../new-sdk/Overview`.
+   See `New SDK Overview <../new-sdk/Overview.rst>`_.
 
 In examples/nativeMode/template you will find a template that allows you to start programming relatively easily by
 filling in the relevant parts of the template. Let us now discuss this template in detail:
@@ -39,7 +39,7 @@ filling in the relevant parts of the template. Let us now discuss this template 
     }
 
 #. The next step is to check that on each network computer that you will run on, the global configuration file
-   starting the virtual quantum nodes is set up correctly. See :doc:`../GettingStarted` on how to perform such a
+   starting the virtual quantum nodes is set up correctly. See `Getting Started <../GettingStarted.rst>`_ on how to perform such a
    configuration and start the local quantum virtual node backends.
 #. Now copy nodeTest.py to a separate file for each node. In our example above where we just have Alice (client
    only) and Bob (server only), you would copy nodeTest to aliceTest.py and bobTest.py.

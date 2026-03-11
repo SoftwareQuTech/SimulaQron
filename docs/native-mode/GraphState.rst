@@ -2,7 +2,7 @@ Distributing a graph state
 ==========================
 
 .. note:: Native mode is the low-level Twisted interface. For new projects, the NetQASM SDK is recommended.
-   See :doc:`../new-sdk/Overview`.
+   See `New SDK Overview <../new-sdk/Overview.rst>`_.
 
 Here we consider a more complicated example, where we have four parties; Alice, Bob, Charlie and David.
 They will distribute a graph state and transform this with local operations and classical communication to make

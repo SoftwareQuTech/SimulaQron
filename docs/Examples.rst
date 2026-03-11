@@ -17,38 +17,38 @@ SimulaQron offers three ways to write quantum network programs, from highest-lev
    directly to SimulaQron's virtual quantum nodes.  This is Python-specific and more verbose,
    but gives full control over the simulation backend.
 
-The examples below assume that you have already made your way through :doc:`GettingStarted`:
+The examples below assume that you have already made your way through `Getting Started <GettingStarted.rst>`_:
 you have the virtual node servers up and running.
 
 -----------------
 New SDK examples
 -----------------
 
-* :doc:`new-sdk/Overview` — Key concepts: ``NetQASMConnection``, ``EPRSocket``, ``flush()``, file structure
-* :doc:`new-sdk/Template` — Getting started: single-node and client-server templates
-* :doc:`new-sdk/CorrRNG` — EPR pairs between two nodes, correlated measurement
-* :doc:`new-sdk/Teleport` — Quantum teleportation with classical correction messages
-* :doc:`new-sdk/ExtendGHZ` — Three-party entanglement, multiple EPR sockets
-* :doc:`new-sdk/MidCircuitLogic` — Multiple ``flush()`` calls for mid-circuit classical decisions
+* `Overview <new-sdk/Overview.rst>`_ — Key concepts: ``NetQASMConnection``, ``EPRSocket``, ``flush()``, file structure
+* `Template <new-sdk/Template.rst>`_ — Getting started: single-node and client-server templates
+* `CorrRNG <new-sdk/CorrRNG.rst>`_ — EPR pairs between two nodes, correlated measurement
+* `Teleport <new-sdk/Teleport.rst>`_ — Quantum teleportation with classical correction messages
+* `ExtendGHZ <new-sdk/ExtendGHZ.rst>`_ — Three-party entanglement, multiple EPR sockets
+* `MidCircuitLogic <new-sdk/MidCircuitLogic.rst>`_ — Multiple ``flush()`` calls for mid-circuit classical decisions
 
 ---------------------
 Event-based examples
 ---------------------
 
-* :doc:`event-based/Overview` — Event-based programming model and state machines
-* :doc:`event-based/PingPong` — Classical ping-pong between two nodes
-* :doc:`event-based/PolitePingPong` — State-machine message dispatch pattern
-* :doc:`event-based/QuantumCorrRNG` — Quantum correlated RNG with state machine
-* :doc:`event-based/QuantumCorrRNGVerified` — Correlated RNG with verification protocol
+* `Overview <event-based/Overview.rst>`_ — Event-based programming model and state machines
+* `PingPong <event-based/PingPong.rst>`_ — Classical ping-pong between two nodes
+* `PolitePingPong <event-based/PolitePingPong.rst>`_ — State-machine message dispatch pattern
+* `QuantumCorrRNG <event-based/QuantumCorrRNG.rst>`_ — Quantum correlated RNG with state machine
+* `QuantumCorrRNGVerified <event-based/QuantumCorrRNGVerified.rst>`_ — Correlated RNG with verification protocol
 
 ---------------------
 Native mode examples
 ---------------------
 
-* :doc:`native-mode/Template` — Template for programming in native (Twisted) mode
-* :doc:`native-mode/CorrRng` — Correlated randomness using native mode
-* :doc:`native-mode/Teleport` — Teleportation using native mode
-* :doc:`native-mode/GraphState` — Distributing a graph state across four nodes
+* `Template <native-mode/Template.rst>`_ — Template for programming in native (Twisted) mode
+* `CorrRng <native-mode/CorrRng.rst>`_ — Correlated randomness using native mode
+* `Teleport <native-mode/Teleport.rst>`_ — Teleportation using native mode
+* `GraphState <native-mode/GraphState.rst>`_ — Distributing a graph state across four nodes
 
 .. toctree::
     :hidden:

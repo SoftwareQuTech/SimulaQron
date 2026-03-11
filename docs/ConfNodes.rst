@@ -5,7 +5,7 @@ SimulaQron uses two configuration files:
 
 * ``simulaqron_network.json`` — defines nodes, their socket ports, and network topology (described on this page)
 * ``simulaqron_settings.json`` — configures the simulation backend, timeouts, and other settings
-  (see :ref:`settings` in :doc:`GettingStarted`)
+  (see the Settings section in `Getting Started <GettingStarted.rst>`_)
 
 -------------------------------------------
 Running all nodes on a single machine
@@ -221,7 +221,7 @@ SimulaQron can automatically generate certain well-known network topologies:
   :math:`n(n-1)/2` for :math:`n` nodes.
 
 .. note:: Topology generation via the CLI is planned but not yet implemented. For now, specify topologies
-    directly in the ``simulaqron_network.json`` file (see :ref:`network-topologies`).
+    directly in the ``simulaqron_network.json`` file (see `Network topologies`_ below).
 
 Along with setting up the network with the specified topology a .png figure is also generated and stored as
 config/topology.png. This is useful if a random network is used, to easily visualize the network used.
@@ -233,7 +233,7 @@ The network that is then started might look like this:
     :align: center
     :alt: Example network topology
 
-To create a custom topology, see section :ref:`network-topologies`.
+To create a custom topology, see section `Network topologies`_ above.
 
 --------------------------
 Starting multiple networks
@@ -251,5 +251,5 @@ To stop a specific network::
 .. note:: By default the network name is "default". To have multiple networks running at the same time the
     nodes cannot use the same port numbers.
 
-The JSON configuration file can hold more than one network configuration. See :ref:`networkConfig` above for
+The JSON configuration file can hold more than one network configuration. See `Configuring the network`_ above for
 an example with multiple networks.

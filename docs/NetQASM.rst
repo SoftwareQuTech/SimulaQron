@@ -2,7 +2,7 @@ The NetQASM interface
 =====================
 
 SimulaQron applications are written using the **NetQASM SDK**. This page describes the core concepts and
-programming model. For complete working examples, see :doc:`Examples`.
+programming model. For complete working examples, see `Examples <Examples.rst>`_.
 
 ------------
 Installation
@@ -91,7 +91,7 @@ You can call ``flush()`` multiple times on the same connection. This enables **m
         other_qubit.X()   # conditional correction
     conn.flush()
 
-See the mid-circuit logic example in :doc:`Examples` for a full demonstration.
+See the mid-circuit logic example in `Examples <Examples.rst>`_ for a full demonstration.
 
 -----------------------
 Minimal example
@@ -173,7 +173,7 @@ receiving classical messages::
         conn.flush()
         conn.close()
 
-See the :doc:`new-sdk/Template` page for how to set up the client and server, and the teleportation example
+See the `Template <new-sdk/Template.rst>`_ page for how to set up the client and server, and the teleportation example
 for a complete two-node program with classical messaging.
 
 -----------------------
@@ -182,9 +182,9 @@ Configuration
 
 Each program needs two configuration files in its directory:
 
-* ``simulaqron_network.json`` — defines the nodes and their socket ports. See :doc:`ConfNodes` for details.
+* ``simulaqron_network.json`` — defines the nodes and their socket ports. See `Configuring the Network <ConfNodes.rst>`_ for details.
 * ``simulaqron_settings.json`` — configures the simulation backend and other settings. See the
-  :ref:`settings` section in :doc:`GettingStarted`.
+  Settings section in `Getting Started <GettingStarted.rst>`_.
 
 The ``stabilizer`` backend is used by default and is recommended unless you need non-Clifford gates (use
 ``qutip`` in that case).
@@ -193,6 +193,6 @@ The ``stabilizer`` backend is used by default and is recommended unless you need
 Further reading
 -----------------------
 
-* :doc:`Examples` — complete working examples from simple to complex
-* :doc:`new-sdk/Overview` — detailed SDK concepts and file structure
+* `Examples <Examples.rst>`_ — complete working examples from simple to complex
+* `New SDK Overview <new-sdk/Overview.rst>`_ — detailed SDK concepts and file structure
 * `NetQASM library documentation <https://netqasm.readthedocs.io/en/latest/>`_

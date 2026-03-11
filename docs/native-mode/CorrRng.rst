@@ -2,7 +2,7 @@ Generate correlated randomness
 ==============================
 
 .. note:: Native mode is the low-level Twisted interface. For new projects, the NetQASM SDK is recommended.
-   See :doc:`../new-sdk/Overview` and the SDK version of this example at :doc:`../new-sdk/CorrRNG`.
+   See `New SDK Overview <../new-sdk/Overview.rst>`_ and the SDK version of this example at `CorrRNG <../new-sdk/CorrRNG.rst>`_.
 
 Having started the virtual quantum nodes, let us now run a simple test application, which already illustrates some of
 the aspects in realizing protocols. Our objective will be to realize the following protocol which will generate 1

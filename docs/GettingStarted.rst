@@ -22,7 +22,7 @@ Now, we can install SimulaQron by simply typing::
 
     pip3 install simulaqron
 
-You can then make use of SimulaQron using the command :code:`simulaqron` in the terminal. For more information on how
+You can then make use of SimulaQron using the command ``simulaqron`` in the terminal. For more information on how
 to use this command see below or type::
 
     simulaqron -h
@@ -45,7 +45,7 @@ Before delving into how to write any program yourself, let's first simply run on
 Remember from the Overview that SimulaQron has two parts: the first are the virtual node servers that simulate
 the hardware at each node as well as the quantum communication between them in a transparent manner.
 The second are the applications themselves which can be written in two ways: the direct way is to use the native
-mode using the Python Twisted framework connecting to the virtual node servers (see :doc:`Examples`),
+mode using the Python Twisted framework connecting to the virtual node servers (see `Examples <Examples.rst>`_),
 and the recommended way is to use the NetQASM library that calls the virtual nodes via the NetQASM interface.
 We will here illustrate how to use SimulaQron with the NetQASM library.
 
@@ -59,14 +59,14 @@ the backend of SimulaQron simply type::
 
     simulaqron start
 
-.. warning:: Running :code:`simulaqron start` will be default start up servers on localhost (i.e., your own computer),
+.. warning:: Running ``simulaqron start`` will be default start up servers on localhost (i.e., your own computer),
     using port numbers between 8000 and 9000, to form the simulated quantum internet hardware. SimulaQron does not
     provide any access control to its simulated hardware, so you are responsible to securing access should this be
     relevant for you. You can also run the different simulated nodes on different computers. We do not take any
     responsibility for problems caused by SimulaQron.
 
-For more information on what :code:`./cli/SimulaQron start` does, how to change the nodes and the ports of the network,
-the topology etc, see :doc:`ConfNodes`.
+For more information on what ``./cli/SimulaQron start`` does, how to change the nodes and the ports of the network,
+the topology etc, see `Configuring the Network <ConfNodes.rst>`_.
 
 To stop the backend, simply type::
 
@@ -93,7 +93,7 @@ Evidently, there would be classical means to achieve this trivial task chosen fo
 
 * Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`.
 
-The examples can be found in ``examples/new-sdk/`` (see :doc:`Examples` for the full list).
+The examples can be found in ``examples/new-sdk/`` (see `Examples <Examples.rst>`_ for the full list).
 Before seeing how this example works, let us simply run the code::
 
     cd examples/new-sdk/corrRNG
@@ -170,7 +170,7 @@ Similarly the core of bobTest.py is::
     m1_val = int(m1)
     sim_conn.close()
 
-For further examples, see :doc:`Examples` and :doc:`NetQASM` for the full SDK reference.
+For further examples, see `Examples <Examples.rst>`_ and `The NetQASM Interface <NetQASM.rst>`_ for the full SDK reference.
 
 .. _settings:
 
@@ -220,7 +220,7 @@ This command will create a file with the following configuration::
         "t1": 1.0
     }
 
-Section :ref:`settings_fields` provides a description about each one of the configuration options in the file.
+The section `Settings Fields`_ below provides a description about each one of the configuration options in the file.
 
 Alternatively, you can place the ``simulaqron_settings.json`` file in the folder ``~/.simulaqron`` (i.e. a folder
 named ``.simulaqron`` in your home folder). Doing so will make your settings persist across different projects you
@@ -268,7 +268,7 @@ The SimulaQron settings file contains a set of fields to control the configurati
 * ``t1``: T1 parameter to use when applying noise on the emulated qubits. This value is only used when the
   ``noisy_qubit`` option is set to ``true``.
 
-The default value of all these fields can be seen in the :ref:`settings` section.
+The default value of all these fields can be seen in the Settings_ section above.
 
 .. note:: An application can become "stalled" in certain configurations, leaving the application to look "hung". This
     leads to a deadlock of the application. SimulaQron will wait for the configured time before considering the

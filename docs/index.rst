@@ -27,7 +27,7 @@ Quick start
       pip3 install simulaqron
 
 2. **Configure your network** — create a ``simulaqron_network.json`` defining nodes and ports
-   (see :doc:`ConfNodes`)
+   (see `Configuring the Network <ConfNodes.rst>`_)
 
 3. **Write your program** using the NetQASM SDK::
 
@@ -42,17 +42,16 @@ Quick start
       print(int(m))         # read measurement result
       conn.close()
 
-4. **Run examples** — see :doc:`Examples` for complete working programs
+4. **Run examples** — see `Examples <Examples.rst>`_ for complete working programs
 
 Where to go next
 ----------------
 
-* **New to SimulaQron?** Start with :doc:`GettingStarted` for installation and your first example
-* **Want to write programs?** See :doc:`NetQASM` for the NetQASM SDK reference
-* **Looking for examples?** See :doc:`Examples` — new SDK, event-based, and native-mode examples
-* **Configuring networks and settings?** See :doc:`ConfNodes`
-* **Architecture and internals?** See :doc:`Overview`
-* **API reference?** See :ref:`modindex`
+* **New to SimulaQron?** Start with `Getting Started <GettingStarted.rst>`_ for installation and your first example
+* **Want to write programs?** See `The NetQASM Interface <NetQASM.rst>`_ for the NetQASM SDK reference
+* **Looking for examples?** See `Examples <Examples.rst>`_ — new SDK, event-based, and native-mode examples
+* **Configuring networks and settings?** See `Configuring the Network <ConfNodes.rst>`_
+* **Architecture and internals?** See `Overview <Overview.rst>`_
 
 We also have a `paper <http://iopscience.iop.org/article/10.1088/2058-9565/aad56e>`_ describing the design of
 SimulaQron, freely available on `arxiv <https://arxiv.org/abs/1712.08032>`_.
@@ -72,6 +71,6 @@ SimulaQron, freely available on `arxiv <https://arxiv.org/abs/1712.08032>`_.
 Indices and tables
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+* Index
+* Module Index
+* Search

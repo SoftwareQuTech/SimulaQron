@@ -2,11 +2,11 @@ Teleporting a Qubit
 ===================
 
 .. note:: Native mode is the low-level Twisted interface. For new projects, the NetQASM SDK is recommended.
-   See :doc:`../new-sdk/Overview` and the SDK version of this example at :doc:`../new-sdk/Teleport`.
+   See `New SDK Overview <../new-sdk/Overview.rst>`_ and the SDK version of this example at `Teleport <../new-sdk/Teleport.rst>`_.
 
 Let's now consider a very simple protocol, in which Alice first generates an EPR pair with Bob, and then teleports
 a qubit to Bob. To program it in SimulaQron's native mode, we will use the template described in
-:doc:`Template`.
+`Template <Template.rst>`_.
 
 ------------
 The protocol
