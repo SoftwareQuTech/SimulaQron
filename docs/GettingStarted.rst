@@ -220,7 +220,7 @@ This command will create a file with the following configuration::
         "t1": 1.0
     }
 
-Section :ref: `settings_fields` provides a description about each one of the configuration options in the file.
+Section :ref:`settings_fields` provides a description about each one of the configuration options in the file.
 
 Alternatively, you can place the ``simulaqron_settings.json`` file in the folder ``~/.simulaqron`` (i.e. a folder
 named ``.simulaqron`` in your home folder). Doing so will make your settings persist across different projects you
@@ -268,7 +268,7 @@ The SimulaQron settings file contains a set of fields to control the configurati
 * ``t1``: T1 parameter to use when applying noise on the emulated qubits. This value is only used when the
   ``noisy_qubit`` option is set to ``true``.
 
-The default value of all these fields can be seen in the :ref: `settings` section.
+The default value of all these fields can be seen in the :ref:`settings` section.
 
 .. note:: An application can become "stalled" in certain configurations, leaving the application to look "hung". This
     leads to a deadlock of the application. SimulaQron will wait for the configured time before considering the
