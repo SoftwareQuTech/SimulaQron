@@ -35,7 +35,7 @@ from dataclasses import dataclass, fields
 from enum import Enum
 from os import PathLike
 from pathlib import Path
-from typing import Self
+from typing_extensions import Self
 
 from dataclasses_serialization.json import JSONSerializer
 from dataclasses_serialization.json import JSONSerializerMixin

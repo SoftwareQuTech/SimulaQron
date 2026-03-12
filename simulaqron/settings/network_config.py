@@ -3,11 +3,12 @@ import shutil
 import socket
 from contextlib import closing
 from dataclasses import dataclass, field, fields
-from enum import StrEnum
 from importlib import resources
 from os import PathLike
 from pathlib import Path
-from typing import Optional, Self, Dict, List, Tuple, Any
+from strenum import StrEnum
+from typing import Optional, Dict, List, Tuple, Any
+from typing_extensions import Self
 
 from dataclasses_serialization.json import JSONSerializer, JSONSerializerMixin
 

@@ -19,13 +19,13 @@ class TestSettings:
     def clean_settings(self):
         # Load the setting files in cwd and home, saved them in a temp file
         if cwd_settings.exists() and cwd_settings.is_file():
-            orig_cwd_settings = NamedTemporaryFile(suffix=".json", mode="w", delete_on_close=False).__enter__()
+            orig_cwd_settings = NamedTemporaryFile(suffix=".json", mode="w", delete=False).__enter__()
             shutil.copyfile(cwd_settings, orig_cwd_settings.name)
             cwd_settings.unlink()
         else:
             orig_cwd_settings = None
         if home_settings.exists() and home_settings.is_file():
-            orig_home_settings = NamedTemporaryFile(suffix=".json", mode="w", delete_on_close=False).__enter__()
+            orig_home_settings = NamedTemporaryFile(suffix=".json", mode="w", delete=False).__enter__()
             shutil.copyfile(home_settings, orig_home_settings.name)
             home_settings.unlink()
         else:
@@ -37,10 +37,12 @@ class TestSettings:
             cwd_settings.touch()
             shutil.copyfile(orig_cwd_settings.name, cwd_settings)
             orig_cwd_settings.__exit__(None, None, None)
+            Path(orig_cwd_settings.name).unlink()
         if orig_home_settings is not None:
             home_settings.touch()
             shutil.copyfile(orig_home_settings.name, home_settings)
             orig_home_settings.__exit__(None, None, None)
+            Path(orig_home_settings.name).unlink()
 
     @staticmethod
     def _cleanup_config_files():

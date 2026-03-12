@@ -21,13 +21,13 @@ class TestNetworksSettings:
     def clean_settings(self):
         # Load the setting files in cwd and home, saved them in a temp file
         if cwd_network.is_file() and cwd_network.is_file():
-            orig_cwd_network = NamedTemporaryFile(suffix=".json", mode="w", delete_on_close=False).__enter__()
+            orig_cwd_network = NamedTemporaryFile(suffix=".json", mode="w", delete=False).__enter__()
             shutil.copyfile(cwd_network, orig_cwd_network.name)
             cwd_network.unlink()
         else:
             orig_cwd_network = None
         if home_network.is_file() and home_network.is_file():
-            orig_home_network = NamedTemporaryFile(suffix=".json", mode="w", delete_on_close=False).__enter__()
+            orig_home_network = NamedTemporaryFile(suffix=".json", mode="w", delete=False).__enter__()
             shutil.copyfile(home_network, orig_home_network.name)
             home_network.unlink()
         else:
@@ -39,10 +39,12 @@ class TestNetworksSettings:
             cwd_network.touch()
             shutil.copyfile(orig_cwd_network.name, cwd_network)
             orig_cwd_network.__exit__(None, None, None)
+            Path(orig_cwd_network.name).unlink()
         if orig_home_network is not None:
             home_network.touch()
             shutil.copyfile(orig_home_network.name, home_network)
             orig_home_network.__exit__(None, None, None)
+            Path(orig_home_network.name).unlink()
 
         files_to_check = [cwd_network, home_network]
         for file in files_to_check:
@@ -243,27 +245,29 @@ class TestNetworksSettings:
 
         expected_network_config = TestNetworksSettings._build_expected_config(alice_ports, bob_ports)
 
-        with NamedTemporaryFile(mode="wt", delete_on_close=False) as temp_file:
+        with NamedTemporaryFile(mode="wt", delete=False) as temp_file:
             network_config.write_to_file(temp_file.name)
             temp_file.flush()
 
             serialized_content = Path(temp_file.name).read_text()
             assert serialized_content == expected_network_config
+            Path(temp_file.name).unlink()
 
     def test_deserialize_network_config(self, reset_net_cfg):
         raw_config = TestNetworksSettings._build_expected_config([8020, 8021, 8022], [8050, 8051, 8052])
-        with NamedTemporaryFile(mode="wt", delete_on_close=False) as temp_file:
+        with NamedTemporaryFile(mode="wt", delete=False) as temp_file:
             temp_file.write(raw_config)
             temp_file.flush()
 
             network_config.read_from_file(temp_file.name)
             assert json.dumps(JSONSerializer.serialize(network_config), indent=4) == raw_config
+            Path(temp_file.name).unlink()
 
     def test_load_old_json_format(self):
         this_file_folder = Path(__file__).parent
         old_json_config_path = this_file_folder / "resources" / "old_format.json"
 
-        with NamedTemporaryFile(mode="wt", delete_on_close=False) as temp_file:
+        with NamedTemporaryFile(mode="wt", delete=False) as temp_file:
             # We copy the content of the resource into a temp file, so we don't
             # overwrite the resource for future test sessions
             shutil.copy(old_json_config_path, temp_file.name)
@@ -294,3 +298,4 @@ class TestNetworksSettings:
             assert network_config.nodes[1].qnodeos_port == 8832
             assert network_config.nodes[1].vnode_hostname == "localhost"
             assert network_config.nodes[1].vnode_port == 8833
+            Path(temp_file.name).unlink()
