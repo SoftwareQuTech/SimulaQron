@@ -25,6 +25,13 @@ requirements python-deps:
 	@${PYTHON} -m pip install .
 
 install-optional: install
+	# Python setuptools 81 removed "dry_run" option when compiling C++ code
+	# this breaks the build of projectq
+	# As a hack, we install the bare minimum tools to build projectq, then
+	# we build and install it (ignoring any build requirement in the projectq
+	# package spec), and finally we install the rest of the optional requirements
+	@${PYTHON} -m pip install "setuptools<81" pybind11
+	@${PYTHON} -m pip install "git+https://github.com/ProjectQ-Framework/ProjectQ.git@v0.8.0" --no-build-isolation
 	@${PYTHON} -m pip install .\[opt\]
 
 tests:

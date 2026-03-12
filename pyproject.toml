@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools >= 77.0.3", "wheel", "setuptools-scm>=8"]
+requires = ["setuptools<81", "wheel", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
@@ -18,9 +18,10 @@ dependencies = [
     "click>=8.0,<9.0",
     "daemons>=1.3.0,<2.0.0",
     "netqasm>=2.1.1,<3.0.0",
-    "multiprocess>=0.70.18,<1.0"
+    "multiprocess>=0.70.18,<1.0",
+    "StrEnum<1.0.0"
 ]
-requires-python = ">=3.8,<3.13"
+requires-python = ">=3.10,<3.13"
 authors = [
   {name = "Axel Dahlberg", email = "e.a.dahlberg@tudelft.nl"}
 ]
@@ -29,8 +30,6 @@ maintainers = [
 ]
 description = "A simulator for developing Quantum Internet software"
 readme = "README.md"
-license = "MIT"
-license-files = ["LICENCE"]
 keywords = ["egg", "bacon", "sausage", "tomatoes", "Lobster Thermidor"]
 classifiers = [
         "Programming Language :: Python :: 3.8",
