@@ -1,5 +1,5 @@
-Configuring the simulated network
-=================================
+SimulaQron Configuration
+========================
 
 SimulaQron uses two configuration files:
 
@@ -7,16 +7,16 @@ SimulaQron uses two configuration files:
 * ``simulaqron_settings.json`` — configures the simulation backend, timeouts, and other settings
   (see the Settings section in `Getting Started <GettingStarted.rst>`_)
 
--------------------------------------------
+-------------------------------------
 Running all nodes on a single machine
--------------------------------------------
+-------------------------------------
 
 When developing and testing, you typically run all simulated nodes on one computer.
 In this case, all sockets use ``localhost`` and you just need distinct port numbers for each node.
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 Using the SimulaQron CLI
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``simulaqron`` command manages the backend for you. To start a network with nodes Alice and Bob::
 
@@ -36,8 +36,9 @@ If something went wrong (e.g. the process was killed) and SimulaQron thinks the 
 
 The ``simulaqron start`` command accepts these arguments:
 
-* ``--nodes <nodes_list>`` (**required**): Comma-separated list of node names to start. These must exist in
-  the network configuration file.
+* ``--nodes <nodes_list>`` (optional): Comma-separated list of node names to start. These must exist in
+  the network configuration file. If not given, SimulaQron will start all the defined nodes in
+  ``simulaqron_network.json``.
 * ``--simulaqron-config-file=PATH`` (optional): Path to a SimulaQron settings file. Defaults to
   ``simulaqron_settings.json`` in the current folder.
 * ``--network-config-file=PATH`` (optional): Path to a network configuration file. Defaults to
@@ -48,9 +49,9 @@ The ``simulaqron start`` command accepts these arguments:
 .. warning:: ``simulaqron start`` will fail if any of the ports specified in the config files are already in
     use by a running SimulaQron network or another program.
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Using per-example run scripts
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Each example in ``examples/new-sdk/`` and ``examples/nativeMode/`` includes a ``run.sh`` script that starts
 the SimulaQron backend and launches the node programs. This is the easiest way to try an example::
@@ -61,9 +62,9 @@ the SimulaQron backend and launches the node programs. This is the easiest way t
 The ``run.sh`` script reads the ``simulaqron_network.json`` and ``simulaqron_settings.json`` in the example
 directory, so each example is self-contained.
 
--------------------------------------------
+----------------------------------
 Running nodes on separate machines
--------------------------------------------
+----------------------------------
 
 To simulate a real distributed quantum network, you can run each node on a different physical computer.
 In this case, you need to:
@@ -120,9 +121,16 @@ For each node, you specify IP and port for three sockets:
 * ``qnodeos_socket`` — connection to the QNodeOS server that interprets NetQASM subroutines
 * ``vnode_socket`` — connection to the SimulaQron VirtualNode that runs the quantum simulation
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+You can easily copy the default network configuration by using the simulaqron CLI command::
+
+    simulaqron nodes default
+
+This will create a ``simulaqron_network.json`` file in the current folder with 5 nodes: `Alice`,
+`Bob`, `Charlie`, `David` and `Eve`.
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 Using the CLI to add nodes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can build up a network incrementally using the CLI::
 
@@ -140,9 +148,9 @@ You can also specify explicit hostnames and ports:
 * ``--vnode-port``
 * ``--neighbors``
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Writing the JSON config manually
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For more complex setups, write the ``simulaqron_network.json`` file directly.
 Here is an example with two networks ("default" and "small_network")::

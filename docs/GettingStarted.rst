@@ -246,6 +246,9 @@ implement using simulaqron.
 .. note:: Settings needs to be set before starting the SimulaQron backend. If the backend is already running, stop
     it, set the settings and start it again.
 
+It is also possible to create the default SimulaQron network configuration in the current folder. Check the
+`Configuring the Network <ConfNodes.rst>`_ document to check how to achieve this.
+
 ^^^^^^^^^^^^^^^^^^^
 Settings precedence
 ^^^^^^^^^^^^^^^^^^^

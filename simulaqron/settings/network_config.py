@@ -170,6 +170,12 @@ class NetworkConfig(JSONSerializerMixin):
         nodes_are_equal = [this_node == other_node for this_node, other_node in zip(self.nodes, other.nodes)]
         return self.name == other.name and self.topology == other.topology and all(nodes_are_equal)
 
+    def __getitem__(self, item: str) -> NodeConfig | None:
+        for node_name, node_cfg in self.nodes.items():
+            if node_name == item:
+                return node_cfg
+        return None
+
 
 @dataclass
 class NetworksConfiguration(JSONSerializerMixin):

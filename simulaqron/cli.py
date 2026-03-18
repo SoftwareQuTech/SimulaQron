@@ -721,7 +721,7 @@ def add(name: str, network_name: str, hostname: str, app_port: int, qnodeos_port
                             app_port=app_port, qnodeos_port=qnodeos_port, vnode_port=vnode_port,
                             neighbors=neighbors)
     network_config.write_to_file(LOCAL_NETWORK_SETTINGS)
-    added_node: NodeConfig = network_config.get_nodes(network_name=network_name)[name]
+    added_node: NodeConfig = network_config[network_name][name]
     click.echo(f"Node with name '{added_node.name}' was added to the network with name '{network_name}'.\n"
                "Socket addresses are: \n"
                f"* App/Classical: '({added_node.app_hostname}, {added_node.app_port})\n"
