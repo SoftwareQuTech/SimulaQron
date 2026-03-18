@@ -210,8 +210,7 @@ Starting
 
 We first start the virtual quantum node backend, by executing::
 
-    python3 simulaqron/run/startNode.py Alice &
-    python3 simulaqron/run/startNode.py Bob &
+    simulaqron start --nodes=Alice,Bob --network-config-file simulaqron_network.json
 
 We then start up the programs for Alice and Bob themselves. These will connect to the virtual quantum nodes, and
 execute the quantum commands and classical communication outlined above, in the same directory as we placed
@@ -220,3 +219,6 @@ simulaqron_network.json::
     python3 bobTest.py &
     python3 aliceTest.py
 
+You can easily start everything by using the a single helper script::
+
+    sh doNew.sh
