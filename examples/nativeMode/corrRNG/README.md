@@ -1,4 +1,4 @@
-# Description
+# Correlated Random Number Generator
 
 In this example, we have only two nodes: Alice and Bob.
 
@@ -25,7 +25,7 @@ create and activate it.
 
 Once the environment is active, we need to start the simulaqron network:
 ```bash
-siumulaqron start --nodes Alice,Bob
+simulaqron start --nodes=Alice,Bob --network-config-file classicalNet.json
 ```
 
 This will read the JSON configuration files and start the SimulaQron virtual nodes for nodes `Alice` and `Bob`.
@@ -37,8 +37,13 @@ After this, you can simply run the example by using the `run` script:
 
 # How to stop the execution in case the test execution stalls.
 
-To fully stop the execution, you can use the `doNew` script. This will stop the current execution and run the
-example once again:
+To fully stop the execution, you can use the `terninate` script:
+```bash
+./terminate.sh
+```
+
+Us you want to terminate the current execution and start a new one, you can use the `doNew` script. This will stop
+the current execution and run the example once again:
 ```bash
 ./doNew.sh
 ```
@@ -56,4 +61,4 @@ PID file for the running network. This file is located in `~/simulaqron_pids` an
 rm ~/simulaqron_pids/simulaqron_network_<network_name>.pid
 ```
 
-After this, you can try to start the network again
+After this, you can try to start the network again.

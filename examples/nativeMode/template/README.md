@@ -25,7 +25,7 @@ Each one of those nodes defines 3 entries:
 ## Adding new nodes
 
 To add a new node named "Eva", follow these steps:
-1. Open the config.json file in a text editor.
+1. Open the `network_config.json` file in a text editor.
 2. Locate the "nodes" array inside the "default" object.
 3. Add a new object to the "nodes" array for "Eva". The structure should match the existing nodes:
 ```json
@@ -40,8 +40,6 @@ To add a new node named "Eva", follow these steps:
   Replace PORT_NUMBER with unique port numbers for each socket type (e.g., 8851, 8852, 8853). The result should
   look like:
 ```json
-Copy
-
 {
     "name": "default",
     "nodes": [
