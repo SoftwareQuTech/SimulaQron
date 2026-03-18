@@ -6,14 +6,30 @@ Setup
 -----
 
 SimulaQron requires `Python 3.12 <https://python.org/>`_ along with the packages *netqasm*, *twisted*, *numpy*, *scipy*,
-*networkx*, *click* and *daemons*.
+*networkx*, *click* and *daemons*. By following the installation instructions in the following sections, you will install
+SimulaQron with all the required packages.
 
 ^^^^^^^^^^^^^^^^^^^^^^
 Installation using pip
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The easiest way to install SimulaQron is using pip (requires MacOS or Linux). Start by creating and activating a
-python virtual environment::
+The easiest way to install SimulaQron is using pip. SimulaQron has been tested working in Linux, and WSL (under windows).
+For installation on macOS, please use a Linux virtual machine to install SimulaQron.
+
+Before proceeding with the installation, you need to install Python 3.12. For Debian-based distributions (like Ubuntu)
+you can install the *deadsnakes* repository to gain access to some specific python versions::
+
+    sudo add-apt-repository -y "ppa:deadsnakes/ppa"
+
+After adding the repository, you can install the *full* version of python, including the development package and the ::
+
+    sudo apt-get install python3.12-full python3.12-dev
+
+Additionally, you will need the `build-essential` package, to install tools used when building some SimulaQron dependencies::
+
+    sudo apt-get install build-essential cmake vim linux-headers-generic
+
+To install SimulaQron, start by creating and activating a python virtual environment::
 
     python3.12 -m venv simulaqron-venv
     source simulaqron-venv/bin/activate
@@ -21,6 +37,10 @@ python virtual environment::
 Now, we can install SimulaQron by simply typing::
 
     pip3 install simulaqron
+
+It is also recommended that you can also install optional dependencies to enable full support of qubit engines::
+
+    pip3 install simulaqron\[opt\]
 
 You can then make use of SimulaQron using the command ``simulaqron`` in the terminal. For more information on how
 to use this command see below or type::
@@ -30,12 +50,6 @@ to use this command see below or type::
 To make sure you have the version compatible with this documentation type::
 
     simulaqron version
-
-If you want to make sure that everything has been installed properly you can start run the unittests. Open an
-interactive python console by typing `python3` and the::
-
-    import simulaqron
-    simulaqron.tests()
 
 ------------------------
 Testing a simple example
@@ -52,6 +66,7 @@ We will here illustrate how to use SimulaQron with the NetQASM library.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Starting the SimulaQron backend
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 By default SimulaQron uses the five nodes Alice, Bob, Charlie, David and Eve on your local computers. In this example
 there will be three processes for each node listening to incoming messages on a certain port number. These make up
 the simulation backend, the NetQASM server and the classical communication server. To start the processes and thus
@@ -59,13 +74,13 @@ the backend of SimulaQron simply type::
 
     simulaqron start
 
-.. warning:: Running ``simulaqron start`` will be default start up servers on localhost (i.e., your own computer),
+.. warning:: Running ``simulaqron start`` will by default start up servers on localhost (i.e., your own computer),
     using port numbers between 8000 and 9000, to form the simulated quantum internet hardware. SimulaQron does not
     provide any access control to its simulated hardware, so you are responsible to securing access should this be
     relevant for you. You can also run the different simulated nodes on different computers. We do not take any
     responsibility for problems caused by SimulaQron.
 
-For more information on what ``./cli/SimulaQron start`` does, how to change the nodes and the ports of the network,
+For more information on what ``simulaqron start`` does, how to change the nodes and the ports of the network,
 the topology etc, see `Configuring the Network <ConfNodes.rst>`_.
 
 To stop the backend, simply type::
@@ -77,7 +92,7 @@ makes SimulaQron think that the network is still running. To reset this you can 
 
     simulaqron reset
 
-Note that this also kills any currently running network and resets any settings or configurations.
+Note that this also kills any currently running network and resets any local settings or configurations.
 
 ^^^^^^^^^^^^^^^^^^^
 Running a protocol
@@ -117,9 +132,12 @@ going on here? Let us first look at how we will realize the example by making an
 While the task we want to realize here is completely trivial, the addition of step 3 does however already highlight a
 range of choices on how to realize step 3 and the need to find good abstractions to allow easy application development.
 One way to realize step 3 would be to hardwire Alice's and Bob's measurements: if the hardware can identify the
-correct qubits from the entanglement generation, then we could instruct it to measure it immediately without asking for a notification from the entanglement generation process. It is clear that in a network that is a bit larger than our tiny three node setup, identifying the right setup requires a link between the underlying qubits and classical control information: this is the objective of the classical/quantum combiner.
+correct qubits from the entanglement generation, then we could instruct it to measure it immediately without asking
+for a notification from the entanglement generation process. It is clear that in a network that is a bit larger than
+our tiny three node setup, identifying the right setup requires a link between the underlying qubits and classical
+control information: this is the objective of the classical/quantum combiner.
 
-The script run.sh executes the following two python scripts::
+The script ``run.sh`` executes the following two python scripts::
 
     #!/bin/sh
 
@@ -132,7 +150,7 @@ We first create a ``NetQASMConnection`` which handles all communication with the
 An ``EPRSocket`` is used to create or receive entangled qubit pairs with a remote node.
 The key pattern is: queue operations, call ``flush()`` to execute them, then read results with ``int(m)``.
 
-The core of aliceTest.py is::
+The core of ``aliceTest.py`` is::
 
     epr_socket = EPRSocket("Bob")
 
@@ -153,7 +171,7 @@ The core of aliceTest.py is::
     m1_val = int(m1)
     sim_conn.close()
 
-Similarly the core of bobTest.py is::
+Similarly the core of ``bobTest.py`` is::
 
     epr_socket = EPRSocket("Alice")
 
@@ -189,15 +207,14 @@ To set a setting, for example to use the projectQ backend, type::
 This will create a file named ``simulaqron_settings.json`` in the current folder. This new file contains a full set of
 simulaqron configuration, including the setting that was just configured (using the `projectq` backend, in the example).
 
-It is also possible to manually create this file::
+It is also possible to manually create this` `simulaqron_settings.json`` file with any text editor::
 
      {
         "backend": "projectq",
         "log_level": 10
      }
 
-which would set the backend to be use ProjectQ and the log-level to be debug (10). Any setting in this file will
-override the settings set in the CLI.
+which would set the backend to be use ProjectQ and the log-level to be debug (10).
 
 Is is also possible to create a configuration file that contains all the default configurations::
 
@@ -214,7 +231,7 @@ This command will create a file with the following configuration::
         "recv_retry_time": 0.1,
         "recv_max_retries": 10,
         "log_level": 30,
-        "sim_backend": "stabilizer",
+        "sim_backend": "qutip",
         "noisy_qubits": false,
         "max_app_waiting_time": -1.0,
         "t1": 1.0

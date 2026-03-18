@@ -91,9 +91,9 @@ def _path_exists(path: Path) -> bool:
 def _load_local_settings_or_default():
     if LOCAL_SIMULAQRON_SETTINGS.exists() and LOCAL_SIMULAQRON_SETTINGS.is_file():
         simulaqron_settings.read_from_file(LOCAL_SIMULAQRON_SETTINGS)
-        print(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
+        click.echo(f"Configuration loaded from file: '{LOCAL_SIMULAQRON_SETTINGS}'")
     else:
-        print("Configuration from default configuration")
+        click.echo("Configuration from default configuration")
         simulaqron_settings.default_settings()
 
 
@@ -110,9 +110,9 @@ def _create_local_settings_if_needed_and_load():
 def _load_local_network_or_default():
     if LOCAL_NETWORK_SETTINGS.exists() and LOCAL_NETWORK_SETTINGS.is_file():
         network_config.read_from_file(LOCAL_NETWORK_SETTINGS)
-        print(f"Network configuration loaded from file: '{LOCAL_NETWORK_SETTINGS}'")
+        click.echo(f"Network configuration loaded from file: '{LOCAL_NETWORK_SETTINGS}'")
     else:
-        print("Configuration from default configuration")
+        click.echo("Configuration from default configuration")
         network_config.default_settings()
 
 
@@ -144,7 +144,7 @@ def version():
     """
     Prints the version of simulqron.
     """
-    print(metadata.version('simulaqron'))
+    click.echo(metadata.version('simulaqron'))
 
 
 #################
@@ -218,21 +218,27 @@ def start(name: str, nodes: str, simulaqron_config_file: Path, network_config_fi
                     " --name option and try again."  # noqa: E131
         )
     # Check that the nodes to start exist in the given network
-    nodes = nodes.split(",")
+    start_all = False
     if len(nodes) <= 0:
-        raise click.BadOptionUsage(
-            option_name="nodes",
-            message="The list of nodes to start is empty. Please check the list given in "
-                    "the --nodes argument."
-        )
-    for node_to_start in nodes:
-        if node_to_start not in network_config.networks[name].nodes:
-            raise click.BadOptionUsage(
-                option_name="nodes",
-                message=f"The node '{node_to_start}' was not found in the network named "  # noqa: E713
-                        f"'{name} 'specified in the configuration file '{network_config_file}'.\n"  # noqa: E131
-                        "Please check the list of names you passed in the --nodes option and try again."  # noqa: E131
-            )
+        click.echo(f"No nodes specified to start. Starting all nodes configured in '{network_config_file}'.")
+        start_all = True
+        nodes = []
+    else:
+        nodes = nodes.split(",")
+
+    if start_all:
+        for node_to_start in network_config.networks[name].nodes:
+            nodes.append(node_to_start)
+    else:
+        for node_to_start in nodes:
+            if node_to_start not in network_config.networks[name].nodes:
+                raise click.BadOptionUsage(
+                    option_name="nodes",
+                    message=f"The node '{node_to_start}' was not found in the network named "  # noqa: E713
+                            f"'{name} 'specified in the configuration file '{network_config_file}'.\n"  # noqa: E131
+                            "Please check the list of names you passed in the --nodes option "  # noqa: E131
+                            "and try again."  # noqa: E131
+                )
     # Check that there is no other network with the same name running
     pidfile = PID_FOLDER / f"simulaqron_network_{name}.pid"
     if pidfile.exists():
@@ -301,9 +307,9 @@ def reset(force: bool):
     :param force: Don't ask for confirmation, and immediately reset the simulaqron settings.
     """
     if not force:
-        answer = input("Are you sure you want to reset simulaqron?\nThis will revert settings and "
+        answer = input("Are you sure you want to reset simulaqron?\nThis will revert local settings and "
                        "network config files to the default values.\nNote, this action will remove "
-                       f"the file at {LOCAL_SIMULAQRON_SETTINGS} if it exists.\n"
+                       f"the file at {LOCAL_SIMULAQRON_SETTINGS} and {LOCAL_NETWORK_SETTINGS} if they exist.\n"
                        "(yes/no)")
     else:
         answer = "yes"
@@ -315,7 +321,12 @@ def reset(force: bool):
                 if entry.exists():
                     entry.unlink()
         simulaqron_settings.default_settings()
-        simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
+        if LOCAL_NETWORK_SETTINGS.exists():
+            simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
+
+        network_config.using_default_network()
+        if LOCAL_NETWORK_SETTINGS.exists():
+            network_config.write_to_file(LOCAL_NETWORK_SETTINGS)
     else:
         raise click.ClickException("Aborting!")
 
@@ -352,7 +363,7 @@ def default():
     "value",
     type=click.Choice([b.value for b in SimBackend])
 )
-def sim_backend(value: SimBackend):
+def backend(value: SimBackend):
     """
     The backend to use (stabilizer, projectq, qutip).
 
@@ -362,7 +373,7 @@ def sim_backend(value: SimBackend):
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.sim_backend = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
+    click.echo(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
 @set.command(
@@ -382,7 +393,7 @@ def max_qubits(value: int):
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.max_qubits = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
+    click.echo(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
 @set.command(
@@ -402,7 +413,7 @@ def max_registers(value: int):
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.max_registers = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
+    click.echo(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
 @set.command(
@@ -421,7 +432,7 @@ def conn_retry_time(value: float):
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.conn_retry_time = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
+    click.echo(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
 @set.command(
@@ -440,7 +451,7 @@ def recv_timeout(value: float):
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.recv_timeout = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
+    click.echo(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
 @set.command(
@@ -459,7 +470,7 @@ def recv_retry_time(value: float):
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.recv_retry_time = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
+    click.echo(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
 @set.command(
@@ -480,7 +491,7 @@ def log_level(value: int):
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.log_level = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
+    click.echo(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
 @set.command(
@@ -503,7 +514,7 @@ def noisy_qubits(value: str):
     else:
         simulaqron_settings.noisy_qubits = False
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
+    click.echo(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
 @set.command(
@@ -522,7 +533,7 @@ def t1(value: float):
     _create_local_settings_if_needed_and_load()
     simulaqron_settings.t1 = value
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
-    print(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
+    click.echo(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 
 
 ###############
@@ -539,12 +550,12 @@ def get():
 @get.command(
     help="The backend to use (stabilizer, projectq, qutip).",
 )
-def sim_backend():
+def backend():
     """
     Prints the current configured simulaqron backend.
     """
     _load_local_settings_or_default()
-    print(simulaqron_settings.sim_backend)
+    click.echo(simulaqron_settings.sim_backend)
 
 
 @get.command(
@@ -555,7 +566,7 @@ def max_qubits():
     Prints the current configured max virt-qubits per node and max sim-qubits per register.
     """
     _load_local_settings_or_default()
-    print(simulaqron_settings.max_qubits)
+    click.echo(simulaqron_settings.max_qubits)
 
 
 @get.command(
@@ -566,7 +577,7 @@ def max_registers():
     Prints the current configured max number of register a node can hold.
     """
     _load_local_settings_or_default()
-    print(simulaqron_settings.max_registers)
+    click.echo(simulaqron_settings.max_registers)
 
 
 @get.command(
@@ -578,7 +589,7 @@ def conn_retry_time():
     to connect to another node or SimulaQron component.
     """
     _load_local_settings_or_default()
-    print(simulaqron_settings.conn_retry_time)
+    click.echo(simulaqron_settings.conn_retry_time)
 
 
 @get.command(
@@ -590,7 +601,7 @@ def recv_timeout():
     an EPR half before raising a timeout error.
     """
     _load_local_settings_or_default()
-    print(simulaqron_settings.recv_timeout)
+    click.echo(simulaqron_settings.recv_timeout)
 
 
 @get.command(
@@ -602,7 +613,7 @@ def recv_retry_time():
     attempts to receive an EPR half.
     """
     _load_local_settings_or_default()
-    print(simulaqron_settings.recv_retry_time)
+    click.echo(simulaqron_settings.recv_retry_time)
 
 
 @get.command(
@@ -613,7 +624,7 @@ def log_level():
     Prints the current configured log level.
     """
     _load_local_settings_or_default()
-    print(simulaqron_settings.log_level)
+    click.echo(simulaqron_settings.log_level)
 
 
 @get.command(
@@ -625,9 +636,9 @@ def noisy_qubits():
     """
     _load_local_settings_or_default()
     if simulaqron_settings.noisy_qubits:
-        print("on")
+        click.echo("on")
     else:
-        print("off")
+        click.echo("off")
 
 
 @get.command(
@@ -638,7 +649,7 @@ def t1():
     Prints the current configured t1 value when simulating noisy qubits.
     """
     _load_local_settings_or_default()
-    print(simulaqron_settings.t1)
+    click.echo(simulaqron_settings.t1)
 
 
 ###############
@@ -711,11 +722,11 @@ def add(name: str, network_name: str, hostname: str, app_port: int, qnodeos_port
                             neighbors=neighbors)
     network_config.write_to_file(LOCAL_NETWORK_SETTINGS)
     added_node: NodeConfig = network_config.get_nodes(network_name=network_name)[name]
-    print(f"Node with name '{added_node.name}' was added to the network with name '{network_name}'.\n"
-          "Socket addresses are: \n"
-          f"* App/Classical: '({added_node.app_hostname}, {added_node.app_port})\n"
-          f"* QNodeOS: '({added_node.qnodeos_hostname}, {added_node.qnodeos_port})\n"
-          f"* Virtual Node: '({added_node.vnode_hostname}, {added_node.vnode_port})\n")
+    click.echo(f"Node with name '{added_node.name}' was added to the network with name '{network_name}'.\n"
+               "Socket addresses are: \n"
+               f"* App/Classical: '({added_node.app_hostname}, {added_node.app_port})\n"
+               f"* QNodeOS: '({added_node.qnodeos_hostname}, {added_node.qnodeos_port})\n"
+               f"* Virtual Node: '({added_node.vnode_hostname}, {added_node.vnode_port})\n")
 
 
 @nodes.command()
@@ -734,13 +745,13 @@ def remove(name: str, network_name: str):
     """
 
     if not LOCAL_NETWORK_SETTINGS.exists() or not LOCAL_NETWORK_SETTINGS.is_file():
-        print(f"WARNING - the file '{LOCAL_NETWORK_SETTINGS}' was not found. The loaded "
-              f"configuration corresponds to the one on '{HOME_NETWORK_SETTINGS}'")
+        click.echo(f"WARNING - the file '{LOCAL_NETWORK_SETTINGS}' was not found. The loaded "
+                   f"configuration corresponds to the one on '{HOME_NETWORK_SETTINGS}'")
     else:
         network_config.read_from_file(LOCAL_NETWORK_SETTINGS)
     network_config.remove_node(node_name=name, network_name=network_name)
     network_config.write_to_file(LOCAL_NETWORK_SETTINGS)
-    print(f"Node with name '{name}' was removed from the network with name '{network_name}'.\n")
+    click.echo(f"Node with name '{name}' was removed from the network with name '{network_name}'.\n")
 
 
 @nodes.command()
@@ -754,7 +765,7 @@ def default():
     """
     network_config.using_default_network()
     network_config.write_to_file(LOCAL_NETWORK_SETTINGS)
-    print(f"Default network saved to file: '{LOCAL_NETWORK_SETTINGS}'")
+    click.echo(f"Default network saved to file: '{LOCAL_NETWORK_SETTINGS}'")
 
 
 @nodes.command()
@@ -769,8 +780,8 @@ def get(network_name: str):
     """
 
     if not LOCAL_NETWORK_SETTINGS.exists() or not LOCAL_NETWORK_SETTINGS.is_file():
-        print(f"WARNING - the file '{LOCAL_NETWORK_SETTINGS}' was not found. The loaded "
-              f"configuration corresponds to the one on '{HOME_NETWORK_SETTINGS}'")
+        click.echo(f"WARNING - the file '{LOCAL_NETWORK_SETTINGS}' was not found. The loaded "
+                   f"configuration corresponds to the one on '{HOME_NETWORK_SETTINGS}'")
     else:
         network_config.read_from_file(LOCAL_NETWORK_SETTINGS)
     try:
@@ -778,7 +789,7 @@ def get(network_name: str):
     except ValueError:
         raise click.BadParameter(f"No network {network_name}")
     else:
-        print(("{} " * len(nodes))[:-1].format(*nodes))
+        click.echo(("{} " * len(nodes))[:-1].format(*nodes))
 
 
 if __name__ == "__main__":
