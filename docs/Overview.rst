@@ -76,7 +76,7 @@ deal with this backend simulation.
 
 Nevertheless, as a guide to the backend, it consists of three essential components:
 
-* quantumEngine - There are currenlty three different quantumEngines implemented: Using `QuTip <http://qutip.org/>`_
+* quantumEngine - There are currently three different quantumEngines implemented: Using `QuTip <http://qutip.org/>`_
     and mixed state, using `Project Q <https://projectq.ch/>`_ and pure states and finally using stabilizer formalism.
     This corresponds to one quantum register full of qubits across which gates can be performed. Should you wish to
     use a different backend, you may wish to add a different engine.
@@ -170,7 +170,8 @@ Automated tests
 ^^^^^^^^^^^^^^^
 
 There are number of automated tests that test many (but not all) of the features of SimulaQron and the NetQASM interface.
-See `Getting Started <GettingStarted.rst>`_ for how to run these.
+To run these tests, you need to clone the SimulaQron `GitHub repository <https://github.com/SoftwareQuTech/SimulaQron>`_,
+and follow the ``README.md`` file to install and run the tests.
 Some of the automated tests use quantum tomography and are thus inherently probabilistic.
 Therefore if you see that one of these fails, you can try to run the test again and see if it is consistent.
 If the tests are to slow on your computer you can also run the short version, which skips the quantum tomography tests.

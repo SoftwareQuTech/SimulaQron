@@ -17,13 +17,13 @@ everything you need::
 Core concepts
 --------------
 
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 NetQASMConnection
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 
-Your connection to the **local quantum backend** (SimulaQron's virtual quantum node). This is *not* a connection
-to another party — it is how your node talks to its local simulated quantum hardware. All qubit operations are
-queued through this connection.
+This objects represent your connection to the **local quantum backend** (SimulaQron's virtual quantum node).
+This is *not* a connection to another party — it is how your node talks to its local simulated quantum hardware.
+All qubit operations are queued through this connection.
 
 Create it once, use it throughout your program, and close it at the end::
 
@@ -36,11 +36,14 @@ Create it once, use it throughout your program, and close it at the end::
 
 If your program uses EPR pairs, pass the EPR sockets at creation time::
 
+    from netqasm.sdk import EPRSocket
+
+    epr_socket = EPRSocket("Bob")
     conn = NetQASMConnection("Alice", epr_sockets=[epr_socket])
 
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^
 Qubit
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^
 
 A qubit allocated on the local quantum backend. Pass the connection so the backend knows where to allocate it::
 
@@ -54,9 +57,9 @@ A qubit allocated on the local quantum backend. Pass the connection so the backe
 
 Gates are **queued** — nothing executes until you call ``flush()``.
 
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^
 EPRSocket
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^
 
 Used to create or receive entangled qubit pairs with a remote node::
 
@@ -70,9 +73,9 @@ Used to create or receive entangled qubit pairs with a remote node::
     epr_socket = EPRSocket("Alice")
     epr = epr_socket.recv_keep()[0]
 
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^
 flush()
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^
 
 The **sync point** that executes all queued quantum operations and makes measurement results available.
 Before ``flush()``, measurement results are just futures/promises. After ``flush()``, you can read them
@@ -93,9 +96,9 @@ You can call ``flush()`` multiple times on the same connection. This enables **m
 
 See the mid-circuit logic example in `Examples <Examples.rst>`_ for a full demonstration.
 
------------------------
+---------------
 Minimal example
------------------------
+---------------
 
 A single-node program that creates a qubit, applies a Hadamard gate, and measures::
 
@@ -110,9 +113,9 @@ A single-node program that creates a qubit, applies a Hadamard gate, and measure
     print("Measurement outcome:", int(m))
     conn.close()
 
------------------------
+--------------------
 Two-node EPR example
------------------------
+--------------------
 
 Alice and Bob generate an EPR pair and each measure their qubit to get correlated random numbers.
 
@@ -138,9 +141,9 @@ Alice and Bob generate an EPR pair and each measure their qubit to get correlate
 
 Both sides will print the same random number (0 or 1), demonstrating quantum correlation.
 
---------------------------
+-----------------------
 Classical communication
---------------------------
+-----------------------
 
 For exchanging classical messages between nodes (e.g. measurement outcomes for teleportation corrections),
 SimulaQron provides ``SimulaQronClassicalClient`` and ``SimulaQronClassicalServer``.

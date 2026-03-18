@@ -69,8 +69,25 @@ After installing the Operating System on the virtual machine, please continue th
 the virtual machine using the Linux instructions as mentioned above.
 
 
-Documentation
--------------
+## Tests
+
+There are 2 sets of tests: quick and slow ones. To ease the execution, the `Makefile` provides two targets:
+* `tests`: This target only run the quick tests.
+* `tests_all`: This target runs quick and slow tests.
+
+To run a test target, simply invoke it with make:
+```shell
+make tests
+```
+
+or:
+```shell
+make tests_all
+```
+
+
+## Documentation
+
 
 Documentation and examples are explained in the HTML documentation 
 https://softwarequtech.github.io/SimulaQron/html/index.html

@@ -13,7 +13,7 @@ Key features
 
 * **Distributed quantum internet simulation** — install a local simulation program on each computer, or run all nodes
   on a single machine
-* **Three simulation backends** — stabilizer formalism (default, efficient), `QuTip <http://qutip.org/>`_ (mixed
+* **Three simulation backends** — stabilizer formalism (efficient), `QuTip <http://qutip.org/>`_ (default, mixed
   state), and `ProjectQ <https://projectq.ch/>`_ (pure state)
 * **Two programming interfaces** — the NetQASM SDK (recommended) and a native Twisted mode for low-level access
 * **Configurable network topologies** — complete, ring, path, random tree, or custom topologies
