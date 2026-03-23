@@ -83,7 +83,7 @@ async def run_alice(reader: StreamReader, writer: StreamWriter) -> None:
         if not data:
             print(f"Alice [{state}]: connection dropped unexpectedly.")
             break
-        msg = data.decode().strip()
+        msg = data.decode("utf-8")
         print(f"Alice [{state}]: received '{msg}'")
 
         handler = dispatch.get((state, msg))
