@@ -1,44 +1,35 @@
 """
 Polite Ping-Pong — Alice (client).
 
-Alice's behaviour is defined as a finite state machine.  She always
-initiates the exchange by sending "ping" before entering the event loop.
-The event loop then reads one message at a time, looks up the
-(current_state, message) pair in the dispatch table, and calls the
-corresponding handler.  The handler performs an action and returns the
-next state.
+Alice waits for Bob's "READY" signal before sending each "PING".  After
+NUM_ROUNDS pings she sends "BYE" instead, ending the exchange.
 
 Alice's state diagram
 ---------------------
 
-                              ┌─ (connect) ─────────────────────────────┐
-                              │  send "ping"                            │
-                              ▼                                         │
-    ──────────────►  WAITING_PONG                                    (start)
-                       │
-            recv "pong"
-            send "thank you"
-                       │
-                       ▼
-            WAITING_YOURE_WELCOME
-                       │
-            recv "you're welcome"
-                       │
-                       ▼
-                      DONE
+              ┌─ (connect) ──────────────────────────────────────────┐
+              │                                                       │
+              ▼                                                       │
+    WAITING_FOR_READY ──[recv "READY"]──► WAITING_FOR_PONG        (start)
+                                              │
+                                     recv "PONG"
+                                              │
+                                              ▼
+                                    WAITING_FOR_READY  (next round)
+                                      ... after NUM_ROUNDS ...
+                                              │
+                                     recv "READY"  (last)
+                                     send "BYE"
+                                              ▼
+                                            DONE
 
-As a transition table (this maps directly to ALICE_DISPATCH below):
+Transition table:
 
-    Current state          │ Message received   │ Action           │ Next state
-    ───────────────────────┼────────────────────┼──────────────────┼──────────────────────
-    WAITING_PONG           │ "pong"             │ send "thank you" │ WAITING_YOURE_WELCOME
-    WAITING_YOURE_WELCOME  │ "you're welcome"   │ (none)           │ DONE
-
-Any (state, message) pair NOT in the table is rejected with a warning;
-the state does not change and the loop continues.
-
-Note: the initial "ping" is sent before the loop starts — it is not a
-state transition but simply Alice's opening move as the initiator.
+    Current state       │ Message  │ Action                      │ Next state
+    ────────────────────┼──────────┼─────────────────────────────┼──────────────────
+    WAITING_FOR_READY   │ "READY"  │ send "PING" (or "BYE")      │ WAITING_FOR_PONG
+                        │          │                             │  (or DONE)
+    WAITING_FOR_PONG    │ "PONG"   │ —                           │ WAITING_FOR_READY
 """
 from asyncio import StreamReader, StreamWriter
 from pathlib import Path
@@ -49,92 +40,58 @@ from simulaqron.settings import network_config, simulaqron_settings
 from simulaqron.settings.network_config import NodeConfigType
 
 
+NUM_ROUNDS = 5
+
 # ── States ───────────────────────────────────────────────────────────────────
 
-STATE_WAITING_PONG          = "WAITING_PONG"           # noqa: E221
-STATE_WAITING_YOURE_WELCOME = "WAITING_YOURE_WELCOME"
-STATE_DONE                  = "DONE"                    # noqa: E221
+STATE_WAITING_FOR_READY = "WAITING_FOR_READY"
+STATE_WAITING_FOR_PONG  = "WAITING_FOR_PONG"   # noqa: E221
+STATE_DONE              = "DONE"                # noqa: E221
 
 
-# ── Handlers ─────────────────────────────────────────────────────────────────
+# ── Event loop ───────────────────────────────────────────────────────────────
 
-async def handle_pong(writer: StreamWriter) -> str:
-    """
-    Transition: WAITING_PONG ──[recv "pong"]──► WAITING_YOURE_WELCOME
+async def run_alice(reader: StreamReader, writer: StreamWriter) -> None:
+    rounds_left = NUM_ROUNDS
 
-    Alice receives a pong and politely says thank you.
-    """
-    reply = "thank you"
-    print(f"Alice: sending '{reply}'")
-    writer.write(reply.encode("utf-8"))
-    await writer.drain()
-    return STATE_WAITING_YOURE_WELCOME
+    async def handle_ready(writer: StreamWriter) -> str:
+        nonlocal rounds_left
+        if rounds_left > 0:
+            rounds_left -= 1
+            round_num = NUM_ROUNDS - rounds_left
+            writer.write(b"PING\n")
+            print(f"Alice [round {round_num}]: sent PING")
+            return STATE_WAITING_FOR_PONG
+        else:
+            writer.write(b"BYE\n")
+            print("Alice: sent BYE, done.")
+            return STATE_DONE
 
+    async def handle_pong(writer: StreamWriter) -> str:
+        print("Alice: received PONG")
+        return STATE_WAITING_FOR_READY
 
-async def handle_youre_welcome(writer: StreamWriter) -> str:
-    """
-    Transition: WAITING_YOURE_WELCOME ──[recv "you're welcome"]──► DONE
+    dispatch = {
+        (STATE_WAITING_FOR_READY, "READY"): handle_ready,
+        (STATE_WAITING_FOR_PONG,  "PONG"):  handle_pong,  # noqa: E241
+    }
 
-    Alice receives the final courtesy and the exchange is complete.
-    No reply is needed.
-    """
-    print("Alice: received 'you're welcome' — exchange complete.")
-    return STATE_DONE
-
-
-# ── Dispatch table ────────────────────────────────────────────────────────────
-# Maps (current_state, message) → handler.
-# This table IS the state machine: every valid transition is listed here,
-# and anything not listed is automatically an invalid transition.
-
-ALICE_DISPATCH = {
-    (STATE_WAITING_PONG,          "pong"):           handle_pong,  # noqa: E241
-    (STATE_WAITING_YOURE_WELCOME, "you're welcome"): handle_youre_welcome,
-}
-
-
-# ── Event loop ────────────────────────────────────────────────────────────────
-
-async def run_alice(reader: StreamReader, writer: StreamWriter):
-    """
-    Alice's event loop.
-
-    Alice initiates by sending "ping", then enters the state machine loop:
-      1. Read the next message from Bob.
-      2. Look up (current_state, message) in ALICE_DISPATCH.
-      3. If found, call the handler and move to the returned next state.
-      4. If not found, log a warning and stay in the current state.
-    Loop exits when the state reaches STATE_DONE or the connection drops.
-    """
-    # Initial action: Alice always opens the exchange with a ping.
-    # This happens before the loop — it is not a state transition.
-    opening = "ping"
-    print(f"Alice: sending '{opening}'")
-    writer.write(opening.encode("utf-8"))
-    await writer.drain()
-
-    state = STATE_WAITING_PONG
+    state = STATE_WAITING_FOR_READY
 
     while state != STATE_DONE:
-        # 1. Wait for the next event (message from Bob)
-        data = await reader.read(255)
+        data = await reader.readline()
         if not data:
             print(f"Alice [{state}]: connection dropped unexpectedly.")
             break
-        msg = data.decode("utf-8")
+        msg = data.decode().strip()
         print(f"Alice [{state}]: received '{msg}'")
 
-        # 2. Look up the transition
-        handler = ALICE_DISPATCH.get((state, msg))
+        handler = dispatch.get((state, msg))
 
-        # 3a. Invalid transition — warn and stay in current state
         if handler is None:
-            print(
-                f"Alice [{state}]: no transition for message '{msg}' — ignoring."
-            )
+            print(f"Alice [{state}]: no transition for '{msg}' — ignoring.")
             continue
 
-        # 3b. Valid transition — execute handler, advance state
         state = await handler(writer)
 
     print(f"Alice: event loop finished (final state: {state}).")
