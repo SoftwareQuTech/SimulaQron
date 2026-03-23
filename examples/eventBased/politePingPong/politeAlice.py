@@ -48,33 +48,45 @@ STATE_WAITING_FOR_READY = "WAITING_FOR_READY"
 STATE_WAITING_FOR_PONG  = "WAITING_FOR_PONG"   # noqa: E221
 STATE_DONE              = "DONE"                # noqa: E221
 
+# ── Mutable round counter ─────────────────────────────────────────────────────
+
+rounds_left = NUM_ROUNDS
+
+
+# ── Handlers ─────────────────────────────────────────────────────────────────
+
+async def handle_ready(writer: StreamWriter) -> str:
+    global rounds_left
+    if rounds_left > 0:
+        rounds_left -= 1
+        round_num = NUM_ROUNDS - rounds_left
+        writer.write(b"PING\n")
+        print(f"Alice [round {round_num}]: sent PING")
+        return STATE_WAITING_FOR_PONG
+    else:
+        writer.write(b"BYE\n")
+        print("Alice: sent BYE, done.")
+        return STATE_DONE
+
+
+async def handle_pong(writer: StreamWriter) -> str:
+    print("Alice: received PONG")
+    return STATE_WAITING_FOR_READY
+
+
+# ── Dispatch table ────────────────────────────────────────────────────────────
+
+ALICE_DISPATCH = {
+    (STATE_WAITING_FOR_READY, "READY"): handle_ready,
+    (STATE_WAITING_FOR_PONG,  "PONG"):  handle_pong,  # noqa: E241
+}
+
 
 # ── Event loop ───────────────────────────────────────────────────────────────
 
 async def run_alice(reader: StreamReader, writer: StreamWriter) -> None:
+    global rounds_left
     rounds_left = NUM_ROUNDS
-
-    async def handle_ready(writer: StreamWriter) -> str:
-        nonlocal rounds_left
-        if rounds_left > 0:
-            rounds_left -= 1
-            round_num = NUM_ROUNDS - rounds_left
-            writer.write(b"PING\n")
-            print(f"Alice [round {round_num}]: sent PING")
-            return STATE_WAITING_FOR_PONG
-        else:
-            writer.write(b"BYE\n")
-            print("Alice: sent BYE, done.")
-            return STATE_DONE
-
-    async def handle_pong(writer: StreamWriter) -> str:
-        print("Alice: received PONG")
-        return STATE_WAITING_FOR_READY
-
-    dispatch = {
-        (STATE_WAITING_FOR_READY, "READY"): handle_ready,
-        (STATE_WAITING_FOR_PONG,  "PONG"):  handle_pong,  # noqa: E241
-    }
 
     state = STATE_WAITING_FOR_READY
 
@@ -86,7 +98,7 @@ async def run_alice(reader: StreamReader, writer: StreamWriter) -> None:
         msg = data.decode("utf-8")
         print(f"Alice [{state}]: received '{msg}'")
 
-        handler = dispatch.get((state, msg))
+        handler = ALICE_DISPATCH.get((state, msg))
 
         if handler is None:
             print(f"Alice [{state}]: no transition for '{msg}' — ignoring.")
