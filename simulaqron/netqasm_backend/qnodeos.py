@@ -3,9 +3,10 @@ import logging
 from typing import Optional, Dict, Callable, Generator, Any, List, Type
 
 from netqasm.backend.executor import Executor
-from netqasm.backend.messages import MsgDoneMessage, Message, MessageType
+from netqasm.backend.messages import MsgDoneMessage, Message, MessageType, StopAppMessage
 from netqasm.backend.qnodeos import QNodeController
 from netqasm.lang.instr import Flavour
+from netqasm.sdk.shared_memory import SharedMemoryManager
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.protocol import Protocol
 
@@ -172,6 +173,11 @@ class SubroutineHandler(QNodeController):
     def _return_qubit_state(self, qubit_id: int, real_part: List[List[float]], imag_part: List[List[float]]):
         qubit_state_message = ReturnQubitStateMessage(qubit_id, real_part, imag_part)
         self._return_msg(msg=qubit_state_message)
+
+    def _handle_stop_app(self, msg: StopAppMessage) -> Generator[Any, None, None]:
+        yield from super()._handle_stop_app(msg)
+        # Clear the shared memory registries occupied in the QNodeOS backend
+        SharedMemoryManager.reset_memories()
 
     # We override the _get_message_handlers method so we can also handle the "get qubit state" message
     def _get_message_handlers(self) -> Dict[NewMessageType | MessageType, Callable]:

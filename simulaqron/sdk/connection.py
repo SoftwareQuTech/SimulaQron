@@ -152,6 +152,28 @@ class SimulaQronConnection(BaseNetQASMConnection):
             retry_time=-1.0,
         )
 
+    def close(
+        self,
+        clear_app: bool = True,
+        stop_backend: bool = False,
+        exception: bool = False,
+    ) -> None:
+        """
+        Closes the SimulaQron connection. It also sends the corresponding messages
+        to the backend to clean up the states associated with the connection.
+        This leaves the quantum backend ready to be used with a new client.
+
+        :param clear_app: Clear the application before closing the connection.
+        :type clear_app: bool
+        :param stop_backend: Stop the backend when closing the connection.
+        :type stop_backend: bool
+        :param exception: Whether the app is stopping due to an exception or not.
+        :type exception: bool
+        """
+        super().close(clear_app, stop_backend, exception)
+        # Clear the shared memories occupied by this connection
+        SharedMemoryManager.reset_memories()
+
     @staticmethod
     def _create_socket(
             name: str,
