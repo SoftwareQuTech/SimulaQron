@@ -1,16 +1,44 @@
 """
-Ping-Pong server (Bob).
+Ping-Pong — Bob (server).
 
-Bob listens for messages from Alice. For each message he receives:
-  - If the message is "ping", he replies with "pong".
-  - For anything else, he replies with "no way!".
-
-Bob keeps listening until Alice disconnects.
+Bob listens for Alice's PINGs and replies with PONGs.
+Both sides know NUM_ROUNDS, so no BYE is needed — Bob stops after
+sending the last PONG and the connection closes naturally.
 
 This is a purely classical example — no quantum operations.
-It demonstrates the event-based programming pattern that we will
-later extend with quantum operations (teleportation, etc.).
+It demonstrates the event-based state-machine pattern used throughout
+SimulaQron examples.
+
+Bob's state diagram
+-------------------
+
+          ┌─ (connect) ──────────────────────────────────────┐
+          │                                                   │
+          ▼                                                   │
+        IDLE ──[recv "PING"]──► PLAYING                   (start)
+                                    │
+                               send "PONG"
+                                    │
+                                    ▼
+                                  IDLE  (next round)
+                          ... after NUM_ROUNDS ...
+                                    │
+                               recv "PING" (last)
+                                    ▼
+                                  DONE
+
+Transition table:
+
+    State    │ Event        │ Action       │ Next state
+    ─────────┼──────────────┼──────────────┼─────────────
+    IDLE     │ recv "PING"  │ —            │ PLAYING
+    PLAYING  │ (entry)      │ send "PONG"  │ IDLE
+    PLAYING  │ (entry)      │ (last round) │ DONE
+
+    PLAYING → IDLE/DONE is an *entry action*: Bob sends PONG immediately
+    on entering PLAYING, before waiting for the next message.
 """
+
 from asyncio import StreamReader, StreamWriter
 from pathlib import Path
 
@@ -20,40 +48,68 @@ from simulaqron.settings import network_config, simulaqron_settings
 from simulaqron.settings.network_config import NodeConfigType
 
 
-async def run_bob(reader: StreamReader, writer: StreamWriter):
-    """
-    Bob's event loop.
+NUM_ROUNDS = 5
 
-    Each iteration:
-      1. Wait for a message from Alice
-      2. Decide on a reply based on the message content
-      3. Send the reply back
-    """
-    print("Bob: Alice connected, waiting for messages...", flush=True)
+# ── States ───────────────────────────────────────────────────────────────────
 
-    while True:
-        # Wait until Alice sends something
-        data = await reader.read(255)
+STATE_IDLE    = "IDLE"
+STATE_PLAYING = "PLAYING"
+STATE_DONE    = "DONE"    # noqa: E221
 
-        # If we get empty data, Alice has disconnected
+
+# ── Handlers ─────────────────────────────────────────────────────────────────
+
+async def handle_ping(_writer: StreamWriter) -> str:
+    """Transition: IDLE ──[recv "PING"]──► PLAYING"""
+    print("Bob: received PING", flush=True)
+    return STATE_PLAYING
+
+
+# ── Dispatch table ────────────────────────────────────────────────────────────
+
+BOB_DISPATCH = {
+    (STATE_IDLE, "PING"): handle_ping,
+}
+
+
+# ── Event loop ────────────────────────────────────────────────────────────────
+
+async def run_bob(reader: StreamReader, writer: StreamWriter) -> None:
+    print("Bob: Alice connected.", flush=True)
+    rounds_done = 0
+    state = STATE_IDLE
+
+    while state != STATE_DONE:
+        # Entry action: PLAYING → send PONG → IDLE (or DONE)
+        if state == STATE_PLAYING:
+            rounds_done += 1
+            writer.write(b"PONG\n")
+            print(f"Bob [round {rounds_done}]: sent PONG", flush=True)
+            state = STATE_IDLE if rounds_done < NUM_ROUNDS else STATE_DONE
+            continue
+
+        data = await reader.readline()
         if not data:
-            print("Bob: Alice disconnected.", flush=True)
+            print(f"Bob [{state}]: connection dropped unexpectedly.", flush=True)
             break
+        msg = data.decode("utf-8")
+        print(f"Bob [{state}]: received '{msg}'", flush=True)
 
-        message = data.decode("utf-8")
-        print(f"Bob: received '{message}'", flush=True)
+        handler = BOB_DISPATCH.get((state, msg))
 
-        # Decide on a reply
-        if message == "ping":
-            reply = "pong"
-        else:
-            reply = "no way!"
+        if handler is None:
+            print(
+                f"Bob [{state}]: no transition for '{msg}' — ignoring.",
+                flush=True,
+            )
+            continue
 
-        # Send the reply
-        print(f"Bob: sending  '{reply}'", flush=True)
-        writer.write(reply.encode("utf-8"))
-        await writer.drain()
+        state = await handler(writer)
 
+    print(f"Bob: event loop finished (final state: {state}).", flush=True)
+
+
+# ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     # Load configuration files — paths are relative to this script's location

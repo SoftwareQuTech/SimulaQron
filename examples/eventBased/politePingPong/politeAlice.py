@@ -1,36 +1,37 @@
 """
 Polite Ping-Pong — Alice (client).
 
-Alice waits for Bob's "READY" signal before sending each "PING".  After
-NUM_ROUNDS pings she sends "BYE" instead, ending the exchange.
+Extends plain ping pong with a greeting phase: Bob sends "HI" on connect,
+Alice replies with "HI", then the game proceeds exactly as in ping pong.
 
 Alice's state diagram
 ---------------------
 
-              ┌─ (connect) ──────────────────────────────────────────┐
-              │                                                       │
-              ▼                                                       │
-    WAITING_FOR_READY ──[recv "READY"]──► WAITING_FOR_PONG        (start)
-                                              │
-                                     recv "PONG"
-                                              │
-                                              ▼
-                                    WAITING_FOR_READY  (next round)
-                                      ... after NUM_ROUNDS ...
-                                              │
-                                     recv "READY"  (last)
-                                     send "BYE"
-                                              ▼
-                                            DONE
+    (connect)
+        │
+        ▼
+  WAITING_HI ──[recv "HI"]──► IDLE            ← greeting phase
+                  send "HI"     │
+                                │ (entry action: send "PING")
+                                ▼
+                            PLAYING
+                                │
+                           recv "PONG"
+                          ┌─────┴──────────────┐
+                    rounds left?             done?
+                          │                   │
+                          ▼                   ▼
+                        IDLE                DONE
 
 Transition table:
 
-    Current state       │ Message  │ Action                      │ Next state
-    ────────────────────┼──────────┼─────────────────────────────┼──────────────────
-    WAITING_FOR_READY   │ "READY"  │ send "PING" (or "BYE")      │ WAITING_FOR_PONG
-                        │          │                             │  (or DONE)
-    WAITING_FOR_PONG    │ "PONG"   │ —                           │ WAITING_FOR_READY
+    State       │ Event        │ Action       │ Next state
+    ────────────┼──────────────┼──────────────┼────────────────
+    WAITING_HI  │ recv "HI"   │ send "HI"    │ IDLE
+    IDLE        │ (entry)      │ send "PING"  │ PLAYING
+    PLAYING     │ recv "PONG"  │ —            │ IDLE or DONE
 """
+
 from asyncio import StreamReader, StreamWriter
 from pathlib import Path
 
@@ -44,61 +45,53 @@ NUM_ROUNDS = 5
 
 # ── States ───────────────────────────────────────────────────────────────────
 
-STATE_WAITING_FOR_READY = "WAITING_FOR_READY"
-STATE_WAITING_FOR_PONG  = "WAITING_FOR_PONG"   # noqa: E221
-STATE_DONE              = "DONE"                # noqa: E221
-
-# ── Mutable round counter ─────────────────────────────────────────────────────
-
-rounds_left = NUM_ROUNDS
-
-
-# ── Handlers ─────────────────────────────────────────────────────────────────
-
-async def handle_ready(writer: StreamWriter) -> str:
-    global rounds_left
-    if rounds_left > 0:
-        rounds_left -= 1
-        round_num = NUM_ROUNDS - rounds_left
-        writer.write(b"PING\n")
-        print(f"Alice [round {round_num}]: sent PING")
-        return STATE_WAITING_FOR_PONG
-    else:
-        writer.write(b"BYE\n")
-        print("Alice: sent BYE, done.")
-        return STATE_DONE
-
-
-async def handle_pong(writer: StreamWriter) -> str:
-    print("Alice: received PONG")
-    return STATE_WAITING_FOR_READY
-
-
-# ── Dispatch table ────────────────────────────────────────────────────────────
-
-ALICE_DISPATCH = {
-    (STATE_WAITING_FOR_READY, "READY"): handle_ready,
-    (STATE_WAITING_FOR_PONG,  "PONG"):  handle_pong,  # noqa: E241
-}
+STATE_WAITING_HI = "WAITING_HI"
+STATE_IDLE       = "IDLE"      # noqa: E221
+STATE_PLAYING    = "PLAYING"   # noqa: E221
+STATE_DONE       = "DONE"      # noqa: E221
 
 
 # ── Event loop ───────────────────────────────────────────────────────────────
 
 async def run_alice(reader: StreamReader, writer: StreamWriter) -> None:
-    global rounds_left
-    rounds_left = NUM_ROUNDS
+    rounds_done = 0
 
-    state = STATE_WAITING_FOR_READY
+    async def handle_hi(writer: StreamWriter) -> str:
+        """Transition: WAITING_HI ──[recv "HI"]──► IDLE"""
+        writer.write(b"HI\n")
+        print("Alice: sent HI — greeting done, game starting")
+        return STATE_IDLE
+
+    async def handle_pong(_writer: StreamWriter) -> str:
+        """Transition: PLAYING ──[recv "PONG"]──► IDLE (or DONE)"""
+        nonlocal rounds_done
+        print(f"Alice [round {rounds_done}]: received PONG")
+        if rounds_done < NUM_ROUNDS:
+            return STATE_IDLE
+        return STATE_DONE
+
+    dispatch = {
+        (STATE_WAITING_HI, "HI"):   handle_hi,
+        (STATE_PLAYING,    "PONG"): handle_pong,
+    }
+
+    state = STATE_WAITING_HI
 
     while state != STATE_DONE:
+        # Entry action: IDLE → send PING → PLAYING
+        if state == STATE_IDLE:
+            rounds_done += 1
+            writer.write(b"PING\n")
+            print(f"Alice [round {rounds_done}]: sent PING")
+            state = STATE_PLAYING
+
         data = await reader.readline()
         if not data:
             print(f"Alice [{state}]: connection dropped unexpectedly.")
             break
         msg = data.decode("utf-8")
-        print(f"Alice [{state}]: received '{msg}'")
 
-        handler = ALICE_DISPATCH.get((state, msg))
+        handler = dispatch.get((state, msg))
 
         if handler is None:
             print(f"Alice [{state}]: no transition for '{msg}' — ignoring.")
