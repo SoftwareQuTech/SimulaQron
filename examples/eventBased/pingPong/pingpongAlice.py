@@ -52,9 +52,9 @@ NUM_ROUNDS = 5
 
 # ── States ───────────────────────────────────────────────────────────────────
 
-STATE_IDLE    = "IDLE"
-STATE_PLAYING = "PLAYING"
-STATE_DONE    = "DONE"    # noqa: E221
+STATE_IDLE    = "IDLE"     # noqa: E221
+STATE_PLAYING = "PLAYING"  # noqa: E221
+STATE_DONE    = "DONE"     # noqa: E221
 
 
 # ── Event loop ───────────────────────────────────────────────────────────────

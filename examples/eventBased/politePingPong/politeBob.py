@@ -67,7 +67,7 @@ async def handle_ping(_writer: StreamWriter) -> str:
 # ── Dispatch table ────────────────────────────────────────────────────────────
 
 BOB_DISPATCH = {
-    (STATE_WAITING_HI, "HI"):   handle_hi,
+    (STATE_WAITING_HI, "HI"):   handle_hi,    # noqa: E241
     (STATE_IDLE,       "PING"): handle_ping,  # noqa: E241
 }
 

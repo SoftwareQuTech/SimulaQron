@@ -71,8 +71,8 @@ async def run_alice(reader: StreamReader, writer: StreamWriter) -> None:
         return STATE_DONE
 
     dispatch = {
-        (STATE_WAITING_HI, "HI"):   handle_hi,
-        (STATE_PLAYING,    "PONG"): handle_pong,
+        (STATE_WAITING_HI, "HI"):   handle_hi,    # noqa: E241
+        (STATE_PLAYING,    "PONG"): handle_pong,  # noqa: E241
     }
 
     state = STATE_WAITING_HI
