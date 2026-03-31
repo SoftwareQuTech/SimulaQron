@@ -5,7 +5,7 @@ SimulaQron uses two configuration files:
 
 * ``simulaqron_network.json`` — defines nodes, their socket ports, and network topology (described on this page)
 * ``simulaqron_settings.json`` — configures the simulation backend, timeouts, and other settings
-  (see the Settings section in `Getting Started <GettingStarted.rst>`_)
+  (see the Settings section in :ref:`Configuring Settings <settings>`)
 
 -------------------------------------
 Running all nodes on a single machine
@@ -57,7 +57,7 @@ Each example in ``examples/new-sdk/`` and ``examples/nativeMode/`` includes a ``
 the SimulaQron backend and launches the node programs. This is the easiest way to try an example::
 
     cd examples/new-sdk/corrRNG
-    sh run.sh
+    bash run.sh
 
 The ``run.sh`` script reads the ``simulaqron_network.json`` and ``simulaqron_settings.json`` in the example
 directory, so each example is self-contained.
@@ -229,7 +229,7 @@ SimulaQron can automatically generate certain well-known network topologies:
   :math:`n(n-1)/2` for :math:`n` nodes.
 
 .. note:: Topology generation via the CLI is planned but not yet implemented. For now, specify topologies
-    directly in the ``simulaqron_network.json`` file (see `Network topologies`_ below).
+    directly in the ``simulaqron_network.json`` file (see `Network topologies`_ above).
 
 Along with setting up the network with the specified topology a .png figure is also generated and stored as
 config/topology.png. This is useful if a random network is used, to easily visualize the network used.
@@ -259,5 +259,5 @@ To stop a specific network::
 .. note:: By default the network name is "default". To have multiple networks running at the same time the
     nodes cannot use the same port numbers.
 
-The JSON configuration file can hold more than one network configuration. See `Configuring the network`_ above for
-an example with multiple networks.
+The JSON configuration file can hold more than one network configuration. See `Writing the JSON config manually`_
+above for an example with multiple networks.

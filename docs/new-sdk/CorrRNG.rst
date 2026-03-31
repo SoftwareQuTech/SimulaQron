@@ -76,7 +76,7 @@ Running
 ::
 
     cd examples/new-sdk/corrRNG
-    sh run.sh
+    bash run.sh
 
 Expected output (the bit value is random)::
 

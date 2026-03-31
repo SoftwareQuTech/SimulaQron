@@ -1,5 +1,5 @@
 SimulaQron Programming Examples
-================================
+===============================
 
 SimulaQron offers three ways to write quantum network programs, from highest-level to lowest-level:
 
@@ -17,38 +17,57 @@ SimulaQron offers three ways to write quantum network programs, from highest-lev
    directly to SimulaQron's virtual quantum nodes.  This is Python-specific and more verbose,
    but gives full control over the simulation backend.
 
-The examples below assume that you have already made your way through `Getting Started <GettingStarted.rst>`_:
-you have the virtual node servers up and running.
+.. _get-examples:
+
+-----------------------
+How to get the examples
+-----------------------
+
+The code of the examples can be found in `SimulaQron GitHub repository <https://github.com/SoftwareQuTech/SimulaQron>`_.
+Clone this repository using ``git``::
+
+    git clone https://github.com/SoftwareQuTech/SimulaQron.git
+
+All the examples can be found in the ``examples`` folder.
+
+When running one of the examples mentioned below, we assume that you have already made your way through
+:doc:`Getting Started <GettingStarted>` and you have the virtual node servers up and running.
+
+.. _new-sdk-examples:
 
 -----------------
 New SDK examples
 -----------------
 
-* `Overview <new-sdk/Overview.rst>`_ — Key concepts: ``NetQASMConnection``, ``EPRSocket``, ``flush()``, file structure
-* `Template <new-sdk/Template.rst>`_ — Getting started: single-node and client-server templates
-* `CorrRNG <new-sdk/CorrRNG.rst>`_ — EPR pairs between two nodes, correlated measurement
-* `Teleport <new-sdk/Teleport.rst>`_ — Quantum teleportation with classical correction messages
-* `ExtendGHZ <new-sdk/ExtendGHZ.rst>`_ — Three-party entanglement, multiple EPR sockets
-* `MidCircuitLogic <new-sdk/MidCircuitLogic.rst>`_ — Multiple ``flush()`` calls for mid-circuit classical decisions
+* :doc:`Overview <new-sdk/Overview>` — Key concepts: ``NetQASMConnection``, ``EPRSocket``, ``flush()``, file structure
+* :doc:`Template <new-sdk/Template>` — Getting started: single-node and client-server templates
+* :doc:`CorrRNG <new-sdk/CorrRNG>` — EPR pairs between two nodes, correlated measurement
+* :doc:`Teleport <new-sdk/Teleport>` — Quantum teleportation with classical correction messages
+* :doc:`ExtendGHZ <new-sdk/ExtendGHZ>` — Three-party entanglement, multiple EPR sockets
+* :doc:`MidCircuitLogic <new-sdk/MidCircuitLogic>` — Multiple ``flush()`` calls for mid-circuit classical decisions
+
+.. _event-based-examples:
 
 ---------------------
 Event-based examples
 ---------------------
 
-* `Overview <event-based/Overview.rst>`_ — Event-based programming model and state machines
-* `PingPong <event-based/PingPong.rst>`_ — Classical ping-pong between two nodes
-* `PolitePingPong <event-based/PolitePingPong.rst>`_ — State-machine message dispatch pattern
-* `QuantumCorrRNG <event-based/QuantumCorrRNG.rst>`_ — Quantum correlated RNG with state machine
-* `QuantumCorrRNGVerified <event-based/QuantumCorrRNGVerified.rst>`_ — Correlated RNG with verification protocol
+* :doc:`Overview <event-based/Overview>` — Event-based programming model and state machines
+* :doc:`PingPong <event-based/PingPong>` — Classical ping-pong between two nodes
+* :doc:`PolitePingPong <event-based/PolitePingPong>` — State-machine message dispatch pattern
+* :doc:`QuantumCorrRNG <event-based/QuantumCorrRNG>` — Quantum correlated RNG with state machine
+* :doc:`QuantumCorrRNGVerified <event-based/QuantumCorrRNGVerified>` — Correlated RNG with verification protocol
+
+.. _native-mode-examples:
 
 ---------------------
 Native mode examples
 ---------------------
 
-* `Template <native-mode/Template.rst>`_ — Template for programming in native (Twisted) mode
-* `CorrRng <native-mode/CorrRng.rst>`_ — Correlated randomness using native mode
-* `Teleport <native-mode/Teleport.rst>`_ — Teleportation using native mode
-* `GraphState <native-mode/GraphState.rst>`_ — Distributing a graph state across four nodes
+* :doc:`Template <native-mode/Template>` — Template for programming in native (Twisted) mode
+* :doc:`CorrRng <native-mode/CorrRng>` — Correlated randomness using native mode
+* :doc:`Teleport <native-mode/Teleport>` — Teleportation using native mode
+* :doc:`GraphState <native-mode/GraphState>` — Distributing a graph state across four nodes
 
 .. toctree::
     :hidden:

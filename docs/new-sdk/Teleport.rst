@@ -8,13 +8,13 @@ Found in ``examples/new-sdk/teleport/``.
 The protocol
 ------------
 
-1. Alice and Bob share an EPR pair (entangled qubits A and B).
-2. Alice has a qubit *q* she wants to teleport to Bob.
-3. Alice applies CNOT(q, A) and then H(q).
-4. Alice measures both *q* and *A*, obtaining bits *a* and *b*.
-5. Alice sends *a* and *b* to Bob via a classical message.
-6. Bob applies correction gates: X if *b* = 1, Z if *a* = 1.
-7. Bob's qubit B is now in the same state as Alice's original qubit *q*.
+1. Alice and Bob share an EPR pair (entangled qubits ``A`` and ``B``).
+2. Alice has a qubit ``q`` she wants to teleport to Bob.
+3. Alice applies ``CNOT(q, A)`` and then ``H(q)``.
+4. Alice measures both ``q`` and ``A``, obtaining bits ``a`` and ``b``.
+5. Alice sends ``a`` and ``b`` to Bob via a classical message.
+6. Bob applies correction gates: X if ``b = 1``, Z if ``a = 1``.
+7. Bob's qubit B is now in the same state as Alice's original qubit ``q``.
 
 Alice's code
 ------------
@@ -96,4 +96,4 @@ Running
 ::
 
     cd examples/new-sdk/teleport
-    sh run.sh
+    bash run.sh

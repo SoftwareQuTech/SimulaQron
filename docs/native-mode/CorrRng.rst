@@ -2,7 +2,7 @@ Generate correlated randomness
 ==============================
 
 .. note:: Native mode is the low-level Twisted interface. For new projects, the NetQASM SDK is recommended.
-   See `New SDK Overview <../new-sdk/Overview.rst>`_ and the SDK version of this example at `CorrRNG <../new-sdk/CorrRNG.rst>`_.
+   See :doc:`New SDK Overview <../new-sdk/Overview>` and the :doc:`new SDK version of this example <../new-sdk/CorrRNG>`.
 
 Having started the virtual quantum nodes, let us now run a simple test application, which already illustrates some of
 the aspects in realizing protocols. Our objective will be to realize the following protocol which will generate 1
@@ -17,7 +17,7 @@ for illustration.
 Before seeing how this example works, let us again simply run the code::
 
     cd examples/nativeMode/corrRNG
-    sh doNew.sh
+    bash doNew.sh
 
 Next to a considerable about of debugging information, you should be seeing the following two lines::
 
@@ -53,9 +53,8 @@ delay causing the qubit to decohere in the meantime.
 To realize this, we thus need not only the connection to the virtual quantum node servers, but Alice and Bob
 themselves need to run a client/server to exchange classical control information. Before looking at the code, we
 know that the setup of these servers is again determined by a configuration file, namely ``classicalNet.json``.
-This file defines which nodes act as servers in the classical communication network listening for control information
-to execute the protocol. You want to copy this to whatever example you are running. It takes the JSON format,
-where in our example we have Alice and Bob::
+You want to copy this to whatever example you are running. It takes the JSON format, where in our example we
+have Alice and Bob::
 
     {
         "default": {
@@ -75,10 +74,10 @@ where in our example we have Alice and Bob::
         }
     }
 
-The first thing that happens if we execute the script doNew.sh is that after some setting up it will call run.sh,
+The first thing that happens if we execute the script ``doNew.sh`` is that after some setting up it will call ``run.sh``,
 executing::
 
-    #!/bin/sh
+    #!/usr/bin/env bash
 
     python3 bobTest.py &
     python3 aliceTest.py
@@ -162,3 +161,30 @@ Not included in the code below are several standard methods that require no chan
                     x = yield qB.callRemote("measure")
 
                     print("BOB: My Random Number is ", x, "\n")
+
+--------
+Starting
+--------
+
+We first start the virtual quantum node backend, by executing::
+
+    simulaqron start --nodes=Alice,Bob --network-config-file classicalNet.json
+
+We then start up the programs for Alice and Bob themselves. These will connect to the virtual quantum nodes, and
+execute the quantum commands and classical communication outlined above, in the same directory as we placed
+``classicalNet.json``::
+
+    python3 bobTest.py &
+    python3 aliceTest.py
+
+You can easily start everything by using the a single helper script::
+
+    bash doNew.sh
+
+-------
+Stoping
+-------
+
+You can stop all the running processes by using the helper script::
+
+    bash terminate.sh

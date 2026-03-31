@@ -98,7 +98,7 @@ Running
 ::
 
     cd examples/eventBased/quantumCorrRNG
-    sh run.sh
+    bash run.sh
 
 .. note:: Unlike the purely classical examples, this one requires the SimulaQron
     backend to be running.  The ``run.sh`` script starts it automatically.

@@ -91,4 +91,4 @@ Running
 ::
 
     cd examples/eventBased/politePingPong
-    sh run.sh
+    bash run.sh

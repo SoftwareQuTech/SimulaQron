@@ -82,4 +82,4 @@ Running
 ::
 
     cd examples/new-sdk/extendGHZ
-    sh run.sh
+    bash run.sh

@@ -61,7 +61,7 @@ class QutipEngine(QuantumEngine):
     """
     def __init__(self, node: str, num: int, maxQubits: int = 10):
         """
-        Initializes the Qutip engine
+        Initializes the Qutip engine.
 
         :param node: Node name this register is started from.
         :type node: str

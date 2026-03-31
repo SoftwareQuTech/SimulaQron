@@ -1,5 +1,5 @@
 Mid-Circuit Classical Logic
-==========================
+===========================
 
 This example demonstrates how to use ``flush()`` to read measurement results
 *during* a quantum program, make classical decisions, and continue with more
@@ -97,4 +97,4 @@ Running
 ::
 
     cd examples/new-sdk/midCircuitLogic
-    sh run.sh
+    bash run.sh

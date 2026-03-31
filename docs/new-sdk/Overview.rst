@@ -36,7 +36,7 @@ flush()
         result = int(m)         # NOW this works
 
     You can call ``flush()`` multiple times on the same connection — this is how
-    mid-circuit classical logic works (see `MidCircuitLogic <MidCircuitLogic.rst>`_).
+    mid-circuit classical logic works (see :doc:`MidCircuitLogic <MidCircuitLogic>`).
 
 Qubit
     A qubit allocated on the local quantum backend.  Pass ``sim_conn`` so the
@@ -69,7 +69,7 @@ Every example follows the same structure:
 To run any example::
 
     cd examples/new-sdk/<example_name>
-    sh run.sh
+    bash run.sh
 
 Examples
 --------
@@ -82,13 +82,13 @@ The examples are ordered from simplest to most complex:
 
     * - Example
       - What it teaches
-    * - `Template <Template.rst>`_
+    * - :doc:`Template <Template>`
       - Basic setup: single node with local qubits, and client-server template
-    * - `CorrRNG <CorrRNG.rst>`_
+    * - :doc:`CorrRNG <CorrRNG>`
       - EPR pairs between two nodes, correlated measurement
-    * - `Teleport <Teleport.rst>`_
+    * - :doc:`Teleport <Teleport>`
       - Quantum teleportation with classical correction messages
-    * - `ExtendGHZ <ExtendGHZ.rst>`_
+    * - :doc:`ExtendGHZ <ExtendGHZ>`
       - Three-party entanglement, multiple EPR sockets on one connection
-    * - `MidCircuitLogic <MidCircuitLogic.rst>`_
+    * - :doc:`MidCircuitLogic <MidCircuitLogic>`
       - Multiple ``flush()`` calls for mid-circuit classical decisions

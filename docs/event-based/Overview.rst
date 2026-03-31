@@ -5,7 +5,7 @@ The event-based examples show how to structure quantum network protocols using
 a **state machine** pattern.  This is the recommended approach for protocols that
 interleave classical negotiation with quantum operations.
 
-Prerequisites: you should understand the `New SDK Overview <../new-sdk/Overview.rst>`_ first.
+Prerequisites: you should understand the :doc:`New SDK Overview <../new-sdk/Overview>` first.
 
 The state machine pattern
 -------------------------
@@ -68,11 +68,11 @@ The examples progress from purely classical to quantum:
 
     * - Example
       - What it teaches
-    * - `PingPong <PingPong.rst>`_
+    * - :doc:`PingPong <PingPong>`
       - Basic event loop with simple if/else message handling
-    * - `PolitePingPong <PolitePingPong.rst>`_
+    * - :doc:`PolitePingPong <PolitePingPong>`
       - Full state machine pattern with dispatch table
-    * - `QuantumCorrRNG <QuantumCorrRNG.rst>`_
+    * - :doc:`QuantumCorrRNG <QuantumCorrRNG>`
       - Adding quantum operations (EPR + measure) to event handlers
-    * - `QuantumCorrRNGVerified <QuantumCorrRNGVerified.rst>`_
+    * - :doc:`QuantumCorrRNGVerified <QuantumCorrRNGVerified>`
       - Multi-state protocol: negotiate, quantum, then classical verification

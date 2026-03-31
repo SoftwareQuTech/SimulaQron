@@ -60,7 +60,7 @@ Running
 ::
 
     cd examples/eventBased/pingPong
-    sh run.sh
+    bash run.sh
 
 Expected output::
 

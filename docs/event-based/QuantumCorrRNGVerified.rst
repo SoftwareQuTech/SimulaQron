@@ -118,7 +118,7 @@ Running
 ::
 
     cd examples/eventBased/quantumCorrRNGVerified
-    sh run.sh
+    bash run.sh
 
 Expected output::
 

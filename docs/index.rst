@@ -22,36 +22,62 @@ Key features
 Quick start
 -----------
 
-1. **Install**::
+1. **Install dependencies**::
 
-      pip3 install simulaqron
+    sudo add-apt-repository -y "ppa:deadsnakes/ppa"
+    sudo apt-get install python3.12-full python3.12-dev
+    sudo apt-get install build-essential cmake linux-headers-generic
 
-2. **Configure your network** — create a ``simulaqron_network.json`` defining nodes and ports
-   (see `Configuring the Network <ConfNodes.rst>`_)
+2. **Create a python virtual environment**::
 
-3. **Write your program** using the NetQASM SDK::
+    python3.12 -m venv simulaqron-venv
 
-      from netqasm.sdk.external import NetQASMConnection
-      from netqasm.sdk import Qubit
+3. **Activate the virtual environment**::
 
-      conn = NetQASMConnection("Alice")
-      q = Qubit(conn)
-      q.H()
-      m = q.measure()
-      conn.flush()          # execute queued operations
-      print(int(m))         # read measurement result
-      conn.close()
+    source simulaqron-venv/bin/activate
 
-4. **Run examples** — see `Examples <Examples.rst>`_ for complete working programs
+4. **Install SimulaQron**::
+
+    pip3 install simulaqron
+
+5. **Configure your network** — create a ``simulaqron_network.json`` defining nodes and ports
+   (see :doc:`Configuring the Network <ConfNodes>`)
+
+6. **Start the simulaqron backend**::
+
+    simulaqron start
+
+7. **Write your first program** using the NetQASM SDK. Save this code as ``program.py``::
+
+    from netqasm.runtime.settings import set_simulator
+    set_simulator("simulaqron")
+    from netqasm.sdk.external import NetQASMConnection
+    from netqasm.sdk import Qubit
+
+    conn = NetQASMConnection("Alice")
+    q = Qubit(conn)
+    q.H()
+    m = q.measure()
+    conn.flush()                             # execute queued operations
+    print(f"Qubit measurement: {int(m)}")    # read measurement result
+    conn.close()
+
+8. **Execute your program**::
+
+    python program.py
+
+9. **Check the output**. Output should be ``Qubit measurement: 0/1``. Measurement should randomly be ``0`` or ``1``.
+
+10. **Run other more complex examples** — see :doc:`Examples <Examples>` for complete working programs
 
 Where to go next
 ----------------
 
-* **New to SimulaQron?** Start with `Getting Started <GettingStarted.rst>`_ for installation and your first example
-* **Want to write programs?** See `The NetQASM Interface <NetQASM.rst>`_ for the NetQASM SDK reference
-* **Looking for examples?** See `Examples <Examples.rst>`_ — new SDK, event-based, and native-mode examples
-* **Configuring networks and settings?** See `Configuring the Network <ConfNodes.rst>`_
-* **Architecture and internals?** See `Overview <Overview.rst>`_
+* **New to SimulaQron?** Start with :doc:`Getting Started <GettingStarted>` for installation and your first example
+* **Want to write programs?** See :doc:`The NetQASM Interface <NetQASM>` for the NetQASM SDK reference
+* **Looking for examples?** See :doc:`Examples <Examples>` — new SDK, event-based, and native-mode examples
+* **Configuring networks and settings?** See :ref:`Configuring the Network <networkConfig>` and :ref:`Settings <settings>`.
+* **Architecture and internals?** See :doc:`Overview <Overview>`
 
 We also have a `paper <http://iopscience.iop.org/article/10.1088/2058-9565/aad56e>`_ describing the design of
 SimulaQron, freely available on `arxiv <https://arxiv.org/abs/1712.08032>`_.

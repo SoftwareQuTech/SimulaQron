@@ -21,7 +21,7 @@ you can install the *deadsnakes* repository to gain access to some specific pyth
 
     sudo add-apt-repository -y "ppa:deadsnakes/ppa"
 
-After adding the repository, you can install the *full* version of python, including the development package and the ::
+After adding the repository, you can install the *full* version of python, including the development package::
 
     sudo apt-get install python3.12-full python3.12-dev
 
@@ -56,10 +56,10 @@ Testing a simple example
 ------------------------
 
 Before delving into how to write any program yourself, let's first simply run one of the existing examples.
-Remember from the Overview that SimulaQron has two parts: the first are the virtual node servers that simulate
-the hardware at each node as well as the quantum communication between them in a transparent manner.
+Remember from the :doc:`Overview<Overview>` that SimulaQron has two parts: the first are the virtual node servers
+that simulate the hardware at each node as well as the quantum communication between them in a transparent manner.
 The second are the applications themselves which can be written in two ways: the direct way is to use the native
-mode using the Python Twisted framework connecting to the virtual node servers (see `Examples <Examples.rst>`_),
+mode using the Python Twisted framework connecting to the virtual node servers (see :ref:`Native mode examples <native-mode-examples>`),
 and the recommended way is to use the NetQASM library that calls the virtual nodes via the NetQASM interface.
 We will here illustrate how to use SimulaQron with the NetQASM library.
 
@@ -81,7 +81,7 @@ the backend of SimulaQron simply type::
     responsibility for problems caused by SimulaQron.
 
 For more information on what ``simulaqron start`` does, how to change the nodes and the ports of the network,
-the topology etc, see `Configuring the Network <ConfNodes.rst>`_.
+the topology etc, see :doc:`Configuring the Network <ConfNodes>`.
 
 To stop the backend, simply type::
 
@@ -99,7 +99,8 @@ Running a protocol
 ^^^^^^^^^^^^^^^^^^^
 
 Having started the virtual quantum nodes as above, let us now run a simple test application, which already illustrates
-some of the aspects in realizing protocols.
+some of the aspects in realizing protocols. Before proceeding, please download the SimulaQron examples as shown in the
+:ref:`How to get the examples<get-examples>` section.
 Our objective will be to realize the following protocol which will generate 1 shared random bit between Alice and Bob.
 Evidently, there would be classical means to achieve this trivial task chosen for illustration.
 
@@ -108,11 +109,12 @@ Evidently, there would be classical means to achieve this trivial task chosen fo
 
 * Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`.
 
-The examples can be found in ``examples/new-sdk/`` (see `Examples <Examples.rst>`_ for the full list).
-Before seeing how this example works, let us simply run the code::
+We will follow the example located in ``examples/new-sdk/coorRNG`` (see :ref:`New SDK Examples <new-sdk-examples>` for
+the full list). Before seeing how this works, let us simply run the code (assuming you're already in the ``SimulaQron``
+folder cloned from GitHub)::
 
     cd examples/new-sdk/corrRNG
-    sh run.sh
+    bash run.sh
 
 You should be seeing the following two lines::
 
@@ -125,21 +127,21 @@ going on here? Let us first look at how we will realize the example by making an
 * Alice and Bob generate one EPR pair, that is, two maximally entangled qubits :math:`A` and :math:`B` of the form
   :math:`|\Psi\rangle_{AB} = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)`
 
-* Alice and Bob are informed of the identifiers of the qubits and are informed that entanglement was generated.
-
 * Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`.
 
-While the task we want to realize here is completely trivial, the addition of step 3 does however already highlight a
-range of choices on how to realize step 3 and the need to find good abstractions to allow easy application development.
-One way to realize step 3 would be to hardwire Alice's and Bob's measurements: if the hardware can identify the
+While the task we want to realize here is completely trivial, the addition of step 2 does however already highlight a
+range of choices on how to realize step 2 and the need to find good abstractions to allow easy application development.
+One way to realize step 2 would be to hardwire Alice's and Bob's measurements: if the hardware can identify the
 correct qubits from the entanglement generation, then we could instruct it to measure it immediately without asking
 for a notification from the entanglement generation process. It is clear that in a network that is a bit larger than
-our tiny three node setup, identifying the right setup requires a link between the underlying qubits and classical
+our tiny two node setup, identifying the right setup requires a link between the underlying qubits and classical
 control information: this is the objective of the classical/quantum combiner.
 
 The script ``run.sh`` executes the following two python scripts::
 
-    #!/bin/sh
+    #!/usr/bin/env bash
+
+    # Some code to start SimulaQron backend
 
     python3 aliceTest.py
     python3 bobTest.py &
@@ -188,7 +190,7 @@ Similarly the core of ``bobTest.py`` is::
     m1_val = int(m1)
     sim_conn.close()
 
-For further examples, see `Examples <Examples.rst>`_ and `The NetQASM Interface <NetQASM.rst>`_ for the full SDK reference.
+For further examples, see :doc:`Examples <Examples>` and :doc:`The NetQASM Interface <NetQASM>` for the full SDK reference.
 
 .. _settings:
 
@@ -207,7 +209,7 @@ To set a setting, for example to use the projectQ backend, type::
 This will create a file named ``simulaqron_settings.json`` in the current folder. This new file contains a full set of
 simulaqron configuration, including the setting that was just configured (using the `projectq` backend, in the example).
 
-It is also possible to manually create this` `simulaqron_settings.json`` file with any text editor::
+It is also possible to manually create this ``simulaqron_settings.json`` file with any text editor::
 
      {
         "backend": "projectq",
@@ -247,7 +249,7 @@ implement using simulaqron.
     it, set the settings and start it again.
 
 It is also possible to create the default SimulaQron network configuration in the current folder. Check the
-`Configuring the Network <ConfNodes.rst>`_ document to check how to achieve this.
+:doc:`Configuring the Network <ConfNodes>` document to check how to achieve this.
 
 ^^^^^^^^^^^^^^^^^^^
 Settings precedence
@@ -270,7 +272,7 @@ Settings Fields
 The SimulaQron settings file contains a set of fields to control the configurations of the SimulaQron simulation:
 
 * ``max_qubit``: Maximum number of qubits to simulate on the Virtual Node.
-* ``max_registers``: Maximmum number of registers to use in the Virtual Node.
+* ``max_registers``: Maximum number of registers to use in the Virtual Node.
 * ``conn_retry_time``: Number of seconds to wait between connection retries.
 * ``conn_max_retries``: Maximum number of times to retry a connection before failing the whole execution.
 * ``recv_timeout``: Maximum number of milliseconds to wait for the messages when trying to create EPR pairs.

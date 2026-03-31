@@ -121,4 +121,4 @@ Running
 ::
 
     cd examples/new-sdk/template-client-server
-    sh run.sh
+    bash run.sh

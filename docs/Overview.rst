@@ -15,11 +15,11 @@ In the light of the alternate interface below it may appear inefficient to expor
 the purpose of SimulaQron is precisely to explore and play with higher layer abstractions on top of any hardware, or
 its simulated version, SimulaQron. As such it is best to think of SimulaQron as a piece of simulated hardware with its
 own native interface, which we may first abstract into a higher level command language for programming. Examples of
-how to program SimulaQron in native mode can be found in `Examples <Examples.rst>`_.
+how to program SimulaQron in native mode can be found in :doc:`Examples <Examples>`.
 
 The second way to run applications is via a higher level interface, the NetQASM interface. If you want your
 applications to later use real quantum hardware more easily instead of SimulaQron, then this is the interface to use.
-Examples of how to program using the NetQASM can be found in `The NetQASM Interface <NetQASM.rst>`_.
+Examples of how to program using the NetQASM can be found in :doc:`The NetQASM Interface <NetQASM>`.
 
 .. image:: figs/netqasm_architecture.png
     :width: 500px

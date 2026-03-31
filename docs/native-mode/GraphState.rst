@@ -2,7 +2,7 @@ Distributing a graph state
 ==========================
 
 .. note:: Native mode is the low-level Twisted interface. For new projects, the NetQASM SDK is recommended.
-   See `New SDK Overview <../new-sdk/Overview.rst>`_.
+   See :doc:`New SDK Overview <../new-sdk/Overview>`.
 
 Here we consider a more complicated example, where we have four parties; Alice, Bob, Charlie and David.
 They will distribute a graph state and transform this with local operations and classical communication to make
@@ -446,3 +446,12 @@ simulaqron_network.json::
 You can easily start everything by using the a single helper script::
 
     sh doNew.sh
+
+-------
+Stoping
+-------
+
+You can stop all the running processes by using the helper script::
+
+    bash terminate.sh
+
