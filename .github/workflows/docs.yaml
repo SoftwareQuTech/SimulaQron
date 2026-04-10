@@ -14,18 +14,17 @@ jobs:
         with:
           python-version: "3.12"
       - run: |
-          make install
+          make install-optional
           cd docs
           make install-deps
           make build
-          tar -C build/html/ --dereference --hard-dereference -cvzf $RUNNER_TEMP/github-pages.tar.gz .
       - name: Upload static files as artifact
         # We only execute this step if the commit is tagged, i.e., this is a release
         #if: startsWith(github.ref, 'refs/tags')
         id: deployment
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
-          path: ${{ runner.temp }}/github-pages.tar.gz
+          path: build/html/
 
   deploy:
     name: Deploy docs
