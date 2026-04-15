@@ -22,9 +22,12 @@ EPRSocket
     Used to create or receive entangled qubit pairs with a remote node.
     ``create_keep()`` on one side, ``recv_keep()`` on the other::
 
+        # Alice’s side
         epr_socket = EPRSocket("Bob")
-        epr = epr_socket.create_keep()[0]   # Alice's side
-        epr = epr_socket.recv_keep()[0]     # Bob's side
+        epr = epr_socket.create_keep()[0]
+        # Bob’s side
+        epr_socket = EPRSocket("Alice")
+        epr = epr_socket.recv_keep()[0]
 
 flush()
     Sends all queued quantum operations to the backend and waits for them to complete.
@@ -37,6 +40,17 @@ flush()
 
     You can call ``flush()`` multiple times on the same connection — this is how
     mid-circuit classical logic works (see :doc:`MidCircuitLogic <MidCircuitLogic>`).
+
+close()
+    Similarly to ``flush``, sends all queued quantum operations to the backend, waits
+    for them to complete *but also* sends a ``StopSignal`` to the simulaqron backend.
+    This signal releases any resource used by the application and closes the connection
+    with the simulaqron backend, leaving in a clean state, ready for executing another
+    (or the same) application::
+
+        sim_conn.flush()        # execute everything
+        result = int(m)         # NOW this works
+        simm_conn.close()       # Close the connection with the backend
 
 Qubit
     A qubit allocated on the local quantum backend.  Pass ``sim_conn`` so the
@@ -55,6 +69,11 @@ Classical networking
             writer.write(b"hello")
             reply = await reader.read(255)
 
+    Both ``SimulaQronClassicalClient`` and ``SimulaQronClassicalServer`` classes make use
+    of *Python Coroutines* as the main entry points for clients and servers. These are simple
+    python functions that are declared using the ``async`` keyword. For more information about
+    Python Coroutines, please check the `official python documentation <https://docs.python.org/3/library/asyncio-task.html#coroutines>`_.
+
 File structure
 --------------
 
@@ -62,7 +81,7 @@ Every example follows the same structure:
 
 - One Python file per node (e.g. ``aliceTest.py``, ``bobTest.py``)
 - ``simulaqron_network.json`` — defines node names and socket ports
-- ``simulaqron_settings.json`` — backend settings (``stabilizer`` by default)
+- ``simulaqron_settings.json`` — backend settings (``qutip`` by default. For more information check :ref:`SimulaQron backends<sim_backends>`).
 - ``run.sh`` — starts the SimulaQron backend and launches all node scripts
 - ``terminate.sh`` — stops background processes
 

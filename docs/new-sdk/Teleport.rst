@@ -67,9 +67,9 @@ From ``bobTest.py`` — Bob waits for Alice's correction bits, then applies them
         entangled_qubit = epr_socket.recv_keep()[0]
 
         # Apply teleportation corrections based on Alice's classical message
-        if int(corrections[0]) == 1:
-            entangled_qubit.X()
         if int(corrections[1]) == 1:
+            entangled_qubit.X()
+        if int(corrections[0]) == 1:
             entangled_qubit.Z()
         meas = entangled_qubit.measure()
 
@@ -85,8 +85,8 @@ Key concepts
 - **Classical + quantum coordination**: Alice must send classical bits to Bob so he
   can apply corrections.  This requires the client-server pattern
   (``SimulaQronClassicalClient``/``SimulaQronClassicalServer``).
-- **Order matters**: Bob must receive the classical message *before* applying
-  corrections to his entangled qubit.
+- **Order matters**: Bob may receive his half of the EPR pair earlier, but he cannot
+  complete the teleportation recovery step until he has Alice’s two classical bits.
 - The teleported state is reconstructed perfectly regardless of the random
   measurement outcomes — the corrections compensate.
 

@@ -3,7 +3,7 @@ Polite Ping-Pong: The State Machine Pattern
 
 Extends the basic ping-pong into a proper state machine with dispatch tables.
 Alice and Bob have a polite exchange: ping, pong, thank you, you're welcome.
-Found in ``examples/eventBased/politePingPong/``.
+Found in ``examples/event-based/politePingPong/``.
 
 This is still purely classical, but introduces the **state machine pattern**
 that all subsequent quantum examples will use.
@@ -90,5 +90,5 @@ Running
 
 ::
 
-    cd examples/eventBased/politePingPong
+    cd examples/event-based/politePingPong
     bash run.sh

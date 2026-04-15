@@ -38,7 +38,7 @@ Now, we can install SimulaQron by simply typing::
 
     pip3 install simulaqron
 
-It is also recommended that you can also install optional dependencies to enable full support of qubit engines::
+It is also recommended that you also install optional dependencies to enable full support of qubit engines::
 
     pip3 install simulaqron\[opt\]
 
@@ -109,7 +109,7 @@ Evidently, there would be classical means to achieve this trivial task chosen fo
 
 * Both Alice and Bob measure their respective qubits to obtain a classical random number :math:`x \in \{0,1\}`.
 
-We will follow the example located in ``examples/new-sdk/coorRNG`` (see :ref:`New SDK Examples <new-sdk-examples>` for
+We will follow the example located in ``examples/new-sdk/corrRNG`` (see :ref:`New SDK Examples <new-sdk-examples>` for
 the full list). Before seeing how this works, let us simply run the code (assuming you're already in the ``SimulaQron``
 folder cloned from GitHub)::
 
@@ -143,8 +143,8 @@ The script ``run.sh`` executes the following two python scripts::
 
     # Some code to start SimulaQron backend
 
-    python3 aliceTest.py
-    python3 bobTest.py &
+    python3 aliceTest.py &
+    python3 bobTest.py
 
 Let us now look at the programs for Alice and Bob.
 
@@ -212,13 +212,13 @@ simulaqron configuration, including the setting that was just configured (using 
 It is also possible to manually create this ``simulaqron_settings.json`` file with any text editor::
 
      {
-        "backend": "projectq",
+        "sim_backend": "projectq",
         "log_level": 10
      }
 
-which would set the backend to be use ProjectQ and the log-level to be debug (10).
+which would set the backend to use ProjectQ and the log-level to be debug (10).
 
-Is is also possible to create a configuration file that contains all the default configurations::
+It is also possible to create a configuration file that contains all the default configurations::
 
     simulaqron set default
 
@@ -245,7 +245,7 @@ Alternatively, you can place the ``simulaqron_settings.json`` file in the folder
 named ``.simulaqron`` in your home folder). Doing so will make your settings persist across different projects you
 implement using simulaqron.
 
-.. note:: Settings needs to be set before starting the SimulaQron backend. If the backend is already running, stop
+.. note:: Settings need to be set before starting the SimulaQron backend. If the backend is already running, stop
     it, set the settings and start it again.
 
 It is also possible to create the default SimulaQron network configuration in the current folder. Check the
@@ -271,7 +271,7 @@ Settings Fields
 
 The SimulaQron settings file contains a set of fields to control the configurations of the SimulaQron simulation:
 
-* ``max_qubit``: Maximum number of qubits to simulate on the Virtual Node.
+* ``max_qubits``: Maximum number of qubits to simulate on the Virtual Node.
 * ``max_registers``: Maximum number of registers to use in the Virtual Node.
 * ``conn_retry_time``: Number of seconds to wait between connection retries.
 * ``conn_max_retries``: Maximum number of times to retry a connection before failing the whole execution.
@@ -286,9 +286,9 @@ The SimulaQron settings file contains a set of fields to control the configurati
 * ``noisy_qubits``: Whether to enable noisy qubits simulation or not. Setting this to ``true`` will randomly apply a
   Pauli gate after every operation, emulating noise on the qubit backend.
 * ``max_app_waiting_time``: Maximum time (in seconds) to wait before considering the running application as stalled.
-  A value of ``-1.0`` will disable the stalling waiting time, allowing SimulaQron to wait undefinitely.
+  A value of ``-1.0`` will disable the stalling waiting time, allowing SimulaQron to wait indefinitely.
 * ``t1``: T1 parameter to use when applying noise on the emulated qubits. This value is only used when the
-  ``noisy_qubit`` option is set to ``true``.
+  ``noisy_qubits`` option is set to ``true``.
 
 The default value of all these fields can be seen in the Settings_ section above.
 

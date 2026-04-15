@@ -18,8 +18,8 @@ You can run
 sh terminate.sh
 ```
 
-which should get rid of all things running for the teleport example itself. If you have a
-debugging enabled, you may also  wish to wipe old log files by running:
+which should get rid of all things running from any other SimulaQron application. If you have a
+debugging enabled, you may also wish to wipe old log files by running:
 
 ```shell
 rm /tmp/simulaqron*
@@ -35,8 +35,6 @@ If you are running everything on the same machine, simply type:
 ./run.sh
 ```
 
-WARNING: It seems restarting the simulaqron backend is needed! - There is no need to restart the simulaqron backend again if you want to re-run your example. 
-
 
 ## On multiple machines
 
@@ -45,7 +43,7 @@ file. To run this example on different machines, it is necessary that both machi
 other via a network (or the internet). Additionally, you need to know the IP addresses of both
 machines.
 
-Assuming that the server (alice) will run on a machine with IP `192.168.0.1` and the client (bob)
+Assuming that the server (Alice) will run on a machine with IP `192.168.0.1` and the client (Bob)
 will run on the machine with IP `192.168.0.2`, modify the `simulaqron_network.json` file *on both*
 the server and the client to look like this:
 
@@ -77,14 +75,18 @@ the server and the client to look like this:
 Note that the `localhost` entries from Alice were changed to `192.168.0.1`. Similarly, the
 `localhost` entries from Bob were changed to `192.168.0.2`.
 
-After these modifications, yu can start the simulaqron backends by invoking:
+After these modifications, you can start the simulaqron backends by invoking:
 
 ```shell
-simulaqron start --node Alice
-simulaqron start --node Bob
+simulaqron start --nodes Alice
+```
+on the machine that you will use as Alice, and similarly:
+
+```bash
+simulaqron start --nodes Bob
 ```
 
-on the machines you will use as Alice and Bob respectively. Again this needs to be run only once.
+on the machine that you will use as Bob. This needs to be run only once.
 Now you can run:
 
 * on Bob:
@@ -97,5 +99,5 @@ python bobTest.py
 python aliceTest.py
 ```
 
-The code assumes you start Bob before starting Alice. Using your knowledge of network programming
-from our ping pong example - do you have an idea to make this more robust?
+The code assumes you execute Bob application side before executing Alice side. Using your knowledge
+of network programming from our ping pong example - do you have an idea to make this more robust?

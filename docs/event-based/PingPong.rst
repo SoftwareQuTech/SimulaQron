@@ -3,7 +3,7 @@ Ping-Pong: Basic Event Loop
 
 The simplest event-based example.  Alice sends a sequence of messages to Bob,
 who replies to each one.  No state machine — just a simple if/else to choose
-the reply.  Found in ``examples/eventBased/pingPong/``.
+the reply.  Found in ``examples/event-based/pingPong/``.
 
 This is purely classical (no quantum operations).  It demonstrates the basic
 async event loop pattern before adding state machines and quantum in later examples.
@@ -59,7 +59,7 @@ Running
 
 ::
 
-    cd examples/eventBased/pingPong
+    cd examples/event-based/pingPong
     bash run.sh
 
 Expected output::

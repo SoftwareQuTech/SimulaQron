@@ -3,17 +3,17 @@ SimulaQron Programming Examples
 
 SimulaQron offers three ways to write quantum network programs, from highest-level to lowest-level:
 
-1. **New SDK** (``examples/new-sdk/``) — The recommended approach using the NetQASM SDK.
-   Programs use ``NetQASMConnection`` and ``EPRSocket`` for quantum operations, and
-   ``SimulaQronClassicalClient``/``SimulaQronClassicalServer`` for classical messaging.
+1. **New SDK** (``examples/new-sdk/``) — The recommended approach *for simple quantum apps using
+   the NetQASM SDK*. Programs use ``NetQASMConnection`` and ``EPRSocket`` for quantum operations,
+   and ``SimulaQronClassicalClient``/``SimulaQronClassicalServer`` for classical messaging.
    Start here if you are new to SimulaQron.
 
-2. **Event-based** (``examples/eventBased/``) — Builds on the new SDK by adding a state-machine
+2. **Event-based** (``examples/event-based/``) — Builds on the new SDK by adding a state-machine
    pattern for classical messaging.  Each node defines states, message handlers, and a dispatch
-   table.  This is the recommended pattern for protocols that interleave classical negotiation
-   with quantum operations.
+   table.  This is the recommended pattern *for protocols that interleave classical negotiation
+   with quantum operations*.
 
-3. **Native mode** (``examples/nativeMode/``) — The low-level Twisted interface that talks
+3. **Native mode** (``examples/native-mode/``) — The low-level Twisted interface that talks
    directly to SimulaQron's virtual quantum nodes.  This is Python-specific and more verbose,
    but gives full control over the simulation backend.
 
@@ -65,7 +65,7 @@ Native mode examples
 ---------------------
 
 * :doc:`Template <native-mode/Template>` — Template for programming in native (Twisted) mode
-* :doc:`CorrRng <native-mode/CorrRng>` — Correlated randomness using native mode
+* :doc:`CorrRNG <native-mode/CorrRNG>` — Correlated randomness using native mode
 * :doc:`Teleport <native-mode/Teleport>` — Teleportation using native mode
 * :doc:`GraphState <native-mode/GraphState>` — Distributing a graph state across four nodes
 
@@ -83,7 +83,7 @@ Native mode examples
     event-based/PolitePingPong
     event-based/QuantumCorrRNG
     event-based/QuantumCorrRNGVerified
-    native-mode/CorrRng
+    native-mode/CorrRNG
     native-mode/Template
     native-mode/Teleport
     native-mode/GraphState

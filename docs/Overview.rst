@@ -76,8 +76,11 @@ deal with this backend simulation.
 
 Nevertheless, as a guide to the backend, it consists of three essential components:
 
-* quantumEngine - There are currently three different quantumEngines implemented: Using `QuTip <http://qutip.org/>`_
-    and mixed state, using `Project Q <https://projectq.ch/>`_ and pure states and finally using stabilizer formalism.
+.. _sim_backends:
+
+* quantumEngine - There are currently three different quantumEngines (simulation backends) implemented: Using
+    `QuTip <http://qutip.org/>`_ and mixed state, using `Project Q <https://projectq.ch/>`_ and pure states and
+    finally using stabilizer formalism.
     This corresponds to one quantum register full of qubits across which gates can be performed. Should you wish to
     use a different backend, you may wish to add a different engine.
     The three current backends give different runtimes due to how quantum states are stored and manipulated.

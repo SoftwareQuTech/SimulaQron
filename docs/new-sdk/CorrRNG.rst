@@ -45,7 +45,8 @@ From ``aliceTest.py``::
 Bob's code
 ----------
 
-From ``bobTest.py`` — the only difference is ``recv_keep()`` instead of ``create_keep()``::
+From ``bobTest.py`` — the key difference is the usage of ``recv_keep()`` instead of ``create_keep()``;
+the rest of the code is analogous to Alice's::
 
     def run_bob(this_node_name: str, remote_node_name: str) -> int:
         epr_socket = EPRSocket(remote_node_name)
@@ -80,5 +81,7 @@ Running
 
 Expected output (the bit value is random)::
 
-    Alice: My Random Number is '0'
-    Bob: My Random Number is '0'
+    Alice: My Random Number is 'X'
+    Bob: My Random Number is 'X'
+
+where :math:`x\in{0,1}`.

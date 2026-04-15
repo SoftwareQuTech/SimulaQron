@@ -16,7 +16,7 @@ for illustration.
 
 Before seeing how this example works, let us again simply run the code::
 
-    cd examples/nativeMode/corrRNG
+    cd examples/native-mode/corrRNG
     bash doNew.sh
 
 Next to a considerable about of debugging information, you should be seeing the following two lines::

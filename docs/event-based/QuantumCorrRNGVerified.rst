@@ -4,7 +4,7 @@ Quantum Correlated RNG with Verification
 Extends the previous example by adding a classical verification step after the
 quantum measurement.  After both nodes measure their EPR halves, Alice sends her
 result to Bob so he can confirm the correlation.
-Found in ``examples/eventBased/quantumCorrRNGVerified/``.
+Found in ``examples/event-based/quantumCorrRNGVerified/``.
 
 This demonstrates the full cycle:
 **classical negotiation → quantum operation → classical verification**
@@ -117,7 +117,7 @@ Running
 
 ::
 
-    cd examples/eventBased/quantumCorrRNGVerified
+    cd examples/event-based/quantumCorrRNGVerified
     bash run.sh
 
 Expected output::

@@ -458,7 +458,6 @@ class QutipEngine(QuantumEngine):
         :type qubitNum: int
         :param state: New state to write in the place of the old qubit.
         :type state: Any
-        :param
         """
 
         # Remove the qubit currently there by tracing it out

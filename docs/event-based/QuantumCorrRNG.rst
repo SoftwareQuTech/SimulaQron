@@ -3,7 +3,7 @@ Quantum Correlated RNG: Adding Quantum to Event Handlers
 
 This example combines the state machine pattern with quantum operations.
 Alice proposes generating shared randomness; if Bob agrees, both create an EPR
-pair and measure their half.  Found in ``examples/eventBased/quantumCorrRNG/``.
+pair and measure their half.  Found in ``examples/event-based/quantumCorrRNG/``.
 
 This is the first example that runs quantum operations inside an event handler.
 
@@ -97,7 +97,7 @@ Running
 
 ::
 
-    cd examples/eventBased/quantumCorrRNG
+    cd examples/event-based/quantumCorrRNG
     bash run.sh
 
 .. note:: Unlike the purely classical examples, this one requires the SimulaQron

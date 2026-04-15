@@ -109,11 +109,11 @@ Configuration files
     {
         "max_qubits": 20,
         "max_registers": 1000,
-        "sim_backend": "stabilizer",
+        "sim_backend": "qutip",
         ...
     }
 
-Use ``stabilizer`` backend by default. Use ``qutip`` when you need non-Clifford gates.
+Use ``qutip`` backend by default. Use ``stabilizer`` when you need Clifford gates.
 
 Running
 -------

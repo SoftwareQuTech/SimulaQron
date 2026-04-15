@@ -26,9 +26,9 @@ async def run_bob(reader: StreamReader, writer: StreamWriter):
     entangled_qubit = epr_socket.recv_keep()[0]
 
     # Apply teleportation corrections based on Alice's classical message
-    if int(corrections[0]) == 1:
-        entangled_qubit.X()
     if int(corrections[1]) == 1:
+        entangled_qubit.X()
+    if int(corrections[0]) == 1:
         entangled_qubit.Z()
     meas = entangled_qubit.measure()
 

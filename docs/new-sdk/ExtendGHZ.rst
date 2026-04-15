@@ -12,9 +12,9 @@ The protocol
 ------------
 
 1. Alice creates an EPR pair with Bob and tells Bob to proceed.
-2. Bob receives Alice's entangled qubit, creates a *new* EPR pair with Charlie,
+2. Bob receives his half of an EPR pair that Alice created with him, creates a *new* EPR pair with Charlie,
    and applies a CNOT to extend the entanglement into a GHZ state.
-3. Charlie receives his entangled qubit from Bob.
+3. Charlie receives his half of an EPR pair that Bob created with him.
 4. All three measure — their outcomes are correlated.
 
 The communication flow is::

@@ -22,32 +22,37 @@ Key features
 Quick start
 -----------
 
-1. **Install dependencies**::
+#. **Install dependencies**::
 
     sudo add-apt-repository -y "ppa:deadsnakes/ppa"
     sudo apt-get install python3.12-full python3.12-dev
     sudo apt-get install build-essential cmake linux-headers-generic
 
-2. **Create a python virtual environment**::
+#. **Create a python virtual environment**::
 
     python3.12 -m venv simulaqron-venv
 
-3. **Activate the virtual environment**::
+#. **Activate the virtual environment**::
 
     source simulaqron-venv/bin/activate
 
-4. **Install SimulaQron**::
+#. **Install SimulaQron**::
 
-    pip3 install simulaqron
+    pip install simulaqron
 
-5. **Configure your network** — create a ``simulaqron_network.json`` defining nodes and ports
-   (see :doc:`Configuring the Network <ConfNodes>`)
+#. **Configure SimulaQron** — use the ``simulaqron`` command line tool to create a default ``simulaqron_settings.json`` file::
 
-6. **Start the simulaqron backend**::
+    simulaqron set default
+
+#. **Configure your network** — use the ``simulaqron`` command line tool to create a default ``simulaqron_network.json`` file, which contains 5 nodes::
+
+    simulaqron nodes default
+
+#. **Start the simulaqron backend**::
 
     simulaqron start
 
-7. **Write your first program** using the NetQASM SDK. Save this code as ``program.py``::
+#. **Write your first program** using the NetQASM SDK. Save this code as ``program.py``::
 
     from netqasm.runtime.settings import set_simulator
     set_simulator("simulaqron")
@@ -62,13 +67,17 @@ Quick start
     print(f"Qubit measurement: {int(m)}")    # read measurement result
     conn.close()
 
-8. **Execute your program**::
+#. **Execute your program**::
 
     python program.py
 
-9. **Check the output**. Output should be ``Qubit measurement: 0/1``. Measurement should randomly be ``0`` or ``1``.
+#. **Check the output**. Output should be ``Qubit measurement: 0/1``. Measurement should randomly be ``0`` or ``1``.
 
-10. **Run other more complex examples** — see :doc:`Examples <Examples>` for complete working programs
+#. **Stop simulaqron backend**. Before running another application, stop the current running backend::
+
+    pip install simulaqron
+
+#. **Run other more complex examples** — see :doc:`Examples <Examples>` for complete working programs.
 
 Where to go next
 ----------------

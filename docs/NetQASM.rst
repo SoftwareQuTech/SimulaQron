@@ -43,7 +43,8 @@ If your program uses EPR pairs, pass the EPR sockets at creation time::
 Qubit
 ^^^^^
 
-A qubit allocated on the local quantum backend. Pass the connection so the backend knows where to allocate it::
+A qubit allocated on the local quantum backend. The qubit gets initialized to the :math:`|0\rangle` state.
+Pass the connection so the backend knows where to allocate it::
 
     from netqasm.sdk import Qubit
 
@@ -195,8 +196,8 @@ Each program needs two configuration files in its directory:
 * ``simulaqron_settings.json`` — configures the simulation backend and other settings. See the
   Settings section in :doc:`Getting Started <GettingStarted>`.
 
-The ``stabilizer`` backend is used by default and is recommended unless you need non-Clifford gates (use
-``qutip`` in that case).
+The ``qutip`` backend is used by default and is recommended unless you need Clifford gates (use
+``stabilizer`` in that case).
 
 -----------------------
 Further reading

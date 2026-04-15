@@ -1,9 +1,9 @@
 Mid-Circuit Classical Logic
 ===========================
 
-This example demonstrates how to use ``flush()`` to read measurement results
-*during* a quantum program, make classical decisions, and continue with more
-quantum operations — all within a single connection.
+This single-node example demonstrates how to use ``flush()`` to read measurement
+results *during* a quantum program, make classical decisions, and continue with
+more quantum operations — all within a single connection.
 Found in ``examples/new-sdk/midCircuitLogic/``.
 
 Why mid-circuit logic?
@@ -21,9 +21,11 @@ The protocol
 
 A simple 3-round protocol on a single node:
 
-1. **Round 1**: Prepare :math:`|+\rangle` and measure.
-2. **Round 2**: Based on round 1's outcome, prepare the *opposite* state.
-3. **Round 3**: Based on the XOR of rounds 1 and 2, decide what to prepare.
+#. **Round 1**: Prepare :math:`|+\rangle` and measure.
+#. **Round 2**: Based on round 1's outcome, prepare the *opposite* state:
+    #. If round 1 gave ``0``, prepare :math:`|1\rangle`
+    #. If round 1 gave ``1``, prepare :math:`|0\rangle`
+#. **Round 3**: Based on the XOR of rounds 1 and 2, decide what to prepare.
 
 The code
 --------

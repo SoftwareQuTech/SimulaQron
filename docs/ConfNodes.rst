@@ -43,7 +43,7 @@ The ``simulaqron start`` command accepts these arguments:
   ``simulaqron_settings.json`` in the current folder.
 * ``--network-config-file=PATH`` (optional): Path to a network configuration file. Defaults to
   ``simulaqron_network.json`` in the current folder.
-* ``--name=<network-name>`` (optional): Name of the network to start (must match a name in the config file).
+* ``--network-name=<network-name>`` (optional): Name of the network to start (must match a name in the config file).
   Defaults to ``default``.
 
 .. warning:: ``simulaqron start`` will fail if any of the ports specified in the config files are already in
@@ -53,7 +53,7 @@ The ``simulaqron start`` command accepts these arguments:
 Using per-example run scripts
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Each example in ``examples/new-sdk/`` and ``examples/nativeMode/`` includes a ``run.sh`` script that starts
+Each example in ``examples/new-sdk/`` and ``examples/native-mode/`` includes a ``run.sh`` script that starts
 the SimulaQron backend and launches the node programs. This is the easiest way to try an example::
 
     cd examples/new-sdk/corrRNG

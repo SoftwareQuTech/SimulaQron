@@ -61,7 +61,7 @@ class SimulaQronConnection(BaseNetQASMConnection):
         :param log_config: Configuration of the logging. Check the documentation of
                            ``netqasm.sdk.config.LogConfig`` for more information about this.
         :type log_config: LogConfig
-        :param epr_sockets: List of ``EPRSocket``s to use in the simulator.
+        :param epr_sockets: List of ``EPRSocket`` s to use in the simulator.
         :type epr_sockets: List[EPRSocket]
         :param compiler: A transpiler object that transpiles the NetQASM instructions.
         :type compiler: Type[SubroutineTranspiler] | None

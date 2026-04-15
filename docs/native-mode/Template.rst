@@ -4,7 +4,7 @@ Template for programming in native mode
 .. note:: Native mode is the low-level Twisted interface. For new projects, the NetQASM SDK is recommended.
    See `New SDK Overview <../new-sdk/Overview.rst>`_.
 
-In examples/nativeMode/template you will find a template that allows you to start programming relatively easily by
+In examples/native-mode/template you will find a template that allows you to start programming relatively easily by
 filling in the relevant parts of the template. Let us now discuss this template in detail:
 
 #. The first step in programming your application protocol is to determine how many nodes are involved. For simplicity,
