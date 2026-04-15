@@ -1,15 +1,19 @@
 How to build the docs
 =====================
 
-First build the docs by:
+First, install some dependencies needed to build the docs:
+
+```bash
+make install-deps
+```
+
+Then, you can build the docs by:
 
 ```bash
 make build
 ```
 
-This will first install any required dependencies and build the html files. (the next time you can simply do `make html`).
-
-To open the built docs, do:
+In system with a desktop GUI (i.e. non-headless systems), you can open the built docs with the command:
 
 ```bash
 make open

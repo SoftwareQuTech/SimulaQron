@@ -33,12 +33,11 @@ RUN addgroup --gid ${GID} "${GNAME}"
 RUN adduser --home "${UHOME}" --disabled-password --uid ${UID} --ingroup "${GNAME}" "${UNAME}"
 WORKDIR ${UHOME}
 
-# Remove unnecessary sotware
+# Remove unnecessary software
 RUN apt-get purge -y adduser software-properties-common
 RUN apt-get autoremove -y
 
 FROM base-image AS venv-image
-
 
 # Install build essentials, to correctly build python deps
 # We install it only for this stage, so we create a lighter docker image for executing
