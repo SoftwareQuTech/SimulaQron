@@ -235,7 +235,8 @@ def start(network_name: str, nodes: str, simulaqron_config_file: Path, network_c
                 raise click.BadOptionUsage(
                     option_name="nodes",
                     message=f"The node '{node_to_start}' was not found in the network named "  # noqa: E713
-                            f"'{network_name} 'specified in the configuration file '{network_config_file}'.\n"  # noqa: E131
+                            f"'{network_name} 'specified in the configuration file "  # noqa: E131
+                            f"'{network_config_file}'.\n"  # noqa: E131
                             "Please check the list of names you passed in the --nodes option "  # noqa: E131
                             "and try again."  # noqa: E131
                 )
