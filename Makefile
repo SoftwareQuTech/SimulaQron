@@ -53,7 +53,7 @@ examples:
 	@cd examples/new-sdk/teleport && bash terminate.sh && sleep 3
 	@cd examples/new-sdk/midCircuitLogic && timeout 90 bash run.sh
 	@cd examples/new-sdk/midCircuitLogic && bash terminate.sh && sleep 3
-	@cd examples/nativeMode/teleport && bash terminate.sh && sleep 3
+	@cd examples/native-mode/teleport && bash terminate.sh && sleep 3
 	@echo "Chosen examples passed."
 
 install: test-deps
