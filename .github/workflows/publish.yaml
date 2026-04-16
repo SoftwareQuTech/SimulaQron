@@ -1,0 +1,46 @@
+name: Publish Python distributions to PyPI
+
+on: push
+jobs:
+  build-n-publish:
+    name: Build and publish Python distributions to PyPI
+    runs-on: ubuntu-latest
+    # We only execute this step if the commit is tagged, i.e., this is a release
+    if: startsWith(github.ref, 'refs/tags')
+    # Use the following for PyPI deployments
+    environment:
+      name: pypi
+      url: https://pypi.org/p/simulaqron
+    # Use the following for TestPyPI deployments
+#    environment:
+#      name: testpypi
+#      url: https://test.pypi.org/p/simulaqron
+    permissions:
+      id-token: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@master
+    - name: Set up Python 3.12
+      uses: actions/setup-python@master
+      with:
+        python-version: "3.12"
+    - name: Install pypa/build
+      run: >-
+        python3.12 -m
+        pip install
+        build
+        --user
+    - name: Build a binary wheel and a source tarball
+      run: >-
+        python3.12 -m
+        build
+        --sdist
+        --wheel
+        --outdir dist/
+        .
+#    - name: Publish distribution to Test PyPI
+#      uses: pypa/gh-action-pypi-publish@release/v1.14
+#      with:
+#        repository_url: https://test.pypi.org/legacy/
+    - name: Publish distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1.14

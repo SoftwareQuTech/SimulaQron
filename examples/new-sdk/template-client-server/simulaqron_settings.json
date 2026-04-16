@@ -1,0 +1,14 @@
+{
+    "max_qubits": 20,
+    "max_registers": 1000,
+    "conn_retry_time": 0.5,
+    "conn_max_retries": 10,
+    "recv_timeout": 100,
+    "recv_retry_time": 0.1,
+    "recv_max_retries": 10,
+    "log_level": 30,
+    "sim_backend": "stabilizer",
+    "noisy_qubits": false,
+    "max_app_waiting_time": -1.0,
+    "t1": 1.0
+}

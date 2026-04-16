@@ -28,10 +28,11 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import abc
+
 from twisted.spread import pb
 
 
-class quantumError(pb.Error):
+class QuantumError(pb.Error):
     def __init__(self, value):
         self.value = value
 
@@ -39,11 +40,11 @@ class quantumError(pb.Error):
         return repr(self.value)
 
 
-class noQubitError(quantumError):
+class NoQubitError(QuantumError):
     pass
 
 
-class virtNetError(Exception):
+class VirtNetError(Exception):
     def __init__(self, value):
         self.value = value
 
@@ -51,20 +52,21 @@ class virtNetError(Exception):
         return repr(self.value)
 
 
-class quantumEngine(pb.Referenceable):
+class QuantumEngine(pb.Referenceable, abc.ABC):
     """
     Basic quantum engine. Abstract class meant to be subclassed to implement different simulation backends.
-
-    Attributes:
-        Arguments
-        node		node this register is started from
-        num		number of this register
-        maxQubits	maximum number of qubits this register supports
     """
 
-    def __init__(self, node, num, maxQubits=10):
+    def __init__(self, node: str, num: int, maxQubits: int = 10):
         """
-        Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.
+        Initialize the simple engine.
+
+        :param node: Node name this register is started from.
+        :type node: str
+        :param num: Number of this register.
+        :type num: int
+        :param maxQubits: maximum number of qubits this register supports. If not give, it will default to 10.
+        :type maxQubits: int
         """
 
         self.maxQubits = maxQubits
@@ -77,27 +79,34 @@ class quantumEngine(pb.Referenceable):
         self.simNode = node
 
     @abc.abstractmethod
-    def add_fresh_qubit(self):
+    def add_fresh_qubit(self) -> int:
         """
-        Add a new qubit initialized in the \|0\> state.
+        Add a new qubit initialized in the :math:`|0>` state.
+
         :return: The qubit number
         :rtype: int
         """
         pass
 
     @abc.abstractmethod
-    def add_qubit(self, newQubit):
+    def add_qubit(self, newQubit) -> int:
         """
         Add new qubit in the state described by the density matrix newQubit
+
+        :param newQubit: The new qubit state
+        :type newQubit: Any
         :return: The qubit number
         :rtype: int
         """
         pass
 
     @abc.abstractmethod
-    def remove_qubit(self, qubitNum):
+    def remove_qubit(self, qubitNum: int) -> None:
         """
         Removes the qubit with the desired number qubitNum
+
+        :param qubitNum: Qubit number
+        :type qubitNum: int
         :rtype: None
         """
         pass
@@ -113,9 +122,23 @@ class quantumEngine(pb.Referenceable):
         pass
 
     @abc.abstractmethod
+    def get_density_matrix_RI(self):
+        """
+        Retrieves the entire register in real and imaginary parts and returns the result of
+        the outer product. In other words, if the qubit is in state :math:`|q>`, this function
+        returns the density matrix :math:`|q><q|` of the qubit.
+
+        :return: The density matrix real and imaginary parts of a qubit state
+        """
+        pass
+
+    @abc.abstractmethod
     def apply_H(self, qubitNum):
         """
         Applies a Hadamard gate to the qubits with number qubitNum.
+
+        :param qubitNum: Qubit number
+        :type qubitNum: int
         :rtype: None
         """
         pass
@@ -124,6 +147,9 @@ class quantumEngine(pb.Referenceable):
     def apply_K(self, qubitNum):
         """
         Applies a K gate to the qubits with number qubitNum. Maps computational basis to Y eigenbasis.
+
+        :param qubitNum: Qubit number
+        :type qubitNum: int
         :rtype: None
         """
         pass
@@ -131,7 +157,10 @@ class quantumEngine(pb.Referenceable):
     @abc.abstractmethod
     def apply_X(self, qubitNum):
         """
-        Applies a X gate to the qubits with number qubitNum.
+        Applies an X gate to the qubits with number qubitNum.
+
+        :param qubitNum: Qubit number
+        :type qubitNum: int
         :rtype: None
         """
         pass
@@ -140,6 +169,9 @@ class quantumEngine(pb.Referenceable):
     def apply_Z(self, qubitNum):
         """
         Applies a Z gate to the qubits with number qubitNum.
+
+        :param qubitNum: Qubit number
+        :type qubitNum: int
         :rtype: None
         """
         pass
@@ -148,6 +180,9 @@ class quantumEngine(pb.Referenceable):
     def apply_Y(self, qubitNum):
         """
         Applies a Y gate to the qubits with number qubitNum.
+
+        :param qubitNum: Qubit number
+        :type qubitNum: int
         :rtype: None
         """
         pass
@@ -156,6 +191,9 @@ class quantumEngine(pb.Referenceable):
     def apply_T(self, qubitNum):
         """
         Applies a T gate to the qubits with number qubitNum.
+
+        :param qubitNum: Qubit number
+        :type qubitNum: int
         :rtype: None
         """
         pass
@@ -166,12 +204,12 @@ class quantumEngine(pb.Referenceable):
         Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError
         is raised.
 
-        :param qubitNum: int
-            Qubit number
-        :param n: tuple
-            A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
-        :param a: float
-            The rotation angle in radians.
+        :param qubitNum: Qubit number
+        :type qubitNum: int
+        :param n: A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+        :type n: Tuple[int, int, int]
+        :param a: The rotation angle in radians.
+        :type a: float
         :rtype: None
         """
         pass
@@ -180,6 +218,11 @@ class quantumEngine(pb.Referenceable):
     def apply_CNOT(self, qubitNum1, qubitNum2):
         """
         Applies the CNOT to the qubit with the numbers qubitNum1 and qubitNum2.
+
+        :param qubitNum1: Qubit number 1
+        :type qubitNum1: int
+        :param qubitNum2: Qubit number 2
+        :type qubitNum2: int
         :rtype: None
         """
         pass
@@ -188,6 +231,11 @@ class quantumEngine(pb.Referenceable):
     def apply_CPHASE(self, qubitNum1, qubitNum2):
         """
         Applies the CPHASE to the qubit with the numbers qubitNum1 and qubitNum2.
+
+        :param qubitNum1: Qubit number 1
+        :type qubitNum1: int
+        :param qubitNum2: Qubit number 2
+        :type qubitNum2: int
         :rtype: None
         """
         pass
@@ -197,9 +245,10 @@ class quantumEngine(pb.Referenceable):
         """
         Applies a unitary gate to the specified qubit.
 
-        Arguments:
-        gateU   	unitary to apply as Qobj
-        qubitNum 	the number of the qubit this gate is applied to
+        :param gateU: Unitary to apply as Qobj
+        :type gateU: Qobj
+        :param qubitNum: The number of the qubit this gate is applied to
+        :type qubitNum: int
         :rtype: None
         """
         pass
@@ -209,10 +258,12 @@ class quantumEngine(pb.Referenceable):
         """
         Applies a unitary gate to the two specified qubits.
 
-        Arguments:
-        gateU		unitary to apply as Qobj
-        qubit1 		the first qubit
-        qubit2		the second qubit
+        :param gateU: Unitary to apply as Qobj
+        :type gateU: Qobj
+        :param qubit1: The first qubit
+        :type qubit1: int
+        :param qubit2: The second qubit
+        :type qubit2: int
         :rtype: None
         """
         pass
@@ -223,9 +274,9 @@ class quantumEngine(pb.Referenceable):
         Measures the desired qubit in the standard basis. This returns the classical outcome. The quantum register
         is in the post-measurment state corresponding to the obtained outcome.
 
-        Arguments:
-        qubitNum	qubit to be measured
-        :return: The meaurement outcome
+        :param qubitNum: Qubit to be measured
+        :type qubitNum: int
+        :return: The measurement outcome
         :rtype: int
         """
         pass
@@ -235,9 +286,9 @@ class quantumEngine(pb.Referenceable):
         """
         Measures the desired qubit in the standard basis. This returns the classical outcome and deletes the qubit.
 
-        Arguments:
-        qubitNum	qubit to be measured
-        :return: The meaurement outcome
+        :param qubitNum: Qubit to be measured
+        :type qubitNum: int
+        :return: The measurement outcome
         :rtype: int
         """
         pass
@@ -246,6 +297,11 @@ class quantumEngine(pb.Referenceable):
     def replace_qubit(self, qubitNum, state):
         """
         Replaces the qubit at position qubitNum with the one given by state.
+
+        :param qubitNum: Qubit to be replaced
+        :type qubitNum: int
+        :param state: New state to write in the place of the old qubit.
+        :type state: Any
         :rtype: None
         """
         pass
@@ -254,6 +310,9 @@ class quantumEngine(pb.Referenceable):
     def absorb(self, other):
         """
         Absorb the qubits from the other engine into this one. This is done by tensoring the state at the end.
+
+        :param other: The other qubit to absorb.
+        :type other: int
         :rtype: None
         """
         pass
@@ -263,10 +322,11 @@ class quantumEngine(pb.Referenceable):
         """
         Absorb the qubits, given in pieces
 
-        Arguments:
-        R		real part of the qubit state as a list
-        I		imaginary part as a list
-        activeQ		active number of qubits
+        :param R: Real part of the qubit state as a list.
+        :type R: List[float]
+        :param I: Imaginary part as a list.
+        :type I: List[float]
+        :param activeQ: Active number of qubits
         :rtype: None
         """
         pass

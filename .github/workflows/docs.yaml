@@ -1,0 +1,46 @@
+name: Build docs
+
+on: push
+
+jobs:
+  build:
+    name: Build Docs
+    runs-on: ubuntu-latest
+    # We only execute this step if the commit is tagged, i.e., this is a release
+    if: startsWith(github.ref, 'refs/tags')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+      - name: Build docs
+        uses: actions/setup-python@master
+        with:
+          python-version: "3.12"
+      # We *need* to install projectq to generate documentation
+      # This is needed because sphinx analyzes SimulaQron's code to generate the HTML;
+      # this implies that the modules are imported (but not executed), which therefore
+      # imports projectq classes.
+      - name: Install simulaqron and build docs
+        run: |
+          make install-optional
+          cd docs
+          make install-deps
+          make build
+      - name: Upload static files as artifact
+        id: deployment
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs/build/html/
+
+  deploy:
+    name: Deploy docs
+    needs: build
+    runs-on: ubuntu-latest
+    # We only execute this step if the commit is tagged, i.e., this is a release
+    if: startsWith(github.ref, 'refs/tags')
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

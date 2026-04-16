@@ -30,31 +30,40 @@ import random
 import time
 
 import numpy as np
-from twisted.spread import pb
+import logging
 from twisted.internet.defer import DeferredLock
-from twisted.internet import reactor
-from twisted.internet.task import deferLater
 from twisted.internet.defer import inlineCallbacks
+from twisted.internet.task import deferLater
+from twisted.spread import pb
 
-from netqasm.logging.glob import get_netqasm_logger
+from simulaqron.general.host_config import Host
+from simulaqron.reactor import reactor
+import simulaqron.settings as settings
+from simulaqron.virtual_node.basics import QuantumEngine
 
-from simulaqron import settings
 
-
-class simulatedQubit(pb.Referenceable):
+class SimulatedQubit(pb.Referenceable):
     """
     Simulated qubit object in the specified local simulation engine.
-
-    - **Arguments**
-        :node:        network node that this qubit lives at
-        :register:    register on that node that the qubit is in
 
     .. note::
         Qubit objects are local to each node that is simulating a particular quantum register.
         A qubit object provides the backing for a virtual qubit, which may be at another node.
     """
 
-    def __init__(self, node, register, simNum, num=0):
+    def __init__(self, node: Host, register: QuantumEngine, simNum: int, num: int = 0):
+        """
+        Creates a new simulated qubit object in the local simulation engine.
+
+        :param node: Network node that this qubit lives at.
+        :type node: Host
+        :param register: Register on that node that the qubit is in.
+        :type register: QuantumEngine
+        :param simNum: The number of the simulated qubit. This value is unique at each virtual node.
+        :type simNum: int
+        :param num: Number in the register.
+        :type num: int
+        """
         # Node where this qubit is located
         self.node = node
 
@@ -81,17 +90,15 @@ class simulatedQubit(pb.Referenceable):
         self.T1 = settings.simulaqron_settings.t1
         self.last_accessed = time.time()
 
-        self._logger = get_netqasm_logger(
-            f"{self.__class__.__name__}(node={node.name}, sim_num={simNum})"
-        )
+        self._logger = logging.getLogger() 
 
     @inlineCallbacks
     def lock(self):
-        self._logger.debug(f"locking sim qubit in register with num {self.register.num}")
+        self._logger.debug("locking sim qubit in register with num %d", self.register.num)
         while self.isLocked():
             yield deferLater(reactor, self._delay, lambda: None)
         yield self._lock.acquire()
-        self._logger.debug(f"got lock for sim qubit in register with num {self.register.num}")
+        self._logger.debug("got lock for sim qubit in register with num %d", self.register.num)
 
     @inlineCallbacks
     def remote_lock(self):
@@ -99,10 +106,10 @@ class simulatedQubit(pb.Referenceable):
 
     def unlock(self):
         try:
-            self._logger.debug(f"unlocking sim qubit in register with num {self.register.num}")
+            self._logger.debug("unlocking sim qubit in register with num %d", self.register.num)
             self._lock.release()
         except AssertionError as exc:
-            self._logger.error(f"AssertionError {exc}")
+            self._logger.error("AssertionError %s", exc)
 
     def remote_unlock(self):
         self.unlock()
@@ -177,6 +184,7 @@ class simulatedQubit(pb.Referenceable):
     def remote_apply_rotation(self, *args):
         """
         Apply rotation around axis n with angle a.
+
         Arguments:
         n    A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
         a    The rotation angle in radians.
@@ -198,7 +206,7 @@ class simulatedQubit(pb.Referenceable):
         Measure the qubit in the standard basis. This does NOT delete the qubit, but replace the relevant
         qubit with the measurement outcome.
 
-        Returns the measurement outcome.
+        :return: The measurement outcome.
         """
         self._apply_random_pauli_noise()
         outcome = self.register.measure_qubit_inplace(self.num)
@@ -208,7 +216,7 @@ class simulatedQubit(pb.Referenceable):
         """
         Measure the qubit in the standard basis. This does delete the qubit.
 
-        Returns the measurement outcome.
+        :return: The measurement outcome.
         """
 
         # Measure the qubit
@@ -220,8 +228,7 @@ class simulatedQubit(pb.Referenceable):
         """
         Performs a CNOT operation with this qubit as control, and the other qubit as target.
 
-        Arguments
-        targetNum    the qubit to use as the target of the CNOT
+        :param targetNum: The qubit to use as the target of the CNOT
         """
 
         self._logger.debug("VIRTUAL NODE %s: CNOT from %d to %d", self.node.name, self.num, targetNum)
@@ -232,8 +239,7 @@ class simulatedQubit(pb.Referenceable):
         """
         Performs a CPHASE operation with this qubit as control, and the other qubit as target.
 
-        Arguments
-        targetNum    the qubit to use as the target of the CPHASE
+        :param targetNum: the qubit to use as the target of the CPHASE
         """
         self._apply_random_pauli_noise()
         self.register.apply_CPHASE(self.num, targetNum)
@@ -262,6 +268,12 @@ class simulatedQubit(pb.Referenceable):
         """
         return self.register.get_register_RI()
 
+    def remote_get_density_matrix_RI(self):
+        """
+        Returns the matrix density as per the internal state of the qubit.
+        """
+        return self.register.get_density_matrix_RI()
+
     def remote_get_numbers(self):
         """
         Returns the number of the simulating register.
@@ -273,8 +285,8 @@ class simulatedQubit(pb.Referenceable):
         Returns the state of the qubits in the list qList by tracing out the rest.
         """
         backend = settings.simulaqron_settings.sim_backend
-        if backend != settings.SimBackend.QUTIP.value:
-            raise RuntimeError("Cannot get reduced qubit state using backend {}".format(backend))
+        if backend != settings.SimBackend.QUTIP:
+            raise RuntimeError(f"Cannot get reduced qubit state using backend {backend}")
         self._logger.debug("VIRTUAL NODE %s: Returning qubit %d", self.node.name, self.num)
         return self.register.get_qubits_RI([self.num])
 

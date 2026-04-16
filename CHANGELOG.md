@@ -5,6 +5,15 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 
 Upcoming
 --------
+2026-03-13 (v4.0.1)
+-------------------
+- Migrated project specification to use modern TOML approach.
+- Tested working with Python versions 3.10, 3.11 and 3.12.
+- Added new SDK for easily creating SimulaQron applications. This new SDK allows to also create
+  client-server applications using event-based programming paradigm.
+- Updated the SimulaQron network configuration file format. This is done to align the network
+  configuration file with the data required by SimulaQron "native" mode and the "NetQASM" mode.
+- Updated documentation of most of the undocumented functions and to match the new developments.
 
 2021-11-18 (v4.0.0)
 -------------------

@@ -4,18 +4,10 @@ simulaqron.run package
 Submodules
 ----------
 
-simulaqron.run.startCQC module
-------------------------------
+simulaqron.run.run module
+-------------------------
 
-.. automodule:: simulaqron.run.startCQC
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-simulaqron.run.startNode module
--------------------------------
-
-.. automodule:: simulaqron.run.startNode
+.. automodule:: simulaqron.run.run
     :members:
     :undoc-members:
     :show-inheritance:

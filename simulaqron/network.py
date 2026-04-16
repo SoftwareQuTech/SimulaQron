@@ -27,18 +27,24 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import time
 import random
-import multiprocessing as mp
-import networkx as nx
+import time
 from timeit import default_timer as timer
+from typing import List, Dict
 
-from netqasm.logging.glob import get_netqasm_logger, get_log_level
+import networkx as nx
+from multiprocess.context import ForkProcess as Process
+import logging
+from pathlib import Path
 
-from simulaqron.toolbox.manage_nodes import NetworksConfigConstructor
+from simulaqron.settings import network_config
+from simulaqron.settings.network_config import NodeConfig
 from simulaqron.settings import simulaqron_settings
 from simulaqron.start import start_vnode, start_qnodeos
+# WARNING - this import *needs* to be after importing start_vnode and start_qnodeos
+# Otherwise the code that patches some netqasm internal definitions will not work correctly!
 from simulaqron.sdk import SimulaQronConnection
+
 
 #########################################################################################
 # Network class, sets up (part of) a simulated network.                                 #
@@ -47,101 +53,60 @@ from simulaqron.sdk import SimulaQronConnection
 
 
 class Network:
-    def __init__(self, name=None, nodes=None, topology=None, network_config_file=None, force=False, new=True):
+    def __init__(self, nodes: List[str], network_config_file: Path, network_name: str = "default"):
         """
         Used to spin up a simulated network.
+        This class uses the network configuration loaded in the global network_config object and
+        starts the nodes mentioned in the constructor of this class.
 
-        If new=True then a fresh network with only the specified nodes
-        (or the default Alice, Bob, Charlie, David and Eve) are created and overwriting the current network with
-        the same name in the network config file. Otherwise only the specified nodes are started without changing
-        the config file. Note that if the nodes does not currently exists and new=False, an ValueError is raised.
-
-        If force=False an input to confirm the overwriting is issued.
-
-        :param name: None or str (defualts to "default")
-        :param nodes: None or list of str
-        :param topology: None or dict
-        :param network_config_file: None or str (defaults to simulaqron_settings.network_config_file
-        :param force: bool
-        :param new: bool
+        :param nodes: A list of strings with the node names to start.
+        :type nodes: List[str]
+        :param network_config_file: Path to network config file (required).
+        :type network_config_file: str
+        :param network_name: The name of network to start. Defaults to "default".
+        :type network_name: str
         """
+
+        self._network_config_file = network_config_file
+
         self._running = False
+        self.name = network_name
 
-        if name is None:
-            self.name = "default"
-        else:
-            self.name = name
+        self.processes: List[Process] = []
+        self._logger = logging.getLogger(f"{self.__class__.__name__}({self.name})")
 
-        self.processes = []
-        self._logger = get_netqasm_logger(f"{self.__class__.__name__}({self.name})")
-
-        if network_config_file is None:
-            self._network_config_file = simulaqron_settings.network_config_file
-        else:
-            self._network_config_file = network_config_file
-
-        networks_config = NetworksConfigConstructor(file_path=self._network_config_file)
-
-        if new:
-            if nodes is None:
-                if isinstance(topology, dict):
-                    self.nodes = list(topology.keys())
-                else:
-                    self.nodes = ["Alice", "Bob", "Charlie", "David", "Eve"]
-            else:
-                self.nodes = nodes
-            self.topology = construct_topology_config(topology, self.nodes)
-            if not force:
-                answer = input("Do you want to add/replace the network {} in the file {}"
-                               "with a network constisting of the nodes {}? (yes/no)"
-                               .format(self.name, self._network_config_file, self.nodes))
-                if answer not in ["yes", "y"]:
-                    raise RuntimeError("User did not want to replace network in file")
-            networks_config.add_network(node_names=self.nodes, network_name=self.name, topology=self.topology)
-            networks_config.write_to_file(self._network_config_file)
-        else:
-            if topology is not None:
-                raise ValueError("If new is False a topology cannot be used.")
-            if self.name in networks_config.networks:
-                node_names = networks_config.get_node_names(self.name)
-                self.topology = networks_config.networks[self.name].topology
-            else:
-                raise ValueError("Network {} is not in the file {}\n"
-                                 "If you wish to add this network to the file, use the"
-                                 "--new flag.".format(self.name, self._network_config_file))
-            if nodes is None:
-                self.nodes = node_names
-            else:
-                self.nodes = nodes
-                for node_name in self.nodes:
-                    if node_name not in node_names:
-                        raise ValueError("Node {} is not in the current network {} in the file {}\n"
-                                         "If you wish to overwrite the current network in the file, use the"
-                                         "--new flag.".format(node_name, self.name, self._network_config_file))
+        # Determine the nodes to start, using the in-memory network config
+        self._nodes_to_start: List[NodeConfig] = []
+        for node in network_config.get_nodes(network_name):
+            if node.name in nodes:
+                self._nodes_to_start.append(node)
 
         self._setup_processes()
 
     @property
-    def running(self):
+    def running(self) -> bool:
         """
-        Is the network up and running?
+        Checks whether the network up and running.
+
+        :return: True if the network up and running. False otherwise
+        :rtype: bool
         """
         if self._running:
             return True
-        for node in self.nodes:
+        for node in self._nodes_to_start:
             try:
                 SimulaQronConnection.try_connection(
-                    name=node,
+                    name=node.name,
                     network_name=self.name,
                 )
             except ConnectionRefusedError:
                 self._running = False
                 break
             except Exception as err:
-                self._logger.exception("Got unexpected exception when trying to connect: {}".format(err))
+                self._logger.exception("Got unexpected exception when trying to connect: %s", err)
                 raise err
         else:
-            self._logger.debug(f"Network {self.name} is now running")
+            self._logger.debug("Network %s is now running", self.name)
             self._running = True
 
         return self._running
@@ -152,14 +117,21 @@ class Network:
     def _setup_processes(self):
         """
         Setup the processes forming the network, however they are not started yet.
+
+        This method creates the following *heavy processes* (either by forking or spawning):
+        * One for SimulaQron's Virtual Node.
+        * One for QNodeOS's (NetQASM interpreter) server.
         """
-        mp.set_start_method("spawn", force=True)
-        for node in self.nodes:
-            process_virtual = mp.Process(
-                target=start_vnode, args=(node, self.name, get_log_level()), name="VirtNode {}".format(node)
+        for node in self._nodes_to_start:
+            process_virtual = Process(
+                target=start_vnode, 
+                args=(node.name, self._network_config_file, self.name, simulaqron_settings.log_level),
+                name=f"VirtNode {node.name}"
             )
-            process_qnodeos = mp.Process(
-                target=start_qnodeos, args=(node, self.name, get_log_level()), name="QnodeOSNode {}".format(node)
+            process_qnodeos = Process(
+                target=start_qnodeos, 
+                args=(node.name, self._network_config_file, self.name, simulaqron_settings.log_level),
+                name=f"QnodeOSNode {node.name}"
             )
             self.processes += [process_virtual, process_qnodeos]
 
@@ -170,11 +142,11 @@ class Network:
         blog until the all processes are running and are connected or not.
         :param wait_until_running: bool
         """
-        self._logger.info("Starting network with name {}".format(self.name))
+        self._logger.info("Starting network with name %s", self.name)
         for p in self.processes:
             if not p.is_alive():
-                self._logger.debug("Starting process {}".format(p.name))
-                p.deamon = True
+                self._logger.debug("Starting process %s", p.name)
+                p.daemon = True
                 p.start()
 
         if wait_until_running:
@@ -191,42 +163,54 @@ class Network:
         Stops the network.
         """
         self._running = False
-        self._logger.info("Stopping network with name {}".format(self.name))
+        self._logger.info("Stopping network with name %s", self.name)
         for p in self.processes:
-            while p.is_alive():
-                time.sleep(0.1)
+            if p.is_alive():
                 try:
                     p.terminate()
+                    p.join(timeout=5)
+                    if p.is_alive():
+                        # Process ignored SIGTERM — force-kill it so we never hang here
+                        self._logger.warning("Process %s did not stop after SIGTERM, killing it", p.name)
+                        p.kill()
                 except Exception as err:
-                    self._logger("Could not terminate one of the processes in the network due to error: {}".format(err))
+                    self._logger.warning("Could not terminate one of the processes in the"
+                                         "network due to error: %s", err)
+
+    def __str__(self):
+        return f"Network '{self.name}', procs: {self.processes}"
 
 
-def construct_topology_config(topology, nodes):
+# Helper functions to build topologies
+
+def construct_topology_config(topology: str | Dict | None, nodes: List[str]) -> Dict[str, List[str]]:
     """
-    Constructs a json file at config/topology.json, used to define the topology of the network.
+    Constructs a dictionary that maps the node names with their neighbours, representing a network topology.
 
-    :param topology: str
-        Should be one of the following: None, 'complete', 'ring', 'random_tree'.
-    :param nodes: list of str
-        List of the names of the nodes.
-    :return: None
+    :param topology: The type of topology to generate. Should be one of the following: None, 'complete',
+                     'ring', 'random_tree'.
+    :type topology: str | Dict
+    :param nodes: List of the names of the nodes.
+    :type nodes: List[str]
+    :return: A dictionary where keys are the names of the nodes and values are a list of strings of their neighbors
+    :rtype: Dict[str, List[str]]
     """
-    if topology is not None:
-        if isinstance(topology, dict):
+    if isinstance(topology, str):
+        # Trick to get the integer after "random_connected": split on that string
+        topology = topology.split("random_connected")
+
+    adjacency_dct = {}
+    match topology:
+        case dict() | None:
             return topology
-        elif topology == "complete":
-            adjacency_dct = {}
+        case ["complete"]:
             for i, node in enumerate(nodes):
-                adjacency_dct[node] = nodes[:i] + nodes[i + 1 :]
-
-        elif topology == "ring":
-            adjacency_dct = {}
+                adjacency_dct[node] = nodes[:i] + nodes[i + 1:]
+        case ["ring"]:
             nn = len(nodes)
             for i, node in enumerate(nodes):
                 adjacency_dct[node] = [nodes[(i - 1) % nn], nodes[(i + 1) % nn]]
-
-        elif topology == "path":
-            adjacency_dct = {}
+        case ["path"]:
             nn = len(nodes)
             for i, node in enumerate(nodes):
                 if i == 0:
@@ -235,13 +219,12 @@ def construct_topology_config(topology, nodes):
                     adjacency_dct[node] = [nodes[i - 1]]
                 else:
                     adjacency_dct[node] = [nodes[(i - 1) % nn], nodes[(i + 1) % nn]]
-
-        elif topology == "random_tree":
+        case ["random_tree"]:
             adjacency_dct = get_random_tree(nodes)
-
-        elif topology[:16] == "random_connected":
+        case ["", raw_nr_edges]:
+            # Here the "randon_connected" matches, and we also get the raw # of edges
             try:
-                nr_edges = int(topology[17:])
+                nr_edges = int(raw_nr_edges)
             except ValueError:
                 raise ValueError(
                     "When specifying a random connected graph use the format 'random_connected_{nr_edges}',"
@@ -253,22 +236,19 @@ def construct_topology_config(topology, nodes):
                     "where 'nr_edges' is the number of edges of the graph."
                 )
             adjacency_dct = get_random_connected(nodes, nr_edges)
-
-        else:
+        case _:
             raise ValueError("Unknown topology name")
-        return adjacency_dct
-    else:
-        return None
+    return adjacency_dct
 
 
-def get_random_tree(nodes):
+def get_random_tree(nodes: List[str]) -> Dict[str, List[str]]:
     """
     Constructs a dictionary describing a random tree, with the name of the vertices are taken from the 'nodes'
 
-    :param nodes: list of str
-        Name of the nodes to be used
-    :return: dct
-        keys are the names of the nodes and values their neighbors
+    :param nodes: Name of the nodes to be used
+    :type nodes: List[str]
+    :return: A dictionary where keys are the names of the nodes and values are a list of strings of their neighbors
+    :rtype: Dict[str, List[str]]
     """
     tree = nx.random_tree(len(nodes))
 
@@ -282,17 +262,17 @@ def get_random_tree(nodes):
     return adjacency_dct
 
 
-def get_random_connected(nodes, nr_edges):
+def get_random_connected(nodes: List[str], nr_edges: int) -> Dict[str, List[str]]:
     """
     Constructs a dictionary describing a random connected graph with a specified number of edges,
     with the name of the vertices are taken from the 'nodes'
 
-    :param nodes: list of str
-        Name of the nodes to be used
-    :param nr_edges: int
-        The number of edges that the graph should have.
-    :return: dct
-        keys are the names of the nodes and values their neighbors
+    :param nodes: Name of the nodes to be used
+    :type nodes: List[str]
+    :param nr_edges: The number of edges that the graph should have.
+    :type nr_edges: int
+    :return: A dictionary where keys are the names of the nodes and values are a list of strings of their neighbors
+    :rtype: Dict[str, List[str]]
     """
     nn = len(nodes)
     min_edges = nn - 1

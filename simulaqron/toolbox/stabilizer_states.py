@@ -7,10 +7,11 @@
 #
 ##########################################################################################
 
-import numpy as np
-import networkx as nx
-from scipy.linalg import block_diag
 from random import randint
+
+import networkx as nx
+import numpy as np
+from scipy.linalg import block_diag
 
 
 class StabilizerState:
@@ -22,67 +23,57 @@ class StabilizerState:
 
     Pauli2bool = {"I": (False, False), "X": (True, False), "Y": (True, True), "Z": (False, True)}
 
-    def __init__(self, data=None, check_symplectic=True):
+    def __init__(self, data=None, check_symplectic: bool = True):
         """
         This class represent a stabilizer state and allows to be manipulated using
         Clifford operations and Pauli-measurements.
 
         If check_symplectic=True then a check will be made that all stabilizers commute, by checking
-        That the matrix is symplectic. Otherwise no check is made.
-
-        :param data:
-            Can be one of the following:
-
-            A binary array of rank 2:
-                A binary array representing the generators of the stabilizer group.
-                If the array is n-by-2n a stabilizer state on n qubits will be represented.
-                The n first columns are the X-stabilizers and the n last the Z-stabilizer.
-                If the array is n-by-(2n+1), the last column is seen as the phase for each generator
-                as follows:
-                    0 -> 1
-                    1 -> -1
-
-            An array of rank 1 containing 'str':
-                Then each string is assumed to be a generator as for example "XXZIY"
-                Note that each string in the array should have the same length.
-                If the number of strings is 'n' then a stabilizer state on 'n' qubits is created.
-                If the strings have length 'n' then it is assumed that the phase is '+1'.
-                An explicit phase can be added to the start of the string as for example: "-1XXXY".
-                Creating a Bell-pair:
-                    StabilizerState(["XX", "ZZ"])  # The state (|00> + |11>) / sqrt(2)
-
-            'None' (default):
-                Then this is seen as a stabilizer state on no qubits, i.e. a complex number.
-                To add a qubit to such a state one can do:
-                    s = StabilizerState()
-                    s.add_qubit()  # This is now in the state |0>
-
-            'int':
-                Then a stabilizer state on this many qubits are created, all in the state |0> as:
-                    StabilizerState(5)  # This is the then the state |00000>
-
-            'networkx.Graph':
-                Then the graph state corresponding to this graph will be created.
-                This assumes that the nodes are numbered from 0 to n - 1, where n is the number of nodes.
-                For example:
-                    StabilizerState(networkx.complete_graph(5))  # Single qubit Clifford equiv. to a GHZ state
+        That the matrix is symplectic. Otherwise, no check is made.
 
         Examples:
-        A qubit in the state |0> can be created as:
-            StabilizerState([[0, 1]])
+        A qubit in the state :math:`|0>` can be created as ``StabilizerState([[0, 1]])``.
 
-        A qubit in the state |1> can be created as:
-            StabilizerState([[0, 1, 1]])
+        A qubit in the state :math:`|1>` can be created as ``StabilizerState([[0, 1, 1]])``.
 
-        The entangled state (|00> + |11>)/sqrt(2) can be created as:
-            StabilizerState([[1, 1, 0, 0],
-                              0, 0, 1, 1]])
+        The entangled state :math:`(|00> + |11>)/\\sqrt(2)` can be created as
+        ``StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])``.
 
-        The entangled state (|01> + |10>)/sqrt(2) can be created as:
-            StabilizerState([[1, 1, 0, 0, 0],
-                              0, 0, 1, 1, 1]])
-        :param check_symplectic: bool
-            Whether to check if all stabilizers commute or not.
+        The entangled state :math:`(|01> + |10>)/\\sqrt(2)` can be created as
+        ``StabilizerState([[1, 1, 0, 0, 0], [0, 0, 1, 1, 1]])``.
+
+        :param data: Can be one of the following:
+
+            * A binary array of rank 2 representing the generators of the stabilizer group.
+              If the array is n-by-2n a stabilizer state on n qubits will be represented.
+              The n first columns are the X-stabilizers and the n last the Z-stabilizer.
+              If the array is n-by-(2n+1), the last column is seen as the phase for each generator
+              as follows:
+              0 -> 1
+              1 -> -1
+            * An array of rank 1 containing ``str``:
+              Then each string is assumed to be a generator as for example ``XXZIY``
+              Note that each string in the array should have the same length.
+              If the number of strings is ``n`` then a stabilizer state on ``n`` qubits is created.
+              If the strings have length ``n`` then it is assumed that the phase is ``+1``.
+              An explicit phase can be added to the start of the string as for example: ``-1XXXY``.
+              Creating a Bell-pair:
+              ``StabilizerState(["XX", "ZZ"])  # The state (|00> + |11>) / sqrt(2)``
+            * ``None`` (default):
+              Then this is seen as a stabilizer state on no qubits, i.e. a complex number.
+              To add a qubit to such a state one can do:
+              ``s = StabilizerState()``
+              ``s.add_qubit()  # This is now in the state |0>``
+            * ``int``:
+              Then a stabilizer state on this many qubits are created, all in the state :math:`|0>` as:
+              ``StabilizerState(5)  # This is the then the state |00000>``
+            * ``networkx.Graph``:
+              Then the graph state corresponding to this graph will be created.
+              This assumes that the nodes are numbered from 0 to n - 1, where n is the number of nodes.
+              For example:
+              ``StabilizerState(networkx.complete_graph(5))  # Single qubit Clifford equiv. to a GHZ state``
+        :param check_symplectic: Whether to check if all stabilizers commute or not.
+        :type check_symplectic: bool
         """
         if data is None:
             self._group = np.empty(shape=(0, 0), dtype=bool)
@@ -131,7 +122,7 @@ class StabilizerState:
                     self._group = np.array(data, dtype=bool)
                 except Exception as err:
                     raise ValueError(
-                        "Could not create an array of the 'data' due to the following error: {}".format(err)
+                        f"Could not create an array of the 'data' due to the following error: {err}"
                     )
 
                 if len(self._group.shape) != 2:
@@ -217,9 +208,9 @@ class StabilizerState:
         return "StabilizerState(np." + self._group.__repr__() + ")"
 
     def __str__(self):
-        to_return = "Stabilizer state on {} with the following stabilizer generators:\n".format(self.num_qubits)
+        to_return = f"Stabilizer state on {self.num_qubits} with the following stabilizer generators: \n"
         for row_str in self.to_string().split('\n'):
-            to_return += "\t{}\n".format(row_str)
+            to_return += f"\t{row_str}\n"
         return to_return[:-1]
 
     def __len__(self):
@@ -229,7 +220,7 @@ class StabilizerState:
     def _row_to_string(row):
         assert (len(row) - 1) % 2 == 0
         n = int((len(row) - 1) / 2)
-        to_return = "{} ".format(StabilizerState.bool2phase[row[-1]])
+        to_return = f"{StabilizerState.bool2phase[row[-1]]} "
         for i in range(n):
             to_return += StabilizerState.bool2Pauli[(row[i], row[i + n])]
         return to_return
@@ -264,6 +255,7 @@ class StabilizerState:
         """
         Given a boolean matrix returns the matrix in row reduced echelon form
         where entries are seen as elements of GF(2), i.e. intergers modulus 2.
+
         :param matrix: The boolean matrix
         :type matrix: :obj:`numpy.array`
         :return:
@@ -272,7 +264,7 @@ class StabilizerState:
         try:
             new_matrix = np.array(matrix, dtype=bool)
         except Exception as err:
-            raise ValueError("Could not create an array of the 'data' due to the following error: {}".format(err))
+            raise ValueError(f"Could not create an array of the 'data' due to the following error: {err}")
 
         if len(new_matrix.shape) != 2:
             raise ValueError("'data' needs to be an array of rank 2")
@@ -420,7 +412,7 @@ class StabilizerState:
         if isinstance(stabilizer, str):
             stab = StabilizerState._str_to_operator(stabilizer)
             if stab is None:
-                raise ValueError("Cannot parse {} as a stabilizer.".format(stabilizer))
+                raise ValueError(f"Cannot parse {stabilizer} as a stabilizer.")
         else:
             stab = list(stabilizer)
         num_cols = matrix.shape[1]
@@ -453,7 +445,7 @@ class StabilizerState:
             if not isinstance(entry, bool):
                 raise ValueError("All entries in a stabilizer should be of type `bool`.")
         if len(stabilizer) != num_cols:
-            raise ValueError("Stabilizer must be of length {}, not {}".format(num_cols, len(stabilizer)))
+            raise ValueError(f"Stabilizer must be of length {num_cols}, not {len(stabilizer)}")
 
     def add_qubit(self):
         r"""
@@ -495,9 +487,9 @@ class StabilizerState:
             return self
         else:
             this_X_stab = self._group[:, : self.num_qubits]
-            this_Z_stab = self._group[:, self.num_qubits : -1]
+            this_Z_stab = self._group[:, self.num_qubits: -1]
             other_X_stab = other._group[:, : other.num_qubits]
-            other_Z_stab = other._group[:, other.num_qubits : -1]
+            other_Z_stab = other._group[:, other.num_qubits: -1]
 
             new_X_stab = block_diag(this_X_stab, other_X_stab)
             new_Z_stab = block_diag(this_Z_stab, other_Z_stab)
@@ -537,7 +529,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
+            raise ValueError(f"position= {position} if not a valid qubit position (i.e. in [0, {n}]")
         yz_rows = self._group[:, position + n]
 
         # Flip phases for Y and Z rows
@@ -552,7 +544,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
+            raise ValueError(f"position= {position} if not a valid qubit position (i.e. in [0, {n}]")
         xz_rows = np.logical_xor(self._group[:, position], self._group[:, position + n])
 
         # Flip phases for X and Z rows
@@ -567,7 +559,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
+            raise ValueError(f"position= {position} if not a valid qubit position (i.e. in [0, {n}]")
         xy_rows = self._group[:, position]
 
         # Flip phases for X and Y rows
@@ -582,7 +574,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
+            raise ValueError(f"position= {position} if not a valid qubit position (i.e. in [0, {n}]")
         # Swap the Z and X columns
         self._group[:, [position, position + n]] = self._group[:, [position + n, position]]
 
@@ -599,7 +591,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
+            raise ValueError(f"position= {position} if not a valid qubit position (i.e. in [0, {n}]")
         # Perform effective CNOT from Z column to X column
         yz_rows = self._group[:, position + n]
         self._group[yz_rows, position] = np.logical_not(self._group[yz_rows, position])
@@ -617,7 +609,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position= {} if not a valid qubit position (i.e. in [0, {}]".format(position, n))
+            raise ValueError(f"position= {position} if not a valid qubit position (i.e. in [0, {n}]")
         # Perform effective CNOT from X column to Z column
         xy_rows = self._group[:, position]
         self._group[xy_rows, position + n] = np.logical_not(self._group[xy_rows, position + n])
@@ -644,9 +636,9 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (control >= 0 and control < n):
-            raise ValueError("control= {} if not a valid qubit position (i.e. in [0, {}]".format(control, n))
+            raise ValueError(f"control= {control} if not a valid qubit position (i.e. in [0, {n}]")
         if not (target >= 0 and target < n):
-            raise ValueError("target= {} if not a valid qubit position (i.e. in [0, {}]".format(target, n))
+            raise ValueError(f"target= {target} if not a valid qubit position (i.e. in [0, {n}]")
         if control == target:
             raise ValueError("Control and target qubits cannot be the same")
 
@@ -680,9 +672,9 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (control >= 0 and control < n):
-            raise ValueError("control= {} if not a valid qubit position (i.e. in [0, {}]".format(control, n))
+            raise ValueError(f"control= {control} if not a valid qubit position (i.e. in [0, {n}]")
         if not (target >= 0 and target < n):
-            raise ValueError("target= {} if not a valid qubit position (i.e. in [0, {}]".format(target, n))
+            raise ValueError(f"target= {target} if not a valid qubit position (i.e. in [0, {n}]")
         if control == target:
             raise ValueError("Control and target qubits cannot be the same")
 
@@ -714,7 +706,7 @@ class StabilizerState:
         """
         n = self.num_qubits
         if not (position >= 0 and position < n):
-            raise ValueError("position = {} if not a valid qubit position (not in [0, {}))".format(position, n))
+            raise ValueError(f"position = {position} if not a valid qubit position (not in [0, {n}))")
 
         tmp_matrix = self._group
         # Create a new matrix where the X and Z columns of the corresponding qubit are the first.
@@ -736,7 +728,7 @@ class StabilizerState:
             if not inplace:
                 # Simply remove first generator and columns for X and Z of this qubit
                 X_part = tmp_matrix[1:n, 1:n]
-                Z_part_and_phase = tmp_matrix[1:n, n + 1 :]
+                Z_part_and_phase = tmp_matrix[1:n, n + 1:]
                 self._group = np.concatenate((X_part, Z_part_and_phase), 1)
                 self._nr_rows = n - 1
             else:
@@ -843,8 +835,8 @@ class StabilizerState:
                 operations.append(("Z", j))
         # Spp is now in the form of (I,Gamma) where Gamma is the adj mat of the Graph
         # SQC equivalent to the stabilizer state.
-        adj_mat = Spp.to_array()[:, n : 2 * n]
-        G = nx.from_numpy_matrix(adj_mat)
+        adj_mat = Spp.to_array()[:, n: 2 * n]
+        G = nx.from_numpy_array(adj_mat)
 
         if return_operations:
             return G, operations

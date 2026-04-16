@@ -26,6 +26,7 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+from typing import Tuple, Dict, List
 
 try:
     import projectq as pQ
@@ -33,20 +34,24 @@ except ImportError:
     raise RuntimeError("If you want to use the projectq backend you need to install the python package 'projectq'")
 import numpy as np
 
-from simulaqron.virtual_node.basics import quantumEngine, quantumError, noQubitError
+from simulaqron.virtual_node.basics import QuantumEngine, QuantumError, NoQubitError
 
 
-class projectQEngine(quantumEngine):
+class ProjectQEngine(QuantumEngine):
     """
     Basic quantum engine which uses ProjectQ.
-
-    Attributes:
-        maxQubits:	maximum number of qubits this engine will support.
     """
 
-    def __init__(self, node, num, maxQubits=10):
+    def __init__(self, node: str, num: int, maxQubits: int = 10):
         """
-        Initialize the simple engine. If no number is given for maxQubits, the assumption will be 10.
+        Initialize the ProjectQ engine.
+
+        :param node: Node name this register is started from.
+        :type node: str
+        :param num: Number of this register.
+        :type num: int
+        :param maxQubits: Maximum number of qubits this engine will support.
+        :type maxQubits: int
         """
 
         super().__init__(node=node, num=num, maxQubits=maxQubits)
@@ -59,7 +64,7 @@ class projectQEngine(quantumEngine):
 
     def __del__(self):
         """
-        Measures out all the current qubits, needed for projectQs garbage collectorself.
+        Measures out all the current qubits, needed for projectQs garbage collectors.
         """
         # Check first that project Q garbage collector not already removed qubits
         self.eng.flush()
@@ -67,13 +72,16 @@ class projectQEngine(quantumEngine):
             for _ in range(self.activeQubits):
                 self.measure_qubit(0)
 
-    def add_fresh_qubit(self):
+    def add_fresh_qubit(self) -> int:
         """
-        Add a new qubit initialized in the \|0\> state.
+        Add a new qubit initialized in the :math:`|0>` state.
+
+        :return: The ID of the new qubit allocated.
+        :rtype: int
         """
         # Check if we are still allowed to add qubits
         if self.activeQubits >= self.maxQubits:
-            raise noQubitError("No more qubits available in register.")
+            raise NoQubitError("No more qubits available in register.")
 
         # Prepare a clean qubit state in |0>
         qubit = self.eng.allocate_qubit()[0]
@@ -89,11 +97,15 @@ class projectQEngine(quantumEngine):
     def add_qubit(self, newQubit):
         """
         Add new qubit in the state described by the vector newQubit ([a, b])
+
+        :param newQubit: The density matrix of the new qubit.
+        :return: The ID of the new qubit allocated.
+        :rtype: int
         """
 
         norm = np.dot(np.array(newQubit), np.array(newQubit).conj())
         if not norm <= 1:
-            raise quantumError("State {} is not normalized.".format(newQubit))
+            raise QuantumError(f"State {newQubit} is not normalized.")
 
         # Create a fresh qubit
         num = self.add_fresh_qubit()
@@ -106,13 +118,16 @@ class projectQEngine(quantumEngine):
     def remove_qubit(self, qubitNum):
         """
         Removes the qubit with the desired number qubitNum
+
+        :param qubitNum: Qubit number
+        :type qubitNum: int
         """
         if (qubitNum + 1) > self.activeQubits:
-            raise quantumError("No such qubit to remove")
+            raise QuantumError("No such qubit to remove")
 
         self.measure_qubit(qubitNum)
 
-    def get_register_RI(self):
+    def _get_internal_qubit_state(self) -> Tuple[Dict[int, int], List[complex]]:
         """
         Retrieves the entire register in real and imaginary parts and returns the result as a
         list. Twisted only likes to send real valued lists, not complex ones.
@@ -121,27 +136,60 @@ class projectQEngine(quantumEngine):
         order, state = self.eng.backend.cheat()
         # Update the order based on the positions in the qubitReg
         # and not of the qubit IDs
-        q_reg_order = {}
+        q_reg_order: Dict[int, int] = {}
         for i, q in enumerate(self.qubitReg):
             q_reg_order[i] = order[q.id]
 
+        return q_reg_order, state
+
+    def get_register_RI(self) -> Tuple[Dict[int, int], Tuple[Tuple[float, ...], Tuple[float, ...]]]:
+        """
+        Retrieves the entire register in real and imaginary parts and returns the result as a
+        list. Twisted only likes to send real valued lists, not complex ones.
+
+        :return: The qubit states real and imaginary parts.
+        :rtype: Tuple[Tuple[float, ...], Tuple[float, ...]]
+        """
+        q_reg_order, state = self._get_internal_qubit_state()
+
         # Note previously the format of real and imaginary numbers were
         # expected, use the same even though Re will be the qubit mapping
-        # and Im the state
-        Re = tuple(n.real for n in state)
-        Im = tuple(n.imag for n in state)
+        # and Im the state.
+        # Use float() to convert numpy.float64 → Python float so Twisted PB
+        # can serialize the values (numpy scalar types become Unpersistable).
+        Re = tuple(float(n.real) for n in state)
+        Im = tuple(float(n.imag) for n in state)
 
         return q_reg_order, (Re, Im)
+
+    def get_density_matrix_RI(self) -> Tuple[List[float], List[float]]:
+        """
+        Retrieves the density matrix of the qubit as a real and imaginary part. Twisted only
+        likes to send real valued lists, not complex ones.
+
+        :return: The qubit density matrix real and imaginary parts.
+        :rtype: Tuple[List[float], List[float]]
+        """
+        _, raw_qubit_state = self._get_internal_qubit_state()
+        qubit_state = np.array(raw_qubit_state)
+        density_matrix = np.outer(qubit_state, qubit_state)
+        return density_matrix.real.tolist(), density_matrix.imag.tolist()
 
     def apply_H(self, qubitNum):
         """
         Applies a Hadamard gate to the qubits with number qubitNum.
+
+        :param qubitNum: Qubit number
+        :type qubitNum: int
         """
         self.apply_onequbit_gate(pQ.ops.H, qubitNum)
 
     def apply_K(self, qubitNum):
         """
         Applies a K gate to the qubits with number qubitNum. Maps computational basis to Y eigenbasis.
+
+        :param qubitNum: Qubit number
+        :type qubitNum: int
         """
         self.apply_onequbit_gate(pQ.ops.H, qubitNum)
         self.apply_onequbit_gate(pQ.ops.S, qubitNum)
@@ -151,6 +199,9 @@ class projectQEngine(quantumEngine):
     def apply_X(self, qubitNum):
         """
         Applies a X gate to the qubits with number qubitNum.
+
+        :param qubitNum: Qubit number
+        :type qubitNum: int
         """
 
         self.apply_onequbit_gate(pQ.ops.X, qubitNum)
@@ -158,6 +209,9 @@ class projectQEngine(quantumEngine):
     def apply_Z(self, qubitNum):
         """
         Applies a Z gate to the qubits with number qubitNum.
+
+        :param qubitNum: Qubit number
+        :type qubitNum: int
         """
 
         self.apply_onequbit_gate(pQ.ops.Z, qubitNum)
@@ -165,6 +219,9 @@ class projectQEngine(quantumEngine):
     def apply_Y(self, qubitNum):
         """
         Applies a Y gate to the qubits with number qubitNum.
+
+        :param qubitNum: Qubit number
+        :type qubitNum: int
         """
 
         self.apply_onequbit_gate(pQ.ops.Y, qubitNum)
@@ -172,20 +229,23 @@ class projectQEngine(quantumEngine):
     def apply_T(self, qubitNum):
         """
         Applies a T gate to the qubits with number qubitNum.
+
+        :param qubitNum: Qubit number
+        :type qubitNum: int
         """
         self.apply_onequbit_gate(pQ.ops.T, qubitNum)
 
-    def apply_rotation(self, qubitNum, n, a):
+    def apply_rotation(self, qubitNum: int, n: Tuple[float, float, float], a: float):
         """
         Applies a rotation around the axis n with the angle a to qubit with number qubitNum. If n is zero a ValueError
         is raised.
 
-        :param qubitNum: int
-            Qubit number
-        :param n: tuple of floats
-            A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
-        :param a: float
-            The rotation angle in radians.
+        :param qubitNum: Qubit number
+        :type qubitNum: int
+        :param n: A tuple of three numbers specifying the rotation axis, e.g n=(1,0,0)
+        :type n: Tuple[float, float, float]
+        :param a: The rotation angle in radians.
+        :type a: float
         """
         n = tuple(n)
         if n == (1, 0, 0):
@@ -200,62 +260,74 @@ class projectQEngine(quantumEngine):
     def apply_CNOT(self, qubitNum1, qubitNum2):
         """
         Applies the CNOT to the qubit with the numbers qubitNum1 and qubitNum2.
+
+        :param qubitNum1: Qubit number 1.
+        :type qubitNum1: int
+        :param qubitNum1: Qubit number 2.
+        :type qubitNum1: int
         """
         self.apply_twoqubit_gate(pQ.ops.CNOT, qubitNum1, qubitNum2)
 
     def apply_CPHASE(self, qubitNum1, qubitNum2):
         """
         Applies the CPHASE to the qubit with the numbers qubitNum1 and qubitNum2.
+
+        :param qubitNum1: Qubit number 1.
+        :type qubitNum1: int
+        :param qubitNum1: Qubit number 2.
+        :type qubitNum1: int
         """
 
         self.apply_twoqubit_gate(pQ.ops.CZ, qubitNum1, qubitNum2)
 
-    def apply_onequbit_gate(self, gate, qubitNum):
+    def apply_onequbit_gate(self, gate, qubitNum: int):
         """
         Applies a unitary gate to the specified qubit.
 
-        Arguments:
-        gate       The project Q gate to be applied
-        qubitNum 	the number of the qubit this gate is applied to
+        :param gate: The project Q gate to be applied.
+        :param qubitNum: The number of the qubit this gate is applied to.
+        :type qubitNum: int
         """
 
         if (qubitNum + 1) > self.activeQubits:
-            raise quantumError("No such qubit to apply a single qubit gate to")
+            raise QuantumError("No such qubit to apply a single qubit gate to")
 
         gate | self.qubitReg[qubitNum]
 
-    def apply_twoqubit_gate(self, gate, qubit1, qubit2):
+    def apply_twoqubit_gate(self, gate, qubit1: int, qubit2: int):
         """
         Applies a unitary gate to the two specified qubits.
 
         Arguments:
-        gate       The project Q gate to be applied
-        qubit1 		the first qubit
-        qubit2		the second qubit
+        :param gate: The project Q gate to be applied
+        :param qubit1: The first qubit
+        :type qubit1: int
+        :param qubit2: The second qubit
+        :type qubit2: int
         """
         if (qubit1 + 1) > self.activeQubits:
-            raise quantumError("No such qubit to act as a control qubit")
+            raise QuantumError("No such qubit to act as a control qubit")
 
         if (qubit2 + 1) > self.activeQubits:
-            raise quantumError("No such qubit to act as a target qubit")
+            raise QuantumError("No such qubit to act as a target qubit")
 
         if qubit1 == qubit2:
-            raise quantumError("Control and target are equal")
+            raise QuantumError("Control and target are equal")
 
         gate | (self.qubitReg[qubit1], self.qubitReg[qubit2])
 
-    def measure_qubit_inplace(self, qubitNum):
+    def measure_qubit_inplace(self, qubitNum: int):
         """
         Measures the desired qubit in the standard basis. This returns the classical outcome. The quantum register
-        is in the post-measurment state corresponding to the obtained outcome.
+        is in the post-measurement state corresponding to the obtained outcome.
 
-        Arguments:
-        qubitNum	qubit to be measured
+        :param qubitNum: The number of the qubit to measure.
+        :type qubitNum: int
         """
 
         # Check we have such a qubit...
         if (qubitNum + 1) > self.activeQubits:
-            raise quantumError("No such qubit to be measured.")
+            raise QuantumError("No such qubit to be measured.")
 
         pQ.ops.Measure | self.qubitReg[qubitNum]
 
@@ -266,12 +338,12 @@ class projectQEngine(quantumEngine):
         # return measurement outcome
         return outcome
 
-    def measure_qubit(self, qubitNum):
+    def measure_qubit(self, qubitNum: int):
         """
         Measures the desired qubit in the standard basis. This returns the classical outcome and deletes the qubit.
 
-        Arguments:
-        qubitNum	qubit to be measured
+        :param qubitNum: The number of the qubit to measure.
+        :type qubitNum: int
         """
         outcome = self.measure_qubit_inplace(qubitNum)
 
@@ -282,20 +354,28 @@ class projectQEngine(quantumEngine):
 
         return outcome
 
-    def replace_qubit(self, qubitNum, state):
+    def replace_qubit(self, qubitNum: int, state):
         """
         Replaces the qubit at position qubitNum with the one given by state.
+
+        :param qubitNum: Qubit to be replaced
+        :type qubitNum: int
+        :param state: New state to write in the place of the old qubit.
+        :type state: Any
         """
         raise NotImplementedError("Currently you cannot replace a qubit using project Q as backend")
 
     def absorb(self, other):
         """
         Absorb the qubits from the other engine into this one. This is done by tensoring the state at the end.
+
+        :param other: The other qubit to absorb.
+        :type other: int
         """
         # Check whether there is space
         newNum = self.activeQubits + other.activeQubits
         if newNum > self.maxQubits:
-            raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
+            raise QuantumError("Cannot merge: qubits exceed the maximum available.\n")
 
         # Check whether there are in fact qubits to tensor up....
         if self.activeQubits == 0:
@@ -310,15 +390,16 @@ class projectQEngine(quantumEngine):
         """
         Absorb the qubits, given in pieces
 
-        Arguments:
-        R		real part of the qubit state as a list
-        I		imaginary part as a list
-        activeQ		active number of qubits
+        :param R: Real part of the qubit state as a list.
+        :type R: List[float]
+        :param I: Imaginary part as a list.
+        :type I: List[float]
+        :param activeQ: Active number of qubits
         """
         # Check whether there is space
         newNum = self.activeQubits + activeQ
         if newNum > self.maxQubits:
-            raise quantumError("Cannot merge: qubits exceed the maximum available.\n")
+            raise QuantumError("Cannot merge: qubits exceed the maximum available.\n")
 
         if activeQ > 0:
             # Unpack the ordering of qubits and the real and imaginary part

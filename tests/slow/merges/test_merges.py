@@ -1,18 +1,54 @@
+import sys
+from pathlib import Path
+
 import os
-import logging
 import unittest
+import logging
+from typing import Callable, List
+
 import numpy as np
-import multiprocessing as mp
 
 from twisted.spread import pb
-from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
 
+from multiprocess.context import ForkProcess as Process
+from multiprocess.connection import Pipe, Connection
+from logging import DEBUG
 from simulaqron.general.host_config import SocketsConfig
-from simulaqron.local.setup import setup_local, assemble_qubit
+from simulaqron.math import assemble_qubit
+from simulaqron.local.setup import setup_local
 from simulaqron.network import Network
-from simulaqron.settings import simulaqron_settings, SimBackend
+from simulaqron.settings import simulaqron_settings, network_config
+from simulaqron.settings.network_config import NodeConfigType
+from simulaqron.settings.simulaqron_config import SimBackend
 from simulaqron.toolbox.stabilizer_states import StabilizerState
+from simulaqron.reactor import reactor
+
+_logger = logging.getLogger("test_merges")
+
+# Diego Rivera: 2026-01-16:
+# Note about moving these tests to NetQASM API.
+# NetQASM is a library that needs to be implemented by the simulators. It also
+# aims to be a higher-level abstraction layer, so it does not expose implementation
+# details from the underlying quantum simulator.
+# On the other hand, these tests aim to check the functionality of merging two
+# qubits into a single register. This functionality *is specific to the SimulaQron
+# simulator*, since it is required to allow quantum simulation distributed in
+# multiple hosts.
+# Being this said, I see two main difficulties to move these tests to NetQASM API:
+# * Since NetQASM aims to hide all implementation details, there is no NetQASM
+#   primitive to express "moving a qubit from one host to another".
+# * The functionality tested here is SimulaQron-specific. It would be difficult
+#   to rewrite these tests in NetQASM, which might hide APIs needed to fully test
+#   the underlying functionality.
+# Stephanie: 2026-03-08
+# There is no point in moving this test to netqasm: this is is not the role of netqasm here
+# best refer to the documentaiton or the simulaqron paper of what the architeture of simulaqron
+# is. And in this architecture the merge is done by the simulaqron backend always, I dont get
+# why one would consider moving this to netqasm. It's something that only happens for simulated
+# qubits. One can, however, make a similar test through the netqasm interface in addition to this one
+# and this may be valuable. But this does not mean making merges. The below also doesnt make
+# manual merges: rather it takes actions that will trigger a merge in the backend.
 
 
 class localNode(pb.Root):
@@ -41,7 +77,7 @@ class localNode(pb.Root):
         virtualNum	number of the virtual qubit corresponding to the EPR pair received
         """
 
-        logging.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
+        _logger.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
 
         if self.num_qubits_received == 0:
             self.q1 = yield self.virtRoot.callRemote("get_virtual_ref", virtualNum)
@@ -61,30 +97,30 @@ class localNode(pb.Root):
         virtualNum	number of the virtual qubit corresponding to the EPR pair received
         """
 
-        logging.debug("LOCAL %s: Got both qubits from Alice and Bob.", self.node.name)
+        _logger.debug("LOCAL %s: Got both qubits from Alice and Bob.", self.node.name)
 
         # We'll test an operation that will cause a merge of the two remote registers
         yield self.q1.callRemote("apply_H")
         yield self.q1.callRemote("cnot_onto", self.q2)
 
-        if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
+        if simulaqron_settings.sim_backend == SimBackend.QUTIP:
             # Output state
             (realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits", [self.q1, self.q2])
             rho = assemble_qubit(realRho, imagRho)
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
-        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ.value:
-            (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", self.q1)
+        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
+            _, (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", self.q1)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
-        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER:
             (array, _) = yield self.virtRoot.callRemote("get_register_RI", self.q1)
             state = StabilizerState(array)
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
             correct = state == expectedState
         else:
-            ValueError("Unknown backend {}".format(simulaqron_settings.sim_backend))
+            ValueError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
         return bool(correct)
 
@@ -99,7 +135,7 @@ class localNode(pb.Root):
         virtualNum	number of the virtual qubit corresponding to the EPR pair received
         """
 
-        logging.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
+        _logger.debug("LOCAL %s: Getting reference to qubit number %d.", self.node.name, virtualNum)
 
         # Get a reference to our side of the EPR pair
         qA = yield self.virtRoot.callRemote("get_virtual_ref", virtualNum)
@@ -115,29 +151,30 @@ class localNode(pb.Root):
             yield q.callRemote("apply_H")
             yield q.callRemote("cnot_onto", qA)
 
-        if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
+        if simulaqron_settings.sim_backend == SimBackend.QUTIP:
             # Output state
             (realRho, imagRho) = yield self.virtRoot.callRemote("get_multiple_qubits", [qA, q])
             rho = assemble_qubit(realRho, imagRho)
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
-        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ.value:
-            (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", qA)
+        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
+            _, (realvec, imagvec) = yield self.virtRoot.callRemote("get_register_RI", qA)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
-        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER:
             (array, _) = yield self.virtRoot.callRemote("get_register_RI", qA)
             state = StabilizerState(array)
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
             correct = state == expectedState
         else:
-            ValueError("Unknown backend {}".format(simulaqron_settings.sim_backend))
+            ValueError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
         return bool(correct)
 
 
-# @for_all_methods()
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestMerge(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -146,35 +183,40 @@ class TestMerge(unittest.TestCase):
 
         cls.processes = []
         cls.processes_to_wait_for = None
-
         simulaqron_settings.default_settings()
+        simulaqron_settings.sim_backend = SimBackend.PROJECTQ
+
         path_to_here = os.path.dirname(os.path.abspath(__file__))
         network_config_file = os.path.join(path_to_here, "configs", "network.json")
-        simulaqron_settings.network_config_file = network_config_file
+        network_config.read_from_file(network_config_file)
         nodes = ["Alice", "Bob", "Charlie"]
-        cls.network = Network(nodes=nodes, force=True)
+        cls.network = Network(nodes=nodes, network_config_file=Path(network_config_file))
         cls.network.start()
 
     @classmethod
     def tearDownClass(cls):
         for p in cls.processes:
             p.terminate()
+            p.join()
 
         cls.network.stop()
-        reactor.crash()
-        simulaqron_settings.default_settings()
 
     @staticmethod
-    def setup_node(name, node_code, classical_net_file, send_end):
-        # This file defines the network of virtual quantum nodes
-        virtualFile = os.path.join(os.path.dirname(__file__), "configs", "network.json")
+    def setup_node(name: str, node_code: Callable, nodes_in_classical_network: List[str], send_end: Connection):
+        if simulaqron_settings.log_level == DEBUG:
+            stdout_file = open(f"stdout-setup-node-{name}-{os.getpid()}.out.txt", "w")
+            stderr_file = open(f"stderr-setup-node-{name}-{os.getpid()}.out.txt", "w")
+            sys.stdout = stdout_file
+            sys.stderr = stderr_file
+        # We get the virtual nodes network configuration from the loaded network config
+        virtualNet = SocketsConfig(network_config, config_type=NodeConfigType.VNODE)
 
-        # This file defines the nodes acting as servers in the classical communication network
-        classicalFile = os.path.join(os.path.dirname(__file__), "configs", classical_net_file)
+        # We get the classical nodes network configuration from the loaded network config
+        classicalNet = SocketsConfig(network_config, config_type=NodeConfigType.APP)
 
-        # Read configuration files for the virtual quantum, as well as the classical network
-        virtualNet = SocketsConfig(virtualFile)
-        classicalNet = SocketsConfig(classicalFile)
+        # We also filter the nodes that will participate in the classical network, so we don't
+        # start local nodes unnecessarily
+        classicalNet.filter(nodes_in_classical_network)
 
         # Check if we should run a local classical server. If so, initialize the code
         # to handle remote connections on the classical communication network
@@ -188,14 +230,13 @@ class TestMerge(unittest.TestCase):
         # execute the function runClientNode
         setup_local(name, virtualNet, classicalNet, lNode, node_code, send_end)
 
-    def run_test(self, classical_net_file):
-        mp.set_start_method("spawn", force=True)
+    def run_test(self, nodes_in_class_network: List[str]):
         pipe_list = []
-        for name, node_code in zip(self.nodes, self.node_codes):
-            recv_end, send_end = mp.Pipe(False)
-            p = mp.Process(target=self.setup_node,
-                           args=[name, node_code, classical_net_file, send_end],
-                           name=name)
+        for node_name, node_code in zip(self.nodes, self.node_codes):
+            recv_end, send_end = Pipe(False)
+            p = Process(target=self.setup_node,
+                        args=[node_name, node_code, nodes_in_class_network, send_end],
+                        name=node_name)
             self.processes.append(p)
             pipe_list.append(recv_end)
 
@@ -212,6 +253,8 @@ class TestMerge(unittest.TestCase):
         self.assertTrue(all(results))
 
 
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestBothLocal(TestMerge):
     @classmethod
     def setUpClass(cls):
@@ -233,7 +276,7 @@ class TestBothLocal(TestMerge):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
 
         # Create 2 qubits
         qA = yield virtRoot.callRemote("new_qubit_inreg", qReg)
@@ -243,33 +286,36 @@ class TestBothLocal(TestMerge):
         yield qA.callRemote("apply_H")
         yield qA.callRemote("cnot_onto", qB)
 
-        if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
+        if simulaqron_settings.sim_backend == SimBackend.QUTIP:
             # Output state
             (realRho, imagRho) = yield virtRoot.callRemote("get_multiple_qubits", [qA, qB])
             rho = assemble_qubit(realRho, imagRho)
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
-        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ.value:
-            (realvec, imagvec, _, _, _) = yield virtRoot.callRemote("get_register", qA)
+        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
+            (_, (realvec, imagvec), _, _, _) = yield virtRoot.callRemote("get_register", qA)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
-        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER:
             (array, _, _, _, _) = yield virtRoot.callRemote("get_register", qA)
             state = StabilizerState(array)
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
             correct = state == expectedState
         else:
-            ValueError("Unknown backend {}".format(simulaqron_settings.sim_backend))
+            ValueError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
         send_end.send(correct)
 
         reactor.stop()
 
     def test(self):
-        self.run_test("Alice.cfg")
+        # Original arg: "Alice.cfg" -> specifies NO node in the classical network
+        self.run_test([])
 
 
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestBothLocalNotSameReg(TestBothLocal):
     @classmethod
     @inlineCallbacks
@@ -284,7 +330,7 @@ class TestBothLocalNotSameReg(TestBothLocal):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
         # Create a second register
         newReg = yield virtRoot.callRemote("add_register")
 
@@ -296,30 +342,32 @@ class TestBothLocalNotSameReg(TestBothLocal):
         yield qA.callRemote("apply_H")
         yield qA.callRemote("cnot_onto", qB)
 
-        if simulaqron_settings.sim_backend == SimBackend.QUTIP.value:
+        if simulaqron_settings.sim_backend == SimBackend.QUTIP:
             # Output state
             (realRho, imagRho) = yield virtRoot.callRemote("get_multiple_qubits", [qA, qB])
             rho = assemble_qubit(realRho, imagRho)
             expectedRho = [[0.5, 0, 0, 0.5], [0, 0, 0, 0], [0, 0, 0, 0], [0.5, 0, 0, 0.5]]
             correct = np.all(np.isclose(rho, expectedRho))
-        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ.value:
-            (realvec, imagvec, _, _, _) = yield virtRoot.callRemote("get_register", qA)
+        elif simulaqron_settings.sim_backend == SimBackend.PROJECTQ:
+            (_, (realvec, imagvec), _, _, _) = yield virtRoot.callRemote("get_register", qA)
             state = [r + (1j * j) for r, j in zip(realvec, imagvec)]
             expectedState = [1 / np.sqrt(2), 0, 0, 1 / np.sqrt(2)]
             correct = np.all(np.isclose(state, expectedState))
-        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER.value:
+        elif simulaqron_settings.sim_backend == SimBackend.STABILIZER:
             (array, _, _, _, _) = yield virtRoot.callRemote("get_register", qA)
             state = StabilizerState(array)
             expectedState = StabilizerState([[1, 1, 0, 0], [0, 0, 1, 1]])
             correct = state == expectedState
         else:
-            ValueError("Unknown backend {}".format(simulaqron_settings.sim_backend))
+            ValueError(f"Unknown backend {simulaqron_settings.sim_backend}")
 
         send_end.send(correct)
 
         reactor.stop()
 
 
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestBothRemote(TestMerge):
     @classmethod
     def setUpClass(cls):
@@ -341,14 +389,14 @@ class TestBothRemote(TestMerge):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
 
         # Create qubit
         qA = yield virtRoot.callRemote("new_qubit_inreg", qReg)
 
         # Instruct the virtual node to transfer the qubit
         remoteNum = yield virtRoot.callRemote("send_qubit", qA, "Charlie")
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
 
         # Tell Charlie the number of the virtual qubit so the can use it locally
         # and extend it to a GHZ state with Charlie
@@ -372,14 +420,14 @@ class TestBothRemote(TestMerge):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
 
         # Create qubits
         qB = yield virtRoot.callRemote("new_qubit_inreg", qReg)
 
         # Instruct the virtual node to transfer the qubit
         remoteNum = yield virtRoot.callRemote("send_qubit", qB, "Charlie")
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
 
         # Tell Charlie the number of the virtual qubit so the can use it locally
         # and extend it to a GHZ state with Charlie
@@ -402,13 +450,16 @@ class TestBothRemote(TestMerge):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
         send_end.send(True)
 
     def test(self):
-        self.run_test("AliceBobCharlie.cfg")
+        # Original arg: "AliceBobCharlie.cfg" -> specifies "Alice", "Bob", and "Charlie" in the classical network
+        self.run_test(["Alice", "Bob", "Charlie"])
 
 
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestBothRemoteSameNodeDiffReg(TestMerge):
     @classmethod
     def setUpClass(cls):
@@ -430,7 +481,7 @@ class TestBothRemoteSameNodeDiffReg(TestMerge):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
 
         # Create new register
         newReg = yield virtRoot.callRemote("new_register")
@@ -442,8 +493,8 @@ class TestBothRemoteSameNodeDiffReg(TestMerge):
         # Instruct the virtual node to transfer the qubit
         remoteNumA = yield virtRoot.callRemote("send_qubit", qA, "Bob")
         remoteNumB = yield virtRoot.callRemote("send_qubit", qB, "Bob")
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumA)
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumB)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumA)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumB)
 
         # Tell Charlie the number of the virtual qubit so the can use it locally
         # and extend it to a GHZ state with Charlie
@@ -468,13 +519,16 @@ class TestBothRemoteSameNodeDiffReg(TestMerge):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
         send_end.send(True)
 
     def test(self):
-        self.run_test("AliceBob.cfg")
+        # Original arg: "AliceBob.cfg" -> specifies "Alice", and "Bob" in the classical network
+        self.run_test(["Alice", "Bob"])
 
 
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestBothRemoteSameNodeSameReg(TestBothRemoteSameNodeDiffReg):
     @staticmethod
     @inlineCallbacks
@@ -489,7 +543,7 @@ class TestBothRemoteSameNodeSameReg(TestBothRemoteSameNodeDiffReg):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
 
         # Create 2 qubits
         qA = yield virtRoot.callRemote("new_qubit_inreg", qReg)
@@ -503,8 +557,8 @@ class TestBothRemoteSameNodeSameReg(TestBothRemoteSameNodeDiffReg):
         # Instruct the virtual node to transfer the qubit
         remoteNumA = yield virtRoot.callRemote("send_qubit", qA, "Bob")
         remoteNumB = yield virtRoot.callRemote("send_qubit", qB, "Bob")
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumA)
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumB)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumA)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNumB)
 
         # Tell Charlie the number of the virtual qubit so the can use it locally
         # and extend it to a GHZ state with Charlie
@@ -518,6 +572,8 @@ class TestBothRemoteSameNodeSameReg(TestBothRemoteSameNodeDiffReg):
         reactor.stop()
 
 
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestRemoteAtoB(TestBothRemoteSameNodeDiffReg):
     @staticmethod
     @inlineCallbacks
@@ -532,14 +588,14 @@ class TestRemoteAtoB(TestBothRemoteSameNodeDiffReg):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
 
         # Create qubit
         qA = yield virtRoot.callRemote("new_qubit_inreg", qReg)
 
         # Instruct the virtual node to transfer the qubit
         remoteNum = yield virtRoot.callRemote("send_qubit", qA, "Bob")
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
 
         # Tell Bob the number of the virtual qubit so the can use it locally
         bob = classicalNet.hostDict["Bob"]
@@ -550,6 +606,8 @@ class TestRemoteAtoB(TestBothRemoteSameNodeDiffReg):
         reactor.stop()
 
 
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs refactoring to use NetQASM")
+#@pytest.mark.skip(reason="Uses deprecated internal APIs - needs updating to new API")
 class TestRemoteBtoA(TestBothRemoteSameNodeDiffReg):
     @staticmethod
     @inlineCallbacks
@@ -564,14 +622,14 @@ class TestRemoteBtoA(TestBothRemoteSameNodeDiffReg):
         classicalNet	servers in the classical communication network (dictionary of hosts)
         """
 
-        logging.debug("LOCAL %s: Runing client side program.", myName)
+        _logger.debug("LOCAL %s: Runing client side program.", myName)
 
         # Create qubit
         qA = yield virtRoot.callRemote("new_qubit_inreg", qReg)
 
         # Instruct the virtual node to transfer the qubit
         remoteNum = yield virtRoot.callRemote("send_qubit", qA, "Bob")
-        logging.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
+        _logger.debug("LOCAL %s: Remote qubit is %d.", myName, remoteNum)
 
         # Tell Bob the number of the virtual qubit so the can use it locally
         bob = classicalNet.hostDict["Bob"]

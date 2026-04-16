@@ -3,7 +3,9 @@ PIP            = pip3
 EXAMPLES_DIR   = examples
 SIMULAQRON_DIR = simulaqron
 TEST_DIR       = tests
-RESET_FILE     = ${SIMULAQRON_DIR}/toolbox/reset.py
+
+# IMPORTANT: For running in makefile, we need to use only 1 thread in OMP library
+export OMP_NUM_THREADS=1
 
 clean: _delete_pyc _delete_pid _clear_build _reset
 
@@ -17,32 +19,51 @@ lint:
 	@${PYTHON} -m flake8 ${SIMULAQRON_DIR} ${EXAMPLES_DIR} ${TEST_DIR}
 
 test-deps:
-	@${PYTHON} -m pip install -r test_requirements.txt
+	@${PYTHON} -m pip install .\[test\]
 
 requirements python-deps:
-	@cat requirements.txt | xargs -n 1 -L 1 $(PIP) install
+	@${PYTHON} -m pip install .
 
 install-optional: install
-	@cat optional-requirements.txt | xargs -n 1 -L 1 $(PIP) install
+	# Python setuptools 81 removed "dry_run" option when compiling C++ code
+	# this breaks the build of projectq
+	# As a hack, we install the bare minimum tools to build projectq, then
+	# we build and install it (ignoring any build requirement in the projectq
+	# package spec), and finally we install the rest of the optional requirements
+	@${PYTHON} -m pip install "setuptools<81" pybind11
+	@${PYTHON} -m pip install "git+https://github.com/ProjectQ-Framework/ProjectQ.git@v0.8.0" --no-build-isolation
+	@${PYTHON} -m pip install .\[opt\]
 
-_reset:
-	@${PYTHON} ${RESET_FILE}
+tests:
+	@${PYTHON} -m pytest -v ${TEST_DIR}/quick
 
-_tests:
-	@${PYTHON} -m pytest ${TEST_DIR}/quick
+tests_slow:
+	@${PYTHON} -m pytest -v ${TEST_DIR}/slow
 
-tests: _tests _reset
+tests_all:
+	@${PYTHON} -m pytest -v --capture=tee-sys ${TEST_DIR}
 
-_tests_all:
-	@${PYTHON} -m pytest ${TEST_DIR}
-
-tests_all: _tests_all _reset
+examples:
+	@echo "--- new-sdk examples ---"
+	@cd examples/new-sdk/corrRNG && timeout 90 bash run.sh
+	@cd examples/new-sdk/corrRNG && bash terminate.sh && sleep 3
+	@cd examples/new-sdk/extendGHZ && timeout 90 bash run.sh
+	@cd examples/new-sdk/extendGHZ && bash terminate.sh && sleep 3
+	@cd examples/new-sdk/teleport && timeout 90 bash run.sh
+	@cd examples/new-sdk/teleport && bash terminate.sh && sleep 3
+	@cd examples/new-sdk/midCircuitLogic && timeout 90 bash run.sh
+	@cd examples/new-sdk/midCircuitLogic && bash terminate.sh && sleep 3
+	@cd examples/native-mode/teleport && bash terminate.sh && sleep 3
+	@echo "Chosen examples passed."
 
 install: test-deps
 	@$(PYTHON) -m pip install -e . ${PIP_FLAGS}
 
 _verified:
 	@echo "SimulaQron is verified!"
+
+ci: lint tests tests_slow examples
+	@echo "All CI checks passed."
 
 verify: clean python-deps lint tests _verified
 
@@ -62,4 +83,4 @@ _build:
 
 build: _clear_build _build
 
-.PHONY: clean lint python-deps tests full_tests verify build
+.PHONY: clean lint python-deps tests tests_slow tests_all examples ci full_tests verify build

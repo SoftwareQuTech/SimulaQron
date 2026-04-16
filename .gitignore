@@ -1,6 +1,7 @@
 *.pyc
 .*.sw?
 *.DS_Store
+*.whl
 /docs/build/*
 /build/*
 /dist/*
@@ -9,6 +10,9 @@
 
 .idea/*
 .vscode/*
+.claude/*
 
 cqc/backend/logFile*
 examples/**/log/*
+
+*.out.txt

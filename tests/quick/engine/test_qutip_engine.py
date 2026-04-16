@@ -27,35 +27,24 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import unittest
+import pytest
 
-from simulaqron.toolbox import has_module
-from simulaqron.settings import SimBackend
+from importlib.util import find_spec
 
-if has_module.main(SimBackend.QUTIP.value):
-
-    from simulaqron.virtual_node.qutip_simulator import qutipEngine
-
-    _has_module = True
-
-else:
-
-    _has_module = False
+if find_spec("qutip") is not None:
+    from simulaqron.virtual_node.qutip_simulator import QutipEngine
+    
+enable_if_qutip = pytest.mark.skipif(
+    find_spec("qutip") is None,
+    reason="Qtip tests require the 'qutip' module"
+)
 
 
-def if_has_module(test):
-    def new_test(self):
-        if _has_module:
-            test(self)
-
-    return new_test
-
-
-class TestQutipEngine(unittest.TestCase):
-    @if_has_module
+class TestQutipEngine:
+    @enable_if_qutip
     def test_tracing(self):
-        se = qutipEngine("alice", 0, 10)
-        se2 = qutipEngine("Alice", 0, 10)
+        se = QutipEngine("alice", 0, 10)
+        se2 = QutipEngine("Alice", 0, 10)
 
         se.add_fresh_qubit()
         se.add_fresh_qubit()
@@ -73,11 +62,11 @@ class TestQutipEngine(unittest.TestCase):
         se.remove_qubit(1)
         se2.remove_qubit(2)
 
-        self.assertEqual(se.qubitReg, se2.qubitReg)
+        assert se.qubitReg == se2.qubitReg
 
-    @if_has_module
+    @enable_if_qutip
     def test_gates(self):
-        se = qutipEngine("alice", 0, 10)
+        se = QutipEngine("alice", 0, 10)
         se.add_fresh_qubit()
         savedQubit = se.qubitReg
 
@@ -86,22 +75,17 @@ class TestQutipEngine(unittest.TestCase):
         se.apply_H(0)
         se.apply_X(0)
 
-        self.assertEqual(savedQubit, se.qubitReg)
+        assert savedQubit == se.qubitReg
 
-    @if_has_module
+    @enable_if_qutip
     def test_measure(self):
-        se = qutipEngine("alice", 0)
+        se = QutipEngine("alice", 0)
 
         se.add_fresh_qubit()
         outcome = se.measure_qubit(0)
-        self.assertEqual(outcome, 0)
+        assert outcome == 0
 
         se.add_fresh_qubit()
         se.apply_X(0)
         outcome = se.measure_qubit(0)
-        self.assertEqual(outcome, 1)
-
-
-if __name__ == '__main__':
-    if _has_module:
-        unittest.main()
+        assert outcome == 1
