@@ -8,13 +8,16 @@ Found in ``examples/new-sdk/teleport/``.
 The protocol
 ------------
 
-1. Alice and Bob share an EPR pair (entangled qubits ``A`` and ``B``).
-2. Alice has a qubit ``q`` she wants to teleport to Bob.
-3. Alice applies ``CNOT(q, A)`` and then ``H(q)``.
-4. Alice measures both ``q`` and ``A``, obtaining bits ``a`` and ``b``.
-5. Alice sends ``a`` and ``b`` to Bob via a classical message.
-6. Bob applies correction gates: X if ``b = 1``, Z if ``a = 1``.
-7. Bob's qubit B is now in the same state as Alice's original qubit ``q``.
+#. Alice and Bob share an EPR pair (entangled qubits ``A`` and ``B``).
+
+.. math:: |\Phi^{+}\rangle = = \frac{1}{\sqrt{2}} \left(|0\rangle_A |0\rangle_B + |1\rangle_A |1\rangle_B\right)
+
+#. Alice has a qubit ``Q`` she wants to teleport to Bob.
+#. Alice applies ``CNOT(q, A)`` and then ``H(Q)``.
+#. Alice measures both ``Q`` and ``A``, obtaining bits ``q`` and ``a``.
+#. Alice sends ``q`` and ``a`` to Bob via a classical message.
+#. Bob applies correction gates: X if ``a = 1``, Z if ``q = 1``.
+#. Bob's qubit B is now in the same state as Alice's original qubit ``Q``.
 
 Alice's code
 ------------
@@ -26,30 +29,31 @@ circuit, and sends the correction bits to Bob::
         epr_socket = EPRSocket("Bob")
 
         # sim_conn is our connection to the quantum backend (SimulaQron), not to Bob.
+        # Bob is reached via EPRSocket for quantum and reader/writer for classical.
         sim_conn = NetQASMConnection("Alice", epr_sockets=[epr_socket])
 
         # Create a qubit to teleport
-        q = Qubit(sim_conn)
-        q.H()
+        Q = Qubit(sim_conn)
+        Q.H()
         # Create entanglement
-        epr = epr_socket.create_keep()[0]
+        A = epr_socket.create_keep()[0]
         # Teleport circuit: CNOT + H + measure both
-        q.cnot(epr)
-        q.H()
-        m1 = q.measure()
-        m2 = epr.measure()
+        Q.cnot(A)
+        Q.H()
+        q = Q.measure()
+        a = A.measure()
 
-        # flush() executes all queued quantum operations
+        # flush() executes all queued quantum operations and makes measurement
+        # results available.  Before flush(), q and a are just futures/promises.
         sim_conn.flush()
 
         # int(m) extracts the measurement outcome — only valid after flush().
-        m1_val = int(m1)
-        m2_val = int(m2)
+        q_val = int(q)
+        a_val = int(a)
         sim_conn.close()
-
-        # Send correction bits to Bob via classical channel
-        message = f"{m1_val}:{m2_val}"
+        message = f"{q_val}:{a_val}"  # noqa: E231
         writer.write(message.encode("utf-8"))
+        return q_val, a_val
 
 Bob's code
 ----------
@@ -57,24 +61,30 @@ Bob's code
 From ``bobTest.py`` — Bob waits for Alice's correction bits, then applies them::
 
     async def run_bob(reader: StreamReader, writer: StreamWriter):
-        # Wait for the classical correction message first
+        # We wait for the classical message first
         corrections_bytes = await reader.read(255)
         corrections = corrections_bytes.decode("utf-8").split(":")
-
+        (q_val, a_val) = corrections
         epr_socket = EPRSocket("Alice")
+
+        # sim_conn is our connection to the quantum backend (SimulaQron), not to Alice.
+        # Alice is reached via EPRSocket for quantum and reader/writer for classical.
         sim_conn = NetQASMConnection("Bob", epr_sockets=[epr_socket])
 
-        entangled_qubit = epr_socket.recv_keep()[0]
+        B = epr_socket.recv_keep()[0]
 
         # Apply teleportation corrections based on Alice's classical message
-        if int(corrections[1]) == 1:
-            entangled_qubit.X()
-        if int(corrections[0]) == 1:
-            entangled_qubit.Z()
-        meas = entangled_qubit.measure()
+        if int(a_val) == 1:
+            B.X()
+        if int(q_val) == 1:
+            B.Z()
+        meas = B.measure()
 
+        # flush() executes all queued quantum operations and makes measurement
+        # results available.  Before flush(), meas is just a future/promise.
         sim_conn.flush()
 
+        # int(m) extracts the measurement outcome — only valid after flush().
         meas_val = int(meas)
         sim_conn.close()
         print(f"Bob measurement: {meas_val}")

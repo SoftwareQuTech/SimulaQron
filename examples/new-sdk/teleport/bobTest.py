@@ -17,20 +17,21 @@ async def run_bob(reader: StreamReader, writer: StreamWriter):
     # We wait for the classical message first
     corrections_bytes = await reader.read(255)
     corrections = corrections_bytes.decode("utf-8").split(":")
+    (q_val, a_val) = corrections
     epr_socket = EPRSocket("Alice")
 
     # sim_conn is our connection to the quantum backend (SimulaQron), not to Alice.
     # Alice is reached via EPRSocket for quantum and reader/writer for classical.
     sim_conn = NetQASMConnection("Bob", epr_sockets=[epr_socket])
 
-    entangled_qubit = epr_socket.recv_keep()[0]
+    B = epr_socket.recv_keep()[0]
 
     # Apply teleportation corrections based on Alice's classical message
-    if int(corrections[1]) == 1:
-        entangled_qubit.X()
-    if int(corrections[0]) == 1:
-        entangled_qubit.Z()
-    meas = entangled_qubit.measure()
+    if int(a_val) == 1:
+        B.X()
+    if int(q_val) == 1:
+        B.Z()
+    meas = B.measure()
 
     # flush() executes all queued quantum operations and makes measurement
     # results available.  Before flush(), meas is just a future/promise.
