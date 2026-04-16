@@ -18,7 +18,8 @@ class SimulaQronClassicalClient:
         """
         self._sockets_config = sockets_config
 
-    async def connect_and_run(self, server_name: str, callback: Coroutine[Any, Any, _T]) -> _T:
+    async def connect_and_run(self, server_name: str, callback: Coroutine[Any, Any, _T],
+                              *args: Any, **kwargs: Any) -> _T:
         """
         "Async" version of the `run_client` method, which can be awaited in a context of a python coroutine.
         For more information check the documentation of the `run_client` method.
@@ -30,22 +31,27 @@ class SimulaQronClassicalClient:
                          implements the logic for interacting with the server. The passed function
                          *must* be a python "async" function.
         :type callback: Callable[[StreamReader, StreamWriter], Awaitable[None]]
+        :param args: Positional arguments you want to pass into the callback.
+        :type args: Any
+        :param kwargs: Keyword arguments you want to pass into the callback.
+        :type kwargs: Any
         """
         if server_name not in self._sockets_config.hostDict:
             raise RuntimeError(f"The node with name '{server_name}' is not on the network configuration.")
         socket_config = self._sockets_config.hostDict[server_name]
-        return await self._run_client(socket_config.hostname, socket_config.port, callback)
+        return await self._run_client(socket_config.hostname, socket_config.port, callback, *args, **kwargs)
 
-    async def _run_client(self, hostname: str, port: int, callback: Coroutine[Any, Any, _T]) -> _T:
+    async def _run_client(self, hostname: str, port: int,
+                          callback: Coroutine[Any, Any, _T], *args: Any, **kwargs: Any) -> _T:
         """
         Python coroutine that opens the connection and runs the function provided by the user.
         """
         reader, writer = await asyncio.open_connection(hostname, port)
-        result = await callback(reader, writer)
+        result = await callback(reader, writer, *args, **kwargs)
         writer.close()
         return result
 
-    def run_client(self, server_name: str, callback: Coroutine[Any, Any, _T]) -> _T:
+    def run_client(self, server_name: str, callback: Coroutine[Any, Any, _T], *args: Any, **kwargs: Any) -> _T:
         """
         Runs a function implementing a client that connects to the node with the given name.
         Once the connection has been established, the given callback will be executed to start
@@ -71,11 +77,15 @@ class SimulaQronClassicalClient:
                          implements the logic for interacting with the server. The passed function
                          *must* be a python "async" function.
         :type callback: Callable[[StreamReader, StreamWriter], Awaitable[None]]
+        :param args: Positional arguments you want to pass into the callback.
+        :type args: Any
+        :param kwargs: Keyword arguments you want to pass into the callback.
+        :type kwargs: Any
         """
         if server_name not in self._sockets_config.hostDict:
             raise RuntimeError(f"The node with name '{server_name}' is not on the network configuration.")
         socket_config = self._sockets_config.hostDict[server_name]
-        return asyncio.run(self._run_client(socket_config.hostname, socket_config.port, callback))
+        return asyncio.run(self._run_client(socket_config.hostname, socket_config.port, callback, *args, **kwargs))
 
 
 class SimulaQronClassicalServer:
