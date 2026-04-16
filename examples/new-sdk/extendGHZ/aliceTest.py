@@ -33,23 +33,28 @@ async def run_alice(reader: StreamReader, writer: StreamWriter) -> int:
     sim_conn = NetQASMConnection(this_node_name, epr_sockets=[epr_socket])
 
     # Create an entangled qubit with Bob
-    epr = epr_socket.create_keep()[0]
+    A = epr_socket.create_keep()[0]
+
+    # We need to flush the EPR pair creation, so the reciever does not timeout on the other side.
+    sim_conn.flush()
 
     writer.write("receive_qubit".encode("utf-8"))
     answer = await reader.read(100)
 
     assert answer.decode("utf-8") == "continue"
 
-    m1 = epr.measure()
+    a = A.measure()
 
     # flush() executes all queued quantum operations and makes measurement
-    # results available.  Before flush(), m1 is just a future/promise.
+    # results available.  Before flush(), a is just a future/promise.
     sim_conn.flush()
 
-    # int(m) extracts the measurement outcome — only valid after flush().
-    m1_val = int(m1)
+    # int(a) extracts the measurement outcome — only valid after flush().
+    a_val = int(a)
     sim_conn.close()
-    return m1_val
+
+    print(f"{node_name}: My outcome is '{a_val}'")
+    return 0
 
 
 if __name__ == "__main__":
@@ -88,6 +93,3 @@ if __name__ == "__main__":
     client = SimulaQronClassicalClient(classical_sockets)
 
     result = client.run_client(other_node_name, run_alice)
-    #result = run_alice(1, 0)
-
-    print(f"{node_name}: My outcome is '{result}'")

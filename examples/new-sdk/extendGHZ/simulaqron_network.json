@@ -22,13 +22,6 @@
                     "qnodeos_socket": ["localhost", 8842],
                     "vnode_socket": ["localhost", 8843]
                 }
-            },
-            {
-                "David": {
-                    "app_socket": ["localhost", 8871],
-                    "qnodeos_socket": ["localhost", 8872],
-                    "vnode_socket": ["localhost", 8873]
-                }
             }
         ],
         "topology": null

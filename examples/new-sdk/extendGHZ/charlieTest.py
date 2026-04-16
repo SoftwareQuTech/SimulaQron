@@ -26,6 +26,7 @@ async def run_charlie(reader: StreamReader, writer: StreamWriter) -> int:
     this_node_name = "Charlie"
     remote_node_name = "Bob"
     message = await reader.read(100)
+
     assert message.decode("utf-8") == "receive_qubit"
     epr_socket = EPRSocket(remote_node_name)
 
@@ -34,21 +35,39 @@ async def run_charlie(reader: StreamReader, writer: StreamWriter) -> int:
     sim_conn = NetQASMConnection(this_node_name, epr_sockets=[epr_socket])
 
     # Receive an entangled qubit
-    epr = epr_socket.recv_keep()[0]
+    C = epr_socket.recv_keep()[0]
 
-    writer.write("continue".encode("utf-8"))
-
-    # And simply measure it
-    m1 = epr.measure()
-
-    # flush() executes all queued quantum operations and makes measurement
-    # results available.  Before flush(), m1 is just a future/promise.
+    # We need to flush the EPR pair creation, so the reciever does not timeout on the other side.
     sim_conn.flush()
 
-    # int(m) extracts the measurement outcome — only valid after flush().
-    m1_val = int(m1)
+    # Signal Bob to send us the b_2 measurement
+    writer.write("continue".encode("utf-8"))
+
+    # Receive b_2 measurement from Bob
+    b_2_bytes: bytes = await reader.read(100)
+    b_2_val = int(b_2_bytes.decode("utf-8"))
+
+    # Perform an X correction depending on Bob's measurement
+    if b_2_val == 1:
+        C.X()
+
+    sim_conn.flush()
+
+    # At this point, we have achieved |GHZ>_{AB_1C}
+    # Tell Bob to continue
+    writer.write("continue".encode("utf-8"))
+
+    # We can measure the C qubit, part of the GHZ
+    c = C.measure()
+
+    # flush() executes all queued quantum operations and makes measurement
+    # results available.  Before flush(), c is just a future/promise.
+    sim_conn.flush()
+
+    # int(c) extracts the measurement outcome — only valid after flush().
+    c_val = int(c)
     sim_conn.close()
-    print(f"{this_node_name}: My outcome is '{m1_val}'")
+    print(f"{this_node_name}: My outcome is '{c_val}'")
     return 0
 
 

@@ -18,13 +18,37 @@ set_simulator("simulaqron")
 # setting the simulator for NetQASM
 from netqasm.logging.glob import set_log_level  # noqa: E402
 from netqasm.sdk.external import NetQASMConnection  # noqa: E402
-from netqasm.sdk import EPRSocket  # noqa: E402
+from netqasm.sdk import EPRSocket, Qubit  # noqa: E402
 
 
-async def send_to_charlie(reader: StreamReader, writer: StreamWriter):
+async def send_to_charlie(reader: StreamReader, writer: StreamWriter,
+                          sim_conn: NetQASMConnection, B_1: Qubit, B_2: Qubit) -> None:
+    # Tell Bob to receive the EPR half
     writer.write("receive_qubit".encode("utf-8"))
+
+    # Await for the green light from Charlie
     message = await reader.read(100)
     assert message.decode("utf-8") == "continue"
+
+    # Create the GHZ state by entangling the qubit entangled with Alice
+    B_1.cnot(B_2)
+
+    # We now measure the entagled qubit with Charlie
+    b_2 = B_2.measure()
+
+    # flush() executes all queued quantum operations and makes measurement
+    # results available.  Before flush(), b_2 is just a future/promise.
+    sim_conn.flush()
+
+    # int(b_2) extracts the measurement outcome — only valid after flush().
+    b_2_val = int(b_2)
+
+    # We send the measurement b_2 to Charlie, for corrections.
+    writer.write(f"{b_2_val}".encode("utf-8"))
+
+    # We wait for green light from Charlie, again
+    charlie_msg = await reader.read(100)
+    assert charlie_msg.decode("utf-8") == "continue"
 
 
 async def run_bob(reader: StreamReader, writer: StreamWriter) -> int:
@@ -49,29 +73,32 @@ async def run_bob(reader: StreamReader, writer: StreamWriter) -> int:
     sim_conn = NetQASMConnection(this_node_name, epr_sockets=[epr_socket_alice, epr_socket_charlie])
 
     # Receive an entangled qubit from Alice
-    epr_alice = epr_socket_alice.recv_keep()[0]
+    B_1 = epr_socket_alice.recv_keep()[0]
 
     # Create a new entangled pair with Charlie
-    epr_charlie = epr_socket_charlie.create_keep()[0]
+    B_2 = epr_socket_charlie.create_keep()[0]
 
-    await charlie_client.connect_and_run(end_node_name, send_to_charlie)
-
-    # Create the GHZ state by entangling the fresh qubit
-    epr_alice.cnot(epr_charlie)
-
-    writer.write("continue".encode("utf-8"))
-
-    # And simply measure it
-    m1 = epr_charlie.measure()
-
-    # flush() executes all queued quantum operations and makes measurement
-    # results available.  Before flush(), m1 is just a future/promise.
+    # We need to flush the EPR pair creation, so the reciever does not timeout on the other side.
     sim_conn.flush()
 
-    # int(m) extracts the measurement outcome — only valid after flush().
-    m1_val = int(m1)
+    # The next part of the protocol needs to be executed between Bob and Charlie.
+    # In this interaction, Bob acts as client
+    await charlie_client.connect_and_run(end_node_name, send_to_charlie, sim_conn, B_1, B_2)
+
+    # At this point, we have achieved |GHZ>_{AB_1C}
+    # Tell Alice to continue
+    writer.write("continue".encode("utf-8"))
+
+    # We can measure the B_1 qubit, part of the GHZ
+    b_1 = B_1.measure()
+
+    # flush() executes all queued quantum operations and makes measurement
+    # results available. Before flush(), c is just a future/promise.
+    sim_conn.flush()
+
+    b_1_val = int(b_1)
     sim_conn.close()
-    print(f"{this_node_name}: My outcome is '{m1_val}'")
+    print(f"{this_node_name}: My outcome is '{b_1_val}'")
     return 0
 
 
