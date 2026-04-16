@@ -23,19 +23,19 @@ def run_bob(this_node_name: str, remote_node_name: str) -> int:
     sim_conn = NetQASMConnection(this_node_name, epr_sockets=[epr_socket])
 
     # Receive an entangled qubit
-    epr = epr_socket.recv_keep()[0]
+    B = epr_socket.recv_keep()[0]
 
     # And simply measure it
-    m1 = epr.measure()
+    b = B.measure()
 
     # flush() executes all queued quantum operations and makes measurement
-    # results available.  Before flush(), m1 is just a future/promise.
+    # results available.  Before flush(), b is just a future/promise.
     sim_conn.flush()
 
     # int(m) extracts the measurement outcome — only valid after flush().
-    m1_val = int(m1)
+    b_val = int(b)
     sim_conn.close()
-    return m1_val
+    return b_val
 
 
 if __name__ == "__main__":

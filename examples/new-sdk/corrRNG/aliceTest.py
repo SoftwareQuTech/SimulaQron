@@ -23,19 +23,19 @@ def run_alice(this_node_name: str, remote_node_name: str) -> int:
     sim_conn = NetQASMConnection(this_node_name, epr_sockets=[epr_socket])
 
     # Create an entangled qubit
-    epr = epr_socket.create_keep()[0]
+    A = epr_socket.create_keep()[0]
 
     # And simply measure it
-    m1 = epr.measure()
+    a = A.measure()
 
     # flush() executes all queued quantum operations and makes measurement
-    # results available.  Before flush(), m1 is just a future/promise.
+    # results available.  Before flush(), a is just a future/promise.
     sim_conn.flush()
 
     # int(m) extracts the measurement outcome — only valid after flush().
-    m1_val = int(m1)
+    a_val = int(a)
     sim_conn.close()
-    return m1_val
+    return a_val
 
 
 if __name__ == "__main__":
