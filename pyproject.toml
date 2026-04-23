@@ -32,7 +32,6 @@ description = "A simulator for developing Quantum Internet software"
 readme = "README.md"
 keywords = ["egg", "bacon", "sausage", "tomatoes", "Lobster Thermidor"]
 classifiers = [
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",

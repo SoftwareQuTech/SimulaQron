@@ -1,4 +1,4 @@
-# SimulaQron - simple quantum network simulator (4.0.0)
+# SimulaQron - simple quantum network simulator (4.1.1)
 
 The purpose of this simulator of quantum network nodes is to allow you to develop new applications for
 a future quantum internet, while we do not yet have real quantum network nodes available for testing. 
@@ -23,7 +23,7 @@ Then you can install Python 3.12 and the Python development package:
 sudo apt-get install python3.12-full python3.12-dev
 ```
 
-Additionally, you will need the `build-essential` package, to install tools used when building some SimulaQron dependencies::
+Additionally, you will need the `build-essential` package, to install tools used when building some SimulaQron dependencies:
 
 ```shell
 sudo apt-get install build-essential cmake vim linux-headers-generic
@@ -38,6 +38,12 @@ make install
 Additionally, you can install SimulaQron with extra dependencies:
 ```shell
 make install-optional
+```
+
+
+Finally, if you would like to contribute to the development of SimulaQron, please install the development dependencies:
+```shell
+make install-development
 ```
 
 ### Windows

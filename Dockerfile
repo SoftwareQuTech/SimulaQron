@@ -52,19 +52,25 @@ RUN python3.12 -m venv simulaqron-venv
 ENV PATH="${UHOME}/simulaqron-venv/bin:$PATH"
 
 # Install SimulaQron
-# Option 1: Install from the wheel file
+# Option 1: Install from PyPI
+RUN pip install "simulaqron[opt]"
+
+# Option 2: Install from the wheel file - for testing purposes
+# Using this option requires that you build SimulaQron locally before you build the docker image.
+# Before building the docker image, make sure you have installed simulaqron "development" dependencies:
+# `make install-development`.
+# Then, you can build SimulaQron using the makefile: `make build`.
+
 # Copy the simulaqron wheel into the container
-COPY dist/*.whl ${UHOME}
-RUN pip install *.whl
-RUN rm *.whl
+#COPY dist/*.whl ${UHOME}
+#RUN pip install *.whl
+#RUN rm *.whl
 
-# Install extra packages that need build-essential
-RUN pip install "qutip<5.0.0"
-RUN pip install "setuptools<81" pybind11
-RUN pip install "git+https://github.com/ProjectQ-Framework/ProjectQ.git@v0.8.0" --no-build-isolation
+## Install extra packages that need build-essential
+#RUN pip install "qutip<5.0.0"
+#RUN pip install "setuptools<81" pybind11
+#RUN pip install "git+https://github.com/ProjectQ-Framework/ProjectQ.git@v0.8.0" --no-build-isolation
 
-# Option 2: (Recommended for release) Install from PyPI
-#RUN pip install "simulaqron[opt]>=4.0.1"
 
 FROM base-image AS run-image
 

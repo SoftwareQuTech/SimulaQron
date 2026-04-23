@@ -3,9 +3,16 @@ CHANGELOG
 
 For more details refer to the [documentation](https://softwarequtech.github.io/SimulaQron/html/index.html).
 
-Upcoming
---------
-2026-03-13 (v4.0.1)
+
+2026-04-23 (v4.1.1)
+-------------------
+- Update README file.
+- Added `install-development` target in the Makefile to ease the process of installing development dependencies.
+- Remove old "nativeMode" files after rename of the folder.
+- Adjusted Dockerfile to use the lates PyPI deployed version of SimulaQron.
+- Fixed GitHub workflow to automatically deploy documentation.
+
+2026-04-16 (v4.1)
 -------------------
 - Migrated project specification to use modern TOML approach.
 - Tested working with Python versions 3.10, 3.11 and 3.12.
@@ -19,7 +26,7 @@ Upcoming
 -------------------
 - Major breaking change! Using `cqc` is now deprecated and replaced with `netqasm`.
   `netqasm` improves on `cqc` on many levels, for more details.
-  As with `cqc`, `netqasm` also has a SDK in python for writing applications, which is very similar to the SDK for `cqc`.
+  As with `cqc`, `netqasm` also has an SDK in python for writing applications, which is very similar to the SDK for `cqc`.
   However, there are some differences, for details see [the netqasm repo](https://github.com/QuTech-Delft/netqasm) and [its documentation](https://netqasm.readthedocs.io/en/latest/).
 
 2020-08-24 (v3.0.16)

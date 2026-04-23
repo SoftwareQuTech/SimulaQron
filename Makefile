@@ -24,6 +24,11 @@ test-deps:
 requirements python-deps:
 	@${PYTHON} -m pip install .
 
+dev-deps:
+	@${PYTHON} -m pip install .\[dev\]
+
+install-development: dev-deps
+
 install-optional: install
 	# Python setuptools 81 removed "dry_run" option when compiling C++ code
 	# this breaks the build of projectq
@@ -79,7 +84,7 @@ _remove_egg_info:
 _clear_build: _remove_build _remove_dist _remove_egg_info
 
 _build:
-	@${PYTHON} setup.py sdist bdist_wheel
+	@${PYTHON} -m build --sdist --wheel --outdir dist/ .
 
 build: _clear_build _build
 
