@@ -88,7 +88,10 @@ async def run_alice(reader: StreamReader, writer: StreamWriter) -> None:
         if not data:
             print(f"Alice [{state}]: connection dropped unexpectedly.")
             break
-        msg = data.decode("utf-8")
+        # Since reader.readLine() reads until newline is found, and returns the string
+        # with the newline character, we need to get rid of it to correctly transition
+        # to the next stage of the state machine.
+        msg = data.decode("utf-8").replace("\n", "")
 
         handler = dispatch.get((state, msg))
 
