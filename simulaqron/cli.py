@@ -183,8 +183,8 @@ def start(network_name: str, nodes: str, simulaqron_config_file: Path, network_c
     """
     Starts a network with the given parameters or from config files.
 
-    :param name: Name of the network to start.
-    :type name: str
+    :param network_name: Name of the network to start.
+    :type network_name: str
     :param nodes: Comma separated list of nodes to start.
     :type nodes: str
     :param simulaqron_config_file: Path to simulaqron's config file.
@@ -242,12 +242,11 @@ def start(network_name: str, nodes: str, simulaqron_config_file: Path, network_c
                 )
     # Check that there is no other network with the same name running
     pidfile = PID_FOLDER / f"simulaqron_network_{network_name}.pid"
-    if pidfile.exists():
-        raise click.BadOptionUsage(
-            option_name="pidfile",
-            message=f"Network with name {network_name} is already running.\nThe pidfile for "
-                    f"this network is located at {pidfile}"  # noqa: E131
-        )
+    # if pidfile.exists():
+    #     raise click.ClickException(
+    #         message=f"Network with name {network_name} is already running.\nThe pidfile for "
+    #                 f"this network is located at {pidfile}"  # noqa: E131
+    #     )
 
     # Let's start the simulaqron daemon. We will pass the config file so it will be available
     # in the child process and load the same config

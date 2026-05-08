@@ -37,6 +37,7 @@ class TestStartStopNetwork:
         for p in network.processes:
             assert p.is_alive() is True
         network.stop()
+        time.sleep(2)
         for p in network.processes:
             assert p.is_alive() is False
 
