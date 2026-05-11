@@ -3,6 +3,14 @@ CHANGELOG
 
 For more details refer to the [documentation](https://softwarequtech.github.io/SimulaQron/html/index.html).
 
+2026-05-13 (v4.1.2)
+-------------------
+- Fix expected message exchange in event-based Ping-Pong examples.
+- Only start required Virtual Nodes processes when starting SimulaQron backend instead of starting all the
+  nodes defined in the network configuration.
+- macOS Support: use "pollreactor" in macOS platforms to correctly allow starting backend processes.
+- Avoid using port 8021, which is used by a system service in macOS platforms.
+
 
 2026-04-23 (v4.1.1)
 -------------------
