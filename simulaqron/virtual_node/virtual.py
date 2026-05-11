@@ -33,7 +33,7 @@ from typing import Tuple, List, Any
 
 import logging
 from twisted.internet.defer import inlineCallbacks, DeferredLock, Deferred, DeferredList
-from twisted.internet.error import ConnectionRefusedError, CannotListenError
+from twisted.internet.error import CannotListenError
 from twisted.internet.task import deferLater
 from twisted.spread import pb
 from twisted.spread.pb import RemoteError, RemoteReference
@@ -102,7 +102,7 @@ def call_method(obj, method_name, *args, **kwargs):
 # forming the quantum network
 #
 class Backend:
-    def __init__(self, name: str, network_name: str = "default"):
+    def __init__(self, name: str, nodes_running: List[str], network_name: str):
         """
         Create the Virtual Node backend. This will read the networks configuration and
         populate the name,hostname,port information with the information found in the
@@ -110,14 +110,21 @@ class Backend:
 
         :param name: Node name to start.
         :type name: str
-        :network_name: Name of the network to start.
+        :param nodes_running: List of nodes currently running.
+        :type nodes_running: List[str]
+        :param network_name: Name of the network to start.
         :type network_name: str
         """
         self._logger = logging.getLogger(f"{self.__class__.__name__}({name})")
 
         # Read the configuration file
         self.config = SocketsConfig(network_config, network_name=network_name, config_type="vnode")
+        # We only want to start connections to the nodes that are running, not to all
+        # of nodes that are defined in the network config
+        # To this end, we filter the loaded network config, so it contains only the running nodes
+        self.config.filter(nodes_running)
         self.myID: Host = self.config.hostDict[name]
+        self._logger.debug("myID: (name: %s) %s", name, str(self.myID))
 
     def start(
             self,
@@ -141,7 +148,7 @@ class Backend:
             self._logger.debug("Running reactor")
             reactor.run()
         except CannotListenError as exc:
-            self._logger.debug("NetQASM server address (%d) is already in use.", self.myID.port, exc_info=exc)
+            self._logger.debug("NetQASM server port (%d) is already in use.", self.myID.port, exc_info=exc)
             return
         except Exception as e:
             self._logger.debug("Critical error when starting local virtual node server", exc_info=e)

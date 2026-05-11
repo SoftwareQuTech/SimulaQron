@@ -32,7 +32,7 @@ import signal
 import sys
 from functools import partial
 from pathlib import Path
-
+from typing import List
 
 from simulaqron.reactor import reactor
 from simulaqron.virtual_node.virtual import Backend
@@ -52,7 +52,7 @@ def _sigterm_handler(name, _signo, _stack_frame):
     reactor.stop()
 
 
-def start_vnode(name: str, network_config_file: Path, network_name: str = "default", log_level: str = "WARNING"):
+def start_vnode(name: str, network_config_file: Path, network_name: str, nodes_running: List[str]):
     """
     Start the execution of a virtual simulaqron node. This node will simulate all quantum aspects
     of the node, and is then reachable via Twisted PB (Simulaqron Native Mode) or - when also starting QNPU - 
@@ -64,8 +64,8 @@ def start_vnode(name: str, network_config_file: Path, network_name: str = "defau
     :type network_config_file: Path
     :param network_name: Name of the network (e.g., 'default').
     :type network_name: str
-    :param log_level: Logging level (e.g., 'DEBUG', 'INFO', 'WARNING').
-    :type log_level: str
+    :param nodes_running: List of nodes running (e.g., ['Alice', 'Bob']).
+    :type nodes_running: List[str]
     """
 
     # Let's ensure we have read the config file. This relies on the right one being passed from network.py

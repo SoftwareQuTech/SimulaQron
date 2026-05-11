@@ -72,7 +72,8 @@ class Network:
         self._running = False
         self.name = network_name
 
-        self.processes: List[Process] = []
+        self._virtual_node_processes: List[Process] = []
+        self._qnodeos_processes: List[Process] = []
         self._logger = logging.getLogger(f"{self.__class__.__name__}({self.name})")
 
         # Determine the nodes to start, using the in-memory network config
@@ -114,6 +115,10 @@ class Network:
     def __del__(self):
         self.stop()
 
+    @property
+    def processes(self) -> List[Process]:
+        return self._qnodeos_processes + self._virtual_node_processes
+
     def _setup_processes(self):
         """
         Setup the processes forming the network, however they are not started yet.
@@ -125,15 +130,16 @@ class Network:
         for node in self._nodes_to_start:
             process_virtual = Process(
                 target=start_vnode, 
-                args=(node.name, self._network_config_file, self.name, simulaqron_settings.log_level),
+                args=(node.name, self._network_config_file, self.name, [node.name for node in self._nodes_to_start]),
                 name=f"VirtNode {node.name}"
             )
             process_qnodeos = Process(
                 target=start_qnodeos, 
-                args=(node.name, self._network_config_file, self.name, simulaqron_settings.log_level),
+                args=(node.name, self._network_config_file, self.name),
                 name=f"QnodeOSNode {node.name}"
             )
-            self.processes += [process_virtual, process_qnodeos]
+            self._virtual_node_processes.append(process_virtual)
+            self._qnodeos_processes.append(process_qnodeos)
 
     def start(self, wait_until_running=False):
         """
@@ -143,9 +149,17 @@ class Network:
         :param wait_until_running: bool
         """
         self._logger.info("Starting network with name %s", self.name)
-        for p in self.processes:
+        for p in self._virtual_node_processes:
             if not p.is_alive():
-                self._logger.debug("Starting process %s", p.name)
+                self._logger.debug("Starting Virtual Node process %s", p.name)
+                p.daemon = True
+                p.start()
+
+        time.sleep(1)
+
+        for p in self._qnodeos_processes:
+            if not p.is_alive():
+                self._logger.debug("Starting QNodeOS process %s", p.name)
                 p.daemon = True
                 p.start()
 
