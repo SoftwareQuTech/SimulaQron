@@ -30,7 +30,7 @@ def _init_register(virt_root, my_name: str, node: NetQASMFactory):
     _setup_netqasm_server(my_name, node)
 
 
-def _connect_to_virt_node(my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig):
+def _connect_to_virt_node(my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig, attempt: int = 0):
     """Tries to connect to local virtual node.
 
     If connection is refused, we try again after a set amount of time
@@ -49,11 +49,11 @@ def _connect_to_virt_node(my_name: str, netqasm_factory: NetQASMFactory, virtual
     defer_virtual_node.addCallback(_init_register, my_name, netqasm_factory)
     # If connection fails do:
     defer_virtual_node.addErrback(_handle_connection_error, my_name, netqasm_factory, virtual_network,
-                                  virtual_node.hostname, virtual_node.port)
+                                  virtual_node.hostname, virtual_node.port, attempt)
 
 
 def _handle_connection_error(reason, my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig,
-                             virtual_node_hostname: str, virtual_node_port: int):
+                             virtual_node_hostname: str, virtual_node_port: int, attempt: int):
     """ Handles errors from trying to connect to local virtual node.
 
     If a ConnectionRefusedError is raised another try will be made after
@@ -61,24 +61,26 @@ def _handle_connection_error(reason, my_name: str, netqasm_factory: NetQASMFacto
     """
     try:
         reason.raiseException()
-    except ConnectionRefusedError as err:
-        # TODO - Implement checking of max number of connections
-        logger.debug("START_QNODEOS %s: Could not connect to Virtual node (%s, %d), trying again...", my_name,
-                     virtual_node_hostname, virtual_node_port, exc_info=err)
-        reactor.callLater(
-            simulaqron_settings.conn_retry_time,
-            _connect_to_virt_node,
-            my_name,
-            netqasm_factory,
-            virtual_network,
-        )
-    except Exception as e:
-        logger.error(
-            "START_QNODEOS %s: Critical error when connection to local virtual node: %s",
-            my_name,
-            e,
-        )
-        reactor.stop()
+    except Exception as err:
+        if attempt > simulaqron_settings.conn_max_retries:
+            logger.exception(
+                "START_QNODEOS %s: Exhausted the maximum number of attempts to connect to local virtual node",
+                my_name,
+                exc_info=err,
+            )
+            reactor.stop()
+            return
+        else:
+            logger.debug("START_QNODEOS %s: Could not connect to Virtual node (%s, %d), trying again...", my_name,
+                         virtual_node_hostname, virtual_node_port, exc_info=err)
+            reactor.callLater(
+                simulaqron_settings.conn_retry_time,
+                _connect_to_virt_node,
+                my_name,
+                netqasm_factory,
+                virtual_network,
+                attempt + 1
+            )
 
 
 def _setup_netqasm_server(my_name: str, netqasm_factory: NetQASMFactory):
@@ -120,7 +122,7 @@ def _sigterm_handler(_signo, _stack_frame):
     reactor.stop()
 
 
-def start_qnodeos(node_name: str, network_config_file: Path, network_name: str = "default", log_level: str = "WARNING"):
+def start_qnodeos(node_name: str, network_config_file: Path, network_name: str):
     """
     Start the QNPU that accepts NetQASM subroutines, and sends them as instructions to the SimulaQron virtual node
     backend over twisted PB (Native Mode SimulaQron).
@@ -131,8 +133,6 @@ def start_qnodeos(node_name: str, network_config_file: Path, network_name: str =
     :type network_config_file: Path
     :param network_name: Name of the network (e.g., 'default').
     :type network_name: str
-    :param log_level: Logging level (e.g., 'DEBUG', 'INFO', 'WARNING').
-    :type log_level: str
     """
 
     # Let's ensure we read the config file

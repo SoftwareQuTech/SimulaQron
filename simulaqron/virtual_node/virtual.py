@@ -176,6 +176,7 @@ class VirtualNode(pb.Root):
         :type maxRegisters: int
         """
         self._logger = logging.getLogger(f"{self.__class__.__name__}({ID.name})")
+        self._attempt = 0
 
         # Store our own host identifiers and configuration
         self.myID = ID
@@ -203,7 +204,7 @@ class VirtualNode(pb.Root):
         self.virtQubits = []
         self.simQubits = []
 
-        # Set up connections to the neighouring nodes in the network
+        # Set up connections to the (Virtual Nodes processes) neighbouring nodes in the network
         self.connectNet()
 
         # Global lock: needs to be acquire whenever we want to manipulate more than one
@@ -293,7 +294,7 @@ class VirtualNode(pb.Root):
         # Add this node to the local connections
         self.conn[node.name] = node
 
-    def handle_connection_error(self, reason, node):
+    def handle_connection_error(self, reason, node: Host):
         """
         Handles errors from trying to connect to other node.
         If a ConnectionRefusedError is raised another try will be made after `conn_retry_time`` seconds
@@ -303,13 +304,20 @@ class VirtualNode(pb.Root):
 
         try:
             reason.raiseException()
-        except ConnectionRefusedError as err:
-            self._logger.debug("Could not connect to %s (%s, %d), trying again...",
-                               node.name, node.hostname, node.port, exc_info=err)
-            reactor.callLater(simulaqron_settings.conn_retry_time, self.connect_to_node, node)
-        except Exception as e:
-            self._logger.exception(e)
-            reactor.stop()
+        except Exception as err:
+            if self._attempt > simulaqron_settings.conn_max_retries:
+                self._logger.exception(
+                    "Exhausted the maximum number of attempts to connect to neighbour virtual node '%s'",
+                    node.hostname,
+                    exc_info=err
+                )
+                reactor.stop()
+            else:
+                self._logger.debug("Could not connect to %s (%s, %d), trying again...",
+                                   node.name, node.hostname, node.port, exc_info=err)
+                self._attempt = self._attempt + 1
+                reactor.callLater(simulaqron_settings.conn_retry_time, self.connect_to_node, node)
+
 
     def _get_virtual_id(self):
         """

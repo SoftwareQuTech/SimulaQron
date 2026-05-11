@@ -94,7 +94,7 @@ def start_vnode(name: str, network_config_file: Path, network_name: str, nodes_r
     logger.debug("START_VNODE: Starting VIRTUAL NODE %s", name)
 
     # Start the backend with the parameters configured in the simulaqron log file
-    be = Backend(name, network_name=network_name)
+    be = Backend(name, nodes_running, network_name=network_name)
     be.start(max_qubits=simulaqron_settings.max_qubits, max_registers=simulaqron_settings.max_registers)
 
     # Print a message we have terminated the node.

@@ -10,6 +10,8 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
   nodes defined in the network configuration.
 - macOS Support: use "pollreactor" in macOS platforms to correctly allow starting backend processes.
 - Avoid using port 8021, which is used by a system service in macOS platforms.
+- Starting the SimulaQron backend now respects the "conn_max_retries" configuration when backend processes
+  try to connect to each other.
 
 
 2026-04-23 (v4.1.1)
