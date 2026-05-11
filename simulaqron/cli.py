@@ -25,6 +25,17 @@ if not PID_FOLDER.exists():
     Path.mkdir(PID_FOLDER)
 
 
+# The following two classes (SimulaQronDaemon and RunningSimulaQronDaemon) are 2 classes that
+# implement the simulaqron daemon process.
+# The former class models a daemon process used to launch the backend processes
+# (1 Vnode and 1 QNodeOS process per node starting), and then it simply goes to sleep.
+# The latter class is used when invoking "simulaqron stop" to "reattach" to the launching
+# daemon process, and kill all the backend processes.
+# Both of the mentioned classes rely on the python "daemons" package, **which is designed
+# to run on Unix platforms** (Linux/macOS). Implementing a similar behavior in Windows
+# will require a heavy reimplementation of these 2 classes.
+
+
 class RunningSimulaQronDaemon(run.RunDaemon):
     """
     SimulaQronDaemon class used to represent SimulaQron daemons that are already running.

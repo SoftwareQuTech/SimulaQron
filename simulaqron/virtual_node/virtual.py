@@ -318,7 +318,6 @@ class VirtualNode(pb.Root):
                 self._attempt = self._attempt + 1
                 reactor.callLater(simulaqron_settings.conn_retry_time, self.connect_to_node, node)
 
-
     def _get_virtual_id(self):
         """
         This is a crude and horrible cludge to generate unique IDs for virtual qubits.

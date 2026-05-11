@@ -24,13 +24,11 @@ Then you can install Python 3.12 and the Python development package:
 ```shell
 sudo apt-get install python3.12-full python3.12-dev
 ```
-
 Additionally, you will need the `build-essential` package, to install tools used when building some SimulaQron dependencies:
 
 ```shell
 sudo apt-get install build-essential cmake vim linux-headers-generic
 ```
-
 After this point, you should have all the required dependencies.
 
 
@@ -64,12 +62,10 @@ by using the Makefile:
 ```shell
 make install
 ```
-
 Additionally, you can install SimulaQron with extra dependencies:
 ```shell
 make install-optional
 ```
-
 
 Finally, if you would like to contribute to the development of SimulaQron, please install the development dependencies:
 ```shell
@@ -94,7 +90,7 @@ In Windows, SimulaQron can be installed in two similar ways:
 
 #### Native installation
 
-SimulaQron has also been tested working on macOS Tahoe (26.5) on an M3 pro CPU.
+SimulaQron has also been tested working on macOS Tahoe (26.5) on an M3 Pro CPU.
 
 Before proceeding with the SimulaQron install, you need to install python 3.12, which is available from the
 [Homebrew package manager](https://brew.sh/). Once that homebrew has been installed, you can install Python
@@ -104,8 +100,15 @@ Before proceeding with the SimulaQron install, you need to install python 3.12, 
 brew install python@3.12
 ```
 
-After this, you can follow the instructions to install SimulaQron either [from PyPI](#installing-from-pypi)
-or directly [from this repository](#installing-from-this-repository).
+Additionally, to install the optional dependencies, you will need to install *XCode COmmand Line Tools*. To do
+so, run the following command in a terminal:
+
+```shell
+xcode-select --install
+```
+
+And follow the instructions on the screen. After this, you can follow the instructions to install SimulaQron
+either [from PyPI](#installing-from-pypi) or directly [from this repository](#installing-from-this-repository).
 
 
 #### Using the provided virtual machines

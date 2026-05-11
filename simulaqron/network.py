@@ -28,18 +28,24 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import random
+import sys
 import time
 from timeit import default_timer as timer
 from typing import List, Dict
 
 import networkx as nx
-from multiprocess.context import ForkProcess as Process
+
+if sys.platform == "win32":
+    # Windows does not support "fork", so new processes need to be created with
+    # the spawn method.
+    from multiprocess.context import SpawnProcess as Process
+else:
+    from multiprocess.context import ForkProcess as Process
 import logging
 from pathlib import Path
 
 from simulaqron.settings import network_config
 from simulaqron.settings.network_config import NodeConfig
-from simulaqron.settings import simulaqron_settings
 from simulaqron.start import start_vnode, start_qnodeos
 # WARNING - this import *needs* to be after importing start_vnode and start_qnodeos
 # Otherwise the code that patches some netqasm internal definitions will not work correctly!

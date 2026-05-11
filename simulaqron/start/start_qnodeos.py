@@ -5,7 +5,7 @@ import time
 from timeit import default_timer as timer
 
 import logging
-from twisted.internet.error import ConnectionRefusedError, CannotListenError
+from twisted.internet.error import CannotListenError
 from twisted.spread import pb
 from pathlib import Path
 
@@ -30,7 +30,7 @@ def _init_register(virt_root, my_name: str, node: NetQASMFactory):
     _setup_netqasm_server(my_name, node)
 
 
-def _connect_to_virt_node(my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig, attempt: int = 0):
+def _connect_to_virt_node(my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig, attempt: int):
     """Tries to connect to local virtual node.
 
     If connection is refused, we try again after a set amount of time
@@ -178,7 +178,7 @@ def start_qnodeos(node_name: str, network_config_file: Path, network_name: str):
 
     # Connect to the local virtual node simulating the "local" qubits
     logger.debug(f"START_QNODEOS: Connect to virtual node {node_name}")
-    _connect_to_virt_node(node_name, netqasm_factory, virtual_network)
+    _connect_to_virt_node(node_name, netqasm_factory, virtual_network, 0)
 
     # Run reactor
     reactor.run()
