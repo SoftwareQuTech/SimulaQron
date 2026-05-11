@@ -1,18 +1,22 @@
 import sys
 
-if sys.platform == "darwin":
+if sys.platform == "linux":
+    # "pollreactor" performs better than "asyncioreactor", but at the cost of
+    # not having interoperability with python's asyncio library.
+    # This is fine, since the backend of SimulaQron (the part using twisted
+    # library) does not make use of python asyncio functions.
+    # Since the written applications (which do use asyncio) will run in separate
+    # (heavy) processes, this change in the backend does not conflict with the
+    # writing of SimulaQron applications.
     from twisted.internet import pollreactor
 
     pollreactor.install()
 
-if sys.platform == "linux":
-    # TODO - Find out which is the right twisted reactor for Linux
-    #  Currently "asyncioreactor" works, and allow interoperability with asyncio primitives.
-    #  However, this reactor is slow, and asyncio support is not needed on the background
-    #  processes that run the simulaqron backend.
-    from twisted.internet import asyncioreactor
+if sys.platform == "darwin":
+    # On macOS platforms, "pollreactor" enable to run SimulaQron without any problems.
+    from twisted.internet import pollreactor
 
-    asyncioreactor.install()
+    pollreactor.install()
 
 if sys.platform == "win32":
     # TODO - Find out which is the right twisted reactor for Win
