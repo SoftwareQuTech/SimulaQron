@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Optional, List
 
 import click
-from daemons.interfaces import exit
-from daemons.prefab import run
+from daemons.interfaces import exit  # type: ignore[import-untyped]
+from daemons.prefab import run  # type: ignore[import-untyped]
 
 from simulaqron.network import Network
 from simulaqron.settings import LOCAL_SIMULAQRON_SETTINGS, LOCAL_NETWORK_SETTINGS, HOME_NETWORK_SETTINGS
@@ -137,6 +137,15 @@ def _create_local_networks_if_needed_and_load():
     _load_local_network_or_default()
 
 
+def _confirm_action(prompt: str, force: bool) -> bool:
+    if force:
+        return True
+    answer = input(prompt)
+    if answer.lower() in ["yes", "y"]:
+        return True
+    return False
+
+
 @click.group(
     context_settings=CONTEXT_SETTINGS,
     epilog="Run 'simulaqron COMMAND --help' for more information on a command."
@@ -233,15 +242,15 @@ def start(network_name: str, nodes: str, simulaqron_config_file: Path, network_c
     if len(nodes) <= 0:
         click.echo(f"No nodes specified to start. Starting all nodes configured in '{network_config_file}'.")
         start_all = True
-        nodes = []
+        parsed_nodes = []
     else:
-        nodes = nodes.split(",")
+        parsed_nodes = nodes.split(",")
 
     if start_all:
         for node_to_start in network_config.networks[network_name].nodes:
-            nodes.append(node_to_start)
+            parsed_nodes.append(node_to_start)
     else:
-        for node_to_start in nodes:
+        for node_to_start in parsed_nodes:
             if node_to_start not in network_config.networks[network_name].nodes:
                 raise click.BadOptionUsage(
                     option_name="nodes",
@@ -261,7 +270,12 @@ def start(network_name: str, nodes: str, simulaqron_config_file: Path, network_c
 
     # Let's start the simulaqron daemon. We will pass the config file so it will be available
     # in the child process and load the same config
-    d = SimulaQronDaemon(pidfile=pidfile, name=network_name, nodes=nodes, network_config_file=network_config_file)
+    d = SimulaQronDaemon(
+        pidfile=pidfile,
+        name=network_name,
+        nodes=parsed_nodes,
+        network_config_file=network_config_file
+    )
     try:
         d.start()
     except SystemExit as e:
@@ -311,26 +325,37 @@ def stop(name: str):
     help="Don't ask for confirmation.",
     is_flag=True,
 )
-def reset(force: bool):
+@click.option(
+    "-s",
+    "--settings",
+    help="Also reset the SimulaQron settings to their default.",
+    is_flag=True,
+)
+def reset(force: bool, settings: bool):
     """
-    Resets simulaqron. This command will stop any running network and reset the local SimulaQron
-    settings to their default.
+    Resets simulaqron. This command will stop any running network and *optionally* reset the
+    local SimulaQron settings to their default.
     :param force: Don't ask for confirmation, and immediately reset the simulaqron settings.
+    :type force: bool
+    :param settings: Also reset the SimulaQron settings to their default.
+    :type settings: bool
     """
-    if not force:
-        answer = input("Are you sure you want to reset simulaqron?\nThis will revert local settings and "
-                       "network config files to the default values.\nNote, this action will remove "
-                       f"the file at {LOCAL_SIMULAQRON_SETTINGS} and {LOCAL_NETWORK_SETTINGS} if they exist.\n"
-                       "(yes/no)")
-    else:
-        answer = "yes"
-    if answer.lower() in ["yes", "y"]:
+    stop_prompt = "Are you sure you want to stop the simulaqron backend?\n(yes/no)"
+    if _confirm_action(stop_prompt, force):
         for entry in PID_FOLDER.iterdir():
             if entry.suffix == ".pid":
                 d = RunningSimulaQronDaemon(pidfile=entry)
                 d.stop()
                 if entry.exists():
                     entry.unlink()
+    else:
+        raise click.ClickException("SimulaQron backend stop aborted!")
+
+    settings_prompt = ("Are you sure you want to reset simulaqron settings?\nThis will revert local "
+                       "settings and network config files to the default values.\nNote, this action "
+                       f"will remove the file at {LOCAL_SIMULAQRON_SETTINGS} and {LOCAL_NETWORK_SETTINGS} "
+                       "if they exist.\n(yes/no)")
+    if settings and _confirm_action(settings_prompt, force):
         simulaqron_settings.default_settings()
         if LOCAL_NETWORK_SETTINGS.exists():
             simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
@@ -339,7 +364,7 @@ def reset(force: bool):
         if LOCAL_NETWORK_SETTINGS.exists():
             network_config.write_to_file(LOCAL_NETWORK_SETTINGS)
     else:
-        raise click.ClickException("Aborting!")
+        raise click.ClickException("Settings reset aborted!")
 
 
 ###############
@@ -460,7 +485,7 @@ def recv_timeout(value: float):
     :param value: Value of the recv_timeout.
     """
     _create_local_settings_if_needed_and_load()
-    simulaqron_settings.recv_timeout = value
+    simulaqron_settings.recv_timeout = int(value)
     simulaqron_settings.write_to_file(LOCAL_SIMULAQRON_SETTINGS)
     click.echo(f"Configuration saved to file: '{LOCAL_SIMULAQRON_SETTINGS}'")
 

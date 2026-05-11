@@ -30,7 +30,7 @@ maintainers = [
 ]
 description = "A simulator for developing Quantum Internet software"
 readme = "README.md"
-keywords = ["egg", "bacon", "sausage", "tomatoes", "Lobster Thermidor"]
+keywords = ["simulaqron", "quantum simulator", "quantum application", "qubit", "tudelft"]
 classifiers = [
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
@@ -40,16 +40,14 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-test = [
-    "flake8>=5.0.0,<6.0.0",
-    "pytest>=7.1, <8.0",
-    "qutip<5.0.0"
-]
 opt = [
     "projectq<=0.8.0",
     "qutip<5.0.0"
 ]
 dev = [
+    "flake8>=5.0.0,<6.0.0",
+    "pytest>=7.1, <8.0",
+    "qutip<5.0.0",
     "sphinx>=7.2.6, <8.0",
     "sphinx-rtd-theme",
     "build",
@@ -69,3 +67,6 @@ simulaqron = "simulaqron.cli:cli_entry_point"
 
 [project.urls]
 Homepage = "https://github.com/SoftwareQuTech/SimulaQron"
+Documentation = "https://softwarequtech.github.io/SimulaQron/index.html"
+Changelog = "https://github.com/SoftwareQuTech/SimulaQron/blob/master/CHANGELOG.md"
+Repository = "https://github.com/SoftwareQuTech/SimulaQron"
