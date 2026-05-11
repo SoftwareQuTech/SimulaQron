@@ -1,8 +1,11 @@
 import importlib.metadata as metadata
 import logging
-import time
+import os
+import signal
 import sys
+import time
 from pathlib import Path
+from psutil import Process
 from typing import Optional, List
 
 import click
@@ -10,6 +13,7 @@ from daemons.interfaces import exit  # type: ignore[import-untyped]
 from daemons.prefab import run  # type: ignore[import-untyped]
 
 from simulaqron.network import Network
+from simulaqron.toolbox.cliutil import find_processes_by_cmdline
 from simulaqron.settings import LOCAL_SIMULAQRON_SETTINGS, LOCAL_NETWORK_SETTINGS, HOME_NETWORK_SETTINGS
 from simulaqron.settings import simulaqron_settings, network_config
 from simulaqron.settings.network_config import (NodeConfig, DEFAULT_SIMULAQRON_NETWORK_FILENAME,
@@ -140,7 +144,7 @@ def _create_local_networks_if_needed_and_load():
 def _confirm_action(prompt: str, force: bool) -> bool:
     if force:
         return True
-    answer = input(prompt)
+    answer = input(prompt + " ")
     if answer.lower() in ["yes", "y"]:
         return True
     return False
@@ -322,35 +326,78 @@ def stop(name: str):
 @click.option(
     "-f",
     "--force",
-    help="Don't ask for confirmation.",
+    help="Don't ask for any confirmation.",
     is_flag=True,
+)
+@click.option(
+    "-p",
+    "--processes",
+    help="Forcefully terminate any SimulaQron backend-related processes.\nWARNING: This "
+         "potentially leaves the system in a state where SimulaQron thinks that the "
+         "backend is running, but the processes are not running anymore. This is due to "
+         f"the fact that the associated PID is still in the {PID_FOLDER} folder. In this"
+         "state, subsequent invocations of `simulaqron start` will fail with the \"network"
+         " is already running\". error. Use the `-d` option of this command to also delete "
+         "the corresponding .pid files.",
+    is_flag=True,
+    default=False,
+)
+@click.option(
+    "-d",
+    "--pidfiles",
+    help=f"Deletes any .pid files in {PID_FOLDER} representing a running network backend.\n"
+         "WARNING: This potentially leaves the system in a state where SimulaQron thinks "  # noqa: E131
+         "that the backend is not running, but the ports are taken by running processes."
+         "In this state, subsequent invocations of `simulaqron start` will fail with the "
+         "\"cannot bind address\" error. Use the `-p` option of this command to also "
+         "forcefully kill those processes.",
+    is_flag=True,
+    default=False,
 )
 @click.option(
     "-s",
     "--settings",
-    help="Also reset the SimulaQron settings to their default.",
+    help="Reset the SimulaQron settings to their default. Using this option affects both "
+         f"{LOCAL_SIMULAQRON_SETTINGS} *and* {LOCAL_NETWORK_SETTINGS} files.",
     is_flag=True,
+    default=False,
 )
-def reset(force: bool, settings: bool):
+def reset(force: bool, processes: bool, pidfiles: bool, settings: bool):
     """
-    Resets simulaqron. This command will stop any running network and *optionally* reset the
-    local SimulaQron settings to their default.
-    :param force: Don't ask for confirmation, and immediately reset the simulaqron settings.
+    Resets simulaqron. This command can be used to reset SimulaQron in several levels,
+    depending on the options used.
+
+    :param force: Don't ask for any confirmation when resetting.
     :type force: bool
-    :param settings: Also reset the SimulaQron settings to their default.
+    :param processes: Whether to forcefully kill any simulaqron *backend* process.
+    :type processes: bool
+    :param pidfiles: Whether to delete the PID files in ~/.simulaqron_pids/ folder.
+    :type pidfiles: bool
+    :param settings: Whether to reset the *local* SimulaQron settings and network configuration
+                     to their default.
     :type settings: bool
     """
-    stop_prompt = "Are you sure you want to stop the simulaqron backend?\n(yes/no)"
-    if _confirm_action(stop_prompt, force):
-        for entry in PID_FOLDER.iterdir():
-            if entry.suffix == ".pid":
-                d = RunningSimulaQronDaemon(pidfile=entry)
-                d.stop()
-                if entry.exists():
-                    entry.unlink()
-    else:
-        raise click.ClickException("SimulaQron backend stop aborted!")
+    # Find processes related with "simulaqron" and kill them
+    processes_prompt = "Are you sure you want to forcefully stop all the `simulaqron` processes?\n(yes/no)"
+    if processes and _confirm_action(processes_prompt, force):
+        simulaqron_processes: List[Process] = find_processes_by_cmdline("simulaqron")
+        for proc in simulaqron_processes:
+            if "reset" in proc.cmdline() and "-p" in proc.cmdline():
+                continue
+            logging.warning(
+                "Sending SIGKILL to PID = %d, cmd = %s",
+                proc.pid, str(proc.cmdline())
+            )
+            os.kill(proc.pid, signal.SIGKILL)
 
+    # Delete all the -pid files in the PID_FOLDER folder
+    pid_files_prompt = f"Are you sure you want to delete the .pid files in {PID_FOLDER}?\n(yes/no)"
+    if pidfiles and _confirm_action(pid_files_prompt, force):
+        for entry in PID_FOLDER.iterdir():
+            if entry.exists() and entry.suffix == ".pid":
+                entry.unlink()
+
+    # Reset the *local* network and simulaqron settings
     settings_prompt = ("Are you sure you want to reset simulaqron settings?\nThis will revert local "
                        "settings and network config files to the default values.\nNote, this action "
                        f"will remove the file at {LOCAL_SIMULAQRON_SETTINGS} and {LOCAL_NETWORK_SETTINGS} "
@@ -363,8 +410,6 @@ def reset(force: bool, settings: bool):
         network_config.using_default_network()
         if LOCAL_NETWORK_SETTINGS.exists():
             network_config.write_to_file(LOCAL_NETWORK_SETTINGS)
-    else:
-        raise click.ClickException("Settings reset aborted!")
 
 
 ###############
