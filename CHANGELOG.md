@@ -13,8 +13,9 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
 - Avoid using port 8021, which is used by a system service in macOS platforms.
 - Starting the SimulaQron backend now respects the "conn_max_retries" configuration when backend processes
   try to connect to each other.
-- CLI tool `simulaqron reset` no longer resets the SimulaQron settings by default; use the `-s` option to
-  do so.
+- CLI tool `simulaqron reset` no longer resets the SimulaQron settings by default. It is now separated into
+  several subcommands that can reset simulaqron settings, delete PID files and kill simulaqron backend
+  processes. run `simulaqron reset -h` for more info.
 
 
 2026-04-23 (v4.1.1)
