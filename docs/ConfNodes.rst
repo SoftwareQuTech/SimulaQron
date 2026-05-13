@@ -30,9 +30,18 @@ To stop the backend::
 
     simulaqron stop
 
-If something went wrong (e.g. the process was killed) and SimulaQron thinks the network is still running::
+If something went wrong (e.g. the process was killed) and SimulaQron thinks the network is still running, you
+can run::
 
-    simulaqron reset
+    simulaqron reset pidfiles
+
+to delete all the PID files in ``~/.simulaqron_pids/`` folder. Additionally, if you want to terminate any potential
+processed spawned by the backend, you can run::
+
+    simulaqron reset processes
+
+Each one of these commands should be used as a last resource for resetting SimulaQron backend. Please carefully read
+the help of each one of the commands: ``simulaqron reset pidfiles -h`` and ``simulaqron reset processes -h``
 
 The ``simulaqron start`` command accepts these arguments:
 

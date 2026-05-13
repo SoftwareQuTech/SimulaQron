@@ -88,11 +88,15 @@ To stop the backend, simply type::
     simulaqron stop
 
 If something went wrong (for example the process was killed before you stopped it) there might be leftover files which
-makes SimulaQron think that the network is still running. To reset this you can type::
+makes SimulaQron think that the network is still running. To delete those file this you can run::
 
-    simulaqron reset
+    simulaqron reset pidfiles
 
-Note that this also kills any currently running network and resets any local settings or configurations.
+Additionally, if you want to stop any process that might still be running from older executions, you can run::
+
+    simulaqron reset processes
+
+Please carefully read the help for both command (by adding ``-h`` at the end of the commands above) before running them.
 
 ^^^^^^^^^^^^^^^^^^^
 Running a protocol
