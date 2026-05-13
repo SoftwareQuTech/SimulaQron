@@ -41,6 +41,7 @@ Let us here briefly sketch how the SimulaQron backend works internally. Further 
 
 The simulator consists of two parts and has a relatively modular design:
 
+.. _VNodes:
 
 ^^^^^^^^^^^^^^^^^^^^^
 Virtual quantum nodes

@@ -86,7 +86,8 @@ Where to go next
 * **Want to write programs?** See :doc:`The NetQASM Interface <NetQASM>` for the NetQASM SDK reference
 * **Looking for examples?** See :doc:`Examples <Examples>` — new SDK, event-based, and native-mode examples
 * **Configuring networks and settings?** See :ref:`Configuring the Network <networkConfig>` and :ref:`Settings <settings>`.
-* **Architecture and internals?** See :doc:`Overview <Overview>`
+* **Architecture and internals?** See :doc:`Overview <Overview>` and :doc:`Apps Architecture and Interactions <AppsArch>`
+* **Having issues when running SimulaQron?** See :doc:`Troubleshooting <Troubleshooting>`
 
 We also have a `paper <http://iopscience.iop.org/article/10.1088/2058-9565/aad56e>`_ describing the design of
 SimulaQron, freely available on `arxiv <https://arxiv.org/abs/1712.08032>`_.
@@ -100,6 +101,7 @@ SimulaQron, freely available on `arxiv <https://arxiv.org/abs/1712.08032>`_.
    Examples
    ConfNodes
    Overview
+   AppsArch
    simulaqron
 
 
