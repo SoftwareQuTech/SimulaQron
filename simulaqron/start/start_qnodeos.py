@@ -9,6 +9,7 @@ from twisted.internet.error import CannotListenError
 from twisted.spread import pb
 from pathlib import Path
 
+from simulaqron.general.constants import SIMULAQRON_LOGS_FOLDER
 from simulaqron.reactor import reactor
 from simulaqron.netqasm_backend.factory import NetQASMFactory
 from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
@@ -112,13 +113,13 @@ def _setup_netqasm_server(my_name: str, netqasm_factory: NetQASMFactory):
         reactor.stop()
 
 
-stdout_file = None
+log_file = None
 
 
 def _sigterm_handler(_signo, _stack_frame):
-    if stdout_file is not None:
-        stdout_file.flush()
-        stdout_file.close()
+    if log_file is not None:
+        log_file.flush()
+        log_file.close()
     reactor.stop()
 
 
@@ -135,21 +136,21 @@ def start_qnodeos(node_name: str, network_config_file: Path, network_name: str):
     :type network_name: str
     """
 
+    global log_file
     # Let's ensure we read the config file
     network_config.read_from_file(network_config_file)
 
-    if simulaqron_settings.log_level == logging.DEBUG:
-        global stdout_file
-        stdout_file = open(f"/tmp/simulaqron-stdout-stderr-qnos-{node_name}-{os.getpid()}.out.txt", "w")
-        sys.stdout = stdout_file
-        sys.stderr = stdout_file
+    qnodeos_log = SIMULAQRON_LOGS_FOLDER / f"simulaqron-qnos-{node_name}-{os.getpid()}.log"
+    log_file = open(qnodeos_log, "w")
+    sys.stdout = log_file
+    sys.stderr = log_file
 
     # Force configure root logger with a handler
     logging.basicConfig(
         format="%(asctime)s:%(levelname)s:%(name)s:%(filename)s:%(lineno)d:%(message)s",
         level=simulaqron_settings.log_level,
         force=True,
-        stream=stdout_file  # send logs to the same file
+        stream=log_file if log_file is not None else sys.stdout
     )
 
     """Start the indicated backend NetQASM Server"""

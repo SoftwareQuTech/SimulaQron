@@ -503,7 +503,6 @@ class VirtualNode(pb.Root):
         yield self._get_global_lock()
 
         try:
-            print(f"DEBUG new_qubit: len(virtQubits)={len(self.virtQubits)}, maxQubits={self.maxQubits}", flush=True)
             if (len(self.virtQubits) >= self.maxQubits) and (not ignore_max_qubits):
                 self._logger.error("Maximum number of virtual qubits reached.")
                 raise NoQubitError("Max virtual qubits reached")

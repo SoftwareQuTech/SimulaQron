@@ -34,6 +34,7 @@ from functools import partial
 from pathlib import Path
 from typing import List
 
+from simulaqron.general.constants import SIMULAQRON_LOGS_FOLDER
 from simulaqron.reactor import reactor
 from simulaqron.virtual_node.virtual import Backend
 from simulaqron.settings import simulaqron_settings
@@ -41,14 +42,14 @@ from simulaqron.settings import network_config
 
 logger = logging.getLogger("start_vnode")
 
-stdout_file = None
+log_file = None
 
 
 def _sigterm_handler(name, _signo, _stack_frame):
     print(f"START_VNODE: Shutting down Node '{name}' from signal {_signo}.", flush=True)
-    if stdout_file is not None:
-        stdout_file.flush()
-        stdout_file.close()
+    if log_file is not None:
+        log_file.flush()
+        log_file.close()
     reactor.stop()
 
 
@@ -67,15 +68,17 @@ def start_vnode(name: str, network_config_file: Path, network_name: str, nodes_r
     :param nodes_running: List of nodes running (e.g., ['Alice', 'Bob']).
     :type nodes_running: List[str]
     """
+    global log_file
 
     # Let's ensure we have read the config file. This relies on the right one being passed from network.py
     network_config.read_from_file(network_config_file)
 
     # We will have our logging output be written to a file in order to not distract from the app
     # logging that the user will later see on the screen
-    stdout_file = open(f"/tmp/simulaqron-stdout-stderr-vnode-{name}-{os.getpid()}.out.txt", "w")
-    sys.stdout = stdout_file
-    sys.stderr = stdout_file
+    vnode_log = SIMULAQRON_LOGS_FOLDER / f"simulaqron-vnode-{name}-{os.getpid()}.log"
+    log_file = open(vnode_log, "w")
+    sys.stdout = log_file
+    sys.stderr = log_file
     
     # Force configure root logger with a handler, ensure our log output to this file
     # will allow us to trace back exactly where it came from in the codebase
@@ -83,7 +86,7 @@ def start_vnode(name: str, network_config_file: Path, network_name: str, nodes_r
         format="%(asctime)s:%(levelname)s:%(name)s:%(filename)s:%(lineno)d:%(message)s",
         level=simulaqron_settings.log_level,
         force=True,
-        stream=stdout_file  # send logs to the same file
+        stream=log_file if log_file is not None else sys.stdout
     )
     
     # Set up the handlers: those define what we will do when the process is terminated (by killing it)

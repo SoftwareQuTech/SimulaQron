@@ -12,6 +12,7 @@ import click
 from daemons.interfaces import exit  # type: ignore[import-untyped]
 from daemons.prefab import run  # type: ignore[import-untyped]
 
+from simulaqron.general.constants import SIMULAQRON_LOGS_FOLDER
 from simulaqron.network import Network
 from simulaqron.toolbox.cliutil import find_processes_by_cmdline
 from simulaqron.settings import LOCAL_SIMULAQRON_SETTINGS, LOCAL_NETWORK_SETTINGS, HOME_NETWORK_SETTINGS
@@ -79,8 +80,9 @@ class SimulaQronDaemon(run.RunDaemon):
         """Starts all nodes defined in netsim's config directory."""
 
         # Let's make sure we can record the output where it's accessible
-        sys.stdout = open('/tmp/simulaqron.out', 'w', buffering=1)
-        sys.stderr = open('/tmp/simulaqron.err', 'w', buffering=1)
+        simulaqron_driver_log = SIMULAQRON_LOGS_FOLDER / f"simulaqron-driver-{os.getpid()}.log"
+        sys.stdout = open(simulaqron_driver_log, 'w', buffering=1)
+        sys.stderr = open(simulaqron_driver_log, 'w', buffering=1)
 
         # Let's read the config file we should be working from
         network_config.read_from_file(self.network_config_file)
