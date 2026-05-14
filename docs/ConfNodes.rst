@@ -41,7 +41,15 @@ processed spawned by the backend, you can run::
     simulaqron reset processes
 
 Each one of these commands should be used as a last resource for resetting SimulaQron backend. Please carefully read
-the help of each one of the commands: ``simulaqron reset pidfiles -h`` and ``simulaqron reset processes -h``
+the help of each one of the commands: ``simulaqron reset pidfiles -h`` and ``simulaqron reset processes -h``. If you
+need help with general troubleshooting, please have a look at the :doc:`Troubleshooting SimulaQron <Troubleshooting>`
+and :ref:`How to check if there are "leftover" processes <process-leftovers>` pages.
+
+.. caution:: Please note that ``simulaqron reset processes`` will *terminate only processes related with the SimulaQron
+   backend*. In this sense it *will not terminate processes that implement the application itself*. These are usually
+   the invocations to run "Alice", "Bob", or the execution of the ``run.sh`` script. These processes need to be
+   terminated manually. Check :ref:`how to check if there are "leftover" processes <process-leftovers>` to learn more
+   about how to identify and terminate such processes.
 
 The ``simulaqron start`` command accepts these arguments:
 

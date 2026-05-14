@@ -63,6 +63,8 @@ mode using the Python Twisted framework connecting to the virtual node servers (
 and the recommended way is to use the NetQASM library that calls the virtual nodes via the NetQASM interface.
 We will here illustrate how to use SimulaQron with the NetQASM library.
 
+.. _starting-backend:
+
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Starting the SimulaQron backend
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -92,11 +94,20 @@ makes SimulaQron think that the network is still running. To delete those file t
 
     simulaqron reset pidfiles
 
-Additionally, if you want to stop any process that might still be running from older executions, you can run::
+Additionally, if you want to *stop any SimulaQron backend-related process* that might still be running from older
+executions, you can run::
 
     simulaqron reset processes
 
-Please carefully read the help for both command (by adding ``-h`` at the end of the commands above) before running them.
+.. caution:: Please carefully read the help for both command (by adding ``-h`` at the end of the commands above)
+   before running them. If you need help with general troubleshooting, please have a look at the
+   :doc:`Troubleshooting SimulaQron <Troubleshooting>` page
+
+.. caution:: Remember that ``simulaqron reset processes`` will *terminate only processes related with the SimulaQron
+   backend*. In this sense it *will not terminate processes that implement the application itself*. These are usually
+   the invocations to run "Alice", "Bob", or the execution of the ``run.sh`` script. These processes need to be
+   terminated manually. Check :ref:`how to check if there are "leftover" processes <process-leftovers>` to learn more
+   about how to identify and terminate such processes.
 
 ^^^^^^^^^^^^^^^^^^^
 Running a protocol

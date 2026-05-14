@@ -1,5 +1,5 @@
 Architecture and Interactions of a SimulaQron App
-====================================
+=================================================
 
 General Application Architecture
 --------------------------------

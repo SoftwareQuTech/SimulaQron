@@ -101,6 +101,7 @@ SimulaQron, freely available on `arxiv <https://arxiv.org/abs/1712.08032>`_.
    Examples
    ConfNodes
    Overview
+   Troubleshooting
    AppsArch
    simulaqron
 

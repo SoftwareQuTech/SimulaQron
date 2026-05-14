@@ -338,8 +338,10 @@ def reset():
     is_flag=True,
 )
 @reset.command(
-    help="Forcefully terminate any SimulaQron backend-related processes.\nWARNING: This "
-         "potentially leaves the system in a state where SimulaQron thinks that the "
+    help="Forcefully terminate any SimulaQron backend-related processes.IMPORTANT: Please note\n"
+         "that this command *will not* terminate any processes from the application layer (i.e.\n"
+         "processes that were invoked manually - namely \"Alice\", \"Bob\", and processes alike).\n"
+         "WARNING: This potentially leaves the system in a state where SimulaQron thinks that the "
          "backend is running, but the processes are not running anymore. This is due to "
          f"the fact that the associated PID is still in the {PID_FOLDER} folder. In this "
          "state, subsequent invocations of `simulaqron start` will fail with the \"network "
@@ -360,7 +362,7 @@ def processes(force: bool):
     :type force: bool
     """
     # Find processes related with "simulaqron" and kill them
-    processes_prompt = "Are you sure you want to forcefully stop all the `simulaqron` processes?"
+    processes_prompt = "Are you sure you want to forcefully stop all the simulaqron backend processes?"
     if force or click.confirm(processes_prompt):
         simulaqron_processes: List[Process] = find_processes_by_cmdline("simulaqron")
         for proc in simulaqron_processes:
