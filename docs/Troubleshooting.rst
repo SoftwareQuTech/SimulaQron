@@ -290,3 +290,125 @@ On macOS, you can use the command ``netstat -anvp tcp | awk 'NR<3 || /LISTEN/'``
 On both systems, the column "Local Address" will give you information about the IP and port numbers already taken. That
 column has the format ``<IP>:<port>``, where ``IP`` follows the format ``AAA.BBB.CCC.DDD``, which is the followed by
 the port number. If your chosen port number is not on the list, it's free to use!
+
+
+Installation Issues
+-------------------
+
+This section is intended to provide a way to solve the most common problems when installing SimulaQron. Please note
+that **this list is not exhaustive**, and it is provided in a best-effort basis.
+
+
+Windows
+^^^^^^^
+
+Installation in Windows environments *is only supported using a VM or WSL*. To install WSL on your Windows environment,
+please refer to the `official microsoft documentation <https://learn.microsoft.com/en-us/windows/wsl/install>`_.
+
+After you installed WSL, you can follow the Linux installation instructions.
+
+
+Linux-specific errors
+^^^^^^^^^^^^^^^^^^^^^
+
+The instructions assume that you are running a Debian-based linux distribution (like Ubuntu).
+
+
+Cannot find the ``python3.12`` package
+""""""""""""""""""""""""""""""""""""""
+
+Python 3.12 is a rather old python version. For this reason, this python version *is not available* in most of the
+recent distribution versions. To have access to this version, you need to add the "Deadsnakes" repository by running::
+
+    $ sudo add-apt-repository -y "ppa:deadsnakes/ppa"
+    $ sudo apt-get update
+
+After running that, try installing Python 3.12 again.
+
+
+``python3.12 -m ensurepip --upgrade --default-pip`` returned non-zero exit status 1
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+This usually happens when creating a python virtual environment. The main reason for this error is that you are
+missing the ``python3.12-venv`` package. For SimulaQron to run, we need the full installation of Python 3.12,
+including the development package::
+
+    $ sudo apt-get install python3.12-full python3.12-dev
+
+After installing this, try creating your virtual environment again.
+
+
+error: command 'x86_64-linux-gnu-g++' failed: No such file or directory
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+This usually happens when installing simulaqron using pip *with the optional dependencies* (i.e.
+``pip install "simulaqron[opt]"``), on a machine that does not have a C++ compiler. Please make sure that you install
+all the requirements by running::
+
+    $ sudo apt-get install build-essential cmake vim git linux-headers-generic
+
+Then try to install simulaqron with the optional dependencies again.
+
+
+macOS-specific errors
+^^^^^^^^^^^^^^^^^^^^^
+
+
+error: command 'x86_64-linux-gnu-g++' failed: No such file or directory
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+This usually happens when installing simulaqron using pip *with the optional dependencies* (i.e.
+``pip install "simulaqron[opt]"``), on a machine that does not have a C++ compiler. Please make sure that you install
+all the requirements by running::
+
+    % xcode-select --install
+
+And follow the options for installing XCode build tools.
+
+
+General installation errors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+fatal error: Python.h: No such file or directory
+""""""""""""""""""""""""""""""""""""""""""""""""
+
+This happens when you are missing the ``python3.12-dev`` package. On Linux, run::
+
+    $ sudo apt-get install python3.12-dev
+
+On macOS, brew should install the development dependencies. You can always try to install python again::
+
+    % brew reinstall python@3.12
+
+After this, try installing simulaqron again.
+
+
+'Compiler' object has no attribute 'dry_run'
+""""""""""""""""""""""""""""""""""""""""""""
+
+This error arises when trying to install simulaqron with the optional dependencies. One of them is
+`ProjectQ <https://projectq.ch/>`_, which is a rather old software, written in C++. Considering this, ProjectQ
+*needs to be compiled by pip* before installing it. Since ProjectQ is an old software, it relies on compilation
+tools that nowadays are not part of the pip compilation toolchain.
+
+*On Linux systems* we can fix this by installing the older versions of the pip toolchain, and instruct pip to
+not create an isolated environment for compiling ProjectQ::
+
+    $ pip install "setuptools<81" pybind11
+    $ pip install "git+https://github.com/ProjectQ-Framework/ProjectQ.git@v0.8.0" --no-build-isolation
+
+*On macOS systems*, we have also observed this error when compiling `QuTip <http://qutip.org/>`_. In this case, you
+can also instruct pip to compile Qutip with the older toolchain::
+
+    % pip install "setuptools<81" pybind11 Cython
+    % pip install "git+https://github.com/ProjectQ-Framework/ProjectQ.git@v0.8.0" --no-build-isolation
+    % pip install "qutip<5.0.0" --no-build-isolation
+
+.. warning:: Please note that compiling the packages might take more than a few minutes. As an alternative, we provide
+   **unofficial packages already compiled** for the platforms supported by SimulaQron. To use these **unofficial
+   distributions**, add an option to ``pip`` to look for ``qutip`` and ``projectq`` packages on an 3rd party repository::
+
+       $ pip install projectq qutip --index-url https://gitlab.tudelft.nl/api/v4/projects/28442/packages/pypi/simple
+
+Then you can try to install simulaqron with optional dependencies again.

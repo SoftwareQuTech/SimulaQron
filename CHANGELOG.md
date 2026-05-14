@@ -3,7 +3,7 @@ CHANGELOG
 
 For more details refer to the [documentation](https://softwarequtech.github.io/SimulaQron/index.html).
 
-2026-05-13 (v4.1.2)
+2026-05-15 (v4.1.2)
 -------------------
 - Fix expected message exchange in event-based Ping-Pong examples.
 - Only start required Virtual Nodes processes when starting SimulaQron backend instead of starting all the
@@ -17,7 +17,6 @@ For more details refer to the [documentation](https://softwarequtech.github.io/S
   several subcommands that can reset simulaqron settings, delete PID files and kill simulaqron backend
   processes. Run `simulaqron reset -h` for more info.
 - Log files can now be found inside the `/tmp/simulaqron` folder.
-
 
 2026-04-23 (v4.1.1)
 -------------------

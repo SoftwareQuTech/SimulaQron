@@ -31,7 +31,8 @@ from typing import Tuple, Dict, List
 try:
     import projectq as pQ
 except ImportError:
-    raise RuntimeError("If you want to use the projectq backend you need to install the python package 'projectq'")
+    raise RuntimeError("If you want to use the projectq backend you need to install simulaqron "
+                       "with the optional dependencies: 'pip install simulaqron[opt]'")
 import numpy as np
 
 from simulaqron.virtual_node.basics import QuantumEngine, QuantumError, NoQubitError

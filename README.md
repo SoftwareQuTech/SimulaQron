@@ -1,4 +1,4 @@
-# SimulaQron - simple quantum network simulator (4.1.1)
+# SimulaQron - simple quantum network simulator (4.1.2)
 
 The purpose of this simulator of quantum network nodes is to allow you to develop new applications for
 a future quantum internet, while we do not yet have real quantum network nodes available for testing. 
@@ -34,7 +34,12 @@ After this point, you should have all the required dependencies.
 
 #### Create Python virtual environment (venv)
 
-Before proceeding with the installation
+Before proceeding with the installation, create a python virtual environment (venv) and activate it:
+
+```shell
+python3.12 -m venv simulaqron
+source simulaqron/bin/activate 
+```
 
 
 ##### Installing from PyPI
@@ -100,7 +105,7 @@ Before proceeding with the SimulaQron install, you need to install python 3.12, 
 brew install python@3.12
 ```
 
-Additionally, to install the optional dependencies, you will need to install *XCode COmmand Line Tools*. To do
+Additionally, to install the optional dependencies, you will need to install *XCode Command Line Tools*. To do
 so, run the following command in a terminal:
 
 ```shell
