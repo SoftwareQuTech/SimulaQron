@@ -4,6 +4,9 @@ EXAMPLES_DIR   = examples
 SIMULAQRON_DIR = simulaqron
 TEST_DIR       = tests
 
+# We use the Gitlab repo to look for already-compiled versions os projectq and qutip
+GITLAB_REPO=$(shell curl --write-out '%{http_code}' --silent --output /dev/null https://gitlab.tudelft.nl/api/v4/projects/28442/packages/pypi/simple)
+
 # IMPORTANT: For running in makefile, we need to use only 1 thread in OMP library
 export OMP_NUM_THREADS=1
 
@@ -15,13 +18,22 @@ _delete_pyc:
 _delete_pid:
 	@find ${SIMULAQRON_DIR} -name '*.pid' -delete
 
+_install_projectq_qutip:
+	@if [ "${GITLAB_REPO}" = "200" ]; then \
+    	${PYTHON} -m pip install projectq qutip --index-url https://gitlab.tudelft.nl/api/v4/projects/28442/packages/pypi/simple; \
+    else \
+		${PYTHON} -m pip install "setuptools<81" pybind11; \
+		${PYTHON} -m pip install "git+https://github.com/ProjectQ-Framework/ProjectQ.git@v0.8.0" --no-build-isolation; \
+		${PYTHON} -m pip install "qutip<5.0.0" --no-build-isolation \
+    fi
+
 lint-deps:
 	@${PYTHON} -m pip install .\[lint\]
 
 lint:
 	@${PYTHON} -m flake8 ${SIMULAQRON_DIR} ${EXAMPLES_DIR} ${TEST_DIR}
 
-test-deps:
+test-deps: _install_projectq_qutip
 	@${PYTHON} -m pip install .\[test\]
 
 requirements python-deps:
@@ -32,14 +44,7 @@ dev-deps:
 
 install-development: dev-deps
 
-install-optional:
-	@# Python setuptools 81 removed "dry_run" option when compiling C++ code
-	@# this breaks the build of projectq
-	@# As a hack, we install the bare minimum tools to build projectq, then
-	@# we build and install it (ignoring any build requirement in the projectq
-	@# package spec), and finally we install the rest of the optional requirements
-	@${PYTHON} -m pip install "setuptools<81" pybind11
-	@${PYTHON} -m pip install "git+https://github.com/ProjectQ-Framework/ProjectQ.git@v0.8.0" --no-build-isolation
+install-optional: _install_projectq_qutip
 	@${PYTHON} -m pip install .\[opt\]
 
 tests:
