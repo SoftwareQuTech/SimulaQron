@@ -1,7 +1,7 @@
 Troubleshooting SimulaQron
 ==========================
 
-This document aims to help you troubleshooting some situations that can arise while running simulaqron applications.
+This document aims to help you troubleshooting some situations that can arise while running SimulaQron applications.
 This documents assumes that you have read the :doc:`SimulaQron Overview <Overview>` and
 :doc:`SimulaQron Application Architecture <AppsArch>` before you proceed.
 
@@ -15,11 +15,11 @@ cannot be changed.
 
 Under this folder you will find:
 
-* *Driver log file*: Each time that you invoke que driver (``simulaqron start``), the driver will create a general log.
-  This file will be called ``simulaqron-driver-<pid>.log``, where "``<pid>``" is a number corresponding to the process
+* *Driver log file*: Each time that you invoke the driver (``simulaqron start``), it will create a general log. This
+  file will be called ``simulaqron-driver-<pid>.log``, where "``<pid>``" is a number corresponding to the process
   ID as reported by the OS.
 * *SimulaQron's QNodeOS and Virtual Node log files*: Once that the backend is running, the spawned QNodeOS and Virtual
-  Node processes will create a logs file named ``simulaqron-<qnos/vnode>-<node_name>-<pid>.log``. From the file name
+  Node processes will create logs file named ``simulaqron-<qnos/vnode>-<node_name>-<pid>.log``. From the file name
   you'll be able to identify if the log file corresponds to QNodeOS or Virtual Node process, the node name, and the
   process ID as reported by the OS.
 
@@ -31,7 +31,7 @@ How can I increase/decrease the verbosity of the log files?
 -----------------------------------------------------------
 
 By default, the log verbosity level is set to "warning". This means that the information shown in the logs only
-contains lines that are logged with severity "warning" or higher. YOu can increase the verbosity to see more debugging
+contains lines that are logged with severity "warning" or higher. You can increase the verbosity to see more debugging
 messages. To do so, edit your ``simulaqron_config.json`` file and change the "log_level" line from::
 
     "log_level": 30,
@@ -46,21 +46,21 @@ valid values of the log level that you can use in this field.
 
 .. warning:: **Do not forget** to change the log level back to the default value (30) **before** submitting your solution.
 
-After changing the log configuration, stop your application, stop SimulaQron backend, start SimulaQron backend and then
-start your application again.
+After changing the log configuration, stop your application, stop SimulaQron backend, and then start SimulaQron backend
+and your application again.
 
 
 How can I "follow" the log files on real time?
 ----------------------------------------------
 
-Unix systems (Linux and macOS) embed the ``tail`` tool that allows you to follow a file as it grows. This is useful to
-print a log file on the terminal, and keep "listening to" new updates as they are written on the file. To do so, run
+Unix systems (Linux and macOS) embed the ``tail`` tool that allows you to follow a text file as it grows. This is useful
+to print a log file on the terminal, and keep "listening to" new updates as they are written on the file. To do so, run
 the following command on a separate terminal::
 
     tail -f /my/log/file.log
 
 Adjust the ``/my/log/file.log`` path to match the file you want to follow on real time. This command will print on the
-terminal the last 10 lines of the file, and the will keep waiting for new lines to arrive. As soon as they arrive, they
+terminal the last 10 lines of the file, and it will keep waiting for new lines to arrive. As soon as they arrive, they
 will also be printed don the terminal.
 
 
@@ -73,19 +73,19 @@ This can happen for multiple reasons. We will try to address a few of them here.
 Another instance of the backend is still running
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The most common scenario arises when you are trying to run the application layer using a backend from "another version".
-This can happen when you update the port numbers in the ``simulaqron_networks.json`` file and you did not restart the
-backend after that.
+The most common scenario arises when you are trying to run the application layer using a backend from "another version"
+(or even another application). This can happen when you update the port numbers in the ``simulaqron_networks.json``
+file and you did not restart the backend after that.
 
-In this case try restarting simulaqron backend by running::
+In this case try restarting SimulaQron backend by running::
 
     simulaqron stop
 
-and then running the ``simulaqron start`` command as per the example or step of the lab you are currently following.
+and then run the ``simulaqron start`` command as per the example or step of the lab you are currently following.
 
-If after this the error persist, check the code of the application (usually alice and/or bob) and make sure that these
-file load the same ``simulaqron_settings.json`` and ``simulaqron_config.json`` files as the ```simulaqron start``
-command.
+If after this the error persist, check the code of the application (usually alice and/or bob implementations) and
+make sure that these file load the same ``simulaqron_settings.json`` and ``simulaqron_config.json`` files as the
+ones passed to the ``simulaqron start`` command.
 
 .. _exception-in-backend:
 
@@ -93,7 +93,7 @@ Exceptions on the backend
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When running the backend, the spawned processes are daemonized, meaning that if an exception happens there, it is not
-possible to see that on the terminal. When an exception happened in the backend, some of the TCP ports used to execute
+possible to see that on the terminal. When an exception happens in the backend, some of the TCP ports used to execute
 quantum operations are not properly open, and your application might be waiting for a connection or message that will
 never arrive.
 
@@ -107,16 +107,17 @@ more clues about what is happening.
 Protocol not implemented properly
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Another usual scenario where your application looks stalled is because of error when implementing classical messages
+Another usual scenario where your application looks stalled is because of errors when implementing classical messages
 interchange. In some cases, your client or server side application is waiting for the arrival of a message. Once it
 arrived, it reads the characters from the classical socket, and check if it the expected message or not.
 
 In this case, make sure that you properly check the expected string, and raise and exception or fail the execution if
-something unexpected happen. To this last end, you can use python asserts to aid you in that::
+something unexpected happen. In this last case, you can use python asserts to aid you in that::
 
     assert message == "expected"
 
-The line above will make whole program fail if ``message`` is not exactly the string ``expected``.
+The line above will make whole program fail if the variable ``message`` does not contain the exact the string
+``expected``.
 
 .. caution:: Killing a single process might leave some other processes (application nodes) still running in the
    background. This might lead to scenarios where subsequent execution might fail with connection errors. To fully
@@ -169,17 +170,17 @@ in their command line.
 In the example above, it is important to identify some information. The ``PID`` and ``COMMAND`` columns are the most
 important ones. We will use them to identify which processes can be terminated:
 
-* Processes that contain ``simulaqron start`` in their commandline, they are *SimulaQron backend-related processes*.
+* Processes that contain ``simulaqron start`` in their command line, they are *SimulaQron backend-related processes*.
 * Processes that are simply ``python myTest.py`` *are usually SimulaQron application processes*. Try to remember
   if you manually started these processes (or via the ``run.sh`` script) to correctly identify it.
-* All other processes on the list *are usually system processes*. **These processes need to left untouched**.
+* All other processes on the list *are usually system processes*. **These processes need to be left untouched**.
 
-Once that you have identified that you have some leftover processes from old executions, you can try two ways to stop
-these processes:
+Once that you have identified the processes that you want to terminate (usually leftover processes from old executions),
+you can try two ways to stop these processes:
 
 * Run ``simulaqron reset processes``. As explained in the :ref:`starting backend section <starting-backend>`, this
-  command can be used to forcefully stop any backend-related processes. If you run this command and run get the list
-  of python processes, you'll see that some of them are not there anymore::
+  command can be used to forcefully stop any backend-related processes. If you run this command and later run
+  ``ps aux | awk 'NR==1 || /python/'`` to get the list of python processes, you'll see that some of them disappear::
 
     $ simulaqron reset processes
     Are you sure you want to forcefully stop all the `simulaqron` processes? [y/N]: y
@@ -212,7 +213,8 @@ these processes:
     root        1723  0.0  0.0 114868 23364 ?        Ssl  08:15   0:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
     user       12561  0.0  0.0  11764  2360 pts/1    S+   11:26   0:00 awk NR==1 || /python/
 
-  You can see that we were able to kill the leftover SimulaQron application process (``python bobTest.py``).
+  You can see that we were able to kill the leftover SimulaQron application process (``python bobTest.py``), but also
+  the processes from the SimulaQron backend.
 
 .. note:: When running ``kill``, if you get errors like "kill: (<PID>) - No such process", you can safely ignore them.
    This error means that you specified a PID that was not valid. Recheck the process list ans try again.
@@ -223,7 +225,7 @@ How can I check if a port is taken or not?
 ------------------------------------------
 
 First of all, a running system is dynamic, so there's no guarantee that a port available now will still be available
-in 5 minutes more. Despite this, if you pick a port number (ranging from :math:`1` to :math:`65535`) cleverly enough,
+in in the future. Despite this, if you pick a port number (which range from :math:`1` to :math:`65535`) cleverly enough,
 it will most likely be available whenever you need it.
 
 In Linux, port numbers under :math:`1000` need sudo permissions to be used, so we highly recommend *not* to use them.
@@ -341,13 +343,13 @@ After installing this, try creating your virtual environment again.
 error: command 'x86_64-linux-gnu-g++' failed: No such file or directory
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-This usually happens when installing simulaqron using pip *with the optional dependencies* (i.e.
+This usually happens when installing SimulaQron using pip *with the optional dependencies* (i.e.
 ``pip install "simulaqron[opt]"``), on a machine that does not have a C++ compiler. Please make sure that you install
 all the requirements by running::
 
     $ sudo apt-get install build-essential cmake vim git linux-headers-generic
 
-Then try to install simulaqron with the optional dependencies again.
+Then try to install SimulaQron with the optional dependencies again.
 
 
 macOS-specific errors
@@ -357,7 +359,7 @@ macOS-specific errors
 error: command 'x86_64-linux-gnu-g++' failed: No such file or directory
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-This usually happens when installing simulaqron using pip *with the optional dependencies* (i.e.
+This usually happens when installing SimulaQron using pip *with the optional dependencies* (i.e.
 ``pip install "simulaqron[opt]"``), on a machine that does not have a C++ compiler. Please make sure that you install
 all the requirements by running::
 
@@ -381,13 +383,13 @@ On macOS, brew should install the development dependencies. You can always try t
 
     % brew reinstall python@3.12
 
-After this, try installing simulaqron again.
+After this, try installing SimulaQron again.
 
 
 'Compiler' object has no attribute 'dry_run'
 """"""""""""""""""""""""""""""""""""""""""""
 
-This error arises when trying to install simulaqron with the optional dependencies. One of them is
+This error arises when trying to install SimulaQron with the optional dependencies. One of them is
 `ProjectQ <https://projectq.ch/>`_, which is a rather old software, written in C++. Considering this, ProjectQ
 *needs to be compiled by pip* before installing it. Since ProjectQ is an old software, it relies on compilation
 tools that nowadays are not part of the pip compilation toolchain.
@@ -399,7 +401,7 @@ not create an isolated environment for compiling ProjectQ::
     $ pip install "git+https://github.com/ProjectQ-Framework/ProjectQ.git@v0.8.0" --no-build-isolation
 
 *On macOS systems*, we have also observed this error when compiling `QuTip <http://qutip.org/>`_. In this case, you
-can also instruct pip to compile Qutip with the older toolchain::
+can also instruct pip to compile Qutip and ProjectQ with the older toolchain::
 
     % pip install "setuptools<81" pybind11 Cython
     % pip install "git+https://github.com/ProjectQ-Framework/ProjectQ.git@v0.8.0" --no-build-isolation
@@ -414,4 +416,4 @@ can also instruct pip to compile Qutip with the older toolchain::
     **In macOS, these packages are compiled only for macOS 26 (Tahoe)**. Additionally, they require installing "libomp"
     from homebrew: ``brew install libomp``.
 
-Then you can try to install simulaqron with optional dependencies again.
+Then you can try to install SimulaQron with optional dependencies again.
