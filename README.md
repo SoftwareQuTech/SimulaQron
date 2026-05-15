@@ -102,7 +102,7 @@ Before proceeding with the SimulaQron install, you need to install python 3.12, 
 3.12 using the following command:
 
 ```shell
-brew install python@3.12
+brew install python@3.12 libomp
 ```
 
 Additionally, to install the optional dependencies, you will need to install *XCode Command Line Tools*. To do

@@ -411,4 +411,7 @@ can also instruct pip to compile Qutip with the older toolchain::
 
        $ pip install projectq qutip --index-url https://gitlab.tudelft.nl/api/v4/projects/28442/packages/pypi/simple
 
+    **In macOS, these packages are compiled only for macOS 26 (Tahoe)**. Additionally, they require installing "libomp"
+    from homebrew: ``brew install libomp``.
+
 Then you can try to install simulaqron with optional dependencies again.
