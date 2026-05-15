@@ -15,6 +15,9 @@ _delete_pyc:
 _delete_pid:
 	@find ${SIMULAQRON_DIR} -name '*.pid' -delete
 
+lint-deps:
+	@${PYTHON} -m pip install .\[lint\]
+
 lint:
 	@${PYTHON} -m flake8 ${SIMULAQRON_DIR} ${EXAMPLES_DIR} ${TEST_DIR}
 
@@ -61,7 +64,7 @@ examples:
 	@cd examples/native-mode/teleport && bash terminate.sh && sleep 3
 	@echo "Chosen examples passed."
 
-install: test-deps
+install:
 	@$(PYTHON) -m pip install . ${PIP_FLAGS}
 
 install-dev: install-optional

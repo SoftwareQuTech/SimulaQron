@@ -12,11 +12,11 @@ jobs:
       with:
         python-version: "3.12"
     - run: |
-        make install
+        make lint-deps
         make lint
 
-  tests:
-    name: Run tests  
+  tests-examples:
+    name: Run tests and examples
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
@@ -24,18 +24,6 @@ jobs:
       with:
         python-version: "3.12"
     - run: |
-        make install
         make test-deps
         make tests
-
-  examples:
-    name: Run examples
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-python@master
-      with:
-        python-version: "3.12"
-    - run: |
-        make install
         make examples
