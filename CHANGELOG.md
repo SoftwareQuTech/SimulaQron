@@ -1,15 +1,29 @@
 CHANGELOG
 =========
 
-For more details refer to the [documentation](https://softwarequtech.github.io/SimulaQron/html/index.html).
+For more details refer to the [documentation](https://softwarequtech.github.io/SimulaQron/index.html).
 
+2026-05-15 (v4.1.2)
+-------------------
+- Fix expected message exchange in event-based Ping-Pong examples.
+- Only start required Virtual Nodes processes when starting SimulaQron backend instead of starting all the
+  nodes defined in the network configuration.
+- macOS Support: use twisted's "pollreactor" in macOS platforms to correctly allow starting backend processes.
+- Linux Support: use twisted's "pollreactor" in Linux platforms to improve performance.
+- Avoid using port 8021, which is used by a system service in macOS platforms.
+- Starting the SimulaQron backend now respects the "conn_max_retries" configuration when backend processes
+  try to connect to each other.
+- CLI tool `simulaqron reset` no longer resets the SimulaQron settings by default. It is now separated into
+  several subcommands that can reset simulaqron settings, delete PID files and kill simulaqron backend
+  processes. Run `simulaqron reset -h` for more info.
+- Log files can now be found inside the `/tmp/simulaqron` folder.
 
 2026-04-23 (v4.1.1)
 -------------------
 - Update README file.
 - Added `install-development` target in the Makefile to ease the process of installing development dependencies.
 - Remove old "nativeMode" files after rename of the folder.
-- Adjusted Dockerfile to use the lates PyPI deployed version of SimulaQron.
+- Adjusted Dockerfile to use the latest PyPI deployed version of SimulaQron.
 - Fixed GitHub workflow to automatically deploy documentation.
 
 2026-04-16 (v4.1)

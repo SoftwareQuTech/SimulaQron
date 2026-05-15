@@ -33,7 +33,7 @@ from typing import Tuple, List, Any
 
 import logging
 from twisted.internet.defer import inlineCallbacks, DeferredLock, Deferred, DeferredList
-from twisted.internet.error import ConnectionRefusedError, CannotListenError
+from twisted.internet.error import CannotListenError
 from twisted.internet.task import deferLater
 from twisted.spread import pb
 from twisted.spread.pb import RemoteError, RemoteReference
@@ -102,7 +102,7 @@ def call_method(obj, method_name, *args, **kwargs):
 # forming the quantum network
 #
 class Backend:
-    def __init__(self, name: str, network_name: str = "default"):
+    def __init__(self, name: str, nodes_running: List[str], network_name: str):
         """
         Create the Virtual Node backend. This will read the networks configuration and
         populate the name,hostname,port information with the information found in the
@@ -110,14 +110,21 @@ class Backend:
 
         :param name: Node name to start.
         :type name: str
-        :network_name: Name of the network to start.
+        :param nodes_running: List of nodes currently running.
+        :type nodes_running: List[str]
+        :param network_name: Name of the network to start.
         :type network_name: str
         """
         self._logger = logging.getLogger(f"{self.__class__.__name__}({name})")
 
         # Read the configuration file
         self.config = SocketsConfig(network_config, network_name=network_name, config_type="vnode")
+        # We only want to start connections to the nodes that are running, not to all
+        # of nodes that are defined in the network config
+        # To this end, we filter the loaded network config, so it contains only the running nodes
+        self.config.filter(nodes_running)
         self.myID: Host = self.config.hostDict[name]
+        self._logger.debug("myID: (name: %s) %s", name, str(self.myID))
 
     def start(
             self,
@@ -141,7 +148,7 @@ class Backend:
             self._logger.debug("Running reactor")
             reactor.run()
         except CannotListenError as exc:
-            self._logger.debug("NetQASM server address (%d) is already in use.", self.myID.port, exc_info=exc)
+            self._logger.debug("NetQASM server port (%d) is already in use.", self.myID.port, exc_info=exc)
             return
         except Exception as e:
             self._logger.debug("Critical error when starting local virtual node server", exc_info=e)
@@ -169,6 +176,7 @@ class VirtualNode(pb.Root):
         :type maxRegisters: int
         """
         self._logger = logging.getLogger(f"{self.__class__.__name__}({ID.name})")
+        self._attempt = 0
 
         # Store our own host identifiers and configuration
         self.myID = ID
@@ -196,7 +204,7 @@ class VirtualNode(pb.Root):
         self.virtQubits = []
         self.simQubits = []
 
-        # Set up connections to the neighouring nodes in the network
+        # Set up connections to the (Virtual Nodes processes) neighbouring nodes in the network
         self.connectNet()
 
         # Global lock: needs to be acquire whenever we want to manipulate more than one
@@ -286,7 +294,7 @@ class VirtualNode(pb.Root):
         # Add this node to the local connections
         self.conn[node.name] = node
 
-    def handle_connection_error(self, reason, node):
+    def handle_connection_error(self, reason, node: Host):
         """
         Handles errors from trying to connect to other node.
         If a ConnectionRefusedError is raised another try will be made after `conn_retry_time`` seconds
@@ -296,13 +304,19 @@ class VirtualNode(pb.Root):
 
         try:
             reason.raiseException()
-        except ConnectionRefusedError as err:
-            self._logger.debug("Could not connect to %s (%s, %d), trying again...",
-                               node.name, node.hostname, node.port, exc_info=err)
-            reactor.callLater(simulaqron_settings.conn_retry_time, self.connect_to_node, node)
-        except Exception as e:
-            self._logger.exception(e)
-            reactor.stop()
+        except Exception as err:
+            if self._attempt > simulaqron_settings.conn_max_retries:
+                self._logger.exception(
+                    "Exhausted the maximum number of attempts to connect to neighbour virtual node '%s'",
+                    node.hostname,
+                    exc_info=err
+                )
+                reactor.stop()
+            else:
+                self._logger.debug("Could not connect to %s (%s, %d), trying again...",
+                                   node.name, node.hostname, node.port, exc_info=err)
+                self._attempt = self._attempt + 1
+                reactor.callLater(simulaqron_settings.conn_retry_time, self.connect_to_node, node)
 
     def _get_virtual_id(self):
         """
@@ -489,7 +503,6 @@ class VirtualNode(pb.Root):
         yield self._get_global_lock()
 
         try:
-            print(f"DEBUG new_qubit: len(virtQubits)={len(self.virtQubits)}, maxQubits={self.maxQubits}", flush=True)
             if (len(self.virtQubits) >= self.maxQubits) and (not ignore_max_qubits):
                 self._logger.error("Maximum number of virtual qubits reached.")
                 raise NoQubitError("Max virtual qubits reached")

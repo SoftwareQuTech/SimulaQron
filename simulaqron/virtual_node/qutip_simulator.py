@@ -49,7 +49,8 @@ try:
         qp.gate_expand_2toN = lambda U, N, t1, t2: _expand_op(U, N, [t1, t2])
 
 except ImportError:
-    raise RuntimeError("If you want to use the qutip backend you need to install the python package 'qutip'")
+    raise RuntimeError("If you want to use the qutip backend you need to install simulaqron "
+                       "with the optional dependencies: 'pip install simulaqron[opt]'")
 
 from simulaqron.virtual_node.basics import QuantumEngine, QuantumError, NoQubitError
 

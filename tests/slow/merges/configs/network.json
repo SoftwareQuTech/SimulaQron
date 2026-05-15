@@ -6,15 +6,15 @@
                 "Alice": {
                     "app_socket": [
                         "localhost",
-                        8001
+                        18001
                     ],
                     "qnodeos_socket": [
                         "localhost",
-                        8003
+                        18002
                     ],
                     "vnode_socket": [
                         "localhost",
-                        8014
+                        18003
                     ]
                 }
             },
@@ -22,15 +22,15 @@
                 "Bob": {
                     "app_socket": [
                         "localhost",
-                        8015
+                        18011
                     ],
                     "qnodeos_socket": [
                         "localhost",
-                        8016
+                        18012
                     ],
                     "vnode_socket": [
                         "localhost",
-                        8021
+                        18013
                     ]
                 }
             },
@@ -38,15 +38,15 @@
                 "Charlie": {
                     "app_socket": [
                         "localhost",
-                        8024
+                        18021
                     ],
                     "qnodeos_socket": [
                         "localhost",
-                        8025
+                        18022
                     ],
                     "vnode_socket": [
                         "localhost",
-                        8032
+                        18023
                     ]
                 }
             }

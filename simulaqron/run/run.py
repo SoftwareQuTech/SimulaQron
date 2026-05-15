@@ -198,7 +198,7 @@ def run_applications(
 
     for _ in range(num_rounds):
         network = Network(
-            nodes=network_config.get_node_names("default"),
+            nodes=app_names,
             network_config_file=network_cfg,
             network_name="default",
         )

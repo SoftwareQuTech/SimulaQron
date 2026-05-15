@@ -254,7 +254,7 @@ class TestNetworksSettings:
             Path(temp_file.name).unlink()
 
     def test_deserialize_network_config(self, reset_net_cfg):
-        raw_config = TestNetworksSettings._build_expected_config([8020, 8021, 8022], [8050, 8051, 8052])
+        raw_config = TestNetworksSettings._build_expected_config([8020, 8022, 8023], [8050, 8051, 8052])
         with NamedTemporaryFile(mode="wt", delete=False) as temp_file:
             temp_file.write(raw_config)
             temp_file.flush()

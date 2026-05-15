@@ -5,10 +5,11 @@ import time
 from timeit import default_timer as timer
 
 import logging
-from twisted.internet.error import ConnectionRefusedError, CannotListenError
+from twisted.internet.error import CannotListenError
 from twisted.spread import pb
 from pathlib import Path
 
+from simulaqron.general.constants import SIMULAQRON_LOGS_FOLDER
 from simulaqron.reactor import reactor
 from simulaqron.netqasm_backend.factory import NetQASMFactory
 from simulaqron.netqasm_backend.qnodeos import SubroutineHandler
@@ -30,7 +31,7 @@ def _init_register(virt_root, my_name: str, node: NetQASMFactory):
     _setup_netqasm_server(my_name, node)
 
 
-def _connect_to_virt_node(my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig):
+def _connect_to_virt_node(my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig, attempt: int):
     """Tries to connect to local virtual node.
 
     If connection is refused, we try again after a set amount of time
@@ -49,11 +50,11 @@ def _connect_to_virt_node(my_name: str, netqasm_factory: NetQASMFactory, virtual
     defer_virtual_node.addCallback(_init_register, my_name, netqasm_factory)
     # If connection fails do:
     defer_virtual_node.addErrback(_handle_connection_error, my_name, netqasm_factory, virtual_network,
-                                  virtual_node.hostname, virtual_node.port)
+                                  virtual_node.hostname, virtual_node.port, attempt)
 
 
 def _handle_connection_error(reason, my_name: str, netqasm_factory: NetQASMFactory, virtual_network: SocketsConfig,
-                             virtual_node_hostname: str, virtual_node_port: int):
+                             virtual_node_hostname: str, virtual_node_port: int, attempt: int):
     """ Handles errors from trying to connect to local virtual node.
 
     If a ConnectionRefusedError is raised another try will be made after
@@ -61,24 +62,26 @@ def _handle_connection_error(reason, my_name: str, netqasm_factory: NetQASMFacto
     """
     try:
         reason.raiseException()
-    except ConnectionRefusedError as err:
-        # TODO - Implement checking of max number of connections
-        logger.debug("START_QNODEOS %s: Could not connect to Virtual node (%s, %d), trying again...", my_name,
-                     virtual_node_hostname, virtual_node_port, exc_info=err)
-        reactor.callLater(
-            simulaqron_settings.conn_retry_time,
-            _connect_to_virt_node,
-            my_name,
-            netqasm_factory,
-            virtual_network,
-        )
-    except Exception as e:
-        logger.error(
-            "START_QNODEOS %s: Critical error when connection to local virtual node: %s",
-            my_name,
-            e,
-        )
-        reactor.stop()
+    except Exception as err:
+        if attempt > simulaqron_settings.conn_max_retries:
+            logger.exception(
+                "START_QNODEOS %s: Exhausted the maximum number of attempts to connect to local virtual node",
+                my_name,
+                exc_info=err,
+            )
+            reactor.stop()
+            return
+        else:
+            logger.debug("START_QNODEOS %s: Could not connect to Virtual node (%s, %d), trying again...", my_name,
+                         virtual_node_hostname, virtual_node_port, exc_info=err)
+            reactor.callLater(
+                simulaqron_settings.conn_retry_time,
+                _connect_to_virt_node,
+                my_name,
+                netqasm_factory,
+                virtual_network,
+                attempt + 1
+            )
 
 
 def _setup_netqasm_server(my_name: str, netqasm_factory: NetQASMFactory):
@@ -110,17 +113,17 @@ def _setup_netqasm_server(my_name: str, netqasm_factory: NetQASMFactory):
         reactor.stop()
 
 
-stdout_file = None
+log_file = None
 
 
 def _sigterm_handler(_signo, _stack_frame):
-    if stdout_file is not None:
-        stdout_file.flush()
-        stdout_file.close()
+    if log_file is not None:
+        log_file.flush()
+        log_file.close()
     reactor.stop()
 
 
-def start_qnodeos(node_name: str, network_config_file: Path, network_name: str = "default", log_level: str = "WARNING"):
+def start_qnodeos(node_name: str, network_config_file: Path, network_name: str):
     """
     Start the QNPU that accepts NetQASM subroutines, and sends them as instructions to the SimulaQron virtual node
     backend over twisted PB (Native Mode SimulaQron).
@@ -131,25 +134,23 @@ def start_qnodeos(node_name: str, network_config_file: Path, network_name: str =
     :type network_config_file: Path
     :param network_name: Name of the network (e.g., 'default').
     :type network_name: str
-    :param log_level: Logging level (e.g., 'DEBUG', 'INFO', 'WARNING').
-    :type log_level: str
     """
 
+    global log_file
     # Let's ensure we read the config file
     network_config.read_from_file(network_config_file)
 
-    if simulaqron_settings.log_level == logging.DEBUG:
-        global stdout_file
-        stdout_file = open(f"/tmp/simulaqron-stdout-stderr-qnos-{node_name}-{os.getpid()}.out.txt", "w")
-        sys.stdout = stdout_file
-        sys.stderr = stdout_file
+    qnodeos_log = SIMULAQRON_LOGS_FOLDER / f"simulaqron-qnos-{node_name}-{os.getpid()}.log"
+    log_file = open(qnodeos_log, "w")
+    sys.stdout = log_file
+    sys.stderr = log_file
 
     # Force configure root logger with a handler
     logging.basicConfig(
         format="%(asctime)s:%(levelname)s:%(name)s:%(filename)s:%(lineno)d:%(message)s",
         level=simulaqron_settings.log_level,
         force=True,
-        stream=stdout_file  # send logs to the same file
+        stream=log_file if log_file is not None else sys.stdout
     )
 
     """Start the indicated backend NetQASM Server"""
@@ -178,7 +179,7 @@ def start_qnodeos(node_name: str, network_config_file: Path, network_name: str =
 
     # Connect to the local virtual node simulating the "local" qubits
     logger.debug(f"START_QNODEOS: Connect to virtual node {node_name}")
-    _connect_to_virt_node(node_name, netqasm_factory, virtual_network)
+    _connect_to_virt_node(node_name, netqasm_factory, virtual_network, 0)
 
     # Run reactor
     reactor.run()

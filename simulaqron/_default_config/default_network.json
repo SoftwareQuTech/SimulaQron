@@ -19,8 +19,8 @@
       {
         "Charlie": {
           "app_socket": ["localhost", 8020],
-          "qnodeos_socket": ["localhost", 8021],
-          "vnode_socket": ["localhost", 8022]
+          "qnodeos_socket": ["localhost", 8022],
+          "vnode_socket": ["localhost", 8023]
         }
       },
       {
