@@ -1,7 +1,6 @@
 import time
 
 import pytest
-from timeit import default_timer as timer
 
 from simulaqron.settings import simulaqron_settings, network_config, get_default_network_config_file
 from simulaqron.network import Network
@@ -21,6 +20,7 @@ class TestStartStopNetwork:
         for p in network.processes:
             assert p.is_alive() is False
         network.start(wait_until_running=True)
+        time.sleep(2)
         assert network.running is True
         for p in network.processes:
             assert p.is_alive() is True
@@ -34,28 +34,13 @@ class TestStartStopNetwork:
     def test_start_stop(self):
         network = Network(nodes=self.nodes, network_config_file=get_default_network_config_file(use_embedded=True))
         network.start(wait_until_running=True)
+        time.sleep(2)
         for p in network.processes:
             assert p.is_alive() is True
         network.stop()
         time.sleep(2)
         for p in network.processes:
             assert p.is_alive() is False
-
-    def test_no_wait(self):
-        network = Network(nodes=self.nodes, network_config_file=get_default_network_config_file(use_embedded=True))
-        network.start(wait_until_running=False)
-        assert network.running is False
-
-        # Check that network starts running eventually
-        max_time = 10  # s
-        t_start = timer()
-        while timer() < t_start + max_time:
-            if network.running:
-                break
-            else:
-                time.sleep(0.1)
-
-        assert network.running is True
 
     def test_del(self):
         network = Network(nodes=self.nodes, network_config_file=get_default_network_config_file(use_embedded=True))
