@@ -24,7 +24,7 @@ _install_projectq_qutip:
     else \
 		${PYTHON} -m pip install "setuptools<81" pybind11; \
 		${PYTHON} -m pip install "git+https://github.com/ProjectQ-Framework/ProjectQ.git@v0.8.0" --no-build-isolation; \
-		${PYTHON} -m pip install "qutip<5.0.0" --no-build-isolation \
+		${PYTHON} -m pip install "qutip<5.0.0" --no-build-isolation; \
     fi
 
 lint-deps:
